@@ -1,0 +1,57 @@
+services:                                                                                                                                      
+  traefik:
+    image: traefik:v3.1.6
+    container_name: kivop-traefik
+    restart: unless-stopped
+    command:
+      --api.insecure=true
+      --api.dashboard=true
+      --entrypoints.http.address=:80
+      --providers.docker
+      --providers.docker.exposedbydefault=false
+    ports:
+      - "80:80"
+#      - "443:443"
+      - "8080:8080" # only for dashboard
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+#
+# Example Service for traefik lables
+#
+  whoami:
+    image: traefik/whoami
+    container_name: kivop-whoami
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.whoami.rule: Path(`/whoami`)
+
+#
+# Database
+#
+  postgres:
+    image: postgres:13.16
+    container_name: kivop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: example # only for development
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+#
+# Volumes
+#
+volumes:
+  postgres-data:
+    name: "kivop-postgres-data"
+
+#
+# Networks
+#
+networks:
+  default:
+    name: "kivop-net"
