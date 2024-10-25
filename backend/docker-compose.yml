@@ -1,3 +1,8 @@
+x-shared_environment: &shared_environment
+  DATABASE_HOST: postgres
+  DATABASE_USERNAME: vapor
+  DATABASE_PASSWORD: example
+
 services:                                                                                                                                      
   traefik:
     image: traefik:v3.1.6
@@ -38,9 +43,31 @@ services:
     container_name: kivop-postgres
     restart: unless-stopped
     environment:
+      POSTGRES_USER: vapor # only for development
       POSTGRES_PASSWORD: example # only for development
     volumes:
+      - ./init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
       - postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+#
+# Vapor: meeting-service
+#
+  meeting-service:
+    extends:
+      file: ./meeting-service/docker-compose.yml
+      service: app
+    container_name: kivop-meeting-service
+    environment:
+      <<: *shared_environment
+      DATABASE_NAME: meeting_db
+    labels:
+      traefik.enable: true
+      traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.regex: ^/meeting-service(:/(.*))?
+      traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.meeting-service.rule: PathPrefix(`/meeting-service`)
+      traefik.http.routers.meeting-service.middlewares: meeting-service-replace-path-regex
 
 #
 # Volumes
