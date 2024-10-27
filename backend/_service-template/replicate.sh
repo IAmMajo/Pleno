@@ -40,7 +40,10 @@ function read_user_inputs {
     if [[ $CREATE_DATABASE_ANSWER =~ ^[Yy](es)?$ ]]; then # If y|Y|yes|Yes
         echo -e "${RESET_COLOR}Your database is going to be named ${ITALIC_CYAN}${SRVNAME}_db${RESET_COLOR}."
     else
-        echo "No database will be created."
+        echo 'No database will be created.'
+        echo ''
+        echo -e "Please be aware, although no database is going to be created, that the service is going to be configured to try and connect to a database named ${ITALIC_CYAN}${SRVNAME}_db${RESET_COLOR} nevertheless."
+        echo -e "A manual correction is necessary. The files ${ITALIC_CYAN}../docker-compose.yml${RESET_COLOR}, ${ITALIC_CYAN}../${SRVNAME}-service/docker-compose.yml${RESET_COLOR} and ${ITALIC_CYAN}../${SRVNAME}-service/Sources/App/configure.swift${RESET_COLOR} are going to be affected by this."
     fi
 
     PROCEED_ANSWER=''

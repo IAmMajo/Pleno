@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "testing-service",
+    name: "SRVNAME_PLACEHOLDER-service",
     platforms: [
        .macOS(.v13)
     ],

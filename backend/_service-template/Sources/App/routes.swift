@@ -10,5 +10,5 @@ func routes(_ app: Application) throws {
         "Hello, world!"
     }
 
-    try app.register(collection: TestingController())
+    try app.register(collection: FIRST_LETTER_CAPITAL_SRVNAME_PLACEHOLDERController())
 }
