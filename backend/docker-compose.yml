@@ -52,24 +52,6 @@ services:
       - 5432:5432
 
 #
-# Vapor: meeting-service
-#
-  meeting-service:
-    extends:
-      file: ./meeting-service/docker-compose.yml
-      service: app
-    container_name: kivop-meeting-service
-    environment:
-      <<: *shared_environment
-      DATABASE_NAME: meeting_db
-    labels:
-      traefik.enable: true
-      traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.regex: ^/meeting-service(:/(.*))?
-      traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.replacement: /$$1
-      traefik.http.routers.meeting-service.rule: PathPrefix(`/meeting-service`)
-      traefik.http.routers.meeting-service.middlewares: meeting-service-replace-path-regex
-
-#
 # Vapor: config-service
 #
   config-service:
@@ -77,6 +59,8 @@ services:
       file: ./config-service/docker-compose.yml
       service: app
     container_name: kivop-config-service
+    depends_on:
+      - postgres
     environment:
       <<: *shared_environment
       DATABASE_NAME: config_db
@@ -86,6 +70,26 @@ services:
       traefik.http.middlewares.config-service-replace-path-regex.replacepathregex.replacement: /$$1
       traefik.http.routers.config-service.rule: PathPrefix(`/config-service`)
       traefik.http.routers.config-service.middlewares: config-service-replace-path-regex
+
+#
+# Vapor: meeting-service
+#
+  meeting-service:
+    extends:
+      file: ./meeting-service/docker-compose.yml
+      service: app
+    container_name: kivop-meeting-service
+    depends_on:
+      - config-service
+    environment:
+      <<: *shared_environment
+      DATABASE_NAME: meeting_db
+    labels:
+      traefik.enable: true
+      traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.regex: ^/meeting-service(:/(.*))?
+      traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.meeting-service.rule: PathPrefix(`/meeting-service`)
+      traefik.http.routers.meeting-service.middlewares: meeting-service-replace-path-regex
 
 #
 # Volumes

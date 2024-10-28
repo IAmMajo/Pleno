@@ -59,6 +59,8 @@ function read_user_inputs {
     fi
 
 }
+
+cd $(echo $BASH_SOURCE | sed "s#$(basename $BASH_SOURCE)##")
 echo ''
 echo -e "${GRAY}*---------------------------------------------------------------------------*${RESET_COLOR}"
 echo -e "${GRAY}|${RESET_COLOR}                                                                           ${GRAY}|${RESET_COLOR}"
@@ -84,7 +86,7 @@ find "../${SRVNAME}-service/" -type f -print0 | xargs -0 sed -i '' -e "s/FIRST_L
 find "../${SRVNAME}-service/" -type f -print0 | xargs -0 sed -i '' -e "s/SRVNAME_PLACEHOLDER/${SRVNAME}/g"
 
 # Add service  to /backend/docker-compose.yml
-sed -i '' -e "s|^# Volumes$|# Vapor: ${SRVNAME}-service\n#\n  ${SRVNAME}-service:\n    extends:\n      file: ./${SRVNAME}-service/docker-compose.yml\n      service: app\n    container_name: kivop-${SRVNAME}-service\n    environment:\n      <<: *shared_environment\n      DATABASE_NAME: ${SRVNAME}_db\n    labels:\n      traefik.enable: true\n      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.regex: ^/${SRVNAME}-service(:/(.*))?\n      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.replacement: /\$\$1\n      traefik.http.routers.${SRVNAME}-service.rule: PathPrefix(\`/${SRVNAME}-service\`)\n      traefik.http.routers.${SRVNAME}-service.middlewares: ${SRVNAME}-service-replace-path-regex\n\n#\n# Volumes|" ../docker-compose.yml
+sed -i '' -e "s|^# Volumes$|# Vapor: ${SRVNAME}-service\n#\n  ${SRVNAME}-service:\n    extends:\n      file: ./${SRVNAME}-service/docker-compose.yml\n      service: app\n    container_name: kivop-${SRVNAME}-service\n    depends_on:\n      - config-service\n    environment:\n      <<: *shared_environment\n      DATABASE_NAME: ${SRVNAME}_db\n    labels:\n      traefik.enable: true\n      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.regex: ^/${SRVNAME}-service(:/(.*))?\n      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.replacement: /\$\$1\n      traefik.http.routers.${SRVNAME}-service.rule: PathPrefix(\`/${SRVNAME}-service\`)\n      traefik.http.routers.${SRVNAME}-service.middlewares: ${SRVNAME}-service-replace-path-regex\n\n#\n# Volumes|" ../docker-compose.yml
 
 # Add database to /backend/init-dbs.sh
 if [[ $CREATE_DATABASE_ANSWER =~ ^[Yy](es)?$ ]]; then # If y|Y|yes|Yes
