@@ -70,6 +70,24 @@ services:
       traefik.http.routers.meeting-service.middlewares: meeting-service-replace-path-regex
 
 #
+# Vapor: config-service
+#
+  config-service:
+    extends:
+      file: ./config-service/docker-compose.yml
+      service: app
+    container_name: kivop-config-service
+    environment:
+      <<: *shared_environment
+      DATABASE_NAME: config_db
+    labels:
+      traefik.enable: true
+      traefik.http.middlewares.config-service-replace-path-regex.replacepathregex.regex: ^/config-service(:/(.*))?
+      traefik.http.middlewares.config-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.config-service.rule: PathPrefix(`/config-service`)
+      traefik.http.routers.config-service.middlewares: config-service-replace-path-regex
+
+#
 # Volumes
 #
 volumes:
