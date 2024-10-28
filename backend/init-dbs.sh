@@ -6,4 +6,6 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
 	GRANT ALL PRIVILEGES ON DATABASE meeting_db TO vapor;
 	CREATE DATABASE config_db;
 	GRANT ALL PRIVILEGES ON DATABASE config_db TO vapor;
+	CREATE DATABASE auth_db;
+	GRANT ALL PRIVILEGES ON DATABASE auth_db TO vapor;
 EOSQL

@@ -92,6 +92,26 @@ services:
       traefik.http.routers.meeting-service.middlewares: meeting-service-replace-path-regex
 
 #
+# Vapor: auth-service
+#
+  auth-service:
+    extends:
+      file: ./auth-service/docker-compose.yml
+      service: app
+    container_name: kivop-auth-service
+    depends_on:
+      - config-service
+    environment:
+      <<: *shared_environment
+      DATABASE_NAME: auth_db
+    labels:
+      traefik.enable: true
+      traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.regex: ^/auth-service(:/(.*))?
+      traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.auth-service.rule: PathPrefix(`/auth-service`)
+      traefik.http.routers.auth-service.middlewares: auth-service-replace-path-regex
+
+#
 # Volumes
 #
 volumes:
