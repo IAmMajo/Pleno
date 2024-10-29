@@ -16,6 +16,8 @@ public func configure(_ app: Application) async throws {
         database: Environment.get("DATABASE_NAME") ?? "auth_db",
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
+    
+    app.migrations.add(CreateUser())
 
     // register routes
     try routes(app)
