@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:kivop}/backend/notifications-service",
+      "name": "Debug App (backend/notifications-service)",
+      "program": "${workspaceFolder:kivop}/backend/notifications-service/.build/debug/App",
+      "preLaunchTask": "swift: Build Debug App (backend/notifications-service)"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:kivop}/backend/notifications-service",
+      "name": "Release App (backend/notifications-service)",
+      "program": "${workspaceFolder:kivop}/backend/notifications-service/.build/release/App",
+      "preLaunchTask": "swift: Build Release App (backend/notifications-service)"
+    }
+  ]
+}
