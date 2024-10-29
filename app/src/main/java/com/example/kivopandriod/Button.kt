@@ -47,4 +47,7 @@ class CustomButton @JvmOverloads constructor(
     fun setButtonFontColor(color: Int) {
         button.setTextColor(color)
     }
+    fun setClickListener(listener: OnClickListener) {
+        button.setOnClickListener(listener)
+    }
 }
