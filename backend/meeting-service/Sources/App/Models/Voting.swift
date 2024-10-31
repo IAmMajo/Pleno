@@ -23,7 +23,8 @@ public final class Voting: Model, @unchecked Sendable {
     @Field(key: "is_closed")
     public var isClosed: Bool
     
-    @Timestamp(key: "started_at", on: .create) // in minutes
+//    @Timestamp(key: "started_at", on: .create) // in minutes
+    @Field(key: "started_at") // in minutes, null = not started yet
     public var startedAt: Date?
     
     @Field(key: "anonymous")
