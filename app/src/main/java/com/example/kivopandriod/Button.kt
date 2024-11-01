@@ -25,7 +25,7 @@ class CustomButton @JvmOverloads constructor(
             val typedArray = context.obtainStyledAttributes(it, R.styleable.CustomButton)
             val buttonText = typedArray.getString(R.styleable.CustomButton_text) ?: "Default Text"
             val buttonColor = typedArray.getColor(R.styleable.CustomButton_buttonColor, Color.Blue.toArgb())
-            val buttonFontColor = typedArray.getColor(R.styleable.CustomButton_fontColor, Color.White.toArgb())
+            val buttonFontColor = typedArray.getColor(R.styleable.CustomButton_buttonFontColor, Color.White.toArgb())
 
             setText(buttonText)
             setButtonColor(buttonColor)

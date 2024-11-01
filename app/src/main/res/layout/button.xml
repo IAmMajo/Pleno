@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Placeholder"
-        android:background="@drawable/rounded_button"
+        android:background="@drawable/rounded_corners"
         android:textColor="@color/white"
         android:textSize="13sp"
         android:textFontWeight="700"

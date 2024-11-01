@@ -2,6 +2,6 @@
     <declare-styleable name="CustomButton">
         <attr name="text" format="string"/>
         <attr name="buttonColor" format="color" />
-        <attr name="fontColor" format="color" />
+        <attr name="buttonFontColor" format="color" />
     </declare-styleable>
 </resources>
