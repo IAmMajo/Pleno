@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.compose.ui.graphics.Color
@@ -29,6 +28,8 @@ class AgendaCard @JvmOverloads constructor(
 
             setCardColor(cardColor)
             setCardFontColor(cardFontColor)
+
+            typedArray.recycle()
         }
 
     }
