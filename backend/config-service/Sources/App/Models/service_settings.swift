@@ -18,20 +18,20 @@ final class Service_setting: Model, @unchecked Sendable {
     var service_id: UUID
     
     @Field(key: "settings_id")
-    var settings_id: UUID
+    var setting_id: UUID
     
-    @Timestamp(key: "created_at", on: .create)
+    @Timestamp(key: "created", on: .create)
     var created: Date?
     
-    @Timestamp(key: "updated_at", on: .update)
+    @Timestamp(key: "updated", on: .update)
     var updated: Date?
     
     init() {}
     
-    init(id: UUID? = nil, serviceId: UUID, settingsId: UUID) {
+    init(id: UUID? = nil, serviceId: UUID, settingId: UUID) {
         self.id = id
         self.service_id = serviceId
-        self.settings_id = settingsId
+        self.setting_id = settingId
     }
 }
     
