@@ -18,6 +18,8 @@ public func configure(_ app: Application) async throws {
     ), as: .psql)
 
 //    app.migrations.add(CreateTodo())
+    app.migrations.add(CreatePlace())
+    app.migrations.add(CreateLocation())
     app.migrations.add(CreateMeeting())
     app.migrations.add(CreateAttendance())
     app.migrations.add(CreateRecord())

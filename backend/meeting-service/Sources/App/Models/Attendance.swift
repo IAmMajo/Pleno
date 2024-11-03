@@ -11,27 +11,27 @@ public final class Attendance: Model, @unchecked Sendable {
         @Parent(key: "meeting_id")
         public var meeting: Meeting
         
-        @Field(key: "user_id")
-        public var userId: UUID // TODO: userId: UUID durch user: User austauschen
+        @Field(key: "identity_id")
+        public var identityId: UUID // TODO: identityId: UUID durch identity: Identity austauschen
         
         public init() {}
         
-        public convenience init(meeting: Meeting, userId: UUID) throws {
-            try self.init(meetingId: meeting.requireID(), userId: userId)
+        public convenience init(meeting: Meeting, identityId: UUID) throws {
+            try self.init(meetingId: meeting.requireID(), identityId: identityId)
         }
 
-        public init(meetingId: Meeting.IDValue, userId: UUID) {
+        public init(meetingId: Meeting.IDValue, identityId: UUID) {
             self.$meeting.id = meetingId
-            self.userId = userId
+            self.identityId = identityId
         }
 
         public static func == (lhs: IDValue, rhs: IDValue) -> Bool {
-            lhs.$meeting.id == rhs.$meeting.id && lhs.userId == rhs.userId
+            lhs.$meeting.id == rhs.$meeting.id && lhs.identityId == rhs.identityId
         }
 
         public func hash(into hasher: inout Hasher) {
             hasher.combine(self.$meeting.id)
-            hasher.combine(self.userId)
+            hasher.combine(self.identityId)
         }
         
     }
@@ -39,17 +39,13 @@ public final class Attendance: Model, @unchecked Sendable {
     @CompositeID()
     public var id: IDValue?
 
-    @Field(key: "name")
-    public var name: String
-
     @Field(key: "status")
     public var status: AttendanceStatus
 
     public init() { }
     
-    public init(id: IDValue, name: String, status: AttendanceStatus) {
+    public init(id: IDValue, status: AttendanceStatus) {
         self.id = id
-        self.name = name
         self.status = status
     }
 }

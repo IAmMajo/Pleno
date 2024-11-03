@@ -26,8 +26,8 @@ public final class Meeting: Model, @unchecked Sendable {
     @Field(key: "duration") // in minutes
     public var duration: UInt16?
     
-    @Field(key: "location")
-    public var location: String?
+    @OptionalParent(key: "location_id")
+    public var location: Location?
     
     @Field(key: "chair_id")
     public var chairId: UUID
@@ -44,7 +44,7 @@ public final class Meeting: Model, @unchecked Sendable {
     status: MeetingStatus,
     start: Date,
     duration: UInt16? = nil,
-    location: String? = nil,
+    locationId: Location.IDValue? = nil,
     chairId: UUID,
     code: String? = nil) {
         self.id = id
@@ -53,7 +53,7 @@ public final class Meeting: Model, @unchecked Sendable {
         self.status = status
         self.start = start
         self.duration = duration
-        self.location = location
+        self.$location.id = locationId
         self.chairId = chairId
         self.code = code
     }
