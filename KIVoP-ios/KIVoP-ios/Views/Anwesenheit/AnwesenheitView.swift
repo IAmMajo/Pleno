@@ -14,6 +14,7 @@ struct AnwesenheitView: View {
     
     @State private var searchText: String = ""
     @State private var selectedTab: Tab = .past
+    @State private var showAnwesenheitAktuellView = false
     
     @State private var currentMeeting = Meeting(title: "Jahreshauptversammlung", date: Date())
     @State private var pastMeetings: [Meeting] = [
@@ -100,7 +101,7 @@ struct AnwesenheitView: View {
                             .background(Color.blue)
                             .cornerRadius(10)
                             .onTapGesture {
-                                // Navigation zur AnwesenheitAktuellView
+                                showAnwesenheitAktuellView.toggle()
                             }
                         }
                         .padding(.horizontal)
@@ -143,6 +144,9 @@ struct AnwesenheitView: View {
                         .listStyle(InsetGroupedListStyle())
                     }
                     .padding(.top)
+                }
+                .fullScreenCover(isPresented: $showAnwesenheitAktuellView) {
+                    AnwesenheitAktuellView(meeting: currentMeeting)
                 }
             }
             .navigationBarHidden(true)
