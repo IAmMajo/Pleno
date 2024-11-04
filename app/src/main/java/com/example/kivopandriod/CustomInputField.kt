@@ -1,7 +1,9 @@
 package com.example.kivopandriod
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -21,14 +23,14 @@ fun CustomInputField(
     label: String,
     placeholder: String,
     modifier: Modifier = Modifier,
-    horizontalPadding: Dp = 16.dp,   // Standardwert für horizontales Padding
-    verticalPadding: Dp = 8.dp       // Standardwert für vertikales Padding
+    horizontalPadding: Dp = 16.dp,
+    verticalPadding: Dp = 8.dp
 ) {
     val textState = remember { mutableStateOf(TextFieldValue()) }
 
     Column(
         modifier = modifier
-            .padding(horizontal = horizontalPadding, vertical = verticalPadding) // Verwende die Padding-Parameter
+            .padding(horizontal = horizontalPadding, vertical = verticalPadding)
             .fillMaxWidth()
     ) {
         Text(
@@ -45,15 +47,25 @@ fun CustomInputField(
         )
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun CustomInputFieldPreview() {
-    KIVoPAndriodTheme {
-        CustomInputField(
-            label = "Text field",
-            placeholder = "placeholder"
-        )
+        Column()
+        {
+            // Erstes CustomInputField
+            CustomInputField(
+                label = "Vorname",
+                placeholder = "Gib deinen Vornamen ein",
 
+            )
+
+            // Zweites CustomInputField
+            CustomInputField(
+                label = "Nachname",
+                placeholder = "Gib deinen Nachnamen ein",
+
+            )
+        }
     }
-}
+
+
