@@ -7,12 +7,13 @@
 
 import Fluent
 import Vapor
+import Models
 
-struct Service_settingsDTO: Content {
-    var service_id: UUID?
-    var setting_id: UUID?
+public struct Service_settingsDTO: Content {
+    public var service_id: UUID?
+    public var setting_id: UUID?
     
-    func toModel() -> Service_setting? {
+    public func toModel() -> Service_setting? {
         guard let serviceId = service_id, let settingId = setting_id else {
                 return nil
             }

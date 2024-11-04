@@ -7,12 +7,13 @@
 
 import Fluent
 import Vapor
+import Models
 
-struct ServicesDTO: Content {
-    var name: String?
+public struct ServicesDTO: Content {
+    public var name: String?
     
     
-    func toModel() -> Service {
+    public func toModel() -> Service {
         let model = Service()
         
         if let name = self.name{

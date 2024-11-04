@@ -7,12 +7,13 @@
 
 import Fluent
 import Vapor
+import Models
 
-struct SettingsDTO: Content {
-    var key: String?
-    var value: String?
+public struct SettingsDTO: Content {
+    public var key: String?
+    public var value: String?
     
-    func toModel() -> Setting {
+    public func toModel() -> Setting {
         let model = Setting()
         
         if let key = self.key{

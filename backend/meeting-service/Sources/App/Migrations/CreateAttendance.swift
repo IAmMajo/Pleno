@@ -1,4 +1,5 @@
 import Fluent
+import Models
 
 struct CreateAttendance: AsyncMigration {
     func prepare(on database: Database) async throws {
