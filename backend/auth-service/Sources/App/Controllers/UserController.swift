@@ -1,5 +1,6 @@
 import Fluent
 import Vapor
+import Models
 
 struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {

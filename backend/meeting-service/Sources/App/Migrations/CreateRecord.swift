@@ -1,4 +1,5 @@
 import Fluent
+import Models
 
 struct CreateRecord: AsyncMigration {
     func prepare(on database: Database) async throws {

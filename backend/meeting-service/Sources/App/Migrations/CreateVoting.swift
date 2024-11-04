@@ -1,5 +1,6 @@
 import Fluent
 import FluentSQL
+import Models
 
 struct CreateVoting: AsyncMigration {
     func prepare(on database: Database) async throws {

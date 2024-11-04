@@ -1,4 +1,5 @@
 import Fluent
+import Models
 
 struct CreateMeeting: AsyncMigration {
     func prepare(on database: Database) async throws {
