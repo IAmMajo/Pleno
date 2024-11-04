@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "kivop-models",
+    name: "models",
     platforms: [
        .macOS(.v13)
     ],
