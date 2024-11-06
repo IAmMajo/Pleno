@@ -7,20 +7,17 @@
 
 import SwiftUI
 
-// Datenmodelle werden ausgelagert, sobald Daten übers backend verfügbar sind.
-
 struct AnwesenheitView: View {
     @Environment(\.dismiss) var dismiss
     
     @State private var searchText: String = ""
     @State private var selectedTab: Tab = .past
-    @State private var showAnwesenheitAktuellView = false
     
     @State private var currentMeeting = Meeting(title: "Jahreshauptversammlung", date: Date())
     @State private var pastMeetings: [Meeting] = [
-        Meeting(title: "Termin-Titel", date: Calendar.current.date(byAdding: .day, value: -10, to: Date())!, attendance: .attended),
-        Meeting(title: "Termin-Titel", date: Calendar.current.date(byAdding: .day, value: -20, to: Date())!, attendance: .missed),
-        Meeting(title: "Termin-Titel", date: Calendar.current.date(byAdding: .month, value: -1, to: Date())!, attendance: .attended)
+        Meeting(title: "1", date: Calendar.current.date(byAdding: .day, value: -10, to: Date())!, attendance: .attended),
+        Meeting(title: "2", date: Calendar.current.date(byAdding: .day, value: -20, to: Date())!, attendance: .missed),
+        Meeting(title: "3", date: Calendar.current.date(byAdding: .month, value: -1, to: Date())!, attendance: .attended)
     ]
     @State private var proposedMeetings: [Meeting] = [
         Meeting(title: "Planungs-Meeting", date: Calendar.current.date(byAdding: .day, value: 10, to: Date())!),
@@ -31,18 +28,18 @@ struct AnwesenheitView: View {
         NavigationView {
             VStack(alignment: .leading, spacing: 16) {
                 
-                // Zurück-Button
+                // Navbar
                 Button(action: {
                     dismiss()
                 }) {
                     HStack {
-                        Image(systemName: "arrow.left")
+                        Image(systemName: "chevron.backward")
                         Text("Zurück")
                     }
                     .foregroundColor(.blue)
-                    .padding(.leading)
                 }
-                
+                .padding(.horizontal)
+
                 // Titel
                 Text("Anwesenheit")
                     .font(.largeTitle)
@@ -68,11 +65,11 @@ struct AnwesenheitView: View {
                 .frame(height: 40)
                 .padding(.horizontal)
                 
-                // Grauer Hintergrund für den unteren Inhalt
+                // Inhalt
                 ZStack {
                     Color.gray.opacity(0.1)
                         .edgesIgnoringSafeArea(.all)
-
+                    
                     VStack(alignment: .leading, spacing: 16) {
                         // Aktuelle Sitzung
                         VStack(alignment: .leading, spacing: 4) {
@@ -82,26 +79,25 @@ struct AnwesenheitView: View {
                                 .foregroundColor(.gray)
                                 .padding(.leading)
                             
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(currentMeeting.title)
-                                        .font(.headline)
+                            NavigationLink(destination: AnwesenheitAktuellView(meeting: currentMeeting)) {
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text(currentMeeting.title)
+                                            .font(.headline)
+                                            .foregroundColor(.white)
+                                        Text(currentMeeting.date, style: .date)
+                                            .font(.subheadline)
+                                            .foregroundColor(.white.opacity(0.7))
+                                    }
+                                    Spacer()
+                                    Image(systemName: "clock")
+                                        .foregroundColor(.yellow)
+                                    Image(systemName: "chevron.right")
                                         .foregroundColor(.white)
-                                    Text(currentMeeting.date, style: .date)
-                                        .font(.subheadline)
-                                        .foregroundColor(.white.opacity(0.7))
                                 }
-                                Spacer()
-                                Image(systemName: "clock")
-                                    .foregroundColor(.yellow)
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.white)
-                            }
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(10)
-                            .onTapGesture {
-                                showAnwesenheitAktuellView.toggle()
+                                .padding()
+                                .background(Color.blue)
+                                .cornerRadius(10)
                             }
                         }
                         .padding(.horizontal)
@@ -120,23 +116,23 @@ struct AnwesenheitView: View {
                             ForEach(getMeetings(for: selectedTab)) { month in
                                 Section(header: Text(month.name)) {
                                     ForEach(month.meetings) { meeting in
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                Text(meeting.title)
-                                                    .font(.body)
-                                                Text(meeting.date, style: .date)
-                                                    .font(.caption)
-                                                    .foregroundColor(.gray)
+                                        NavigationLink(destination: destinationView(for: meeting)) {
+                                            HStack {
+                                                VStack(alignment: .leading) {
+                                                    Text(meeting.title)
+                                                        .font(.body)
+                                                    Text(meeting.date, style: .date)
+                                                        .font(.caption)
+                                                        .foregroundColor(.gray)
+                                                }
+                                                Spacer()
+                                                if selectedTab == .past {
+                                                    Image(systemName: meeting.attendance == .attended ? "checkmark" : "xmark")
+                                                        .foregroundColor(meeting.attendance == .attended ? .blue : .red)
+                                                }
                                             }
-                                            Spacer()
-                                            if selectedTab == .past {
-                                                Image(systemName: meeting.attendance == .attended ? "checkmark" : "xmark")
-                                                    .foregroundColor(meeting.attendance == .attended ? .blue : .red)
-                                            }
-                                            Image(systemName: "chevron.right")
-                                                .foregroundColor(.gray)
+                                            .padding(.vertical, 8)
                                         }
-                                        .padding(.vertical, 8)
                                     }
                                 }
                             }
@@ -145,11 +141,16 @@ struct AnwesenheitView: View {
                     }
                     .padding(.top)
                 }
-                .fullScreenCover(isPresented: $showAnwesenheitAktuellView) {
-                    AnwesenheitAktuellView(meeting: currentMeeting)
-                }
             }
-            .navigationBarHidden(true)
+        }
+        .navigationBarHidden(true)
+    }
+    
+    func destinationView(for meeting: Meeting) -> some View {
+        if selectedTab == .past {
+            return AnyView(AnwesenheitDetailView(meeting: meeting))
+        } else {
+            return AnyView(AnwesenheitPlanungView(meeting: meeting))
         }
     }
     
