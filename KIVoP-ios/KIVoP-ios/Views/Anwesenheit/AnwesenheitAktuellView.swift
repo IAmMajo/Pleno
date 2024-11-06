@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-// Datenmodelle und Testdaten werden ausgelagert und entfernt, sobald das backend implemntiert ist
-
-// Brauchen wir den Namen des Termins?
-
-// Sortierung der Mitgleider steht noch aus
-
 struct AnwesenheitAktuellView: View {
     var meeting: Meeting
     @Environment(\.dismiss) var dismiss
@@ -20,19 +14,36 @@ struct AnwesenheitAktuellView: View {
     @State private var searchText: String = ""
     @State private var participationCode: String = ""
     
-    // Beispielwerte für die Anzahl der Teilnehmer
-    @State private var participantsCount: [String: Int] = [
-        "teilgenommen": 5,
-        "ausstehend": 2,
-        "nicht_teilgenommen": 1
-    ]
-    
     // Beispiel-Mitgliederliste
     @State private var members: [Member] = [
         Member(name: "Max Mustermann", title: "Sitzungsleiter", hasVoted: .yes),
-        Member(name: "Erika Mustermann", title: "Stellvertretende", hasVoted: .pending),
-        Member(name: "Hans Müller", hasVoted: .no)
+        Member(name: "Erika Mustermann", title: "Stellvertretende", hasVoted: .no),
+        Member(name: "Hans Müller"),
+        Member(name: "Maria Meier", hasVoted: .yes),
+        Member(name: "Lukas Schmidt", hasVoted: .no)
     ]
+    
+    // Sortierung der Mitglieder, falls noch nicht abgestimt wurde wird nach .yes sortiert.
+    var sortedMembers: [Member] {
+        members.sorted {
+            if $0.hasVoted == $1.hasVoted {
+                return $0.name < $1.name
+            }
+            if $0.hasVoted == .yes {
+                return true
+            }
+            if $1.hasVoted == .yes {
+                return false
+            }
+            if $0.hasVoted == nil {
+                return true
+            }
+            if $1.hasVoted == nil {
+                return false
+            }
+            return false
+        }
+    }
     
     var body: some View {
         NavigationView {
@@ -43,7 +54,7 @@ struct AnwesenheitAktuellView: View {
                         dismiss()
                     }) {
                         HStack {
-                            Image(systemName: "arrow.left")
+                            Image(systemName: "chevron.backward")
                             Text("Zurück")
                         }
                         .foregroundColor(.blue)
@@ -81,7 +92,7 @@ struct AnwesenheitAktuellView: View {
                 .frame(height: 40)
                 .padding(.horizontal)
                 
-                // Grauer Hintergrund
+                // Inhalt
                 ZStack {
                     Color.gray.opacity(0.1)
                         .edgesIgnoringSafeArea(.all)
@@ -126,7 +137,7 @@ struct AnwesenheitAktuellView: View {
                         HStack {
                             Spacer()
                             VStack {
-                                Text("\(participantsCount["teilgenommen"] ?? 0)")
+                                Text("\(members.filter { $0.hasVoted == .yes }.count)")
                                     .font(.largeTitle)
                                 Image(systemName: "person.fill.checkmark")
                                     .foregroundColor(.blue)
@@ -137,7 +148,7 @@ struct AnwesenheitAktuellView: View {
                             Spacer()
                             
                             VStack {
-                                Text("\(participantsCount["ausstehend"] ?? 0)")
+                                Text("\(members.filter { $0.hasVoted == nil }.count)")
                                     .font(.largeTitle)
                                 Image(systemName: "person.fill.questionmark")
                                     .foregroundColor(.gray)
@@ -148,7 +159,7 @@ struct AnwesenheitAktuellView: View {
                             Spacer()
                             
                             VStack {
-                                Text("\(participantsCount["nicht_teilgenommen"] ?? 0)")
+                                Text("\(members.filter { $0.hasVoted == .no }.count)")
                                     .font(.largeTitle)
                                 Image(systemName: "person.fill.xmark")
                                     .foregroundColor(.orange)
@@ -161,10 +172,8 @@ struct AnwesenheitAktuellView: View {
                         
                         // Mitgliederliste
                         List {
-                            Section(header: Text("Mitglieder")
-                                        .font(.headline)
-                                        .foregroundColor(.gray)) {
-                                ForEach(members) { member in
+                            Section(header: Text("Mitglieder")) {
+                                ForEach(sortedMembers) { member in
                                     HStack {
                                         // Profilbild (Platzhalter)
                                         Circle()
@@ -184,8 +193,8 @@ struct AnwesenheitAktuellView: View {
                                         Spacer()
                                         
                                         // Abstimmungssymbol
-                                        Image(systemName: member.hasVoted.icon)
-                                            .foregroundColor(member.hasVoted.color)
+                                        Image(systemName: member.hasVoted?.icon ?? VoteStatus.notVoted.icon)
+                                            .foregroundColor(member.hasVoted?.color ?? VoteStatus.notVoted.color)
                                             .font(.system(size: 22))
                                     }
                                     .padding(.vertical, 8) // Padding für jedes Listenelement
@@ -195,46 +204,8 @@ struct AnwesenheitAktuellView: View {
                     }
                 }
             }
-            .navigationBarHidden(true)
         }
-    }
-}
-
-
-// Datenmodell für Mitglieder
-struct Member: Identifiable {
-    let id = UUID()
-    let name: String
-    var title: String?
-    var hasVoted: VoteStatus
-}
-
-// Abstimmungstatus
-enum VoteStatus {
-    case yes
-    case pending
-    case no
-    
-    var icon: String {
-        switch self {
-        case .yes:
-            return "checkmark"
-        case .pending:
-            return "questionmark.circle"
-        case .no:
-            return "xmark"
-        }
-    }
-    
-    var color: Color {
-        switch self {
-        case .yes:
-            return .blue
-        case .pending:
-            return .gray
-        case .no:
-            return .red
-        }
+        .navigationBarHidden(true)
     }
 }
 
