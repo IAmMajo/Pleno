@@ -1,6 +1,0 @@
-<resources>
-    <declare-styleable name="AgendaCard">
-        <attr name="cardColor" format="color" />
-        <attr name="cardFontColor" format="color" />
-    </declare-styleable>
-</resources>
