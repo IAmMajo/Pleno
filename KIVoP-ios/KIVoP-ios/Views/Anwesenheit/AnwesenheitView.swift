@@ -146,7 +146,7 @@ struct AnwesenheitView: View {
                                                 VStack(alignment: .leading) {
                                                     Text(meeting.title)
                                                     Text(dateFormatter.string(from: meeting.date))
-                                                        .font(.subheadline)
+                                                        .font(.footnote)
                                                 }
                                                 .padding(.vertical, -2)
                                                 Spacer()
@@ -165,6 +165,7 @@ struct AnwesenheitView: View {
                                 }
                             }
                         }
+                        .padding(.top, -10)
                         .listStyle(InsetGroupedListStyle())
                     }
                     .padding(.top)
