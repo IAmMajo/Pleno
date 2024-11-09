@@ -23,19 +23,19 @@ struct AnwesenheitView: View {
     
     // Der attendance value ist zurzeit nur zur Visualisierung. Der Status wird vom jeweiligen Mitglied übernommen, je nachdem ob das angemeldete Mitglied an dem Termin teilgenommen hatte oder nicht.
     // Der scheduled Wert wird der Basis Wert sein.
-    @State private var meetings: [Meeting] = [
-        Meeting(title: "Jahreshauptversammlung", date: Date(), status: "current"),
-        Meeting(title: "Treffen 1", date: Calendar.current.date(byAdding: .day, value: -10, to: Date())!, attendance: .attended, status: "past"),
-        Meeting(title: "Treffen 2", date: Calendar.current.date(byAdding: .day, value: -20, to: Date())!, attendance: .missed, status: "past"),
-        Meeting(title: "Treffen 3", date: Calendar.current.date(byAdding: .month, value: -1, to: Date())!, attendance: .attended, status: "past"),
-        Meeting(title: "Planungs-Meeting", date: Calendar.current.date(byAdding: .day, value: 10, to: Date())!, status: "scheduled"),
-        Meeting(title: "Feedback-Runde", date: Calendar.current.date(byAdding: .day, value: 20, to: Date())!, status: "scheduled")
+    @State private var events: [Event] = [
+        Event(title: "Jahreshauptversammlung", date: Date(), status: "current"),
+        Event(title: "Treffen 1", date: Calendar.current.date(byAdding: .day, value: -10, to: Date())!, attendance: .attended, status: "past"),
+        Event(title: "Treffen 2", date: Calendar.current.date(byAdding: .day, value: -20, to: Date())!, attendance: .missed, status: "past"),
+        Event(title: "Treffen 3", date: Calendar.current.date(byAdding: .month, value: -1, to: Date())!, attendance: .attended, status: "past"),
+        Event(title: "Planungs-Meeting", date: Calendar.current.date(byAdding: .day, value: 10, to: Date())!, status: "scheduled"),
+        Event(title: "Feedback-Runde", date: Calendar.current.date(byAdding: .day, value: 20, to: Date())!, status: "scheduled")
     ]
     
-    // Aus dem Meeting Array wird das aktuelle Meeting gezogen.
-    // Das sowie das Meeting Array ist nur vorrübergehend hier, bis echte Testdaten verwendet werden
-    var currentMeetings: [Meeting] {
-        meetings.filter { $0.status == "current" }
+    // Aus dem Event Array wird das aktuelle Event gezogen.
+    // Das sowie das Event Array ist nur vorrübergehend hier, bis echte Testdaten verwendet werden
+    var currentEvents: [Event] {
+        events.filter { $0.status == "current" }
     }
     
     var body: some View {
@@ -93,14 +93,14 @@ struct AnwesenheitView: View {
                                 .foregroundColor(.gray)
                                 .padding(.leading)
                             
-                            if !currentMeetings.isEmpty {
-                                ForEach(currentMeetings) { meeting in
-                                    NavigationLink(destination: destinationView(for: meeting)) {
+                            if !currentEvents.isEmpty {
+                                ForEach(currentEvents) { event in
+                                    NavigationLink(destination: destinationView(for: event)) {
                                         HStack {
                                             VStack(alignment: .leading) {
-                                                Text(meeting.title)
+                                                Text(event.title)
                                                     .foregroundColor(.white)
-                                                Text(dateFormatter.string(from: meeting.date))
+                                                Text(dateFormatter.string(from: event.date))
                                                     .font(.subheadline)
                                                     .foregroundColor(.white)
                                             }
@@ -138,26 +138,26 @@ struct AnwesenheitView: View {
                         // Liste der Termine
                         List {
                             // Aufsplittung nach Monaten.
-                            ForEach(getMeetings(for: selectedTab)) { month in
+                            ForEach(getEvents(for: selectedTab)) { month in
                                 Section(header: Text(month.name)) {
-                                    ForEach(month.meetings) { meeting in
-                                        NavigationLink(destination: destinationView(for: meeting)) {
+                                    ForEach(month.events) { event in
+                                        NavigationLink(destination: destinationView(for: event)) {
                                             HStack {
                                                 VStack(alignment: .leading) {
-                                                    Text(meeting.title)
-                                                    Text(dateFormatter.string(from: meeting.date))
+                                                    Text(event.title)
+                                                    Text(dateFormatter.string(from: event.date))
                                                         .font(.footnote)
                                                 }
                                                 .padding(.vertical, -2)
                                                 Spacer()
                                                 if selectedTab == .past {
-                                                    Image(systemName: meeting.attendance == .attended ? "checkmark" : "xmark")
-                                                        .foregroundColor(meeting.attendance == .attended ? .blue : .red)
+                                                    Image(systemName: event.attendance == .attended ? "checkmark" : "xmark")
+                                                        .foregroundColor(event.attendance == .attended ? .blue : .red)
                                                 } else if selectedTab == .scheduled {
                                                     // Wenn abgestimmt wurde Haken oder X.
                                                     // Wenn noch nicht abgestimmt wurde anderes Icon.
-                                                    Image(systemName: meeting.attendance == .attended ? "checkmark" : (meeting.attendance == .missed ? "xmark" : "calendar"))
-                                                        .foregroundColor(meeting.attendance == .attended ? .blue : (meeting.attendance == .missed ? .red : .orange))
+                                                    Image(systemName: event.attendance == .attended ? "checkmark" : (event.attendance == .missed ? "xmark" : "calendar"))
+                                                        .foregroundColor(event.attendance == .attended ? .blue : (event.attendance == .missed ? .red : .orange))
                                                 }
                                             }
                                         }
@@ -175,40 +175,40 @@ struct AnwesenheitView: View {
         .navigationBarHidden(true)
     }
     
-    func destinationView(for meeting: Meeting) -> some View {
-        if meeting.status == "past" {
-            return AnyView(AnwesenheitDetailView(meeting: meeting))
-        } else if meeting.status == "scheduled" {
-            return AnyView(AnwesenheitPlanungView(meeting: meeting))
+    func destinationView(for event: Event) -> some View {
+        if event.status == "past" {
+            return AnyView(AnwesenheitDetailView(event: event))
+        } else if event.status == "scheduled" {
+            return AnyView(AnwesenheitPlanungView(event: event))
         } else {
-            return AnyView(AnwesenheitAktuellView(meeting: meeting))
+            return AnyView(AnwesenheitAktuellView(event: event))
         }
     }
     
-    // Funktion, um Meetings nach Monaten zu gruppieren
-    private func getMeetings(for tab: Tab) -> [MonthGroup] {
-        // Filtern der Meetings basierend auf der ausgewählten Registerkarte. Aktuelle Meetings werden nicht angezeigt.
-        let filteredMeetings = meetings.filter { meeting in
-            guard meeting.status != "current" else {
+    // Funktion, um Events nach Monaten zu gruppieren
+    private func getEvents(for tab: Tab) -> [MonthGroup] {
+        // Filtern der Events basierend auf der ausgewählten Registerkarte. Aktuelle Events werden nicht angezeigt.
+        let filteredEvents = events.filter { event in
+            guard event.status != "current" else {
                 return false
             }
             
             if tab == .past {
-                return meeting.status == "past"
+                return event.status == "past"
             } else {
-                return meeting.status == "scheduled"
+                return event.status == "scheduled"
             }
         }
-        // Gruppierung der gefilterten Meetings nach Monat und Jahr
-        let groupedMeetings = Dictionary(grouping: filteredMeetings) { meeting in
-            Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: meeting.date))!
+        // Gruppierung der gefilterten Events nach Monat und Jahr
+        let groupedEvents = Dictionary(grouping: filteredEvents) { event in
+            Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: event.date))!
         }
         // Erstellen von MonthGroup für jede Gruppierung, formatiert nach Monat und Jahr
-        return groupedMeetings.map { (key, value) in
+        return groupedEvents.map { (key, value) in
             let formatter = DateFormatter()
             formatter.dateFormat = "MMMM - yyyy"
             let monthName = formatter.string(from: key)
-            return MonthGroup(name: monthName, meetings: value)
+            return MonthGroup(name: monthName, events: value)
         }.sorted(by: { $0.name < $1.name }) // Sortierung nach Monat
     }
 }
@@ -217,10 +217,10 @@ struct AnwesenheitView: View {
 struct MonthGroup: Identifiable {
     let id = UUID()
     let name: String
-    let meetings: [Meeting]
+    let events: [Event]
 }
 
-struct Meeting: Identifiable {
+struct Event: Identifiable {
     let id = UUID()
     let title: String
     let date: Date

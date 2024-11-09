@@ -11,7 +11,7 @@ struct AnwesenheitDetailView: View {
     @Environment(\.dismiss) var dismiss
     
     @State private var searchText: String = ""
-    var meeting: Meeting
+    var event: Event
     
     // Beispiel-Mitgliederliste
     @State private var members: [Member] = [
@@ -62,7 +62,7 @@ struct AnwesenheitDetailView: View {
                     Spacer()
                     
                     // Datum des aktuellen Termins
-                    Text(meeting.date, style: .date)
+                    Text(event.date, style: .date)
                         .font(.headline)
                         .foregroundColor(.primary)
                     
@@ -170,7 +170,7 @@ struct AnwesenheitDetailView: View {
 struct AnwesenheitDetailView_Previews: PreviewProvider {
     static var previews: some View {
         AnwesenheitDetailView(
-            meeting: Meeting(
+            event: Event(
                 title: "Jahreshauptversammlung",
                 date: Date(),
                 status: "past"

@@ -11,7 +11,7 @@ struct AnwesenheitPlanungView: View {
     @Environment(\.dismiss) var dismiss
     
     @State private var searchText: String = ""
-    var meeting: Meeting
+    var event: Event
     
     // Beispiel-Mitgliederliste
     @State private var members: [Member] = [
@@ -65,7 +65,7 @@ struct AnwesenheitPlanungView: View {
                     Spacer()
                     
                     // Datum des aktuellen Termins
-                    Text(meeting.date, style: .date)
+                    Text(event.date, style: .date)
                         .font(.headline)
                         .foregroundColor(.primary)
                     
@@ -258,7 +258,7 @@ enum VoteStatus {
 struct AnwesenheitPlanungView_Previews: PreviewProvider {
     static var previews: some View {
         AnwesenheitPlanungView(
-            meeting: Meeting(
+            event: Event(
                 title: "Jahreshauptversammlung",
                 date: Date(),
                 status: "scheduled"

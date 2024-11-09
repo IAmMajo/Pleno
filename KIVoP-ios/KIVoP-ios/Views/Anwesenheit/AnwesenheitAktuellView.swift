@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AnwesenheitAktuellView: View {
-    var meeting: Meeting
+    var event: Event
     @Environment(\.dismiss) var dismiss
     
     @State private var searchText: String = ""
@@ -63,7 +63,7 @@ struct AnwesenheitAktuellView: View {
                     Spacer()
                     
                     // Datum des aktuellen Termins
-                    Text(meeting.date, style: .date)
+                    Text(event.date, style: .date)
                         .font(.headline)
                         .foregroundColor(.primary)
                     
@@ -212,7 +212,7 @@ struct AnwesenheitAktuellView: View {
 struct AnwesenheitAktuellView_Previews: PreviewProvider {
     static var previews: some View {
         AnwesenheitAktuellView(
-            meeting: Meeting(
+            event: Event(
                 title: "Jahreshauptversammlung",
                 date: Date(),
                 status: "current"
