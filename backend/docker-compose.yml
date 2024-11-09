@@ -95,12 +95,13 @@ services:
 # Vapor: auth-service
 #
   auth-service:
-    extends:
-      file: ./auth-service/docker-compose.yml
-      service: app
+    image: kivop-auth-service:latest
+    build:
+      context: ./
+      dockerfile: auth-service/Dockerfile
     container_name: kivop-auth-service
     depends_on:
-      - config-service
+     - config-service
     environment:
       <<: *shared_environment
       DATABASE_NAME: auth_db
@@ -110,6 +111,36 @@ services:
       traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.replacement: /$$1
       traefik.http.routers.auth-service.rule: PathPrefix(`/auth-service`)
       traefik.http.routers.auth-service.middlewares: auth-service-replace-path-regex
+
+  auth-service-migration:
+    profiles:
+      - migration
+    image: kivop-auth-service:latest
+    build:
+      context: ./
+      dockerfile: auth-service/Dockerfile
+    container_name: kivop-auth-service-migration
+    environment:
+      <<: *shared_environment
+      DATABASE_NAME: auth_db
+    depends_on:
+      - postgres
+    command: ["migrate", "--yes"]
+
+  auth-service-revert:
+    profiles:
+      - revert
+    image: kivop-auth-service:latest
+    build:
+      context: ./
+      dockerfile: auth-service/Dockerfile
+    container_name: kivop-auth-service-revert
+    environment:
+      <<: *shared_environment
+      DATABASE_NAME: auth_db
+    depends_on:
+      - postgres
+    command: ["migrate", "--revert", "--yes"]
 
 #
 # Volumes
