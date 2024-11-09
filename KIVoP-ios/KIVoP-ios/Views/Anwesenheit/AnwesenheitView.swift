@@ -13,16 +13,30 @@ struct AnwesenheitView: View {
     @State private var searchText: String = ""
     @State private var selectedTab: Tab = .past
     
-    @State private var currentMeeting = Meeting(title: "Jahreshauptversammlung", date: Date())
-    @State private var pastMeetings: [Meeting] = [
-        Meeting(title: "1", date: Calendar.current.date(byAdding: .day, value: -10, to: Date())!, attendance: .attended),
-        Meeting(title: "2", date: Calendar.current.date(byAdding: .day, value: -20, to: Date())!, attendance: .missed),
-        Meeting(title: "3", date: Calendar.current.date(byAdding: .month, value: -1, to: Date())!, attendance: .attended)
+    // dateFormatter Funktion damit das Datum im richtigen Format angezeigt wird.
+    private let dateFormatter: DateFormatter
+
+    init() {
+        self.dateFormatter = DateFormatter()
+        self.dateFormatter.dateFormat = "dd.MM.yyyy"
+    }
+    
+    // Der attendance value ist zurzeit nur zur Visualisierung. Der Status wird vom jeweiligen Mitglied übernommen, je nachdem ob das angemeldete Mitglied an dem Termin teilgenommen hatte oder nicht.
+    // Der scheduled Wert wird der Basis Wert sein.
+    @State private var meetings: [Meeting] = [
+        Meeting(title: "Jahreshauptversammlung", date: Date(), status: "current"),
+        Meeting(title: "Treffen 1", date: Calendar.current.date(byAdding: .day, value: -10, to: Date())!, attendance: .attended, status: "past"),
+        Meeting(title: "Treffen 2", date: Calendar.current.date(byAdding: .day, value: -20, to: Date())!, attendance: .missed, status: "past"),
+        Meeting(title: "Treffen 3", date: Calendar.current.date(byAdding: .month, value: -1, to: Date())!, attendance: .attended, status: "past"),
+        Meeting(title: "Planungs-Meeting", date: Calendar.current.date(byAdding: .day, value: 10, to: Date())!, status: "scheduled"),
+        Meeting(title: "Feedback-Runde", date: Calendar.current.date(byAdding: .day, value: 20, to: Date())!, status: "scheduled")
     ]
-    @State private var proposedMeetings: [Meeting] = [
-        Meeting(title: "Planungs-Meeting", date: Calendar.current.date(byAdding: .day, value: 10, to: Date())!),
-        Meeting(title: "Feedback-Runde", date: Calendar.current.date(byAdding: .day, value: 20, to: Date())!)
-    ]
+    
+    // Aus dem Meeting Array wird das aktuelle Meeting gezogen.
+    // Das sowie das Meeting Array ist nur vorrübergehend hier, bis echte Testdaten verwendet werden
+    var currentMeetings: [Meeting] {
+        meetings.filter { $0.status == "current" }
+    }
     
     var body: some View {
         NavigationView {
@@ -71,7 +85,7 @@ struct AnwesenheitView: View {
                         .edgesIgnoringSafeArea(.all)
                     
                     VStack(alignment: .leading, spacing: 16) {
-                        // Aktuelle Sitzung
+                        // Aktuelle Sitzung, falls es keine gibt, wird angezeigt das es keine aktuelle Sitzung gibt
                         VStack(alignment: .leading, spacing: 4) {
                             Text("AKTUELLE SITZUNG")
                                 .font(.caption)
@@ -79,25 +93,36 @@ struct AnwesenheitView: View {
                                 .foregroundColor(.gray)
                                 .padding(.leading)
                             
-                            NavigationLink(destination: AnwesenheitAktuellView(meeting: currentMeeting)) {
-                                HStack {
-                                    VStack(alignment: .leading) {
-                                        Text(currentMeeting.title)
-                                            .font(.headline)
-                                            .foregroundColor(.white)
-                                        Text(currentMeeting.date, style: .date)
-                                            .font(.subheadline)
-                                            .foregroundColor(.white.opacity(0.7))
+                            if !currentMeetings.isEmpty {
+                                ForEach(currentMeetings) { meeting in
+                                    NavigationLink(destination: destinationView(for: meeting)) {
+                                        HStack {
+                                            VStack(alignment: .leading) {
+                                                Text(meeting.title)
+                                                    .foregroundColor(.white)
+                                                Text(dateFormatter.string(from: meeting.date))
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.white)
+                                            }
+                                            .padding(.vertical, 4)
+                                            Spacer()
+                                            Image(systemName: "clock")
+                                                .foregroundColor(.yellow)
+                                            Image(systemName: "chevron.right")
+                                                .foregroundColor(.white)
+                                        }
+                                        .padding(.horizontal)
+                                        .padding(.vertical, 2)
+                                        .background(Color.blue)
+                                        .cornerRadius(10)
                                     }
-                                    Spacer()
-                                    Image(systemName: "clock")
-                                        .foregroundColor(.yellow)
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.white)
                                 }
-                                .padding()
-                                .background(Color.blue)
-                                .cornerRadius(10)
+                            } else {
+                                // Platzhalter-Text, wenn es keine aktuelle Sitzung gibt
+                                Text("Aktuell ist keine Sitzung im Gange.")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray.opacity(0.7))
+                                    .padding(.leading)
                             }
                         }
                         .padding(.horizontal)
@@ -105,14 +130,14 @@ struct AnwesenheitView: View {
                         // TabView für vergangene und vorgeschlagene Termine
                         Picker("Termine", selection: $selectedTab) {
                             Text("Vergangene Termine").tag(Tab.past)
-                            Text("Vorgeschlagene Termine").tag(Tab.proposed)
+                            Text("Anstehende Termine").tag(Tab.scheduled)
                         }
                         .pickerStyle(SegmentedPickerStyle())
                         .padding(.horizontal)
                         
                         // Liste der Termine
                         List {
-                            // Aufsplittung nach Monaten. Schema soll "Monat - Jahr" sein.
+                            // Aufsplittung nach Monaten.
                             ForEach(getMeetings(for: selectedTab)) { month in
                                 Section(header: Text(month.name)) {
                                     ForEach(month.meetings) { meeting in
@@ -120,18 +145,21 @@ struct AnwesenheitView: View {
                                             HStack {
                                                 VStack(alignment: .leading) {
                                                     Text(meeting.title)
-                                                        .font(.body)
-                                                    Text(meeting.date, style: .date)
-                                                        .font(.caption)
-                                                        .foregroundColor(.gray)
+                                                    Text(dateFormatter.string(from: meeting.date))
+                                                        .font(.subheadline)
                                                 }
+                                                .padding(.vertical, -2)
                                                 Spacer()
                                                 if selectedTab == .past {
                                                     Image(systemName: meeting.attendance == .attended ? "checkmark" : "xmark")
                                                         .foregroundColor(meeting.attendance == .attended ? .blue : .red)
+                                                } else if selectedTab == .scheduled {
+                                                    // Wenn abgestimmt wurde Haken oder X.
+                                                    // Wenn noch nicht abgestimmt wurde anderes Icon.
+                                                    Image(systemName: meeting.attendance == .attended ? "checkmark" : (meeting.attendance == .missed ? "xmark" : "calendar"))
+                                                        .foregroundColor(meeting.attendance == .attended ? .blue : (meeting.attendance == .missed ? .red : .orange))
                                                 }
                                             }
-                                            .padding(.vertical, 8)
                                         }
                                     }
                                 }
@@ -147,45 +175,56 @@ struct AnwesenheitView: View {
     }
     
     func destinationView(for meeting: Meeting) -> some View {
-        if selectedTab == .past {
+        if meeting.status == "past" {
             return AnyView(AnwesenheitDetailView(meeting: meeting))
-        } else {
+        } else if meeting.status == "scheduled" {
             return AnyView(AnwesenheitPlanungView(meeting: meeting))
+        } else {
+            return AnyView(AnwesenheitAktuellView(meeting: meeting))
         }
     }
     
     // Funktion, um Meetings nach Monaten zu gruppieren
     private func getMeetings(for tab: Tab) -> [MonthGroup] {
-        let meetings = tab == .past ? pastMeetings : proposedMeetings
-        
-        // Gruppierung der Meetings nach Monat
-        let groupedMeetings = Dictionary(grouping: meetings) { meeting in
+        // Filtern der Meetings basierend auf der ausgewählten Registerkarte. Aktuelle Meetings werden nicht angezeigt.
+        let filteredMeetings = meetings.filter { meeting in
+            guard meeting.status != "current" else {
+                return false
+            }
+            
+            if tab == .past {
+                return meeting.status == "past"
+            } else {
+                return meeting.status == "scheduled"
+            }
+        }
+        // Gruppierung der gefilterten Meetings nach Monat und Jahr
+        let groupedMeetings = Dictionary(grouping: filteredMeetings) { meeting in
             Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: meeting.date))!
         }
-        
-        // Erstellen von MonthGroup für jede Gruppierung mit nur Monat und Jahr
+        // Erstellen von MonthGroup für jede Gruppierung, formatiert nach Monat und Jahr
         return groupedMeetings.map { (key, value) in
             let formatter = DateFormatter()
-            formatter.dateFormat = "MMMM yyyy"
+            formatter.dateFormat = "MMMM - yyyy"
             let monthName = formatter.string(from: key)
             return MonthGroup(name: monthName, meetings: value)
         }.sorted(by: { $0.name < $1.name }) // Sortierung nach Monat
     }
 }
 
-// Strukturen zur Gruppierung der Meetings
+// Modelle und Enums zur Strukturierung der Daten
 struct MonthGroup: Identifiable {
     let id = UUID()
     let name: String
     let meetings: [Meeting]
 }
 
-// Modelle und Enums zur Strukturierung der Daten
 struct Meeting: Identifiable {
     let id = UUID()
     let title: String
     let date: Date
     var attendance: AttendanceStatus?
+    var status: String
 }
 
 enum AttendanceStatus {
@@ -193,7 +232,7 @@ enum AttendanceStatus {
 }
 
 enum Tab {
-    case past, proposed
+    case past, scheduled
 }
 
 // Vorschau für SwiftUI
