@@ -208,7 +208,6 @@ struct AnwesenheitPlanungView: View {
                                             .foregroundColor(member.hasVoted?.color ?? VoteStatus.notVoted.color)
                                             .font(.system(size: 22))
                                     }
-                                    .padding(.vertical, 8)
                                 }
                             }
                         }
@@ -261,7 +260,8 @@ struct AnwesenheitPlanungView_Previews: PreviewProvider {
         AnwesenheitPlanungView(
             meeting: Meeting(
                 title: "Jahreshauptversammlung",
-                date: Date()
+                date: Date(),
+                status: "scheduled"
             )
         )
     }

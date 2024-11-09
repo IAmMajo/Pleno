@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct AnwesenheitDetailView: View {
-    var meeting: Meeting
     @Environment(\.dismiss) var dismiss
     
     @State private var searchText: String = ""
+    var meeting: Meeting
     
     // Beispiel-Mitgliederliste
     @State private var members: [Member] = [
@@ -22,19 +22,25 @@ struct AnwesenheitDetailView: View {
         Member(name: "Lukas Schmidt", hasVoted: .no)
     ]
     
-    // Sortierung der Mitglieder nil und .no werden gleich behandelt.
+    // Sortierung der Mitglieder, falls noch nicht abgestimt wurde wird nach .yes sortiert.
     var sortedMembers: [Member] {
         members.sorted {
-            // Vergleiche den Status zuerst
-            let statusComparison = ($0.hasVoted ?? .no) == .yes && ($1.hasVoted ?? .no) != .yes
-            if statusComparison {
-                return true
-            } else if ($0.hasVoted ?? .no) == .yes && ($1.hasVoted ?? .no) == .yes {
-                return $0.name < $1.name  // Alphabetische Sortierung, wenn beide .yes
-            } else if ($0.hasVoted ?? .no) == .no && ($1.hasVoted ?? .no) == .no {
-                return $0.name < $1.name  // Alphabetische Sortierung, wenn beide .no
+            if $0.hasVoted == $1.hasVoted {
+                return $0.name < $1.name
             }
-            return false  // Hier fällt die Sortierung durch andere Status
+            if $0.hasVoted == .yes {
+                return true
+            }
+            if $1.hasVoted == .yes {
+                return false
+            }
+            if $0.hasVoted == nil {
+                return true
+            }
+            if $1.hasVoted == nil {
+                return false
+            }
+            return false
         }
     }
     
@@ -150,7 +156,6 @@ struct AnwesenheitDetailView: View {
                                             .foregroundColor(voteStatus.color)
                                             .font(.system(size: 22))
                                     }
-                                    .padding(.vertical, 8)
                                 }
                             }
                         }
@@ -167,7 +172,8 @@ struct AnwesenheitDetailView_Previews: PreviewProvider {
         AnwesenheitDetailView(
             meeting: Meeting(
                 title: "Jahreshauptversammlung",
-                date: Date()
+                date: Date(),
+                status: "past"
             )
         )
     }

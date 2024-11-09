@@ -197,7 +197,6 @@ struct AnwesenheitAktuellView: View {
                                             .foregroundColor(member.hasVoted?.color ?? VoteStatus.notVoted.color)
                                             .font(.system(size: 22))
                                     }
-                                    .padding(.vertical, 8) // Padding für jedes Listenelement
                                 }
                             }
                         }
@@ -215,7 +214,8 @@ struct AnwesenheitAktuellView_Previews: PreviewProvider {
         AnwesenheitAktuellView(
             meeting: Meeting(
                 title: "Jahreshauptversammlung",
-                date: Date()
+                date: Date(),
+                status: "current"
             )
         )
     }
