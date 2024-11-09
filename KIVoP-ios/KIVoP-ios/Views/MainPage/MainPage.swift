@@ -176,13 +176,6 @@ struct ProtokolleView: View {
     }
 }
 
-struct AnwesenheitView: View {
-    var body: some View {
-        Text("Anwesenheit")
-            .font(.largeTitle)
-    }
-}
-
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         MainPage()

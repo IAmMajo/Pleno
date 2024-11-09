@@ -48,6 +48,9 @@
         }
       }
     },
+    "%lld" : {
+
+    },
     "10" : {
       "localizations" : {
         "de" : {
@@ -224,6 +227,38 @@
         }
       }
     },
+    "Aktuell ist keine Sitzung im Gange." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuell ist keine Sitzung im Gange."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Currently, no meeting in progress"
+          }
+        }
+      }
+    },
+    "AKTUELLE SITZUNG" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AKTUELLE SITZUNG"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CURRENT MEETING"
+          }
+        }
+      }
+    },
     "Aktuelles Passwort" : {
       "localizations" : {
         "de" : {
@@ -286,6 +321,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sonrasında,"
+          }
+        }
+      }
+    },
+    "Anstehende Termine" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anstehende Termine"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upcoming Meetings"
           }
         }
       }
@@ -356,6 +407,22 @@
         }
       }
     },
+    "Code scannen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code scannen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan code"
+          }
+        }
+      }
+    },
     "Dein Name: " : {
       "localizations" : {
         "de" : {
@@ -374,6 +441,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adın:"
+          }
+        }
+      }
+    },
+    "Dies ist nur eine vorläufige Umfrage, um festzustellen, wie viele Mitglieder kommen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dies ist nur eine vorläufige Umfrage, um festzustellen, wie viele Mitglieder kommen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is just a preliminary survey to determine how many members will attend."
           }
         }
       }
@@ -581,6 +664,22 @@
         }
       }
     },
+    "Ja" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ja"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yes"
+          }
+        }
+      }
+    },
     "Jahreshauptversammlung" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -622,6 +721,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kamera"
+          }
+        }
+      }
+    },
+    "Kannst du an diesem Termin?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kannst du an diesem Termin?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you available"
           }
         }
       }
@@ -732,6 +847,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "İle"
+          }
+        }
+      }
+    },
+    "Mitglieder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitglieder"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Members"
           }
         }
       }
@@ -847,6 +978,22 @@
         }
       }
     },
+    "Nein" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nein"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No"
+          }
+        }
+      }
+    },
     "Neues Passwort" : {
       "localizations" : {
         "de" : {
@@ -887,6 +1034,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "YENİ ŞİFRE"
+          }
+        }
+      }
+    },
+    "oder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "oder"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "or"
           }
         }
       }
@@ -1221,6 +1384,70 @@
         }
       }
     },
+    "Suchen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search"
+          }
+        }
+      }
+    },
+    "Teilnahme bestätigen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teilnahme bestätigen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Submit attendance"
+          }
+        }
+      }
+    },
+    "Teilnahmecode" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teilnahmecode"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Participation code"
+          }
+        }
+      }
+    },
+    "Termine" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Termine"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Events"
+          }
+        }
+      }
+    },
     "Umfragen, " : {
       "localizations" : {
         "de" : {
@@ -1305,6 +1532,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kulüp gezisi…"
+          }
+        }
+      }
+    },
+    "Vergangene Termine" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergangene Termine"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent events"
           }
         }
       }
