@@ -1,15 +1,16 @@
 import Fluent
 import Vapor
+import Models
 
-struct UserDTO: Content {
-    var id: UUID?
-    var email: String?
-    var name: String?
-    var passwordHash: String?
-    var role: String?
-    var isActive: Bool?
+public struct UserDTO: Content {
+    public var id: UUID?
+    public var email: String?
+    public var name: String?
+    public var passwordHash: String?
+    public var role: String?
+    public var isActive: Bool?
     
-    func toModel() -> User {
+    public func toModel() -> User {
         let model = User()
         
         model.id = self.id
