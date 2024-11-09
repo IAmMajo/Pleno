@@ -23,6 +23,7 @@ struct CreateEmailVerification: AsyncMigration {
 
     func revert(on database: Database) async throws {
         try await database.schema(EmailVerification.schema).delete()
+        try await database.enum("verification_status").delete()
     }
 }
 
