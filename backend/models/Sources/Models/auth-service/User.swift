@@ -33,9 +33,10 @@ public final class User: Model, Content, @unchecked Sendable {
     
     public init() { }
     
-    public init (id: UUID? = nil, identity: Identity, email: String, passwordHash: String, isAdmin: Bool = false, isActive: Bool = false) {
+    // TODO temporarily every user is active by default until email verification works. Attention for the first user!
+    public init (id: UUID? = nil, identityID: Identity.IDValue, email: String, passwordHash: String, isAdmin: Bool = false, isActive: Bool = true) {
         self.id = id
-        self.identity = identity
+        self.$identity.id = identityID
         self.email = email
         self.passwordHash = passwordHash
         self.isAdmin = isAdmin

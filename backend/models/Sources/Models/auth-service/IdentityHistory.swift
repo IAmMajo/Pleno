@@ -18,10 +18,10 @@ public final class IdentityHistory: Model, Content, @unchecked Sendable {
     
     public init() {}
     
-    public init(id: UUID? = nil, user: User, identity: Identity) throws {
+    public init(id: UUID? = nil, userID: User.IDValue, identityID: Identity.IDValue) {
         self.id = id
-        self.user = user
-        self.identity = identity
+        self.$user.id = userID
+        self.$identity.id = identityID
     }
 }
 
