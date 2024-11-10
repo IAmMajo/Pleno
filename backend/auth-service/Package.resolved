@@ -1,5 +1,5 @@
 {
-  "originHash" : "b4a350512c8f84e3f40be0d70e0ba9c6d10e1047922abf2415f73049fd90a86a",
+  "originHash" : "d62c46f6286611e628cd743e064ed08182ff71595c8381b4774951c4a08b4cdc",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -53,6 +53,24 @@
       "state" : {
         "revision" : "fd57101e426d3edf66a32ba63a7d0b8ced4d7499",
         "version" : "2.10.0"
+      }
+    },
+    {
+      "identity" : "jwt",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor/jwt.git",
+      "state" : {
+        "revision" : "d65f32bfd08fae5910d603028be5dec4f35b3482",
+        "version" : "4.2.2"
+      }
+    },
+    {
+      "identity" : "jwt-kit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor/jwt-kit.git",
+      "state" : {
+        "revision" : "13e7513b3ba0afa13967daf77af2fb4ad087306c",
+        "version" : "4.13.5"
       }
     },
     {
@@ -150,8 +168,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-crypto.git",
       "state" : {
-        "revision" : "21f7878f2b39d46fd8ba2b06459ccb431cdf876c",
-        "version" : "3.8.1"
+        "revision" : "06dc63c6d8da54ee11ceb268cde1fa68161afc96",
+        "version" : "3.9.1"
       }
     },
     {
@@ -213,8 +231,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-ssl.git",
       "state" : {
-        "revision" : "d7ceaf0e4d8001cd35cdc12e42cdd281e9e564e8",
-        "version" : "2.28.0"
+        "revision" : "c7e95421334b1068490b5d41314a50e70bab23d1",
+        "version" : "2.29.0"
       }
     },
     {
@@ -240,8 +258,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swift-server/swift-service-lifecycle.git",
       "state" : {
-        "revision" : "24c800fb494fbee6e42bc156dc94232dc08971af",
-        "version" : "2.6.1"
+        "revision" : "f70b838872863396a25694d8b19fe58bcd0b7903",
+        "version" : "2.6.2"
       }
     },
     {
@@ -258,8 +276,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/vapor.git",
       "state" : {
-        "revision" : "4d3bc6ce08b72a14c9879810cf0be455ca98f1fb",
-        "version" : "4.106.1"
+        "revision" : "9786a424db75c4e9eb53e255ce1268675b680562",
+        "version" : "4.106.3"
       }
     },
     {
