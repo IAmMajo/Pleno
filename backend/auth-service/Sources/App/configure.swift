@@ -25,6 +25,9 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateEmailVerification())
     
     app.jwt.signers.use(.hs256(key: "Ganzgeheimespasswort"))
+    
+    app.logger.logLevel = .debug
+    
 
     // register routes
     try routes(app)

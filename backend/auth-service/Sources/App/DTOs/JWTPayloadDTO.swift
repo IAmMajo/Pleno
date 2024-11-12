@@ -1,9 +1,9 @@
 import Fluent
 import Vapor
 import Models
-import JWT
+@preconcurrency import JWT
 
-public struct JWTPayloadDTO: JWTPayload {
+public struct JWTPayloadDTO: JWTPayload, Authenticatable, Sendable {
     public var userID: UUID?
     public var exp: ExpirationClaim
     public var isAdmin: Bool?
