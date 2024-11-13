@@ -1,0 +1,82 @@
+services:                                                                                                                                      
+  traefik:
+    image: traefik:v3.2.0
+    container_name: kivop-traefik
+    restart: unless-stopped
+    command:
+      - "--api.insecure=false"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.http.address=:80"
+      - "--entryPoints.http.http.redirections.entryPoint.to=https"
+      - "--entryPoints.http.http.redirections.entryPoint.scheme=https"
+      - "--entryPoints.https.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http"
+      - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.email=${LC_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - traefik-letsencrypt:/letsencrypt
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      traefik.enable: true
+      traefik.http.routers.dashboard.entrypoints: https
+      traefik.http.routers.dashboard.rule: Host(`dashboard.kivop.ipv64.net`)
+      traefik.http.routers.dashboard.middlewares: dashboard-auth
+      traefik.http.routers.dashboard.tls: true
+      traefik.http.routers.dashboard.service: api@internal
+      traefik.http.routers.dashboard.tls.certresolver: myresolver
+      traefik.http.middlewares.dashboard-auth.basicauth.users: ${DASHBOARD_ADMIN}
+
+#
+# Database
+#
+  postgres:
+    image: postgres:17.0-bookworm
+    container_name: kivop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vapor # only for development
+      POSTGRES_PASSWORD: example # only for development
+    volumes:
+      - ./init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
+      - postgres-data:/var/lib/postgresql/data
+
+#
+# Vapor: auth-service
+#
+  auth-service:
+    extends:
+      file: ./docker-compose.yml
+      service: auth-service
+    container_name: kivop-auth-service
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.auth-service.rule: PathPrefix(`/auth`) || PathPrefix(`/users`)
+      traefik.http.routers.auth-service.entrypoints: https
+      traefik.http.routers.auth-service.tls.certresolver: myresolver
+
+#
+# Volumes
+#
+volumes:
+  postgres-data:
+    name: "kivop-postgres-data"
+  traefik-letsencrypt:
+    name: "kivop-traefik-letsencrypt"
+
+#
+# Networks
+#
+networks:
+  default:
+    name: "kivop-net"
