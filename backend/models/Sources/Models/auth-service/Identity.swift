@@ -22,4 +22,9 @@ public final class Identity: Model, Content, @unchecked Sendable {
         self.id = id
         self.name = name
     }
+    
+    public func clone() -> Identity {
+        let newIdentity = Identity(name: self.name)
+        return newIdentity
+    }
 }

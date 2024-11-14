@@ -6,8 +6,8 @@ struct CreateIdentity: AsyncMigration {
         try await database.schema(Identity.schema)
             .id()
             .field("name", .string, .required)
-            .field("created_at", .date)
-            .field("updated_at", .date)
+            .field("created_at", .datetime)
+            .field("updated_at", .datetime)
             .create()
     }
 

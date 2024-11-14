@@ -7,7 +7,7 @@ struct CreateIdentityHistory: AsyncMigration {
             .id()
             .field("user_id", .uuid, .required, .references(User.schema, "id"))
             .field("identity_id", .uuid, .required, .references(Identity.schema, "id"))
-            .field("valid_from", .date)
+            .field("valid_from", .datetime)
             .create()
     }
 
