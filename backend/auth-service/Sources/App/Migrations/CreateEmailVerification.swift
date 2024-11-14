@@ -15,9 +15,9 @@ struct CreateEmailVerification: AsyncMigration {
             .field("email", .string, .required)
             .field("code", .string, .required)
             .field("status", verificationStatus)
-            .field("expires_at", .date)
-            .field("created_at", .date)
-            .field("verified_at", .date)
+            .field("expires_at", .datetime)
+            .field("created_at", .datetime)
+            .field("verified_at", .datetime)
             .create()
     }
 
