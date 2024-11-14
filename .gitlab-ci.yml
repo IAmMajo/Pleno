@@ -1,0 +1,14 @@
+stages:
+  - build
+
+tdo-swiftkotlin:
+    stage: build
+    script:
+        - swiftkotlin ./dtos ./android/dtos
+        - git add *
+        - git commit -m "${COMMIT_MESSAGE}"
+        - git push -o ci.skip "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:${CI_COMMIT_BRANCH}
+    rules:
+    - if: $CI_COMMIT_BRANCH == 'staging-dtos'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
