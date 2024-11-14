@@ -35,18 +35,17 @@ fun TermindCard(
     date: LocalDate,
     time: LocalTime,
     status: Int,
-    color1: Color,
-    color2: Color,
-    color3: Color,
-    icon: Int
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-    val brush = Brush.linearGradient(
-        colors = listOf(color1, color3),
-        start = Offset(0.0f, 0.0f),       // Start oben links
-        end = Offset(400.0f, 700.0f) // Ende unten rechts
-    )
+    val colorH: Color
+
+    colorH = when (status) {
+        0 -> Color(0xFF2EA100)
+        1 -> Color(0xFFFF5449)
+        2 -> Color(0xFF1A1C15)
+        else -> Color(0xFFEEEFE3)
+    }
 
 
     Box(
@@ -54,7 +53,7 @@ fun TermindCard(
             .fillMaxWidth()
             .padding(12.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(brush)
+            .background(colorH)
             .padding(8.dp)
     ){
             Column {
@@ -161,33 +160,3 @@ fun TermindCardPreview() {
 //FFF68E90 rot
 //FF2EA100 grün-icon
 
-/*
-Box(
-modifier = Modifier
-.fillMaxWidth()
-.padding(12.dp)
-.clip(RoundedCornerShape(8.dp))
-.background(color = color1)
-.padding(8.dp)
-)
-
-
-
-// Äußere Box als Rahmen (Border)
-
-Box(
-modifier = Modifier
-.fillMaxWidth()
-.padding(16.dp)
-.clip(shape = RoundedCornerShape(8.dp))
-.background(color = color2)
-.padding(2.dp)
-) {
-    // Innere Box für den eigentlichen Inhalt
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFBFEFB1), shape = RoundedCornerShape(8.dp)) // Innerer Hintergrund als Border
-            .padding(12.dp)
-    )
-*/
