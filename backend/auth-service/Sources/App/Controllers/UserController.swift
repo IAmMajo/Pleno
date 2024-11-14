@@ -8,12 +8,18 @@ struct UserController: RouteCollection {
         
         userRoutes.post("register", use: self.register)
         userRoutes.get("profile", use: self.getProfile)
+        userRoutes.put("profile", use: self.updateProfile)
     }
     
     @Sendable
-    func getProfile(req: Request) async throws -> UserProfileDTO {
+    func updateProfile(req: Request) async throws -> HTTPStatus {
+        // parse and verify jwt token
         let token = try req.jwt.verify(as: JWTPayloadDTO.self)
+
+        // decode updates
+        let update = try req.content.decode(UserProfileUpdateDTO.self)
         
+        // query user
         guard let user = try await User.query(on: req.db)
             .filter(\.$id == token.userID!)
             .with(\.$identity)
@@ -21,6 +27,50 @@ struct UserController: RouteCollection {
             throw Abort(.notFound)
         }
         
+        // clone identity
+        let updatedIdentity = user.identity.clone()
+        
+        // update identity
+        updatedIdentity.name = update.name!
+        
+        // save updated identity
+        try await updatedIdentity.save(on: req.db)
+        
+        // extract identity id
+        let identityID = try updatedIdentity.requireID()
+        
+        // update current identity
+        user.$identity.id = identityID
+        
+        // save update
+        try await user.update(on: req.db)
+        
+        // extract identity id
+        let userID = try user.requireID()
+        
+        // create history object
+        let history = IdentityHistory(userID: userID, identityID: identityID)
+        
+        // save history entry
+        try await history.save(on: req.db)
+        
+        return .ok
+    }
+    
+    @Sendable
+    func getProfile(req: Request) async throws -> UserProfileDTO {
+        // parse and verify jwt token
+        let token = try req.jwt.verify(as: JWTPayloadDTO.self)
+        
+        // query user
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$id == token.userID!)
+            .with(\.$identity)
+            .first() else {
+            throw Abort(.notFound)
+        }
+        
+        // build reponse object
         var response = UserProfileDTO()
         response.email = user.email
         response.isAdmin = user.isAdmin
