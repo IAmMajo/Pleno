@@ -7,7 +7,27 @@ struct UserController: RouteCollection {
         let userRoutes = routes.grouped("users")
         
         userRoutes.post("register", use: self.register)
+        userRoutes.get("profile", use: self.getProfile)
+    }
+    
+    @Sendable
+    func getProfile(req: Request) async throws -> UserProfileDTO {
+        let token = try req.jwt.verify(as: JWTPayloadDTO.self)
         
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$id == token.userID!)
+            .with(\.$identity)
+            .first() else {
+            throw Abort(.notFound)
+        }
+        
+        var response = UserProfileDTO()
+        response.email = user.email
+        response.isAdmin = user.isAdmin
+        response.createdAt = user.createdAt
+        response.name = user.identity.name
+        
+        return response
     }
     
     @Sendable
