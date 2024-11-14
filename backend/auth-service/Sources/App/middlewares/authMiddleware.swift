@@ -3,9 +3,11 @@ import Vapor
 
 struct AuthMiddleware: AsyncMiddleware {
     let jwtSigner: JWTSigner
+    let payloadType: JWTPayloadDTO.Type
     
-    init(jwtSigner: JWTSigner) {
+    init(jwtSigner: JWTSigner, payloadType: JWTPayloadDTO.Type) {
         self.jwtSigner = jwtSigner
+        self.payloadType = payloadType
     }
     
     func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
@@ -15,12 +17,25 @@ struct AuthMiddleware: AsyncMiddleware {
         }
         
         do {
-            let _ = try jwtSigner.verify(token, as: JWTPayloadDTO.self)
+            let payload = try jwtSigner.verify(token, as: JWTPayloadDTO.self)
+            
+            request.jwtPayload = payload
+            
             return try await next.respond(to: request)
         } catch {
             request.logger.error("Token verification failed: \(error)")
             throw Abort(.unauthorized, reason: "Invalid or expired token")
         }
+    }
+}
+
+extension Request {
+    private struct JWTKey: StorageKey {
+        typealias Value = JWTPayloadDTO
+    }
+    var jwtPayload: JWTPayloadDTO? {
+        get { storage[JWTKey.self] }
+        set { storage[JWTKey.self] = newValue }
     }
 }
 

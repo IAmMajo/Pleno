@@ -6,19 +6,25 @@ import JWT
 struct AuthController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
-        let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner)
+        let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
         // Auth-Routen
         let authRoutes = routes.grouped("auth");
         authRoutes.post("login", use: self.login)
         // geschützte Auth-Routen
         let protectedRoutes = authRoutes.grouped(authMiddleware)
         protectedRoutes.get("token-verify", use: self.verifyJWTToken)
-        protectedRoutes.get("test", use: self.test)
+        protectedRoutes.get("token-test", use: self.tokenTest)
     }
     
     @Sendable
-    func test(req: Request) async throws -> String {
-        return "Das hier ist eine Test-Antwort"
+    func tokenTest(req: Request) async throws -> String {
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        let userID: UUID = payload.userID!
+        let exp: ExpirationClaim = payload.exp
+        let isAdmin: Bool = payload.isAdmin!
+        return "User ID: \(userID), Exp: \(exp), isAdmin: \(isAdmin)"
     }
     
     @Sendable
