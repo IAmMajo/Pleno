@@ -146,6 +146,7 @@ fun TermindCardPreview() {
         }
     }
 }
+
 //FFBFEFB1 grün
 //FFFF5449 rot-icon
 //FF1A1C15 schwartz-icon
