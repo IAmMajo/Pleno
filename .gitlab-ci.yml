@@ -6,6 +6,7 @@ tdo-swiftkotlin:
     script:
         - swiftkotlin ./dtos ./android/dtos
         - git add *
+        - git status
         - git commit -m "${COMMIT_MESSAGE}"
         - git push -o ci.skip "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:${CI_COMMIT_BRANCH}
     rules:
