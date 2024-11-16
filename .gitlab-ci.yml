@@ -10,6 +10,6 @@ tdo-swiftkotlin:
         - git commit -m "${SWIFTKOTLIN_COMMIT_MESSAGE}"
         - git push -o ci.skip "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:${CI_COMMIT_BRANCH}
     rules:
-    - if: $CI_COMMIT_BRANCH == "${DTOS_STAGING_BRANCH}"
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
+      - if: '$CI_COMMIT_BRANCH == "${DTOS_STAGING_BRANCH}"'
+      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "${DTOS_STAGING_BRANCH}" && $CI_COMMIT_MESSAGE =~ /Merge branch/'
+
