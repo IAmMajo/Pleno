@@ -4,12 +4,18 @@ stages:
 tdo-swiftkotlin:
     stage: build
     script:
-        - ./translate-dtos.sh
-        - git add *
-        - git status
-        - git commit -m "${SWIFTKOTLIN_COMMIT_MESSAGE}"
-        - git push -o ci.skip "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:${CI_COMMIT_BRANCH}
-    rules:
-      - if: '$CI_COMMIT_BRANCH == "${DTOS_STAGING_BRANCH}"'
-      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "${DTOS_STAGING_BRANCH}" && $CI_COMMIT_MESSAGE =~ /Merge branch/'
+        - echo "SWIFTKOTLIN_COMMIT_MESSAGE - ${SWIFTKOTLIN_COMMIT_MESSAGE}"
+        - echo "DTOS_STAGING_BRANCH - ${DTOS_STAGING_BRANCH}"
+        - echo "CI_COMMIT_BRANCH - ${CI_COMMIT_BRANCH}"
+        - echo "CI_PIPELINE_SOURCE - ${CI_PIPELINE_SOURCE}"
+        - echo "CI_COMMIT_REF_NAME - ${CI_COMMIT_REF_NAME}"
+        - echo "CI_MERGE_REQUEST_TARGET_BRANCH_NAME - ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}"
+        #- ./translate-dtos.sh
+        #- git add *
+        #- git status
+        #- git commit -m "${SWIFTKOTLIN_COMMIT_MESSAGE}"
+        #- git push -o ci.skip "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:${CI_COMMIT_BRANCH}
+    #rules:
+    #  - if: '$CI_COMMIT_BRANCH == "${DTOS_STAGING_BRANCH}"'
+    #  - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "${DTOS_STAGING_BRANCH}" && $CI_COMMIT_MESSAGE =~ /Merge branch/'
 
