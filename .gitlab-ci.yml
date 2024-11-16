@@ -4,7 +4,7 @@ stages:
 tdo-swiftkotlin:
     stage: build
     script:
-        - swiftkotlin ./dtos ./android/dtos
+        - ./translate-dtos.sh
         - git add *
         - git status
         - git commit -m "${SWIFTKOTLIN_COMMIT_MESSAGE}"
