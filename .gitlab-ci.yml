@@ -11,5 +11,5 @@ tdo-swiftkotlin:
         - git push -o ci.skip "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:${CI_COMMIT_BRANCH}
     rules:
       - if: $CI_COMMIT_BRANCH == "${DTOS_STAGING_BRANCH}"
-      - when: always
+        when: always
 
