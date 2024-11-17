@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct Onboarding_Login: View {
+    @Environment(\.colorScheme) var colorScheme // Zugriff auf Light/Dark Mode
     @State private var email: String = ""
     @State private var password: String = ""
     
@@ -16,32 +17,31 @@ struct Onboarding_Login: View {
                     .padding(.bottom, 30)
                 
                 // Textfeld für E-Mail
-                VStack(spacing: 5) {
-                    TextField("E-Mail-Adresse", text: $email)
+                VStack(spacing: 0) {
+                    TextField("", text: $email,prompt: Text("E-Mail-Adresse")
+                        .foregroundColor(dynamicPlaceholderColor()))
                         .padding()
-                        .background(Color(UIColor.secondarySystemBackground)) // Anpassbarer Hintergrund für Dark/Light Mode
-                        .cornerRadius(10)
-                        .overlay( // Rahmen für bessere Sichtbarkeit
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color(UIColor.separator), lineWidth: 1)
-                        )
-                        .frame(width: 450)
+                        .background(Color(UIColor.systemBackground)) // Dynamische Anpassung an den Modus
+                        .foregroundColor(Color.primary) // Passt die Textfarbe an den Modus an
+                        .frame(width: 615)
+                    
+                    Divider()
+                        .frame(height: 0.5)
+                        .background(Color.gray.opacity(0.6))
+                        .padding(.horizontal, 10)
+                        .frame(width: 615)
+                    
+                    SecureField("", text: $password, prompt: Text("Passwort")
+                        .foregroundColor(dynamicPlaceholderColor()))
+                        .padding()
+                        .background(Color(UIColor.systemBackground)) // Dynamische Anpassung an den Modus
+                        .foregroundColor(Color.primary) // Passt die Textfarbe an den Modus an
+                        .frame(width: 615)
                 }
-                .padding(.horizontal, 24)
+                .cornerRadius(10)
+
                 
-                // Textfeld für Passwort
-                VStack(spacing: 5) {
-                    SecureField("Passwort", text: $password)
-                        .padding()
-                        .background(Color(UIColor.secondarySystemBackground)) // Anpassbarer Hintergrund für Dark/Light Mode
-                        .cornerRadius(10)
-                        .overlay( // Rahmen für bessere Sichtbarkeit
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color(UIColor.separator), lineWidth: 1)
-                        )
-                        .frame(width: 450)
-                }
-                .padding(.horizontal, 24)
+               
                 
                 // Links für Registrierung und Passwort vergessen
                 HStack {
@@ -59,9 +59,9 @@ struct Onboarding_Login: View {
                             .font(.footnote)
                     }
                 }
-                .frame(width: 450)
+                .frame(width: 570)
                 .padding(.horizontal, 24)
-                .padding(.bottom, 30)
+                .padding(.bottom, 35)
                 
                 // Login-Button
                 NavigationLink(destination: MainPage()) {
@@ -70,7 +70,6 @@ struct Onboarding_Login: View {
                         .frame(width: 450, height: 44)
                         .background(Color.blue)
                         .cornerRadius(10)
-                        .fontWeight(.bold)
                 }
                 .padding(.bottom, 20)
                 
@@ -82,7 +81,12 @@ struct Onboarding_Login: View {
             .navigationBarBackButtonHidden(true)
         }
     }
+    func dynamicPlaceholderColor() -> Color {
+           return colorScheme == .dark ? .white : .black
+       }
+    
 }
+
 
 struct Onboarding_Login_Previews: PreviewProvider {
     static var previews: some View {

@@ -281,6 +281,7 @@ struct NutzerverwaltungView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
                         ForEach(0..<7) { _ in
+                            
                             VStack {
                                 Circle()
                                     .fill(Color.gray)
