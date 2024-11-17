@@ -48,7 +48,31 @@
         }
       }
     },
+    "(ca. 160 min.)" : {
+
+    },
     "%lld" : {
+
+    },
+    "%lld%%" : {
+
+    },
+    "•" : {
+
+    },
+    "01.11.23" : {
+
+    },
+    "01.12.23" : {
+
+    },
+    "04.11.23" : {
+
+    },
+    "8/12" : {
+
+    },
+    "9/12" : {
 
     },
     "10" : {
@@ -94,6 +118,9 @@
           }
         }
       }
+    },
+    "18:06 Uhr" : {
+
     },
     "21.01.2024" : {
       "localizations" : {
@@ -161,6 +188,28 @@
         }
       }
     },
+    "Abschied" : {
+
+    },
+    "Abstimmen" : {
+
+    },
+    "Abstimmung" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abstimmung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voting"
+          }
+        }
+      }
+    },
     "Abstimmungen" : {
       "localizations" : {
         "de" : {
@@ -172,12 +221,12 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voting"
+            "value" : "Votings"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Oylamalar"
           }
         }
@@ -204,6 +253,12 @@
           }
         }
       }
+    },
+    "Adresse" : {
+
+    },
+    "Agenda" : {
+
     },
     "AKTIONEN" : {
       "localizations" : {
@@ -239,6 +294,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Currently, no meeting in progress"
+          }
+        }
+      }
+    },
+    "Aktuelle Sitzung" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuelle Sitzung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current Meeting"
           }
         }
       }
@@ -325,6 +396,9 @@
         }
       }
     },
+    "Anstehend" : {
+
+    },
     "Anstehende Termine" : {
       "localizations" : {
         "de" : {
@@ -362,6 +436,12 @@
           }
         }
       }
+    },
+    "Auswahl" : {
+
+    },
+    "Back to root" : {
+
     },
     "Bearbeiten" : {
       "localizations" : {
@@ -407,6 +487,9 @@
         }
       }
     },
+    "Bla" : {
+
+    },
     "Code scannen" : {
       "localizations" : {
         "de" : {
@@ -422,6 +505,9 @@
           }
         }
       }
+    },
+    "Count" : {
+
     },
     "Dein Name: " : {
       "localizations" : {
@@ -445,6 +531,9 @@
         }
       }
     },
+    "Dezember 2023" : {
+
+    },
     "Dies ist nur eine vorläufige Umfrage, um festzustellen, wie viele Mitglieder kommen." : {
       "localizations" : {
         "de" : {
@@ -460,6 +549,9 @@
           }
         }
       }
+    },
+    "Du kannst deine Wahl danach nciht mehr ändern!" : {
+
     },
     "Du kannst deine Wahl danach nicht mehr ändern!" : {
       "localizations" : {
@@ -549,6 +641,9 @@
         }
       }
     },
+    "Enthalten" : {
+
+    },
     "erstelle " : {
       "localizations" : {
         "de" : {
@@ -597,6 +692,9 @@
     "Fast Fertig" : {
 
     },
+    "Franz" : {
+
+    },
     "Galerie" : {
       "localizations" : {
         "de" : {
@@ -618,6 +716,18 @@
           }
         }
       }
+    },
+    "Glühwein" : {
+
+    },
+    "Go to Screen 2" : {
+
+    },
+    "Go to Screen 3" : {
+
+    },
+    "Hallo" : {
+
     },
     "Hallo, %@" : {
       "localizations" : {
@@ -663,6 +773,21 @@
           }
         }
       }
+    },
+    "Heinz-Peters" : {
+
+    },
+    "Hello, World #2!" : {
+
+    },
+    "Hello, World #3!" : {
+
+    },
+    "Hello, World!" : {
+
+    },
+    "In der alten Turnhalle hinter dem Friedhof, Altes Grab 5 b, 42069 Hölle" : {
+
     },
     "Ja" : {
       "localizations" : {
@@ -741,6 +866,9 @@
         }
       }
     },
+    "Keine Abstimmungen gefunden" : {
+
+    },
     "KIVoP " : {
       "localizations" : {
         "de" : {
@@ -762,6 +890,9 @@
           }
         }
       }
+    },
+    "Langweiliger Orga-Punkt" : {
+
     },
     "Link" : {
       "localizations" : {
@@ -934,6 +1065,9 @@
         }
       }
     },
+    "Möchtest du wirklich abstimmen" : {
+
+    },
     "Name" : {
       "localizations" : {
         "de" : {
@@ -1038,6 +1172,9 @@
         }
       }
     },
+    "November 2023" : {
+
+    },
     "oder" : {
       "localizations" : {
         "de" : {
@@ -1075,6 +1212,12 @@
           }
         }
       }
+    },
+    "Option" : {
+
+    },
+    "Organisation" : {
+
     },
     "Organisator" : {
       "localizations" : {
@@ -1186,6 +1329,9 @@
         }
       }
     },
+    "Pop to root" : {
+
+    },
     "Profil" : {
       "localizations" : {
         "de" : {
@@ -1251,6 +1397,12 @@
           }
         }
       }
+    },
+    "Protokoll" : {
+
+    },
+    "Protokollant" : {
+
     },
     "Protokolle" : {
       "localizations" : {
@@ -1318,6 +1470,34 @@
         }
       }
     },
+    "Root" : {
+
+    },
+    "Screen 1" : {
+
+    },
+    "Screen 2" : {
+
+    },
+    "Screen 3" : {
+
+    },
+    "Sitzung" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sitzung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeting"
+          }
+        }
+      }
+    },
     "Sitzungen" : {
       "localizations" : {
         "de" : {
@@ -1329,16 +1509,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "meetings"
+            "value" : "Meetings"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Toplantılar"
           }
         }
       }
+    },
+    "Sitzungsleiter" : {
+
     },
     "Sobald dies geschehen ist, erhältst du eine " : {
       "localizations" : {
@@ -1448,6 +1631,18 @@
         }
       }
     },
+    "Three" : {
+
+    },
+    "Treffen mit Förderverein" : {
+
+    },
+    "Treffen mit Kassenwart" : {
+
+    },
+    "Two" : {
+
+    },
     "Umfragen, " : {
       "localizations" : {
         "de" : {
@@ -1466,6 +1661,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Anketler,"
+          }
+        }
+      }
+    },
+    "Vereinsfarbe" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vereinsfarbe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "club color"
           }
         }
       }
@@ -1536,6 +1747,9 @@
         }
       }
     },
+    "Vergangen" : {
+
+    },
     "Vergangene Termine" : {
       "localizations" : {
         "de" : {
@@ -1597,6 +1811,15 @@
         }
       }
     },
+    "Vorsitzende wählen" : {
+
+    },
+    "Vorstandsitzung Dez. 23" : {
+
+    },
+    "Vorstandsitzung Nov. 23" : {
+
+    },
     "Weiter" : {
       "localizations" : {
         "de" : {
@@ -1618,6 +1841,9 @@
           }
         }
       }
+    },
+    "Welche Farbe soll die neue Vereinsfarbe werden?" : {
+
     },
     "Wirklich abmelden?" : {
       "localizations" : {

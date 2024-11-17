@@ -51,7 +51,7 @@ struct MainPage: View {
                 List {
                     // Einzeloption Sitzungen
                     Section {
-                        NavigationLink(destination: SitzungenView()) {
+                       NavigationLink(destination: KIVoP_ios.Meeting()) {
                             HStack {
                                 Image(systemName: "calendar.badge.clock")
                                     .foregroundColor(.accentColor)
@@ -63,7 +63,7 @@ struct MainPage: View {
                     
                     // Zusätzliche Optionen
                     Section {
-                        NavigationLink(destination: AbstimmungenView()) {
+                        NavigationLink(destination: Votings()) {
                             HStack {
                                 Image(systemName: "chart.pie.fill")
                                     .foregroundColor(.accentColor)
@@ -155,19 +155,6 @@ struct MainPage: View {
 }
 
 // Sample Views für die anderen Punkte nach hinzufügen bitte löschen!!!
-struct SitzungenView: View {
-    var body: some View {
-        Text("Sitzungen")
-            .font(.largeTitle)
-    }
-}
-
-struct AbstimmungenView: View {
-    var body: some View {
-        Text("Abstimmungen")
-            .font(.largeTitle)
-    }
-}
 
 struct ProtokolleView: View {
     var body: some View {
