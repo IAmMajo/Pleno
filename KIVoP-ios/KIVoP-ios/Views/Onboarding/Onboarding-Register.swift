@@ -51,7 +51,6 @@ struct Onboarding_Register: View {
                         .padding()
                         .background(Color(UIColor.systemBackground))
                         .cornerRadius(10)
-                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 10)
@@ -67,7 +66,6 @@ struct Onboarding_Register: View {
                         .padding()
                         .background(Color(UIColor.systemBackground))
                         .cornerRadius(10)
-                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 10)
@@ -95,7 +93,6 @@ struct Onboarding_Register: View {
                             .background(Color(UIColor.systemBackground))
                     }
                     .cornerRadius(10)
-                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 10)

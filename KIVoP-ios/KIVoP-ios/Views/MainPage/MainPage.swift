@@ -149,8 +149,8 @@ struct MainPage: View {
                 .padding(.bottom, 20)
             }
             .background(Color(UIColor.systemGroupedBackground))
-            .navigationBarHidden(true) // Verstecken von navigation bar und back button
-        }
+        }.navigationBarHidden(true) // Verstecken von navigation bar und back button
+
     }
 }
 
