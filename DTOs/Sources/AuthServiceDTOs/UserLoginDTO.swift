@@ -1,7 +1,6 @@
-import Fluent
-import Vapor
+import Foundation
 
-public struct UserLoginDTO: Content {
+public struct UserLoginDTO: Codable {
     public var email: String?
     public var password: String?
     

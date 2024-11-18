@@ -1,7 +1,6 @@
-import Fluent
-import Vapor
+import Foundation
 
-public struct UserProfileUpdateDTO: Content {
+public struct UserProfileUpdateDTO: Codable {
     public var name: String?
     
     public init(name: String? = nil) {
