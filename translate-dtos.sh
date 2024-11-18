@@ -38,10 +38,12 @@ find "$DEST" -type f -name '*.swift' | while read -r file; do
     perl -pi -e 's/^public struct ([A-Za-z0-9_]+): Codable \{$/public data class \1 {/g' $file
     # Basic data type translations
     for key in "${!basicdatatypes[@]}"; do
-        perl -pi -e "s/(?<=: )$key|(?<=\[)$key(?=\??\])/${basicdatatypes[$key]}/g" $file
+        perl -pi -e "s/(?<=: )$key|(?<=\[)$key/${basicdatatypes[$key]}/g" $file
     done
     # Array -> List
     perl -pi -e 's/\[([A-Za-z0-9_]+\??)\]/List<\1>/g' $file
+    # Dict -> Map
+    perl -pi -e 's/\[([A-Za-z0-9_]+\??): ([A-Za-z0-9_]+\??)\]/Map<\1, \2>/g' $file
     # Add space before colon
     perl -pi -e 's/(?<=public var [A-Za-z0-9_]{1,244}):/ :/g' $file
     # Remove imports and empty lines
