@@ -27,24 +27,28 @@ dto-main-staging-mrs:
     # staging-backend
     - >
       curl --header "Content-Type: application/json"
+      --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN"
       --request POST
       --data "$(printf '{"source_branch":"%s","target_branch":"%s","title":"%s","assignee_id":%s,"labels":"%s","reviewer_ids":[%s]}' "$CI_DEFAULT_BRANCH" "$BACKEND_STAGING_BRANCH" "$(printf "$DTO_MAIN_STAGING_MRS_TITLE" "$BACKEND_STAGING_BRANCH")" "$(echo $MERGE_REQ | jq -r '.[0].assignee.id')" "$BACKEND_LABEL" "$(echo $MERGE_REQ | jq -r '.[0].reviewers[0].id')")"
       "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests"
     # staging-android
     - >
       curl --header "Content-Type: application/json"
+      --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN"
       --request POST
       --data "$(printf '{"source_branch":"%s","target_branch":"%s","title":"%s","assignee_id":%s,"labels":"%s","reviewer_ids":[%s]}' "$CI_DEFAULT_BRANCH" "$ANDROID_STAGING_BRANCH" "$(printf "$DTO_MAIN_STAGING_MRS_TITLE" "$ANDROID_STAGING_BRANCH")" "$(echo $MERGE_REQ | jq -r '.[0].assignee.id')" "$ANDROID_LABEL" "$(echo $MERGE_REQ | jq -r '.[0].reviewers[0].id')")"
       "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests"
     # staging-ios
     - >
       curl --header "Content-Type: application/json"
+      --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN"
       --request POST
       --data "$(printf '{"source_branch":"%s","target_branch":"%s","title":"%s","assignee_id":%s,"labels":"%s","reviewer_ids":[%s]}' "$CI_DEFAULT_BRANCH" "$IOS_STAGING_BRANCH" "$(printf "$DTO_MAIN_STAGING_MRS_TITLE" "$IOS_STAGING_BRANCH")" "$(echo $MERGE_REQ | jq -r '.[0].assignee.id')" "$IOS_LABEL" "$(echo $MERGE_REQ | jq -r '.[0].reviewers[0].id')")"
       "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests"
     # staging-ipados
     - >
       curl --header "Content-Type: application/json"
+      --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN"
       --request POST
       --data "$(printf '{"source_branch":"%s","target_branch":"%s","title":"%s","assignee_id":%s,"labels":"%s","reviewer_ids":[%s]}' "$CI_DEFAULT_BRANCH" "$IPADOS_STAGING_BRANCH" "$(printf "$DTO_MAIN_STAGING_MRS_TITLE" "$IPADOS_STAGING_BRANCH")" "$(echo $MERGE_REQ | jq -r '.[0].assignee.id')" "$IPADOS_LABEL" "$(echo $MERGE_REQ | jq -r '.[0].reviewers[0].id')")"
       "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests"
