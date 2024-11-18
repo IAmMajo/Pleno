@@ -440,9 +440,6 @@
     "Auswahl" : {
 
     },
-    "Back to root" : {
-
-    },
     "Bearbeiten" : {
       "localizations" : {
         "de" : {
@@ -720,12 +717,6 @@
     "Glühwein" : {
 
     },
-    "Go to Screen 2" : {
-
-    },
-    "Go to Screen 3" : {
-
-    },
     "Hallo" : {
 
     },
@@ -775,15 +766,6 @@
       }
     },
     "Heinz-Peters" : {
-
-    },
-    "Hello, World #2!" : {
-
-    },
-    "Hello, World #3!" : {
-
-    },
-    "Hello, World!" : {
 
     },
     "In der alten Turnhalle hinter dem Friedhof, Altes Grab 5 b, 42069 Hölle" : {
@@ -1329,9 +1311,6 @@
         }
       }
     },
-    "Pop to root" : {
-
-    },
     "Profil" : {
       "localizations" : {
         "de" : {
@@ -1469,18 +1448,6 @@
           }
         }
       }
-    },
-    "Root" : {
-
-    },
-    "Screen 1" : {
-
-    },
-    "Screen 2" : {
-
-    },
-    "Screen 3" : {
-
     },
     "Sitzung" : {
       "localizations" : {
@@ -1631,16 +1598,10 @@
         }
       }
     },
-    "Three" : {
-
-    },
     "Treffen mit Förderverein" : {
 
     },
     "Treffen mit Kassenwart" : {
-
-    },
-    "Two" : {
 
     },
     "Umfragen, " : {

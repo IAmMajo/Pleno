@@ -63,7 +63,7 @@ enum status: String, Codable {
 }
 
 
-struct Votings: View {
+struct VotingsView: View {
  
    let sampleMeetings = [
       MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession),
@@ -189,7 +189,7 @@ struct Votings: View {
 
 #Preview {
    NavigationStack {
-      Votings()
+      VotingsView()
          .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                Button {

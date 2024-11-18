@@ -63,7 +63,7 @@ struct MainPage: View {
                     
                     // Zusätzliche Optionen
                     Section {
-                        NavigationLink(destination: Votings()) {
+                        NavigationLink(destination: VotingsView()) {
                             HStack {
                                 Image(systemName: "chart.pie.fill")
                                     .foregroundColor(.accentColor)

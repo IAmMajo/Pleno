@@ -43,7 +43,7 @@ struct Votings_VotingsSectionView: View {
           ForEach(votingGroup, id: \.self) { voting in
                            NavigationLink(destination: {
                               if (!sampleIdentity.votes.contains(where: { $0.voting.title == voting.title }) && voting.is_open) { //user has voted
-                                 Votings_VotingDetail(voting: voting, sampleIdentity: sampleIdentity)
+                                 Votings_VoteView(voting: voting, sampleIdentity: sampleIdentity)
                                     .navigationTitle(voting.title)
                               } else {
                                  Votings_VotingResultView(voting: voting, sampleIdentity: sampleIdentity)

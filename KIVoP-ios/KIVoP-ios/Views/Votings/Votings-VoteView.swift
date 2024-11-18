@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Votings_VotingDetail: View {
+struct Votings_VoteView: View {
       
    let voting: Voting
    var sampleIdentity: Identity
@@ -110,7 +110,7 @@ struct Votings_VotingDetail: View {
 //   @Previewable @State var rootIsActive: Bool = false
    
    NavigationView {
-      Votings_VotingDetail(voting: Voting(title: "Vereinsfarbe", question: "Welche Farbe soll die neue Vereinsfarbe werden?", startet_at: Date.now, is_open: true, meeting: MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession), voting_options: [
+      Votings_VoteView(voting: Voting(title: "Vereinsfarbe", question: "Welche Farbe soll die neue Vereinsfarbe werden?", startet_at: Date.now, is_open: true, meeting: MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession), voting_options: [
          Voting_option(index: 0, text: "Enthaltung"),
          Voting_option(index: 1, text: "Rot"),
          Voting_option(index: 2, text: "Grün"),
