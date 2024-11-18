@@ -1,6 +1,7 @@
 import Fluent
 import Vapor
 import Models
+import JWT
 
 struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -9,6 +10,15 @@ struct UserController: RouteCollection {
         userRoutes.post("register", use: self.register)
         userRoutes.get("profile", use: self.getProfile)
         userRoutes.put("profile", use: self.updateProfile)
+        
+        let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
+        let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
+        let protectedRoutes = userRoutes.grouped(authMiddleware)
+        
+        // GET /users -> alle User
+        protectedRoutes.get(use: self.getAllUsers)
+        // GET /users/:id -> ein User
+        protectedRoutes.get(":id", use: self.getUser)
     }
     
     @Sendable
@@ -128,5 +138,59 @@ struct UserController: RouteCollection {
         try await history.save(on: req.db)
         
         return .ok
+    }
+    
+    @Sendable
+    func getAllUsers(req: Request) async throws -> [UserProfileDTO] {
+        // Prüft ob ein Token vorhanden ist
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        // Prüft den Token auf Admin
+        guard payload.isAdmin == true else {
+            throw Abort(.forbidden, reason: "User is not an admin")
+        }
+        
+        let users = try await User.query(on: req.db)
+            .with(\.$identity)
+            .all()
+        return users.map { user in
+            UserProfileDTO(
+                email: user.email,
+                name: user.identity.name,
+                isAdmin: user.isAdmin,
+                createdAt: user.createdAt
+            )
+        }
+    }
+    
+    @Sendable
+    func getUser(req: Request) async throws -> UserProfileDTO {
+        // Prüft auf Token
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        //Prüft auf Admin
+        guard payload.isAdmin == true else {
+            throw Abort(.forbidden, reason: "User is not an admin")
+        }
+        //Speichert übergebene userID
+        guard let userID = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing user ID")
+        }
+        // Sucht User
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$id == userID)
+            .with(\.$identity)
+            .first() else {
+            throw Abort(.notFound, reason: "User not found")
+        }
+        // Gibt ProfilDTO zurück
+        return UserProfileDTO(
+            email: user.email,
+            name: user.identity.name,
+            isAdmin: user.isAdmin,
+            createdAt: user.createdAt
+        )
     }
 }
