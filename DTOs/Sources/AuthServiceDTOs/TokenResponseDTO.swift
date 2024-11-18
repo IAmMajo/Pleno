@@ -1,7 +1,6 @@
-import Fluent
-import Vapor
+import Foundation
 
-public struct TokenResponseDTO: Content {
+public struct TokenResponseDTO: Codable {
     public var token: String?
     
     public init(token: String? = nil) {
