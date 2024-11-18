@@ -1,9 +1,5 @@
-@preconcurrency import JWT
-public struct JWTPayloadDTO: JWTPayload, Authenticatable, Sendable {
+public data class JWTPayloadDTO {
     public var userID : Uuid?
-    public var exp : ExpirationClaim
+    public var exp : Date
     public var isAdmin : Boolean?
-    public func verify(using signer: JWTSigner) throws {
-        try exp.verifyNotExpired()
-    }
 }

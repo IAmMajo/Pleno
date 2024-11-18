@@ -1,4 +1,4 @@
-public struct UserProfileDTO: Content {
+public data class UserProfileDTO {
     public var email : String?
     public var name : String?
     public var isAdmin : Boolean?

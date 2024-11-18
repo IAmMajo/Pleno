@@ -1,3 +1,3 @@
-public struct TokenResponseDTO: Content {
+public data class TokenResponseDTO {
     public var token : String?
 }

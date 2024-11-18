@@ -1,3 +1,3 @@
-public struct UserProfileUpdateDTO: Content {
+public data class UserProfileUpdateDTO {
     public var name : String?
 }
