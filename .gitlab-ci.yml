@@ -1,7 +1,7 @@
 stages:
   - build
 
-tdo-swiftkotlin:
+dto-swiftkotlin:
     stage: build
     script:
         - ./translate-dtos.sh
