@@ -3,5 +3,5 @@ public data class SendEmailDTO {
     public var subject : String
     public var message : String?
     public var template : String?
-    public var templateData : [String: String]?
+    public var templateData : Map<String, String>?
 }
