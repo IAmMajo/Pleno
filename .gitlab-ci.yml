@@ -16,3 +16,39 @@ dto-swiftkotlin:
           - translate-dtos.sh
         when: always
 
+dto-main-staging-mrs:
+  stage: build
+  variables:
+    COMMIT_MERGE_REQ_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/commits/$CI_COMMIT_SHA/merge_requests"
+  script:
+    - 'MERGE_REQ=$(curl -s --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN" $COMMIT_MERGE_REQ_URL)'
+    - MR_BRANCH_NAME=$(echo $MERGE_REQ | jq -r '.[0].source_branch')
+    - if [[ "$MR_BRANCH_NAME" != "$DTOS_STAGING_BRANCH" ]]; then exit 0; fi
+    # staging-backend
+    - >
+      curl --header "Content-Type: application/json"
+      --request POST
+      --data "$(printf '{"source_branch":"%s","target_branch":"%s","title":"%s","assignee_id":%s,"labels":"%s","reviewer_ids":[%s]}' "$CI_DEFAULT_BRANCH" "$BACKEND_STAGING_BRANCH" "$(printf "$DTO_MAIN_STAGING_MRS_TITLE" "$BACKEND_STAGING_BRANCH")" "$(echo $MERGE_REQ | jq -r '.[0].assignee.id')" "$BACKEND_LABEL" "$(echo $MERGE_REQ | jq -r '.[0].reviewers[0].id')")"
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests"
+    # staging-android
+    - >
+      curl --header "Content-Type: application/json"
+      --request POST
+      --data "$(printf '{"source_branch":"%s","target_branch":"%s","title":"%s","assignee_id":%s,"labels":"%s","reviewer_ids":[%s]}' "$CI_DEFAULT_BRANCH" "$ANDROID_STAGING_BRANCH" "$(printf "$DTO_MAIN_STAGING_MRS_TITLE" "$ANDROID_STAGING_BRANCH")" "$(echo $MERGE_REQ | jq -r '.[0].assignee.id')" "$ANDROID_LABEL" "$(echo $MERGE_REQ | jq -r '.[0].reviewers[0].id')")"
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests"
+    # staging-ios
+    - >
+      curl --header "Content-Type: application/json"
+      --request POST
+      --data "$(printf '{"source_branch":"%s","target_branch":"%s","title":"%s","assignee_id":%s,"labels":"%s","reviewer_ids":[%s]}' "$CI_DEFAULT_BRANCH" "$IOS_STAGING_BRANCH" "$(printf "$DTO_MAIN_STAGING_MRS_TITLE" "$IOS_STAGING_BRANCH")" "$(echo $MERGE_REQ | jq -r '.[0].assignee.id')" "$IOS_LABEL" "$(echo $MERGE_REQ | jq -r '.[0].reviewers[0].id')")"
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests"
+    # staging-ipados
+    - >
+      curl --header "Content-Type: application/json"
+      --request POST
+      --data "$(printf '{"source_branch":"%s","target_branch":"%s","title":"%s","assignee_id":%s,"labels":"%s","reviewer_ids":[%s]}' "$CI_DEFAULT_BRANCH" "$IPADOS_STAGING_BRANCH" "$(printf "$DTO_MAIN_STAGING_MRS_TITLE" "$IPADOS_STAGING_BRANCH")" "$(echo $MERGE_REQ | jq -r '.[0].assignee.id')" "$IPADOS_LABEL" "$(echo $MERGE_REQ | jq -r '.[0].reviewers[0].id')")"
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+
