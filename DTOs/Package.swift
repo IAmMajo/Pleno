@@ -13,6 +13,9 @@ let package = Package(
         .library(
             name: "NotificationsServiceDTOs",
             targets: ["NotificationsServiceDTOs"]),
+        .library(
+            name: "AuthServiceDTOs",
+            targets: ["AuthServiceDTOs"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -21,5 +24,7 @@ let package = Package(
             name: "MeetingServiceDTOs"),
         .target(
             name: "NotificationsServiceDTOs"),
+        .target(
+            name: "AuthServiceDTOs"),
     ]
 )
