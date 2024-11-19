@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AF3458E42CECCC75008C18D2 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF3458E32CECCC75008C18D2 /* AuthServiceDTOs */; };
+		AF3458E62CECCC75008C18D2 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF3458E52CECCC75008C18D2 /* MeetingServiceDTOs */; };
+		AF3458E82CECCC75008C18D2 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF3458E72CECCC75008C18D2 /* NotificationsServiceDTOs */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		A8390B932CE5F9E6006D2D80 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +58,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF3458E82CECCC75008C18D2 /* NotificationsServiceDTOs in Frameworks */,
+				AF3458E62CECCC75008C18D2 /* MeetingServiceDTOs in Frameworks */,
+				AF3458E42CECCC75008C18D2 /* AuthServiceDTOs in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +121,9 @@
 			);
 			name = kivopadmin;
 			packageProductDependencies = (
+				AF3458E32CECCC75008C18D2 /* AuthServiceDTOs */,
+				AF3458E52CECCC75008C18D2 /* MeetingServiceDTOs */,
+				AF3458E72CECCC75008C18D2 /* NotificationsServiceDTOs */,
 			);
 			productName = kivopadmin;
 			productReference = A8390B822CE5F9E4006D2D80 /* kivopadmin.app */;
@@ -195,6 +207,9 @@
 			);
 			mainGroup = A8390B792CE5F9E4006D2D80;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AF3458E22CECCC75008C18D2 /* XCLocalSwiftPackageReference "../DTOs" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A8390B832CE5F9E4006D2D80 /* Products */;
 			projectDirPath = "";
@@ -550,6 +565,28 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		AF3458E22CECCC75008C18D2 /* XCLocalSwiftPackageReference "../DTOs" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../DTOs;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AF3458E32CECCC75008C18D2 /* AuthServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AuthServiceDTOs;
+		};
+		AF3458E52CECCC75008C18D2 /* MeetingServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MeetingServiceDTOs;
+		};
+		AF3458E72CECCC75008C18D2 /* NotificationsServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NotificationsServiceDTOs;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A8390B7A2CE5F9E4006D2D80 /* Project object */;
 }
