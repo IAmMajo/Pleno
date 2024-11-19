@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.kivopandriod.moduls.EventItem
 import com.example.kivopandriod.ui.theme.BulletDotGrey
 import com.example.kivopandriod.ui.theme.ForestGreen
 import com.example.kivopandriod.ui.theme.LightGreen
