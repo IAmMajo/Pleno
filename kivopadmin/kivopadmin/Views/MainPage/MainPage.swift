@@ -208,6 +208,9 @@ enum SidebarOption {
 
 // Beispiel für Hauptanzeige der Nutzerverwaltung
 struct NutzerverwaltungView: View {
+    @State private var isPopupPresented = false
+    @State private var selectedUser = ""
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             // Title
@@ -280,14 +283,21 @@ struct NutzerverwaltungView: View {
                 // User Avatars
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
-                        ForEach(0..<7) { _ in
-                            
+                        // Dummy User Data
+                        let users = ["Max Mustermann", "Max Mustermann", "Max Mustermann", "Max Mustermann", "Max Mustermann", "Max Mustermann"]
+                        
+                        ForEach(users, id: \.self) { user in
                             VStack {
                                 Circle()
                                     .fill(Color.gray)
                                     .frame(width: 50, height: 50)
-                                    .overlay(Text("MM").foregroundColor(.white))
-                                Text("Max Mustermann")
+                                    .overlay(Text(user.prefix(2)).foregroundColor(.white))
+                                    .onTapGesture {
+                                        selectedUser = user
+                                        isPopupPresented = true
+                                    }
+                                
+                                Text(user)
                                     .font(.caption)
                                     .foregroundColor(.primary)
                             }
@@ -295,11 +305,159 @@ struct NutzerverwaltungView: View {
                     }
                     .padding(.horizontal, 30)
                 }
+                // Sheet for Popup
+                .sheet(isPresented: $isPopupPresented) {
+                    UserPopupView(isPresented: $isPopupPresented, user: $selectedUser)
+                }
+
             }
             
             Spacer()
         }
         .background(Color(UIColor.systemBackground)) // Adapt to Dark/Light Mode
+    }
+}
+
+struct UserPopupView: View {
+    @Binding var isPresented: Bool
+    @Binding var user: String
+    @State private var selectedRole = "Protokollant"
+    @State private var wip = "WIP"
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                VStack {
+                    Circle()
+                        .fill(Color.gray)
+                        .frame(width: 110, height: 110)
+                        .overlay(
+                            Text(user.prefix(2))
+                                .font(.system(size: 50)) // Schriftgröße festlegen
+                                .foregroundColor(.white)
+                        )
+                }
+                HStack{
+                    Text("Name")
+                    Spacer()
+                    Text("\(user)").foregroundColor(.gray)
+                }
+                Divider()
+                HStack{
+                    Text("Rolle")
+                    Spacer()
+                    Text("Protokollant").foregroundColor(.gray)
+                }
+                Divider()
+                HStack{
+                    Text("WIP")
+                    Spacer()
+                    Text("WIP").foregroundColor(.gray)
+                }
+                Spacer()
+                Button("Account löschen") {
+                    // Account löschen
+                    
+                }
+                .padding()
+                .frame(width: 400)
+                .background(Color.red)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                Divider()
+                NavigationLink(destination: UserEditView(user: $user, selectedRole: $selectedRole, wip: $wip)) {
+                    Text("Nutzer bearbeiten")
+                        .foregroundStyle(.blue)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            .padding()
+            .navigationBarItems(leading: Button(action: {
+                isPresented = false
+            }) {
+                Text("Schließen") // Button-Text für den Schließen-Button
+                    .foregroundColor(.blue)
+            })
+        }
+    }
+}
+
+// Neue Ansicht, in der der Benutzer bearbeitet werden kann
+struct UserEditView: View {
+    @Binding var user: String
+    @Binding var selectedRole: String
+    @Binding var wip: String
+    
+    let roles = ["Nutzer", "Protokollant", "Admin", "Prüfer"]
+
+    var body: some View {
+        VStack(spacing: 20) {
+            VStack {
+                Circle()
+                    .fill(Color.gray)
+                    .frame(width: 110, height: 110)
+                    .overlay(
+                        Text(user.prefix(2))
+                            .font(.system(size: 50, weight: .bold)) // Schriftgröße festlegen
+                            .foregroundColor(.white)
+                    )
+                
+                Text("Bild löschen")
+                    .font(.caption)
+                    .foregroundColor(.blue)
+            }
+            HStack {
+                Text("Name")
+                Spacer()
+                TextField("Name bearbeiten", text: $user)
+                    .foregroundColor(.blue)
+                    .cornerRadius(5)
+                    .multilineTextAlignment(.trailing) // Text im TextField rechtsbündig ausrichten
+            }
+
+            Divider()
+
+            // Rolle bearbeiten (Picker)
+            HStack {
+                Text("Rolle")
+                Spacer()
+                Picker("Rolle", selection: $selectedRole) {
+                    ForEach(roles, id: \.self) { role in
+                        Text(role)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle()) // Der Picker erscheint als Dropdown
+            }
+
+            Divider()
+
+            // WIP bearbeiten (TextField)
+            HStack {
+                Text("WIP")
+                Spacer()
+                TextField("WIP bearbeiten", text: $wip)
+                    .foregroundColor(.blue)
+                    .cornerRadius(5)
+                    .multilineTextAlignment(.trailing) // Text im TextField rechtsbündig ausrichten
+            }
+            Spacer()
+
+
+            Button("Account löschen") {
+                // Account löschen
+                
+            }
+            .padding()
+            .frame(width: 400)
+            .background(Color.red)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+            Divider()
+            Text("Änderungen speichern")
+                .foregroundStyle(.blue)
+        }
+        .padding()
+    
     }
 }
 
