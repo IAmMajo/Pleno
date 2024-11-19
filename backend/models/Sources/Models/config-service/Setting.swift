@@ -19,16 +19,38 @@ public final class Setting: Model, @unchecked Sendable {
     @Field(key: "key")
     public var key: String
     
+    @Enum(key: "datatype")
+    public var datatype: DataType
+
     @Field(key: "value")
     public var value: String
 
+    @Field(key: "description")
+    public var description: String?
 
+    
     public init() { }
 
-    public init(id: UUID? = nil, key: String, value: String) {
+    
+    public init(id: UUID? = nil, key: String, datatype: DataType, value: String, description: String? = nil) {
         self.id = id
         self.key = key
+        self.datatype = datatype
         self.value = value
+        self.description = description
+    }
+
+    public enum DataType: String, Codable, CaseIterable, Sendable {
+        case integer = "Integer"
+        case string = "String"
+        case float = "Float"
+        case boolean = "Boolean"
+        case date = "Date"
+        case dateTime = "DateTime"
+        case time = "Time"
+        case binary = "Binary"
+        case text = "Text"
+        case json = "JSON"
     }
 
 }

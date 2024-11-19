@@ -3,42 +3,44 @@ import Vapor
 
 public final class User: Model, Content, @unchecked Sendable {
     public static let schema = "users"
-
+    
     @ID(key: .id)
     public var id: UUID?
     
+    @Parent(key: "identity_id")
+    public var identity: Identity
+    
     @Field(key: "email")
     public var email: String
-
-    @Field(key: "name")
-    public var name: String
-
+    
     @Field(key: "password_hash")
     public var passwordHash: String
     
-    @Field(key: "role")
-    public var role: String
+    @Field(key: "is_admin")
+    public var isAdmin: Bool
     
-    @Boolean(key: "is_active")
+    @Field(key: "is_active")
     public var isActive: Bool
     
+    @Timestamp(key: "created_at", on: .create)
+    public var createdAt: Date?
+    
+    @Timestamp(key: "updated_at", on: .update)
+    public var updatedAt: Date?
+    
+    @Timestamp(key: "last_login", on: .none)
+    public var lastLogin: Date?
+    
     public init() { }
-
-    public init(id: UUID? = nil, name: String, email: String, passwordHash: String, role: String) {
+    
+    // TODO temporarily every user is active by default until email verification works. Attention for the first user!
+    public init (id: UUID? = nil, identityID: Identity.IDValue, email: String, passwordHash: String, isAdmin: Bool = false, isActive: Bool = true) {
         self.id = id
-        self.name = name
+        self.$identity.id = identityID
         self.email = email
         self.passwordHash = passwordHash
-        self.role = role
-        self.isActive = false
+        self.isAdmin = isAdmin
+        self.isActive = isActive
     }
+    
 }
-
-extension User: Validatable {
-    public static func validations(_ validations: inout Validations) {
-        validations.add("email", as: String.self, is: .email)
-        validations.add("name", as: String.self, is: !.empty)
-        validations.add("passwordHash", as: String.self, is: !.empty)
-    }
-}
-
