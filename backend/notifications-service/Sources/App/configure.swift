@@ -2,6 +2,7 @@ import NIOSSL
 import Fluent
 import FluentPostgresDriver
 import Leaf
+import Smtp
 import Vapor
 
 // configures your application
@@ -19,6 +20,32 @@ public func configure(_ app: Application) async throws {
         database: Environment.get("DATABASE_NAME") ?? "notifications_db",
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
+
+    var smtpSignInMethod = SignInMethod.anonymous
+    let smtpUsername = Environment.get("SMTP_USERNAME") ?? ""
+    if !smtpUsername.isEmpty {
+        smtpSignInMethod = .credentials(
+            username: smtpUsername,
+            password: Environment.get("SMTP_PASSWORD") ?? ""
+        )
+    }
+    let smtpSecure: SmtpSecureChannel =
+        switch Environment.get("SMTP_SECURE") {
+        case "SSL":
+            .ssl
+        case "STARTTLS":
+            .startTls
+        case "STARTTLS_WHEN_AVAILABLE":
+            .startTlsWhenAvailable
+        default:
+            .none
+        }
+    app.smtp.configuration = .init(
+        hostname: Environment.get("SMTP_HOST") ?? "",
+        port: Environment.get("SMTP_PORT").flatMap(Int.init(_:)) ?? 465,
+        signInMethod: smtpSignInMethod,
+        secure: smtpSecure
+    )
 
     // register routes
     try routes(app)
