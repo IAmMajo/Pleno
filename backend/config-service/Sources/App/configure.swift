@@ -16,9 +16,14 @@ public func configure(_ app: Application) async throws {
         database: Environment.get("DATABASE_NAME") ?? "config_db",
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
+    // Migrationen
     app.migrations.add(CreateServiceSetting())
     app.migrations.add(CreateService())
     app.migrations.add(CreateSetting())
-    // register routes
-    try routes(app)
+    // Routen
+    let configController = ConfigController()
+    try app.register(collection: configController)
+    
+    // Migrationen ausführen
+    try await app.autoMigrate().get()
 }

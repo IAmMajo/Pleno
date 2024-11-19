@@ -19,11 +19,26 @@ public final class Service: Model, @unchecked Sendable {
     @Field(key: "name")
     public var name: String
 
+    @Field(key: "webhook_url")
+    public var webhook_url: String?
+
+    @Field(key: "description")
+    public var description: String?
+
+    @Field(key: "active")
+    public var active: Bool
+
+    @Children(for: \.$service)
+    var serviceSettings: [ServiceSetting]
+    
     public init() { }
 
-    public init(id: UUID? = nil, name: String) {
+    public init(id: UUID? = nil, name: String, webhook_url: String?, description: String?, active: Bool = true) {
         self.id = id
         self.name = name
+        self.webhook_url = webhook_url
+        self.description = description
+        self.active = active
     }
     
 }
