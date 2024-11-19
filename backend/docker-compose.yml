@@ -143,6 +143,26 @@ services:
     command: ["migrate", "--revert", "--yes"]
 
 #
+# Vapor: notifications-service
+#
+  notifications-service:
+    extends:
+      file: ./notifications-service/docker-compose.yml
+      service: app
+    container_name: kivop-notifications-service
+    depends_on:
+      - config-service
+    environment:
+      <<: *shared_environment
+      DATABASE_NAME: notifications_db
+    labels:
+      traefik.enable: true
+      traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.regex: ^/notifications-service(:/(.*))?
+      traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.notifications-service.rule: PathPrefix(`/notifications-service`)
+      traefik.http.routers.notifications-service.middlewares: notifications-service-replace-path-regex
+
+#
 # Volumes
 #
 volumes:
