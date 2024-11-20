@@ -19,6 +19,10 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
         // 📧 SMTP protocol support for the Vapor web framework
         .package(url: "https://github.com/Mikroservices/Smtp.git", from: "3.1.2"),
+        // 🧬 KIVoP Models
+        .package(path: "../models"),
+        // 🎁 KIVoP DTOs
+        .package(path: "../../DTOs")  
     ],
     targets: [
         .executableTarget(
@@ -31,6 +35,8 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "Smtp", package: "Smtp"),
+                .product(name: "Models", package: "models"),
+                .product(name: "NotificationsServiceDTOs", package: "dtos")
             ],
             swiftSettings: swiftSettings
         ),
