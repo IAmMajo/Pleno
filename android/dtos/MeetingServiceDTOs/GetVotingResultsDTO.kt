@@ -1,5 +1,6 @@
 public data class GetVotingResultsDTO {
     public var votingId : Uuid
+    public var myVote : UByte? // Index 0: Abstention | nil: did not vote at all
     public var results : List<GetVotingResultDTO>
 }
 public data class GetVotingResultDTO {
