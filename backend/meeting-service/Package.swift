@@ -18,7 +18,7 @@ let package = Package(
         // 🧬 KIVoP Models
         .package(path: "../models"),
         // 🎁 KIVoP DTOs
-        .package(path: "../../dtos")
+        .package(path: "../../DTOs")
     ],
     targets: [
         .executableTarget(
