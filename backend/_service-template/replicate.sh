@@ -61,6 +61,55 @@ echo ''
 
 read_user_inputs
 
+COMPOSE_TEMPLATE="# Vapor: ${SRVNAME}-service
+#
+  ${SRVNAME}-service:
+    image: kivop-${SRVNAME}-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/${SRVNAME}-service/Dockerfile
+    container_name: kivop-${SRVNAME}-service
+    depends_on:
+     - config-service
+    environment:
+      <<: *shared_environment
+    labels:
+      traefik.enable: true
+      traefik.http.routers.${SRVNAME}-service.rule: PathPrefix(\`/${SRVNAME}\`)
+
+  ${SRVNAME}-service-migration:
+    profiles:
+      - migration
+    image: kivop-${SRVNAME}-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/${SRVNAME}-service/Dockerfile
+    container_name: kivop-${SRVNAME}-service-migration
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - postgres
+    command: [\"migrate\", \"--yes\"]
+
+  ${SRVNAME}-service-revert:
+    profiles:
+      - revert
+    image: kivop-${SRVNAME}-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/${SRVNAME}-service/Dockerfile
+    container_name: kivop-${SRVNAME}-service-revert
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - postgres
+    command: [\"migrate\", \"--revert\", \"--yes\"]
+
+#
+# Volumes"
+
+ESCAPED_COMPOSE_TEMPLATE=$(echo "$COMPOSE_TEMPLATE" | awk '{if (NR > 1) printf "\\n"; printf "%s", $0}')
+
 cp -r . "../${SRVNAME}-service" && rm "../${SRVNAME}-service/replicate.sh" # Copy entire template to new service-folder and remove replicate.sh
 
 # Replace every placeholder in newly created files' names
@@ -73,7 +122,7 @@ find "../${SRVNAME}-service/" -type f -print0 | xargs -0 sed -i '' -e "s/FIRST_L
 find "../${SRVNAME}-service/" -type f -print0 | xargs -0 sed -i '' -e "s/SRVNAME_PLACEHOLDER/${SRVNAME}/g"
 
 # Add service  to /backend/docker-compose.yml
-sed -i '' -e "s|^# Volumes$|# Vapor: ${SRVNAME}-service\n#\n  ${SRVNAME}-service:\n    image: kivop-${SRVNAME}-service:latest\n    build:\n      context: ./..\n      dockerfile: backend/${SRVNAME}-service/Dockerfile\n    container_name: kivop-${SRVNAME}-service\n    depends_on:\n     - config-service\n    environment:\n      <<: *shared_environment\n    labels:\n      traefik.enable: true\n      traefik.http.routers.${SRVNAME}-service.rule: PathPrefix(\`/${SRVNAME}\`)\n\n#\n# Volumes|" ../docker-compose.yml
+sed -i '' -e "s|^# Volumes$|${ESCAPED_COMPOSE_TEMPLATE}|" ../docker-compose.yml
 
 echo ''
 echo -e "${GRAY}>>>${RESET_COLOR} ${BOLD_CYAN}DONE${RESET_COLOR} ${GRAY}<<<${RESET_COLOR}"
