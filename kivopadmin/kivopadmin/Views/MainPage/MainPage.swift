@@ -473,21 +473,22 @@ struct UserEditView: View {
 
 struct PendingRequestsNavigationView: View {
     @Binding var isPresented: Bool
-    @Binding var selectedUser: String
+        @Binding var selectedUser: String
 
-    var body: some View {
-        NavigationStack {
-            PendingRequestsView(selectedUser: $selectedUser)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Zurück") {
-                            isPresented = false // Schließe das gesamte Pop-up
+        var body: some View {
+            NavigationStack {
+                PendingRequestsView(selectedUser: $selectedUser)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button("Zurück") {
+                                isPresented = false // Schließe das gesamte Pop-up
+                            }
                         }
                     }
-                }
+            }
         }
     }
-}
+
 
 
 struct PendingRequestsView: View {
@@ -508,10 +509,10 @@ struct PendingRequestsView: View {
                     VStack(alignment: .leading) {
                         Text(request.0)
                             .font(.system(size: 18)) // Größere Schrift für die Namen
-                            .foregroundColor(.black) // Schwarze Schriftfarbe
+                            .foregroundColor(Color.primary) // Dynamisch: passt sich Light/Darkmode an
                         Text(request.1)
                             .font(.system(size: 14)) // Kleinere Schrift für die E-Mail
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color.secondary) // Dynamisch: für graue Schrift
                     }
                 }
             }
@@ -519,9 +520,11 @@ struct PendingRequestsView: View {
         .listStyle(PlainListStyle()) // Entfernt zusätzliche Graufärbung
         .navigationTitle("Beitrittsanfragen") // Titel nur in der Navigation Bar
         .navigationBarTitleDisplayMode(.inline)
-        .background(Color.white) // Weißer Hintergrund
+        .background(Color(UIColor.systemBackground)) // Dynamischer Hintergrund für Light/Darkmode
     }
 }
+
+
 
 
 
@@ -534,24 +537,26 @@ struct PendingRequestPopup: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text("Name")
+                        .foregroundColor(Color.primary) // Dynamisch: passt sich Light/Darkmode an
                     Spacer()
                     Text(user)
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.secondary) // Dynamisch: für graue Schrift
                 }
                 HStack {
                     Text("E-Mail-Adresse")
+                        .foregroundColor(Color.primary)
                     Spacer()
-                    Text(email) // E-Mail direkt aus dem Array
-                        .foregroundColor(.gray)
+                    Text(email)
+                        .foregroundColor(Color.secondary)
                 }
                 HStack {
                     Text("Registrierungsdatum")
+                        .foregroundColor(Color.primary)
                     Spacer()
                     Text("01.01.2024")
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.secondary)
                 }
                 Divider()
-
             }
             .padding()
 
@@ -564,7 +569,7 @@ struct PendingRequestPopup: View {
                     Text("Bestätigen")
                         .font(.system(size: 16)) // Kleinere Schriftgröße
                         .padding(.vertical, 10) // Weniger Höhe
-                        .frame(width: 352) // Reduzierte Breite
+                        .frame(width: 352, height: 38) // Angepasste Größe
                         .background(Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(8) // Abgerundete Ecken
@@ -576,7 +581,7 @@ struct PendingRequestPopup: View {
                     Text("Ablehnen")
                         .font(.system(size: 16)) // Kleinere Schriftgröße
                         .padding(.vertical, 10) // Weniger Höhe
-                        .frame(width: 352) // Reduzierte Breite
+                        .frame(width: 352, height: 38) // Angepasste Größe
                         .background(Color.red)
                         .foregroundColor(.white)
                         .cornerRadius(8) // Abgerundete Ecken
@@ -585,10 +590,23 @@ struct PendingRequestPopup: View {
             .padding(.horizontal, 20)
         }
         .padding()
-        .navigationBarTitleDisplayMode(.inline) // Titel in der Navigation Bar
-        .background(Color.white) // Weißer Hintergrund
+        .navigationTitle("Beitrittsanfrage: \(user)") // Dynamischer Header mit dem Namen
+        .navigationBarTitleDisplayMode(.inline)
+        .overlay( // Graue Linie unter dem Titel hinzufügen
+            VStack {
+                Divider() // Divider-Linie
+                    .background(Color.gray.opacity(0.5)) // Transparente graue Linie
+                    .frame(height: 1) // Höhe der Linie
+                    .offset(y: 2) // Platzierung direkt unter der Navigation Bar
+                Spacer()
+            }
+        )
+        .background(Color(UIColor.systemBackground)) // Dynamischer Hintergrund für Light/Darkmode
     }
 }
+
+
+
 
 
 // Beispielansicht für Konfiguration der Funktionen
