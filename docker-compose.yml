@@ -51,6 +51,21 @@ services:
       - postgres-data:/var/lib/postgresql/data
 
 #
+# Vapor: config-service
+#
+  config-service:
+    extends:
+      file: ./docker-compose.yml
+      service: config-service
+    container_name: kivop-config-service
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.config-service.rule: PathPrefix(`/config`)
+      traefik.http.routers.config-service.entrypoints: https
+      traefik.http.routers.config-service.tls.certresolver: myresolver
+
+#
 # Vapor: auth-service
 #
   auth-service:
@@ -64,6 +79,36 @@ services:
       traefik.http.routers.auth-service.rule: PathPrefix(`/auth`) || PathPrefix(`/users`)
       traefik.http.routers.auth-service.entrypoints: https
       traefik.http.routers.auth-service.tls.certresolver: myresolver
+
+#
+# Vapor: meeting-service
+#
+  meeting-service:
+    extends:
+      file: ./docker-compose.yml
+      service: meeting-service
+    container_name: kivop-meeting-service
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.meeting-service.rule: PathPrefix(`/meeting`)
+      traefik.http.routers.meeting-service.entrypoints: https
+      traefik.http.routers.meeting-service.tls.certresolver: myresolver
+
+#
+# Vapor: notifications-service
+#
+  notifications-service:
+    extends:
+      file: ./docker-compose.yml
+      service: notifications-service
+    container_name: kivop-notifications-service
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.notifications-service.rule: PathPrefix(`/email`)
+      traefik.http.routers.notifications-service.entrypoints: https
+      traefik.http.routers.notifications-service.tls.certresolver: myresolver
 
 #
 # Volumes
