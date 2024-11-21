@@ -79,7 +79,7 @@ COMPOSE_TEMPLATE="# Vapor: ${SRVNAME}-service
 
   ${SRVNAME}-service-migration:
     profiles:
-      - migration
+      - not-default
     image: kivop-${SRVNAME}-service:latest
     build:
       context: ./..
@@ -93,7 +93,7 @@ COMPOSE_TEMPLATE="# Vapor: ${SRVNAME}-service
 
   ${SRVNAME}-service-revert:
     profiles:
-      - revert
+      - not-default
     image: kivop-${SRVNAME}-service:latest
     build:
       context: ./..
