@@ -65,6 +65,20 @@ services:
       traefik.http.routers.config-service.entrypoints: https
       traefik.http.routers.config-service.tls.certresolver: myresolver
 
+  config-service-migration:
+    profiles:
+      - not-default
+    extends:
+      file: ./docker-compose.yml
+      service: config-service-migration
+
+  config-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./docker-compose.yml
+      service: config-service-migration
+
 #
 # Vapor: auth-service
 #
@@ -80,6 +94,20 @@ services:
       traefik.http.routers.auth-service.entrypoints: https
       traefik.http.routers.auth-service.tls.certresolver: myresolver
 
+  auth-service-migration:
+    profiles:
+      - not-default
+    extends:
+      file: ./docker-compose.yml
+      service: auth-service-migration
+
+  auth-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./docker-compose.yml
+      service: auth-service-migration
+
 #
 # Vapor: meeting-service
 #
@@ -94,6 +122,20 @@ services:
       traefik.http.routers.meeting-service.rule: PathPrefix(`/meeting`)
       traefik.http.routers.meeting-service.entrypoints: https
       traefik.http.routers.meeting-service.tls.certresolver: myresolver
+
+  meeting-service-migration:
+    profiles:
+      - not-default
+    extends:
+      file: ./docker-compose.yml
+      service: meeting-service-migration
+
+  meeting-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./docker-compose.yml
+      service: meeting-service-migration
 
 #
 # Vapor: notifications-service
