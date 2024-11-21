@@ -8,7 +8,7 @@ public struct GetLocationDTO: Codable {
     public var postalCode: String?
     public var place: String?
     
-    public init(id: UUID, street: String, number: String, letter: Date, postalCode: String? = nil, place: String? = nil) {
+    public init(id: UUID, street: String, number: String, letter: String, postalCode: String? = nil, place: String? = nil) {
         self.id = id
         self.street = street
         self.number = number
