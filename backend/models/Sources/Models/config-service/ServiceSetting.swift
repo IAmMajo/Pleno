@@ -17,14 +17,14 @@ public final class ServiceSetting: Model, @unchecked Sendable {
     @Parent(key: "service_id")
     public var service: Service
     
-    @Parent(key: "settings_id")
+    @Parent(key: "setting_id")
     public var setting: Setting
     
-    @Timestamp(key: "created", on: .create)
-    public var created: Date
+    @Timestamp(key: "created", on: .create, format: .unix)
+    public var created: Date?
     
-    @Timestamp(key: "updated", on: .update)
-    public var updated: Date
+    @Timestamp(key: "updated", on: .update, format: .unix)
+    public var updated: Date?
     
     public init() {}
     
@@ -32,8 +32,8 @@ public final class ServiceSetting: Model, @unchecked Sendable {
         self.id = id
         self.$service.id = serviceID
         self.$setting.id = settingID
-        self.createdAt = Date()
-        self.updatedAt = Date()
+        self.created = Date()
+        self.updated = Date()
     }
 }
     

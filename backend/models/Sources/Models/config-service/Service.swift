@@ -27,9 +27,6 @@ public final class Service: Model, @unchecked Sendable {
 
     @Field(key: "active")
     public var active: Bool
-
-    @Children(for: \.$service)
-    var serviceSettings: [ServiceSetting]
     
     public init() { }
 
