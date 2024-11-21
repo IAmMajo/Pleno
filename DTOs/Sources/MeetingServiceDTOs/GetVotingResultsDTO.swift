@@ -2,6 +2,7 @@ import Foundation
 
 public struct GetVotingResultsDTO: Codable {
     public var votingId: UUID
+    public var myVote: UInt8? // Index 0: Abstention | nil: did not vote at all
     public var results: [GetVotingResultDTO]
     
     public init(votingId: UUID, results: [GetVotingResultDTO]) {
