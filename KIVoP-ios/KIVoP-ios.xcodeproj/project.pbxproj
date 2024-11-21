@@ -10,6 +10,10 @@
 		AF04581B2CECCA540071EDF8 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581A2CECCA540071EDF8 /* AuthServiceDTOs */; };
 		AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581C2CECCA540071EDF8 /* MeetingServiceDTOs */; };
 		AF04581F2CECCA540071EDF8 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581E2CECCA540071EDF8 /* NotificationsServiceDTOs */; };
+		AF0EDF152CEFA8F100582C70 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF142CEFA8F100582C70 /* AuthServiceDTOs */; };
+		AF0EDF172CEFA8F100582C70 /* ConfigServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF162CEFA8F100582C70 /* ConfigServiceDTOs */; };
+		AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF182CEFA8F100582C70 /* MeetingServiceDTOs */; };
+		AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,8 +75,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF0EDF152CEFA8F100582C70 /* AuthServiceDTOs in Frameworks */,
+				AF0EDF172CEFA8F100582C70 /* ConfigServiceDTOs in Frameworks */,
 				AF04581F2CECCA540071EDF8 /* NotificationsServiceDTOs in Frameworks */,
+				AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */,
 				AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */,
+				AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */,
 				AF04581B2CECCA540071EDF8 /* AuthServiceDTOs in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -137,6 +145,10 @@
 				AF04581A2CECCA540071EDF8 /* AuthServiceDTOs */,
 				AF04581C2CECCA540071EDF8 /* MeetingServiceDTOs */,
 				AF04581E2CECCA540071EDF8 /* NotificationsServiceDTOs */,
+				AF0EDF142CEFA8F100582C70 /* AuthServiceDTOs */,
+				AF0EDF162CEFA8F100582C70 /* ConfigServiceDTOs */,
+				AF0EDF182CEFA8F100582C70 /* MeetingServiceDTOs */,
+				AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */,
 			);
 			productName = "KIVoP-ios";
 			productReference = A81ABA922CD130F00026F492 /* KIVoP-ios.app */;
@@ -223,7 +235,7 @@
 			mainGroup = A81ABA892CD130F00026F492;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				AF0458192CECCA540071EDF8 /* XCLocalSwiftPackageReference "../DTOs" */,
+				AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A81ABA932CD130F00026F492 /* Products */;
@@ -592,7 +604,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		AF0458192CECCA540071EDF8 /* XCLocalSwiftPackageReference "../DTOs" */ = {
+		AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../DTOs;
 		};
@@ -608,6 +620,22 @@
 			productName = MeetingServiceDTOs;
 		};
 		AF04581E2CECCA540071EDF8 /* NotificationsServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NotificationsServiceDTOs;
+		};
+		AF0EDF142CEFA8F100582C70 /* AuthServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AuthServiceDTOs;
+		};
+		AF0EDF162CEFA8F100582C70 /* ConfigServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ConfigServiceDTOs;
+		};
+		AF0EDF182CEFA8F100582C70 /* MeetingServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MeetingServiceDTOs;
+		};
+		AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = NotificationsServiceDTOs;
 		};
