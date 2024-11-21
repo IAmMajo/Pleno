@@ -6,6 +6,7 @@ struct MainPage: View {
     @State private var Meeting: String = "Jahreshauptversammlung"
     @State private var selectedView: SidebarOption = .nutzerverwaltung
     @State private var isAdminExpanded: Bool = true
+
     
     private var User: String {
         Name.components(separatedBy: " ").first ?? ""
@@ -229,31 +230,40 @@ struct NutzerverwaltungView: View {
                 
                 // Ausstehend row
                 HStack {
-                    Text("Ausstehend")
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                    
-                    Text("3")
-                        .foregroundColor(.orange)
-                    
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
-                }
-                .padding(.horizontal, 30)
+                                    Text("Ausstehend")
+                                        .foregroundColor(.primary)
+                                    
+                                    Spacer()
+                                    
+                                    Text("3")
+                                        .foregroundColor(.orange)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                }
+                                .padding(.horizontal, 30)
+                                .onTapGesture {
+                                    isPopupPresented = true // Öffne Pop-up
+                                }
+                                .sheet(isPresented: $isPopupPresented) {
+                                    PendingRequestsNavigationView(
+                                        isPresented: $isPopupPresented,
+                                        selectedUser: $selectedUser
+                                    )
+                                }
+                            }
+            
+            // Einladungslink row
+            HStack {
+                Text("Einladungslink")
+                    .foregroundColor(.primary)
                 
-                // Einladungslink row
-                HStack {
-                    Text("Einladungslink")
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                    
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
-                }
-                .padding(.horizontal, 30)
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.gray)
             }
+            .padding(.horizontal, 30)
             
             // Nutzerübersicht Section
             VStack(alignment: .leading, spacing: 10) {
@@ -284,7 +294,7 @@ struct NutzerverwaltungView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
                         // Dummy User Data
-                        let users = ["Max Mustermann", "Max Mustermann", "Max Mustermann", "Max Mustermann", "Max Mustermann", "Max Mustermann"]
+                        let users = ["Max Mustermann", "Maxine Musterfrau", "Maximilian Musterkind"]
                         
                         ForEach(users, id: \.self) { user in
                             VStack {
@@ -309,7 +319,6 @@ struct NutzerverwaltungView: View {
                 .sheet(isPresented: $isPopupPresented) {
                     UserPopupView(isPresented: $isPopupPresented, user: $selectedUser)
                 }
-
             }
             
             Spacer()
@@ -317,6 +326,7 @@ struct NutzerverwaltungView: View {
         .background(Color(UIColor.systemBackground)) // Adapt to Dark/Light Mode
     }
 }
+
 
 struct UserPopupView: View {
     @Binding var isPresented: Bool
@@ -460,6 +470,126 @@ struct UserEditView: View {
     
     }
 }
+
+struct PendingRequestsNavigationView: View {
+    @Binding var isPresented: Bool
+    @Binding var selectedUser: String
+
+    var body: some View {
+        NavigationStack {
+            PendingRequestsView(selectedUser: $selectedUser)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Zurück") {
+                            isPresented = false // Schließe das gesamte Pop-up
+                        }
+                    }
+                }
+        }
+    }
+}
+
+
+struct PendingRequestsView: View {
+    @Binding var selectedUser: String
+
+    let requests = [
+        ("Max Mustermann", "maxmustermann@web.de"),
+        ("Maxine Musterfrau", "maxinemusterfrau@gmail.com"),
+        ("Maximilian Musterkind", "maximilianmusterkind@web.de")
+    ]
+    
+    var body: some View {
+        List {
+            ForEach(requests, id: \.0) { request in
+                NavigationLink(
+                    destination: PendingRequestPopup(user: request.0, email: request.1)
+                ) {
+                    VStack(alignment: .leading) {
+                        Text(request.0)
+                            .font(.system(size: 18)) // Größere Schrift für die Namen
+                            .foregroundColor(.black) // Schwarze Schriftfarbe
+                        Text(request.1)
+                            .font(.system(size: 14)) // Kleinere Schrift für die E-Mail
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+        }
+        .listStyle(PlainListStyle()) // Entfernt zusätzliche Graufärbung
+        .navigationTitle("Beitrittsanfragen") // Titel nur in der Navigation Bar
+        .navigationBarTitleDisplayMode(.inline)
+        .background(Color.white) // Weißer Hintergrund
+    }
+}
+
+
+
+struct PendingRequestPopup: View {
+    var user: String
+    var email: String
+
+    var body: some View {
+        VStack(spacing: 20) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text("Name")
+                    Spacer()
+                    Text(user)
+                        .foregroundColor(.gray)
+                }
+                HStack {
+                    Text("E-Mail-Adresse")
+                    Spacer()
+                    Text(email) // E-Mail direkt aus dem Array
+                        .foregroundColor(.gray)
+                }
+                HStack {
+                    Text("Registrierungsdatum")
+                    Spacer()
+                    Text("01.01.2024")
+                        .foregroundColor(.gray)
+                }
+                Divider()
+
+            }
+            .padding()
+
+            Spacer()
+
+            VStack(spacing: 10) { // Buttons vertikal anordnen
+                Button(action: {
+                    // Aktion zum Bestätigen
+                }) {
+                    Text("Bestätigen")
+                        .font(.system(size: 16)) // Kleinere Schriftgröße
+                        .padding(.vertical, 10) // Weniger Höhe
+                        .frame(width: 352) // Reduzierte Breite
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8) // Abgerundete Ecken
+                }
+
+                Button(action: {
+                    // Aktion zum Ablehnen
+                }) {
+                    Text("Ablehnen")
+                        .font(.system(size: 16)) // Kleinere Schriftgröße
+                        .padding(.vertical, 10) // Weniger Höhe
+                        .frame(width: 352) // Reduzierte Breite
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .cornerRadius(8) // Abgerundete Ecken
+                }
+            }
+            .padding(.horizontal, 20)
+        }
+        .padding()
+        .navigationBarTitleDisplayMode(.inline) // Titel in der Navigation Bar
+        .background(Color.white) // Weißer Hintergrund
+    }
+}
+
 
 // Beispielansicht für Konfiguration der Funktionen
 struct FunktionenView: View {
