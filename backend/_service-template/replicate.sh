@@ -73,8 +73,7 @@ find "../${SRVNAME}-service/" -type f -print0 | xargs -0 sed -i '' -e "s/FIRST_L
 find "../${SRVNAME}-service/" -type f -print0 | xargs -0 sed -i '' -e "s/SRVNAME_PLACEHOLDER/${SRVNAME}/g"
 
 # Add service  to /backend/docker-compose.yml
-sed -i '' -e "s|^# Volumes$|# Vapor: ${SRVNAME}-service\n#\n  ${SRVNAME}-service:\n    image: kivop-${SRVNAME}-service:latest\n    build:\n      context: ./..\n      dockerfile: backend/${SRVNAME}-service/Dockerfile\n    container_name: kivop-${SRVNAME}-service\n    depends_on:\n     - config-service\n    environment:\n      <<: *shared_environment\n    labels:\n      traefik.enable: true\n      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.regex: ^/${SRVNAME}-service(:/(.*))?\n      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.replacement: /$$1\n      traefik.http.routers.${SRVNAME}-service.rule: PathPrefix(\`/${SRVNAME}-service\`)\n      traefik.http.routers.${SRVNAME}-service.middlewares: ${SRVNAME}-service-replace-path-regex\n\n#\n# Volumes|" ../docker-compose.yml
-
+sed -i '' -e "s|^# Volumes$|# Vapor: ${SRVNAME}-service\n#\n  ${SRVNAME}-service:\n    image: kivop-${SRVNAME}-service:latest\n    build:\n      context: ./..\n      dockerfile: backend/${SRVNAME}-service/Dockerfile\n    container_name: kivop-${SRVNAME}-service\n    depends_on:\n     - config-service\n    environment:\n      <<: *shared_environment\n    labels:\n      traefik.enable: true\n      traefik.http.routers.${SRVNAME}-service.rule: PathPrefix(\`/${SRVNAME}\`)\n\n#\n# Volumes|" ../docker-compose.yml
 
 echo ''
 echo -e "${GRAY}>>>${RESET_COLOR} ${BOLD_CYAN}DONE${RESET_COLOR} ${GRAY}<<<${RESET_COLOR}"
