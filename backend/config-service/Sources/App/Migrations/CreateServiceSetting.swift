@@ -5,16 +5,16 @@
 //  Created by Dennis Sept on 02.11.24.
 //
 import Fluent
+import Models
 
 struct CreateServiceSetting: AsyncMigration {
     func prepare(on database: Database) async throws {
         try await database.schema("service_settings")
             .id() 
-            .field("service_id", .uuid, .required, .references("service", "id"))
-            .field("settings_id", .uuid, .required, .references("settings", "id"))
-            .field("created", .datetime, .required)
-            .field("updated", .datetime , .required)
-            .unique(on: "service_id", "setting_id")
+            .field("service_id", .uuid, .required, .references(Service.schema, .id))
+            .field("setting_id", .uuid, .required, .references(Setting.schema, .id))
+            .field("created", .datetime)
+            .field("updated", .datetime)
             .create()
     }
 

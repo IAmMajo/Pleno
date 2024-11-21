@@ -1,4 +1,5 @@
 import Fluent
+import Models
 import Vapor
 
 struct ConfigController: RouteCollection{
@@ -37,9 +38,10 @@ struct ConfigController: RouteCollection{
             headers.add(name: .contentType, value: "application/json")
             return Response(status: .badRequest, headers: headers, body: .init(data: data))
         }
-        let setting = try await Setting.find(id, on: req.db)
-            .unwrap(or: Abort(.notFound, reason: "Einstellung nicht gefunden."))
-        
+        guard let setting = try await Setting.find(id, on: req.db) else {
+            throw Abort(.notFound, reason: "Einstellung nicht gefunden.")
+        }
+
         let responseDTO = SettingResponseDTO(
             id: setting.id,
             key: setting.key,
@@ -65,8 +67,10 @@ struct ConfigController: RouteCollection{
             throw Abort(.badRequest, reason: "Ungültige Einstellungs-ID.")
         }
 
-        let setting = try await Setting.find(id, on: req.db)
-            .unwrap(or: Abort(.notFound))
+        guard let setting = try await Setting.find(id, on: req.db) else {
+            throw Abort(.notFound, reason: "Einstellung nicht gefunden.")
+        }
+
         let oldValue = setting.value
         setting.value = input.value
         try await setting.save(on: req.db)
@@ -119,7 +123,7 @@ struct ConfigController: RouteCollection{
         let encoder = JSONEncoder()
         let responseData = try encoder.encode(responseDTO)
         
-        var response = Response(status: .multiStatus) // 207 Multi-Status
+        let response = Response(status: .multiStatus) // 207 Multi-Status
         response.headers.contentType = .json
         response.body = .init(data: responseData)
         return response
@@ -129,15 +133,15 @@ struct ConfigController: RouteCollection{
     private func sendWebhookNotification(req: Request, event: String, setting: Setting, oldValue: String) async throws {
         // Aktive Services mit webhook_url abrufen
         let services = try await Service.query(on: req.db)
-            .filter(\.$webhookURL != nil)
+            .filter(\.$webhook_url != nil)
             .filter(\.$active == true)
             .all()
         
         for service in services {
-            guard let webhookURL = service.webhookURL else {
+            guard let webhookURL = service.webhook_url else {
                 continue
             }
-
+            
             let payload = WebhookPayloadDTO(
                 event: event,
                 settings_id: setting.id!,
@@ -152,19 +156,25 @@ struct ConfigController: RouteCollection{
                     value: oldValue
                 )
             )
-
-            let data = try JSONEncoder().encode(payload)
+            
+            let encoder = JSONEncoder()
+            let payloadData = try encoder.encode(payload)
+            
+            var webhookRequest = ClientRequest()
+            webhookRequest.method = .POST
+            webhookRequest.url = URI(string: webhookURL)
+            webhookRequest.headers.contentType = .json
+            webhookRequest.body = .init(data: payloadData)
+            
             do {
-                _ = try await req.client.post(URI(string: webhookURL)) { postReq in
-                    postReq.headers.add(name: .contentType, value: "application/json")
-                    postReq.body = .init(data: data)
-                }
+                _ = try await req.client.send(webhookRequest)
             } catch {
-                // Optional: Fehlerbehandlung oder Logging
-                req.logger.error("Webhook-Fehler bei URL \(webhookURL): \(error)")
+                // Fehlerbehandlung, z.B. Logging
+                req.logger.error("Fehler beim Senden der Webhook-Benachrichtigung: \(error.localizedDescription)")
             }
         }
     }
+
 }
 
 // Fehlerantwort-DTO für konsistente Fehlerbehandlung
