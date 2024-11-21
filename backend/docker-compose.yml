@@ -2,10 +2,11 @@ x-shared_environment: &shared_environment
   DATABASE_HOST: postgres
   DATABASE_USERNAME: vapor
   DATABASE_PASSWORD: example
+  DATABASE_NAME: kivop
 
 services:                                                                                                                                      
   traefik:
-    image: traefik:v3.1.6
+    image: traefik:v3.2.0
     container_name: kivop-traefik
     restart: unless-stopped
     command:
@@ -25,21 +26,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
 #
-# Example Service for traefik lables
-#
-  whoami:
-    image: traefik/whoami
-    container_name: kivop-whoami
-    restart: unless-stopped
-    labels:
-      traefik.enable: true
-      traefik.http.routers.whoami.rule: Path(`/whoami`)
-
-#
 # Database
 #
   postgres:
-    image: postgres:13.16
+    image: postgres:17.0-bookworm
     container_name: kivop-postgres
     restart: unless-stopped
     environment:
@@ -55,41 +45,91 @@ services:
 # Vapor: config-service
 #
   config-service:
-    extends:
-      file: ./config-service/docker-compose.yml
-      service: app
+    image: kivop-config-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/config-service/Dockerfile
     container_name: kivop-config-service
     depends_on:
       - postgres
     environment:
       <<: *shared_environment
-      DATABASE_NAME: config_db
     labels:
       traefik.enable: true
-      traefik.http.middlewares.config-service-replace-path-regex.replacepathregex.regex: ^/config-service(:/(.*))?
-      traefik.http.middlewares.config-service-replace-path-regex.replacepathregex.replacement: /$$1
-      traefik.http.routers.config-service.rule: PathPrefix(`/config-service`)
-      traefik.http.routers.config-service.middlewares: config-service-replace-path-regex
+      traefik.http.routers.config-service.rule: PathPrefix(`/config`)
+
+  config-service-migration:
+    profiles:
+      - not-default
+    image: kivop-config-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/config-service/Dockerfile
+    container_name: kivop-config-service-migration
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - postgres
+    command: ["migrate", "--yes"]
+
+  config-service-revert:
+    profiles:
+      - not-default
+    image: kivop-config-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/config-service/Dockerfile
+    container_name: kivop-config-service-revert
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - postgres
+    command: ["migrate", "--revert", "--yes"]
 
 #
 # Vapor: meeting-service
 #
   meeting-service:
-    extends:
-      file: ./meeting-service/docker-compose.yml
-      service: app
+    image: kivop-meeting-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/meeting-service/Dockerfile
     container_name: kivop-meeting-service
     depends_on:
       - config-service
     environment:
       <<: *shared_environment
-      DATABASE_NAME: meeting_db
     labels:
       traefik.enable: true
-      traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.regex: ^/meeting-service(:/(.*))?
-      traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.replacement: /$$1
-      traefik.http.routers.meeting-service.rule: PathPrefix(`/meeting-service`)
-      traefik.http.routers.meeting-service.middlewares: meeting-service-replace-path-regex
+      traefik.http.routers.meeting-service.rule: PathPrefix(`/meeting`)
+
+  meeting-service-migration:
+    profiles:
+      - not-default
+    image: kivop-meeting-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/meeting-service/Dockerfile
+    container_name: kivop-meeting-service-migration
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - postgres
+    command: ["migrate", "--yes"]
+
+  meeting-service-revert:
+    profiles:
+      - not-default
+    image: kivop-meeting-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/meeting-service/Dockerfile
+    container_name: kivop-meeting-service-revert
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - postgres
+    command: ["migrate", "--revert", "--yes"]
 
 #
 # Vapor: auth-service
@@ -97,47 +137,41 @@ services:
   auth-service:
     image: kivop-auth-service:latest
     build:
-      context: ./
-      dockerfile: auth-service/Dockerfile
+      context: ./..
+      dockerfile: backend/auth-service/Dockerfile
     container_name: kivop-auth-service
     depends_on:
      - config-service
     environment:
       <<: *shared_environment
-      DATABASE_NAME: auth_db
     labels:
       traefik.enable: true
-      traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.regex: ^/auth-service(:/(.*))?
-      traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.replacement: /$$1
-      traefik.http.routers.auth-service.rule: PathPrefix(`/auth-service`)
-      traefik.http.routers.auth-service.middlewares: auth-service-replace-path-regex
+      traefik.http.routers.auth-service.rule: PathPrefix(`/auth`) || PathPrefix(`/users`)
 
   auth-service-migration:
     profiles:
-      - migration
+      - not-default
     image: kivop-auth-service:latest
     build:
-      context: ./
-      dockerfile: auth-service/Dockerfile
+      context: ./..
+      dockerfile: backend/auth-service/Dockerfile
     container_name: kivop-auth-service-migration
     environment:
       <<: *shared_environment
-      DATABASE_NAME: auth_db
     depends_on:
       - postgres
     command: ["migrate", "--yes"]
 
   auth-service-revert:
     profiles:
-      - revert
+      - not-default
     image: kivop-auth-service:latest
     build:
-      context: ./
-      dockerfile: auth-service/Dockerfile
+      context: ./..
+      dockerfile: backend/auth-service/Dockerfile
     container_name: kivop-auth-service-revert
     environment:
       <<: *shared_environment
-      DATABASE_NAME: auth_db
     depends_on:
       - postgres
     command: ["migrate", "--revert", "--yes"]
@@ -146,21 +180,18 @@ services:
 # Vapor: notifications-service
 #
   notifications-service:
-    extends:
-      file: ./notifications-service/docker-compose.yml
-      service: app
+    image: kivop-notifications-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/notifications-service/Dockerfile
     container_name: kivop-notifications-service
     depends_on:
       - config-service
     environment:
       <<: *shared_environment
-      DATABASE_NAME: notifications_db
     labels:
       traefik.enable: true
-      traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.regex: ^/notifications-service(:/(.*))?
-      traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.replacement: /$$1
-      traefik.http.routers.notifications-service.rule: PathPrefix(`/notifications-service`)
-      traefik.http.routers.notifications-service.middlewares: notifications-service-replace-path-regex
+      traefik.http.routers.notifications-service.rule: PathPrefix(`/email`)
 
 #
 # Volumes
