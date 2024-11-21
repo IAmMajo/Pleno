@@ -31,20 +31,7 @@ function read_user_inputs {
         return
     fi
 
-    CREATE_DATABASE_ANSWER=''
-    while [[ ! $CREATE_DATABASE_ANSWER =~ ^[Yy](es)?$|^[Nn]o?$ ]]; do # Eligible answers: y|Y|yes|Yes|n|N|no|No
-        echo -e "\n${LIGHT_CYAN}Would you like to create a corresponding database as well? (Y/n)${BOLD_CYAN}"
-        read CREATE_DATABASE_ANSWER
-    done
     echo -e "${RESET_COLOR}Your service  is going to be named ${ITALIC_CYAN}${SRVNAME}-service${RESET_COLOR}."
-    if [[ $CREATE_DATABASE_ANSWER =~ ^[Yy](es)?$ ]]; then # If y|Y|yes|Yes
-        echo -e "${RESET_COLOR}Your database is going to be named ${ITALIC_CYAN}${SRVNAME}_db${RESET_COLOR}."
-    else
-        echo 'No database will be created.'
-        echo ''
-        echo -e "Please be aware, although no database is going to be created, that the service is going to be configured to try and connect to a database named ${ITALIC_CYAN}${SRVNAME}_db${RESET_COLOR} nevertheless."
-        echo -e "A manual correction is necessary. The files ${ITALIC_CYAN}../docker-compose.yml${RESET_COLOR}, ${ITALIC_CYAN}../${SRVNAME}-service/docker-compose.yml${RESET_COLOR} and ${ITALIC_CYAN}../${SRVNAME}-service/Sources/App/configure.swift${RESET_COLOR} are going to be affected by this."
-    fi
 
     PROCEED_ANSWER=''
     while [[ ! $PROCEED_ANSWER =~ ^[Yy](es)?$|^[Nn]o?$ ]]; do # eligible answers: y|Y|yes|Yes|n|N|no|No
@@ -86,13 +73,8 @@ find "../${SRVNAME}-service/" -type f -print0 | xargs -0 sed -i '' -e "s/FIRST_L
 find "../${SRVNAME}-service/" -type f -print0 | xargs -0 sed -i '' -e "s/SRVNAME_PLACEHOLDER/${SRVNAME}/g"
 
 # Add service  to /backend/docker-compose.yml
-#sed -i '' -e "s|^# Volumes$|# Vapor: ${SRVNAME}-service\n#\n  ${SRVNAME}-service:\n    extends:\n      file: ./${SRVNAME}-service/docker-compose.yml\n      service: app\n    container_name: kivop-${SRVNAME}-service\n    depends_on:\n      - config-service\n    environment:\n      <<: *shared_environment\n      DATABASE_NAME: ${SRVNAME}_db\n    labels:\n      traefik.enable: true\n      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.regex: ^/${SRVNAME}-service(:/(.*))?\n      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.replacement: /\$\$1\n      traefik.http.routers.${SRVNAME}-service.rule: PathPrefix(\`/${SRVNAME}-service\`)\n      traefik.http.routers.${SRVNAME}-service.middlewares: ${SRVNAME}-service-replace-path-regex\n\n#\n# Volumes|" ../docker-compose.yml
-sed -i '' -e "s|^# Volumes$|# Vapor: ${SRVNAME}-service\n#\n  ${SRVNAME}-service:\n    image: kivop-${SRVNAME}-service:latest\n    build:\n      context: ./..\n      dockerfile: backend/${SRVNAME}-service/Dockerfile\n    container_name: kivop-${SRVNAME}-service\n    depends_on:\n     - config-service\n    environment:\n      <<: *shared_environment\n      DATABASE_NAME: ${SRVNAME}_db\n    labels:\n      traefik.enable: true\n      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.regex: ^/${SRVNAME}-service(:/(.*))?\n      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.replacement: /$$1\n      traefik.http.routers.${SRVNAME}-service.rule: PathPrefix(\`/${SRVNAME}-service\`)\n      traefik.http.routers.${SRVNAME}-service.middlewares: ${SRVNAME}-service-replace-path-regex\n\n#\n# Volumes|" ../docker-compose.yml
+sed -i '' -e "s|^# Volumes$|# Vapor: ${SRVNAME}-service\n#\n  ${SRVNAME}-service:\n    image: kivop-${SRVNAME}-service:latest\n    build:\n      context: ./..\n      dockerfile: backend/${SRVNAME}-service/Dockerfile\n    container_name: kivop-${SRVNAME}-service\n    depends_on:\n     - config-service\n    environment:\n      <<: *shared_environment\n    labels:\n      traefik.enable: true\n      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.regex: ^/${SRVNAME}-service(:/(.*))?\n      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.replacement: /$$1\n      traefik.http.routers.${SRVNAME}-service.rule: PathPrefix(\`/${SRVNAME}-service\`)\n      traefik.http.routers.${SRVNAME}-service.middlewares: ${SRVNAME}-service-replace-path-regex\n\n#\n# Volumes|" ../docker-compose.yml
 
-# Add database to /backend/init-dbs.sh
-if [[ $CREATE_DATABASE_ANSWER =~ ^[Yy](es)?$ ]]; then # If y|Y|yes|Yes
-    sed -i '' -e "s/^EOSQL$/\tCREATE DATABASE ${SRVNAME}_db;\n\tGRANT ALL PRIVILEGES ON DATABASE ${SRVNAME}_db TO vapor;\nEOSQL/" ../init-dbs.sh
-fi
 
 echo ''
 echo -e "${GRAY}>>>${RESET_COLOR} ${BOLD_CYAN}DONE${RESET_COLOR} ${GRAY}<<<${RESET_COLOR}"
