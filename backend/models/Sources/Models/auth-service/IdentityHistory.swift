@@ -7,8 +7,8 @@ public final class IdentityHistory: Model, Content, @unchecked Sendable {
     @ID(key: .id)
     public var id: UUID?
     
-    @Parent(key: "user_id")
-    public var user: User
+    @OptionalParent(key: "user_id")
+    public var user: User?
     
     @Parent(key: "identity_id")
     public var identity: Identity
