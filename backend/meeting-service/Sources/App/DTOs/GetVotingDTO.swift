@@ -1,4 +1,4 @@
 import Vapor
 import MeetingServiceDTOs
 
-extension GetVotingDTO: @retroactive Content { }
+extension GetVotingDTO: @retroactive Content, @unchecked @retroactive Sendable { }

@@ -13,27 +13,27 @@ public final class Vote: Model, @unchecked Sendable {
         @Parent(key: "voting_id")
         public var voting: Voting
         
-        @Field(key: "identity_id")
-        public var identityId: UUID // TODO: identityId: UUID durch identity: Identity austauschen
+        @Parent(key: "identity_id")
+        public var identity: Identity
         
         public init() {}
         
-        public convenience init(voting: Voting, identityId: UUID) throws {
-            try self.init(votingId: voting.requireID(), identityId: identityId)
+        public convenience init(voting: Voting, identity: Identity) throws {
+            try self.init(votingId: voting.requireID(), identityId: identity.requireID())
         }
 
-        public init(votingId: Voting.IDValue, identityId: UUID) {
+        public init(votingId: Voting.IDValue, identityId: Identity.IDValue) {
             self.$voting.id = votingId
-            self.identityId = identityId
+            self.$identity.id = identityId
         }
 
         public static func == (lhs: IDValue, rhs: IDValue) -> Bool {
-            lhs.$voting.id == rhs.$voting.id && lhs.identityId == rhs.identityId
+            lhs.$voting.id == rhs.$voting.id && lhs.$identity.id == rhs.$identity.id
         }
 
         public func hash(into hasher: inout Hasher) {
             hasher.combine(self.$voting.id)
-            hasher.combine(self.identityId)
+            hasher.combine(self.$identity.id)
         }
         
     }

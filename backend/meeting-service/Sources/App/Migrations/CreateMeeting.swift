@@ -16,7 +16,7 @@ struct CreateMeeting: AsyncMigration {
             .field("start", .datetime, .required)
             .field("duration", .uint16)
             .field("location", .uuid, .references(Location.schema, .id))
-            .field("chair_id", .uuid, .required) // TODO: Notwendigkeit von .references überprüfen. Zu 'identities' oder 'attendances'?
+            .field("chair_id", .uuid, .references(Identity.schema, .id)) // TODO: Überprüfen: .references zu 'attendances'?
             .field("code", .string)
             .create()
     }

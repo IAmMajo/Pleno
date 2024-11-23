@@ -11,27 +11,27 @@ public final class Attendance: Model, @unchecked Sendable {
         @Parent(key: "meeting_id")
         public var meeting: Meeting
         
-        @Field(key: "identity_id")
-        public var identityId: UUID // TODO: identityId: UUID durch identity: Identity austauschen
+        @Parent(key: "identity_id")
+        public var identity: Identity
         
         public init() {}
         
-        public convenience init(meeting: Meeting, identityId: UUID) throws {
-            try self.init(meetingId: meeting.requireID(), identityId: identityId)
+        public convenience init(meeting: Meeting, identity: Identity) throws {
+            try self.init(meetingId: meeting.requireID(), identityId: identity.requireID())
         }
 
-        public init(meetingId: Meeting.IDValue, identityId: UUID) {
+        public init(meetingId: Meeting.IDValue, identityId: Identity.IDValue) {
             self.$meeting.id = meetingId
-            self.identityId = identityId
+            self.$identity.id = identityId
         }
 
         public static func == (lhs: IDValue, rhs: IDValue) -> Bool {
-            lhs.$meeting.id == rhs.$meeting.id && lhs.identityId == rhs.identityId
+            lhs.$meeting.id == rhs.$meeting.id && lhs.$identity.id == rhs.$identity.id
         }
 
         public func hash(into hasher: inout Hasher) {
             hasher.combine(self.$meeting.id)
-            hasher.combine(self.identityId)
+            hasher.combine(self.$identity.id)
         }
         
     }

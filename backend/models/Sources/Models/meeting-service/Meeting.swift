@@ -29,10 +29,10 @@ public final class Meeting: Model, @unchecked Sendable {
     @OptionalParent(key: "location_id")
     public var location: Location?
     
-    @Field(key: "chair_id")
-    public var chairId: UUID
+    @OptionalParent(key: "chair_id")
+    public var chair: Identity?
     
-    @Field(key: "code") // 6-digit code
+    @OptionalField(key: "code") // 6-digit code
     public var code: String?
 
     public init() { }
@@ -40,12 +40,12 @@ public final class Meeting: Model, @unchecked Sendable {
     public init(
     id: UUID? = nil,
     name: String,
-    description: String,
+    description: String = "",
     status: MeetingStatus,
     start: Date,
     duration: UInt16? = nil,
     locationId: Location.IDValue? = nil,
-    chairId: UUID,
+    chairId: Identity.IDValue? = nil,
     code: String? = nil) {
         self.id = id
         self.name = name
@@ -54,7 +54,7 @@ public final class Meeting: Model, @unchecked Sendable {
         self.start = start
         self.duration = duration
         self.$location.id = locationId
-        self.chairId = chairId
+        self.$chair.id = chairId
         self.code = code
     }
 }

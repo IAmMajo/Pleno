@@ -28,7 +28,7 @@ public final class Location: Model, @unchecked Sendable {
 
     public init() { }
     
-    public init(id: UUID?, name: String, street: String, number: String, letter: String, placeId: Place.IDValue? = nil) {
+    public init(id: UUID? = nil, name: String, street: String, number: String, letter: String, placeId: Place.IDValue? = nil) {
         self.id = id
         self.name = name
         self.street = street
