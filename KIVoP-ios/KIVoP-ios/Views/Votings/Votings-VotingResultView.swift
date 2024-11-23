@@ -10,38 +10,13 @@ import LocalAuthentication
 
 struct Votings_VotingResultView: View {
    
-//   @Binding var path: [String]
-//   @Binding var shouldPopToVotingsView: Bool
-   
    let voting: Voting
 //   let colorMapping: [UInt8: Color]
    var sampleIdentity: Identity
-   
-//   @State private var navigateToNextView = false
-   
-   func getColor (index: UInt8) -> Color {
-      return colorMapping[index] ?? .gray
-   }
-   
-   func selection (voting: Voting) -> Voting_option? {
-//      return voting.voting_options[3]
-      if (sampleIdentity.votes.contains(where: { $0.voting.title == voting.title })) {
-         let index = sampleIdentity.votes.first(where: {$0.voting.title == voting.title})?.index
-         return voting.voting_options.first(where: {$0.index == index})
-      }
-     return nil
-   }
 
    var votesCount: Int {
       return voting.voting_options.reduce(0, { x, y in
          x + (y.count ?? 0)})
-   }
-   
-   func getPercent (option: Voting_option) -> Int {
-      guard votesCount > 0 else {
-         return 0 // Return 0% if there are no votes
-      }
-      return Int((Float(option.count ?? 0) / Float(votesCount)) * 100)
    }
    
     var body: some View {
@@ -90,26 +65,30 @@ struct Votings_VotingResultView: View {
        }
        .navigationBarTitleDisplayMode(.inline)
        .background(Color(UIColor.secondarySystemBackground))
-//       .navigationBarBackButtonHidden(true)
-//       .toolbar {
-//          ToolbarItem(placement: .navigationBarLeading) {
-//             Button {
-//                navigateToNextView = true
-//             } label: {
-//                HStack {
-//                   Image(systemName: "chevron.backward")
-//                   Text("Zurück")
-//                }
-//             }
-//          }
-//       }
-//       .navigationDestination(isPresented: $navigateToNextView) { Votings() }
     }
+   
+   func getColor (index: UInt8) -> Color {
+      return colorMapping[index] ?? .gray
+   }
+   
+   func selection (voting: Voting) -> Voting_option? {
+//      return voting.voting_options[3]
+      if (sampleIdentity.votes.contains(where: { $0.voting.title == voting.title })) {
+         let index = sampleIdentity.votes.first(where: {$0.voting.title == voting.title})?.index
+         return voting.voting_options.first(where: {$0.index == index})
+      }
+     return nil
+   }
+   
+   func getPercent (option: Voting_option) -> Int {
+      guard votesCount > 0 else {
+         return 0 // Return 0% if there are no votes
+      }
+      return Int((Float(option.count ?? 0) / Float(votesCount)) * 100)
+   }
 }
 
 #Preview() {
-//      @Previewable @State var path: [String] = ["VoteView"]
-//   @Previewable @State var rootIsActive: Bool = false
    
    Votings_VotingResultView(voting: Voting(title: "Vereinsfarbe", question: "Welche Farbe soll die neue Vereinsfarbe werden?", startet_at: Date.now, is_open: true, meeting: MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession), voting_options: [
       Voting_option(index: 0, text: "Enthaltung", count: 10),

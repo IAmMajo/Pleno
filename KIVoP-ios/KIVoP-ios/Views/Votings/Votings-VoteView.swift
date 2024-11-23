@@ -16,21 +16,16 @@ struct Votings_VoteView: View {
 //      var identity = sampleIdentity
 //
 //   }
+  
+   @Environment(\.dismiss) private var dismiss
+
    @State private var selection: Voting_option?
    @State private var showingAlert = false
-   @State private var navigateToNextView = false
-//   @Binding var path: [String]
-//   @Binding var rootIsActive: Bool
-   
-   func updateSampleIdentity(selection: Voting_option?) -> Identity {
-      var identity = sampleIdentity
-      identity.votes.append(Vote(voting: voting, index: selection?.index ?? 0))
-      return identity
-   }
+   var onNavigate: (Identity) -> Void
    
 
    var body: some View {
-         Group {
+         NavigationStack {
             VStack {
                Text("Welche Farbe soll die neue Vereinsfarbe werden?")
                   .font(.title)
@@ -79,8 +74,8 @@ struct Votings_VoteView: View {
                         Task {
                            await BiometricAuth.executeIfSuccessfulAuth {
                               print("Successful Auth!")
-                              navigateToNextView = true
-//                              path.append("VotingResultView")
+                              dismiss()
+                              onNavigate(updateSampleIdentity(selection: selection ?? nil))
                            } otherwise: {
                               print("Failed Auth!")
                            }
@@ -89,26 +84,27 @@ struct Votings_VoteView: View {
                      secondaryButton: .cancel(Text("Zurück"))
                   )
                }
-//               .navigationDestination(for: String.self) { pathValue in
-//                  if pathValue == "VotingResultView" {
-//                     Votings_VotingResultView(shouldPopToVotingsView: $rootIsActive, voting: voting, sampleIdentity: updateSampleIdentity(selection: selection ?? nil))
-//                  }
-//               }
-                  .navigationDestination(isPresented: $navigateToNextView) {
-                  Votings_VotingResultView(voting: voting, sampleIdentity: updateSampleIdentity(selection: selection ?? nil))
-               }
             }
             .background(Color(UIColor.secondarySystemBackground))
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Abbrechen", action: { dismiss() })
+                }
+            }
 
          }
          .navigationBarTitleDisplayMode(.inline)
    }
+   
+   
+   func updateSampleIdentity(selection: Voting_option?) -> Identity {
+      var identity = sampleIdentity
+      identity.votes.append(Vote(voting: voting, index: selection?.index ?? 0))
+      return identity
+   }
 }
 
 #Preview {
-//   @Previewable @State var path: [String] = ["VoteView"]
-//   @Previewable @State var rootIsActive: Bool = false
-   
    NavigationView {
       Votings_VoteView(voting: Voting(title: "Vereinsfarbe", question: "Welche Farbe soll die neue Vereinsfarbe werden?", startet_at: Date.now, is_open: true, meeting: MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession), voting_options: [
          Voting_option(index: 0, text: "Enthaltung"),
@@ -128,7 +124,7 @@ struct Votings_VoteView: View {
                               Voting_option(index: 2, text: "Option2", count: 15),
                               Voting_option(index: 3, text: "Option3", count: 5),
                               Voting_option(index: 4, text: "Option4", count: 30),
-                           ]), index: 0)]))
+                           ]), index: 0)]), onNavigate: { identity in})
       .toolbar {
          ToolbarItem(placement: .navigationBarLeading) {
             Button {

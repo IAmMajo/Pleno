@@ -121,9 +121,14 @@ struct VotingsView: View {
    
    ///////////////////////////////////////////////////////////////////////
    
-//   @State private var navPath: [String] = []
-//   @State var isActive : Bool = false
    @State private var searchText = ""
+
+   @State private var selectedVoting: Voting?
+   @State private var updatedIdentity: Identity?
+   @State private var isShowingVoteSheet = false
+   @State private var navigateToResultView = false
+   @State private var navigateToNextView = false
+
 
    var votingsOfMeetings: [[Voting]] {
       var votingsByMeeting: [UUID: [Voting]] = [:]
@@ -158,7 +163,34 @@ struct VotingsView: View {
             if !votingsOfMeetings.isEmpty {
                List {
                   ForEach(votingsOfMeetings, id: \.self) { votingGroup in
-                     Votings_VotingsSectionView(votingGroup: votingGroup, sampleIdentity: sampleIdentity)
+                     Votings_VotingsSectionView(votingGroup: votingGroup, sampleIdentity: sampleIdentity, onVotingSelected: { voting in
+                        selectedVoting = voting
+                        if (!sampleIdentity.votes.contains(where: { $0.voting.title == voting.title }) && voting.is_open) {
+                           isShowingVoteSheet = true
+                        } else {
+                           navigateToResultView = true
+                        }
+                     })
+                  }
+               }
+               .sheet(isPresented: $isShowingVoteSheet) {
+                  if let voting = selectedVoting {
+                     Votings_VoteView(voting: voting, sampleIdentity: sampleIdentity, onNavigate: { identity in
+                        updatedIdentity = identity
+                        navigateToNextView = true
+                     })
+                        .navigationTitle(voting.title)
+                  }
+               }
+               .navigationDestination(isPresented: $navigateToResultView) {
+                  if let voting = selectedVoting {
+                     Votings_VotingResultView(voting: voting, sampleIdentity: sampleIdentity)
+                        .navigationTitle(voting.title)
+                  }
+               }
+               .navigationDestination(isPresented: $navigateToNextView) {
+                  if let voting = selectedVoting, let identity = updatedIdentity {
+                     Votings_VotingResultView(voting: voting, sampleIdentity: identity)
                   }
                }
             } else {
