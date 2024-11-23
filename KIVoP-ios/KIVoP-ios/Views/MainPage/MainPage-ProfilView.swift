@@ -4,7 +4,7 @@ import AuthServiceDTOs
 struct MainPage_ProfilView: View {
     // Benutzerinformationen (dynamisch geladen)
     @State private var name: String = ""
-    @State private var shortName: String = "MM"
+    @State private var shortName: String = "??"
     @State private var profileImage: UIImage? = nil
     
     // Vereinsinformationen (gehardcoded)

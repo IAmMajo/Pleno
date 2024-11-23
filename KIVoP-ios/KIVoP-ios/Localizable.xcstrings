@@ -76,6 +76,7 @@
 
     },
     "10" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -98,6 +99,7 @@
       }
     },
     "18:06" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -875,6 +877,12 @@
           }
         }
       }
+    },
+    "Lade Profilbild..." : {
+
+    },
+    "Lade..." : {
+
     },
     "Laden..." : {
 

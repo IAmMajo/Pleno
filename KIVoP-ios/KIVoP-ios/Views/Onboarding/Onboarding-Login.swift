@@ -130,10 +130,10 @@ struct Onboarding_Login: View {
         isLoading = true
         errorMessage = nil
         
-        // Create UserLoginDTO
+        // Erstelle UserLoginDTO
         let loginDTO = UserLoginDTO(email: email, password: password)
         
-        // Define API endpoint
+        // Definiere API endpoint
         let url = URL(string: "https://kivop.ipv64.net/auth/login")!
         
         // Create POST request
@@ -151,7 +151,7 @@ struct Onboarding_Login: View {
             return
         }
         
-        // Perform API call
+        // API call ausführen
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 isLoading = false

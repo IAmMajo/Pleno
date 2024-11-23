@@ -70,8 +70,8 @@ struct MainPage_ProfilView_Password: View {
                     Text("Speichern")
                         .frame(maxWidth: .infinity)
                         .padding(15)
-                        .background(Color.accentColor) // Dynamic color for Dark/Light mode
-                        .foregroundColor(Color(UIColor.systemBackground)) // Text contrasts with the background
+                        .background(Color.accentColor) // Dynamische Farben für Dark/Light mode
+                        .foregroundColor(Color(UIColor.systemBackground)) // Text contrast mit dem Hintergrund
                         .cornerRadius(10)
                 }
                 .padding(.top, 20)
@@ -106,7 +106,7 @@ struct MainPage_ProfilView_Password: View {
         errorMessage = nil
         successMessage = nil
 
-        // Basic validations
+        // Einfache Validation
         guard !currentPassword.isEmpty else {
             errorMessage = "Bitte aktuelles Passwort eingeben."
             return
@@ -127,12 +127,12 @@ struct MainPage_ProfilView_Password: View {
             return
         }
 
-        // Call API to validate current password and save the new password
+        // API um aktuelles Passwort zu validieren und neues zu speichern
         saveNewPassword()
     }
 
     private func validatePasswordStrength(_ password: String) -> Bool {
-        // Minimum 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
+        // Minimum 8 Zeichen, 1 Großbuchstabe, 1 Kleinbuchstabe, 1 Zahl, 1 Sonderzeichen
         let passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}$"
         return NSPredicate(format: "SELF MATCHES %@", passwordRegex).evaluate(with: password)
     }

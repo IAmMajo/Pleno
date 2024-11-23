@@ -15,7 +15,7 @@ struct Onboarding_Register: View {
             VStack {
                 Spacer().frame(height: 40)
                 
-                // Register title
+                // Titel
                 ZStack(alignment: .bottom) {
                     Text("Registrieren")
                         .font(.title)
@@ -25,18 +25,17 @@ struct Onboarding_Register: View {
                     Rectangle()
                         .frame(width: 103, height: 3)
                         .foregroundColor(.primary)
-                        .offset(y: 5) // Abstand nach unten
+                        .offset(y: 5)
                 }
                 .padding(.bottom, 40)
                 .padding(.top, 40)
                 
-                // Profile picture placeholder
+                // Profil-Bild placeholder
                 Circle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 100, height: 100)
                     .overlay(Text("Profilbild").foregroundColor(.gray))
                 
-
                 NavigationLink(destination: MainPage_ProfilView_ProfilPicture()) {
                     Text("Bearbeiten")
                         .foregroundColor(.blue)
@@ -45,39 +44,15 @@ struct Onboarding_Register: View {
                 .padding(.bottom, 30)
                 
                 // Name TextField
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("NAME")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .padding(.horizontal, 5)
-                    
-                    TextField("Name", text: $name)
-                        .padding()
-                        .background(Color(UIColor.systemBackground))
-                        .cornerRadius(10)
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 10)
+                inputField(title: "NAME", text: $name)
                 
                 // Email TextField
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("E-MAIL")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .padding(.horizontal, 5)
-                    
-                    TextField("E-Mail", text: $email)
-                        .padding()
-                        .background(Color(UIColor.systemBackground))
-                        .cornerRadius(10)
-                        .keyboardType(.emailAddress)
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 10)
+                inputField(title: "E-MAIL", text: $email)
+                    .keyboardType(.emailAddress)
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
                 
-                // Password TextField
+                // Passwort TextField
                 VStack(alignment: .leading, spacing: 5) {
                     Text("PASSWORT")
                         .font(.caption)
@@ -137,7 +112,7 @@ struct Onboarding_Register: View {
                         .padding(.horizontal, 24)
                 }
                 
-                // Back to Login Button
+                // Zurück zu Login Button
                 NavigationLink(destination: Onboarding_Login()) {
                     Text("Zurück zum Login")
                         .foregroundColor(.blue)
@@ -167,17 +142,23 @@ struct Onboarding_Register: View {
         isLoading = true
         errorMessage = nil
         
-        // Validate password
+        // Passwort validieren
+        guard validatePassword(password) else {
+            errorMessage = "Passwort muss mindestens 8 Zeichen, eine Zahl und ein Sonderzeichen enthalten."
+            isLoading = false
+            return
+        }
+        
         guard password == confirmPassword else {
             errorMessage = "Passwörter stimmen nicht überein."
             isLoading = false
             return
         }
         
-        // Create UserRegistrationDTO
+        // Erstelle UserRegistrationDTO
         let registrationDTO = UserRegistrationDTO(name: name, email: email, password: password)
         
-        // Define API endpoint
+        // Definiere API endpoint
         let url = URL(string: "https://kivop.ipv64.net/users/register")!
         
         // Create POST request
@@ -195,7 +176,7 @@ struct Onboarding_Register: View {
             return
         }
         
-        // Perform API call
+        // API call ausführen
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 isLoading = false
@@ -215,13 +196,37 @@ struct Onboarding_Register: View {
             }
         }.resume()
     }
+    
+    // MARK: - Passwort-Validierung
+    private func validatePassword(_ password: String) -> Bool {
+        let passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$&*]).{8,}$"
+        let predicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
+        return predicate.evaluate(with: password)
+    }
+    
+    // MARK: - Wiederverwendbare Eingabefelder
+    private func inputField(title: String, text: Binding<String>) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.gray)
+                .padding(.horizontal, 5)
+            
+            TextField(title, text: text)
+                .padding()
+                .background(Color(UIColor.systemBackground))
+                .cornerRadius(10)
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 10)
+    }
 }
 
 struct Onboarding_Register_Previews: PreviewProvider {
     static var previews: some View {
         Onboarding_Register()
-            .environment(\.colorScheme, .light) // Preview in Light Mode
+            .environment(\.colorScheme, .light)
         Onboarding_Register()
-            .environment(\.colorScheme, .dark) // Preview in Dark Mode
+            .environment(\.colorScheme, .dark)
     }
 }

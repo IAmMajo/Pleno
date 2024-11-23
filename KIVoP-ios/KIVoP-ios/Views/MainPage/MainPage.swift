@@ -4,7 +4,7 @@ import MeetingServiceDTOs
 
 struct MainPage: View {
     @State private var name: String = ""
-    @State private var shortName: String = "MM"
+    @State private var shortName: String = "??"
     @State private var meeting: String? = nil
     @State private var meetingDate: String? = nil
     @State private var meetingTime: String? = nil
@@ -15,7 +15,7 @@ struct MainPage: View {
     var body: some View {
         NavigationView {
             VStack(alignment: .leading, spacing: 0) {
-                // Greeting
+                // Begrüßung
                 if isLoading {
                     ProgressView()
                         .padding()
@@ -31,7 +31,7 @@ struct MainPage: View {
                         .padding([.top, .leading], 20)
                 }
 
-                // Profile Information
+                // Profil-Informationen
                 NavigationLink(destination: MainPage_ProfilView()) {
                     HStack {
                         Circle()
@@ -148,7 +148,7 @@ struct MainPage: View {
                         }
 
                         Button(action: {
-                            // Action for the current meeting
+                            // Aktion für das aktuelle Meeting
                         }) {
                             Text("Zur aktuellen Sitzung")
                                 .font(.footnote)
@@ -176,7 +176,7 @@ struct MainPage: View {
         }
     }
 
-    // MARK: - API Logic
+    // MARK: - API Logik
 
     private func fetchUserProfile() {
         guard let url = URL(string: "https://kivop.ipv64.net/users/profile") else {
@@ -252,7 +252,7 @@ struct MainPage: View {
         }.resume()
     }
 
-    // MARK: - Helpers
+    // MARK: - Helfer
 
     private func calculateShortName(from fullName: String) -> String {
         let nameParts = fullName.split(separator: " ")
@@ -279,8 +279,6 @@ struct MainPage: View {
         return formatter.string(from: date)
     }
 }
-
-
 
 // Sample Views für die anderen Punkte nach hinzufügen bitte löschen!!!
 
