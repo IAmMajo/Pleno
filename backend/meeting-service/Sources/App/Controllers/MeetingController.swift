@@ -23,19 +23,21 @@ struct MeetingController: RouteCollection {
     }
     
     @Sendable func getAllMeetings(req: Request) async throws -> [GetMeetingDTO] {
+        let isAdmin = req.jwtPayload?.isAdmin ?? false
         let meetings = try await Meeting.query(on: req.db).with(\.$location) {location in
             location.with(\.$place)
         }.all()
         return try meetings.map { meeting in
-            return try meeting.toGetMeetingDTO()
+            return try meeting.toGetMeetingDTO(showCode: isAdmin)
         }
     }
     
     @Sendable func getSingleMeeting(req: Request) async throws -> GetMeetingDTO {
+        let isAdmin = req.jwtPayload?.isAdmin ?? false
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        return try meeting.toGetMeetingDTO()
+        return try meeting.toGetMeetingDTO(showCode: isAdmin)
     }
     
     @Sendable func createMeeting(req: Request) async throws -> GetMeetingDTO { // TODO: Encapsulate both creations in one transaction (if possible)
@@ -123,19 +125,20 @@ struct MeetingController: RouteCollection {
         guard meeting.status == .scheduled else {
             throw Abort(.badRequest, reason: "Cannot start meeting that is not scheduled (status is '\(meeting.status)').")
         }
-        guard let payload = req.jwtPayload else {
+        guard let userId = req.jwtPayload?.userID else {
             throw Abort(.unauthorized)
         }
+        let identityId = try await Identity.byUserId(userId, req.db).requireID()
         meeting.status = .inSession
         meeting.start = .now
-        meeting.$chair.id = payload.userID
+        meeting.$chair.id = identityId
         meeting.code = String(Int.random(in: 100000...999999))
         try await meeting.update(on: req.db)
         
-        let record = Record(id: try .init(meeting: meeting, lang: "DE"), identityId: payload.userID!, status: .underway)
+        let record = Record(id: try .init(meeting: meeting, lang: "DE"), identityId: identityId, status: .underway)
         try await record.create(on: req.db)
         
-        return try meeting.toGetMeetingDTO()
+        return try meeting.toGetMeetingDTO(showCode: true)
     }
     
     @Sendable func endMeeting(req: Request) async throws -> GetMeetingDTO {
@@ -168,14 +171,15 @@ struct MeetingController: RouteCollection {
                 .field(\.$id.$identity.$id)
                 .all()
                 .map { attendance in
-                    return attendance.$id.$identity.id
+                    try attendance.requireID().identity.requireID()
+//                    return attendance.$id.$identity.id
                 }
             for identityId in attendees {
                 try await Attendance(id: .init(meetingId: meetingId, identityId: identityId), status: .absent).create(on: db)
             }
             try await meeting.update(on: db)
         }
-        return try meeting.toGetMeetingDTO()
+        return try meeting.toGetMeetingDTO(showCode: true)
     }
     
     @Sendable func getAllLocations(req: Request) async throws -> [GetLocationDTO] {
