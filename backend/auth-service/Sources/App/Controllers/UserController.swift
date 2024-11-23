@@ -19,6 +19,12 @@ struct UserController: RouteCollection {
         protectedRoutes.get(use: self.getAllUsers)
         // GET /users/:id -> ein User
         protectedRoutes.get(":id", use: self.getUser)
+        // GET /users/identities/:id
+        protectedRoutes.get("identities", ":id", use: self.getIdentities)
+        // PATCH /users/:id
+        protectedRoutes.patch(":id", use: self.updateUserStatus)
+        // DELETE /users/:id
+        protectedRoutes.delete(":id", use: self.deleteUser)
     }
     
     @Sendable
@@ -156,9 +162,11 @@ struct UserController: RouteCollection {
             .all()
         return users.map { user in
             UserProfileDTO(
+                uid: user.id,
                 email: user.email,
                 name: user.identity.name,
                 isAdmin: user.isAdmin,
+                isActive: user.isActive,
                 createdAt: user.createdAt
             )
         }
@@ -187,10 +195,94 @@ struct UserController: RouteCollection {
         }
         // Gibt ProfilDTO zurück
         return UserProfileDTO(
+            uid: user.id,
             email: user.email,
             name: user.identity.name,
             isAdmin: user.isAdmin,
+            isActive: user.isActive,
             createdAt: user.createdAt
         )
+    }
+    
+    @Sendable
+    func getIdentities(req: Request) async throws -> [Identity] {
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        guard payload.isAdmin == true else {
+            throw Abort(.forbidden, reason: "User is not an admin")
+        }
+        guard let userID = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing user ID")
+        }
+        let identities = try await Identity.query(on: req.db)
+            .join(IdentityHistory.self, on: \Identity.$id == \IdentityHistory.$identity.$id)
+            .filter(IdentityHistory.self, \.$user.$id == userID)
+            .all()
+        
+        guard !identities.isEmpty else {
+            throw Abort(.notFound, reason: "No identities found for user")
+        }
+        return identities
+    }
+    
+    @Sendable
+    func updateUserStatus(req: Request) async throws -> HTTPResponseStatus {
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        guard payload.isAdmin == true else {
+            throw Abort(.forbidden, reason: "User is not an admin")
+        }
+        guard let userID = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing user ID")
+        }
+        let update = try req.content.decode(UserProfileUpdateDTO.self)
+        
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$id == userID)
+            .first() else {
+            throw Abort(.notFound, reason: "User not found")
+        }
+        if let isActive = update.isActive {
+            user.isActive = isActive
+        }
+        if let isAdmin = update.isAdmin {
+            user.isAdmin = isAdmin
+        }
+        
+        try await user.save(on: req.db)
+        
+        return .ok
+    }
+    
+    @Sendable
+    func deleteUser(req: Request) async throws -> HTTPResponseStatus {
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        guard payload.isAdmin == true else {
+            throw Abort(.forbidden, reason: "User is not an admin")
+        }
+        guard let userID = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing user ID")
+        }
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$id == userID)
+            .first() else {
+            throw Abort(.notFound, reason: "User not found")
+        }
+        let identityHistories = try await IdentityHistory.query(on: req.db)
+            .filter(\.$user.$id == userID)
+            .all()
+        
+        for identityHistory in identityHistories {
+            identityHistory.$user.id = nil
+            try await identityHistory.save(on: req.db)
+        }
+        
+        try await user.delete(on: req.db)
+        
+        return .noContent
     }
 }
