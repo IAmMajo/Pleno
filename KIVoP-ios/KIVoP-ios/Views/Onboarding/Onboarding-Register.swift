@@ -1,11 +1,15 @@
 import SwiftUI
+import AuthServiceDTOs
 
 struct Onboarding_Register: View {
     @State private var name: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
-    
+    @State private var errorMessage: String? = nil
+    @State private var isLoading: Bool = false
+    @State private var registrationSuccessful: Bool = false
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -66,6 +70,9 @@ struct Onboarding_Register: View {
                         .padding()
                         .background(Color(UIColor.systemBackground))
                         .cornerRadius(10)
+                        .keyboardType(.emailAddress)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 10)
@@ -100,16 +107,35 @@ struct Onboarding_Register: View {
                 Spacer()
                 
                 // Register Button
-                NavigationLink(destination: Onboarding_Wait()) {
-                    Text("Registrieren")
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, maxHeight: 44)
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                        .fontWeight(.bold)
+                Button(action: {
+                    registerUser()
+                }) {
+                    if isLoading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity, maxHeight: 44)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    } else {
+                        Text("Registrieren")
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, maxHeight: 44)
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                            .fontWeight(.bold)
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 10)
+                .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty)
+                
+                // Error Message
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                        .padding(.horizontal, 24)
+                }
                 
                 // Back to Login Button
                 NavigationLink(destination: Onboarding_Login()) {
@@ -128,7 +154,66 @@ struct Onboarding_Register: View {
             .background(Color(UIColor.systemGray6))
             .edgesIgnoringSafeArea(.all)
             .navigationBarBackButtonHidden(true)
+            .alert("Erfolgreich registriert!", isPresented: $registrationSuccessful) {
+                Button("OK", role: .cancel) {
+                    // Weiterleitung oder zusätzliche Logik
+                }
+            }
         }
+    }
+    
+    private func registerUser() {
+        // Set loading state
+        isLoading = true
+        errorMessage = nil
+        
+        // Validate password
+        guard password == confirmPassword else {
+            errorMessage = "Passwörter stimmen nicht überein."
+            isLoading = false
+            return
+        }
+        
+        // Create UserRegistrationDTO
+        let registrationDTO = UserRegistrationDTO(name: name, email: email, password: password)
+        
+        // Define API endpoint
+        let url = URL(string: "https://kivop.ipv64.net/users/register")!
+        
+        // Create POST request
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Encode DTO to JSON
+        do {
+            let jsonData = try JSONEncoder().encode(registrationDTO)
+            request.httpBody = jsonData
+        } catch {
+            errorMessage = "Fehler beim Verarbeiten der Daten."
+            isLoading = false
+            return
+        }
+        
+        // Perform API call
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                isLoading = false
+                if let error = error {
+                    errorMessage = "Netzwerkfehler: \(error.localizedDescription)"
+                    return
+                }
+                
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
+                    errorMessage = "Registrierung fehlgeschlagen."
+                    return
+                }
+                
+                // Erfolgreiche Registrierung
+                registrationSuccessful = true
+                errorMessage = nil
+            }
+        }.resume()
     }
 }
 
