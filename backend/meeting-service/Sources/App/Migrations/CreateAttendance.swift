@@ -10,7 +10,7 @@ struct CreateAttendance: AsyncMigration {
             .create()
         try await database.schema(Attendance.schema)
             .field("meeting_id", .uuid, .required, .references(Meeting.schema, .id))
-            .field("identity_id", .uuid, .required) // TODO: Notwendigkeit von .references zu 'identities' überprüfen.
+            .field("identity_id", .uuid, .required, .references(Identity.schema, .id)) // TODO: Überprüfen: .references zu 'attendances'?
             .field("status", attendanceStatus)
             .compositeIdentifier(over: "meeting_id", "identity_id")
             .create()

@@ -39,8 +39,8 @@ public final class Record: Model, @unchecked Sendable {
     @CompositeID()
     public var id: IDValue?
 
-    @Field(key: "identity_id")
-    public var identityId: UUID // TODO: identityId: UUID durch identity: Identity austauschen
+    @Parent(key: "identity_id")
+    public var identity: Identity
 
     @Field(key: "status")
     public var status: RecordStatus
@@ -50,9 +50,9 @@ public final class Record: Model, @unchecked Sendable {
 
     public init() { }
     
-    public init(id: IDValue, identityId: UUID, status: RecordStatus, content: String) {
+    public init(id: IDValue, identityId: Identity.IDValue, status: RecordStatus, content: String = "") {
         self.id = id
-        self.identityId = identityId
+        self.$identity.id = identityId
         self.status = status
         self.content = content
     }
