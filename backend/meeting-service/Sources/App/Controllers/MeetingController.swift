@@ -62,7 +62,9 @@ struct MeetingController: RouteCollection {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        let patchMeetingDTO = try req.content.decode(PatchMeetingDTO.self)
+        guard let patchMeetingDTO = try? req.content.decode(PatchMeetingDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected PatchMeetingDTO.")
+        }
         guard meeting.status == .scheduled else {
             throw Abort(.badRequest, reason: "Updating a meeting after it has \(meeting.status == .inSession ? "started" : "ended") is not allowed.")
         }
@@ -97,6 +99,12 @@ struct MeetingController: RouteCollection {
             .first() == nil {
             try await meeting.location!.delete(on: req.db)
         }
+        
+        // Check if changes were made
+        guard meeting.hasChanges else {
+            throw Abort(.conflict, reason: "No changes were made.")
+        }
+        
         // Update meeting
         try await meeting.update(on: req.db)
         try await meeting.$location.load(on: req.db)
