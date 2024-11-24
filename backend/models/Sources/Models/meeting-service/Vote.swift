@@ -41,12 +41,13 @@ public final class Vote: Model, @unchecked Sendable {
     @CompositeID()
     public var id: IDValue?
     
-    @OptionalField(key: "index")
-    public var index: UInt8?
+    @Field(key: "index") // Index 0: Abstention
+    public var index: UInt8
     
     public init() { }
     
-    public init(id: IDValue) {
+    public init(id: IDValue, index: UInt8) {
         self.id = id
+        self.index = index
     }
 }

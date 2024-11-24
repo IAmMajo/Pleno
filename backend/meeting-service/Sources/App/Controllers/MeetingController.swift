@@ -216,7 +216,7 @@ struct MeetingController: RouteCollection {
                 placeId = try await Place.query(on: db).filter(\.$postalCode == postalCode).filter(\.$place == place).first()!.requireID()
             } catch {
                 let placeModel: Place = .init(postalCode: postalCode, place: place)
-                try await placeModel.save(on: db)
+                try await placeModel.create(on: db)
                 placeId = try placeModel.requireID()
             }
         }
@@ -230,7 +230,7 @@ struct MeetingController: RouteCollection {
             .first() {
             return (existingLocation, false)
         } else {
-            try await location.save(on: db)
+            try await location.create(on: db)
             return (location, true)
         }
         

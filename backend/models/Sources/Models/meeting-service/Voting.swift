@@ -32,6 +32,12 @@ public final class Voting: Model, @unchecked Sendable {
     
     @Field(key: "anonymous")
     public var anonymous: Bool
+    
+    @Children(for: \.$id.$voting)
+    public var votingOptions: [VotingOption]
+    
+    @Children(for: \.$id.$voting)
+    public var votes: [Vote]
 
     public init() { }
     

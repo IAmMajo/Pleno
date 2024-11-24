@@ -34,6 +34,15 @@ public final class Meeting: Model, @unchecked Sendable {
     
     @OptionalField(key: "code") // 6-digit code
     public var code: String?
+    
+    @Children(for: \.$id.$meeting)
+    public var attendances: [Attendance]
+    
+    @Children(for: \.$id.$meeting)
+    public var records: [Record]
+    
+    @Children(for: \.$meeting)
+    public var votings: [Voting]
 
     public init() { }
     

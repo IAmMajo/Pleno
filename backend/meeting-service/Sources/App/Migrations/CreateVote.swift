@@ -7,7 +7,7 @@ struct CreateVote: AsyncMigration {
         try await database.schema(Vote.schema)
             .field("voting_id", .uuid, .required, .references(Voting.schema, .id, onDelete: .cascade)) // TODO: .references(Voting.schema, "id") oder .references(VotingOption.schema, "id")
             .field("identity_id", .uuid, .required, .references(Identity.schema, .id)) // TODO: Überprüfen: .references zu 'attendances'?
-            .field("index", .uint8)
+            .field("index", .uint8, .required)
             .compositeIdentifier(over: "voting_id", "identity_id")
             .create()
     }
