@@ -81,7 +81,7 @@ struct AttendanceController: RouteCollection {
             try await attendance.update(on: req.db)
         } else {
             let attendance = try Attendance(id: .init(meetingId: meeting.requireID(), identityId: identityId), status: attendanceStatus)
-            try await attendance.save(on: req.db)
+            try await attendance.create(on: req.db)
         }
         return .noContent
     }

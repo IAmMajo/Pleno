@@ -22,7 +22,7 @@ func routes(_ app: Application) throws {
     try meetings.register(collection: VotingController())
     try meetings.register(collection: RecordController())
     
-    app.get("**", "brew", "coffee") { req -> HTTPStatus in // 418
+    app.get("brew", "coffee") { req -> HTTPStatus in // 418
         .imATeapot
     }
 }

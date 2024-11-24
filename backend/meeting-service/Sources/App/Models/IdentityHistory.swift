@@ -10,6 +10,7 @@ extension IdentityHistory {
         }
         return try await self.query(on: db)
             .filter(\.$user.$id == user.requireID())
+            .with(\.$identity)
             .all()
     }
 }

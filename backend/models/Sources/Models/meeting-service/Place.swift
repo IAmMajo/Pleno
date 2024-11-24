@@ -16,6 +16,9 @@ public final class Place: Model, @unchecked Sendable {
     
     @Field(key: "place")
     public var place: String
+    
+    @Children(for: \.$place)
+    public var locations: [Location]
 
     public init() { }
     

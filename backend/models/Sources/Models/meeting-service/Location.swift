@@ -25,6 +25,9 @@ public final class Location: Model, @unchecked Sendable {
     
     @OptionalParent(key: "place_id")
     public var place: Place?
+    
+    @Children(for: \.$location)
+    public var meetings: [Meeting]
 
     public init() { }
     

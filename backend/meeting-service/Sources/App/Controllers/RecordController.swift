@@ -183,9 +183,9 @@ struct RecordController: RouteCollection {
             throw Abort(.conflict, reason: "Cannot create a new, translated record, since there is already one for the language '\(lang2)'.")
         }
         
-        var translatedRecord = Record(id: try .init(meeting: meeting, lang: lang2), identityId: identityId, status: .underway, content: record.content)
+        let translatedRecord = Record(id: try .init(meeting: meeting, lang: lang2), identityId: identityId, status: .underway, content: record.content)
         
-        try await translatedRecord.save(on: req.db)
+        try await translatedRecord.create(on: req.db)
         return try translatedRecord.toGetRecordDTO()
     }
 }
