@@ -5,8 +5,9 @@ public struct GetVotingResultsDTO: Codable {
     public var myVote: UInt8? // Index 0: Abstention | nil: did not vote at all
     public var results: [GetVotingResultDTO]
     
-    public init(votingId: UUID, results: [GetVotingResultDTO]) {
+    public init(votingId: UUID, myVote: UInt8? = nil, results: [GetVotingResultDTO]) {
         self.votingId = votingId
+        self.myVote = myVote
         self.results = results
     }
 }
