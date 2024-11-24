@@ -1,4 +1,5 @@
 import SwiftUI
+import MeetingServiceDTOs
 
 struct MainPage: View {
     @State private var Name: String = "Max Mustermann"
