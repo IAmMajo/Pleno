@@ -39,7 +39,7 @@ public final class Attendance: Model, @unchecked Sendable {
     @CompositeID()
     public var id: IDValue?
 
-    @Field(key: "status")
+    @Enum(key: "status")
     public var status: AttendanceStatus
 
     public init() { }

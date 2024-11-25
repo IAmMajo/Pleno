@@ -17,7 +17,7 @@ public final class Meeting: Model, @unchecked Sendable {
     @Field(key: "description")
     public var description: String
     
-    @Field(key: "status")
+    @Enum(key: "status")
     public var status: MeetingStatus
     
     @Field(key: "start")

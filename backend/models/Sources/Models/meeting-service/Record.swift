@@ -42,7 +42,7 @@ public final class Record: Model, @unchecked Sendable {
     @Parent(key: "identity_id")
     public var identity: Identity
 
-    @Field(key: "status")
+    @Enum(key: "status")
     public var status: RecordStatus
 
     @Field(key: "content")

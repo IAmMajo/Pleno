@@ -20,12 +20,12 @@ struct AuthMiddleware: AsyncMiddleware {
             let payload = try jwtSigner.verify(token, as: JWTPayloadDTO.self)
             
             request.jwtPayload = payload
-            
-            return try await next.respond(to: request)
         } catch {
             request.logger.error("Token verification failed: \(error)")
             throw Abort(.unauthorized, reason: "Invalid or expired token")
         }
+        
+        return try await next.respond(to: request)
     }
 }
 

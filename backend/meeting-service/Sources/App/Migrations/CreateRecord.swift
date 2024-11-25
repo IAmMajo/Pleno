@@ -12,7 +12,7 @@ struct CreateRecord: AsyncMigration {
             .field("meeting_id", .uuid, .required, .references(Meeting.schema, .id))
             .field("lang", .string, .required)
             .field("identity_id", .uuid, .required, .references(Identity.schema, .id)) // TODO: Überprüfen: .references zu 'attendances'?
-            .field("status", recordStatus)
+            .field("status", recordStatus, .required, .sql(.default("underway")))
             .field("content", .string, .required, .sql(.default("")))
             .compositeIdentifier(over: "meeting_id", "lang")
             .create()
