@@ -237,7 +237,7 @@ enum Tab {
 }
 
 // Vorschau für SwiftUI
-struct AnwesenheitView_Previews: PreviewProvider {
+struct AttendanceView_Previews: PreviewProvider {
     static var previews: some View {
         AttendanceView()
     }

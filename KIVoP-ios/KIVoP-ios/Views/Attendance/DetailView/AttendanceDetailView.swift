@@ -166,15 +166,3 @@ struct AttendanceDetailView: View {
         .navigationBarHidden(true)
     }
 }
-
-struct AnwesenheitDetailView_Previews: PreviewProvider {
-    static var previews: some View {
-        AttendanceDetailView(
-            event: Event(
-                title: "Jahreshauptversammlung",
-                date: Date(),
-                status: "past"
-            )
-        )
-    }
-}
