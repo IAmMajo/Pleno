@@ -23,5 +23,6 @@ struct CreateMeeting: AsyncMigration {
 
     func revert(on database: Database) async throws {
         try await database.schema(Meeting.schema).delete()
+        try await database.enum("meeting_status").delete()
     }
 }

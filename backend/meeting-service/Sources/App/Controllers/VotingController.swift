@@ -112,7 +112,7 @@ struct VotingController: RouteCollection {
                 .filter(\.$index == UInt8(i))
                 .all())
         }
-        var totalVoteAmounts: [Int] = totalVotes.map { votes in
+        let totalVoteAmounts: [Int] = totalVotes.map { votes in
             votes.count
         }
         let totalVotesCount = totalVoteAmounts.reduce(0) { partialResult, votes in
