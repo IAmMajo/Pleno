@@ -1,11 +1,34 @@
+//
+//  AttendanceViewModel.swift
+//  KIVoP-ios
+//
+//  Created by Henrik Peltzer on 25.11.24.
+//
+
 import Foundation
 import SwiftUI
 import MeetingServiceDTOs
+// Just for testing
+import AuthServiceDTOs
 
 class AttendanceViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedTab: Int = 0
+    @Published var token: String
+    @Published var errorMessage: String?
     @Published var meetings: [GetMeetingDTO] = exampleMeetings
+    
+    // Initialisieren des ViewModels mit dem gespeicherten Token aus UserDefaults
+    init() {
+        // Laden des Tokens aus UserDefaults
+        if let savedToken = UserDefaults.standard.string(forKey: "authToken") {
+            self.token = savedToken
+        } else {
+            self.token = ""  // Leerer Token, wenn keiner gespeichert ist
+        }
+        // Meetings laden
+        loadMeetingsFromAPI()
+    }
 
     static let exampleMeetings: [GetMeetingDTO] = [
         GetMeetingDTO(id: UUID(), name: "Jahreshauptversammlung", description: "Beschreibung", status: .inSession, start: Date()),
@@ -16,41 +39,102 @@ class AttendanceViewModel: ObservableObject {
         GetMeetingDTO(id: UUID(), name: "Feedback-Runde", description: "Beschreibung", status: .scheduled, start: Calendar.current.date(byAdding: .day, value: 20, to: Date())!)
     ]
     
-    
     // Abruf der Meetings von der API
     func loadMeetingsFromAPI() {
-        guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
-            print("Ungültige URL")
-            return
+        Task {
+            do {
+                // Token prüfen oder Login durchführen
+                let token: String
+                if let storedToken = UserDefaults.standard.string(forKey: "authToken"), !storedToken.isEmpty {
+                    token = storedToken
+                } else {
+                    // Token nicht gefunden, also Login durchführen
+                    token = try await loginUser()  // Hier wird await verwendet
+                    // Token im UserDefaults speichern
+                    UserDefaults.standard.set(token, forKey: "authToken")
+                }
+                
+                // Meetings abrufen
+                try await fetchMeetings(token: token)
+            } catch {
+                // Fehlerbehandlung auf dem Hauptthread
+                DispatchQueue.main.async {
+                    self.errorMessage = error.localizedDescription
+                }
+            }
         }
+    }
 
+    // Login und Token zurückgeben
+    func loginUser() async throws -> String {
+        let loginData = UserLoginDTO(
+            email: "henrik.peltzer@gmail.com",  // Beispiel-E-Mail
+            password: "Test123"  // Beispiel-Passwort
+        )
+        
+        guard let url = URL(string: "https://kivop.ipv64.net/auth/login") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONEncoder().encode(loginData)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "Login failed", code: 401, userInfo: nil)
+        }
+        
+        guard let tokenResponse = try? JSONDecoder().decode(TokenResponseDTO.self, from: data),
+              let token = tokenResponse.token else {
+            throw NSError(domain: "Token parsing failed", code: 500, userInfo: nil)
+        }
+        
+        // Token in UserDefaults speichern
+        UserDefaults.standard.set(token, forKey: "authToken")
+        print("Token erhalten und gespeichert: \(token)")
+        return token
+    }
+
+    
+    // Meetings mit dem Token abrufen
+    func fetchMeetings(token: String) async throws {
+        guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            if let error = error {
-                print("Fehler beim Abrufen der Daten: \(error)")
-                return
-            }
-
-            guard let data = data else {
-                print("Keine Daten erhalten")
-                return
-            }
-
-            do {
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                let fetchedMeetings = try decoder.decode([GetMeetingDTO].self, from: data)
-
-                DispatchQueue.main.async {
-                    self?.meetings.append(contentsOf: fetchedMeetings)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        print("Token lautet: \(token)")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "Failed to fetch meetings", code: 500, userInfo: nil)
+        }
+        
+        do {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            // Die Dekodierung und die Fehlerbehandlung innerhalb der Hauptwarteschlange
+            DispatchQueue.main.async {
+                do {
+                    let fetchedMeetings = try decoder.decode([GetMeetingDTO].self, from: data)
+                    self.meetings.append(contentsOf: fetchedMeetings)
+                    
+                    // Anzahl der Meetings in der Konsole ausgeben
+                    print("Anzahl der abgerufenen Meetings: \(fetchedMeetings.count)")
+                } catch {
+                    // Fehlerbehandlung beim Dekodieren der Meetings
+                    self.errorMessage = "Fehler beim Dekodieren der Meetings: \(error.localizedDescription)"
                 }
-            } catch {
-                print("Fehler beim Dekodieren der Daten: \(error)")
             }
-        }.resume()
+        }
     }
+
     
     // Aktuelle Sitzung (falls vorhanden)
     var currentMeeting: GetMeetingDTO? {
