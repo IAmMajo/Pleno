@@ -18,5 +18,6 @@ struct CreateAttendance: AsyncMigration {
 
     func revert(on database: Database) async throws {
         try await database.schema(Attendance.schema).delete()
+        try await database.enum("attendance_status").delete()
     }
 }

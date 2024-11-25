@@ -20,5 +20,6 @@ struct CreateRecord: AsyncMigration {
 
     func revert(on database: Database) async throws {
         try await database.schema(Record.schema).delete()
+        try await database.enum("record_status").delete()
     }
 }
