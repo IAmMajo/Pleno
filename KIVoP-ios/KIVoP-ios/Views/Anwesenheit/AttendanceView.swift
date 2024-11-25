@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AnwesenheitView: View {
+struct AttendanceView: View {
     @Environment(\.dismiss) var dismiss
     
     @State private var searchText: String = ""
@@ -177,11 +177,11 @@ struct AnwesenheitView: View {
     
     func destinationView(for event: Event) -> some View {
         if event.status == "past" {
-            return AnyView(AnwesenheitDetailView(event: event))
+            return AnyView(AttendanceDetailView(event: event))
         } else if event.status == "scheduled" {
-            return AnyView(AnwesenheitPlanungView(event: event))
+            return AnyView(AttendancePlanningView(event: event))
         } else {
-            return AnyView(AnwesenheitAktuellView(event: event))
+            return AnyView(AttendanceCurrentView(event: event))
         }
     }
     
@@ -239,6 +239,6 @@ enum Tab {
 // Vorschau für SwiftUI
 struct AnwesenheitView_Previews: PreviewProvider {
     static var previews: some View {
-        AnwesenheitView()
+        AttendanceView()
     }
 }

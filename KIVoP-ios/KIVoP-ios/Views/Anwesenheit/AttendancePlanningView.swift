@@ -1,5 +1,5 @@
 //
-//  AnwesenheitDetailView.swift
+//  AnwesenheitPlanungView.swift
 //  KIVoP-ios
 //
 //  Created by Henrik Peltzer on 02.11.24.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AnwesenheitDetailView: View {
+struct AttendancePlanningView: View {
     @Environment(\.dismiss) var dismiss
     
     @State private var searchText: String = ""
@@ -43,10 +43,13 @@ struct AnwesenheitDetailView: View {
             return false
         }
     }
+
+    // Beispiel: Aktueller Nutzer, dessen Teilnahme erfasst wird
+    @State private var currentUser: Member = Member(name: "Aktueller Nutzer", title: nil, hasVoted: nil)
     
     var body: some View {
         NavigationView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .center, spacing: 16) {
                 // Navbar
                 HStack {
                     Button(action: {
@@ -66,7 +69,6 @@ struct AnwesenheitDetailView: View {
                         .font(.headline)
                         .foregroundColor(.primary)
                     
-                    Spacer()
                     Spacer()
                     Spacer()
                 }
@@ -95,45 +97,93 @@ struct AnwesenheitDetailView: View {
                 ZStack {
                     Color.gray.opacity(0.1)
                         .edgesIgnoringSafeArea(.all)
-
+                    
                     VStack {
-                        
-                        Spacer()
-                        Spacer()
-                        
-                        // Teilnahme Status Icons (nur für die abgestimmten Mitglieder)
-                        HStack {
-                            Spacer()
-                            VStack {
-                                Text("\(members.filter { $0.hasVoted == .yes }.count)")
-                                    .font(.largeTitle)
-                                Image(systemName: "person.fill.checkmark")
-                                    .foregroundColor(.blue)
-                                    .font(.largeTitle)
+                    // Titel für Teilnahme-Umfrage
+                    Text("Kannst du an diesem Termin?")
+                        .font(.title2)
+                        .padding(.top, 20)
+                    
+                    // Teilnahme Schaltflächen
+                    HStack(spacing: 40) {
+                        // "Ja"-Button
+                        Button(action: {
+                            currentUser.hasVoted = .yes
+                        }) {
+                            HStack {
+                                Image(systemName: "checkmark")
+                                Text("Ja")
                             }
-                            
-                            Spacer()
-                            Spacer()
-                            
-                            VStack {
-                                Text("\(members.filter { $0.hasVoted == .no || $0.hasVoted == nil }.count)")
-                                    .font(.largeTitle)
-                                Image(systemName: "person.fill.xmark")
-                                    .foregroundColor(.orange)
-                                    .font(.largeTitle)
-                            }
-                            Spacer()
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
                         }
-                        .padding(.horizontal)
+                        
+                        // "Nein"-Button
+                        Button(action: {
+                            currentUser.hasVoted = .no
+                        }) {
+                            HStack {
+                                Image(systemName: "xmark")
+                                Text("Nein")
+                            }
+                            .padding()
+                            .background(Color.gray.opacity(0.2))
+                            .foregroundColor(.black)
+                            .cornerRadius(10)
+                        }
+                    }
+                    .padding(.top, 20)
+                    
+                    // Fußzeile mit Hinweis
+                    Text("Dies ist nur eine vorläufige Umfrage, um festzustellen, wie viele Mitglieder kommen.")
+                        .font(.system(size: 11))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 10)
+                    
+                    // Teilnahme Status Icons
+                    HStack {
+                        Spacer()
+                        VStack {
+                            Text("\(members.filter { $0.hasVoted == .yes }.count)")
+                                .font(.largeTitle)
+                            Image(systemName: "person.fill.checkmark")
+                                .foregroundColor(.blue)
+                                .font(.largeTitle)
+                        }
                         
                         Spacer()
                         Spacer()
                         
-                        // Mitgliederliste
+                        VStack {
+                            Text("\(members.filter { $0.hasVoted == nil }.count)")
+                                .font(.largeTitle)
+                            Image(systemName: "person.fill.questionmark")
+                                .foregroundColor(.gray)
+                                .font(.largeTitle)
+                        }
+                        
+                        Spacer()
+                        Spacer()
+                        
+                        VStack {
+                            Text("\(members.filter { $0.hasVoted == .no }.count)")
+                                .font(.largeTitle)
+                            Image(systemName: "person.fill.xmark")
+                                .foregroundColor(.orange)
+                                .font(.largeTitle)
+                        }
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    Spacer()
+                    
+                    // Teilnehmerliste
                         List {
                             Section(header: Text("Mitglieder")) {
                                 ForEach(sortedMembers) { member in
-                                    let voteStatus = member.hasVoted ?? .no
                                     HStack {
                                         // Profilbild (Platzhalter)
                                         Circle()
@@ -150,10 +200,12 @@ struct AnwesenheitDetailView: View {
                                                     .foregroundColor(.gray)
                                             }
                                         }
+                                        
                                         Spacer()
                                         
-                                        Image(systemName: voteStatus.icon)
-                                            .foregroundColor(voteStatus.color)
+                                        // Abstimmungssymbol
+                                        Image(systemName: member.hasVoted?.icon ?? VoteStatus.notVoted.icon)
+                                            .foregroundColor(member.hasVoted?.color ?? VoteStatus.notVoted.color)
                                             .font(.system(size: 22))
                                     }
                                 }
@@ -167,13 +219,49 @@ struct AnwesenheitDetailView: View {
     }
 }
 
-struct AnwesenheitDetailView_Previews: PreviewProvider {
+struct Member: Identifiable {
+    let id = UUID()
+    let name: String
+    var title: String?
+    var hasVoted: VoteStatus?
+}
+
+enum VoteStatus {
+    case yes
+    case no
+    case notVoted
+    
+    var icon: String {
+        switch self {
+        case .yes:
+            return "checkmark"
+        case .notVoted:
+            return "questionmark.circle"
+        case .no:
+            return "xmark"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .yes:
+            return .blue
+        case .notVoted:
+            return .gray
+        case .no:
+            return .red
+        }
+    }
+}
+
+
+struct AnwesenheitPlanungView_Previews: PreviewProvider {
     static var previews: some View {
-        AnwesenheitDetailView(
+        AttendancePlanningView(
             event: Event(
                 title: "Jahreshauptversammlung",
                 date: Date(),
-                status: "past"
+                status: "scheduled"
             )
         )
     }
