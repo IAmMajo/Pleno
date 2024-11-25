@@ -61,8 +61,9 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.config-service.rule: PathPrefix(`/config`)
+      traefik.http.routers.config-service.rule: Host(`kivop.ipv64.net`) && PathPrefix(`/config`)
       traefik.http.routers.config-service.entrypoints: https
+      traefik.http.routers.config-service.tls: true
       traefik.http.routers.config-service.tls.certresolver: myresolver
 
   config-service-migration:
@@ -90,8 +91,9 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.auth-service.rule: PathPrefix(`/auth`) || PathPrefix(`/users`)
+      traefik.http.routers.auth-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/auth`) || PathPrefix(`/users`))
       traefik.http.routers.auth-service.entrypoints: https
+      traefik.http.routers.auth-service.tls: true
       traefik.http.routers.auth-service.tls.certresolver: myresolver
 
   auth-service-migration:
@@ -119,8 +121,9 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.meeting-service.rule: PathPrefix(`/meeting`)
+      traefik.http.routers.meeting-service.rule: Host(`kivop.ipv64.net`) && PathPrefix(`/meeting`)
       traefik.http.routers.meeting-service.entrypoints: https
+      traefik.http.routers.meeting-service.tls: true
       traefik.http.routers.meeting-service.tls.certresolver: myresolver
 
   meeting-service-migration:
@@ -148,8 +151,9 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.notifications-service.rule: PathPrefix(`/email`)
+      traefik.http.routers.notifications-service.rule: Host(`kivop.ipv64.net`) && PathPrefix(`/email`)
       traefik.http.routers.notifications-service.entrypoints: https
+      traefik.http.routers.notifications-service.tls: true
       traefik.http.routers.notifications-service.tls.certresolver: myresolver
 
 #
