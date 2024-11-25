@@ -1,15 +1,17 @@
 import SwiftUI
 import AuthServiceDTOs
 import MeetingServiceDTOs
+import UIKit
 
 struct MainPage: View {
     @State private var name: String = ""
     @State private var shortName: String = "??"
+    @State private var profileImage: UIImage? = nil
     @State private var meeting: String? = nil
     @State private var meetingDate: String? = nil
     @State private var meetingTime: String? = nil
     @State private var attendeesCount: Int? = nil
-    @State private var isLoading = true
+    @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
 
     var body: some View {
@@ -17,7 +19,7 @@ struct MainPage: View {
             VStack(alignment: .leading, spacing: 0) {
                 // Begrüßung
                 if isLoading {
-                    ProgressView()
+                    ProgressView("Laden...")
                         .padding()
                 } else if let errorMessage = errorMessage {
                     Text(errorMessage)
@@ -34,10 +36,20 @@ struct MainPage: View {
                 // Profil-Informationen
                 NavigationLink(destination: MainPage_ProfilView()) {
                     HStack {
-                        Circle()
-                            .fill(Color.gray)
-                            .frame(width: 50, height: 50)
-                            .overlay(Text(shortName).foregroundColor(.white))
+                        if let profileImage = profileImage {
+                            // Profilbild anzeigen, wenn vorhanden
+                            Image(uiImage: profileImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 50, height: 50)
+                                .clipShape(Circle())
+                        } else {
+                            // Shortname-Kreis als Fallback
+                            Circle()
+                                .fill(Color.gray)
+                                .frame(width: 50, height: 50)
+                                .overlay(Text(shortName).foregroundColor(.white))
+                        }
 
                         VStack(alignment: .leading) {
                             Text(name.isEmpty ? "Name laden..." : name)
@@ -171,98 +183,60 @@ struct MainPage: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            fetchUserProfile()
-            fetchCurrentMeeting()
+            loadUserProfile()
+            loadCurrentMeeting()
         }
     }
 
-    // MARK: - API Logik
-
-    private func fetchUserProfile() {
-        guard let url = URL(string: "https://kivop.ipv64.net/users/profile") else {
-            self.errorMessage = "Ungültige URL."
-            self.isLoading = false
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
+    // MARK: - Daten laden
+    private func loadUserProfile() {
+        MainPageAPI.fetchUserProfile { result in
             DispatchQueue.main.async {
                 self.isLoading = false
-
-                if let error = error {
-                    self.errorMessage = "Fehler: \(error.localizedDescription)"
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
-                      let data = data else {
-                    self.errorMessage = "Profil konnte nicht geladen werden."
-                    return
-                }
-
-                do {
-                    let profile = try JSONDecoder().decode(UserProfileDTO.self, from: data)
+                switch result {
+                case .success(let profile):
                     self.name = profile.name ?? ""
-                    self.shortName = calculateShortName(from: profile.name ?? "")
-                } catch {
-                    self.errorMessage = "Fehler beim Verarbeiten der Daten."
+                    self.shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
+                    self.loadProfilePicture() // Profilbild laden
+                case .failure(let error):
+                    self.errorMessage = "Fehler beim Laden des Profils: \(error.localizedDescription)"
                 }
             }
-        }.resume()
+        }
     }
 
-    private func fetchCurrentMeeting() {
-        guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
-            self.errorMessage = "Ungültige URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
+    private func loadProfilePicture() {
+        MainPageAPI.fetchProfilePicture { result in
             DispatchQueue.main.async {
-                if let error = error {
-                    print("Fehler beim Laden des Meetings: \(error.localizedDescription)")
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
-                      let data = data else {
-                    return
-                }
-
-                do {
-                    let meetings = try JSONDecoder().decode([GetMeetingDTO].self, from: data)
-                    if let currentMeeting = meetings.first {
-                        self.meeting = currentMeeting.name
-                        self.meetingDate = formatDate(currentMeeting.start)
-                        self.meetingTime = formatTime(currentMeeting.start)
-                        self.attendeesCount = currentMeeting.duration.map { Int($0) }
-                    }
-                } catch {
-                    print("Fehler beim Verarbeiten der Meeting-Daten: \(error.localizedDescription)")
+                switch result {
+                case .success(let image):
+                    self.profileImage = image
+                case .failure:
+                    self.profileImage = nil // Kein Bild verfügbar
                 }
             }
-        }.resume()
-    }
-
-    // MARK: - Helfer
-
-    private func calculateShortName(from fullName: String) -> String {
-        let nameParts = fullName.split(separator: " ")
-        guard let firstInitial = nameParts.first?.prefix(1),
-              let lastInitial = nameParts.last?.prefix(1) else {
-            return "??"
         }
-        return "\(firstInitial)\(lastInitial)".uppercased()
     }
 
+    private func loadCurrentMeeting() {
+        MainPageAPI.fetchCurrentMeeting { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let meeting):
+                    if let meeting = meeting {
+                        self.meeting = meeting.name
+                        self.meetingDate = formatDate(meeting.start)
+                        self.meetingTime = formatTime(meeting.start)
+                        self.attendeesCount = meeting.duration.map { Int($0) }
+                    }
+                case .failure(let error):
+                    print("Fehler beim Laden des Meetings: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    // MARK: - Helferfunktionen
     private func extractFirstName(from fullName: String) -> String {
         return fullName.split(separator: " ").first.map(String.init) ?? "Nutzer"
     }
@@ -280,17 +254,19 @@ struct MainPage: View {
     }
 }
 
+struct MainPage_Previews: PreviewProvider {
+    static var previews: some View {
+        MainPage()
+    }
+}
+
+
+
 // Sample Views für die anderen Punkte nach hinzufügen bitte löschen!!!
 
 struct ProtokolleView: View {
     var body: some View {
         Text("Protokolle")
             .font(.largeTitle)
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainPage()
     }
 }

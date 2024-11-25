@@ -2,15 +2,15 @@ import SwiftUI
 import AuthServiceDTOs
 
 struct MainPage_ProfilView: View {
-    // Benutzerinformationen (dynamisch geladen)
+    // Benutzerinformationen
     @State private var name: String = ""
     @State private var shortName: String = "??"
     @State private var profileImage: UIImage? = nil
-    
+
     // Vereinsinformationen (gehardcoded)
     private let clubName: String = "Name des Vereins der manchmal auch sehr lange werden kann e.V."
     private let clubShortName: String = "VL"
-    
+
     // UI-Zustände
     @State private var showSignOutConfirmation = false
     @State private var showDeleteAccountAlert = false
@@ -21,10 +21,9 @@ struct MainPage_ProfilView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
-                Spacer()
-                    .frame(height: 10)
+                Spacer().frame(height: 10)
 
-                // Vereinslogo und Vereinsname (festgelegt)
+                // Vereinslogo und Name
                 VStack {
                     Circle()
                         .fill(Color.gray.opacity(0.2))
@@ -66,8 +65,8 @@ struct MainPage_ProfilView: View {
 
                 // Benutzerinformationen
                 VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        NavigationLink(destination: MainPage_ProfilView_Name()) {
+                    NavigationLink(destination: MainPage_ProfilView_Name()) {
+                        HStack {
                             Text("Name")
                             Spacer()
                             Text(name.isEmpty ? "Lade Benutzername..." : name)
@@ -113,7 +112,8 @@ struct MainPage_ProfilView: View {
                     }
                     .confirmationDialog("Wirklich abmelden?", isPresented: $showSignOutConfirmation, titleVisibility: .visible) {
                         Button("Abmelden", role: .destructive) {
-                            logoutUser()
+                            MainPageAPI.logoutUser()
+                            navigateToLogin = true
                         }
                         Button("Abbrechen", role: .cancel) {}
                     }
@@ -134,7 +134,11 @@ struct MainPage_ProfilView: View {
                     .alert("Möchtest du deinen Account wirklich löschen?", isPresented: $showDeleteAccountAlert) {
                         Button("Abbrechen", role: .cancel) {}
                         Button("Löschen", role: .destructive) {
-                            deleteAccount()
+                            MainPageAPI.deleteUserAccount { result in
+                                if case .success = result {
+                                    navigateToLogin = true
+                                }
+                            }
                         }
                     } message: {
                         Text("Du kannst deine Wahl danach nicht mehr ändern!")
@@ -154,94 +158,20 @@ struct MainPage_ProfilView: View {
                 Onboarding_Login()
             }
             .onAppear {
-                fetchUserProfile()
-            }
-        }
-    }
-
-    // MARK: - API-Logik
-
-    private func fetchUserProfile() {
-        isLoading = true
-        errorMessage = nil
-
-        guard let url = URL(string: "https://kivop.ipv64.net/users/profile") else {
-            errorMessage = "Ungültige URL."
-            isLoading = false
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            DispatchQueue.main.async {
-                isLoading = false
-
-                if let error = error {
-                    errorMessage = "Fehler: \(error.localizedDescription)"
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
-                      let data = data else {
-                    errorMessage = "Profil konnte nicht geladen werden."
-                    return
-                }
-
-                do {
-                    let profile = try JSONDecoder().decode(UserProfileDTO.self, from: data)
-                    self.name = profile.name ?? ""
-                    self.shortName = calculateShortName(from: profile.name ?? "")
-                } catch {
-                    errorMessage = "Fehler beim Verarbeiten der Daten."
+                MainPageAPI.fetchUserProfile { result in
+                    DispatchQueue.main.async {
+                        isLoading = false
+                        switch result {
+                        case .success(let profile):
+                            name = profile.name ?? ""
+                            shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
+                        case .failure(let error):
+                            errorMessage = "Fehler: \(error.localizedDescription)"
+                        }
+                    }
                 }
             }
-        }.resume()
-    }
-
-    private func logoutUser() {
-        UserDefaults.standard.removeObject(forKey: "jwtToken")
-        navigateToLogin = true
-    }
-
-    private func deleteAccount() {
-        guard let url = URL(string: "https://kivop.ipv64.net/users") else {
-            errorMessage = "Ungültige URL."
-            return
         }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { _, response, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    errorMessage = "Fehler beim Löschen des Kontos: \(error.localizedDescription)"
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    errorMessage = "Konto konnte nicht gelöscht werden."
-                    return
-                }
-
-                logoutUser()
-            }
-        }.resume()
-    }
-
-    // MARK: - Hilfsfunktionen
-
-    private func calculateShortName(from fullName: String) -> String {
-        let nameParts = fullName.split(separator: " ")
-        guard let firstInitial = nameParts.first?.prefix(1),
-              let lastInitial = nameParts.last?.prefix(1) else {
-            return "??"
-        }
-        return "\(firstInitial)\(lastInitial)".uppercased()
     }
 }
 

@@ -44,10 +44,10 @@ struct Onboarding_Register: View {
                 .padding(.bottom, 30)
                 
                 // Name TextField
-                inputField(title: "NAME", text: $name)
+                inputField(title: "Name", text: $name)
                 
                 // Email TextField
-                inputField(title: "E-MAIL", text: $email)
+                inputField(title: "E-Mail", text: $email)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
@@ -81,6 +81,14 @@ struct Onboarding_Register: View {
                 
                 Spacer()
                 
+                // Error Message
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                        .padding(.horizontal, 24)
+                }
+                
                 // Register Button
                 Button(action: {
                     registerUser()
@@ -104,14 +112,6 @@ struct Onboarding_Register: View {
                 .padding(.bottom, 10)
                 .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty)
                 
-                // Error Message
-                if let errorMessage = errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.footnote)
-                        .padding(.horizontal, 24)
-                }
-                
                 // Zurück zu Login Button
                 NavigationLink(destination: Onboarding_Login()) {
                     Text("Zurück zum Login")
@@ -129,20 +129,16 @@ struct Onboarding_Register: View {
             .background(Color(UIColor.systemGray6))
             .edgesIgnoringSafeArea(.all)
             .navigationBarBackButtonHidden(true)
-            .alert("Erfolgreich registriert!", isPresented: $registrationSuccessful) {
-                Button("OK", role: .cancel) {
-                    // Weiterleitung oder zusätzliche Logik
-                }
+            .navigationDestination(isPresented: $registrationSuccessful) {
+                MainPage()
             }
         }
     }
     
     private func registerUser() {
-        // Set loading state
         isLoading = true
         errorMessage = nil
         
-        // Passwort validieren
         guard validatePassword(password) else {
             errorMessage = "Passwort muss mindestens 8 Zeichen, eine Zahl und ein Sonderzeichen enthalten."
             isLoading = false
@@ -155,56 +151,26 @@ struct Onboarding_Register: View {
             return
         }
         
-        // Erstelle UserRegistrationDTO
         let registrationDTO = UserRegistrationDTO(name: name, email: email, password: password)
-        
-        // Definiere API endpoint
-        let url = URL(string: "https://kivop.ipv64.net/users/register")!
-        
-        // Create POST request
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Encode DTO to JSON
-        do {
-            let jsonData = try JSONEncoder().encode(registrationDTO)
-            request.httpBody = jsonData
-        } catch {
-            errorMessage = "Fehler beim Verarbeiten der Daten."
-            isLoading = false
-            return
-        }
-        
-        // API call ausführen
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        OnboardingAPI.registerUser(with: registrationDTO) { result in
             DispatchQueue.main.async {
                 isLoading = false
-                if let error = error {
-                    errorMessage = "Netzwerkfehler: \(error.localizedDescription)"
-                    return
+                switch result {
+                case .success:
+                    registrationSuccessful = true
+                case .failure(let error):
+                    errorMessage = error.localizedDescription
                 }
-                
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
-                    errorMessage = "Registrierung fehlgeschlagen."
-                    return
-                }
-                
-                // Erfolgreiche Registrierung
-                registrationSuccessful = true
-                errorMessage = nil
             }
-        }.resume()
+        }
     }
     
-    // MARK: - Passwort-Validierung
     private func validatePassword(_ password: String) -> Bool {
         let passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$&*]).{8,}$"
         let predicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
         return predicate.evaluate(with: password)
     }
     
-    // MARK: - Wiederverwendbare Eingabefelder
     private func inputField(title: String, text: Binding<String>) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)

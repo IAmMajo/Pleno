@@ -98,7 +98,7 @@ struct MainPage_ProfilView_ProfilPicture: View {
                 }
                 .padding()
                 .onAppear {
-                    fetchProfilePicture()
+                    loadProfilePicture()
                 }
             }
             .sheet(isPresented: $showImagePicker) {
@@ -107,101 +107,51 @@ struct MainPage_ProfilView_ProfilPicture: View {
         }
     }
 
-    // MARK: - API-Logik
+    // MARK: - API-Aufrufe über MainPageAPI
 
-    private func fetchProfilePicture() {
+    private func loadProfilePicture() {
         isLoading = true
         errorMessage = nil
 
-        guard let url = URL(string: "https://kivop.ipv64.net/users/profile/picture") else {
-            errorMessage = "Ungültige URL."
-            isLoading = false
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        MainPageAPI.fetchProfilePicture { result in
             DispatchQueue.main.async {
                 self.isLoading = false
 
-                if let error = error {
-                    self.errorMessage = "Fehler: \(error.localizedDescription)"
-                    return
+                switch result {
+                case .success(let image):
+                    self.selectedImage = image
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
                 }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
-                      let data = data, let image = UIImage(data: data) else {
-                    self.errorMessage = "Profilbild konnte nicht geladen werden."
-                    return
-                }
-
-                self.selectedImage = image
             }
-        }.resume()
+        }
     }
 
     private func uploadProfilePicture(image: UIImage) {
-        guard let url = URL(string: "https://kivop.ipv64.net/users/profile/picture") else {
-            errorMessage = "Ungültige URL."
-            return
-        }
-
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            errorMessage = "Fehler beim Konvertieren des Bildes."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
-        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-        request.addValue("image/jpeg", forHTTPHeaderField: "Content-Type")
-        request.httpBody = imageData
-
-        URLSession.shared.dataTask(with: request) { _, response, error in
+        MainPageAPI.uploadProfilePicture(image: image) { result in
             DispatchQueue.main.async {
-                if let error = error {
-                    self.errorMessage = "Fehler beim Hochladen des Profilbilds: \(error.localizedDescription)"
-                    return
+                switch result {
+                case .success:
+                    self.errorMessage = nil
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
                 }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    self.errorMessage = "Profilbild konnte nicht hochgeladen werden."
-                    return
-                }
-
-                self.errorMessage = nil
             }
-        }.resume()
+        }
     }
 
     private func deleteProfilePicture() {
-        guard let url = URL(string: "https://kivop.ipv64.net/users/profile/picture") else {
-            errorMessage = "Ungültige URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { _, response, error in
+        MainPageAPI.deleteProfilePicture { result in
             DispatchQueue.main.async {
-                if let error = error {
-                    self.errorMessage = "Fehler beim Löschen des Profilbilds: \(error.localizedDescription)"
-                    return
+                switch result {
+                case .success:
+                    self.selectedImage = nil
+                    self.errorMessage = nil
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
                 }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    self.errorMessage = "Profilbild konnte nicht gelöscht werden."
-                    return
-                }
-
-                self.selectedImage = nil
             }
-        }.resume()
+        }
     }
 }
 

@@ -11,13 +11,11 @@ struct MainPage_ProfilView_Name: View {
     var body: some View {
         VStack(spacing: 20) {
             if isLoading {
-                // Ladeanzeige
                 ProgressView("Laden...")
                     .frame(maxWidth: .infinity)
                     .padding()
             } else {
-                Spacer()
-                    .frame(height: 10)
+                Spacer().frame(height: 10)
 
                 // Namensbearbeitung
                 HStack {
@@ -88,53 +86,25 @@ struct MainPage_ProfilView_Name: View {
             }
         }
         .onAppear {
-            fetchUserName()
+            loadUserName()
         }
     }
 
-    // MARK: - API-Logik
-
-    private func fetchUserName() {
+    private func loadUserName() {
         isLoading = true
         errorMessage = nil
 
-        guard let url = URL(string: "https://kivop.ipv64.net/users/profile") else {
-            errorMessage = "Ungültige URL."
-            isLoading = false
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        MainPageAPI.fetchUserProfile { result in
             DispatchQueue.main.async {
                 isLoading = false
-
-                if let error = error {
-                    errorMessage = "Fehler: \(error.localizedDescription)"
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    errorMessage = "Profil konnte nicht geladen werden."
-                    return
-                }
-
-                guard let data = data else {
-                    errorMessage = "Keine Daten vom Server."
-                    return
-                }
-
-                do {
-                    let profile = try JSONDecoder().decode(UserProfileDTO.self, from: data)
+                switch result {
+                case .success(let profile):
                     self.name = profile.name ?? ""
-                } catch {
-                    errorMessage = "Fehler beim Verarbeiten der Daten."
+                case .failure(let error):
+                    self.errorMessage = "Fehler: \(error.localizedDescription)"
                 }
             }
-        }.resume()
+        }
     }
 
     private func updateUserName() {
@@ -147,49 +117,20 @@ struct MainPage_ProfilView_Name: View {
         errorMessage = nil
         successMessage = nil
 
-        // URL für die API-Route
-        guard let url = URL(string: "https://kivop.ipv64.net/users/identity") else {
-            errorMessage = "Ungültige URL."
-            isLoading = false
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-
-        // Payload erstellen
-        let updateDTO = UserProfileUpdateDTO(name: name)
-        do {
-            request.httpBody = try JSONEncoder().encode(updateDTO)
-        } catch {
-            errorMessage = "Fehler beim Erstellen der Anfrage."
-            isLoading = false
-            return
-        }
-
-        // Anfrage senden
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        MainPageAPI.updateUserName(name: name) { result in
             DispatchQueue.main.async {
                 isLoading = false
-
-                if let error = error {
-                    errorMessage = "Fehler: \(error.localizedDescription)"
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    errorMessage = "Aktualisierung fehlgeschlagen."
-                    return
-                }
-
-                successMessage = "Name erfolgreich aktualisiert."
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    presentationMode.wrappedValue.dismiss()
+                switch result {
+                case .success:
+                    successMessage = "Name erfolgreich aktualisiert."
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                case .failure(let error):
+                    errorMessage = "Fehler beim Aktualisieren: \(error.localizedDescription)"
                 }
             }
-        }.resume()
+        }
     }
 }
 

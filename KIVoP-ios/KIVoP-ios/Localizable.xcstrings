@@ -575,6 +575,7 @@
       }
     },
     "E-Mail" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -597,6 +598,7 @@
       }
     },
     "E-MAIL" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -641,9 +643,6 @@
       }
     },
     "Enthalten" : {
-
-    },
-    "Erfolgreich registriert!" : {
 
     },
     "erstelle " : {
@@ -1088,6 +1087,7 @@
       }
     },
     "NAME" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1212,9 +1212,6 @@
           }
         }
       }
-    },
-    "OK" : {
-
     },
     "Option" : {
 
