@@ -47,7 +47,7 @@ services:
       POSTGRES_USER: vapor # only for development
       POSTGRES_PASSWORD: example # only for development
     volumes:
-      - ./init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
+      - ./backend/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
       - postgres-data:/var/lib/postgresql/data
 
 #
