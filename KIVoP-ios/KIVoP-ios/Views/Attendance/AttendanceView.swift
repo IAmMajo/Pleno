@@ -10,6 +10,7 @@ import MeetingServiceDTOs
 
 struct AttendanceView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var auth: AuthController
     @StateObject private var viewModel = AttendanceViewModel()
 
     var body: some View {
@@ -147,5 +148,6 @@ struct AttendanceView: View {
 struct AttendanceView_Previews: PreviewProvider {
     static var previews: some View {
         AttendanceView()
+            .environmentObject(AuthController.shared)
     }
 }
