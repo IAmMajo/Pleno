@@ -5,7 +5,7 @@ struct CreateMeeting: AsyncMigration {
     func prepare(on database: Database) async throws {
         let meetingStatus = try await database.enum("meeting_status")
             .case("scheduled")
-            .case("in_session")
+            .case("inSession")
             .case("completed")
             .create()
         try await database.schema(Meeting.schema)
