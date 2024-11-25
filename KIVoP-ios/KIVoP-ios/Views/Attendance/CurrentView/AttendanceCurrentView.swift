@@ -6,9 +6,10 @@
 //
 
 import SwiftUI
+import MeetingServiceDTOs
 
 struct AttendanceCurrentView: View {
-    var event: Event
+    var meeting: GetMeetingDTO
     @Environment(\.dismiss) var dismiss
     
     @State private var searchText: String = ""
@@ -63,7 +64,7 @@ struct AttendanceCurrentView: View {
                     Spacer()
                     
                     // Datum des aktuellen Termins
-                    Text(event.date, style: .date)
+                    Text(meeting.start, style: .date)
                         .font(.headline)
                         .foregroundColor(.primary)
                     

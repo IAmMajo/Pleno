@@ -6,12 +6,13 @@
 //
 
 import SwiftUI
+import MeetingServiceDTOs
 
 struct AttendancePlanningView: View {
     @Environment(\.dismiss) var dismiss
     
     @State private var searchText: String = ""
-    var event: Event
+    var meeting: GetMeetingDTO
     
     // Beispiel-Mitgliederliste
     @State private var members: [Member] = [
@@ -65,7 +66,7 @@ struct AttendancePlanningView: View {
                     Spacer()
                     
                     // Datum des aktuellen Termins
-                    Text(event.date, style: .date)
+                    Text(meeting.start, style: .date)
                         .font(.headline)
                         .foregroundColor(.primary)
                     
