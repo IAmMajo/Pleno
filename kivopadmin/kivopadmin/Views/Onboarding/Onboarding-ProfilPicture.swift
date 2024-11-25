@@ -1,21 +1,27 @@
-//
-//  Onboarding-ProfilPicture.swift
-//  kivopadmin
-//
-//  Created by Amine Ahamri on 14.11.24.
-//
 import SwiftUI
 import UIKit
 
-struct Onboarding_ProfilPicture: View {
+struct Onboarding_ProfilePicture: View {
     @State private var showImagePicker = false
-    @State private var ShortName: String = "MM"
-    @State private var sourceType: UIImagePickerController.SourceType = .camera // Default to camera for direct opening
+    @State private var sourceType: UIImagePickerController.SourceType = .camera
     @State private var selectedImage: UIImage? = nil
+    @State private var userName: String = "" // Dynamischer Name aus Onboarding_Register
+
+    var shortName: String {
+        if userName.isEmpty {
+            return "Profilbild"
+        } else {
+            let nameParts = userName.split(separator: " ")
+            if let firstInitial = nameParts.first?.prefix(1), let lastInitial = nameParts.last?.prefix(1) {
+                return "\(firstInitial)\(lastInitial)".uppercased()
+            }
+            return userName
+        }
+    }
 
     var body: some View {
         ZStack {
-            Color(UIColor.systemBackground)
+            Color(UIColor.systemGroupedBackground)
                 .edgesIgnoringSafeArea(.all)
 
             VStack(spacing: 30) {
@@ -25,27 +31,30 @@ struct Onboarding_ProfilPicture: View {
                         Image(uiImage: image)
                             .resizable()
                             .scaledToFill()
-                            .frame(width: 200, height: 200)
+                            .frame(width: 180, height: 180) // Kleinere Größe für das Profilbild
                             .clipShape(Circle())
                     } else {
                         Circle()
                             .fill(Color.gray.opacity(0.3))
-                            .frame(width: 200, height: 200)
+                            .frame(width: 180, height: 180) // Kleinere Größe für den Kreis
                             .overlay(
-                                Text(ShortName)
-                                    .font(.system(size: 60, weight: .bold))
+                                Text(shortName)
+                                    .font(.system(size: 40, weight: .bold)) // Kleinere Schriftgröße
                                     .foregroundColor(.white)
+                                    .multilineTextAlignment(.center)
                             )
                     }
                 }
 
                 // Delete Button
-                Button(action: {
-                    self.selectedImage = nil // Action to clear the selected image
-                }) {
-                    Text("Löschen")
-                        .font(.headline)
-                        .foregroundColor(.red)
+                if selectedImage != nil {
+                    Button(action: {
+                        self.selectedImage = nil // Aktuelles Bild löschen
+                    }) {
+                        Text("Löschen")
+                            .font(.headline)
+                            .foregroundColor(.red)
+                    }
                 }
 
                 // Action Buttons
@@ -92,19 +101,33 @@ struct Onboarding_ProfilPicture: View {
             .padding()
         }
         .sheet(isPresented: $showImagePicker) {
-            ImagePicker(selectedImage: self.$selectedImage, sourceType: self.sourceType)
+            OnboardingImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
+        }
+        .onAppear {
+            // Dynamischer Wert aus Onboarding_Register übernehmen
+            fetchUserName()
+        }
+    }
+
+    // MARK: - Helper Methods
+    private func fetchUserName() {
+        // Beispiel: Wenn der Name vom Server oder einer anderen View stammt
+        if let storedName = UserDefaults.standard.string(forKey: "OnboardingUserName") {
+            self.userName = storedName
+        } else {
+            self.userName = "" // Placeholder, wenn kein Name verfügbar ist
         }
     }
 }
 
-struct MainPage_ProfilView_ProfilPicture_Previews: PreviewProvider {
+struct Onboarding_ProfilePicture_Previews: PreviewProvider {
     static var previews: some View {
-        Onboarding_ProfilPicture()
+        Onboarding_ProfilePicture()
     }
 }
 
-// ImagePicker View
-struct ImagePicker: UIViewControllerRepresentable {
+// Custom ImagePicker Component
+struct OnboardingImagePicker: UIViewControllerRepresentable {
     @Binding var selectedImage: UIImage?
     var sourceType: UIImagePickerController.SourceType
 
@@ -123,13 +146,13 @@ struct ImagePicker: UIViewControllerRepresentable {
     }
 
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-        let parent: ImagePicker
+        let parent: OnboardingImagePicker
 
-        init(_ parent: ImagePicker) {
+        init(_ parent: OnboardingImagePicker) {
             self.parent = parent
         }
 
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let image = info[.editedImage] as? UIImage ?? info[.originalImage] as? UIImage {
                 parent.selectedImage = image
             }
@@ -137,4 +160,3 @@ struct ImagePicker: UIViewControllerRepresentable {
         }
     }
 }
-

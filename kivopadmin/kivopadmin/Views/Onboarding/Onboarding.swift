@@ -6,11 +6,14 @@
 //
 
 import SwiftUI
+import AuthServiceDTOs
 
 struct Onboarding: View {
     @State private var currentIndex = 0
     @State private var ClubLogo: String = "VL"
     @State private var navigateToLogin = false
+    
+    @ObservedObject var controller = BackendController()
 
     var body: some View {
         NavigationStack{

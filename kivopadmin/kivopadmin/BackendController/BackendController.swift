@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import AuthServiceDTOs
 
 class BackendController: ObservableObject {
     // Publisher für die Daten
@@ -47,4 +48,9 @@ class BackendController: ObservableObject {
         //     // Handle response
         // }
     }
+
+    
+    
+
+
 }
