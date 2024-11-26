@@ -13,17 +13,13 @@ class AttendanceViewModel: ObservableObject {
 
     @Published var searchText: String = ""
     @Published var selectedTab: Int = 0
-    @Published var token: String = ""  // Token ist nun ein nicht optionaler Wert
+    @Published var token: String = ""
     @Published var errorMessage: String?
     @Published var meetings: [GetMeetingDTO] = exampleMeetings
     
     init() {
-        if let savedToken = AuthController.shared.getAuthToken() {
-            self.token = savedToken
-        } else {
-            self.token = ""  // Leerer Token, falls kein Token vorhanden ist
-        }
         // Meetings laden
+        // zu Testzwecken wird hier noch der Login gemacht.
         loadMeetings()
     }
 
@@ -42,7 +38,8 @@ class AttendanceViewModel: ObservableObject {
         Task {
             do {
                 // Statischer Login zum Testen, bis die Funktion implementiert wurde.
-                let token = try await AuthController.shared.login(email: "henrik.peltzer@gmail.com", password: "Test123")
+                try await AuthController.shared.login(email: "henrik.peltzer@gmail.com", password: "Test123")
+                let token = try await AuthController.shared.getAuthToken()
                 
                 // Meetings abrufen
                 guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
