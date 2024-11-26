@@ -120,66 +120,48 @@ struct MainPageAPI {
     
     // MARK: - Benutzernamen Updaten
     static func updateUserName(name: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let url = URL(string: "https://kivop.ipv64.net/users/identity") else {
-            print("Fehler: Ungültige URL")
+        guard let url = URL(string: "https://kivop.ipv64.net/users/profile") else {
             completion(.failure(APIError.invalidURL))
             return
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            print("Fehler: Kein JWT-Token gefunden")
+        guard let jwtToken = UserDefaults.standard.string(forKey: "jwtToken") else {
+            print("Fehler: Kein JWT-Token gespeichert!")
             completion(.failure(APIError.invalidRequest))
             return
         }
 
-        let updateDTO = UserProfileUpdateDTO(name: name)
+        print("Verwendetes JWT-Token: \(jwtToken)")
 
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
+
+        let updateDTO = UserProfileUpdateDTO(name: name)
         do {
-            let jsonData = try JSONEncoder().encode(updateDTO)
-            request.httpBody = jsonData
-            // Debug: JSON-Body prüfen
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("Request JSON: \(jsonString)")
-            } else {
-                print("Fehler: JSON konnte nicht erstellt werden")
-            }
+            request.httpBody = try JSONEncoder().encode(updateDTO)
         } catch {
-            print("Fehler beim Serialisieren des DTO: \(error.localizedDescription)")
+            print("Fehler beim Encoden des JSON: \(error.localizedDescription)")
             completion(.failure(error))
             return
         }
 
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        URLSession.shared.dataTask(with: request) { _, response, error in
             if let error = error {
-                print("Netzwerkfehler: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
 
             if let httpResponse = response as? HTTPURLResponse {
-                // Debug: Status Code und Header prüfen
                 print("Status Code: \(httpResponse.statusCode)")
-                print("Response Headers: \(httpResponse.allHeaderFields)")
-
-                if httpResponse.statusCode == 200 {
-                    print("Name erfolgreich aktualisiert.")
-                    completion(.success(()))
-                } else {
-                    // Debug: Fehlerhafte Antwort
-                    if let data = data, let responseBody = String(data: data, encoding: .utf8) {
-                        print("Fehlerhafte Antwort: \(responseBody)")
-                    }
+                if httpResponse.statusCode != 200 {
                     completion(.failure(APIError.invalidResponse))
+                    return
                 }
-            } else {
-                print("Fehler: Ungültige Serverantwort")
-                completion(.failure(APIError.invalidResponse))
             }
+
+            completion(.success(()))
         }.resume()
     }
 

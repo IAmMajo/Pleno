@@ -157,6 +157,7 @@ struct Onboarding_Register: View {
                 isLoading = false
                 switch result {
                 case .success:
+                    saveCredentialsToKeychain()
                     registrationSuccessful = true
                 case .failure(let error):
                     errorMessage = error.localizedDescription
@@ -169,6 +170,11 @@ struct Onboarding_Register: View {
         let passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$&*]).{8,}$"
         let predicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
         return predicate.evaluate(with: password)
+    }
+
+    private func saveCredentialsToKeychain() {
+        KeychainHelper.save(key: "email", value: email)
+        KeychainHelper.save(key: "password", value: password)
     }
     
     private func inputField(title: String, text: Binding<String>) -> some View {
