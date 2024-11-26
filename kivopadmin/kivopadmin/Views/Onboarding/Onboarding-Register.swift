@@ -1,39 +1,42 @@
 import SwiftUI
+import AuthServiceDTOs
 
 struct Onboarding_Register: View {
     @State private var name: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
-    
+    @State private var errorMessage: String? = nil
+    @State private var isLoading: Bool = false
+    @State private var registrationSuccessful: Bool = false
+
     var body: some View {
         NavigationStack {
             VStack {
                 Spacer().frame(height: 40)
                 
-                // Register title
+                // Titel
                 ZStack(alignment: .bottom) {
-                    Text("Registrierung")
+                    Text("Registrieren")
                         .font(.title)
                         .fontWeight(.bold)
-                        .padding(.bottom, 5) // Abstand zur Linie
+                        .padding(.bottom, 5)
 
                     Rectangle()
-                        .frame(width: 103, height: 3) // Breite des Rechtecks anpassen
-                        .foregroundColor(.primary) // Farbe der Linie
-                        .offset(y: 5) // Abstand nach unten justieren
+                        .frame(width: 103, height: 3)
+                        .foregroundColor(.primary)
+                        .offset(y: 5)
                 }
                 .padding(.bottom, 40)
                 .padding(.top, 40)
                 
-                // Profile picture placeholder
+                // Profil-Bild placeholder
                 Circle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 100, height: 100)
                     .overlay(Text("Profilbild").foregroundColor(.gray))
                 
-                // Edit profile picture link
-                NavigationLink(destination: Onboarding_ProfilPicture()) {
+                NavigationLink(destination: MainPage_ProfilView_ProfilPicture()) {
                     Text("Bearbeiten")
                         .foregroundColor(.blue)
                         .font(.footnote)
@@ -41,39 +44,15 @@ struct Onboarding_Register: View {
                 .padding(.bottom, 30)
                 
                 // Name TextField
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("NAME")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .padding(.horizontal, 5)
-                    
-                    TextField("Name", text: $name)
-                        .padding()
-                        .background(Color(UIColor.systemBackground)) // Light and Dark mode
-                        .cornerRadius(10)
-                        .frame(width: 615)
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 10)
+                inputField(title: "Name", text: $name)
                 
                 // Email TextField
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("E-MAIL")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .padding(.horizontal, 5)
-                    
-                    TextField("E-Mail", text: $email)
-                        .padding()
-                        .background(Color(UIColor.systemBackground)) // Light and Dark mode
-                        .cornerRadius(10)
-                        .frame(width: 615)
-
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 10)
+                inputField(title: "E-Mail", text: $email)
+                    .keyboardType(.emailAddress)
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
                 
-                // Password TextField
+                // Passwort TextField
                 VStack(alignment: .leading, spacing: 5) {
                     Text("PASSWORT")
                         .font(.caption)
@@ -84,19 +63,16 @@ struct Onboarding_Register: View {
                     VStack(spacing: 0) {
                         SecureField("Neues Passwort", text: $password)
                             .padding()
-                            .background(Color(UIColor.systemBackground)) // Light and Dark mode
-                            .frame(width: 615)
+                            .background(Color(UIColor.systemBackground))
+                        
                         Divider()
                             .frame(height: 0.5)
                             .background(Color.gray.opacity(0.6))
                             .padding(.horizontal, 10)
-                            .frame(width: 615)
                         
                         SecureField("Passwort wiederholen", text: $confirmPassword)
                             .padding()
-                            .background(Color(UIColor.systemBackground)) // Light and Dark mode
-                            .frame(width: 615)
-
+                            .background(Color(UIColor.systemBackground))
                     }
                     .cornerRadius(10)
                 }
@@ -105,48 +81,118 @@ struct Onboarding_Register: View {
                 
                 Spacer()
                 
+                // Error Message
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                        .padding(.horizontal, 24)
+                }
+                
                 // Register Button
-                NavigationLink(destination: MainPage()) {
-                    Text("Account erstellen")
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, maxHeight: 44)
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                        .fontWeight(.bold)
-                        .frame(width: 450)
+                Button(action: {
+                    registerUser()
+                }) {
+                    if isLoading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity, maxHeight: 44)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    } else {
+                        Text("Registrieren")
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, maxHeight: 44)
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                            .fontWeight(.bold)
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 10)
+                .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty)
                 
-                // Back to Login Button
+                // Zurück zu Login Button
                 NavigationLink(destination: Onboarding_Login()) {
                     Text("Zurück zum Login")
                         .foregroundColor(.blue)
                         .frame(maxWidth: .infinity, maxHeight: 44)
-                        .background(Color(UIColor.systemGray5)) //Light and Dark mode
+                        .background(Color(UIColor.systemGray5))
                         .cornerRadius(10)
                         .fontWeight(.bold)
-                        .frame(width: 450)
-
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 20)
                 
                 Spacer().frame(height: 20)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(UIColor.systemGray6))
             .edgesIgnoringSafeArea(.all)
             .navigationBarBackButtonHidden(true)
+            .navigationDestination(isPresented: $registrationSuccessful) {
+                MainPage()
+            }
         }
+    }
+    
+    private func registerUser() {
+        isLoading = true
+        errorMessage = nil
+        
+        guard validatePassword(password) else {
+            errorMessage = "Passwort muss mindestens 8 Zeichen, eine Zahl und ein Sonderzeichen enthalten."
+            isLoading = false
+            return
+        }
+        
+        guard password == confirmPassword else {
+            errorMessage = "Passwörter stimmen nicht überein."
+            isLoading = false
+            return
+        }
+        
+        let registrationDTO = UserRegistrationDTO(name: name, email: email, password: password)
+        OnboardingAPI.registerUser(with: registrationDTO) { result in
+            DispatchQueue.main.async {
+                isLoading = false
+                switch result {
+                case .success:
+                    registrationSuccessful = true
+                case .failure(let error):
+                    errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+    
+    private func validatePassword(_ password: String) -> Bool {
+        let passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$&*]).{8,}$"
+        let predicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
+        return predicate.evaluate(with: password)
+    }
+    
+    private func inputField(title: String, text: Binding<String>) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.gray)
+                .padding(.horizontal, 5)
+            
+            TextField(title, text: text)
+                .padding()
+                .background(Color(UIColor.systemBackground))
+                .cornerRadius(10)
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 10)
     }
 }
 
 struct Onboarding_Register_Previews: PreviewProvider {
     static var previews: some View {
         Onboarding_Register()
-            .environment(\.colorScheme, .light) // Preview in Light Mode
+            .environment(\.colorScheme, .light)
         Onboarding_Register()
-            .environment(\.colorScheme, .dark) // Preview in Dark Mode
+            .environment(\.colorScheme, .dark)
     }
 }
