@@ -1,12 +1,12 @@
 import SwiftUI
 import AuthServiceDTOs
 
-
 struct Onboarding_Login: View {
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var errorMessage: String? = nil
     @State private var isLoading: Bool = false
+    @State private var loginSuccessful: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -29,39 +29,13 @@ struct Onboarding_Login: View {
                 .padding(.top, 40)
                 
                 // Email TextField
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("E-MAIL")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .padding(.top, 5)
-                        .padding(.horizontal, 5)
-                    
-                    TextField("E-Mail", text: $email)
-                        .padding()
-                        .background(Color(UIColor.systemBackground))
-                        .cornerRadius(10)
-                        .keyboardType(.emailAddress)
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 10)
+                inputField(title: "E-Mail", text: $email)
+                    .keyboardType(.emailAddress)
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
                 
                 // Password TextField
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("PASSWORT")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .padding(.top, 5)
-                        .padding(.horizontal, 5)
-                    
-                    SecureField("Passwort", text: $password)
-                        .padding()
-                        .background(Color(UIColor.systemBackground))
-                        .cornerRadius(10)
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 10)
+                inputField(title: "Passwort", text: $password, isSecure: true)
                 
                 Spacer()
                 
@@ -122,73 +96,56 @@ struct Onboarding_Login: View {
             .background(Color(UIColor.systemGray6))
             .edgesIgnoringSafeArea(.all)
             .navigationBarBackButtonHidden(true)
+            .navigationDestination(isPresented: $loginSuccessful) {
+                MainPage()
+            }
         }
     }
     
     private func loginUser() {
-        // Set loading state
         isLoading = true
         errorMessage = nil
         
-        // Erstelle UserLoginDTO
         let loginDTO = UserLoginDTO(email: email, password: password)
-        
-        // Definiere API endpoint
-        let url = URL(string: "https://kivop.ipv64.net/auth/login")!
-        
-        // Create POST request
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Encode DTO to JSON
-        do {
-            let jsonData = try JSONEncoder().encode(loginDTO)
-            request.httpBody = jsonData
-        } catch {
-            errorMessage = "Fehler beim Verarbeiten der Daten."
-            isLoading = false
-            return
-        }
-        
-        // API call ausführen
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        OnboardingAPI.loginUser(with: loginDTO) { result in
             DispatchQueue.main.async {
                 isLoading = false
-                if let error = error {
-                    errorMessage = "Netzwerkfehler: \(error.localizedDescription)"
-                    return
-                }
-                
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    errorMessage = "Ungültige Anmeldedaten."
-                    return
-                }
-                
-                guard let data = data else {
-                    errorMessage = "Keine Daten vom Server."
-                    return
-                }
-                
-                // Decode JWT token
-                do {
-                    let tokenResponse = try JSONDecoder().decode(TokenResponseDTO.self, from: data)
-                    if let token = tokenResponse.token {
-                        // Speichern des Tokens (z. B. im UserDefaults)
-                        UserDefaults.standard.set(token, forKey: "jwtToken")
-                        // Weiterleitung zur MainPage
-                        errorMessage = nil
-                    } else {
-                        errorMessage = "Ungültige Antwort vom Server."
-                    }
-                } catch {
-                    errorMessage = "Fehler beim Verarbeiten der Serverantwort."
+                switch result {
+                case .success(let token):
+                    // Save token and navigate to MainPage
+                    UserDefaults.standard.set(token, forKey: "jwtToken")
+                    loginSuccessful = true
+                case .failure(let error):
+                    errorMessage = error.localizedDescription
                 }
             }
-        }.resume()
+        }
+    }
+    
+    private func inputField(title: String, text: Binding<String>, isSecure: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.gray)
+                .padding(.top, 5)
+                .padding(.horizontal, 5)
+            
+            if isSecure {
+                SecureField(title, text: text)
+                    .padding()
+                    .background(Color(UIColor.systemBackground))
+                    .cornerRadius(10)
+            } else {
+                TextField(title, text: text)
+                    .padding()
+                    .background(Color(UIColor.systemBackground))
+                    .cornerRadius(10)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 10)
     }
 }
-
 
 struct Onboarding_Login_Previews: PreviewProvider {
     static var previews: some View {

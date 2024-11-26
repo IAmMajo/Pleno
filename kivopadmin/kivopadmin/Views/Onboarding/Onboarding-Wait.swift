@@ -30,41 +30,7 @@ struct Onboarding_Wait: View {
                 .padding(.top, 40)
 
                 // Description Text
-                VStack(alignment: .center, spacing: 24) {
-                    Text("Bitte klicke nun auf den ")
-                        .font(.system(size: 24))
-                        .fontWeight(.semibold)
-                    + Text("Link")
-                        .foregroundColor(.blue)
-                        .font(.system(size: 24))
-                        .fontWeight(.semibold)
-                    + Text(" in der Bestätigungs-Mail.")
-                        .fontWeight(.semibold)
-                        .font(.system(size: 24))
-                    
-                    Text("Anschließend kann der ")
-                        .font(.system(size: 24))
-                        .fontWeight(.semibold)
-                    + Text("Organisator")
-                        .foregroundColor(.blue)
-                        .font(.system(size: 24))
-                        .fontWeight(.semibold)
-                    + Text(" deines Vereins dich aufnehmen.")
-                        .fontWeight(.semibold)
-                        .font(.system(size: 24))
-                    
-                    Text("Sobald dies geschehen ist, erhältst du eine ")
-                        .font(.system(size: 24))
-                        .fontWeight(.semibold)
-                    + Text(" Mitteilung.")
-                        .foregroundColor(.blue)
-                        .font(.system(size: 24))
-                        .fontWeight(.semibold)
-                }
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true) // Zeilenumbruch aktivieren
-                .frame(maxWidth: .infinity) // Maximale Breite erlauben
-                .padding(.horizontal, 40)
+                descriptionText
 
                 Spacer()
 
@@ -84,21 +50,25 @@ struct Onboarding_Wait: View {
                     .font(.system(size: 16))
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true) // Zeilenumbruch erlauben
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 40)
+
+                // Fehlermeldung
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 24)
+                }
 
                 Spacer()
 
-                // Ladeindikator oder Fehlermeldung
+                // Ladeindikator
                 if isLoading {
                     ProgressView("Überprüfung...")
                         .padding()
-                } else if let errorMessage = errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .padding()
-                        .fixedSize(horizontal: false, vertical: true)
                 } else if isEmailVerified && isUserAccepted {
                     // Navigation zu MainPage bei Erfolg
                     EmptyView()
@@ -119,102 +89,81 @@ struct Onboarding_Wait: View {
         }
     }
 
-    // MARK: - API-Logik
+    private var descriptionText: some View {
+        VStack(alignment: .center, spacing: 24) {
+            Text("Bitte klicke nun auf den ")
+                .font(.system(size: 24))
+                .fontWeight(.semibold)
+            + Text("Link")
+                .foregroundColor(.blue)
+                .font(.system(size: 24))
+                .fontWeight(.semibold)
+            + Text(" in der Bestätigungs-Mail.")
+                .fontWeight(.semibold)
+                .font(.system(size: 24))
+            
+            Text("Anschließend kann der ")
+                .font(.system(size: 24))
+                .fontWeight(.semibold)
+            + Text("Organisator")
+                .foregroundColor(.blue)
+                .font(.system(size: 24))
+                .fontWeight(.semibold)
+            + Text(" deines Vereins dich aufnehmen.")
+                .fontWeight(.semibold)
+                .font(.system(size: 24))
+            
+            Text("Sobald dies geschehen ist, erhältst du eine ")
+                .font(.system(size: 24))
+                .fontWeight(.semibold)
+            + Text(" Mitteilung.")
+                .foregroundColor(.blue)
+                .font(.system(size: 24))
+                .fontWeight(.semibold)
+        }
+        .multilineTextAlignment(.center)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 40)
+    }
 
     private func checkVerificationStatus() {
         isLoading = true
         errorMessage = nil
 
-        // Überprüft Email-Status
-        checkEmailVerification { emailVerified in
-            if emailVerified {
-                // Wenn Email verifiziert, dann Benutzeraufnahme prüfen
-                checkUserAcceptedStatus { userAccepted in
-                    DispatchQueue.main.async {
-                        self.isEmailVerified = emailVerified
-                        self.isUserAccepted = userAccepted
-                        self.isLoading = false
-
-                        if !userAccepted {
-                            self.errorMessage = "Warte auf die Bestätigung durch den Organisator."
+        OnboardingAPI.checkEmailVerification { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let emailVerified):
+                    self.isEmailVerified = emailVerified
+                    if emailVerified {
+                        OnboardingAPI.checkUserAcceptedStatus { userResult in
+                            DispatchQueue.main.async {
+                                self.isLoading = false
+                                switch userResult {
+                                case .success(let userAccepted):
+                                    self.isUserAccepted = userAccepted
+                                    if !userAccepted {
+                                        self.errorMessage = "Warte auf die Bestätigung durch den Organisator."
+                                    }
+                                case .failure(let error):
+                                    self.errorMessage = error.localizedDescription
+                                }
+                            }
                         }
+                    } else {
+                        self.isLoading = false
+                        self.errorMessage = "Bitte überprüfe deine Email und klicke auf den Bestätigungslink."
                     }
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.isEmailVerified = false
+                case .failure(let error):
                     self.isLoading = false
-                    self.errorMessage = "Bitte überprüfe deine Email und klicke auf den Bestätigungslink."
+                    self.errorMessage = error.localizedDescription
                 }
             }
         }
-    }
-
-    private func checkEmailVerification(completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "https://kivop.ipv64.net/users/email/status") else {
-            DispatchQueue.main.async {
-                self.errorMessage = "Ungültige URL."
-                self.isLoading = false
-            }
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("Fehler beim Überprüfen der Email: \(error)")
-                completion(false)
-                return
-            }
-
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
-                  let data = data,
-                  let json = try? JSONDecoder().decode([String: Bool].self, from: data),
-                  let emailVerified = json["emailVerified"]
-            else {
-                completion(false)
-                return
-            }
-
-            completion(emailVerified)
-        }.resume()
-    }
-
-    private func checkUserAcceptedStatus(completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "https://kivop.ipv64.net/users/profile") else {
-            DispatchQueue.main.async {
-                self.errorMessage = "Ungültige URL."
-                self.isLoading = false
-            }
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("Fehler beim Überprüfen des Benutzers: \(error)")
-                completion(false)
-                return
-            }
-
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
-                  let data = data,
-                  let profile = try? JSONDecoder().decode(UserProfileDTO.self, from: data)
-            else {
-                completion(false)
-                return
-            }
-
-            completion(profile.isAdmin ?? false)
-        }.resume()
     }
 }
+
 
 struct Onboarding_Wait_Previews: PreviewProvider {
     static var previews: some View {

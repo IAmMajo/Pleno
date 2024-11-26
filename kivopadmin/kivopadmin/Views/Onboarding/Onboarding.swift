@@ -6,19 +6,23 @@
 //
 
 import SwiftUI
-import AuthServiceDTOs
 
 struct Onboarding: View {
     @State private var currentIndex = 0
     @State private var ClubLogo: String = "VL"
     @State private var navigateToLogin = false
-    
-    @ObservedObject var controller = BackendController()
 
     var body: some View {
         NavigationStack{
             VStack {
                 Spacer()
+                
+                // Vereinslogo placeholder
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 120, height: 120)
+                    .overlay(Text(ClubLogo).foregroundColor(.gray))
+                    .padding(.bottom, 10)
                 
                 if currentIndex == 0 {
                     // Erster onboarding screen
@@ -89,7 +93,7 @@ struct Onboarding: View {
                 
                 Spacer()
                 
-                // Page indikator
+                // Seiten indikator
                 HStack(spacing: 8) {
                     Circle()
                         .fill(currentIndex == 0 ? Color.blue : Color.gray.opacity(0.3))
@@ -159,12 +163,12 @@ struct Onboarding: View {
                 DragGesture()
                     .onEnded { value in
                         if value.translation.width < -50 && currentIndex < 1 {
-                            // Swipe Links vorwärts
+                            // Swipe links nach vorne
                             withAnimation {
                                 currentIndex += 1
                             }
                         } else if value.translation.width > 50 && currentIndex > 0 {
-                            // Swipe rechts rückwärts
+                            // Swipe rechts nach hinten
                             withAnimation {
                                 currentIndex -= 1
                             }
