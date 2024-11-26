@@ -119,9 +119,9 @@ struct MeetingController: RouteCollection {
             throw Abort(.badRequest, reason: "Cannot delete meeting that is not scheduled (status is '\(meeting.status)').")
         }
         try await req.db.transaction { db in
+            try await meeting.attendances.delete(on: db)
+            try await meeting.votings.delete(on: db) // cascades through voting_options and votes
             try await meeting.delete(on: db)
-            try await Attendance.query(on: db).filter(\.$id.$meeting.$id == meeting.requireID()).delete()
-            try await Voting.query(on: db).filter(\.$meeting.$id == meeting.requireID()).delete() // cascades through voting_options and votes
         }
         return .noContent
     }
@@ -157,8 +157,7 @@ struct MeetingController: RouteCollection {
         guard meeting.status == .inSession else {
             throw Abort(.badRequest, reason: "Cannot end meeting that is not in session (status is '\(meeting.status)').")
         }
-        if let voting = try await Voting.query(on: req.db)
-            .filter(\.$meeting.$id == meetingId)
+        if let voting = try await meeting.$votings.query(on: req.db)
             .group(.or, { group in
                 group.filter(\.$startedAt == nil)
                     .filter(\.$closedAt == nil)
@@ -170,17 +169,15 @@ struct MeetingController: RouteCollection {
         meeting.status = .completed
         meeting.duration = UInt16((meeting.start.distance(to: .now) / 60).rounded(.up))
         try await req.db.transaction { db in
-            try await Attendance.query(on: db)
-                .filter(\.$id.$meeting.$id == meeting.requireID())
+            try await meeting.$attendances.query(on: db)
                 .filter(\.$status != .present)
                 .delete()
-            let attendees = try await Attendance.query(on: db)
-                .filter(\.$id.$meeting.$id == meeting.requireID())
+            let attendees = try await meeting.$attendances.query(on: db)
+                .with(\.$id.$identity)
                 .field(\.$id.$identity.$id)
                 .all()
                 .map { attendance in
                     try attendance.requireID().identity.requireID()
-//                    return attendance.$id.$identity.id
                 }
             for identityId in attendees {
                 try await Attendance(id: .init(meetingId: meetingId, identityId: identityId), status: .absent).create(on: db)

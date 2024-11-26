@@ -8,7 +8,7 @@ struct AttendanceController: RouteCollection {
         routes.group(":id") { meetingRoutes in
             meetingRoutes.get("attendances", use: getAllAttendances)
             meetingRoutes.put("attend", ":code", use: attendMeeting)
-            routes.group("plan-attendance") { planAttendanceRoutes in
+            meetingRoutes.group("plan-attendance") { planAttendanceRoutes in
                 planAttendanceRoutes.put("present", use: planAttendancePresent)
                 planAttendanceRoutes.put("absent", use: planAttendanceAbsent)
             }
@@ -26,9 +26,9 @@ struct AttendanceController: RouteCollection {
             try identityHistory.identity.requireID()
         }
         
-        let attendances = try await Attendance.query(on: req.db)
-            .filter(\.$id.$meeting.$id == meeting.requireID())
+        let attendances = try await meeting.$attendances.query(on: req.db)
             .with(\.$id.$identity)
+            .join(parent: \.$id.$identity)
             .sort(Identity.self, \.$name)
             .all()
         var getAttendanceDTOs = try attendances.map { attendance in

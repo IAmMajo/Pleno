@@ -4,8 +4,12 @@ import Models
 import MeetingServiceDTOs
 
 struct VotingController: RouteCollection {
+    var eventLoop: EventLoop
+    var votingClientWebSocketContainer = VotingClientWebSocketContainer()
+    
     func boot(routes: RoutesBuilder) throws {
         let adminMiddleware = AdminMiddleware()
+        self.votingClientWebSocketContainer.eventLoop = eventLoop
         
         routes.get(":id", "votings", use: getVotingsOfMeeting)
         routes.group("votings") { votingRoutes in
@@ -21,6 +25,7 @@ struct VotingController: RouteCollection {
                     adminRoutes.put("close", use: closeVoting)
                 }
                 singleVotingRoutes.put("vote", ":index", use: voteOnVoting)
+                singleVotingRoutes.webSocket("live-status", onUpgrade: votingLiveStatusWebSocket)
             }
         }
     }
@@ -30,9 +35,8 @@ struct VotingController: RouteCollection {
             throw Abort(.notFound)
         }
         
-        return try await Voting.query(on: req.db)
+        return try await meeting.$votings.query(on: req.db)
             .with(\.$votingOptions)
-            .filter(\.$meeting.$id == meeting.requireID())
             .all()
             .map { voting in
                 try voting.toGetVotingDTO()
@@ -79,25 +83,18 @@ struct VotingController: RouteCollection {
         return try voting.toGetVotingDTO()
     }
     
-    @Sendable func getVotingResults(req: Request) async throws -> GetVotingResultsDTO {
-        guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
-            throw Abort(.notFound)
-        }
-        guard let userId = req.jwtPayload?.userID else {
-            throw Abort(.unauthorized)
-        }
-        let identityIds = try await IdentityHistory.byUserId(userId, req.db).map { identityHistory in
+    func calculateVotingResults(voting: Voting, userId: UUID, db: Database) async throws -> GetVotingResultsDTO {
+        let identityIds = try await IdentityHistory.byUserId(userId, db).map { identityHistory in
             try identityHistory.identity.requireID()
         }
         guard !voting.isOpen && voting.startedAt != nil && voting.closedAt != nil else {
             throw Abort(.locked, reason: "The voting has not closed yet")
         }
         
-        let votingOptions = try await voting.$votingOptions.get(on: req.db)
+        let votingOptions = try await voting.$votingOptions.get(on: db)
         var getVotingResultsDTO = try GetVotingResultsDTO(votingId: voting.requireID(), myVote: nil, results: [])
         
-        if let myVote = try await Vote.query(on: req.db)
-            .filter(\.$id.$voting.$id == voting.requireID())
+        if let myVote = try await voting.$votes.query(on: db)
             .with(\.$id.$identity)
             .filter(\.$id.$identity.$id ~~ identityIds)
             .first() {
@@ -107,8 +104,7 @@ struct VotingController: RouteCollection {
         var totalVotes: [[Vote]] = []
         
         for i in 0...votingOptions.count {
-            try await totalVotes.append(Vote.query(on: req.db)
-                .filter(\.$id.$voting.$id == voting.requireID())
+            try await totalVotes.append(voting.$votes.query(on: db)
                 .filter(\.$index == UInt8(i))
                 .all())
         }
@@ -151,6 +147,16 @@ struct VotingController: RouteCollection {
         }
         
         return getVotingResultsDTO
+    }
+    
+    @Sendable func getVotingResults(req: Request) async throws -> GetVotingResultsDTO {
+        guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
+        return try await self.calculateVotingResults(voting: voting, userId: userId, db: req.db)
     }
     
     @Sendable func updateVoting(req: Request) async throws -> GetVotingDTO {
@@ -215,6 +221,9 @@ struct VotingController: RouteCollection {
         guard !voting.isOpen && voting.startedAt == nil && voting.closedAt == nil else {
             throw Abort(.badRequest, reason: "Only votings which have not started yet can be opened.")
         }
+        guard try await voting.$meeting.get(on: req.db).status == .inSession else {
+            throw Abort(.badRequest, reason: "Only votings in a meeting (which is in session) can be opened.")
+        }
         
         voting.startedAt = .now
         voting.isOpen = true
@@ -230,11 +239,21 @@ struct VotingController: RouteCollection {
         guard voting.isOpen && voting.startedAt != nil && voting.closedAt == nil else {
             throw Abort(.badRequest, reason: "Only votings which are currently open can be closed.")
         }
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
         
         voting.closedAt = .now
         voting.isOpen = false
         
         try await voting.update(on: req.db)
+        
+        let clientWebSocketContainer = try self.votingClientWebSocketContainer.getClientWebSocketContainer(votingId: voting.requireID())
+        try await clientWebSocketContainer.sendBinary(
+            JSONEncoder().encode(self.calculateVotingResults(voting: voting, userId: userId, db: req.db))
+        )
+        try await clientWebSocketContainer.closeAllConnections()
+        
         return try voting.toGetVotingDTO()
     }
     
@@ -261,7 +280,38 @@ struct VotingController: RouteCollection {
         
         let vote = try Vote(id: .init(voting: voting, identity: identity), index: index)
         try await vote.create(on: req.db)
+        
+        let clientWebSocketContainer = try self.votingClientWebSocketContainer.getClientWebSocketContainer(votingId: voting.requireID())
+        if !clientWebSocketContainer.isEmpty {
+            try await clientWebSocketContainer.sendText(
+                "\(voting.$votes.query(on: req.db).count())/\(voting.$meeting.get(on: req.db).$attendances.query(on: req.db).count())"
+            )
+        }
+        
         return .noContent
+    }
+    
+    @Sendable func votingLiveStatusWebSocket(req: Request, ws: WebSocket) async {
+        do {
+            guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
+                throw Abort(.notFound)
+            }
+            guard voting.isOpen else {
+                throw Abort(.badRequest, reason: "Voting is closed.")
+            }
+            guard let userId = req.jwtPayload?.userID else {
+                throw Abort(.unauthorized)
+            }
+            let identity = try await Identity.byUserId(userId, req.db)
+            guard (try await Vote.find(.init(voting: voting, identity: identity), on: req.db)) != nil else {
+                throw Abort(.badRequest, reason: "You must vote on this voting first.")
+            }
+            
+            self.votingClientWebSocketContainer.getClientWebSocketContainer(votingId: try voting.requireID()).add(userId, ws)
+        } catch {
+            ws.send("ERROR: \(error.localizedDescription)", promise: nil)
+            ws.close(code: .unacceptableData, promise: nil)
+        }
     }
 }
 
@@ -269,4 +319,23 @@ struct percentageCutoff {
     public var index: UInt8
     public var percentage: Double
     public var cutoff: Double
+}
+
+final class VotingClientWebSocketContainer: @unchecked Sendable {
+    var eventLoop: EventLoop?
+    var votingClientWebsockets: [UUID: ClientWebSocketContainer]
+    
+    init(eventLoop: EventLoop? = nil, votingClientWebsockets: [UUID: ClientWebSocketContainer] = [:]) {
+        self.eventLoop = eventLoop
+        self.votingClientWebsockets = votingClientWebsockets
+    }
+    
+    func getClientWebSocketContainer(votingId: UUID) -> ClientWebSocketContainer {
+        guard let clientWebSocketContainer = self.votingClientWebsockets[votingId] else {
+            let clientWebSocketContainer = ClientWebSocketContainer(eventLoop: eventLoop!)
+            self.votingClientWebsockets[votingId] = clientWebSocketContainer
+            return clientWebSocketContainer
+        }
+        return clientWebSocketContainer
+    }
 }

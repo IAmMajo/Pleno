@@ -18,7 +18,7 @@ services:
     ports:
       - "80:80"
 #      - "443:443"
-      - "8080:8080" # only for dashboard
+      - "8081:8080" # only for dashboard
     security_opt:
       - no-new-privileges:true
     volumes:

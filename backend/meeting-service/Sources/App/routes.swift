@@ -19,7 +19,7 @@ func routes(_ app: Application) throws {
     let meetings = authProtected.grouped("meetings")
     try meetings.register(collection: MeetingController())
     try meetings.register(collection: AttendanceController())
-    try meetings.register(collection: VotingController())
+    try meetings.register(collection: VotingController(eventLoop: app.eventLoopGroup.next()))
     try meetings.register(collection: RecordController())
     
     app.get("brew", "coffee") { req -> HTTPStatus in // 418
