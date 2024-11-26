@@ -6,6 +6,7 @@ public struct UserRegistrationDTO: Content {
     public var name: String?
     public var email: String?
     public var password: String?
+    public var profileImage: Data?
 }
 
 extension UserRegistrationDTO: Validatable {

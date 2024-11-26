@@ -10,6 +10,7 @@ struct CreateUser: AsyncMigration {
             .field("password_hash", .string, .required)
             .field("is_admin", .bool, .required)
             .field("is_active", .bool, .required)
+            .field("profile_image", .data)
             .field("created_at", .datetime)
             .field("updated_at", .datetime)
             .field("last_login", .datetime)
