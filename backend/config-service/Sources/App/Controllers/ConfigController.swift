@@ -8,10 +8,12 @@ struct ConfigController: RouteCollection{
         settings.get(use: index)
         settings.get(":id", use: show)
         settings.patch(":id", use: update)
-        settings.patch(use: bulkUpdate)     // Massenupdate
+        settings.patch(use: bulkUpdate)
+        settings.get("service", ":serviceID", use: settingsForService)
     }
     
     // GET /config
+    @Sendable
     func index(req: Request) async throws -> Response {
         let settings = try await Setting.query(on: req.db).all()
         let responseDTOs = settings.map { setting in
@@ -30,6 +32,7 @@ struct ConfigController: RouteCollection{
     }
     
     // GET /config/:id
+    @Sendable
     func show(req: Request) async throws -> Response {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             let errorResponse = ErrorResponse(error: true, reason: "Ungültige Einstellungs-ID.")
@@ -56,6 +59,7 @@ struct ConfigController: RouteCollection{
     }
 
     // PATCH /config/:id
+    @Sendable
     func update(req: Request) async throws -> Response {
 
         guard let body = req.body.data else {
@@ -89,6 +93,8 @@ struct ConfigController: RouteCollection{
         return Response(status: .ok, headers: headers, body: .init(data: data))
     }
     
+    // PATCH /config
+    @Sendable
     func bulkUpdate(req: Request) async throws -> Response {
         
         guard let bodyData = req.body.data else {
@@ -128,6 +134,42 @@ struct ConfigController: RouteCollection{
         response.body = .init(data: responseData)
         return response
     }
+    
+    // GET /config/service/:serviceID
+    @Sendable
+    func settingsForService(req: Request) async throws -> Response {
+        guard let serviceID = req.parameters.get("serviceID", as: UUID.self) else {
+            let errorResponse = ErrorResponse(error: true, reason: "Ungültige Service-ID.")
+            let data = try JSONEncoder().encode(errorResponse)
+            var headers = HTTPHeaders()
+            headers.add(name: .contentType, value: "application/json")
+            return Response(status: .badRequest, headers: headers, body: .init(data: data))
+        }
+
+        guard let service = try await Service.find(serviceID, on: req.db) else {
+            throw Abort(.notFound, reason: "Service nicht gefunden.")
+        }
+
+        // Laden der zugehörigen Einstellungen über die Siblings-Beziehung
+        try await service.$settings.load(on: req.db)
+        let settings = service.settings
+
+        let responseDTOs = settings.map { setting in
+            SettingResponseDTO(
+                id: setting.id,
+                key: setting.key,
+                datatype: setting.datatype.rawValue,
+                value: setting.value,
+                description: setting.description
+            )
+        }
+
+        let data = try JSONEncoder().encode(responseDTOs)
+        var headers = HTTPHeaders()
+        headers.add(name: .contentType, value: "application/json")
+        return Response(status: .ok, headers: headers, body: .init(data: data))
+    }
+
 
     // Funktion zum Senden der Webhook-Benachrichtigung
     private func sendWebhookNotification(req: Request, event: String, setting: Setting, oldValue: String) async throws {

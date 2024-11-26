@@ -22,11 +22,15 @@ public final class Service: Model, @unchecked Sendable {
     @Field(key: "webhook_url")
     public var webhook_url: String?
 
-    @Field(key: "description")
+    @OptionalField(key: "description")
     public var description: String?
 
     @Field(key: "active")
     public var active: Bool
+    
+    @Siblings(through: ServiceSetting.self, from: \.$service, to: \.$setting)
+    public var settings: [Setting]
+
     
     public init() { }
 
