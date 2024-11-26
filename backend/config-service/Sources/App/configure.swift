@@ -2,7 +2,7 @@ import NIOSSL
 import Fluent
 import FluentPostgresDriver
 import Vapor
-
+import Models
 // configures your application
 public func configure(_ app: Application) async throws {
     // uncomment to serve files from /Public folder
@@ -21,10 +21,10 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateService())
     app.migrations.add(CreateSetting())
     app.migrations.add(CreateServiceSetting())
-    // Routen
-    //let configController = ConfigController()
-    //try app.register(collection: configController)
-    try routes(app)
     // Migrationen ausführen
     try await app.autoMigrate()
+    
+    try routes(app)
+   
 }
+

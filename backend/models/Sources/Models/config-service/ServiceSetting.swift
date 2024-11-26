@@ -20,10 +20,10 @@ public final class ServiceSetting: Model, @unchecked Sendable {
     @Parent(key: "setting_id")
     public var setting: Setting
     
-    @Timestamp(key: "created", on: .create, format: .unix)
+    @Timestamp(key: "created", on: .create)
     public var created: Date?
     
-    @Timestamp(key: "updated", on: .update, format: .unix)
+    @Timestamp(key: "updated", on: .update)
     public var updated: Date?
     
     public init() {}

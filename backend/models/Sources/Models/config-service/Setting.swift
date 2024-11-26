@@ -25,7 +25,7 @@ public final class Setting: Model, @unchecked Sendable {
     @Field(key: "value")
     public var value: String
 
-    @Field(key: "description")
+    @OptionalField(key: "description")
     public var description: String?
 
     
