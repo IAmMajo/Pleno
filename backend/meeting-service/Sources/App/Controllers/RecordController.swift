@@ -26,8 +26,7 @@ struct RecordController: RouteCollection {
             throw Abort(.notFound)
         }
         
-        return try await Record.query(on: req.db)
-            .filter(\.$id.$meeting.$id == meeting.requireID())
+        return try await meeting.$records.query(on: req.db)
             .all()
             .map { record in
             try record.toGetRecordDTO()
