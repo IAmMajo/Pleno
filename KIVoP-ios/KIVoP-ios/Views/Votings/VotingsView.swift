@@ -66,37 +66,15 @@ enum status: String, Codable {
 
 struct VotingsView: View {
    
-   var _dateComponents1: DateComponents {
-      var dateComponents1 = DateComponents()
-      dateComponents1.day = -7
-      dateComponents1.minute = -15
-      return dateComponents1
-   }
-   
-   var _dateComponents2: DateComponents {
-      var dateComponents2 = DateComponents()
-      dateComponents2.day = -7
-      dateComponents2.minute = -15
-      return dateComponents2
-   }
-   
-   var votingGroup: [Voting] {
-      return [Voting(title: "Vereinsfarbe", question: "Welche Farbe soll die neue Vereinsfarbe werden?", startet_at: Date.now, is_open: true, meeting: sampleMeetings[0], voting_options: options1),]
-   }
-
-   
-   ///////////////////////////////////////////////////////////////////////
-   
-//   let getVoting: GetVotingDTO
-//   @StateObject private var votingsViewModel = VotingsViewModel()
    @State private var getVotings: [GetVotingDTO] = []
    @State private var getVoting: GetVotingDTO?
    @State private var errorMessage: String?
 
    @State private var searchText = ""
 
-   @State private var selectedVoting: Voting?
-   @State private var updatedIdentity: Identity?
+   @State private var selectedVoting: GetVotingDTO?
+   @State private var updatedResults: GetVotingResultsDTO?
+   
    @State private var isShowingVoteSheet = false
    @State private var navigateToResultView = false
    @State private var navigateToNextView = false
@@ -129,64 +107,6 @@ struct VotingsView: View {
    var body: some View {
       ZStack {
          NavigationView {
-//            if !votingsOfMeetings.isEmpty {
-//               List {
-//                  ForEach(votingsOfMeetings, id: \.self) { votingGroup in
-//                     Votings_VotingsSectionView(votingGroup: votingGroup, sampleIdentity: sampleIdentity, onVotingSelected: { voting in
-//                        selectedVoting = voting
-//                        if (!sampleIdentity.votes.contains(where: { $0.voting.title == voting.title }) && voting.is_open) {
-//                           isShowingVoteSheet = true
-//                        } else {
-//                           navigateToResultView = true
-//                        }
-//                     })
-//                  }
-//               }
-//               .sheet(isPresented: $isShowingVoteSheet) {
-//                  if let voting = selectedVoting {
-//                     Votings_VoteView(voting: voting, sampleIdentity: sampleIdentity, onNavigate: { identity in
-//                        updatedIdentity = identity
-//                        navigateToNextView = true
-//                     })
-//                        .navigationTitle(voting.title)
-//                  }
-//               }
-//               .navigationDestination(isPresented: $navigateToResultView) {
-//                  if let voting = selectedVoting {
-//                     Votings_VotingResultView(voting: voting, sampleIdentity: sampleIdentity)
-//                        .navigationTitle(voting.title)
-//                  }
-//               }
-//               .navigationDestination(isPresented: $navigateToNextView) {
-//                  if let voting = selectedVoting, let identity = updatedIdentity {
-//                     Votings_VotingResultView(voting: voting, sampleIdentity: identity)
-//                  }
-//               }
-//            } else {
-//               ContentUnavailableView {
-//                  Label("Keine Abstimmungen gefunden", systemImage: "document")
-//               }
-//            }
-            
-            
-//            if votingsViewModel.isLoading {
-//               ProgressView("Loading votings...")
-//            } else if let error = votingsViewModel.errorMessage {
-//               Text("Error: \(error)")
-//                  .foregroundColor(.red)
-//            } else {
-//               List(votingsViewModel.votings) { voting in
-//                  VStack(alignment: .leading) {
-//                     Text(voting.question)
-//                        .font(.headline)
-//                     Text("Meeting ID: \(voting.meetingId.uuidString)")
-//                        .font(.subheadline)
-//                        .foregroundColor(.gray)
-//                  }
-//               }
-//            }
-            
-            
 //            if let error = errorMessage {
 //               Text("\(error)")
 //            } else {
@@ -198,39 +118,39 @@ struct VotingsView: View {
 //                  }
 //               }
 //            }
-            
+//            
             
             if !votingsOfMeetings.isEmpty {
                List {
                   ForEach(votingsOfMeetings, id: \.self) { votingGroup in
-//                     Votings_VotingsSectionView(votingsView: VotingsView(), votingGroup: votingGroup, mockIdentity: mockIdentity, onVotingSelected: { voting in
-//                        selectedVoting = voting
-//                        if (!sampleIdentity.votes.contains(where: { $0.voting.title == voting.title }) && voting.is_open) {
-//                           isShowingVoteSheet = true
-//                        } else {
-//                           navigateToResultView = true
-//                        }
-//                     })
+                     Votings_VotingsSectionView(votingsView: VotingsView(), votingGroup: votingGroup, mockVotingResults: mockVotingResults, onVotingSelected: { voting in
+                        selectedVoting = voting
+                        if(mockVotingResults.myVote == nil && voting.isOpen) {
+                           isShowingVoteSheet = true
+                        } else {
+                           navigateToResultView = true
+                        }
+                     })
                   }
                }
                .sheet(isPresented: $isShowingVoteSheet) {
                   if let voting = selectedVoting {
-                     Votings_VoteView(voting: voting, sampleIdentity: sampleIdentity, onNavigate: { identity in
-                        updatedIdentity = identity
+                     Votings_VoteView(voting: voting, votingResults: mockVotingResults, onNavigate: { results in
+                        updatedResults = results
                         navigateToNextView = true
                      })
-                     .navigationTitle(voting.title)
+                     .navigationTitle(voting.question)
                   }
                }
                .navigationDestination(isPresented: $navigateToResultView) {
                   if let voting = selectedVoting {
-                     Votings_VotingResultView(voting: voting, sampleIdentity: sampleIdentity)
-                        .navigationTitle(voting.title)
+                     Votings_VotingResultView(votingsView: VotingsView(), voting: voting, votingResults: mockVotingResults)
+                        .navigationTitle(voting.question)
                   }
                }
                .navigationDestination(isPresented: $navigateToNextView) {
-                  if let voting = selectedVoting, let identity = updatedIdentity {
-                     Votings_VotingResultView(voting: voting, sampleIdentity: identity)
+                  if let voting = selectedVoting, let results = updatedResults {
+                     Votings_VotingResultView(votingsView: VotingsView(), voting: voting, votingResults: results)
                   }
                }
             } else {
@@ -239,60 +159,40 @@ struct VotingsView: View {
                }
             }
             
-            
-//            if votingsViewModel.isLoading {
-//               ProgressView("Loading votings...")
-//            } else if let error = votingsViewModel.errorMessage {
-//               Text("Error: \(error)")
-//                  .foregroundColor(.red)
-//            } else {
-//               List(votingsViewModel.votings) { voting in
-//                  VStack(alignment: .leading) {
-//                     Text(voting.question)
-//                        .font(.headline)
-//                     Text("Meeting ID: \(voting.meetingId.uuidString)")
-//                        .font(.subheadline)
-//                        .foregroundColor(.gray)
-//                  }
-//               }
-//            }
-            
          }
          .navigationTitle("Abstimmungen")
          .navigationBarTitleDisplayMode(.large)
          .onAppear {
-//            votingsViewModel.fetchVotings()
             loadVotings()
          }
       }
       .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen")
-      //      .onChange(of: $searchText) {}
-      //.onChange(of: $searchText) {
-      //    Task {
-      //        if searchText == "" {
-      //           await sampleVotings
-      //        }
-      //
-      //        sampleVotings = sampleVotings.filter { voting in
-      //            return voting.title.starts(with: searchText)
-      //        }
-      //    }
-      // }
+      .onChange(of: searchText) {
+         Task {
+            if searchText == "" {
+//               await getVotings
+            } else {
+               getVotings = getVotings.filter { voting in
+                  return voting.question.starts(with: searchText)
+               }
+            }
+         }
+      }
       
    }
    
    func loadVotings() {
-//      APIService.shared.fetchAllVotings(token: "your_jwt_token") { result in
-//         DispatchQueue.main.async {
-//            switch result {
-//            case .success(let fetchedVotings):
-//               self.getVotings = fetchedVotings
-//            case .failure(let error):
-//               self.errorMessage = "Failed to load votings: \(error)"
-//            }
-//         }
-//      }
-      getVotings = mockVotings
+      APIService.shared.fetchAllVotings(token: "your_jwt_token") { result in
+         DispatchQueue.main.async {
+            switch result {
+            case .success(let fetchedVotings):
+               self.getVotings = fetchedVotings
+            case .failure(let error):
+               self.errorMessage = "Failed to load votings: \(error)"
+            }
+         }
+      }
+//      getVotings = mockVotings
    }
    
 //   func loadVoting() {
@@ -311,7 +211,7 @@ struct VotingsView: View {
    func getMeeting(meetingID: UUID) -> GetMeetingDTO {
       // API Call
       // loadMeetings()
-      mockMeetings.first(where: { $0.id == meetingID }) ?? mockMeeting1
+      mockMeetings.first(where: { $0.id == meetingID }) ?? mockMeeting2
    }
    
    
@@ -321,6 +221,7 @@ struct VotingsView: View {
             id: UUID(),
             meetingId: mockMeeting1.id,
             question: "Welche Farbe soll die neue Vereinsfarbe werden?",
+            description: "Der Verein braucht eine neue Vereinsfarbe, welche gut zum Verein passt.",
             isOpen: true,
             startedAt: Date.now,
             closedAt: nil,
@@ -331,6 +232,7 @@ struct VotingsView: View {
             id: UUID(),
             meetingId: mockMeeting2.id,
             question: "Welche Option soll gewählt werden 4?",
+            description: "Beschreibung4",
             isOpen: false,
             startedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!,
             closedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!,
@@ -341,6 +243,7 @@ struct VotingsView: View {
             id: UUID(),
             meetingId: mockMeeting1.id,
             question: "Welche Option soll gewählt werden 2?",
+            description: "Beschreibung2",
             isOpen: false,
             startedAt: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!,
             closedAt: Calendar.current.date(byAdding: .minute, value: -5, to: Date())!,
@@ -351,6 +254,7 @@ struct VotingsView: View {
             id: UUID(),
             meetingId: mockMeeting1.id,
             question: "Welche Option soll gewählt werden 3?",
+            description: "Beschreibung3",
             isOpen: false,
             startedAt: Calendar.current.date(byAdding: .minute, value: -35, to: Date())!,
             closedAt: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!,
@@ -406,7 +310,8 @@ struct VotingsView: View {
    var mockVotingResults: GetVotingResultsDTO {
       return GetVotingResultsDTO(
          votingId: mockVotings[0].id,
-         results: [mockVotingResult1, mockVotingResult2, mockVotingResult3, mockVotingResult4, mockVotingResult5]
+         myVote: nil, // Index 0: Abstention | nil: did not vote at all
+         results: [mockVotingResult1, mockVotingResult2, mockVotingResult3, mockVotingResult4]
       )
    }
    
@@ -442,54 +347,9 @@ struct VotingsView: View {
          identities: []
       )
    }
-   var mockVotingResult5: GetVotingResultDTO {
-      return GetVotingResultDTO(
-         index: 4, // Index 0: Abstention
-         total: 50,
-         percentage: 50,
-         identities: [mockIdentity]
-      )
-   }
+
    
    let mockIdentity: GetIdentityDTO = GetIdentityDTO(id: UUID(), name: "Max Mustermann")
-   
-   
-   
-   var sampleIdentity: Identity {
-      return Identity(name: "Max Mustermann", votes: [Vote(voting: sampleVotings[4], index: 2), Vote(voting: sampleVotings[2], index: 0)])
-   }
-   
-   let sampleMeetings = [
-      MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession),
-      MeetingTest(title: "Sitzung2", start: Calendar.current.date(byAdding: .day, value: -7, to: Date())!, status: .completed)
-   ]
-   
-   var sampleVotings: [Voting] {
-      return [
-         Voting(title: "Vereinsfarbe", question: "Welche Farbe soll die neue Vereinsfarbe werden?", startet_at: Date.now, is_open: true, meeting: sampleMeetings[0], voting_options: options1),
-         Voting(title: "Abstimmung5", question: "Welche Option soll gewählt werden 5?", startet_at: Calendar.current.date(byAdding: _dateComponents1, to: Date())!, is_open: false, meeting: sampleMeetings[1], voting_options: options2),
-         Voting(title: "Abstimmung3", question: "Welche Option soll gewählt werden 3?", startet_at: Calendar.current.date(byAdding: .minute, value: -35, to: Date())!, is_open: false, meeting: sampleMeetings[0], voting_options: options2),
-         Voting(title: "Abstimmung4", question: "Welche Option soll gewählt werden 4?", startet_at: Calendar.current.date(byAdding: .day, value: -7, to: Date())!, is_open: false, meeting: sampleMeetings[1], voting_options: options2),
-         Voting(title: "Abstimmung2", question: "Welche Option soll gewählt werden 2?", startet_at: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!, is_open: false, meeting: sampleMeetings[0], voting_options: options2),
-         Voting(title: "Abstimmung6", question: "Welche Option soll gewählt werden 6?", startet_at: Calendar.current.date(byAdding: _dateComponents2, to: Date())!, is_open: false, meeting: sampleMeetings[1], voting_options: options2)
-         ]
-   }
-   
-   var options1: [Voting_option] = [
-        Voting_option(index: 0, text: "Enthaltung", count: 10),
-        Voting_option(index: 1, text: "Rot", count: 10),
-        Voting_option(index: 2, text: "Grün", count: 30),
-        Voting_option(index: 3, text: "Blau", count: 50),
-   ]
-   
-   
-   var options2: [Voting_option] = [
-      Voting_option(index: 0, text: "Enthaltung", count: 4),
-      Voting_option(index: 1, text: "Option1", count: 10),
-      Voting_option(index: 2, text: "Option2", count: 15),
-      Voting_option(index: 3, text: "Option3", count: 30),
-      Voting_option(index: 4, text: "Option4", count: 8),
-   ]
    
 }
 

@@ -7,110 +7,82 @@
 
 import SwiftUI
 import LocalAuthentication
+import MeetingServiceDTOs
 
 struct Votings_VotingResultView: View {
+   let votingsView: VotingsView
    
-   let voting: Voting
-//   let colorMapping: [UInt8: Color]
-   var sampleIdentity: Identity
-
-   var votesCount: Int {
-      return voting.voting_options.reduce(0, { x, y in
-         x + (y.count ?? 0)})
-   }
+   let voting: GetVotingDTO
+   var votingResults: GetVotingResultsDTO
+   
    
     var body: some View {
-       Group {
+       ScrollView {
           VStack {
              Divider()
              
-             PieChartView(options: voting.voting_options)
+             PieChartView(voting: voting, votingResults: votingResults)
              .padding()
              
              Divider()
              
              HStack {
                 Image(systemName: "person.bust.fill")
-                Text(voting.meeting.title)
+                Text(getMeetingName(voting: voting))
                    .frame(maxWidth: .infinity, alignment: .leading)
              }
              .padding(.leading)
              Text(voting.question)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading).padding(.top, 5).padding(.trailing)
+                .padding(.leading).padding(.top, 2).padding(.trailing)
                 .font(.title2)
                 .fontWeight(.medium)
+             Divider()
+             Text(voting.description)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading).padding(.top, 2).padding(.trailing)
             
              List{
                 Section {
-                   ForEach (voting.voting_options, id: \.self) { option in
+                   ForEach (votingResults.results, id: \.self) { result in
                       HStack {
-                         Image(systemName: selection(voting: voting) == option ? "checkmark.circle.fill" : "circle.fill")
-                            .foregroundStyle(getColor(index: option.index))
-//                            .foregroundStyle(.gray)
-                         Text(option.text)
+                         Image(systemName: votingResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill")
+                            .foregroundStyle(getColor(index: result.index))
+                         Text(voting.options[Int(result.index)].text)
                          Spacer()
-                         Text("\(getPercent(option: option))%")
+                         Text("\(result.percentage, specifier: "%.2f")%") //mit 1-2 Nachkommastellen?
                             .opacity(0.6)
                       }
-//                      .listRowBackground(colorMapping[option.index].opacity(0.4))
                    }
                 } header: {
                    Spacer(minLength: 0).listRowInsets(EdgeInsets())
                 }
              }
+             .frame(height: CGFloat((votingResults.results.count * 65) + (votingResults.results.count < 4 ? 200 : 0)), alignment: .top)
 //             .scrollContentBackground(.hidden)
              .environment(\.defaultMinListHeaderHeight, 10)
           }
        }
        .navigationBarTitleDisplayMode(.inline)
        .background(Color(UIColor.secondarySystemBackground))
+       .onAppear {
+//          fillOptionTextMap()
+       }
     }
    
    func getColor (index: UInt8) -> Color {
       return colorMapping[index] ?? .gray
    }
    
-   func selection (voting: Voting) -> Voting_option? {
-//      return voting.voting_options[3]
-      if (sampleIdentity.votes.contains(where: { $0.voting.title == voting.title })) {
-         let index = sampleIdentity.votes.first(where: {$0.voting.title == voting.title})?.index
-         return voting.voting_options.first(where: {$0.index == index})
-      }
-     return nil
+   func getMeetingName(voting: GetVotingDTO) -> String {
+      // API call
+      return votingsView.getMeeting(meetingID: voting.meetingId).name
    }
-   
-   func getPercent (option: Voting_option) -> Int {
-      guard votesCount > 0 else {
-         return 0 // Return 0% if there are no votes
-      }
-      return Int((Float(option.count ?? 0) / Float(votesCount)) * 100)
-   }
+
 }
 
 #Preview() {
+   var votingsView: VotingsView = .init()
    
-   Votings_VotingResultView(voting: Voting(title: "Vereinsfarbe", question: "Welche Farbe soll die neue Vereinsfarbe werden?", startet_at: Date.now, is_open: true, meeting: MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession), voting_options: [
-      Voting_option(index: 0, text: "Enthaltung", count: 10),
-      Voting_option(index: 1, text: "Rot", count: 10),
-      Voting_option(index: 2, text: "Grün", count: 30),
-      Voting_option(index: 3, text: "Blau", count: 50),
-    ]), sampleIdentity: Identity(name: "Max Mustermann", votes: [Vote(voting: Voting(title: "Abstimmung2", question: "Welche Option soll gewählt werden 2?", startet_at: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!, is_open: false, meeting: MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession), voting_options: [
-      Voting_option(index: 0, text: "Enthaltung", count: 4),
-      Voting_option(index: 1, text: "Option1", count: 10),
-      Voting_option(index: 2, text: "Option2", count: 15),
-      Voting_option(index: 3, text: "Option3", count: 5),
-      Voting_option(index: 4, text: "Option4", count: 30),
-   ]), index: 2), Vote(voting: Voting(title: "Abstimmung5", question: "Welche Option soll gewählt werden 5?", startet_at: Date.distantPast, is_open: false, meeting: MeetingTest(title: "Sitzung2", start: Calendar.current.date(byAdding: .day, value: -7, to: Date())!, status: .completed), voting_options: [
-      Voting_option(index: 0, text: "Enthaltung", count: 4),
-      Voting_option(index: 1, text: "Option1", count: 10),
-      Voting_option(index: 2, text: "Option2", count: 15),
-      Voting_option(index: 3, text: "Option3", count: 5),
-      Voting_option(index: 4, text: "Option4", count: 30),
-   ]), index: 0), Vote(voting: Voting(title: "Vereinsfarbe", question: "Welche Farbe soll die neue Vereinsfarbe werden?", startet_at: Date.now, is_open: true, meeting: MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession), voting_options: [
-      Voting_option(index: 0, text: "Enthaltung"),
-      Voting_option(index: 1, text: "Rot"),
-      Voting_option(index: 2, text: "Grün"),
-      Voting_option(index: 3, text: "Blau"),
-   ]), index: 3)]) )
+   Votings_VotingResultView(votingsView: VotingsView(), voting: votingsView.mockVotings[1], votingResults: votingsView.mockVotingResults)
 }

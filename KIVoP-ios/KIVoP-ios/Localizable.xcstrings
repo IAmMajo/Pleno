@@ -51,10 +51,10 @@
     "(ca. 160 min.)" : {
 
     },
-    "%lld" : {
+    "%@" : {
 
     },
-    "%lld%%" : {
+    "%lld" : {
 
     },
     "•" : {
@@ -847,6 +847,9 @@
           }
         }
       }
+    },
+    "Keine Abstimmungen gefunden" : {
+
     },
     "KIVoP " : {
       "localizations" : {
@@ -1799,9 +1802,6 @@
           }
         }
       }
-    },
-    "Welche Farbe soll die neue Vereinsfarbe werden?" : {
-
     },
     "Wirklich abmelden?" : {
       "localizations" : {

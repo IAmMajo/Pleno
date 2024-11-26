@@ -12,7 +12,7 @@ struct Votings_VotingsSectionView: View {
    var votingsView: VotingsView
    
    let votingGroup: [GetVotingDTO]
-   let mockIdentity: GetIdentityDTO
+   let mockVotingResults: GetVotingResultsDTO
    var onVotingSelected: (GetVotingDTO) -> Void
    
     var body: some View {
@@ -41,8 +41,8 @@ struct Votings_VotingsSectionView: View {
                 Text(voting.question)
                    .frame(maxWidth: .infinity, alignment: .leading)
                 Spacer()
-//                Image(systemName: "\(voteCastedStatus(voting: voting))")
-//                   .foregroundStyle(voteCastedSymbolColor(voting: voting))
+                Image(systemName: "\(voteCastedStatus(voting: voting))")
+                   .foregroundStyle(voteCastedSymbolColor(voting: voting))
                 Spacer()
              }
              .contentShape(Rectangle())
@@ -54,35 +54,43 @@ struct Votings_VotingsSectionView: View {
     }
    
    func getMeetingName(votingGroup: [GetVotingDTO]) -> String {
-      if(votingsView.getMeeting(meetingID: votingGroup.first!.meetingId).status == MeetingStatus.inSession) {
+//      var status: MeetingStatus = votingsView.getMeeting(meetingID: votingGroup.first!.meetingId).status
+      let status = votingsView.getMeeting(meetingID: votingGroup.first!.meetingId).status
+      if(status == MeetingStatus.inSession) {
          return "Aktuelle Sitzung"
       } else {
          return "\(votingsView.getMeeting(meetingID: votingGroup.first!.meetingId).name) - \(DateTimeFormatter.formatDate(votingsView.getMeeting(meetingID: votingGroup.first!.meetingId).start))"
       }
    }
    
-//   func voteCastedSymbolColor (voting: GetVotingDTO) -> Color {
-//      if (sampleIdentity.votes.contains(where: { $0.voting.title == voting.title })) { // später mit id
-//         return .blue
-//      } else {
-//         return voting.is_open ? .orange : .black
-//      }
-//   }
-//   
-//   func voteCastedStatus (voting: GetVotingDTO) -> String {
-//      if (sampleIdentity.votes.contains(where: { $0.voting.title == voting.title })) { // später mit id
-//         return "checkmark"
-//      } else {
-//         return voting.is_open ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
-//      }
-//   }
+   func getVotingResults(votingID: UUID) -> GetVotingResultsDTO {
+      // API Call
+      // loadVotingResults()
+      return mockVotingResults
+   }
+   
+   func voteCastedSymbolColor (voting: GetVotingDTO) -> Color {
+      if (getVotingResults(votingID: voting.id).myVote != nil) {
+         return .blue
+      } else {
+         return voting.isOpen ? .orange : .black
+      }
+   }
+   
+   func voteCastedStatus (voting: GetVotingDTO) -> String {
+      if (getVotingResults(votingID: voting.id).myVote != nil) {
+         return "checkmark"
+      } else {
+         return voting.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
+      }
+   }
 }
 
 #Preview {
    var votingsView: VotingsView = .init()
    var mockVotings = votingsView.mockVotings
-   var mockIdentity = votingsView.mockIdentity
+   var mockVotingResults = votingsView.mockVotingResults
    
-   Votings_VotingsSectionView(votingsView: votingsView, votingGroup: mockVotings, mockIdentity: mockIdentity, onVotingSelected: { voting in
+   Votings_VotingsSectionView(votingsView: votingsView, votingGroup: mockVotings, mockVotingResults: mockVotingResults, onVotingSelected: { voting in
    })
 }

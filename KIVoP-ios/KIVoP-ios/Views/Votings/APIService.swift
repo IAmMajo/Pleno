@@ -18,19 +18,38 @@ extension GetVotingDTO: @retroactive Hashable {
         return lhs.id == rhs.id
     }
 }
+extension GetVotingOptionDTO: @retroactive Identifiable {
+   public var id: UInt8 {
+      self.index
+   }
+}
+extension GetVotingOptionDTO: @retroactive Equatable {}
+extension GetVotingOptionDTO: @retroactive Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(votingId)
+        hasher.combine(index)
+    }
+
+    public static func == (lhs: GetVotingOptionDTO, rhs: GetVotingOptionDTO) -> Bool {
+        return lhs.votingId == rhs.votingId && lhs.index == rhs.index
+    }
+}
 
 extension GetVotingResultDTO: @retroactive Identifiable {
    public var id: UInt8 {
       self.index
    }
 }
-
-//enum APIError: Error {
-//   case invalidResponse
-//   case decodingError
-//   case serverError(Int)
-//   case unknownError
-//}
+extension GetVotingResultDTO: @retroactive Equatable {}
+extension GetVotingResultDTO: @retroactive Hashable {
+   public func hash(into hasher: inout Hasher) {
+      hasher.combine(index) // Use `index` as the hashable property
+   }
+   
+   public static func == (lhs: GetVotingResultDTO, rhs: GetVotingResultDTO) -> Bool {
+      return lhs.index == rhs.index // Compare instances based on `index`
+   }
+}
 
 class APIService {
    static let shared = APIService()
@@ -85,30 +104,4 @@ class APIService {
        APIService.shared.sendRequest(url, token: token, completion: completion)
    }
    
-   //    func fetchAllVotings(completion: @escaping (Result<[GetVotingDTO], Error>) -> Void) {
-   //        let urlString = "\(baseURL)/meetings/votings"
-   //        guard let url = URL(string: urlString) else {
-   //            completion(.failure(NSError(domain: "Invalid URL", code: -1, userInfo: nil)))
-   //            return
-   //        }
-   //
-   //        URLSession.shared.dataTask(with: url) { data, response, error in
-   //            if let error = error {
-   //                completion(.failure(error))
-   //                return
-   //            }
-   //
-   //            guard let data = data else {
-   //                completion(.failure(NSError(domain: "No Data", code: -1, userInfo: nil)))
-   //                return
-   //            }
-   //
-   //            do {
-   //                let votings = try JSONDecoder().decode([GetVotingDTO].self, from: data)
-   //                completion(.success(votings))
-   //            } catch {
-   //                completion(.failure(error))
-   //            }
-   //        }.resume()
-   //    }
 }
