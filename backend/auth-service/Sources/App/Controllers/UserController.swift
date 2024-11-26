@@ -7,7 +7,7 @@ struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let userRoutes = routes.grouped("users")
         
-        userRoutes.post("register", use: self.register)
+        userRoutes.on(.POST, "register", body: .collect(maxSize: "500kb"), use: self.register)
         userRoutes.get("profile", use: self.getProfile)
         userRoutes.put("profile", use: self.updateProfile)
         
@@ -25,13 +25,17 @@ struct UserController: RouteCollection {
         protectedRoutes.patch(":id", use: self.updateUserStatus)
         // DELETE /users/:id
         protectedRoutes.delete(":id", use: self.deleteUser)
+        // GET /users/profile-image/identity/:identity_id
+        protectedRoutes.get("profile-image", "identity", ":id", use: self.getImageIdentity)
+        // GET /users/profile-image/user/:user_id
+        protectedRoutes.get("profile-image", "user", ":id", use: self.getImageUser)
     }
     
     @Sendable
     func updateProfile(req: Request) async throws -> HTTPStatus {
         // parse and verify jwt token
         let token = try req.jwt.verify(as: JWTPayloadDTO.self)
-
+        
         // decode updates
         let update = try req.content.decode(UserProfileUpdateDTO.self)
         
@@ -88,42 +92,52 @@ struct UserController: RouteCollection {
         
         // build reponse object
         var response = UserProfileDTO()
+        response.uid = user.id
         response.email = user.email
         response.isAdmin = user.isAdmin
+        response.isActive = user.isActive
         response.createdAt = user.createdAt
         response.name = user.identity.name
+        response.profileImage = user.profileImage
         
         return response
     }
     
     @Sendable
-    func register(req: Request) async throws -> HTTPStatus {
+    func register(req: Request) async throws -> Response {
         // validate content
         try UserRegistrationDTO.validate(content: req)
         
         // parse registration data
-        let registration_data = try req.content.decode(UserRegistrationDTO.self)
+        let registrationData = try req.content.decode(UserRegistrationDTO.self)
         
         // check for user with same email
-        let count = try await User.query(on: req.db).filter(\.$email == registration_data.email!).count()
+        let count = try await User.query(on: req.db).filter(\.$email == registrationData.email!).count()
         if count != 0 {
             throw Abort(.conflict, reason: "a user with this email already exists")
         }
         
+        let profileImageData: Data?
+        if let profileImage = registrationData.profileImage {
+            profileImageData = profileImage
+        } else {
+            profileImageData = nil
+        }
+        
         // create new identity
-        let identity = Identity(name: registration_data.name!)
+        let identity = Identity(name: registrationData.name!)
         
         // save identity in database
         try await identity.save(on: req.db)
         
         // hash password
-        let passwordHash = try req.password.hash(registration_data.password!)
+        let passwordHash = try req.password.hash(registrationData.password!)
         
         // extract identity id
         let identityID = try identity.requireID()
         
         // create new user
-        let user = User(identityID: identityID, email: registration_data.email!, passwordHash: passwordHash)
+        let user = User(identityID: identityID, email: registrationData.email!, passwordHash: passwordHash, profileImage: profileImageData)
         
         // the first user becomes admin
         let countAll = try await User.query(on: req.db).count()
@@ -143,7 +157,17 @@ struct UserController: RouteCollection {
         // save history entry
         try await history.save(on: req.db)
         
-        return .ok
+        let registeredUser = UserProfileDTO(
+            uid: user.id,
+            email: user.email,
+            name: identity.name,
+            profileImage: user.profileImage,
+            isAdmin: user.isAdmin,
+            isActive: user.isActive,
+            createdAt: user.createdAt
+        )
+        
+        return try await registeredUser.encodeResponse(status: .created, for: req)
     }
     
     @Sendable
@@ -161,10 +185,18 @@ struct UserController: RouteCollection {
             .with(\.$identity)
             .all()
         return users.map { user in
-            UserProfileDTO(
+            //let profileImageBase64: String?
+            // if let profileImage = user.profileImage {
+            //   profileImageBase64 = profileImage.base64EncodedString()
+            // } else {
+            //     profileImageBase64 = nil
+            //}
+            
+            return UserProfileDTO(
                 uid: user.id,
                 email: user.email,
                 name: user.identity.name,
+                profileImage: user.profileImage,
                 isAdmin: user.isAdmin,
                 isActive: user.isActive,
                 createdAt: user.createdAt
@@ -193,11 +225,20 @@ struct UserController: RouteCollection {
             .first() else {
             throw Abort(.notFound, reason: "User not found")
         }
+        
+        //let profileImageBase64: String?
+        //if let profileImage = user.profileImage {
+        //    profileImageBase64 = profileImage.base64EncodedString()
+        //} else {
+        //   profileImageBase64 = nil
+        //}
+        
         // Gibt ProfilDTO zurück
         return UserProfileDTO(
             uid: user.id,
             email: user.email,
             name: user.identity.name,
+            profileImage: user.profileImage,
             isAdmin: user.isAdmin,
             isActive: user.isActive,
             createdAt: user.createdAt
@@ -285,4 +326,38 @@ struct UserController: RouteCollection {
         
         return .noContent
     }
+    
+    @Sendable
+    func getImageIdentity(req: Request) async throws -> Response {
+        guard let identityId = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing identity ID")
+        }
+        guard let identity = try await Identity.query(on: req.db)
+            .join(IdentityHistory.self, on: \Identity.$id == \IdentityHistory.$identity.$id)
+            .filter(IdentityHistory.self, \.$identity.$id == identityId)
+            .first() else {
+            throw Abort(.notFound, reason: "Identity not found")
+        }
+        
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$identity.$id == identity.id!)
+            .first() else {
+            throw Abort(.notFound, reason: "User not found")
+        }
+        return Response(status: .ok, body: .init(data: user.profileImage ?? Data()))
+    }
+    
+    @Sendable
+    func getImageUser(req: Request) async throws -> Response {
+        guard let userId = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing user ID")
+        }
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$id == userId)
+            .first() else {
+            throw Abort(.notFound, reason: "User not found")
+        }
+        return Response(status: .ok, body: .init(data: user.profileImage ?? Data()))
+    }
+
 }
