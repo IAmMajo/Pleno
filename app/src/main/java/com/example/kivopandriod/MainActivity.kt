@@ -7,17 +7,20 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.List
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,6 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,6 +42,11 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.kivopandriod.ui.theme.KIVoPAndriodTheme
 import kotlinx.coroutines.launch
 
@@ -51,7 +60,26 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Screen()
+                    val navController = rememberNavController()
+
+                    NavHost(
+                        navController = navController,
+                        startDestination = "home"
+                    ){
+                        // StartScreen
+                        composable(route = Screen.Home.rout){
+                            HomeScreen(navController = navController)
+                        }
+                        // Sitzungen
+                        composable(route = Screen.Home.rout){
+                            SitzungenScreen(navController = navController)
+                        }
+                        // Protokolle
+                        composable(route = Screen.Home.rout){
+                            ProtokolleScreen(navController = navController)
+                        }
+                    }
+                    Screen(navController)
                 }
             }
         }
@@ -74,11 +102,10 @@ fun GreetingPreview() {
     }
 }
 
-@Preview
 @Composable
-fun Screen(modifier: Modifier = Modifier) {
+fun Screen(navController: NavController, modifier: Modifier = Modifier) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope() // State für das AndroidOS
+    val scope = rememberCoroutineScope()
     // Berechnung der Breite des Drawers (2/3 Bildschirmbreite)
     val drawerWidth = animateFloatAsState(targetValue = if (drawerState.isOpen) 0.66f else 0f)
 
@@ -91,14 +118,16 @@ fun Screen(modifier: Modifier = Modifier) {
                     .width(LocalConfiguration.current.screenWidthDp.dp * drawerWidth.value)
                     .background(color = Color.Gray)
             ) {
-                DrawerContent()
+                DrawerContent(navController) // Übergabe des NavControllers an den Drawer
             }
-        }
+        },
+        gesturesEnabled = true // zum swipen des NavDrawers
         ){
-        // Scaffold oben am Bildschrim
+        // Scaffold oben am Bildschirm
         Scaffold (
             topBar = {
                 // Implementierung der TopBar mit Boolean, welcher aus drawerState entnommen wird.
+                //CenterAlignedTopAppBar
                 TopBar(
                     onOpenDrawer = {
                         scope.launch() {
@@ -111,17 +140,19 @@ fun Screen(modifier: Modifier = Modifier) {
                     }
                 )
             }
-        ){
-            padding -> ScreenContent(modifier = Modifier.padding(padding), title = "ScreenContent")
+        ){  padding ->
+            ScreenContent(modifier = Modifier.padding(padding), title = "ScreenContent")
         }
     }
 }
 
 @Composable
-fun ScreenContent(modifier: Modifier = Modifier,
-                  title: String){
+fun ScreenContent(modifier: Modifier = Modifier, title: String){
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .background(Color.Cyan),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -134,50 +165,104 @@ fun ScreenContent(modifier: Modifier = Modifier,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(onOpenDrawer: () -> Unit){
+fun TopBar(
+    onOpenDrawer: () -> Unit
+){
     TopAppBar(
-        title = {
-            // Title wird mittig allignt
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ){
-                Text(
-                    text = "Screen Name",   // noch anpassen
-                    style = MaterialTheme.typography
-                        .headlineSmall
-                        .copy(fontWeight = FontWeight.SemiBold) // SemiBold Text)
-                )
-            }
-        },
-        actions = {
-            // Icon wird rechts allignt durch Nutzung von `actions`, die immer rechts positioniert werden
+        colors = TopAppBarDefaults
+            .topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) ),
+        navigationIcon = {
             Icon(
                 imageVector = Icons.Default.Menu,
                 contentDescription = "Menu",
                 modifier = Modifier
-                    .padding(26.dp)
-                    // Größe anpassen
-                    .size(28.dp)
-                    // Padding für das Icon (z. B. um es nicht direkt am Rand zu haben)
-                    .clickable{ onOpenDrawer() }
-                // Funktion aufrufen, wenn auf das Icon geklickt wird
+                    .padding(12.dp)
+                    .size(22.dp)
+                    .clickable {onOpenDrawer()}
+            )
+        },
+        title = {
+            Text("Screen Name",                 // TODO - ProfileCard klein einfügen
+                style = MaterialTheme.typography
+                    .headlineSmall
+                    .copy(fontWeight = FontWeight.SemiBold) // SemiBold Text)
             )
 
         },
+        actions = {
+            // Icon wird rechts allignt durch Nutzung von `actions`, die immer rechts positioniert werden
+            Icon(
+                imageVector = Icons.Default.Notifications,
+                contentDescription = "Menu",
+                modifier = Modifier
+                    .padding(12.dp)
+                    // Größe anpassen
+                    .size(22.dp)
+                    // Padding für das Icon (z. B. um es nicht direkt am Rand zu haben)
+                    .clickable{ onOpenDrawer() }
+                     // Funktion aufrufen, wenn auf das Icon geklickt wird
+            )
+
+        }
     )
 }
 
 @Composable
-fun DrawerContent(modifier: Modifier = Modifier){
-    NavigationDrawerItem(
-        icon = { Icon(
-            imageVector = Icons.Rounded.AccountCircle,
-            contentDescription = "Account") },
-        label = { Text(text = "Seite 1") }, //Titel des Items
-        selected = false,           // Ist das gerade die Seite, auf der wir sind?
-        onClick = { /*TODO*/ }      // Logik für onClick Events
-    )
-    Spacer(modifier = Modifier.height(4.dp))
+fun DrawerContent(
+    navController: NavController,
+    modifier: Modifier = Modifier){
+    Column {
+        Text(
+            text= "ProfileCard klein",
+            fontSize = 16.sp,
+            modifier = Modifier.padding(12.dp),
+        )
 
+        Spacer(modifier = Modifier.height(4.dp))
+        NavigationDrawerItem(
+            icon = { Icon(
+                imageVector = Icons.Rounded.Home,
+                contentDescription = "Home") },
+            label = {
+                Text(
+                    text = "Home",   //Titel der Seite
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(12.dp)
+                )
+                },
+            selected = false,           // Ist das gerade die Seite, auf der wir sind?
+            onClick = {navController.navigate("home")}      // Logik für onClick Events
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+        NavigationDrawerItem(
+            icon = { Icon(
+                imageVector = Icons.Rounded.List,
+                contentDescription = "Sitzungen") },
+            label = {
+                Text(
+                    text = "Sitzungen",   //Titel der Seite
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(12.dp)
+                )
+            },
+            selected = false,           // Ist das gerade die Seite, auf der wir sind?
+            onClick = {navController.navigate("sitzungen") }      // Logik für onClick Events
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        NavigationDrawerItem(
+            icon = { Icon(
+                imageVector = Icons.Rounded.Edit,
+                contentDescription = "Protokolle") },
+            label = {
+                Text(
+                    text = "Protokolle",   //Titel der Seite
+                    //fontSize = 16.dp,
+                    modifier = Modifier.padding(12.dp)
+                )
+            },
+            selected = false,           // Ist das gerade die Seite, auf der wir sind?
+            onClick = {navController.navigate("protokolle")}      // Logik für onClick Events
+        )
+    }
 }
