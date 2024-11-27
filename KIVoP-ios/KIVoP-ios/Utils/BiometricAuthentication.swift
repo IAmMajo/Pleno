@@ -35,7 +35,7 @@ public class BiometricAuth {
     }
    
    static public func executeIfSuccessfulAuth(
-     _ onSuccessClosure: () -> Void,
+     _ onSuccessClosure: @escaping () async -> Void,
      otherwise onFailedClosure: (() -> Void)? = nil
    ) async {
      guard await authenticate() else {
@@ -44,7 +44,7 @@ public class BiometricAuth {
          }
          return
      }
-     onSuccessClosure()
+     await onSuccessClosure()
    }
 
 }

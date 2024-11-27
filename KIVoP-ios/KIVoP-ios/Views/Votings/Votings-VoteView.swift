@@ -12,12 +12,16 @@ struct Votings_VoteView: View {
       
    let voting: GetVotingDTO
    let votingResults: GetVotingResultsDTO
-
-   @Environment(\.dismiss) private var dismiss
+   
+   @State private var isLoading = false
+   @State private var error: String?
 
    @State private var selection: GetVotingOptionDTO?
    @State private var showingAlert = false
    
+   @Environment(\.dismiss) private var dismiss
+   
+//   var onNavigate: (GetVotingResultsDTO) -> Void
    var onNavigate: (GetVotingResultsDTO) -> Void
    
 
@@ -67,10 +71,10 @@ struct Votings_VoteView: View {
                      title: Text("Möchtest du wirklich abstimmen"),
                      message: Text("Du kannst deine Wahl danach nciht mehr ändern!"),
                      primaryButton: .default(Text("Abstimmen")) {
-                        // update: user has voted
                         Task {
                            await BiometricAuth.executeIfSuccessfulAuth {
                               print("Successful Auth!")
+                              await castVote(voting: voting, selection: selection ?? nil)
                               dismiss()
                               onNavigate(updateMyVote(selection: selection ?? nil))
                            } otherwise: {
@@ -93,6 +97,20 @@ struct Votings_VoteView: View {
          .navigationBarTitleDisplayMode(.inline)
    }
    
+   private func castVote(voting: GetVotingDTO, selection: GetVotingOptionDTO?) async {
+      isLoading = true
+      error = nil
+      do {
+         if selection != nil {
+            try await APIService.shared.castVote(of: voting.id, with: selection!.index)
+         } else {
+            print("selection is nil")
+         }
+      } catch {
+          self.error = error.localizedDescription
+      }
+      isLoading = false
+   }
    
    func updateMyVote(selection: GetVotingOptionDTO?) -> GetVotingResultsDTO {
       var results = votingResults

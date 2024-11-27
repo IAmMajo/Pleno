@@ -51,6 +51,9 @@
     "(ca. 160 min.)" : {
 
     },
+    "%.2f%%" : {
+
+    },
     "%@" : {
 
     },
@@ -641,6 +644,9 @@
     "Enthalten" : {
 
     },
+    "Error: %@" : {
+
+    },
     "erstelle " : {
       "localizations" : {
         "de" : {
@@ -848,9 +854,6 @@
         }
       }
     },
-    "Keine Abstimmungen gefunden" : {
-
-    },
     "KIVoP " : {
       "localizations" : {
         "de" : {
@@ -897,6 +900,9 @@
           }
         }
       }
+    },
+    "Loading..." : {
+
     },
     "Login" : {
       "localizations" : {

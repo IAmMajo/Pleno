@@ -8,67 +8,17 @@
 import SwiftUI
 import MeetingServiceDTOs
 
-// SampleData
-struct Identity: Identifiable, Hashable {
-   let id = UUID()
-   var name: String
-   
-   var votes: [Vote]
-}
-
-struct Voting: Identifiable, Hashable {
-   let id = UUID()
-   var title: String
-   var question: String
-   var startet_at: Date
-   var is_open: Bool
-   
-   var meeting: MeetingTest
-   //var meetingID: UUID
-   
-   var voting_options: [Voting_option]
-//   var votes: [Vote]
-}
-
-struct Vote: Identifiable, Hashable {
-//   var id: String { "\(votingID.uuidString)-\(identityID.uuidString)" }
-   var id = UUID()
-   var voting: Voting
-//   var identityID: UUID
-   var index: UInt8
-}
-
-struct Voting_option: Identifiable, Hashable {
-   var id = UUID()
-//   var id: String { "\(votingID.uuidString)-\(index)" }
-//
-//   var voting: Voting
-   var index: UInt8
-   var text: String
-   var count: Int?
-}
-
-struct MeetingTest: Identifiable, Hashable {
-   let id = UUID()
-   var title: String
-   var start: Date
-   var status: status
-   
-   //var votings: [Voting]
-}
-
-enum status: String, Codable {
-   case scheduled
-   case inSession
-   case completed
-}
-
 
 struct VotingsView: View {
    
-   @State private var getVotings: [GetVotingDTO] = []
-   @State private var getVoting: GetVotingDTO?
-   @State private var errorMessage: String?
+   @State private var meetings: [GetMeetingDTO] = []
+   @State private var votings: [GetVotingDTO] = []
+   @State private var votingsFiltered: [GetVotingDTO] = []
+   @State private var voting: GetVotingDTO?
+   @State private var votingsOfMeetings: [[GetVotingDTO]] = []
+   
+   @State private var isLoading = false
+   @State private var error: String?
 
    @State private var searchText = ""
 
@@ -79,83 +29,138 @@ struct VotingsView: View {
    @State private var navigateToResultView = false
    @State private var navigateToNextView = false
    
-   var votingsOfMeetings: [[GetVotingDTO]] {
-      var votingsByMeeting: [UUID: [GetVotingDTO]] = [:]
-      
-      for voting in mockVotings {
-         let meetingID = voting.meetingId
-         if votingsByMeeting[meetingID] == nil {
-            votingsByMeeting[meetingID] = []
-         }
-         votingsByMeeting[meetingID]?.append(voting)
-      }
-   
-      var votingsOfMeetingsSorted: [[GetVotingDTO]] = Array(votingsByMeeting.values)
-      
-      votingsOfMeetingsSorted = votingsOfMeetingsSorted.map { $0.sorted { $0.startedAt! > $1.startedAt! } }
+//   func setVotingsOfMeetings() async -> [[GetVotingDTO]] {
+//      var votingsByMeeting: [UUID: [GetVotingDTO]] = [:]
+//      
+//      for voting in votingsFiltered {
+//         let meetingID = voting.meetingId
+//         if votingsByMeeting[meetingID] == nil {
+//            votingsByMeeting[meetingID] = []
+//         }
+//         votingsByMeeting[meetingID]?.append(voting)
+//      }
+//   
+//      var votingsOfMeetingsSorted: [[GetVotingDTO]] = Array(votingsByMeeting.values)
+//      
+//      votingsOfMeetingsSorted = votingsOfMeetingsSorted.map { $0.sorted { $0.startedAt! > $1.startedAt! } }
+//
+//      votingsOfMeetingsSorted.sort {
+//         guard let firstVotingInGroup1 = $0.first, let firstVotingInGroup2 = $1.first else {
+//            return false
+//         }
+//         var meeting1 = await APIService.shared.fetchMeeting(by: firstVotingInGroup1.meetingId)
+//         var meeting2 = await APIService.shared.fetchMeeting(by: firstVotingInGroup2.meetingId)
+//         return meeting1.start > meeting2.start
+//      }
+//      
+//      self.votingsOfMeetings = votingsOfMeetingsSorted
+//   }
+   func setVotingsOfMeetings() async {
+       var votingsByMeeting: [UUID: [GetVotingDTO]] = [:]
+       
+       for voting in votingsFiltered {
+           let meetingID = voting.meetingId
+           if votingsByMeeting[meetingID] == nil {
+               votingsByMeeting[meetingID] = []
+           }
+           votingsByMeeting[meetingID]?.append(voting)
+       }
 
-      votingsOfMeetingsSorted.sort {
-              guard let firstVotingInGroup1 = $0.first, let firstVotingInGroup2 = $1.first else {
-                  return false
+       var votingsOfMeetingsSorted: [[GetVotingDTO]] = Array(votingsByMeeting.values)
+       
+       votingsOfMeetingsSorted = votingsOfMeetingsSorted.map {
+           $0.sorted { $0.startedAt! > $1.startedAt! }
+       }
+       
+       // Fetch meeting data for sorting
+       var meetingStartDates: [UUID: Date] = [:]
+       for group in votingsOfMeetingsSorted {
+           if let firstVoting = group.first {
+              isLoading = true
+              error = nil
+              do {
+                 let meeting = try await APIService.shared.fetchMeeting(by: firstVoting.meetingId)
+                 meetingStartDates[firstVoting.meetingId] = meeting.start
+              } catch {
+                  self.error = error.localizedDescription
               }
-         return getMeeting(meetingID: firstVotingInGroup1.meetingId).start > getMeeting(meetingID: firstVotingInGroup2.meetingId).start
-          }
-      
-      return votingsOfMeetingsSorted
+              isLoading = false
+           }
+       }
+
+       // Sort groups based on meeting start dates
+       votingsOfMeetingsSorted.sort {
+           guard let meeting1Start = meetingStartDates[$0.first?.meetingId ?? UUID()],
+                 let meeting2Start = meetingStartDates[$1.first?.meetingId ?? UUID()] else {
+               return false
+           }
+           return meeting1Start > meeting2Start
+       }
+       
+       self.votingsOfMeetings = votingsOfMeetingsSorted
    }
    
    var body: some View {
       ZStack {
          NavigationView {
-//            if let error = errorMessage {
-//               Text("\(error)")
-//            } else {
-//               List(getVotings, id: \.id) { voting in
-//                  VStack(alignment: .leading) {
-//                     Text(voting.question)
-//                        .font(.subheadline)
-//                        .foregroundColor(.gray)
+//            if !votingsOfMeetings.isEmpty {
+//               List {
+//                  ForEach(votingsOfMeetings, id: \.self) { votingGroup in
+//                     Votings_VotingsSectionView(votingsView: VotingsView(), votingGroup: votingGroup, mockVotingResults: mockVotingResults, onVotingSelected: { voting in
+//                        selectedVoting = voting
+//                        if(mockVotingResults.myVote == nil && voting.isOpen) {
+//                           isShowingVoteSheet = true
+//                        } else {
+//                           navigateToResultView = true
+//                        }
+//                     })
 //                  }
 //               }
+//               .sheet(isPresented: $isShowingVoteSheet) {
+//                  if let voting = selectedVoting {
+//                     Votings_VoteView(voting: voting, votingResults: mockVotingResults, onNavigate: { results in
+//                        updatedResults = results
+//                        navigateToNextView = true
+//                     })
+//                     .navigationTitle(voting.question)
+//                  }
+//               }
+//               .navigationDestination(isPresented: $navigateToResultView) {
+//                  if let voting = selectedVoting {
+//                     Votings_VotingResultView(votingsView: VotingsView(), voting: voting, votingResults: mockVotingResults)
+//                        .navigationTitle(voting.question)
+//                  }
+//               }
+//               .navigationDestination(isPresented: $navigateToNextView) {
+//                  if let voting = selectedVoting, let results = updatedResults {
+//                     Votings_VotingResultView(votingsView: VotingsView(), voting: voting, votingResults: results)
+//                  }
+//               }
+//            } else {
+//               ContentUnavailableView {
+////                  Label("Keine Abstimmungen gefunden", systemImage: "document")
+//               }
 //            }
-//            
             
-            if !votingsOfMeetings.isEmpty {
-               List {
-                  ForEach(votingsOfMeetings, id: \.self) { votingGroup in
-                     Votings_VotingsSectionView(votingsView: VotingsView(), votingGroup: votingGroup, mockVotingResults: mockVotingResults, onVotingSelected: { voting in
-                        selectedVoting = voting
-                        if(mockVotingResults.myVote == nil && voting.isOpen) {
-                           isShowingVoteSheet = true
-                        } else {
-                           navigateToResultView = true
-                        }
-                     })
-                  }
-               }
-               .sheet(isPresented: $isShowingVoteSheet) {
-                  if let voting = selectedVoting {
-                     Votings_VoteView(voting: voting, votingResults: mockVotingResults, onNavigate: { results in
-                        updatedResults = results
-                        navigateToNextView = true
-                     })
-                     .navigationTitle(voting.question)
-                  }
-               }
-               .navigationDestination(isPresented: $navigateToResultView) {
-                  if let voting = selectedVoting {
-                     Votings_VotingResultView(votingsView: VotingsView(), voting: voting, votingResults: mockVotingResults)
-                        .navigationTitle(voting.question)
-                  }
-               }
-               .navigationDestination(isPresented: $navigateToNextView) {
-                  if let voting = selectedVoting, let results = updatedResults {
-                     Votings_VotingResultView(votingsView: VotingsView(), voting: voting, votingResults: results)
-                  }
-               }
-            } else {
-               ContentUnavailableView {
-                  Label("Keine Abstimmungen gefunden", systemImage: "document")
+            
+
+//            Text("Meeting: \(meeting?.name ?? "")")
+
+//            List(meetings, id: \.id) { meeting in
+//               VStack(alignment: .leading) {
+//                  Text(meeting.name)
+//                     .font(.headline)
+//                  Text(meeting.description)
+//                     .font(.subheadline)
+//               }
+//            }
+            
+            List(votings, id: \.id) { voting in
+               VStack(alignment: .leading) {
+                  Text(voting.question)
+                     .font(.headline)
+                  Text(voting.description)
+                     .font(.subheadline)
                }
             }
             
@@ -163,17 +168,37 @@ struct VotingsView: View {
          .navigationTitle("Abstimmungen")
          .navigationBarTitleDisplayMode(.large)
          .onAppear {
-            loadVotings()
+            Task {
+               try await AuthController.shared.login(email: "admin@kivop.ipv64.net", password: "admin")
+               let token = try await AuthController.shared.getAuthToken()
+//               print("Token: \(token)")
+               
+//               await loadMeetings()
+               await loadVotings()
+               
+//               votings = mockVotings
+//               votingsFiltered = votings
+            }
          }
+         .overlay {
+            if isLoading {
+               ProgressView("Loading...")
+            } else if let error = error {
+               Text("Error: \(error)")
+                  .foregroundColor(.red)
+            }
+         }
+         
       }
       .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen")
+      
       .onChange(of: searchText) {
          Task {
-            if searchText == "" {
-//               await getVotings
+            if searchText.isEmpty {
+               votingsFiltered = votings
             } else {
-               getVotings = getVotings.filter { voting in
-                  return voting.question.starts(with: searchText)
+               votingsFiltered = votings.filter { voting in
+                  return voting.question.contains(searchText)
                }
             }
          }
@@ -181,38 +206,60 @@ struct VotingsView: View {
       
    }
    
-   func loadVotings() {
-      APIService.shared.fetchAllVotings(token: "your_jwt_token") { result in
-         DispatchQueue.main.async {
-            switch result {
-            case .success(let fetchedVotings):
-               self.getVotings = fetchedVotings
-            case .failure(let error):
-               self.errorMessage = "Failed to load votings: \(error)"
-            }
-         }
-      }
-//      getVotings = mockVotings
-   }
    
-//   func loadVoting() {
-//      APIService.shared.fetchVoting(votingId: UUID(uuidString: "example-id")!, token: "your_jwt_token") { result in
-//         DispatchQueue.main.async {
-//            switch result {
-//            case .success(let fetchedVoting):
-//               self.getVoting = fetchedVoting
-//            case .failure(let error):
-//               self.errorMessage = "Failed to fetch voting: \(error)"
-//            }
-//         }
+//   private func loadVotings() async {
+//          isLoading = true
+//          error = nil
+//          do {
+//              votings = try await APIService.shared.fetchAllVotings()
+//          } catch {
+//             print(error)
+//             self.error = error.localizedDescription
+//          }
+//          isLoading = false
 //      }
-//   }
+   private func loadVotings() async {
+          isLoading = true
+          error = nil
+          do {
+             print("Error:")
+              votings = try await APIService.shared.fetchAllVotings()
+          } catch let DecodingError.dataCorrupted(context) {
+              print(context)
+          } catch let DecodingError.keyNotFound(key, context) {
+              print("Key '\(key)' not found:", context.debugDescription)
+              print("codingPath:", context.codingPath)
+          } catch let DecodingError.valueNotFound(value, context) {
+              print("Value '\(value)' not found:", context.debugDescription)
+              print("codingPath:", context.codingPath)
+          } catch let DecodingError.typeMismatch(type, context)  {
+              print("Type '\(type)' mismatch:", context.debugDescription)
+              print("codingPath:", context.codingPath)
+          } catch {
+              print("error: ", error)
+          }
+          isLoading = false
+      }
    
-   func getMeeting(meetingID: UUID) -> GetMeetingDTO {
-      // API Call
-      // loadMeetings()
-      mockMeetings.first(where: { $0.id == meetingID }) ?? mockMeeting2
-   }
+      
+   private func loadMeetings() async {
+          isLoading = true
+          error = nil
+          do {
+              meetings = try await APIService.shared.fetchAllMeetings()
+          } catch {
+              self.error = error.localizedDescription
+          }
+          isLoading = false
+      }
+   
+   
+   
+//   func getMeeting(meetingId: UUID) -> GetMeetingDTO {
+//      // API Call
+//      // loadMeetings()
+//      mockMeetings.first(where: { $0.id == meetingID }) ?? mockMeeting2
+//   }
    
    
    var mockVotings: [GetVotingDTO] {

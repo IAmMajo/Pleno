@@ -13,8 +13,13 @@ struct Votings_VotingResultView: View {
    let votingsView: VotingsView
    
    let voting: GetVotingDTO
-   var votingResults: GetVotingResultsDTO
+   @State var votingResults: GetVotingResultsDTO
+   @State var meetingName = ""
    
+   @State private var isLoading = false
+   @State private var error: String?
+   
+   @State private var optionTextMap: [UInt8: String] = [:]
    
     var body: some View {
        ScrollView {
@@ -28,7 +33,7 @@ struct Votings_VotingResultView: View {
              
              HStack {
                 Image(systemName: "person.bust.fill")
-                Text(getMeetingName(voting: voting))
+                Text(meetingName)
                    .frame(maxWidth: .infinity, alignment: .leading)
              }
              .padding(.leading)
@@ -67,17 +72,49 @@ struct Votings_VotingResultView: View {
        .background(Color(UIColor.secondarySystemBackground))
        .onAppear {
 //          fillOptionTextMap()
+          Task {
+             await loadVotingResults(voting: voting)
+             await loadMeetingName(voting: voting)
+          }
        }
     }
+   
+   func fillOptionTextMap(voting: GetVotingDTO) {
+      for option in voting.options {
+         optionTextMap[option.id] = option.text
+      }
+   }
+   
+   private func loadVotingResults(voting: GetVotingDTO) async {
+      isLoading = true
+      error = nil
+      do {
+         votingResults = try await APIService.shared.fetchVotingResults(by: voting.id)
+      } catch {
+         self.error = error.localizedDescription
+      }
+      isLoading = false
+   }
+   
+   private func loadMeetingName(voting: GetVotingDTO) async {
+      isLoading = true
+      error = nil
+      do {
+         let meeting = try await APIService.shared.fetchMeeting(by: voting.meetingId)
+         meetingName = meeting.name
+      } catch {
+         self.error = error.localizedDescription
+      }
+      isLoading = false
+   }
    
    func getColor (index: UInt8) -> Color {
       return colorMapping[index] ?? .gray
    }
    
-   func getMeetingName(voting: GetVotingDTO) -> String {
-      // API call
-      return votingsView.getMeeting(meetingID: voting.meetingId).name
-   }
+//   func getMeetingName(voting: GetVotingDTO) -> String {
+//      return votingsView.getMeeting(meetingID: voting.meetingId).name
+//   }
 
 }
 
