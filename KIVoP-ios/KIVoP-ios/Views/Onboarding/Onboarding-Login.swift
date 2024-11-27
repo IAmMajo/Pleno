@@ -10,6 +10,7 @@ struct Onboarding_Login: View {
     @State private var loginSuccessful: Bool = false
     @State private var faceIDTriggered = false
     @State private var isKeychainAvailable = false
+    @State private var isActive = true // Verfolgt, ob die View aktiv ist
 
     var body: some View {
         NavigationStack {
@@ -103,7 +104,11 @@ struct Onboarding_Login: View {
                 MainPage()
             }
             .onAppear {
+                isActive = true // View ist aktiv
                 checkKeychainAvailability()
+            }
+            .onDisappear {
+                isActive = false // View ist nicht mehr aktiv
             }
         }
     }
@@ -143,7 +148,7 @@ struct Onboarding_Login: View {
     }
 
     private func triggerFaceID() {
-        guard isKeychainAvailable, !faceIDTriggered else { return }
+        guard isKeychainAvailable, !faceIDTriggered, isActive else { return }
         faceIDTriggered = true
 
         Task {
@@ -188,6 +193,7 @@ struct Onboarding_Login: View {
         .padding(.bottom, 10)
     }
 }
+
 
 struct Onboarding_Login_Previews: PreviewProvider {
     static var previews: some View {
