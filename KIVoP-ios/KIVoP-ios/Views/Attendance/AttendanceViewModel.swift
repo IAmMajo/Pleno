@@ -13,8 +13,6 @@ class AttendanceViewModel: ObservableObject {
 
     @Published var searchText: String = ""
     @Published var selectedTab: Int = 0
-    @Published var token: String = ""
-    @Published var errorMessage: String?
     @Published var meetings: [GetMeetingDTO] = []
     
     init() {
@@ -26,9 +24,6 @@ class AttendanceViewModel: ObservableObject {
         Task {
             do {
                 // Statischer Login zum Testen, bis die Funktion implementiert wurde.
-                // TestH@example.com + Test123
-                // henrik.peltzer@gmail.com + Test123
-                // TestA@example.com + Test123
                 try await AuthController.shared.login(email: "henrik.peltzer@gmail.com", password: "Test123")
                 let token = try await AuthController.shared.getAuthToken()
                 
@@ -56,15 +51,14 @@ class AttendanceViewModel: ObservableObject {
                             let fetchedMeetings = try decoder.decode([GetMeetingDTO].self, from: data)
                             self.meetings.append(contentsOf: fetchedMeetings)
                         } catch {
-                            // Fehlerbehandlung beim Dekodieren der Meetings
-                            self.errorMessage = "Fehler beim Dekodieren der Meetings: \(error.localizedDescription)"
+                            print("Fehler beim Dekodieren der Meetings: \(error.localizedDescription)")
                         }
                     }
                 }
             } catch {
                 // Fehlerbehandlung auf dem Hauptthread
                 DispatchQueue.main.async {
-                    self.errorMessage = error.localizedDescription
+                    print("\(error.localizedDescription)")
                 }
             }
         }

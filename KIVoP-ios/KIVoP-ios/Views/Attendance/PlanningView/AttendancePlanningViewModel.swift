@@ -8,6 +8,7 @@
 import Foundation
 import MeetingServiceDTOs
 
+@MainActor
 class AttendancePlanningViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var attendances: [GetAttendanceDTO] = []
