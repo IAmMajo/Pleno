@@ -1,1 +1,5 @@
-#(message)
+#extend("layout"):
+    #export("message"):
+        #(message)
+    #endexport
+#endextend
