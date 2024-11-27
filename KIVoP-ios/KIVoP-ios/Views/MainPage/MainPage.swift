@@ -156,12 +156,6 @@ struct MainPage: View {
 
 // Sample Views für die anderen Punkte nach hinzufügen bitte löschen!!!
 
-struct ProtokolleView: View {
-    var body: some View {
-        Text("Protokolle")
-            .font(.largeTitle)
-    }
-}
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
