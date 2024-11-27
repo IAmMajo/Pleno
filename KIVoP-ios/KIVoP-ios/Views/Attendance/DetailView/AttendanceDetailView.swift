@@ -1,3 +1,10 @@
+//
+//  AttendanceDetailView.swift
+//  KIVoP-ios
+//
+//  Created by Henrik Peltzer on 02.11.24.
+//
+
 import SwiftUI
 import MeetingServiceDTOs
 
@@ -93,13 +100,10 @@ struct AttendanceDetailView: View {
                                             .fill(Color.gray)
                                             .frame(width: 40, height: 40)
                                         
-                                        // Name und ID
+                                        // Name
                                         VStack(alignment: .leading) {
                                             Text(attendance.identity.name)
                                                 .font(.body)
-                                            Text(attendance.identity.id.uuidString)
-                                                .font(.caption)
-                                                .foregroundColor(.gray)
                                         }
                                         
                                         Spacer()

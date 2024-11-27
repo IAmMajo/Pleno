@@ -28,8 +28,13 @@ class AttendanceViewModel: ObservableObject {
         Task {
             do {
                 // Statischer Login zum Testen, bis die Funktion implementiert wurde.
+                // TestH@example.com + Test123
+                // henrik.peltzer@gmail.com + Test123
+                // TestA@example.com + Test123
                 try await AuthController.shared.login(email: "henrik.peltzer@gmail.com", password: "Test123")
                 let token = try await AuthController.shared.getAuthToken()
+                
+                print("\(token)")
                 
                 // Meetings abrufen
                 guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {

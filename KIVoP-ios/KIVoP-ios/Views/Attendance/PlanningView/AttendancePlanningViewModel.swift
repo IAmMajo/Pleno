@@ -8,10 +8,8 @@
 import Foundation
 import MeetingServiceDTOs
 
-class AttendancePlaninngViewModel: ObservableObject {
+class AttendancePlanningViewModel: ObservableObject {
     @Published var searchText: String = ""
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String? = nil
     @Published var attendances: [GetAttendanceDTO] = []
     
     private let baseURL = "https://kivop.ipv64.net"
@@ -27,62 +25,99 @@ class AttendancePlaninngViewModel: ObservableObject {
             do {
                 // Authentifizierung und Token holen
                 let token = try await AuthController.shared.getAuthToken()
-                print("Auth Token abgerufen: \(token)  :Token Ende")  // Debug: Token Ausgabe
                 
-                // URL für die Anfrage erstellen
+                // URL und Request erstellen
                 guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/attendances") else {
-                    throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+                    return
                 }
-                
                 var request = URLRequest(url: url)
                 request.httpMethod = "GET"
                 request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                
-                // API-Aufruf starten
+
+                // API-Aufruf und Antwort verarbeiten
                 let (data, response) = try await URLSession.shared.data(for: request)
-                print("API Anfrage an \(url) abgeschlossen. Statuscode: \((response as? HTTPURLResponse)?.statusCode ?? -1)")  // Debug: Statuscode der Antwort
-                
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    throw NSError(domain: "Invalid response", code: 500, userInfo: nil)
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                    return
                 }
-                
-                // Überprüfe den Statuscode der Antwort
-                if httpResponse.statusCode != 200 {
-                    let errorDetails = "Server returned status code \(httpResponse.statusCode)"
-                    throw NSError(domain: errorDetails, code: httpResponse.statusCode, userInfo: nil)
-                }
-                
-                // JSON dekodieren und auf dem Hauptthread verarbeiten
-                let decoder = JSONDecoder()
-                DispatchQueue.main.async {
-                    do {
-                        let fetchedAttendances = try decoder.decode([GetAttendanceDTO].self, from: data)
-                        self.attendances = fetchedAttendances
-                        
-                        // Anzahl der abgerufenen Anwesenheiten in der Konsole ausgeben
-                        print("Anzahl der abgerufenen Anwesenheiten: \(fetchedAttendances.count)")
-                    } catch {
-                        self.errorMessage = "Fehler beim Dekodieren der Anwesenheiten: \(error.localizedDescription)"
-                        print("Fehler beim Dekodieren: \(error.localizedDescription)")  // Debug: Detaillierte Fehlermeldung
-                    }
-                    self.isLoading = false
+
+                // JSON dekodieren
+                let fetchedAttendances = try JSONDecoder().decode([GetAttendanceDTO].self, from: data)
+
+                self.attendances = fetchedAttendances.sorted {
+                    self.sortOrder(for: $0.status) == self.sortOrder(for: $1.status)
+                        ? $0.identity.name.localizedCaseInsensitiveCompare($1.identity.name) == .orderedAscending
+                        : self.sortOrder(for: $0.status) < self.sortOrder(for: $1.status)
                 }
             } catch {
-                // Fehler auf dem Hauptthread behandeln
-                DispatchQueue.main.async {
-                    self.errorMessage = error.localizedDescription
-                    print("Fehler beim Abrufen der Anwesenheiten: \(error.localizedDescription)")  // Debug: Detaillierte Fehlermeldung
-                    self.isLoading = false
-                }
+                print("Fehler: \(error.localizedDescription)")
             }
         }
     }
     
+    public func markAttendanceAsPresent() {
+        Task {
+            do {
+                // Authentifizierung und Token holen
+                let token = try await AuthController.shared.getAuthToken()
+                
+                // URL für die Anfrage erstellen
+                guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/plan-attendance/present") else {
+                    return
+                }
+                
+                var request = URLRequest(url: url)
+                request.httpMethod = "PUT"
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                
+                // API-Aufruf starten
+                let (_, response) = try await URLSession.shared.data(for: request)
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                    return
+                }
+            }
+        }
+    }
+
+    public func markAttendanceAsAbsent() {
+        Task {
+            do {
+                // Authentifizierung und Token holen
+                let token = try await AuthController.shared.getAuthToken()
+                
+                // URL für die Anfrage erstellen
+                guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/plan-attendance/absent") else {
+                    return
+                }
+                
+                var request = URLRequest(url: url)
+                request.httpMethod = "PUT"
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                
+                // API-Aufruf starten
+                let (_, response) = try await URLSession.shared.data(for: request)
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                    return
+                }
+            }
+        }
+    }
+
     var filteredAttendances: [GetAttendanceDTO] {
-        if searchText.isEmpty {
-            return attendances
-        } else {
-            return attendances.filter { $0.identity.id.uuidString.contains(searchText) }
+        let filtered = searchText.isEmpty ? attendances : attendances.filter {
+            $0.identity.id.uuidString.contains(searchText) ||
+            $0.identity.name.localizedCaseInsensitiveContains(searchText)
+        }
+        
+        // Anwenden der Sortierlogik
+        return filtered.sorted {
+            // Vergleiche zuerst den Status
+            if sortOrder(for: $0.status) == sortOrder(for: $1.status) {
+                // Wenn der Status gleich ist, sortiere alphabetisch nach dem Namen
+                return $0.identity.name.localizedCaseInsensitiveCompare($1.identity.name) == .orderedAscending
+            } else {
+                // Vergleiche den Status basierend auf der Reihenfolge
+                return sortOrder(for: $0.status) < sortOrder(for: $1.status)
+            }
         }
     }
     
@@ -96,5 +131,16 @@ class AttendancePlaninngViewModel: ObservableObject {
     
     var absentCount: Int {
         attendances.filter { $0.status == .absent }.count
+    }
+    
+    private func sortOrder(for status: AttendanceStatus) -> Int {
+        switch status {
+        case .present:
+            return 0 // Höchste Priorität
+        case .accepted:
+            return 1 // Zweithöchste Priorität
+        case .absent:
+            return 2 // Niedrigste Priorität
+        }
     }
 }

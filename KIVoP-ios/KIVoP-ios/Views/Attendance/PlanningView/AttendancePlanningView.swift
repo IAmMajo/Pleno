@@ -1,10 +1,17 @@
+//
+//  AttendancePlanningView.swift
+//  KIVoP-ios
+//
+//  Created by Henrik Peltzer on 02.11.24.
+//
+
 import SwiftUI
 import MeetingServiceDTOs
 
 struct AttendancePlanningView: View {
     @Environment(\.dismiss) var dismiss
     
-    @ObservedObject var viewModel: AttendancePlaninngViewModel
+    @ObservedObject var viewModel: AttendancePlanninngViewModel
     
     var body: some View {
         NavigationView {
@@ -58,9 +65,8 @@ struct AttendancePlanningView: View {
                         
                         // Teilnahme Schaltflächen
                         HStack(spacing: 40) {
-                            // "Ja"-Button
                             Button(action: {
-                                // Action für Ja
+                                viewModel.markAttendanceAsPresent()
                             }) {
                                 HStack {
                                     Image(systemName: "checkmark")
@@ -74,7 +80,7 @@ struct AttendancePlanningView: View {
                             
                             // "Nein"-Button
                             Button(action: {
-                                // Action für Nein
+                                viewModel.markAttendanceAsAbsent()
                             }) {
                                 HStack {
                                     Image(systemName: "xmark")
@@ -99,7 +105,7 @@ struct AttendancePlanningView: View {
                         HStack {
                             Spacer()
                             VStack {
-                                Text("\(viewModel.presentCount)")
+                                Text("\(viewModel.acceptedCount)")
                                     .font(.largeTitle)
                                 Image(systemName: "person.fill.checkmark")
                                     .foregroundColor(.blue)
@@ -110,7 +116,7 @@ struct AttendancePlanningView: View {
                             Spacer()
                             
                             VStack {
-                                Text("\(viewModel.acceptedCount)")
+                                Text("\(viewModel.presentCount)")
                                     .font(.largeTitle)
                                 Image(systemName: "person.fill.questionmark")
                                     .foregroundColor(.gray)
@@ -143,25 +149,28 @@ struct AttendancePlanningView: View {
                                             .fill(Color.gray)
                                             .frame(width: 40, height: 40)
                                         
-                                        // Name und ID
+                                        // Name
                                         VStack(alignment: .leading) {
                                             Text(attendance.identity.name)
                                                 .font(.body)
-                                            Text(attendance.identity.id.uuidString)
-                                                .font(.caption)
-                                                .foregroundColor(.gray)
                                         }
                                         
                                         Spacer()
                                         
-                                        // Inline-Statusbehandlung und Farbzuweisung
-                                        Text(attendance.status.rawValue.capitalized)
-                                            .foregroundColor(
-                                                attendance.status == .present ? .green :
-                                                attendance.status == .absent ? .red :
-                                                attendance.status == .accepted ? .blue : .gray
-                                            )
-                                            .font(.system(size: 18))
+                                        // Inline-Statusbehandlung und Anzeige von Symbolen
+                                        Image(systemName:
+                                            attendance.status == .present ? "questionmark.circle" :
+                                            attendance.status == .absent ? "xmark" :
+                                            attendance.status == .accepted ? "checkmark" :
+                                            "questionmark.circle"
+                                        )
+                                        .foregroundColor(
+                                            attendance.status == .present ? .gray :
+                                            attendance.status == .absent ? .red :
+                                            attendance.status == .accepted ? .blue :
+                                            .gray
+                                        )
+                                        .font(.system(size: 18))
                                     }
                                 }
                             }

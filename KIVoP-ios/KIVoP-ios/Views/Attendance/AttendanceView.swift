@@ -142,7 +142,7 @@ struct AttendanceView: View {
             return AnyView(AttendanceDetailView(viewModel: viewModel))
             
         case .scheduled:
-            let viewModel = AttendancePlaninngViewModel(meeting: meeting)
+            let viewModel = AttendancePlanningViewModel(meeting: meeting)
             return AnyView(AttendancePlanningView(viewModel: viewModel))
         }
     }
