@@ -1,0 +1,21 @@
+#extend("layout"):
+    #export("message"):
+      #if(userName):
+        <h1>Willkommen, #(userName)!</h1>
+      #else:
+        <h1>Willkommen!</h1>
+      #endif
+      <p>
+        Vielen Dank für deine Registrierung bei unserer KI-basierten
+        Volunteering-Plattform.
+      </p>
+      #if(verificationCode):
+        <p>
+          Um deine Registrierung abzuschließen, gib bitte den folgenden
+          Verifikationscode ein:
+        </p>
+        <div class="verification-code">#(verificationCode)</div>
+      #endif
+      <p>Wir freuen uns, dich an Bord zu haben!</p>
+    #endexport
+#endextend
