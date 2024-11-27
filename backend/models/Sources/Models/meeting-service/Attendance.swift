@@ -19,6 +19,14 @@ public final class Attendance: Model, @unchecked Sendable {
         public convenience init(meeting: Meeting, identity: Identity) throws {
             try self.init(meetingId: meeting.requireID(), identityId: identity.requireID())
         }
+        
+        public convenience init(meetingId: Meeting.IDValue, identity: Identity) throws {
+            try self.init(meetingId: meetingId, identityId: identity.requireID())
+        }
+        
+        public convenience init(meeting: Meeting, identityId: Identity.IDValue) throws {
+            try self.init(meetingId: meeting.requireID(), identityId: identityId)
+        }
 
         public init(meetingId: Meeting.IDValue, identityId: Identity.IDValue) {
             self.$meeting.id = meetingId

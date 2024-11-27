@@ -150,10 +150,16 @@ struct MeetingController: RouteCollection {
         meeting.start = .now
         meeting.$chair.id = identityId
         meeting.code = String(Int.random(in: 100000...999999))
-        try await meeting.update(on: req.db)
         
-        let record = Record(id: try .init(meeting: meeting, lang: "DE"), identityId: identityId, status: .underway)
-        try await record.create(on: req.db)
+        try await req.db.transaction { db in
+            try await meeting.update(on: db)
+            
+            let record = Record(id: try .init(meeting: meeting, lang: "DE"), identityId: identityId, status: .underway)
+            try await record.create(on: db)
+            
+            let attendance = try Attendance(id: .init(meeting: meeting, identityId: identityId), status: .present)
+            try await attendance.save(on: req.db) // Updates or creates
+        }
         
         return try meeting.toGetMeetingDTO(showCode: true)
     }
