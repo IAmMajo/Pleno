@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,22 +35,19 @@ fun LoginPage(){
         .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
         ){
+        //TODO: CHANGE LOGIN PAGE!!!
         val annotatedString = buildAnnotatedString {
-            withStyle(style = SpanStyle(color = Color.Red)) {
-                append("Log ")
+            append("Log dich in deinen ")
+            withStyle(style = SpanStyle(color = Primary_dark)) {
+                append("Account")
             }
-            withStyle(style = SpanStyle(color = Color.Blue)) {
-                append("dich ")
-            }
-            withStyle(style = SpanStyle(color = Color.Green)) {
-                append("in ")
-            }
-            append("dein Account ein!")
+            append(" ein!")
         }
-        Text(text = annotatedString,fontSize = 32.sp)
+        Text(text = annotatedString,fontSize = 24.sp, color = Text_light,fontWeight = FontWeight.Bold)
         Column(
             modifier = Modifier
                 .fillMaxHeight(),
+
             verticalArrangement = Arrangement.Center,
         ) {
             CustomInputField(label = "Username", placeholder = "Enter your username", horizontalPadding = 0.dp, verticalPadding = 0.dp)
