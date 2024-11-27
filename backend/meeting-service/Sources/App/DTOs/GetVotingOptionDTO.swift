@@ -34,7 +34,7 @@ extension Validator where T == [GetVotingOptionDTO] {
                 return ValidatorResults.GetVotingOptionDTOArray(isValidGetVotingOptionDTOArray: false)
             }
             for option in input.enumerated() {
-                guard option.element.index == UInt8(option.offset) else {
+                guard option.element.index == UInt8(option.offset + 1) else {
                     return ValidatorResults.GetVotingOptionDTOArray(isValidGetVotingOptionDTOArray: false)
                 }
             }

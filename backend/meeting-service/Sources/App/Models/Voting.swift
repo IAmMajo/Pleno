@@ -4,7 +4,7 @@ import MeetingServiceDTOs
 extension Voting {
     public func toGetVotingDTO() throws -> GetVotingDTO {
         try .init(id: self.requireID(),
-                  meetingId: self.meeting.requireID(),
+                  meetingId: self.$meeting.id,
                   question: self.question,
                   description: self.description,
                   isOpen: self.isOpen,

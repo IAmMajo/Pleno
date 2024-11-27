@@ -8,6 +8,7 @@ struct CreateVoting: AsyncMigration {
             .id()
             .field("meeting_id", .uuid, .required, .references(Meeting.schema, .id))
             .field("question", .string, .required)
+            .field("description", .string, .required, .sql(.default("")))
             .field("is_open", .bool, .required, .sql(.default(false)))
             .field("content", .string, .required, .sql(.default("")))
             .field("started_at", .datetime/*, .required, .sql(.default(SQLFunction("now")))*/)

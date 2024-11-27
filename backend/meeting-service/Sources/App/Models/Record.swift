@@ -3,7 +3,7 @@ import MeetingServiceDTOs
 
 extension Record {
     public func toGetRecordDTO() throws -> GetRecordDTO {
-        try .init(meetingId: self.requireID().meeting.requireID(),
+        try .init(meetingId: self.requireID().$meeting.id,
                   lang: self.requireID().lang,
                   identity: self.identity.toGetIdentityDTO(),
                   status: self.status.convert(),
