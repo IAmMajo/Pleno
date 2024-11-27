@@ -69,7 +69,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("io.noties.markwon:core:4.6.2")
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.8.4" +
-            "")
+    implementation("androidx.navigation:navigation-compose:2.8.4")
 
 }
