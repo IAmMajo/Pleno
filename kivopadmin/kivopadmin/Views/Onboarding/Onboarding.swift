@@ -1,10 +1,3 @@
-//
-//  Onboarding.swift
-//  KIVoP-ios
-//
-//  Created by Amine Ahamri on 07.11.24.
-//
-
 import SwiftUI
 
 struct Onboarding: View {
@@ -13,7 +6,7 @@ struct Onboarding: View {
     @State private var navigateToLogin = false
 
     var body: some View {
-        NavigationStack{
+        NavigationStack {
             VStack {
                 Spacer()
                 
@@ -25,7 +18,7 @@ struct Onboarding: View {
                     .padding(.bottom, 10)
                 
                 if currentIndex == 0 {
-                    // Erster onboarding screen
+                    // Erster Onboarding-Bildschirm
                     VStack {
                         Image("Onboarding1")
                             .resizable()
@@ -54,7 +47,7 @@ struct Onboarding: View {
                         Spacer().frame(height: 20)
                     }
                 } else if currentIndex == 1 {
-                    // Zweiter onboarding screen
+                    // Zweiter Onboarding-Bildschirm
                     VStack {
                         Image("Onboarding2")
                             .resizable()
@@ -93,7 +86,7 @@ struct Onboarding: View {
                 
                 Spacer()
                 
-                // Seiten indikator
+                // Seitenindikator
                 HStack(spacing: 8) {
                     Circle()
                         .fill(currentIndex == 0 ? Color.blue : Color.gray.opacity(0.3))
@@ -105,7 +98,7 @@ struct Onboarding: View {
                 }
                 .padding(.bottom, 20)
                 
-                // Navigation buttons
+                // Navigationsbuttons
                 HStack {
                     if currentIndex > 0 {
                         Button(action: {
@@ -131,6 +124,8 @@ struct Onboarding: View {
                             if currentIndex < 1 {
                                 currentIndex += 1
                             } else {
+                                // Flag in UserDefaults setzen und zu Login weiterleiten
+                                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
                                 navigateToLogin = true
                             }
                         }
@@ -148,14 +143,15 @@ struct Onboarding: View {
                 
                 if currentIndex == 0 {
                     Button(action: {
-                        // Aktion
+                        // Onboarding überspringen
+                        UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                        navigateToLogin = true
                     }) {
-                        NavigationLink(destination: Onboarding_Login()) {
-                            Text("Einführung überspringen")
-                                .foregroundColor(.gray)
-                                .font(.footnote)
-                                .underline()
-                        }}
+                        Text("Einführung überspringen")
+                            .foregroundColor(.gray)
+                            .font(.footnote)
+                            .underline()
+                    }
                     .padding(.bottom, 20)
                 }
             }
@@ -163,12 +159,12 @@ struct Onboarding: View {
                 DragGesture()
                     .onEnded { value in
                         if value.translation.width < -50 && currentIndex < 1 {
-                            // Swipe links nach vorne
+                            // Swipe nach links
                             withAnimation {
                                 currentIndex += 1
                             }
                         } else if value.translation.width > 50 && currentIndex > 0 {
-                            // Swipe rechts nach hinten
+                            // Swipe nach rechts
                             withAnimation {
                                 currentIndex -= 1
                             }
@@ -178,9 +174,15 @@ struct Onboarding: View {
             .navigationDestination(isPresented: $navigateToLogin) {
                 Onboarding_Login()
             }
-        } .navigationBarBackButtonHidden(true)
+        }
+        .onAppear {
+            // Wenn der Benutzer das Onboarding bereits gesehen hat, direkt zur Login-Ansicht weiterleiten
+            if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+                navigateToLogin = true
+            }
+        }
+        .navigationBarBackButtonHidden(true)
     }
-
 }
 
 struct Onboarding_Previews: PreviewProvider {

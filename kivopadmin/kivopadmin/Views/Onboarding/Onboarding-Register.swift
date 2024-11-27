@@ -8,7 +8,7 @@ struct Onboarding_Register: View {
     @State private var confirmPassword: String = ""
     @State private var errorMessage: String? = nil
     @State private var isLoading: Bool = false
-    @State private var registrationSuccessful: Bool = false
+    @State private var navigateToMainPage: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -129,7 +129,7 @@ struct Onboarding_Register: View {
             .background(Color(UIColor.systemGray6))
             .edgesIgnoringSafeArea(.all)
             .navigationBarBackButtonHidden(true)
-            .navigationDestination(isPresented: $registrationSuccessful) {
+            .navigationDestination(isPresented: $navigateToMainPage) {
                 MainPage()
             }
         }
@@ -157,9 +157,16 @@ struct Onboarding_Register: View {
                 isLoading = false
                 switch result {
                 case .success:
-                    registrationSuccessful = true
+                    saveCredentialsToKeychain(email: email, password: password)
+                    navigateToMainPage = true
                 case .failure(let error):
-                    errorMessage = error.localizedDescription
+                    if error.localizedDescription.contains("200") {
+                        // Bei Fehlercode 200 als Erfolg behandeln
+                        saveCredentialsToKeychain(email: email, password: password)
+                        navigateToMainPage = true
+                    } else {
+                        errorMessage = error.localizedDescription
+                    }
                 }
             }
         }
@@ -169,6 +176,11 @@ struct Onboarding_Register: View {
         let passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$&*]).{8,}$"
         let predicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
         return predicate.evaluate(with: password)
+    }
+    
+    private func saveCredentialsToKeychain(email: String, password: String) {
+        KeychainHelper.save(key: "userEmail", value: email)
+        KeychainHelper.save(key: "userPassword", value: password)
     }
     
     private func inputField(title: String, text: Binding<String>) -> some View {

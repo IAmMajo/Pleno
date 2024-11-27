@@ -7,13 +7,14 @@ struct Onboarding_Login: View {
     @State private var errorMessage: String? = nil
     @State private var isLoading: Bool = false
     @State private var loginSuccessful: Bool = false
+    @State private var isBiometricPromptShown: Bool = false
 
     var body: some View {
         NavigationStack {
             VStack {
                 Spacer().frame(height: 40)
                 
-                // Login title
+                // Titel "Login"
                 ZStack(alignment: .bottom) {
                     Text("Login")
                         .font(.title)
@@ -28,18 +29,18 @@ struct Onboarding_Login: View {
                 .padding(.bottom, 40)
                 .padding(.top, 40)
                 
-                // Email TextField
+                // Eingabefeld für die E-Mail
                 inputField(title: "E-Mail", text: $email)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
                 
-                // Password TextField
+                // Eingabefeld für das Passwort
                 inputField(title: "Passwort", text: $password, isSecure: true)
                 
                 Spacer()
                 
-                // Login Button
+                // Login-Button
                 Button(action: {
                     loginUser()
                 }) {
@@ -62,7 +63,7 @@ struct Onboarding_Login: View {
                 .padding(.bottom, 10)
                 .disabled(isLoading || email.isEmpty || password.isEmpty)
                 
-                // Error Message
+                // Fehlermeldung anzeigen
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
@@ -70,7 +71,7 @@ struct Onboarding_Login: View {
                         .padding(.horizontal, 24)
                 }
                 
-                // Register Button
+                // Registrieren-Button
                 NavigationLink(destination: Onboarding_Register()) {
                     Text("Registrieren")
                         .foregroundColor(.blue)
@@ -81,7 +82,7 @@ struct Onboarding_Login: View {
                 }
                 .padding(.horizontal, 24)
                 
-                // Back Button
+                // Zurück-Button
                 NavigationLink(destination: Onboarding()) {
                     Text("Zurück")
                         .foregroundColor(.gray)
@@ -99,9 +100,13 @@ struct Onboarding_Login: View {
             .navigationDestination(isPresented: $loginSuccessful) {
                 MainPage()
             }
+            .onAppear {
+                attemptBiometricLogin()
+            }
         }
     }
     
+    // Funktion für den Login
     private func loginUser() {
         isLoading = true
         errorMessage = nil
@@ -112,7 +117,7 @@ struct Onboarding_Login: View {
                 isLoading = false
                 switch result {
                 case .success(let token):
-                    // Save token and navigate to MainPage
+                    // Token speichern und zur Hauptseite navigieren
                     UserDefaults.standard.set(token, forKey: "jwtToken")
                     loginSuccessful = true
                 case .failure(let error):
@@ -122,6 +127,29 @@ struct Onboarding_Login: View {
         }
     }
     
+    // Funktion zur biometrischen Anmeldung
+    private func attemptBiometricLogin() {
+        // Überprüfen, ob Zugangsdaten im Schlüsselbund gespeichert sind
+        if let storedEmail = KeychainHelper.load(key: "userEmail"),
+           let storedPassword = KeychainHelper.load(key: "userPassword"),
+           !isBiometricPromptShown {
+            
+            // Biometrische Authentifizierung auslösen
+            isBiometricPromptShown = true
+            Task {
+                let isAuthenticated = await BiometricAuth.authenticate()
+                DispatchQueue.main.async {
+                    if isAuthenticated {
+                        email = storedEmail
+                        password = storedPassword
+                        loginUser()
+                    }
+                }
+            }
+        }
+    }
+    
+    // Eingabefeld-Komponente
     private func inputField(title: String, text: Binding<String>, isSecure: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
@@ -150,8 +178,8 @@ struct Onboarding_Login: View {
 struct Onboarding_Login_Previews: PreviewProvider {
     static var previews: some View {
         Onboarding_Login()
-            .environment(\.colorScheme, .light) // Preview in Light Mode
+            .environment(\.colorScheme, .light) // Vorschau im hellen Modus
         Onboarding_Login()
-            .environment(\.colorScheme, .dark) // Preview in Dark Mode
+            .environment(\.colorScheme, .dark) // Vorschau im dunklen Modus
     }
 }
