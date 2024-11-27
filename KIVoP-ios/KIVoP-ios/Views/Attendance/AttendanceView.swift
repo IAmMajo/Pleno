@@ -135,8 +135,8 @@ struct AttendanceView: View {
     private func destinationView(for meeting: GetMeetingDTO) -> some View {
         switch meeting.status {
         case .inSession:
-            return AnyView(AttendanceCurrentView(meeting: meeting))
-            
+            let viewModel = AttendanceCurrentViewModel(meeting: meeting)
+            return AnyView(AttendanceCurrentView(viewModel: viewModel))
         case .completed:
             let viewModel = AttendanceDetailViewModel(meeting: meeting)
             return AnyView(AttendanceDetailView(viewModel: viewModel))
