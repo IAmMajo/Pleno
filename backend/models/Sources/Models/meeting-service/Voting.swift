@@ -14,11 +14,11 @@ public final class Voting: Model, @unchecked Sendable {
     @Parent(key: "meeting_id")
     public var meeting: Meeting
     
-    @Field(key: "description")
-    public var description: String
-    
     @Field(key: "question")
     public var question: String
+    
+    @Field(key: "description")
+    public var description: String
     
     @Field(key: "is_open")
     public var isOpen: Bool
