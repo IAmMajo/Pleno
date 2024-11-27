@@ -51,6 +51,8 @@ android {
 
 dependencies {
 
+    // OkHttp für HTTP-Anfragen
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -70,5 +72,6 @@ dependencies {
     implementation("io.noties.markwon:core:4.6.2")
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.4")
-
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.code.gson:gson:2.10.1")
 }
