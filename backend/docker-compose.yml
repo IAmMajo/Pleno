@@ -189,6 +189,7 @@ services:
       - config-service
     environment:
       <<: *shared_environment
+    env_file: ./../.env
     labels:
       traefik.enable: true
       traefik.http.routers.notifications-service.rule: PathPrefix(`/email`)
