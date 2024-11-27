@@ -29,8 +29,6 @@ import com.example.kivopandriod.services.interpolateColor
 import com.example.kivopandriod.ui.theme.Background_secondary_light
 import com.example.kivopandriod.ui.theme.Text_light
 
-val CakeColorStart = Color(0xFF2C7D91)
-val CakeColorEnd = Color(0xFFF7DEC8)
 
 @SuppressLint("DefaultLocale")
 @Composable
