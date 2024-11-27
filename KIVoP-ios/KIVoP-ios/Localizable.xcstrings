@@ -57,22 +57,7 @@
     "%lld%%" : {
 
     },
-    "•" : {
-
-    },
-    "01.11.23" : {
-
-    },
-    "01.12.23" : {
-
-    },
-    "04.11.23" : {
-
-    },
     "8/12" : {
-
-    },
-    "9/12" : {
 
     },
     "10" : {
@@ -120,9 +105,6 @@
           }
         }
       }
-    },
-    "18:06 Uhr" : {
-
     },
     "21.01.2024" : {
       "localizations" : {
@@ -190,9 +172,6 @@
         }
       }
     },
-    "Abschied" : {
-
-    },
     "Abstimmen" : {
 
     },
@@ -259,9 +238,6 @@
     "Adresse" : {
 
     },
-    "Agenda" : {
-
-    },
     "AKTIONEN" : {
       "localizations" : {
         "de" : {
@@ -301,6 +277,7 @@
       }
     },
     "Aktuelle Sitzung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -331,6 +308,9 @@
           }
         }
       }
+    },
+    "Aktuelle Sitzungen" : {
+
     },
     "Aktuelles Passwort" : {
       "localizations" : {
@@ -401,6 +381,9 @@
     "Anstehend" : {
 
     },
+    "Anstehende Sitzungen" : {
+
+    },
     "Anstehende Termine" : {
       "localizations" : {
         "de" : {
@@ -464,6 +447,9 @@
         }
       }
     },
+    "Beschreibung" : {
+
+    },
     "Bitte klicke nun auf den " : {
       "localizations" : {
         "de" : {
@@ -485,9 +471,6 @@
           }
         }
       }
-    },
-    "Bla" : {
-
     },
     "Code scannen" : {
       "localizations" : {
@@ -529,9 +512,6 @@
           }
         }
       }
-    },
-    "Dezember 2023" : {
-
     },
     "Dies ist nur eine vorläufige Umfrage, um festzustellen, wie viele Mitglieder kommen." : {
       "localizations" : {
@@ -645,6 +625,9 @@
     "Enthalten" : {
 
     },
+    "Error: %@" : {
+
+    },
     "erstelle " : {
       "localizations" : {
         "de" : {
@@ -693,9 +676,6 @@
     "Fast Fertig" : {
 
     },
-    "Franz" : {
-
-    },
     "Galerie" : {
       "localizations" : {
         "de" : {
@@ -717,9 +697,6 @@
           }
         }
       }
-    },
-    "Glühwein" : {
-
     },
     "Hallo" : {
 
@@ -768,12 +745,6 @@
           }
         }
       }
-    },
-    "Heinz-Peters" : {
-
-    },
-    "In der alten Turnhalle hinter dem Friedhof, Altes Grab 5 b, 42069 Hölle" : {
-
     },
     "Ja" : {
       "localizations" : {
@@ -855,6 +826,12 @@
     "Keine Abstimmungen gefunden" : {
 
     },
+    "Keine anstehenden Sitzungen." : {
+
+    },
+    "Keine vergangenen Sitzungen." : {
+
+    },
     "KIVoP " : {
       "localizations" : {
         "de" : {
@@ -910,6 +887,9 @@
           }
         }
       }
+    },
+    "Loading meetings..." : {
+
     },
     "Login" : {
       "localizations" : {
@@ -1172,7 +1152,7 @@
         }
       }
     },
-    "November 2023" : {
+    "No meetings available." : {
 
     },
     "oder" : {
@@ -1396,9 +1376,6 @@
       }
     },
     "Protokoll" : {
-
-    },
-    "Protokollant" : {
 
     },
     "Protokolle" : {
@@ -1732,6 +1709,9 @@
     "Vergangen" : {
 
     },
+    "Vergangene Sitzungen" : {
+
+    },
     "Vergangene Termine" : {
       "localizations" : {
         "de" : {
@@ -1792,15 +1772,6 @@
           }
         }
       }
-    },
-    "Vorsitzende wählen" : {
-
-    },
-    "Vorstandsitzung Dez. 23" : {
-
-    },
-    "Vorstandsitzung Nov. 23" : {
-
     },
     "Weiter" : {
       "localizations" : {

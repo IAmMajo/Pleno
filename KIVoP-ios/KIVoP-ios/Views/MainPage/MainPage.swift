@@ -15,7 +15,7 @@ struct MainPage: View {
     @State private var errorMessage: String? = nil
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
                 // Begrüßung
                 if isLoading {
@@ -75,13 +75,23 @@ struct MainPage: View {
                 // Options List
                 List {
                     Section {
-                        NavigationLink(destination: Meeting()) {
-                            HStack {
-                                Image(systemName: "calendar.badge.clock")
-                                    .foregroundColor(.accentColor)
-                                Text("Sitzungen")
-                                    .foregroundColor(Color.primary)
+                        if meetingManager.isLoading {
+                            ProgressView("Loading meetings...") // Ladeanzeige
+                                .progressViewStyle(CircularProgressViewStyle())
+                        } else if !meetingManager.meetings.isEmpty {
+                            NavigationLink(destination: MeetingView(meetings: meetingManager.meetings)) {
+                                HStack {
+                                    Image(systemName: "calendar.badge.clock")
+                                        .foregroundColor(.accentColor)
+                                    Text("Sitzungen")
+                                        .foregroundColor(Color.primary)
+                                }
                             }
+                        } else if let errorMessage = meetingManager.errorMessage {
+                            Text("Error: \(errorMessage)")
+                                .foregroundColor(.red)
+                        } else {
+                            Text("No meetings available.")
                         }
                     }
 
@@ -180,13 +190,10 @@ struct MainPage: View {
                 }
             }
             .background(Color(UIColor.systemGroupedBackground))
-        }
-        .navigationBarHidden(true)
-        .onAppear {
-            loadUserProfile()
-            loadCurrentMeeting()
-        }
-    }
+            .onAppear {
+                meetingManager.fetchAllMeetings() // Meetings laden, wenn die View erscheint
+            }
+        }.navigationBarHidden(true) // Verstecken von navigation bar und back button
 
     // MARK: - Daten laden
     private func loadUserProfile() {
