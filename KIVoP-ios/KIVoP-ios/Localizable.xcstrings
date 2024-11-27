@@ -48,7 +48,7 @@
     " Mitteilung." : {
 
     },
-    "(ca. 160 min.)" : {
+    "(ca. %u min.)" : {
 
     },
     "%lld" : {
@@ -863,9 +863,6 @@
     "Laden..." : {
 
     },
-    "Langweiliger Orga-Punkt" : {
-
-    },
     "Link" : {
       "localizations" : {
         "de" : {
@@ -1592,12 +1589,6 @@
           }
         }
       }
-    },
-    "Treffen mit Förderverein" : {
-
-    },
-    "Treffen mit Kassenwart" : {
-
     },
     "Überprüfung..." : {
 

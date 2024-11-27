@@ -13,7 +13,9 @@ struct MainPage: View {
     @State private var attendeesCount: Int? = nil
     @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
-
+    
+    @StateObject private var meetingManager = MeetingManager()
+    
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
@@ -32,7 +34,7 @@ struct MainPage: View {
                         .foregroundColor(Color.primary)
                         .padding([.top, .leading], 20)
                 }
-
+                
                 // Profil-Informationen
                 NavigationLink(destination: MainPage_ProfilView()) {
                     HStack {
@@ -50,7 +52,7 @@ struct MainPage: View {
                                 .frame(width: 50, height: 50)
                                 .overlay(Text(shortName).foregroundColor(.white))
                         }
-
+                        
                         VStack(alignment: .leading) {
                             Text(name.isEmpty ? "Name laden..." : name)
                                 .font(.headline)
@@ -59,9 +61,9 @@ struct MainPage: View {
                                 .font(.subheadline)
                                 .foregroundColor(Color.secondary)
                         }
-
+                        
                         Spacer()
-
+                        
                         Image(systemName: "chevron.right")
                             .foregroundColor(Color.secondary)
                     }
@@ -71,7 +73,7 @@ struct MainPage: View {
                     .padding(.horizontal, 10)
                     .padding(10)
                 }
-
+                
                 // Options List
                 List {
                     Section {
@@ -94,7 +96,7 @@ struct MainPage: View {
                             Text("No meetings available.")
                         }
                     }
-
+                    
                     Section {
                         NavigationLink(destination: VotingsView()) {
                             HStack {
@@ -104,7 +106,7 @@ struct MainPage: View {
                                     .foregroundColor(Color.primary)
                             }
                         }
-
+                        
                         NavigationLink(destination: ProtokolleView()) {
                             HStack {
                                 Image(systemName: "doc.text")
@@ -113,7 +115,7 @@ struct MainPage: View {
                                     .foregroundColor(Color.primary)
                             }
                         }
-
+                        
                         NavigationLink(destination: AnwesenheitView()) {
                             HStack {
                                 Image(systemName: "person.crop.circle.fill.badge.checkmark")
@@ -127,16 +129,16 @@ struct MainPage: View {
                 .listStyle(InsetGroupedListStyle())
                 .background(Color.clear)
                 .padding(.top, -10)
-
+                
                 Spacer()
-
+                
                 // Meeting Box
                 if let meeting = meeting {
                     VStack(alignment: .leading, spacing: 10) {
                         Text(meeting)
                             .font(.headline)
                             .foregroundColor(.white)
-
+                        
                         HStack {
                             if let meetingDate = meetingDate {
                                 Image(systemName: "calendar")
@@ -144,9 +146,9 @@ struct MainPage: View {
                                 Text(meetingDate)
                                     .foregroundColor(.white)
                             }
-
+                            
                             Spacer()
-
+                            
                             if let attendeesCount = attendeesCount {
                                 HStack(spacing: 4) {
                                     Text("\(attendeesCount)")
@@ -157,18 +159,18 @@ struct MainPage: View {
                                 .padding(.trailing, 10)
                             }
                         }
-
+                        
                         if let meetingTime = meetingTime {
                             HStack {
                                 Image(systemName: "clock")
                                     .foregroundColor(.white)
                                 Text(meetingTime)
                                     .foregroundColor(.white)
-
+                                
                                 Spacer()
                             }
                         }
-
+                        
                         Button(action: {
                             // Aktion für das aktuelle Meeting
                         }) {
@@ -190,13 +192,17 @@ struct MainPage: View {
                 }
             }
             .background(Color(UIColor.systemGroupedBackground))
-            .onAppear {
-                meetingManager.fetchAllMeetings() // Meetings laden, wenn die View erscheint
-            }
-        }.navigationBarHidden(true) // Verstecken von navigation bar und back button
-
+        }
+        .navigationBarHidden(true) // Verstecken von navigation bar und back button
+        .onAppear {
+            meetingManager.fetchAllMeetings() // Meetings laden, wenn die View erscheint
+            loadUserProfile()
+            loadCurrentMeeting()
+        }
+    }
+        
     // MARK: - Daten laden
-    private func loadUserProfile() {
+    func loadUserProfile() {
         MainPageAPI.fetchUserProfile { result in
             DispatchQueue.main.async {
                 self.isLoading = false
@@ -211,8 +217,8 @@ struct MainPage: View {
             }
         }
     }
-
-    private func loadProfilePicture() {
+        
+    func loadProfilePicture() {
         MainPageAPI.fetchProfilePicture { result in
             DispatchQueue.main.async {
                 switch result {
@@ -224,8 +230,8 @@ struct MainPage: View {
             }
         }
     }
-
-    private func loadCurrentMeeting() {
+        
+    func loadCurrentMeeting() {
         MainPageAPI.fetchCurrentMeeting { result in
             DispatchQueue.main.async {
                 switch result {
@@ -242,24 +248,25 @@ struct MainPage: View {
             }
         }
     }
-
+        
     // MARK: - Helferfunktionen
-    private func extractFirstName(from fullName: String) -> String {
+    func extractFirstName(from fullName: String) -> String {
         return fullName.split(separator: " ").first.map(String.init) ?? "Nutzer"
     }
-
-    private func formatDate(_ date: Date) -> String {
+    
+    func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
     }
-
-    private func formatTime(_ date: Date) -> String {
+    
+    func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
 }
+
 
 struct MainPage_Previews: PreviewProvider {
     static var previews: some View {
