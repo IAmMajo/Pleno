@@ -11,7 +11,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 
@@ -20,6 +22,7 @@ fun CustomInputField(
     label: String,
     placeholder: String,
     modifier: Modifier = Modifier,
+    isPasswort: Boolean = false,
     horizontalPadding: Dp = 16.dp,
     verticalPadding: Dp = 8.dp
 ) {
@@ -35,12 +38,14 @@ fun CustomInputField(
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.fillMaxWidth()
         )
-
+        val visualTransformation = if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None
         OutlinedTextField(
+            visualTransformation = visualTransformation,
             value = textState.value,
             onValueChange = { textState.value = it },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(text = placeholder) }
+            placeholder = { Text(text = placeholder)
+            }
         )
     }
 }
