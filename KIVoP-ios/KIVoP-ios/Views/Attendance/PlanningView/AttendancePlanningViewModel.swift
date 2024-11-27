@@ -144,17 +144,17 @@ class AttendancePlanningViewModel: ObservableObject {
         attendances.filter { $0.status == .absent }.count
     }
     
-        // Sortierungspriorität definieren
-        private func sortOrder(for status: AttendanceStatus?) -> Int {
-            switch status {
-            case .accepted:
-                return 0
-            case .none:
-                return 1
-            case .absent:
-                return 2
-            case .some(.present):
-                return 3
-            }
+    // Sortierungspriorität definieren
+    private func sortOrder(for status: AttendanceStatus?) -> Int {
+        switch status {
+        case .accepted:
+            return 0
+        case .none:
+            return 1
+        case .absent:
+            return 2
+        case .some(.present):
+            return 3
         }
+    }
 }

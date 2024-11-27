@@ -27,42 +27,39 @@ class AttendanceDetailViewModel: ObservableObject {
                 // Authentifizierung und Token holen
                 let token = try await AuthController.shared.getAuthToken()
                 
-                // URL für die Anfrage erstellen
+                // URL und Request erstellen
                 guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/attendances") else {
-                    throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+                    print("Ungültige URL.")
+                    return
                 }
-                
-                print("Meeting: \(meeting.id)")
-                print("Token: \(token)")
                 
                 var request = URLRequest(url: url)
                 request.httpMethod = "GET"
                 request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
                 
-                // API-Aufruf starten
+                // API-Aufruf und Antwort verarbeiten
                 let (data, response) = try await URLSession.shared.data(for: request)
-                
                 guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    throw NSError(domain: "Failed to fetch attendances", code: 500, userInfo: nil)
+                    print("Fehlerhafte Antwort vom Server.")
+                    return
                 }
                 
-                // JSON dekodieren und auf dem Hauptthread verarbeiten
-                let decoder = JSONDecoder()
-                DispatchQueue.main.async {
-                    do {
-                        let fetchedAttendances = try decoder.decode([GetAttendanceDTO].self, from: data)
-                        self.attendances = fetchedAttendances
-                    } catch {
-                        self.errorMessage = "Fehler beim Dekodieren der Anwesenheiten: \(error.localizedDescription)"
-                    }
-                    self.isLoading = false
+                // JSON dekodieren
+                let fetchedAttendances = try JSONDecoder().decode([GetAttendanceDTO].self, from: data)
+                
+                // Attendances sortieren
+                self.attendances = fetchedAttendances.sorted {
+                    let orderA = self.sortOrder(for: $0.status)
+                    let orderB = self.sortOrder(for: $1.status)
+                    
+                    // Zuerst nach Status, dann alphabetisch nach Name sortieren
+                    return orderA == orderB
+                        ? $0.identity.name.localizedCaseInsensitiveCompare($1.identity.name) == .orderedAscending
+                        : orderA < orderB
                 }
+                
             } catch {
-                // Fehler auf dem Hauptthread behandeln
-                DispatchQueue.main.async {
-                    self.errorMessage = error.localizedDescription
-                    self.isLoading = false
-                }
+                print("Fehler: \(error.localizedDescription)")
             }
         }
     }
@@ -80,6 +77,16 @@ class AttendanceDetailViewModel: ObservableObject {
     }
     
     var absentCount: Int {
-        attendances.filter { $0.status == .absent }.count
+        attendances.filter { $0.status != .present }.count
+    }
+    
+    // Sortierungspriorität definieren
+    private func sortOrder(for status: AttendanceStatus?) -> Int {
+        switch status {
+        case .present:
+            return 0
+        default:
+            return 1
+        }
     }
 }

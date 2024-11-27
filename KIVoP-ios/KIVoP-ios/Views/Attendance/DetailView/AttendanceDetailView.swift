@@ -110,16 +110,12 @@ struct AttendanceDetailView: View {
                                         
                                         // Inline-Statusbehandlung und Anzeige von Symbolen
                                         Image(systemName:
-                                            attendance.status == .present ? "questionmark.circle" :
-                                            attendance.status == .absent ? "xmark" :
-                                            attendance.status == .accepted ? "checkmark" :
-                                            "questionmark.circle"
+                                            attendance.status == .present ? "checkmark" :
+                                            "xmark"
                                         )
                                         .foregroundColor(
-                                            attendance.status == .present ? .gray :
-                                            attendance.status == .absent ? .red :
-                                            attendance.status == .accepted ? .blue :
-                                            .gray
+                                            attendance.status == .present ? .blue :
+                                            .red
                                         )
                                         .font(.system(size: 18))
                                     }
