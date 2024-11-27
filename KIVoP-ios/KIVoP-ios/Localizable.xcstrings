@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {
-      "shouldTranslate" : false
-    },
     " deines Vereins dich aufnehmen." : {
       "localizations" : {
         "de" : {
@@ -48,7 +45,10 @@
         }
       }
     },
-    "(ca. %u min.)" : {
+    " Mitteilung." : {
+
+    },
+    "(ca. 160 min.)" : {
 
     },
     "%lld" : {
@@ -61,6 +61,7 @@
 
     },
     "10" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -83,6 +84,7 @@
       }
     },
     "18:06" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -553,6 +555,7 @@
       }
     },
     "E-Mail" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -575,6 +578,7 @@
       }
     },
     "E-MAIL" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -850,6 +854,18 @@
         }
       }
     },
+    "Lade Profilbild..." : {
+
+    },
+    "Lade..." : {
+
+    },
+    "Laden..." : {
+
+    },
+    "Langweiliger Orga-Punkt" : {
+
+    },
     "Link" : {
       "localizations" : {
         "de" : {
@@ -958,11 +974,12 @@
       }
     },
     "Mitteilung." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mitteilung."
+            "value" : " Mitteilung."
           }
         },
         "en" : {
@@ -1050,6 +1067,7 @@
       }
     },
     "NAME" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1070,6 +1088,9 @@
           }
         }
       }
+    },
+    "Name eingeben" : {
+
     },
     "Nein" : {
       "localizations" : {
@@ -1571,6 +1592,15 @@
           }
         }
       }
+    },
+    "Treffen mit Förderverein" : {
+
+    },
+    "Treffen mit Kassenwart" : {
+
+    },
+    "Überprüfung..." : {
+
     },
     "Umfragen, " : {
       "localizations" : {

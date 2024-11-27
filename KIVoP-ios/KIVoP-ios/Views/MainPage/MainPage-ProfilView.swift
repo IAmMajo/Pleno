@@ -1,21 +1,29 @@
 import SwiftUI
+import AuthServiceDTOs
 
 struct MainPage_ProfilView: View {
-    @State private var name: String = "Max Mustermann"
-    @State private var ShortName: String = "MM"
-    @State private var clubName: String = "Name des Vereins der manchmal auch sehr lange werden kann e.V."
-    @State private var clubShortName: String = "VL"
+    // Benutzerinformationen
+    @State private var name: String = ""
+    @State private var shortName: String = "??"
+    @State private var profileImage: UIImage? = nil
+
+    // Vereinsinformationen (gehardcoded)
+    private let clubName: String = "Name des Vereins der manchmal auch sehr lange werden kann e.V."
+    private let clubShortName: String = "VL"
+
+    // UI-Zustände
     @State private var showSignOutConfirmation = false
     @State private var showDeleteAccountAlert = false
     @State private var navigateToLogin = false
+    @State private var isLoading = true
+    @State private var errorMessage: String? = nil
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
-                Spacer()
-                    .frame(height: 10)
-                
-                // Vereinslogo und Vereinsname
+                Spacer().frame(height: 10)
+
+                // Vereinslogo und Name
                 VStack {
                     Circle()
                         .fill(Color.gray.opacity(0.2))
@@ -33,38 +41,45 @@ struct MainPage_ProfilView: View {
                 }
                 .padding(.horizontal)
 
-                // Profilbild und Bearbeiten-Option
+                // Profilbild oder ShortName anzeigen
                 VStack {
-                    Circle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 80, height: 80)
-                        .overlay(Text(ShortName).font(.title).foregroundColor(.white))
+                    if let profileImage = profileImage {
+                        Image(uiImage: profileImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 80, height: 80)
+                            .clipShape(Circle())
+                    } else {
+                        Circle()
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(width: 80, height: 80)
+                            .overlay(Text(shortName).font(.title).foregroundColor(.white))
+                    }
 
                     NavigationLink(destination: MainPage_ProfilView_ProfilPicture()) {
                         Text("Bearbeiten")
                             .font(.footnote)
-                            .foregroundColor(.accentColor) // Dynamische Farbe für Dark Mode
+                            .foregroundColor(.accentColor)
                     }
                 }
 
                 // Benutzerinformationen
                 VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        NavigationLink(destination: MainPage_ProfilView_Name()) {
+                    NavigationLink(destination: MainPage_ProfilView_Name()) {
+                        HStack {
                             Text("Name")
                             Spacer()
-                            Text(name)
-                                .foregroundColor(Color.secondary) // Dynamische Farbe
+                            Text(name.isEmpty ? "Lade Benutzername..." : name)
+                                .foregroundColor(Color.secondary)
                         }
                     }
                     .padding()
-                    .background(Color(UIColor.systemBackground).opacity(0.8)) // Passt sich dem Modus an
+                    .background(Color(UIColor.systemBackground).opacity(0.8))
                     .cornerRadius(10)
 
-                    // Überschrift für Passwort
                     Text("PASSWORT")
                         .font(.footnote)
-                        .foregroundColor(Color.secondary) // Dynamische Farbe
+                        .foregroundColor(Color.secondary)
                         .padding(.top, 10)
 
                     NavigationLink(destination: MainPage_ProfilView_Password()) {
@@ -72,20 +87,19 @@ struct MainPage_ProfilView: View {
                             Text("Passwort ändern")
                             Spacer()
                             Image(systemName: "chevron.right")
-                                .foregroundColor(Color.secondary) // Dynamische Farbe
+                                .foregroundColor(Color.secondary)
                         }
                         .padding()
-                        .background(Color(UIColor.systemBackground).opacity(0.8)) // Passt sich dem Modus an
+                        .background(Color(UIColor.systemBackground).opacity(0.8))
                         .cornerRadius(10)
                     }
 
-                    // Überschrift für Aktionen
                     Text("AKTIONEN")
                         .font(.footnote)
-                        .foregroundColor(Color.secondary) // Dynamische Farbe
+                        .foregroundColor(Color.secondary)
                         .padding(.top, 20)
 
-                    // Abmelden-Button mit Bestätigungsdialog
+                    // Abmelden-Button
                     Button(action: {
                         showSignOutConfirmation = true
                     }) {
@@ -93,16 +107,15 @@ struct MainPage_ProfilView: View {
                             .foregroundColor(.red)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(Color(UIColor.systemBackground).opacity(0.8)) // Passt sich dem Modus an
+                            .background(Color(UIColor.systemBackground).opacity(0.8))
                             .cornerRadius(10)
                     }
                     .confirmationDialog("Wirklich abmelden?", isPresented: $showSignOutConfirmation, titleVisibility: .visible) {
                         Button("Abmelden", role: .destructive) {
+                            MainPageAPI.logoutUser()
                             navigateToLogin = true
                         }
-                        Button("Abbrechen", role: .cancel) {
-                            // Aktion für "Abbrechen"
-                        }
+                        Button("Abbrechen", role: .cancel) {}
                     }
 
                     Spacer().frame(height: 10)
@@ -119,9 +132,13 @@ struct MainPage_ProfilView: View {
                             .cornerRadius(10)
                     }
                     .alert("Möchtest du deinen Account wirklich löschen?", isPresented: $showDeleteAccountAlert) {
-                        Button("Abbrechen", role: .cancel) { }
+                        Button("Abbrechen", role: .cancel) {}
                         Button("Löschen", role: .destructive) {
-                            // Aktion für "Löschen"
+                            MainPageAPI.deleteUserAccount { result in
+                                if case .success = result {
+                                    navigateToLogin = true
+                                }
+                            }
                         }
                     } message: {
                         Text("Du kannst deine Wahl danach nicht mehr ändern!")
@@ -133,12 +150,26 @@ struct MainPage_ProfilView: View {
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(UIColor.systemGroupedBackground)) // Passt sich dem Modus an
-            .navigationBarTitle(name, displayMode: .inline)
+            .background(Color(UIColor.systemGroupedBackground))
+            .navigationBarTitle(name.isEmpty ? "Profil" : name, displayMode: .inline)
             .toolbarBackground(Color(UIColor.systemBackground), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .navigationDestination(isPresented: $navigateToLogin) {
                 Onboarding_Login()
+            }
+            .onAppear {
+                MainPageAPI.fetchUserProfile { result in
+                    DispatchQueue.main.async {
+                        isLoading = false
+                        switch result {
+                        case .success(let profile):
+                            name = profile.name ?? ""
+                            shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
+                        case .failure(let error):
+                            errorMessage = "Fehler: \(error.localizedDescription)"
+                        }
+                    }
+                }
             }
         }
     }
