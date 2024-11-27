@@ -21,6 +21,14 @@ public final class Vote: Model, @unchecked Sendable {
         public convenience init(voting: Voting, identity: Identity) throws {
             try self.init(votingId: voting.requireID(), identityId: identity.requireID())
         }
+        
+        public convenience init(votingId: Voting.IDValue, identity: Identity) throws {
+            try self.init(votingId: votingId, identityId: identity.requireID())
+        }
+        
+        public convenience init(voting: Voting, identityId: Identity.IDValue) throws {
+            try self.init(votingId: voting.requireID(), identityId: identityId)
+        }
 
         public init(votingId: Voting.IDValue, identityId: Identity.IDValue) {
             self.$voting.id = votingId

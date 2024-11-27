@@ -21,6 +21,7 @@ struct RecordController: RouteCollection {
         }
     }
     
+    /// **GET** `/meetings/{id}/records`
     @Sendable func getAllRecords(req: Request) async throws -> [GetRecordDTO] {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -33,6 +34,7 @@ struct RecordController: RouteCollection {
         }
     }
     
+    /// **GET** `/meetings/{id}/records/{lang}`
     @Sendable func getSingleRecord(req: Request) async throws -> GetRecordDTO {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -46,6 +48,7 @@ struct RecordController: RouteCollection {
         return try record.toGetRecordDTO()
     }
     
+    /// **PATCH** `/meetings/{id}/records/{lang}`
     @Sendable func updateRecord(req: Request) async throws -> GetRecordDTO {
         guard let userId = req.jwtPayload?.userID, let isAdmin = req.jwtPayload?.isAdmin else {
             throw Abort(.unauthorized)
@@ -91,6 +94,7 @@ struct RecordController: RouteCollection {
         return try record.toGetRecordDTO()
     }
     
+    /// **DELETE** `/meetings/{id}/records/{lang}`
     @Sendable func deleteRecord(req: Request) async throws -> HTTPStatus {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -108,6 +112,7 @@ struct RecordController: RouteCollection {
         return .noContent
     }
     
+    /// **PUT** `/meetings/{id}/records/{lang}/submit`
     @Sendable func submitRecord(req: Request) async throws -> GetRecordDTO {
         guard let userId = req.jwtPayload?.userID else {
             throw Abort(.unauthorized)
@@ -135,6 +140,7 @@ struct RecordController: RouteCollection {
         return try record.toGetRecordDTO()
     }
     
+    /// **PUT** `/meetings/{id}/records/{lang}/approve`
     @Sendable func approveRecord(req: Request) async throws -> GetRecordDTO {
         guard let isAdmin = req.jwtPayload?.isAdmin else {
             throw Abort(.unauthorized)
@@ -161,6 +167,7 @@ struct RecordController: RouteCollection {
         return try record.toGetRecordDTO()
     }
     
+    /// **PUT** `/meetings/{id}/records/{lang}/translate/{lang2}`
     @Sendable func translateRecord(req: Request) async throws -> GetRecordDTO {
         guard let userId = req.jwtPayload?.userID, let isAdmin = req.jwtPayload?.isAdmin else {
             throw Abort(.unauthorized)

@@ -17,7 +17,7 @@ struct VotingController: RouteCollection {
             votingRoutes.grouped(adminMiddleware).post(use: createVoting)
             votingRoutes.group(":id") { singleVotingRoutes in
                 singleVotingRoutes.get(use: getSingleVoting)
-                singleVotingRoutes.get(use: getVotingResults)
+                singleVotingRoutes.get("results", use: getVotingResults)
                 singleVotingRoutes.group(adminMiddleware) { adminRoutes in
                     adminRoutes.patch(use: updateVoting)
                     adminRoutes.delete(use: deleteVoting)
@@ -30,6 +30,7 @@ struct VotingController: RouteCollection {
         }
     }
     
+    /// **GET** `/meetings/{id}/votings`
     @Sendable func getVotingsOfMeeting(req: Request) async throws -> [GetVotingDTO] {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -43,6 +44,7 @@ struct VotingController: RouteCollection {
             }
     }
     
+    /// **GET** `/meetings/votings`
     @Sendable func getAllVotings(req: Request) async throws -> [GetVotingDTO] {
         return try await Voting.query(on: req.db)
             .with(\.$votingOptions)
@@ -52,7 +54,8 @@ struct VotingController: RouteCollection {
             }
     }
     
-    @Sendable func createVoting(req: Request) async throws -> GetVotingDTO {
+    /// **POST** `/meetings/votings`
+    @Sendable func createVoting(req: Request) async throws -> Response { // -> GetVotingDTO
         guard let createVotingDTO = try? req.content.decode(CreateVotingDTO.self) else {
             throw Abort(.badRequest, reason: "Invalid request body! Expected CreateVotingDTO.")
         }
@@ -72,9 +75,10 @@ struct VotingController: RouteCollection {
             }
             try await voting.$votingOptions.load(on: db)
         }
-        return try voting.toGetVotingDTO()
+        return try await voting.toGetVotingDTO().encodeResponse(status: .created, for: req)
     }
     
+    /// **GET** `/meetings/votings/{id}`
     @Sendable func getSingleVoting(req: Request) async throws -> GetVotingDTO {
         guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -149,6 +153,7 @@ struct VotingController: RouteCollection {
         return getVotingResultsDTO
     }
     
+    /// **GET** `/meetings/votings/{id}/results`
     @Sendable func getVotingResults(req: Request) async throws -> GetVotingResultsDTO {
         guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -159,6 +164,7 @@ struct VotingController: RouteCollection {
         return try await self.calculateVotingResults(voting: voting, userId: userId, db: req.db)
     }
     
+    /// **PATCH** `/meetings/votings/{id}`
     @Sendable func updateVoting(req: Request) async throws -> GetVotingDTO {
         guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -198,6 +204,7 @@ struct VotingController: RouteCollection {
         return try voting.toGetVotingDTO()
     }
     
+    /// **DELETE** `/meetings/votings/{id}`
     @Sendable func deleteVoting(req: Request) async throws -> HTTPStatus {
         guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -214,6 +221,7 @@ struct VotingController: RouteCollection {
         return .noContent
     }
     
+    /// **PUT** `/meetings/votings/{id}/open`
     @Sendable func openVoting(req: Request) async throws -> GetVotingDTO {
         guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -232,6 +240,7 @@ struct VotingController: RouteCollection {
         return try voting.toGetVotingDTO()
     }
     
+    /// **PUT** `/meetings/votings/{id}/close`
     @Sendable func closeVoting(req: Request) async throws -> GetVotingDTO {
         guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -257,6 +266,7 @@ struct VotingController: RouteCollection {
         return try voting.toGetVotingDTO()
     }
     
+    /// **PUT** `/meetings/votings/{id}/vote/{index}`
     @Sendable func voteOnVoting(req: Request) async throws -> HTTPStatus {
         guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -291,6 +301,7 @@ struct VotingController: RouteCollection {
         return .noContent
     }
     
+    /// **WEBSOCKET** `/meetings/votings/{id}/live-status`
     @Sendable func votingLiveStatusWebSocket(req: Request, ws: WebSocket) async {
         do {
             guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
