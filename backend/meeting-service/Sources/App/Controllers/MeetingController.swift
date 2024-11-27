@@ -22,6 +22,7 @@ struct MeetingController: RouteCollection {
         }
     }
     
+    /// **GET** `/meetings`
     @Sendable func getAllMeetings(req: Request) async throws -> [GetMeetingDTO] {
         let isAdmin = req.jwtPayload?.isAdmin ?? false
         let meetings = try await Meeting.query(on: req.db).with(\.$location) {location in
@@ -32,6 +33,7 @@ struct MeetingController: RouteCollection {
         }
     }
     
+    /// **GET** `/meetings/{id}`
     @Sendable func getSingleMeeting(req: Request) async throws -> GetMeetingDTO {
         let isAdmin = req.jwtPayload?.isAdmin ?? false
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
@@ -40,24 +42,29 @@ struct MeetingController: RouteCollection {
         return try meeting.toGetMeetingDTO(showCode: isAdmin)
     }
     
-    @Sendable func createMeeting(req: Request) async throws -> GetMeetingDTO { // TODO: Encapsulate both creations in one transaction (if possible)
+    /// **POST** `/meetings/`
+    @Sendable func createMeeting(req: Request) async throws -> Response { // -> GetMeetingDTO
         guard let createMeetingDTO = try? req.content.decode(CreateMeetingDTO.self) else {
             throw Abort(.badRequest, reason: "Invalid request body! Expected CreateMeetingDTO.")
         }
-        let locationId: Location.IDValue;
-        if createMeetingDTO.locationId != nil {
-            locationId = createMeetingDTO.locationId!
-        } else if let createLocationDTO = createMeetingDTO.location {
-            locationId = try await tryCreateLocation(createLocationDTO, req.db).location.requireID()
-        } else {
-            throw Abort(.badRequest, reason: "Invalid request body! Either CreateMeetingDTO.locationId or CreateMeetingDTO.location must be provided.")
+        let meeting = try await req.db.transaction { db in
+            let locationId: Location.IDValue;
+            if createMeetingDTO.locationId != nil {
+                locationId = createMeetingDTO.locationId!
+            } else if let createLocationDTO = createMeetingDTO.location {
+                locationId = try await tryCreateLocation(createLocationDTO, db).location.requireID()
+            } else {
+                throw Abort(.badRequest, reason: "Invalid request body! Either CreateMeetingDTO.locationId or CreateMeetingDTO.location must be provided.")
+            }
+            let meeting: Meeting = .init(name: createMeetingDTO.name, description: createMeetingDTO.description ?? "", status: .scheduled, start: createMeetingDTO.start, duration: createMeetingDTO.duration, locationId: locationId)
+            try await meeting.create(on: db)
+            try await meeting.$location.load(on: db)
+            return meeting
         }
-        let meeting: Meeting = .init(name: createMeetingDTO.name, description: createMeetingDTO.description ?? "", status: .scheduled, start: createMeetingDTO.start, duration: createMeetingDTO.duration, locationId: locationId)
-        try await meeting.create(on: req.db)
-        try await meeting.$location.load(on: req.db)
-        return try meeting.toGetMeetingDTO()
+        return try await meeting.toGetMeetingDTO().encodeResponse(status: .created, for: req)
     }
     
+    /// **PATCH** `/meetings/{id}`
     @Sendable func updateMeeting(req: Request) async throws -> GetMeetingDTO { // TODO: Encapsulate both creation and update in one transaction (if possible)
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -111,6 +118,7 @@ struct MeetingController: RouteCollection {
         return try meeting.toGetMeetingDTO()
     }
     
+    /// **DELETE** `/meetings/{id}`
     @Sendable func deleteMeeting(req: Request) async throws -> HTTPStatus {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -126,6 +134,7 @@ struct MeetingController: RouteCollection {
         return .noContent
     }
     
+    /// **PUT** `/meetings/{id}/begin`
     @Sendable func beginMeeting(req: Request) async throws -> GetMeetingDTO {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -149,6 +158,7 @@ struct MeetingController: RouteCollection {
         return try meeting.toGetMeetingDTO(showCode: true)
     }
     
+    /// **PUT** `/meetings/{id}/end`
     @Sendable func endMeeting(req: Request) async throws -> GetMeetingDTO {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -187,12 +197,14 @@ struct MeetingController: RouteCollection {
         return try meeting.toGetMeetingDTO(showCode: true)
     }
     
+    /// **GET** `/meetings/locations`
     @Sendable func getAllLocations(req: Request) async throws -> [GetLocationDTO] {
         try await Location.query(on: req.db).all().map { location in
             try location.toGetLocationDTO()
         }
     }
     
+    /// **GET** `/meetings/locations/{id}`
     @Sendable func getSingleLocation(req: Request) async throws -> GetLocationDTO {
         guard let location = try await Location.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)

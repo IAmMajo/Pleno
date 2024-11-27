@@ -15,6 +15,7 @@ struct AttendanceController: RouteCollection {
         }
     }
     
+    /// **GET** `/meetings/{id}/attendances`
     @Sendable func getAllAttendances(req: Request) async throws -> [GetAttendanceDTO] {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -40,9 +41,23 @@ struct AttendanceController: RouteCollection {
             let elem = getAttendanceDTOs.remove(at: index)
             getAttendanceDTOs.insert(elem, at: 0)
         }
+        
+        if meeting.status == .scheduled {
+            getAttendanceDTOs.append(contentsOf: try await Identity.query(on: req.db)
+                .filter(\.$id !~ getAttendanceDTOs.map({ getAttendanceDTO in
+                    getAttendanceDTO.identity.id
+                }))
+                .sort(\.$name)
+                .all()
+                .map { identity in
+                        try .init(meetingId: meeting.requireID(), identity: identity.toGetIdentityDTO())
+                })
+        }
+        
         return getAttendanceDTOs
     }
     
+    /// **PUT** `/meetings/{id}/attend/{code}`
     @Sendable func attendMeeting(req: Request) async throws -> HTTPStatus {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -53,10 +68,12 @@ struct AttendanceController: RouteCollection {
         return try await updateOrCreateAttendance(req, .present, .inSession)
     }
     
+    /// **PUT** `/meetings/{id}/plan-attendance/present`
     @Sendable func planAttendancePresent(req: Request) async throws -> HTTPStatus {
         return try await updateOrCreateAttendance(req, .accepted, .scheduled)
     }
     
+    /// **PUT** `/meetings/{id}/plan-attendance/absent`
     @Sendable func planAttendanceAbsent(req: Request) async throws -> HTTPStatus {
         return try await updateOrCreateAttendance(req, .absent, .scheduled)
     }
