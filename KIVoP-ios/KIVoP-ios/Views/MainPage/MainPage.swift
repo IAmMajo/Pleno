@@ -81,7 +81,7 @@ struct MainPage: View {
                             }
                         }
                         
-                        NavigationLink(destination: AnwesenheitView()) {
+                        NavigationLink(destination: AttendanceView()) {
                             HStack {
                                 Image(systemName: "person.crop.circle.fill.badge.checkmark")
                                     .foregroundColor(.accentColor)

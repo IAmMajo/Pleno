@@ -1,48 +1,16 @@
 //
-//  AnwesenheitDetailView.swift
+//  AnwesenheitAktuellView.swift
 //  KIVoP-ios
 //
 //  Created by Henrik Peltzer on 02.11.24.
 //
 
 import SwiftUI
+import MeetingServiceDTOs
 
-struct AnwesenheitDetailView: View {
+struct AttendanceCurrentView: View {
     @Environment(\.dismiss) var dismiss
-    
-    @State private var searchText: String = ""
-    var event: Event
-    
-    // Beispiel-Mitgliederliste
-    @State private var members: [Member] = [
-        Member(name: "Max Mustermann", title: "Sitzungsleiter", hasVoted: .yes),
-        Member(name: "Erika Mustermann", title: "Stellvertretende", hasVoted: .no),
-        Member(name: "Hans Müller"),
-        Member(name: "Maria Meier", hasVoted: .yes),
-        Member(name: "Lukas Schmidt", hasVoted: .no)
-    ]
-    
-    // Sortierung der Mitglieder, falls noch nicht abgestimt wurde wird nach .yes sortiert.
-    var sortedMembers: [Member] {
-        members.sorted {
-            if $0.hasVoted == $1.hasVoted {
-                return $0.name < $1.name
-            }
-            if $0.hasVoted == .yes {
-                return true
-            }
-            if $1.hasVoted == .yes {
-                return false
-            }
-            if $0.hasVoted == nil {
-                return true
-            }
-            if $1.hasVoted == nil {
-                return false
-            }
-            return false
-        }
-    }
+    @StateObject var viewModel: AttendanceCurrentViewModel
     
     var body: some View {
         NavigationView {
@@ -62,12 +30,10 @@ struct AnwesenheitDetailView: View {
                     Spacer()
                     
                     // Datum des aktuellen Termins
-                    Text(event.date, style: .date)
+                    Text(viewModel.meeting.start, style: .date)
                         .font(.headline)
                         .foregroundColor(.primary)
                     
-                    Spacer()
-                    Spacer()
                     Spacer()
                 }
                 .padding(.horizontal)
@@ -77,14 +43,8 @@ struct AnwesenheitDetailView: View {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(Color.gray.opacity(0.2))
                     HStack {
-                        TextField("Suchen", text: $searchText)
+                        TextField("Suchen", text: $viewModel.searchText)
                             .padding(8)
-                        Button(action: {
-                            // Aktion für Sprachsuche (optional)
-                        }) {
-                            Image(systemName: "mic.fill")
-                                .foregroundColor(.gray)
-                        }
                     }
                     .padding(.horizontal, 8)
                 }
@@ -97,15 +57,46 @@ struct AnwesenheitDetailView: View {
                         .edgesIgnoringSafeArea(.all)
 
                     VStack {
+                        Text("Teilnahme bestätigen")
+                            .padding(.top)
+                            .padding(.horizontal)
+
+                        // QR Code Button
+                        Button(action: {
+                            // Funktion für QR Code scannen wird später implementiert
+                        }) {
+                            HStack {
+                                Image(systemName: "qrcode")
+                                Text("Code scannen")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+
+                        // "oder" Schriftzug
+                        Text("oder")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .padding(.top, 4)
+                            .padding(.horizontal)
+
+                        // Textfeld für Teilnahmecode
+                        TextField("Teilnahmecode", text: $viewModel.participationCode)
+                            .multilineTextAlignment(.center)
+                            .padding(8)
+                            .background(RoundedRectangle(cornerRadius: 0).fill(Color.white))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.black, lineWidth: 2))
+                            .frame(width: 200)
                         
-                        Spacer()
-                        Spacer()
-                        
-                        // Teilnahme Status Icons (nur für die abgestimmten Mitglieder)
+                        // Teilnahme Status Icons
                         HStack {
                             Spacer()
                             VStack {
-                                Text("\(members.filter { $0.hasVoted == .yes }.count)")
+                                Text("\(viewModel.presentCount)")
                                     .font(.largeTitle)
                                 Image(systemName: "person.fill.checkmark")
                                     .foregroundColor(.blue)
@@ -116,45 +107,45 @@ struct AnwesenheitDetailView: View {
                             Spacer()
                             
                             VStack {
-                                Text("\(members.filter { $0.hasVoted == .no || $0.hasVoted == nil }.count)")
+                                Text("\(viewModel.acceptedCount)")
                                     .font(.largeTitle)
-                                Image(systemName: "person.fill.xmark")
-                                    .foregroundColor(.orange)
+                                Image(systemName: "person.fill.questionmark")
+                                    .foregroundColor(.gray)
                                     .font(.largeTitle)
                             }
                             Spacer()
                         }
                         .padding(.horizontal)
-                        
-                        Spacer()
                         Spacer()
                         
-                        // Mitgliederliste
+                        // Teilnehmerliste
                         List {
                             Section(header: Text("Mitglieder")) {
-                                ForEach(sortedMembers) { member in
-                                    let voteStatus = member.hasVoted ?? .no
+                                ForEach(viewModel.filteredAttendances, id: \.identity.id) { attendance in
                                     HStack {
                                         // Profilbild (Platzhalter)
                                         Circle()
                                             .fill(Color.gray)
                                             .frame(width: 40, height: 40)
                                         
-                                        // Name und Titel
+                                        // Name
                                         VStack(alignment: .leading) {
-                                            Text(member.name)
+                                            Text(attendance.identity.name)
                                                 .font(.body)
-                                            if let title = member.title {
-                                                Text(title)
-                                                    .font(.caption)
-                                                    .foregroundColor(.gray)
-                                            }
                                         }
+                                        
                                         Spacer()
                                         
-                                        Image(systemName: voteStatus.icon)
-                                            .foregroundColor(voteStatus.color)
-                                            .font(.system(size: 22))
+                                        // Inline-Statusbehandlung und Anzeige von Symbolen
+                                        Image(systemName:
+                                            attendance.status == .present ? "checkmark" :
+                                            "questionmark.circle"
+                                        )
+                                        .foregroundColor(
+                                            attendance.status == .present ? .blue :
+                                            .gray
+                                        )
+                                        .font(.system(size: 18))
                                     }
                                 }
                             }
@@ -164,17 +155,5 @@ struct AnwesenheitDetailView: View {
             }
         }
         .navigationBarHidden(true)
-    }
-}
-
-struct AnwesenheitDetailView_Previews: PreviewProvider {
-    static var previews: some View {
-        AnwesenheitDetailView(
-            event: Event(
-                title: "Jahreshauptversammlung",
-                date: Date(),
-                status: "past"
-            )
-        )
     }
 }
