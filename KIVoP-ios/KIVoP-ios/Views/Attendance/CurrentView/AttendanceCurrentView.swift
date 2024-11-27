@@ -16,13 +16,7 @@ struct AttendanceCurrentView: View {
     @State private var participationCode: String = ""
     
     // Beispiel-Mitgliederliste
-    @State private var members: [Member] = [
-        Member(name: "Max Mustermann", title: "Sitzungsleiter", hasVoted: .yes),
-        Member(name: "Erika Mustermann", title: "Stellvertretende", hasVoted: .no),
-        Member(name: "Hans Müller"),
-        Member(name: "Maria Meier", hasVoted: .yes),
-        Member(name: "Lukas Schmidt", hasVoted: .no)
-    ]
+    @State private var members: [Member] = []
     
     // Sortierung der Mitglieder, falls noch nicht abgestimt wurde wird nach .yes sortiert.
     var sortedMembers: [Member] {
@@ -81,12 +75,6 @@ struct AttendanceCurrentView: View {
                     HStack {
                         TextField("Suchen", text: $searchText)
                             .padding(8)
-                        Button(action: {
-                            // Aktion für Sprachsuche (optional)
-                        }) {
-                            Image(systemName: "mic.fill")
-                                .foregroundColor(.gray)
-                        }
                     }
                     .padding(.horizontal, 8)
                 }
@@ -206,5 +194,40 @@ struct AttendanceCurrentView: View {
             }
         }
         .navigationBarHidden(true)
+    }
+}
+
+struct Member: Identifiable {
+    let id = UUID()
+    let name: String
+    var title: String?
+    var hasVoted: VoteStatus?
+}
+
+enum VoteStatus {
+    case yes
+    case no
+    case notVoted
+    
+    var icon: String {
+        switch self {
+        case .yes:
+            return "checkmark"
+        case .notVoted:
+            return "questionmark.circle"
+        case .no:
+            return "xmark"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .yes:
+            return .blue
+        case .notVoted:
+            return .gray
+        case .no:
+            return .red
+        }
     }
 }

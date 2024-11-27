@@ -136,10 +136,14 @@ struct AttendanceView: View {
         switch meeting.status {
         case .inSession:
             return AnyView(AttendanceCurrentView(meeting: meeting))
+            
         case .completed:
-            return AnyView(AttendanceDetailView(meeting: meeting))
+            let viewModel = AttendanceDetailViewModel(meeting: meeting)
+            return AnyView(AttendanceDetailView(viewModel: viewModel))
+            
         case .scheduled:
-            return AnyView(AttendancePlanningView(meeting: meeting))
+            let viewModel = AttendancePlaninngViewModel(meeting: meeting)
+            return AnyView(AttendancePlanningView(viewModel: viewModel))
         }
     }
 }

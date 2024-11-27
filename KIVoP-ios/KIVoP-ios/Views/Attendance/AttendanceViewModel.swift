@@ -15,26 +15,16 @@ class AttendanceViewModel: ObservableObject {
     @Published var selectedTab: Int = 0
     @Published var token: String = ""
     @Published var errorMessage: String?
-    @Published var meetings: [GetMeetingDTO] = exampleMeetings
+    @Published var meetings: [GetMeetingDTO] = []
     
     init() {
         // Meetings laden
         // zu Testzwecken wird hier noch der Login gemacht.
-        loadMeetings()
+        fetchMeetings()
     }
-
-    static let exampleMeetings: [GetMeetingDTO] = [
-        // Beispiel-Meetings
-        GetMeetingDTO(id: UUID(), name: "Jahreshauptversammlung", description: "Beschreibung", status: .inSession, start: Date()),
-        GetMeetingDTO(id: UUID(), name: "Treffen 1", description: "Beschreibung", status: .completed, start: Calendar.current.date(byAdding: .day, value: -10, to: Date())!),
-        GetMeetingDTO(id: UUID(), name: "Treffen 2", description: "Beschreibung", status: .completed, start: Calendar.current.date(byAdding: .day, value: -20, to: Date())!),
-        GetMeetingDTO(id: UUID(), name: "Treffen 3", description: "Beschreibung", status: .completed, start: Calendar.current.date(byAdding: .month, value: -1, to: Date())!),
-        GetMeetingDTO(id: UUID(), name: "Planungs-Meeting", description: "Beschreibung", status: .scheduled, start: Calendar.current.date(byAdding: .day, value: 10, to: Date())!),
-        GetMeetingDTO(id: UUID(), name: "Feedback-Runde", description: "Beschreibung", status: .scheduled, start: Calendar.current.date(byAdding: .day, value: 20, to: Date())!)
-    ]
     
     // Abruf der Meetings von der API
-    func loadMeetings() {
+    func fetchMeetings() {
         Task {
             do {
                 // Statischer Login zum Testen, bis die Funktion implementiert wurde.
