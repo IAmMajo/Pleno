@@ -158,7 +158,7 @@ struct MeetingController: RouteCollection {
             try await record.create(on: db)
             
             let attendance = try Attendance(id: .init(meeting: meeting, identityId: identityId), status: .present)
-            try await attendance.save(on: req.db) // Updates or creates
+            try await attendance.save(on: db) // Updates or creates
         }
         
         return try meeting.toGetMeetingDTO(showCode: true)
