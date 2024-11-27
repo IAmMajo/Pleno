@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -62,24 +63,37 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
 
-                    NavHost(
-                        navController = navController,
-                        startDestination = "home"
-                    ){
-                        // StartScreen
-                        composable(route = Screen.Home.rout){
-                            HomeScreen(navController = navController)
+
+                        NavHost(
+                            navController = navController,
+                            startDestination = Screen.Home.rout,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding( //TODO: Padding anpassen
+                                    top = 72.dp,
+                                    start = 12.dp,
+                                    end = 12.dp,
+                                    bottom = 12.dp
+                                )
+
+
+                        ){
+                            // StartScreen
+                            composable(Screen.Home.rout){
+                                HomeScreen(navController = navController)
+                            }
+                            // Sitzungen
+                            composable(Screen.Sitzungen.rout){
+                                SitzungenScreen(navController = navController)
+                            }
+                            // Protokolle
+                            composable(route = Screen.Protokolle.rout){
+                                ProtokolleScreen(navController = navController)
+                            }
                         }
-                        // Sitzungen
-                        composable(route = Screen.Home.rout){
-                            SitzungenScreen(navController = navController)
-                        }
-                        // Protokolle
-                        composable(route = Screen.Home.rout){
-                            ProtokolleScreen(navController = navController)
-                        }
-                    }
-                    Screen(navController)
+                        Nav(navController)
+
+                    //
                 }
             }
         }
@@ -103,7 +117,7 @@ fun GreetingPreview() {
 }
 
 @Composable
-fun Screen(navController: NavController, modifier: Modifier = Modifier) {
+fun Nav(navController: NavController, modifier: Modifier = Modifier) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     // Berechnung der Breite des Drawers (2/3 Bildschirmbreite)
@@ -123,9 +137,7 @@ fun Screen(navController: NavController, modifier: Modifier = Modifier) {
         },
         gesturesEnabled = true // zum swipen des NavDrawers
         ){
-        // Scaffold oben am Bildschirm
-        Scaffold (
-            topBar = {
+
                 // Implementierung der TopBar mit Boolean, welcher aus drawerState entnommen wird.
                 //CenterAlignedTopAppBar
                 TopBar(
@@ -139,26 +151,19 @@ fun Screen(navController: NavController, modifier: Modifier = Modifier) {
                         }
                     }
                 )
-            }
-        ){  padding ->
-            ScreenContent(modifier = Modifier.padding(padding), title = "ScreenContent")
-        }
+
     }
 }
 
 @Composable
-fun ScreenContent(modifier: Modifier = Modifier, title: String){
+fun ScreenContent(modifier: Modifier = Modifier, title: String,navController: NavController){
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .background(Color.Cyan),
+            .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold)
-        )
+
     }
 }
 
@@ -247,7 +252,7 @@ fun DrawerContent(
                 )
             },
             selected = false,           // Ist das gerade die Seite, auf der wir sind?
-            onClick = {navController.navigate("sitzungen") }      // Logik für onClick Events
+            onClick = {navController.navigate(Screen.Sitzungen.rout) }      // Logik für onClick Events
         )
         Spacer(modifier = Modifier.height(4.dp))
         NavigationDrawerItem(
