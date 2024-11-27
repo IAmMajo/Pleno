@@ -108,14 +108,20 @@ struct AttendanceDetailView: View {
                                         
                                         Spacer()
                                         
-                                        // Inline-Statusbehandlung und Farbzuweisung
-                                        Text(attendance.status.rawValue.capitalized)
-                                            .foregroundColor(
-                                                attendance.status == .present ? .green :
-                                                attendance.status == .absent ? .red :
-                                                attendance.status == .accepted ? .blue : .gray
-                                            )
-                                            .font(.system(size: 18))
+                                        // Inline-Statusbehandlung und Anzeige von Symbolen
+                                        Image(systemName:
+                                            attendance.status == .present ? "questionmark.circle" :
+                                            attendance.status == .absent ? "xmark" :
+                                            attendance.status == .accepted ? "checkmark" :
+                                            "questionmark.circle"
+                                        )
+                                        .foregroundColor(
+                                            attendance.status == .present ? .gray :
+                                            attendance.status == .absent ? .red :
+                                            attendance.status == .accepted ? .blue :
+                                            .gray
+                                        )
+                                        .font(.system(size: 18))
                                     }
                                 }
                             }
@@ -125,6 +131,9 @@ struct AttendanceDetailView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            viewModel.fetchAttendances()
+        }
     }
 }
 

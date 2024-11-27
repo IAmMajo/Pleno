@@ -19,10 +19,9 @@ class AttendanceDetailViewModel: ObservableObject {
     
     init(meeting: GetMeetingDTO) {
         self.meeting = meeting
-        fetchAttendances()
     }
     
-    private func fetchAttendances() {
+    public func fetchAttendances() {
         Task {
             do {
                 // Authentifizierung und Token holen
@@ -32,6 +31,9 @@ class AttendanceDetailViewModel: ObservableObject {
                 guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/attendances") else {
                     throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
                 }
+                
+                print("Meeting: \(meeting.id)")
+                print("Token: \(token)")
                 
                 var request = URLRequest(url: url)
                 request.httpMethod = "GET"
@@ -50,9 +52,6 @@ class AttendanceDetailViewModel: ObservableObject {
                     do {
                         let fetchedAttendances = try decoder.decode([GetAttendanceDTO].self, from: data)
                         self.attendances = fetchedAttendances
-                        
-                        // Anzahl der Anwesenheiten in der Konsole ausgeben
-                        print("Anzahl der abgerufenen Anwesenheiten: \(fetchedAttendances.count)")
                     } catch {
                         self.errorMessage = "Fehler beim Dekodieren der Anwesenheiten: \(error.localizedDescription)"
                     }

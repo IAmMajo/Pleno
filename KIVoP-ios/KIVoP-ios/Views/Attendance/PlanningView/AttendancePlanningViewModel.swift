@@ -8,6 +8,7 @@
 import Foundation
 import MeetingServiceDTOs
 
+@MainActor
 class AttendancePlanningViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var attendances: [GetAttendanceDTO] = []
@@ -20,7 +21,7 @@ class AttendancePlanningViewModel: ObservableObject {
         fetchAttendances()
     }
     
-    private func fetchAttendances() {
+    public func fetchAttendances() {
         Task {
             do {
                 // Authentifizierung und Token holen
@@ -28,33 +29,42 @@ class AttendancePlanningViewModel: ObservableObject {
                 
                 // URL und Request erstellen
                 guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/attendances") else {
+                    print("Ungültige URL.")
                     return
                 }
+                
                 var request = URLRequest(url: url)
                 request.httpMethod = "GET"
                 request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
+                
                 // API-Aufruf und Antwort verarbeiten
                 let (data, response) = try await URLSession.shared.data(for: request)
                 guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                    print("Fehlerhafte Antwort vom Server.")
                     return
                 }
-
+                
                 // JSON dekodieren
                 let fetchedAttendances = try JSONDecoder().decode([GetAttendanceDTO].self, from: data)
-
+                
+                // Attendances sortieren
                 self.attendances = fetchedAttendances.sorted {
-                    self.sortOrder(for: $0.status) == self.sortOrder(for: $1.status)
+                    let orderA = self.sortOrder(for: $0.status)
+                    let orderB = self.sortOrder(for: $1.status)
+                    
+                    // Zuerst nach Status, dann alphabetisch nach Name sortieren
+                    return orderA == orderB
                         ? $0.identity.name.localizedCaseInsensitiveCompare($1.identity.name) == .orderedAscending
-                        : self.sortOrder(for: $0.status) < self.sortOrder(for: $1.status)
+                        : orderA < orderB
                 }
+                
             } catch {
                 print("Fehler: \(error.localizedDescription)")
             }
         }
     }
     
-    public func markAttendanceAsPresent() {
+    public func markAttendanceAsAccepted() {
         Task {
             do {
                 // Authentifizierung und Token holen
@@ -71,9 +81,10 @@ class AttendancePlanningViewModel: ObservableObject {
                 
                 // API-Aufruf starten
                 let (_, response) = try await URLSession.shared.data(for: request)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 204 else {
                     return
                 }
+                fetchAttendances()
             }
         }
     }
@@ -95,9 +106,10 @@ class AttendancePlanningViewModel: ObservableObject {
                 
                 // API-Aufruf starten
                 let (_, response) = try await URLSession.shared.data(for: request)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 204 else {
                     return
                 }
+                fetchAttendances()
             }
         }
     }
@@ -121,8 +133,8 @@ class AttendancePlanningViewModel: ObservableObject {
         }
     }
     
-    var presentCount: Int {
-        attendances.filter { $0.status == .present }.count
+    var nilCount: Int {
+        attendances.filter { $0.status == nil }.count
     }
     
     var acceptedCount: Int {
@@ -133,14 +145,17 @@ class AttendancePlanningViewModel: ObservableObject {
         attendances.filter { $0.status == .absent }.count
     }
     
-    private func sortOrder(for status: AttendanceStatus) -> Int {
-        switch status {
-        case .present:
-            return 0 // Höchste Priorität
-        case .accepted:
-            return 1 // Zweithöchste Priorität
-        case .absent:
-            return 2 // Niedrigste Priorität
+        // Sortierungspriorität definieren
+        private func sortOrder(for status: AttendanceStatus?) -> Int {
+            switch status {
+            case .accepted:
+                return 0
+            case .none:
+                return 1
+            case .absent:
+                return 2
+            case .some(.present):
+                return 3
+            }
         }
-    }
 }

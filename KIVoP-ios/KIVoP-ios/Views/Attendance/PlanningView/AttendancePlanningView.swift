@@ -11,7 +11,7 @@ import MeetingServiceDTOs
 struct AttendancePlanningView: View {
     @Environment(\.dismiss) var dismiss
     
-    @ObservedObject var viewModel: AttendancePlanninngViewModel
+    @ObservedObject var viewModel: AttendancePlanningViewModel
     
     var body: some View {
         NavigationView {
@@ -66,7 +66,7 @@ struct AttendancePlanningView: View {
                         // Teilnahme Schaltflächen
                         HStack(spacing: 40) {
                             Button(action: {
-                                viewModel.markAttendanceAsPresent()
+                                viewModel.markAttendanceAsAccepted()
                             }) {
                                 HStack {
                                     Image(systemName: "checkmark")
@@ -116,7 +116,7 @@ struct AttendancePlanningView: View {
                             Spacer()
                             
                             VStack {
-                                Text("\(viewModel.presentCount)")
+                                Text("\(viewModel.nilCount)")
                                     .font(.largeTitle)
                                 Image(systemName: "person.fill.questionmark")
                                     .foregroundColor(.gray)
@@ -159,13 +159,11 @@ struct AttendancePlanningView: View {
                                         
                                         // Inline-Statusbehandlung und Anzeige von Symbolen
                                         Image(systemName:
-                                            attendance.status == .present ? "questionmark.circle" :
                                             attendance.status == .absent ? "xmark" :
                                             attendance.status == .accepted ? "checkmark" :
                                             "questionmark.circle"
                                         )
                                         .foregroundColor(
-                                            attendance.status == .present ? .gray :
                                             attendance.status == .absent ? .red :
                                             attendance.status == .accepted ? .blue :
                                             .gray

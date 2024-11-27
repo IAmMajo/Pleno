@@ -18,8 +18,6 @@ class AttendanceViewModel: ObservableObject {
     @Published var meetings: [GetMeetingDTO] = []
     
     init() {
-        // Meetings laden
-        // zu Testzwecken wird hier noch der Login gemacht.
         fetchMeetings()
     }
     
@@ -33,8 +31,6 @@ class AttendanceViewModel: ObservableObject {
                 // TestA@example.com + Test123
                 try await AuthController.shared.login(email: "henrik.peltzer@gmail.com", password: "Test123")
                 let token = try await AuthController.shared.getAuthToken()
-                
-                print("\(token)")
                 
                 // Meetings abrufen
                 guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
@@ -59,9 +55,6 @@ class AttendanceViewModel: ObservableObject {
                         do {
                             let fetchedMeetings = try decoder.decode([GetMeetingDTO].self, from: data)
                             self.meetings.append(contentsOf: fetchedMeetings)
-                            
-                            // Anzahl der Meetings in der Konsole ausgeben
-                            print("Anzahl der abgerufenen Meetings: \(fetchedMeetings.count)")
                         } catch {
                             // Fehlerbehandlung beim Dekodieren der Meetings
                             self.errorMessage = "Fehler beim Dekodieren der Meetings: \(error.localizedDescription)"
@@ -117,12 +110,11 @@ class AttendanceViewModel: ObservableObject {
 
     // Filtert Sitzungen basierend auf dem Tab
     private func filteredMeetings() -> [GetMeetingDTO] {
-        let now = Date()
         switch selectedTab {
         case 0:
-            return meetings.filter { $0.start < now && $0.status == .completed }
+            return meetings.filter { $0.status == .completed }
         case 1:
-            return meetings.filter { $0.start > now && $0.status == .scheduled }
+            return meetings.filter { $0.status == .scheduled }
         default:
             return []
         }
