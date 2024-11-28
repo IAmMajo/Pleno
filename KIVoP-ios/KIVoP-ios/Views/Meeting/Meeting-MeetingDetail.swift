@@ -1,21 +1,26 @@
 import SwiftUI
+import MeetingServiceDTOs
 
-struct MeetingDetail: View {
+struct MeetingDetailView: View {
+    var meeting: GetMeetingDTO
+    
     var body: some View {
         NavigationStack {
             VStack (alignment: .leading){
                 VStack {
-                    Text("Jahreshauptversammlung")
+                    Text(meeting.name)
                         .font(.title) // Setzt die Schriftgröße auf groß
                         .fontWeight(.bold) // Macht den Text fett
                         .foregroundColor(.primary) // Setzt die Farbe auf die primäre Farbe des Themas
                         .padding()
                 } // Fügt etwas Abstand um den Text hinzu
                 HStack{
-                    Text("18:06 Uhr")
-                    Text("(ca. 160 min.)")
-                        .font(.caption) // Kleiner Schriftgrad
-                        .foregroundColor(.gray) // Graue Farbe
+                    Text(meeting.start, style: .time)
+                    if let duration = meeting.duration {
+                        Text("(ca. \(duration) min.)")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                     Spacer()
                     HStack(spacing: 4) { // kleiner Abstand zwischen dem Symbol und der Personenanzahl
                         Image(systemName: "person.3.fill") // Symbol für eine Gruppe von Personen
@@ -24,61 +29,53 @@ struct MeetingDetail: View {
                 }.padding(.horizontal)
                 List {
                     // Adresse
-                    Section(header: Text("Adresse")) {
-                        Text("In der alten Turnhalle hinter dem Friedhof, Altes Grab 5 b, 42069 Hölle")
+                    if let location = meeting.location {
+                        Section(header: Text("Adresse")) {
+                            let address = """
+                            \(location.name)
+                            \(location.street) \(location.number)\(location.letter)
+                            \(location.postalCode ?? "") \(location.place ?? "")
+                            """
+                            Text(address)
+                                .fixedSize(horizontal: false, vertical: true) // Ermöglicht Zeilenumbruch
+                        }
                     }
-                    
                     // Organiation
                     Section(header: Text("Organisation")) {
-                        HStack{
-                            Image(systemName: "person.circle")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.gray)
-                            VStack(alignment: .leading) {
-                                Text("Heinz-Peters")
-                                Text("Sitzungsleiter")
-                                    .font(.caption) // Kleiner Schriftgrad
-                                    .foregroundColor(.gray) // Graue Farbe
-                            }
-                        }
-                        HStack{
-                            Image(systemName: "person.circle")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.gray)
-                            VStack(alignment: .leading) {
-                                Text("Franz")
-                                Text("Protokollant")
-                                    .font(.caption) // Kleiner Schriftgrad
-                                    .foregroundColor(.gray) // Graue Farbe
+                        if let chair = meeting.chair {
+                            HStack {
+                                Image(systemName: "person.circle")
+                                    .resizable()
+                                    .frame(width: 30, height: 30)
+                                    .foregroundColor(.gray)
+                                VStack(alignment: .leading) {
+                                    Text(chair.name) // Dynamischer Vorsitzender
+                                    Text("Sitzungsleiter")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
                             }
                         }
                     }
+                    // ??????
+
+//                        HStack{
+//                            Image(systemName: "person.circle")
+//                                .resizable()
+//                                .frame(width: 30, height: 30)
+//                                .foregroundColor(.gray)
+//                            VStack(alignment: .leading) {
+//                                Text("Franz")
+//                                Text("Protokollant")
+//                                    .font(.caption) // Kleiner Schriftgrad
+//                                    .foregroundColor(.gray) // Graue Farbe
+//                            }
+//                        }
                     
-                    // Agenda
-                    Section(header: Text("Agenda")) {
+                    // Beschreibung
+                    Section(header: Text("Beschreibung")) {
                         VStack(alignment: .leading, spacing: 8) {
-                            HStack(alignment: .top) {
-                                Text("•").bold()
-                                Text("Vorsitzende wählen")
-                            }
-                            HStack(alignment: .top) {
-                                Text("•").bold()
-                                Text("Langweiliger Orga-Punkt")
-                            }
-                            HStack(alignment: .top) {
-                                Text("•").bold()
-                                Text("Glühwein")
-                            }
-                            HStack(alignment: .top) {
-                                Text("•").bold()
-                                Text("Bla")
-                            }
-                            HStack(alignment: .top) {
-                                Text("•").bold()
-                                Text("Abschied")
-                            }
+                            Text(meeting.description)
                         }
                     }
                     
@@ -130,5 +127,32 @@ struct PlaceholderView: View {
 
 
 #Preview {
-    MeetingDetail()
+    let exampleLocation = GetLocationDTO(
+        id: UUID(),
+        name: "Alte Turnhalle",
+        street: "Altes Grab",
+        number: "5",
+        letter: "b",
+        postalCode: "42069",
+        place: "Hölle"
+    )
+
+    let exampleChair = GetIdentityDTO(
+        id: UUID(),
+        name: "Heinz-Peters"
+    )
+
+    let exampleMeeting = GetMeetingDTO(
+        id: UUID(),
+        name: "Jahreshauptversammlung",
+        description: "Ein wichtiges Treffen für alle Mitglieder.",
+        status: .scheduled,
+        start: Date(),
+        duration: 160,
+        location: exampleLocation,
+        chair: exampleChair,
+        code: "MTG123"
+    )
+    MeetingDetailView(meeting: exampleMeeting)
+    //MeetingDetail()
 }

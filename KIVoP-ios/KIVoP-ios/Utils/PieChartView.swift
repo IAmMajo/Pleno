@@ -7,21 +7,7 @@
 
 import SwiftUI
 import Charts
-
-private var options1: [Voting_option] = [
-   Voting_option(index: 0, text: "Enthaltung", count: 10),
-   Voting_option(index: 1, text: "Rot", count: 10),
-   Voting_option(index: 2, text: "Grün", count: 30),
-   Voting_option(index: 3, text: "Blau", count: 50),
-   Voting_option(index: 4, text: "4", count: 10),
-   Voting_option(index: 5, text: "5", count: 30),
-   Voting_option(index: 6, text: "6", count: 50),
-   Voting_option(index: 7, text: "7", count: 10),
-   Voting_option(index: 8, text: "8", count: 30),
-   Voting_option(index: 9, text: "9", count: 50),
-   Voting_option(index: 10, text: "10", count: 30),
-   Voting_option(index: 11, text: "11", count: 50),
-]
+import MeetingServiceDTOs
 
 //func getModifiedColor(of color: Color) -> Color {
 //   let uiColor = UIColor(color)
@@ -69,18 +55,20 @@ let colorMapping: [UInt8: Color] = [
 ]
 
 struct PieChartView: View {
-   let options: [Voting_option]
-   
+
+   let optionTextMap: [UInt8: String]
+   let votingResults: GetVotingResultsDTO
+
    var body: some View {
-      Chart(options, id: \.index) { option in
+      Chart(votingResults.results, id: \.index) { result in
          SectorMark(
-            angle: .value("Count", option.count!),
+            angle: .value("Count", result.total),
 //            innerRadius: .ratio(0.5),
             angularInset: 4
          )
          .cornerRadius(6)
 //         .foregroundStyle(colorMapping[option.index] ?? .black)
-         .foregroundStyle(by: .value("Option", option.text))
+         .foregroundStyle(by: .value("Option", optionTextMap[result.index] ?? ""))
       }
       .scaledToFit()
       // Später eigene Legende bauen, um mehr als 7 Farben zu haben? Optionen Limit?
@@ -89,10 +77,12 @@ struct PieChartView: View {
 }
 
 #Preview {
-   PieChartView(options: [
-      Voting_option(index: 0, text: "Enthaltung", count: 10),
-      Voting_option(index: 1, text: "Rot", count: 10),
-      Voting_option(index: 2, text: "Grün", count: 30),
-      Voting_option(index: 3, text: "Blau", count: 50),
-    ])
+   var votingsView: VotingsView = .init()
+   
+   PieChartView(optionTextMap: [
+      0: "Enthaltung",
+      1: "Rot",
+      2: "Grün",
+      3: "Blau"
+   ], votingResults: votingsView.mockVotingResults)
 }

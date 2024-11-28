@@ -6,38 +6,34 @@
 //
 
 import SwiftUI
+import MeetingServiceDTOs
 
 struct Votings_VoteView: View {
       
-   let voting: Voting
-   var sampleIdentity: Identity
-   //var updatedSampleIdentity = sampleIdentity
-//   lazy var updatedSampleIdentity: Identity = {
-//      var identity = sampleIdentity
-//
-//   }
-   @State private var selection: Voting_option?
-   @State private var showingAlert = false
-   @State private var navigateToNextView = false
-//   @Binding var path: [String]
-//   @Binding var rootIsActive: Bool
+   let voting: GetVotingDTO
+   let votingResults: GetVotingResultsDTO
    
-   func updateSampleIdentity(selection: Voting_option?) -> Identity {
-      var identity = sampleIdentity
-      identity.votes.append(Vote(voting: voting, index: selection?.index ?? 0))
-      return identity
-   }
+   @State private var isLoading = false
+   @State private var error: String?
+
+   @State private var selection: GetVotingOptionDTO?
+   @State private var showingAlert = false
+   
+   @Environment(\.dismiss) private var dismiss
+   
+//   var onNavigate: (GetVotingResultsDTO) -> Void
+   var onNavigate: (GetVotingResultsDTO) -> Void
    
 
    var body: some View {
-         Group {
+         NavigationStack {
             VStack {
-               Text("Welche Farbe soll die neue Vereinsfarbe werden?")
+               Text(voting.question)
                   .font(.title)
                   .fontWeight(.semibold)
                   .padding(.top)
                
-               List(voting.voting_options, id: \.self, selection: $selection) { option in
+               List(voting.options, id: \.self, selection: $selection) { option in
                   if option.index != 0 {
                      if selection == option {
                         Button(action: {}) {
@@ -75,12 +71,12 @@ struct Votings_VoteView: View {
                      title: Text("Möchtest du wirklich abstimmen"),
                      message: Text("Du kannst deine Wahl danach nciht mehr ändern!"),
                      primaryButton: .default(Text("Abstimmen")) {
-                        // update: user has voted
                         Task {
                            await BiometricAuth.executeIfSuccessfulAuth {
                               print("Successful Auth!")
-                              navigateToNextView = true
-//                              path.append("VotingResultView")
+                              await castVote(voting: voting, selection: selection ?? nil)
+                              dismiss()
+                              onNavigate(updateMyVote(selection: selection ?? nil))
                            } otherwise: {
                               print("Failed Auth!")
                            }
@@ -89,46 +85,48 @@ struct Votings_VoteView: View {
                      secondaryButton: .cancel(Text("Zurück"))
                   )
                }
-//               .navigationDestination(for: String.self) { pathValue in
-//                  if pathValue == "VotingResultView" {
-//                     Votings_VotingResultView(shouldPopToVotingsView: $rootIsActive, voting: voting, sampleIdentity: updateSampleIdentity(selection: selection ?? nil))
-//                  }
-//               }
-                  .navigationDestination(isPresented: $navigateToNextView) {
-                  Votings_VotingResultView(voting: voting, sampleIdentity: updateSampleIdentity(selection: selection ?? nil))
-               }
             }
             .background(Color(UIColor.secondarySystemBackground))
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Abbrechen", action: { dismiss() })
+                }
+            }
 
          }
          .navigationBarTitleDisplayMode(.inline)
    }
+   
+   private func castVote(voting: GetVotingDTO, selection: GetVotingOptionDTO?) async {
+      isLoading = true
+      error = nil
+      do {
+         if selection != nil {
+            try await APIService.shared.castVote(of: voting.id, with: selection!.index)
+         } else {
+            print("selection is nil")
+         }
+      } catch {
+         print("error: ", error)
+      }
+      isLoading = false
+   }
+   
+   func updateMyVote(selection: GetVotingOptionDTO?) -> GetVotingResultsDTO {
+      
+      VotingStateTracker.saveVote(votingId: voting.id, voteIndex: selection?.index ?? 0)
+
+      var results = votingResults
+      results.myVote = selection?.index
+      return results
+   }
 }
 
 #Preview {
-//   @Previewable @State var path: [String] = ["VoteView"]
-//   @Previewable @State var rootIsActive: Bool = false
-   
    NavigationView {
-      Votings_VoteView(voting: Voting(title: "Vereinsfarbe", question: "Welche Farbe soll die neue Vereinsfarbe werden?", startet_at: Date.now, is_open: true, meeting: MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession), voting_options: [
-         Voting_option(index: 0, text: "Enthaltung"),
-         Voting_option(index: 1, text: "Rot"),
-         Voting_option(index: 2, text: "Grün"),
-         Voting_option(index: 3, text: "Blau"),
-      ]),
-                           sampleIdentity: Identity(name: "Max Mustermann", votes: [Vote(voting: Voting(title: "Abstimmung2", question: "Welche Option soll gewählt werden 2?", startet_at: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!, is_open: false, meeting: MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession), voting_options: [
-                              Voting_option(index: 0, text: "Enthaltung", count: 4),
-                              Voting_option(index: 1, text: "Option1", count: 10),
-                              Voting_option(index: 2, text: "Option2", count: 15),
-                              Voting_option(index: 3, text: "Option3", count: 5),
-                              Voting_option(index: 4, text: "Option4", count: 30),
-                           ]), index: 2), Vote(voting: Voting(title: "Abstimmung5", question: "Welche Option soll gewählt werden 5?", startet_at: Date.distantPast, is_open: false, meeting: MeetingTest(title: "Sitzung2", start: Calendar.current.date(byAdding: .day, value: -7, to: Date())!, status: .completed), voting_options: [
-                              Voting_option(index: 0, text: "Enthaltung", count: 4),
-                              Voting_option(index: 1, text: "Option1", count: 10),
-                              Voting_option(index: 2, text: "Option2", count: 15),
-                              Voting_option(index: 3, text: "Option3", count: 5),
-                              Voting_option(index: 4, text: "Option4", count: 30),
-                           ]), index: 0)]))
+      var votingsView: VotingsView = .init()
+      
+      Votings_VoteView(voting: votingsView.mockVotings[0], votingResults: votingsView.mockVotingResults, onNavigate: {results in})
       .toolbar {
          ToolbarItem(placement: .navigationBarLeading) {
             Button {

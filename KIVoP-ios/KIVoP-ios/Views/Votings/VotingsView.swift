@@ -6,185 +6,356 @@
 //
 
 import SwiftUI
-
-// SampleData
-struct Identity: Identifiable, Hashable {
-   let id = UUID()
-   var name: String
-   
-   var votes: [Vote]
-}
-
-struct Voting: Identifiable, Hashable {
-   let id = UUID()
-   var title: String
-   var question: String
-   var startet_at: Date
-   var is_open: Bool
-   
-   var meeting: MeetingTest
-   //var meetingID: UUID
-   
-   var voting_options: [Voting_option]
-//   var votes: [Vote]
-}
-
-struct Vote: Identifiable, Hashable {
-//   var id: String { "\(votingID.uuidString)-\(identityID.uuidString)" }
-   var id = UUID()
-   var voting: Voting
-//   var identityID: UUID
-   var index: UInt8
-}
-
-struct Voting_option: Identifiable, Hashable {
-   var id = UUID()
-//   var id: String { "\(votingID.uuidString)-\(index)" }
-//
-//   var voting: Voting
-   var index: UInt8
-   var text: String
-   var count: Int?
-}
-
-struct MeetingTest: Identifiable, Hashable {
-   let id = UUID()
-   var title: String
-   var start: Date
-   var status: status
-   
-   //var votings: [Voting]
-}
-
-enum status: String, Codable {
-   case scheduled
-   case inSession
-   case completed
-}
+import MeetingServiceDTOs
 
 
 struct VotingsView: View {
- 
-   let sampleMeetings = [
-      MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession),
-      MeetingTest(title: "Sitzung2", start: Calendar.current.date(byAdding: .day, value: -7, to: Date())!, status: .completed)
-   ]
    
-   var _dateComponents1: DateComponents {
-      var dateComponents1 = DateComponents()
-      dateComponents1.day = -7
-      dateComponents1.minute = -15
-      return dateComponents1
-   }
+   @State private var meetings: [GetMeetingDTO] = []
+   @State private var votings: [GetVotingDTO] = []
+   @State private var votingResults: GetVotingResultsDTO?
+   @State private var votingsFiltered: [GetVotingDTO] = []
+   @State private var voting: GetVotingDTO?
+   @State private var votingsOfMeetings: [[GetVotingDTO]] = []
    
-   var _dateComponents2: DateComponents {
-      var dateComponents2 = DateComponents()
-      dateComponents2.day = -7
-      dateComponents2.minute = -15
-      return dateComponents2
-   }
-   
-   var votingGroup: [Voting] {
-      return [Voting(title: "Vereinsfarbe", question: "Welche Farbe soll die neue Vereinsfarbe werden?", startet_at: Date.now, is_open: true, meeting: sampleMeetings[0], voting_options: options1),]
-   }
+   @State private var isLoading = false
+   @State private var error: String?
 
-   var sampleVotings: [Voting] {
-      return [
-         Voting(title: "Vereinsfarbe", question: "Welche Farbe soll die neue Vereinsfarbe werden?", startet_at: Date.now, is_open: true, meeting: sampleMeetings[0], voting_options: options1),
-         Voting(title: "Abstimmung5", question: "Welche Option soll gewählt werden 5?", startet_at: Calendar.current.date(byAdding: _dateComponents1, to: Date())!, is_open: false, meeting: sampleMeetings[1], voting_options: options2),
-         Voting(title: "Abstimmung3", question: "Welche Option soll gewählt werden 3?", startet_at: Calendar.current.date(byAdding: .minute, value: -35, to: Date())!, is_open: false, meeting: sampleMeetings[0], voting_options: options2),
-         Voting(title: "Abstimmung4", question: "Welche Option soll gewählt werden 4?", startet_at: Calendar.current.date(byAdding: .day, value: -7, to: Date())!, is_open: false, meeting: sampleMeetings[1], voting_options: options2),
-         Voting(title: "Abstimmung2", question: "Welche Option soll gewählt werden 2?", startet_at: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!, is_open: false, meeting: sampleMeetings[0], voting_options: options2),
-         Voting(title: "Abstimmung6", question: "Welche Option soll gewählt werden 6?", startet_at: Calendar.current.date(byAdding: _dateComponents2, to: Date())!, is_open: false, meeting: sampleMeetings[1], voting_options: options2)
-         ]
-   }
-   
-   var options1: [Voting_option] = [
-        Voting_option(index: 0, text: "Enthaltung", count: 10),
-        Voting_option(index: 1, text: "Rot", count: 10),
-        Voting_option(index: 2, text: "Grün", count: 30),
-        Voting_option(index: 3, text: "Blau", count: 50),
-   ]
-   
-   
-   var options2: [Voting_option] = [
-      Voting_option(index: 0, text: "Enthaltung", count: 4),
-      Voting_option(index: 1, text: "Option1", count: 10),
-      Voting_option(index: 2, text: "Option2", count: 15),
-      Voting_option(index: 3, text: "Option3", count: 30),
-      Voting_option(index: 4, text: "Option4", count: 8),
-   ]
-   
-   var sampleIdentity: Identity {
-      return Identity(name: "Max Mustermann", votes: [Vote(voting: sampleVotings[4], index: 2), Vote(voting: sampleVotings[2], index: 0)])
-   }
-   
-   ///////////////////////////////////////////////////////////////////////
-   
-//   @State private var navPath: [String] = []
-//   @State var isActive : Bool = false
    @State private var searchText = ""
 
-   var votingsOfMeetings: [[Voting]] {
-      var votingsByMeeting: [UUID: [Voting]] = [:]
-      
-      for voting in sampleVotings {
-         let meetingID = voting.meeting.id
-         if votingsByMeeting[meetingID] == nil {
-            votingsByMeeting[meetingID] = []
-         }
-         votingsByMeeting[meetingID]?.append(voting)
-      }
+   @State private var selectedVoting: GetVotingDTO?
+   @State private var updatedResults: GetVotingResultsDTO?
+   @State private var hasVoted: Bool = false
+   @State private var selectedOption: UInt8?
    
-      var votingsOfMeetingsSorted: [[Voting]] = Array(votingsByMeeting.values)
-      
-      votingsOfMeetingsSorted = votingsOfMeetingsSorted.map { $0.sorted { $0.startet_at > $1.startet_at } }
+   @State private var isShowingVoteSheet = false
+   @State private var navigateToResultView = false
+   @State private var navigateToNextView = false
+ 
+   func setVotingsOfMeetings() async {
+       var votingsByMeeting: [UUID: [GetVotingDTO]] = [:]
+       
+       for voting in votingsFiltered {
+           let meetingID = voting.meetingId
+           if votingsByMeeting[meetingID] == nil {
+               votingsByMeeting[meetingID] = []
+           }
+           votingsByMeeting[meetingID]?.append(voting)
+       }
 
-      votingsOfMeetingsSorted.sort {
-              guard let firstVotingInGroup1 = $0.first, let firstVotingInGroup2 = $1.first else {
-                  return false
+       var votingsOfMeetingsSorted: [[GetVotingDTO]] = Array(votingsByMeeting.values)
+       
+       votingsOfMeetingsSorted = votingsOfMeetingsSorted.map {
+          $0.sorted { ($0.startedAt ?? Date.now) > ($1.startedAt ?? Date.now) }
+       }
+       
+       // Fetch meeting data for sorting
+       var meetingStartDates: [UUID: Date] = [:]
+       for group in votingsOfMeetingsSorted {
+           if let firstVoting = group.first {
+              isLoading = true
+              error = nil
+              do {
+                 let meeting = try await APIService.shared.fetchMeeting(by: firstVoting.meetingId)
+                 meetingStartDates[firstVoting.meetingId] = meeting.start
+              } catch {
+                  self.error = error.localizedDescription
               }
-              return firstVotingInGroup1.meeting.start > firstVotingInGroup2.meeting.start
-          }
-      
-      return votingsOfMeetingsSorted
+              isLoading = false
+           }
+       }
+
+       // Sort groups based on meeting start dates
+       votingsOfMeetingsSorted.sort {
+           guard let meeting1Start = meetingStartDates[$0.first?.meetingId ?? UUID()],
+                 let meeting2Start = meetingStartDates[$1.first?.meetingId ?? UUID()] else {
+               return false
+           }
+           return meeting1Start > meeting2Start
+       }
+       
+       self.votingsOfMeetings = votingsOfMeetingsSorted
    }
-   
    
    var body: some View {
       ZStack {
-         //         NavigationStack(path: $navPath) {
          NavigationView {
             if !votingsOfMeetings.isEmpty {
                List {
                   ForEach(votingsOfMeetings, id: \.self) { votingGroup in
-                     Votings_VotingsSectionView(votingGroup: votingGroup, sampleIdentity: sampleIdentity)
+                     Votings_VotingsSectionView(votingsView: VotingsView(), votingGroup: votingGroup, mockVotingResults: mockVotingResults, onVotingSelected: { voting in
+                        selectedVoting = voting
+                        Task {
+                           if (selectedVoting != nil) {
+                              hasVoted = false
+                              hasVoted = VotingStateTracker.hasVoted(for: voting.id)
+                              await loadVotingResults(voting: voting)
+                           }
+                           if(votingResults?.myVote == nil && voting.isOpen && !hasVoted) {
+                              isShowingVoteSheet = true
+                           } else {
+                              navigateToResultView = true
+                           }
+                        }
+                     })
+                  }
+               }
+               .refreshable {
+                  await loadVotings()
+                  votingsFiltered = votings
+                  await setVotingsOfMeetings()
+               }
+               .sheet(isPresented: $isShowingVoteSheet) {
+                  if let voting = selectedVoting {
+                     Votings_VoteView(voting: voting, votingResults: mockVotingResults, onNavigate: { results in
+                        updatedResults = results
+                        navigateToNextView = true
+                     })
+                     .navigationTitle(voting.question)
+                  }
+               }
+               .navigationDestination(isPresented: $navigateToResultView) {
+                  if let voting = selectedVoting {
+                     Votings_VotingResultView(votingsView: VotingsView(), voting: voting, votingResults: mockVotingResults)
+                        .navigationTitle("Abstimmungs-Ergebnis")
+                  }
+               }
+               .navigationDestination(isPresented: $navigateToNextView) {
+                  if let voting = selectedVoting, let results = updatedResults {
+                     Votings_VotingResultView(votingsView: VotingsView(), voting: voting, votingResults: results)
                   }
                }
             } else {
                ContentUnavailableView {
-                  Label("Keine Abstimmungen gefunden", systemImage: "document")
+//                  Label("Keine Abstimmungen gefunden", systemImage: "document")
                }
             }
+            
          }
          .navigationTitle("Abstimmungen")
          .navigationBarTitleDisplayMode(.large)
+//         .task(id: selectedVoting) {
+//            if let voting = selectedVoting {
+//               hasVoted = VotingStateTracker.hasVoted(for: voting.id)
+//               await loadVotingResults(voting: voting)
+//            }
+//         }
+         .onAppear {
+            Task {
+//               try await AuthController.shared.login(email: "admin@kivop.ipv64.net", password: "admin")
+//               let token = try await AuthController.shared.getAuthToken()
+//               print("Token: \(token)")
+
+               await loadVotings()
+//               votings = mockVotings
+               votingsFiltered = votings
+               await setVotingsOfMeetings()
+            }
+         }
+         .overlay {
+            if isLoading {
+               ProgressView("Loading...")
+            } else if let error = error {
+               Text("Error: \(error)")
+                  .foregroundColor(.red)
+            }
+         }
+         
       }
       .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen")
-      //      .onChange(of: $searchText) {}
-      //.onChange(of: $searchText) {
-      //    Task {
-      //        if searchText == "" {
-      //           await sampleVotings
-      //        }
-      //
-      //        sampleVotings = sampleVotings.filter { voting in
-      //            return voting.title.starts(with: searchText)
-      //        }
-      //    }
-      // }
+      .onChange(of: searchText) {
+         Task {
+            if searchText.isEmpty {
+               votingsFiltered = votings
+            } else {
+               votingsFiltered = votings.filter { voting in
+                  return voting.question.contains(searchText)
+               }
+            }
+         }
+      }
       
    }
+   
+
+   private func loadVotings() async {
+      isLoading = true
+      error = nil
+      do {
+         votings = try await APIService.shared.fetchAllVotings()
+      } catch {
+         print("error: ", error)
+      }
+      isLoading = false
+   }
+   
+   private func loadVotingResults(voting: GetVotingDTO) async {
+      isLoading = true
+      error = nil
+      do {
+         votingResults = try await APIService.shared.fetchVotingResults(by: voting.id)
+      } catch {
+         print("error: ", error)
+      }
+      isLoading = false
+   }
+   
+   private func loadMeetings() async {
+      isLoading = true
+      error = nil
+      do {
+         meetings = try await APIService.shared.fetchAllMeetings()
+      } catch {
+         print("error: ", error)
+      }
+      isLoading = false
+   }
+   
+   
+   
+//   func getMeeting(meetingId: UUID) -> GetMeetingDTO {
+//      // API Call
+//      // loadMeetings()
+//      mockMeetings.first(where: { $0.id == meetingID }) ?? mockMeeting2
+//   }
+   
+   
+   var mockVotings: [GetVotingDTO] {
+      return [
+         GetVotingDTO(
+            id: UUID(),
+            meetingId: mockMeeting1.id,
+            question: "Welche Farbe soll die neue Vereinsfarbe werden?",
+            description: "Der Verein braucht eine neue Vereinsfarbe, welche gut zum Verein passt.",
+            isOpen: true,
+            startedAt: Date.now,
+            closedAt: nil,
+            anonymous: false,
+            options: mockOptions1
+         ),
+         GetVotingDTO(
+            id: UUID(),
+            meetingId: mockMeeting2.id,
+            question: "Welche Option soll gewählt werden 4?",
+            description: "Beschreibung4",
+            isOpen: false,
+            startedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!,
+            closedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!,
+            anonymous: false,
+            options: mockOptions2
+         ),
+         GetVotingDTO(
+            id: UUID(),
+            meetingId: mockMeeting1.id,
+            question: "Welche Option soll gewählt werden 2?",
+            description: "Beschreibung2",
+            isOpen: false,
+            startedAt: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!,
+            closedAt: Calendar.current.date(byAdding: .minute, value: -5, to: Date())!,
+            anonymous: false,
+            options: mockOptions2
+         ),
+         GetVotingDTO(
+            id: UUID(),
+            meetingId: mockMeeting1.id,
+            question: "Welche Option soll gewählt werden 3?",
+            description: "Beschreibung3",
+            isOpen: false,
+            startedAt: Calendar.current.date(byAdding: .minute, value: -35, to: Date())!,
+            closedAt: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!,
+            anonymous: false,
+            options: mockOptions2
+         ),
+      ]
+   }
+   
+   let mockOptions1: [GetVotingOptionDTO] = [
+      GetVotingOptionDTO(index: 0, text: "Enthaltung"),
+      GetVotingOptionDTO(index: 1, text: "Rot"),
+      GetVotingOptionDTO(index: 2, text: "Grün"),
+      GetVotingOptionDTO(index: 3, text: "Blau"),
+   ]
+   
+   let mockOptions2: [GetVotingOptionDTO] = [
+      GetVotingOptionDTO(index: 0, text: "Enthaltung"),
+      GetVotingOptionDTO(index: 1, text: "Option1"),
+      GetVotingOptionDTO(index: 2, text: "Option2"),
+      GetVotingOptionDTO(index: 3, text: "Option3"),
+      GetVotingOptionDTO(index: 4, text: "Option4"),
+   ]
+   
+   var mockMeetings: [GetMeetingDTO] {
+      return [mockMeeting1, mockMeeting2]
+   }
+   
+   let mockMeeting1: GetMeetingDTO = GetMeetingDTO(
+      id: UUID(),
+      name: "Jahreshauptversammlung",
+      description: "Das ist die Jahreshauptversammlung",
+      status: MeetingStatus.inSession,
+      start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!,
+      duration: nil,
+      location: nil,
+      chair: nil,
+      code: nil
+      )
+   
+   let mockMeeting2: GetMeetingDTO = GetMeetingDTO(
+      id: UUID(),
+      name: "Sitzung2",
+      description: "Das ist eine Sitzung2",
+      status: MeetingStatus.completed,
+      start: Calendar.current.date(byAdding: .day, value: -7, to: Date())!,
+      duration: 60,
+      location: nil,
+      chair: nil,
+      code: nil
+      )
+   
+   var mockVotingResults: GetVotingResultsDTO {
+      return GetVotingResultsDTO(
+         votingId: mockVotings[0].id,
+         myVote: nil, // Index 0: Abstention | nil: did not vote at all
+         results: [mockVotingResult1, mockVotingResult2, mockVotingResult3, mockVotingResult4]
+      )
+   }
+   
+   var mockVotingResult1: GetVotingResultDTO {
+      return GetVotingResultDTO(
+         index: 0, // Index 0: Abstention
+         total: 2,
+         percentage: 2,
+         identities: []
+      )
+   }
+   var mockVotingResult2: GetVotingResultDTO {
+      return GetVotingResultDTO(
+         index: 1, // Index 0: Abstention
+         total: 8,
+         percentage: 8,
+         identities: []
+      )
+   }
+   var mockVotingResult3: GetVotingResultDTO {
+      return GetVotingResultDTO(
+         index: 2, // Index 0: Abstention
+         total: 10,
+         percentage: 10,
+         identities: []
+      )
+   }
+   var mockVotingResult4: GetVotingResultDTO {
+      return GetVotingResultDTO(
+         index: 3, // Index 0: Abstention
+         total: 30,
+         percentage: 30,
+         identities: []
+      )
+   }
+
+   
+   let mockIdentity: GetIdentityDTO = GetIdentityDTO(id: UUID(), name: "Max Mustermann")
+   
 }
 
 #Preview {

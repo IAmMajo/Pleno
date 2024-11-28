@@ -6,121 +6,136 @@
 //
 
 import SwiftUI
+import MeetingServiceDTOs
 
 struct Votings_VotingsSectionView: View {
+   var votingsView: VotingsView
    
-   let votingGroup: [Voting]
-   let sampleIdentity: Identity
-//   @Binding var path: [String]
-//   @Binding var rootIsActive: Bool
+   let votingGroup: [GetVotingDTO]
+   let mockVotingResults: GetVotingResultsDTO
+   var onVotingSelected: (GetVotingDTO) -> Void
    
-   func getMeetingTitle(votingGroup: [Voting]) -> String {
-      if (votingGroup.first?.meeting.status == .inSession) {
-         return "Aktuelle Sitzung"
-      } else {
-         return "\(votingGroup.first?.meeting.title ?? "") - \(DateTimeFormatter.formatDate(votingGroup.first?.meeting.start ?? Date()))"
-      }
-   }
-   
-   func voteCastedSymbolColor (voting: Voting) -> Color {
-      if (sampleIdentity.votes.contains(where: { $0.voting.title == voting.title })) { // später mit id
-         return .blue
-      } else {
-         return voting.is_open ? .orange : .black
-      }
-   }
-   
-   func voteCastedStatus (voting: Voting) -> String {
-      if (sampleIdentity.votes.contains(where: { $0.voting.title == voting.title })) { // später mit id
-         return "checkmark"
-      } else {
-         return voting.is_open ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
-      }
-   }
+   @State private var meetingName: String = ""
+   @State private var votingViewModels: [VotingViewModel] = []
+   @State private var isVotingFinished: Bool = false
+
+
+   @State private var isLoading = false
+   @State private var error: String?
    
     var body: some View {
-       Section(header: Text(getMeetingTitle(votingGroup: votingGroup))) {
-          ForEach(votingGroup, id: \.self) { voting in
-                           NavigationLink(destination: {
-                              if (!sampleIdentity.votes.contains(where: { $0.voting.title == voting.title }) && voting.is_open) { //user has voted
-                                 Votings_VoteView(voting: voting, sampleIdentity: sampleIdentity)
-                                    .navigationTitle(voting.title)
-                              } else {
-                                 Votings_VotingResultView(voting: voting, sampleIdentity: sampleIdentity)
-                                    .navigationTitle(voting.title)
-                              }
-                           }) {
-                              HStack {
-                                 Text(voting.title)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                 Spacer()
-                                 Image(systemName: "\(voteCastedStatus(voting: voting))")
-                                    .foregroundStyle(voteCastedSymbolColor(voting: voting))
-                                 Spacer()
-                              }
-                           }
-//             NavigationLink(
-//               destination: Votings_VotingDetail(voting: voting, sampleIdentity: sampleIdentity, rootIsActive: $rootIsActive)
-//                  .navigationTitle(voting.title),
-//               isActive: self.$rootIsActive
-//             ){
+       Section(header: Text(meetingName)) {
+          ForEach(votingViewModels) { viewModel in
+             if (viewModel.voting.startedAt == nil) {
+             } else {
 //                HStack {
-//                   Text(voting.title)
+//                   Text(viewModel.voting.question)
 //                      .frame(maxWidth: .infinity, alignment: .leading)
 //                   Spacer()
-//                   Image(systemName: "\(voteCastedStatus(voting: voting))")
-//                      .foregroundStyle(voteCastedSymbolColor(voting: voting))
+//                   Image(systemName: "\(viewModel.status)")
+//                      .foregroundStyle(viewModel.symbolColor)
 //                   Spacer()
 //                }
-//             }
-//             NavigationLink(value: "VoteView") {
-////             Button(action: {
-////                         print("Navigating to VoteView for \(voting.title)") // Debug
-////                         path.append("VoteView") // Append the destination
-////                     }) {
-//                HStack {
-//                   Text(voting.title)
-//                      .frame(maxWidth: .infinity, alignment: .leading)
-//                   Spacer()
-//                   Image(systemName: "\(voteCastedStatus(voting: voting))")
-//                      .foregroundStyle(voteCastedSymbolColor(voting: voting))
-//                   Spacer()
+//                .contentShape(Rectangle())
+//                .onTapGesture {
+//                   onVotingSelected(viewModel.voting)
 //                }
-//             }
-//             .navigationDestination(for: String.self) { pathValue in
-//                if pathValue == "VoteView" {
-//                   Votings_VotingDetail(voting: voting, sampleIdentity: sampleIdentity, rootIsActive: self.$rootIsActive)
-//                      .navigationTitle(voting.title)
-//                } else if pathValue == "VotingResultView" {
-//                   Votings_VotingResultView(shouldPopToVotingsView: self.$rootIsActive, voting: voting, sampleIdentity: sampleIdentity)
-//                      .navigationTitle(voting.title)
+//                .task {
+//                   await viewModel.loadSymbolColorAndStatus()
 //                }
-//             }
+                Votings_VotingRowView(viewModel: viewModel, onVotingSelected: onVotingSelected)
+             }
+          }
+       }
+       .onAppear {
+          Task {
+             await initializeViewModelsAndMeetingName()
           }
        }
     }
+   
+   private func initializeViewModelsAndMeetingName() async {
+          votingViewModels = votingGroup.map { VotingViewModel(voting: $0) }
+          await loadMeetingName(votingGroup: votingGroup)
+      }
+   
+   private func loadMeetingName(votingGroup: [GetVotingDTO]) async {
+      isLoading = true
+      error = nil
+      do {
+         let meeting = try await APIService.shared.fetchMeeting(by: votingGroup.first!.meetingId)
+         
+         let status = meeting.status
+         if(status == MeetingStatus.inSession) {
+            meetingName = "Aktuelle Sitzung"
+         } else {
+            meetingName = "\(meeting.name) - \(DateTimeFormatter.formatDate(meeting.start))"
+         }
+      } catch {
+         print("error: ", error)
+      }
+      isLoading = false
+   }
+   
+//   func setSymbolColorAndStatus(voting: GetVotingDTO) async {
+//      isLoading = true
+//      error = nil
+//      do {
+//         let results = try await APIService.shared.fetchVotingResults(by: voting.id)
+////         let results = mockVotingResults
+//         if (results.myVote != nil) {
+//            voteCastedSymbolColor = .blue
+//            voteCastedStatus = "checkmark"
+//         } else {
+//            voteCastedSymbolColor = voting.isOpen ? .orange : .black
+//            voteCastedStatus = voting.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
+//         }
+//      } catch {
+//         print("error: ", error)
+//         voteCastedSymbolColor = voting.isOpen ? .orange : .black
+//         print("voteCastedSymbolColor: \(voteCastedSymbolColor)")
+//         voteCastedStatus = voting.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
+//         print("voteCastStatus: \(voteCastedStatus)")
+//      }
+//      isLoading = false
+//   }
+   
+   
+   //   func getMeetingName(votingGroup: [GetVotingDTO]) -> String {
+   //      let status = votingsView.getMeeting(meetingID: votingGroup.first!.meetingId).status
+   //      if(status == MeetingStatus.inSession) {
+   //         return "Aktuelle Sitzung"
+   //      } else {
+   //         return "\(votingsView.getMeeting(meetingID: votingGroup.first!.meetingId).name) - \(DateTimeFormatter.formatDate(votingsView.getMeeting(meetingID: votingGroup.first!.meetingId).start))"
+   //      }
+   //   }
+   
+//   func getVotingResults(votingID: UUID) -> GetVotingResultsDTO {
+//      return mockVotingResults
+//   }
+//   
+//   func voteCastedSymbolColor (voting: GetVotingDTO) -> Color {
+//      if (getVotingResults(votingID: voting.id).myVote != nil) {
+//         return .blue
+//      } else {
+//         return voting.isOpen ? .orange : .black
+//      }
+//   }
+//   
+//   func voteCastedStatus (voting: GetVotingDTO) -> String {
+//      if (getVotingResults(votingID: voting.id).myVote != nil) {
+//         return "checkmark"
+//      } else {
+//         return voting.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
+//      }
+//   }
 }
 
 #Preview {
-//   @Previewable @State var path: [String] = ["VoteView"]
-//   @Previewable @State var isActive: Bool = false
-
-   Votings_VotingsSectionView(votingGroup: [Voting(title: "Vereinsfarbe", question: "Welche Farbe soll die neue Vereinsfarbe werden?", startet_at: Date.now, is_open: true, meeting: MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession), voting_options: [
-      Voting_option(index: 0, text: "Enthaltung"),
-      Voting_option(index: 1, text: "Rot"),
-      Voting_option(index: 2, text: "Grün"),
-      Voting_option(index: 3, text: "Blau"),
-   ])], sampleIdentity: Identity(name: "Max Mustermann", votes: [Vote(voting: Voting(title: "Abstimmung2", question: "Welche Option soll gewählt werden 2?", startet_at: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!, is_open: false, meeting: MeetingTest(title: "Jahreshauptversammlung", start: Calendar.current.date(byAdding: .hour, value: -1, to: Date())!, status: .inSession), voting_options: [
-      Voting_option(index: 0, text: "Enthaltung", count: 4),
-      Voting_option(index: 1, text: "Option1", count: 10),
-      Voting_option(index: 2, text: "Option2", count: 15),
-      Voting_option(index: 3, text: "Option3", count: 5),
-      Voting_option(index: 4, text: "Option4", count: 30),
-   ]), index: 2), Vote(voting: Voting(title: "Abstimmung5", question: "Welche Option soll gewählt werden 5?", startet_at: Date.distantPast, is_open: false, meeting: MeetingTest(title: "Sitzung2", start: Calendar.current.date(byAdding: .day, value: -7, to: Date())!, status: .completed), voting_options: [
-      Voting_option(index: 0, text: "Enthaltung", count: 4),
-      Voting_option(index: 1, text: "Option1", count: 10),
-      Voting_option(index: 2, text: "Option2", count: 15),
-      Voting_option(index: 3, text: "Option3", count: 5),
-      Voting_option(index: 4, text: "Option4", count: 30),
-   ]), index: 0)]))
+   var votingsView: VotingsView = .init()
+   var mockVotings = votingsView.mockVotings
+   var mockVotingResults = votingsView.mockVotingResults
+   
+   Votings_VotingsSectionView(votingsView: votingsView, votingGroup: mockVotings, mockVotingResults: mockVotingResults, onVotingSelected: { voting in
+   })
 }
