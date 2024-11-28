@@ -131,7 +131,7 @@ class MeetingManager: ObservableObject {
                     
                     // Dekodiere die Daten
                     self?.meetings = try decoder.decode([GetMeetingDTO].self, from: data)
-
+                    self?.getCurrentMeeting()
 
                 }catch {
                     self?.errorMessage = "Failed to decode meetings: \(error.localizedDescription)"
