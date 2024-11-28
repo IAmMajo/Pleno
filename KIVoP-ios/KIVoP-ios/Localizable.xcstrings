@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {
-      "shouldTranslate" : false
-    },
     " deines Vereins dich aufnehmen." : {
       "localizations" : {
         "de" : {
@@ -51,9 +48,10 @@
     "(ca. 160 min.)" : {
 
     },
-    "%.2f%%" : {
+    "%lld" : {
 
     },
+    "%lld%%" : {
     "%lld" : {
 
     },
@@ -72,10 +70,8 @@
     "8/12" : {
 
     },
-    "9/12" : {
-
-    },
     "10" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -98,6 +94,7 @@
       }
     },
     "18:06" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -118,9 +115,6 @@
           }
         }
       }
-    },
-    "18:06 Uhr" : {
-
     },
     "21.01.2024" : {
       "localizations" : {
@@ -187,9 +181,6 @@
           }
         }
       }
-    },
-    "Abschied" : {
-
     },
     "Abstimmen" : {
 
@@ -260,9 +251,6 @@
     "Adresse" : {
 
     },
-    "Agenda" : {
-
-    },
     "AKTIONEN" : {
       "localizations" : {
         "de" : {
@@ -302,6 +290,7 @@
       }
     },
     "Aktuelle Sitzung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -332,6 +321,9 @@
           }
         }
       }
+    },
+    "Aktuelle Sitzungen" : {
+
     },
     "Aktuelles Passwort" : {
       "localizations" : {
@@ -402,6 +394,9 @@
     "Anstehend" : {
 
     },
+    "Anstehende Sitzungen" : {
+
+    },
     "Anstehende Termine" : {
       "localizations" : {
         "de" : {
@@ -465,6 +460,9 @@
         }
       }
     },
+    "Beschreibung" : {
+
+    },
     "Bitte klicke nun auf den " : {
       "localizations" : {
         "de" : {
@@ -486,9 +484,6 @@
           }
         }
       }
-    },
-    "Bla" : {
-
     },
     "Code scannen" : {
       "localizations" : {
@@ -582,6 +577,7 @@
       }
     },
     "E-Mail" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -604,6 +600,7 @@
       }
     },
     "E-MAIL" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -648,6 +645,9 @@
       }
     },
     "Enthalten" : {
+
+    },
+    "Error: %@" : {
 
     },
     "Error: %@" : {
@@ -701,9 +701,6 @@
     "Fast Fertig" : {
 
     },
-    "Franz" : {
-
-    },
     "Galerie" : {
       "localizations" : {
         "de" : {
@@ -725,9 +722,6 @@
           }
         }
       }
-    },
-    "Glühwein" : {
-
     },
     "Hallo" : {
 
@@ -776,12 +770,6 @@
           }
         }
       }
-    },
-    "Heinz-Peters" : {
-
-    },
-    "In der alten Turnhalle hinter dem Friedhof, Altes Grab 5 b, 42069 Hölle" : {
-
     },
     "Ja" : {
       "localizations" : {
@@ -860,6 +848,15 @@
         }
       }
     },
+    "Keine Abstimmungen gefunden" : {
+
+    },
+    "Keine anstehenden Sitzungen." : {
+
+    },
+    "Keine vergangenen Sitzungen." : {
+
+    },
     "KIVoP " : {
       "localizations" : {
         "de" : {
@@ -882,7 +879,13 @@
         }
       }
     },
-    "Langweiliger Orga-Punkt" : {
+    "Lade Profilbild..." : {
+
+    },
+    "Lade..." : {
+
+    },
+    "Laden..." : {
 
     },
     "Link" : {
@@ -907,7 +910,7 @@
         }
       }
     },
-    "Loading..." : {
+    "Loading meetings..." : {
 
     },
     "Login" : {
@@ -993,11 +996,12 @@
       }
     },
     "Mitteilung." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mitteilung."
+            "value" : " Mitteilung."
           }
         },
         "en" : {
@@ -1085,6 +1089,7 @@
       }
     },
     "NAME" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1105,6 +1110,9 @@
           }
         }
       }
+    },
+    "Name eingeben" : {
+
     },
     "Nein" : {
       "localizations" : {
@@ -1166,7 +1174,7 @@
         }
       }
     },
-    "November 2023" : {
+    "No meetings available." : {
 
     },
     "oder" : {
@@ -1392,9 +1400,6 @@
     "Protokoll" : {
 
     },
-    "Protokollant" : {
-
-    },
     "Protokolle" : {
       "localizations" : {
         "de" : {
@@ -1610,10 +1615,7 @@
         }
       }
     },
-    "Treffen mit Förderverein" : {
-
-    },
-    "Treffen mit Kassenwart" : {
+    "Überprüfung..." : {
 
     },
     "Umfragen, " : {
@@ -1723,6 +1725,9 @@
     "Vergangen" : {
 
     },
+    "Vergangene Sitzungen" : {
+
+    },
     "Vergangene Termine" : {
       "localizations" : {
         "de" : {
@@ -1783,15 +1788,6 @@
           }
         }
       }
-    },
-    "Vorsitzende wählen" : {
-
-    },
-    "Vorstandsitzung Dez. 23" : {
-
-    },
-    "Vorstandsitzung Nov. 23" : {
-
     },
     "Weiter" : {
       "localizations" : {

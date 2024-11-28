@@ -9,28 +9,29 @@ import Foundation
 import LocalAuthentication
 
 public class BiometricAuth {
+    
+    /// Asynchrone Authentifizierung mit Face ID oder Touch ID
     static public func authenticate() async -> Bool {
         let context = LAContext()
         var error: NSError?
 
-        // Check whether authentication is possible
+        // Prüfen, ob Authentifizierung möglich ist
         if context.canEvaluatePolicy(
-          .deviceOwnerAuthentication, error: &error
+            .deviceOwnerAuthentication, error: &error
         ) {
             do {
-                // Return the result of the authentication
-                return try await context
-                  .evaluatePolicy(
+                // Authentifizierung ausführen und Ergebnis zurückgeben
+                return try await context.evaluatePolicy(
                     .deviceOwnerAuthentication,
-                    localizedReason: "Authentication Required."
-                  )
+                    localizedReason: "Bitte bestätigen Sie sich mit Face ID oder Touch ID."
+                )
             } catch {
-               print("Unhandled biometric auth err: \(error.localizedDescription)")
+                print("Fehler bei der biometrischen Authentifizierung: \(error.localizedDescription)")
                 return false
             }
         } else {
-            // No Password or Biometrics to auth -> return true
-            return true
+            print("Biometrische Authentifizierung nicht verfügbar: \(error?.localizedDescription ?? "Unbekannter Fehler")")
+            return false
         }
     }
    
@@ -47,4 +48,32 @@ public class BiometricAuth {
      await onSuccessClosure()
    }
 
+    /// Prüft, ob biometrische Authentifizierung verfügbar ist
+    static public func isBiometricAvailable() -> Bool {
+        let context = LAContext()
+        var error: NSError?
+        return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
+    }
+
+    /// Authentifiziert den Benutzer mit Face ID/Touch ID und führt eine Aktion aus
+    static public func authenticateWithBiometrics(
+        localizedReason: String = "Bitte bestätigen Sie sich mit Face ID oder Touch ID.",
+        completion: @escaping (Bool, Error?) -> Void
+    ) {
+        let context = LAContext()
+        var error: NSError?
+
+        // Prüfen, ob Face ID/Touch ID verfügbar ist
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: localizedReason) { success, authError in
+                DispatchQueue.main.async {
+                    completion(success, authError)
+                }
+            }
+        } else {
+            DispatchQueue.main.async {
+                completion(false, error)
+            }
+        }
+    }
 }
