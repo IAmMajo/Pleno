@@ -20,6 +20,7 @@ public struct GetMeetingDTO: Codable {
         self.duration = duration
         self.location = location
         self.chair = chair
+        self.code = code
     }
 }
 
