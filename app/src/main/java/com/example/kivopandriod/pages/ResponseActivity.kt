@@ -16,35 +16,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.navigation.NavController
 import com.example.kivopandriod.components.ResponseItem
 import com.example.kivopandriod.components.ResponseList
 import com.example.kivopandriod.services.responseList
 
-class ResponseActivity : ComponentActivity() {
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            MainApp()
-        }
-    }
-}
 
-
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainApp() {
+fun ResponseScreen(
+    navController: NavController? = null,
+    meetingId: String
 
-    MaterialTheme {
+) {
+    //TODO: FIX THIS
         Surface {
             // Zustand für die Antworten (Liste von ResponseItem)
             var responses by remember { mutableStateOf<List<ResponseItem>>(emptyList()) }
-            val meetingId = "E5EBB6A8-AA2F-42FD-9B55-F30B8D68605D"
             // API-Anfrage ausführen
             LaunchedEffect(meetingId)
             {
-                Login(email = "admin@kivop.ipv64.net", password = "admin")
-                Log.d("LaunchedEffect","why")
                 val responseData = responseList(meetingId) // Dynamische Daten abrufen
                 responses = responseData.map { response ->
                     ResponseItem(name = response.name, statusIconResId = response.status)
@@ -55,5 +45,5 @@ fun MainApp() {
             ResponseList(responses = responses, "Rückmeldungen")
         }
     }
-}
+
 

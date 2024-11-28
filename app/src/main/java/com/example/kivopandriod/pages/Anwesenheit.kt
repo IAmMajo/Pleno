@@ -44,6 +44,7 @@ fun AnwesenheitScreen(navController: NavController){
 
     // Ergebnisse anzeigen
     AppointmentTabContent(
+        navController,
         tabs = tabs,
         appointments = appointments
     )

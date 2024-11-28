@@ -47,13 +47,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.kivopandriod.pages.AnwesenheitScreen
 import com.example.kivopandriod.pages.HomeScreen
 import com.example.kivopandriod.pages.LoginScreen
 import com.example.kivopandriod.pages.ProtokolleScreen
+import com.example.kivopandriod.pages.ResponseScreen
 import com.example.kivopandriod.pages.SitzungenScreen
 import com.example.kivopandriod.ui.theme.KIVoPAndriodTheme
 import com.example.kivopandriod.ui.theme.Primary_dark_20
@@ -111,6 +114,16 @@ fun navigation(navController: NavHostController){
         // Anwesenheit
         composable(route = Screen.Anwesenheit.rout){
             AnwesenheitScreen(navController = navController)
+        }
+        // Anwesenheit Response
+        composable(
+            route = Screen.Anwesenheit.rout +"/{meetingID}",
+            arguments = listOf(
+                navArgument("meetingID") {type = NavType.StringType},
+            ))
+            { backStackEntry ->
+            val meetingID = backStackEntry.arguments?.getString("meetingID") ?: ""
+            ResponseScreen(navController = navController, meetingId = meetingID)
         }
         // Protokolle
         composable(route = Screen.Protokolle.rout){

@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.kivopandriod.R
+import com.example.kivopandriod.ui.theme.Background_secondary_light
 
 data class ResponseItem(
     val name: String,
@@ -30,9 +31,8 @@ fun ResponseList(responses: List<ResponseItem>, headerText: String) {
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
-            .padding(16.dp)
             .clip(MaterialTheme.shapes.medium)
-            .background(Color(0xFFE0E0E0))
+            .background(Background_secondary_light)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             val nonOpenCount = responses.count { it.statusIconResId > 0 }
