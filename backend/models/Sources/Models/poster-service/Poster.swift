@@ -26,6 +26,8 @@ public final class Poster: Model, @unchecked Sendable {
     @Field(key: "image_url")
     public var image_url: String
     
+    @Children(for: \.$poster)
+    var positions: [PosterPosition]
    
     public init() { }
 
