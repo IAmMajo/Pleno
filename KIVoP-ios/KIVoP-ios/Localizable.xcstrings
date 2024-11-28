@@ -72,6 +72,28 @@
     "8/12" : {
 
     },
+    "10" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10"
+          }
+        }
+      }
+    },
     "12.12.2023" : {
 
     },
@@ -803,6 +825,9 @@
         }
       }
     },
+    "Keine aktuelle Sitzung verfügbar" : {
+
+    },
     "Keine anstehenden Sitzungen." : {
 
     },
@@ -1038,6 +1063,9 @@
           }
         }
       }
+    },
+    "Neu laden" : {
+
     },
     "Neues Passwort" : {
       "localizations" : {
