@@ -27,7 +27,7 @@ public final class Poster: Model, @unchecked Sendable {
     public var image_url: String
     
     @Children(for: \.$poster)
-    var positions: [PosterPosition]
+    public var positions: [PosterPosition]
    
     public init() { }
 
