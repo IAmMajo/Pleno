@@ -60,6 +60,7 @@ import com.example.kivopandriod.pages.ResponseScreen
 import com.example.kivopandriod.pages.SitzungenScreen
 import com.example.kivopandriod.ui.theme.KIVoPAndriodTheme
 import com.example.kivopandriod.ui.theme.Primary_dark_20
+import com.example.kivopandriod.ui.theme.Text_light
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -195,7 +196,7 @@ fun TopBar(
             Icon(
                 imageVector = Icons.Default.Menu,
                 contentDescription = "Menu",
-                tint = Color(0xff1a1c15),
+                tint = Text_light,
                 modifier = Modifier
                     .padding(12.dp)
                     .size(22.dp)
@@ -208,7 +209,7 @@ fun TopBar(
                     .typography
                     .headlineSmall
                     .copy(fontWeight = FontWeight.SemiBold), // SemiBold Text)
-                color = Color(0xff1a1c15),
+                color = Text_light,
                 modifier = Modifier
                     .padding(7.dp)
             )
@@ -218,7 +219,7 @@ fun TopBar(
             Icon(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Notification",
-                tint = Color(0xff1a1c15),
+                tint = Text_light,
                 modifier = Modifier
                     .padding(12.dp)
                     // Größe anpassen
@@ -255,13 +256,15 @@ fun DrawerContent(
                 .fillMaxWidth(),
             icon = {
                 Icon(
-                imageVector = Icons.Rounded.Home,
-                contentDescription = "Home") },
+                    imageVector = Icons.Rounded.Home,
+                    contentDescription = "Home",
+                    tint = Text_light) },
             label = {
                 Text(
                     text = "Home",   //Titel der Seite
                     fontSize = 16.sp,
-                    modifier = Modifier.padding(12.dp)
+                    modifier = Modifier.padding(12.dp),
+                    color = Text_light,
                 )
                 },
             selected = if (navController.currentDestination?.route == Screen.Home.rout) true else false,           // Ist das gerade die Seite, auf der wir sind?
@@ -282,12 +285,14 @@ fun DrawerContent(
                 .fillMaxWidth(),
             icon = { Icon(
                 imageVector = Icons.Rounded.List,
-                contentDescription = "Sitzungen") },
+                contentDescription = "Sitzungen",
+                tint = Text_light) },
             label = {
                 Text(
                     text = "Sitzungen",   //Titel der Seite
                     fontSize = 16.sp,
-                    modifier = Modifier.padding(12.dp)
+                    modifier = Modifier.padding(12.dp),
+                    color = Text_light,
                 )
             },
 
@@ -307,10 +312,12 @@ fun DrawerContent(
                 .fillMaxWidth(),
             icon = { Icon(
                 imageVector = Icons.Rounded.Edit,
-                contentDescription = "Protokolle") },
+                contentDescription = "Protokolle",
+                tint = Text_light) },
             label = {
                 Text(
                     text = "Protokolle",   //Titel der Seite
+                    color = Text_light,
                     //fontSize = 16.dp,
                     modifier = Modifier.padding(12.dp)
                 )
@@ -331,10 +338,12 @@ fun DrawerContent(
                 .fillMaxWidth(),
             icon = { Icon(
                 imageVector = Icons.Rounded.Edit,
-                contentDescription = "Anwesenheit") },
+                contentDescription = "Anwesenheit",
+                tint = Text_light) },
             label = {
                 Text(
                     text = "Anwesenheit",   //Titel der Seite
+                    color = Text_light,
                     //fontSize = 16.dp,
                     modifier = Modifier.padding(12.dp)
                 )
