@@ -31,7 +31,13 @@ struct CreateSetting: AsyncMigration {
                             datatype: Setting.DataType(rawValue: "Integer")!,
                             value: "30",
                             description: "Das Intervall in Tagen, nach dem Poster automatisch gelöscht werden, falls sie bereits abgehangen wurden"
-                    )
+                    ),
+            Setting(
+                            key: "poster_reminder_interval",
+                            datatype: Setting.DataType(rawValue: "Integer")!,
+                            value: "1",
+                            description: "Das Intervall in Tagen nach Ablauf der Variabel expired_at. Anschließend wird dem Verantwortlichen eine Erinnerung geschickt, um die Poster ab zu hängen"
+                    ),
             
             
         ]

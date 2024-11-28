@@ -10,6 +10,7 @@ func routes(_ app: Application) throws {
         "Hello, world!"
     }
 
+    try app.register(collection: PosterController())
     try app.register(collection: WebhookController())
 
 }

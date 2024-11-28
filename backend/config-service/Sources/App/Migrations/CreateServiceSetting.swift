@@ -2,6 +2,8 @@ import Fluent
 import Models
 import Vapor
 
+
+
 struct CreateServiceSetting: AsyncMigration {
     func prepare(on database: Database) async throws {
         try await database.schema("service_settings")
@@ -22,6 +24,9 @@ struct CreateServiceSetting: AsyncMigration {
               let registrationEnabledSetting = try await Setting.query(on: database)
                 .filter(\.$key == "registration_enabled")
                 .first(),
+              let posterReminderSetting = try await Setting.query(on: database)
+                .filter(\.$key == "poster_reminder_interval")
+                .first(),
               let posterDeletionIntervalSetting = try await Setting.query(on: database)
                 .filter(\.$key == "poster_deletion_interval")
                 .first() else {
@@ -31,7 +36,8 @@ struct CreateServiceSetting: AsyncMigration {
         // Initiale Zuordnungen erstellen
         let serviceSettings = [
             ServiceSetting(serviceID: try authService.requireID(), settingID: try registrationEnabledSetting.requireID()),
-            ServiceSetting(serviceID: try posterService.requireID(), settingID: try posterDeletionIntervalSetting.requireID())
+            ServiceSetting(serviceID: try posterService.requireID(), settingID: try posterDeletionIntervalSetting.requireID()),
+            ServiceSetting(serviceID: try posterService.requireID(), settingID: try posterReminderSetting.requireID())
         ]
 
         for serviceSetting in serviceSettings {

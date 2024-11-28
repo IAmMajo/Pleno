@@ -22,7 +22,6 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateSetting())
     app.migrations.add(CreateServiceSetting())
     // Migrationen ausführen
-    try await app.autoMigrate()
     
     try routes(app)
    
