@@ -25,9 +25,11 @@ struct MeetingController: RouteCollection {
     /// **GET** `/meetings`
     @Sendable func getAllMeetings(req: Request) async throws -> [GetMeetingDTO] {
         let isAdmin = req.jwtPayload?.isAdmin ?? false
-        let meetings = try await Meeting.query(on: req.db).with(\.$location) {location in
-            location.with(\.$place)
-        }.all()
+        let meetings = try await Meeting.query(on: req.db)
+            .with(\.$chair)
+            .with(\.$location) {location in
+                location.with(\.$place)
+            }.all()
         return try meetings.map { meeting in
             return try meeting.toGetMeetingDTO(showCode: isAdmin)
         }
@@ -39,6 +41,9 @@ struct MeetingController: RouteCollection {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
+        try await meeting.$chair.load(on: req.db)
+        try await meeting.$location.load(on: req.db)
+        try await meeting.location?.$place.load(on: req.db)
         return try meeting.toGetMeetingDTO(showCode: isAdmin)
     }
     
@@ -59,13 +64,14 @@ struct MeetingController: RouteCollection {
             let meeting: Meeting = .init(name: createMeetingDTO.name, description: createMeetingDTO.description ?? "", status: .scheduled, start: createMeetingDTO.start, duration: createMeetingDTO.duration, locationId: locationId)
             try await meeting.create(on: db)
             try await meeting.$location.load(on: db)
+            try await meeting.location?.$place.load(on: db)
             return meeting
         }
         return try await meeting.toGetMeetingDTO().encodeResponse(status: .created, for: req)
     }
     
     /// **PATCH** `/meetings/{id}`
-    @Sendable func updateMeeting(req: Request) async throws -> GetMeetingDTO { // TODO: Encapsulate both creation and update in one transaction (if possible)
+    @Sendable func updateMeeting(req: Request) async throws -> GetMeetingDTO {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -87,34 +93,38 @@ struct MeetingController: RouteCollection {
         if let duration = patchMeetingDTO.duration {
             meeting.duration = duration
         }
-        var oldLocationId: Location.IDValue? = nil // If the location is updated, oldLocationId is not going to be nil
-        if let locationId = patchMeetingDTO.locationId {
-            oldLocationId = try meeting.location?.requireID()
-            meeting.$location.id = locationId
-        } else if let createLocationDTO = patchMeetingDTO.location {
-            oldLocationId = try meeting.location?.requireID()
-            let result = try await tryCreateLocation(createLocationDTO, req.db)
-            meeting.$location.id = try result.location.requireID()
+        try await req.db.transaction { db in
+            var oldLocationId: Location.IDValue? = nil // If the location is updated, oldLocationId is not going to be nil
+            if let locationId = patchMeetingDTO.locationId {
+                oldLocationId = try await meeting.$location.get(on: db)?.requireID()
+                meeting.$location.id = locationId
+            } else if let createLocationDTO = patchMeetingDTO.location {
+                oldLocationId = try await meeting.$location.get(on: db)?.requireID()
+                let result = try await tryCreateLocation(createLocationDTO, db)
+                meeting.$location.id = try result.location.requireID()
+            }
+            
+            // Remove old location if it is no longer used
+            if let oldLocationId = oldLocationId,
+               oldLocationId != meeting.$location.id,
+               try await Meeting.query(on: db)
+                .filter(\.$id != meeting.requireID())
+                .filter(\.$location.$id == oldLocationId)
+                .first() == nil {
+                try await Location.find(oldLocationId, on: db)?.delete(on: db)
+            }
+            
+            // Check if changes were made
+            guard meeting.hasChanges else {
+                throw Abort(.conflict, reason: "No changes were made.")
+            }
+            
+            // Update meeting
+            try await meeting.update(on: db)
+            try await meeting.$location.load(on: db)
+            try await meeting.location?.$place.load(on: db)
+            
         }
-        
-        // Remove old location if it is no longer used
-        if let oldLocationId = oldLocationId,
-           try oldLocationId != meeting.location!.requireID(),
-           try await Meeting.query(on: req.db)
-            .filter(\.$id != meeting.requireID())
-            .filter(\.$location.$id == oldLocationId)
-            .first() == nil {
-            try await meeting.location!.delete(on: req.db)
-        }
-        
-        // Check if changes were made
-        guard meeting.hasChanges else {
-            throw Abort(.conflict, reason: "No changes were made.")
-        }
-        
-        // Update meeting
-        try await meeting.update(on: req.db)
-        try await meeting.$location.load(on: req.db)
         return try meeting.toGetMeetingDTO()
     }
     
@@ -157,8 +167,17 @@ struct MeetingController: RouteCollection {
             let record = Record(id: try .init(meeting: meeting, lang: "DE"), identityId: identityId, status: .underway)
             try await record.create(on: db)
             
-            let attendance = try Attendance(id: .init(meeting: meeting, identityId: identityId), status: .present)
-            try await attendance.save(on: db) // Updates or creates
+            if let attendance = try await Attendance.find(.init(meeting: meeting, identityId: identityId), on: db) {
+                attendance.status = .present
+                try await attendance.update(on: db)
+            } else {
+                let attendance = try Attendance(id: .init(meeting: meeting, identityId: identityId), status: .present)
+                try await attendance.create(on: db)
+            }
+            
+            try await meeting.$chair.load(on: db)
+            try await meeting.$location.load(on: db)
+            try await meeting.location?.$place.load(on: db)
         }
         
         return try meeting.toGetMeetingDTO(showCode: true)
@@ -195,10 +214,20 @@ struct MeetingController: RouteCollection {
                 .map { attendance in
                     try attendance.requireID().identity.requireID()
                 }
-            for identityId in attendees {
+            let absentees = try await Identity.query(on: db)
+                .filter(\.$id !~ attendees)
+                .field(\.$id)
+                .all()
+                .map { identity in
+                    try identity.requireID()
+                }
+            for identityId in absentees {
                 try await Attendance(id: .init(meetingId: meetingId, identityId: identityId), status: .absent).create(on: db)
             }
             try await meeting.update(on: db)
+            try await meeting.$chair.load(on: db)
+            try await meeting.$location.load(on: db)
+            try await meeting.location?.$place.load(on: db)
         }
         return try meeting.toGetMeetingDTO(showCode: true)
     }

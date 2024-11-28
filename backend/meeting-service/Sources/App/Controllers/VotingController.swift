@@ -92,7 +92,7 @@ struct VotingController: RouteCollection {
             try identityHistory.identity.requireID()
         }
         guard !voting.isOpen && voting.startedAt != nil && voting.closedAt != nil else {
-            throw Abort(.locked, reason: "The voting has not closed yet")
+            throw Abort(.conflict, reason: "The voting has not closed yet.")
         }
         
         let votingOptions = try await voting.$votingOptions.get(on: db)
@@ -110,6 +110,7 @@ struct VotingController: RouteCollection {
         for i in 0...votingOptions.count {
             try await totalVotes.append(voting.$votes.query(on: db)
                 .filter(\.$index == UInt8(i))
+                .with(\.$id.$identity)
                 .all())
         }
         let totalVoteAmounts: [Int] = totalVotes.map { votes in
@@ -120,7 +121,7 @@ struct VotingController: RouteCollection {
         }
         var percentageCutoffs: [percentageCutoff] = totalVoteAmounts.enumerated().map { index, votes in
             let percentage = (Double(votes) / Double(totalVotesCount))
-            let roundedDownPercentage = (percentage * 100.0).rounded(.down) / 100.0
+            let roundedDownPercentage = (percentage * 10000.0).rounded(.down) / 100.0
             return .init(index: UInt8(index), percentage: roundedDownPercentage, cutoff: percentage - roundedDownPercentage)
         }
         
@@ -138,12 +139,11 @@ struct VotingController: RouteCollection {
             percentageCutoff1.index < percentageCutoff2.index
         }
         
-        for option in votingOptions {
-            let index = Int(try option.requireID().index)
+        for index in 0...votingOptions.count {
             let percentageCutoff = percentageCutoffs[index]
             try getVotingResultsDTO.results.append(
-                GetVotingResultDTO(index: option.requireID().index,
-                                   total: UInt8(totalVotesCount),
+                GetVotingResultDTO(index: UInt8(index),
+                                   total: UInt8(totalVoteAmounts[index]),
                                    percentage: percentageCutoff.percentage,
                                    identities: voting.anonymous ? nil : totalVotes[index].map({ vote in
                                        try vote.requireID().identity.toGetIdentityDTO()
@@ -237,6 +237,7 @@ struct VotingController: RouteCollection {
         voting.isOpen = true
         
         try await voting.update(on: req.db)
+        try await voting.$votingOptions.load(on: req.db)
         return try voting.toGetVotingDTO()
     }
     
@@ -263,6 +264,7 @@ struct VotingController: RouteCollection {
         )
         try await clientWebSocketContainer.closeAllConnections()
         
+        try await voting.$votingOptions.load(on: req.db)
         return try voting.toGetVotingDTO()
     }
     
