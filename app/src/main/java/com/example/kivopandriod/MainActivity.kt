@@ -1,6 +1,7 @@
 package com.example.kivopandriod
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateFloatAsState
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.List
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemColors
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -50,6 +53,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.kivopandriod.ui.theme.KIVoPAndriodTheme
+import com.example.kivopandriod.ui.theme.Primary_dark_20
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -79,6 +84,7 @@ class MainActivity : ComponentActivity() {
                             .background(Color(0xfffafaee)),   //TODO - Android Background Light
                     ){
                         // StartScreen
+
                         composable(Screen.Home.rout){
                             HomeScreen(navController = navController)
                         }
@@ -100,7 +106,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Nav(navController: NavController, modifier: Modifier = Modifier) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    var drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     // Berechnung der Breite des Drawers (2/3 Bildschirmbreite)
     val drawerWidth = animateFloatAsState(targetValue = if (drawerState.isOpen) 0.75f else 0f)
@@ -114,7 +120,7 @@ fun Nav(navController: NavController, modifier: Modifier = Modifier) {
                     .width(LocalConfiguration.current.screenWidthDp.dp * drawerWidth.value)
                     .background(Color(0xffeeefe3))   // TODO - Android Background Secondary
             ) {
-                DrawerContent(navController) // Übergabe des NavControllers an den Drawer
+                DrawerContent(navController,drawerState) // Übergabe des NavControllers an den Drawer
             }
         },
         gesturesEnabled = true // zum swipen des NavDrawers
@@ -199,7 +205,9 @@ fun TopBar(
 @Composable
 fun DrawerContent(
     navController: NavController,
+    drawerState: DrawerState
 ){
+    val coroutineScope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .padding(top = 60.dp, start = 20.dp, end = 8.dp, bottom = 10.dp),
@@ -227,13 +235,20 @@ fun DrawerContent(
                     modifier = Modifier.padding(12.dp)
                 )
                 },
-            selected = false,           // Ist das gerade die Seite, auf der wir sind?
-            onClick = {navController.navigate("home")}      // Logik für onClick Events
-        )
+            selected = if (navController.currentDestination?.route == Screen.Home.rout) true else false,           // Ist das gerade die Seite, auf der wir sind?
+            onClick = {
+                navController.navigate("home")
+                coroutineScope.launch {
+                    drawerState.close() // close drawer
+                }},      // Logik für onClick Events
+            shape = RoundedCornerShape(8.dp),
+            colors =  NavigationDrawerItemDefaults.colors(Primary_dark_20,Color.Transparent),
+            )
 
         Spacer(modifier = Modifier.height(4.dp))
         NavigationDrawerItem(
             modifier = Modifier
+
                 .height(42.dp)
                 .fillMaxWidth(),
             icon = { Icon(
@@ -246,8 +261,15 @@ fun DrawerContent(
                     modifier = Modifier.padding(12.dp)
                 )
             },
-            selected = false,           // Ist das gerade die Seite, auf der wir sind?
-            onClick = {navController.navigate(Screen.Sitzungen.rout) }      // Logik für onClick Events
+
+            selected = if (navController.currentDestination?.route == Screen.Sitzungen.rout) true else false,           // Ist das gerade die Seite, auf der wir sind?
+            onClick = {
+                navController.navigate(Screen.Sitzungen.rout)
+                coroutineScope.launch {
+                    drawerState.close() // close drawer
+                }}, // Logik für onClick Events
+            shape = RoundedCornerShape(8.dp),
+            colors =  NavigationDrawerItemDefaults.colors(Primary_dark_20,Color.Transparent),
         )
         Spacer(modifier = Modifier.height(4.dp))
         NavigationDrawerItem(
@@ -264,8 +286,14 @@ fun DrawerContent(
                     modifier = Modifier.padding(12.dp)
                 )
             },
-            selected = false,           // Ist das gerade die Seite, auf der wir sind?
-            onClick = {navController.navigate("protokolle")}      // Logik für onClick Events
+            selected = if (navController.currentDestination?.route == Screen.Protokolle.rout) true else false,           // Ist das gerade die Seite, auf der wir sind?
+            onClick = {
+                navController.navigate("protokolle")
+                coroutineScope.launch {
+                    drawerState.close() // close drawer
+                }},      // Logik für onClick Events
+            shape = RoundedCornerShape(8.dp),
+            colors =  NavigationDrawerItemDefaults.colors(Primary_dark_20,Color.Transparent),
         )
     }
 }

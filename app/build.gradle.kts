@@ -51,7 +51,6 @@ android {
 
 dependencies {
 
-    // OkHttp für HTTP-Anfragen
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -4,5 +4,4 @@
 
     <style name="Theme.KIVoPAndriod" parent="android:Theme.Material.Light.NoActionBar" />
 
-    <style name="Theme.KIVoPAndriodAppCompat" parent="Theme.AppCompat.Light.NoActionBar"/>
 </resources>
