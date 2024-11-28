@@ -61,7 +61,6 @@
 
     },
     "10" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -832,6 +831,9 @@
         }
       }
     },
+    "Keine aktuelle Sitzung verfügbar" : {
+
+    },
     "Keine anstehenden Sitzungen." : {
 
     },
@@ -1113,6 +1115,9 @@
           }
         }
       }
+    },
+    "Neu laden" : {
+
     },
     "Neues Passwort" : {
       "localizations" : {

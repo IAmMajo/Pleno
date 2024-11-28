@@ -131,65 +131,10 @@ struct MainPage: View {
                 .padding(.top, -10)
                 
                 Spacer()
-                
-                // Meeting Box
-                if let meeting = meeting {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text(meeting)
-                            .font(.headline)
-                            .foregroundColor(.white)
-                        
-                        HStack {
-                            if let meetingDate = meetingDate {
-                                Image(systemName: "calendar")
-                                    .foregroundColor(.white)
-                                Text(meetingDate)
-                                    .foregroundColor(.white)
-                            }
-                            
-                            Spacer()
-                            
-                            if let attendeesCount = attendeesCount {
-                                HStack(spacing: 4) {
-                                    Text("\(attendeesCount)")
-                                        .foregroundColor(.white)
-                                    Image(systemName: "person.3")
-                                        .foregroundColor(.white)
-                                }
-                                .padding(.trailing, 10)
-                            }
-                        }
-                        
-                        if let meetingTime = meetingTime {
-                            HStack {
-                                Image(systemName: "clock")
-                                    .foregroundColor(.white)
-                                Text(meetingTime)
-                                    .foregroundColor(.white)
-                                
-                                Spacer()
-                            }
-                        }
-                        
-                        Button(action: {
-                            // Aktion für das aktuelle Meeting
-                        }) {
-                            Text("Zur aktuellen Sitzung")
-                                .font(.footnote)
-                                .fontWeight(.bold)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color(UIColor.systemBackground))
-                                .foregroundColor(.accentColor)
-                                .cornerRadius(10)
-                        }
-                    }
-                    .padding()
-                    .background(LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.8), Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .cornerRadius(15)
-                    .padding(.horizontal)
-                    .padding(.bottom, 20)
-                }
+
+                MainPageCurrentMeetingView()
+
+
             }
             .background(Color(UIColor.systemGroupedBackground))
         }
