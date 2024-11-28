@@ -101,38 +101,44 @@ class MeetingManager: ObservableObject {
 
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                self?.isLoading = false
-
-                if let error = error {
-                    self?.errorMessage = "Network error: \(error.localizedDescription)"
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                    self?.errorMessage = "Invalid server response."
-                    return
-                }
-
-                guard let data = data else {
-                    self?.errorMessage = "No data received."
-                    return
-                }
-
-                // Debug JSON
-                print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-
-                do {
-                    // Transformiere die JSON-Daten
-                    let transformedData = try self?.transformJSON(data: data)
-                    if let transformedData = transformedData {
-                        let fetchedMeetings = try JSONDecoder().decode([GetMeetingDTO].self, from: transformedData)
-                        self?.meetings = fetchedMeetings
-                        self?.getCurrentMeeting()
+                do{
+                    self?.isLoading = false
+                    
+                    if let error = error {
+                        self?.errorMessage = "Network error: \(error.localizedDescription)"
+                        return
                     }
-                } catch {
+                    
+                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                        self?.errorMessage = "Invalid server response."
+                        return
+                    }
+                    
+                    guard let data = data else {
+                        self?.errorMessage = "No data received."
+                        return
+                    }
+                    
+                    // Debug JSON
+                    print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
+                    
+                    let decoder = JSONDecoder()
+                    
+                    // Falls du mit Date-Formaten arbeitest, musst du das Datumsformat konfigurieren:
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+                    decoder.dateDecodingStrategy = .formatted(formatter)
+                    
+                    // Dekodiere die Daten
+                    self?.meetings = try decoder.decode([GetMeetingDTO].self, from: data)
+                    self?.getCurrentMeeting()
+
+                }catch {
                     self?.errorMessage = "Failed to decode meetings: \(error.localizedDescription)"
-                    print("Decoding error: \(error)") // Detaillierte Fehlermeldung
+                    print("Decoding error: \(error)")
                 }
+
+
             }
         }.resume()
     }
@@ -398,24 +404,26 @@ class MeetingManager: ObservableObject {
     }
 
 
-        private func transformJSON(data: Data) throws -> Data {
-        // Parse the original JSON into an array of dictionaries
-        guard var meetings = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
+    private func transformJSON(data: Data) throws -> Data {
+        guard let meetings = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
             throw NSError(domain: "Invalid JSON format", code: 1, userInfo: nil)
         }
 
-        // Transform the "start" field from String to Double (Unix timestamp)
-        for i in 0..<meetings.count {
-            if let startString = meetings[i]["start"] as? String {
+        // Kopiere und transformiere Meetings
+        let transformedMeetings = meetings.map { meeting -> [String: Any] in
+            var transformedMeeting = meeting
+            if let startString = meeting["start"] as? String {
                 let formatter = ISO8601DateFormatter()
                 if let date = formatter.date(from: startString) {
-                    meetings[i]["start"] = date.timeIntervalSince1970 // Transform into Double
+                    transformedMeeting["start"] = date.timeIntervalSince1970 // Transform into Double
                 }
             }
+
+            return transformedMeeting
         }
 
-        // Convert the modified array back to JSON data
-        return try JSONSerialization.data(withJSONObject: meetings, options: [])
+
+        return try JSONSerialization.data(withJSONObject: transformedMeetings, options: [])
     }
 
 
