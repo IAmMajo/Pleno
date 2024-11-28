@@ -45,26 +45,16 @@
         }
       }
     },
-    "(ca. 160 min.)" : {
+    " Mitteilung." : {
+
+    },
+    "(ca. %u min.)" : {
+
+    },
+    "%.2f%%" : {
 
     },
     "%lld" : {
-
-    },
-    "%lld%%" : {
-    "%lld" : {
-
-    },
-    "•" : {
-
-    },
-    "01.11.23" : {
-
-    },
-    "01.12.23" : {
-
-    },
-    "04.11.23" : {
 
     },
     "8/12" : {
@@ -526,9 +516,6 @@
         }
       }
     },
-    "Dezember 2023" : {
-
-    },
     "Die Abstimmung läuft noch" : {
 
     },
@@ -645,9 +632,6 @@
       }
     },
     "Enthalten" : {
-
-    },
-    "Error: %@" : {
 
     },
     "Error: %@" : {
@@ -848,9 +832,6 @@
         }
       }
     },
-    "Keine Abstimmungen gefunden" : {
-
-    },
     "Keine anstehenden Sitzungen." : {
 
     },
@@ -911,6 +892,9 @@
       }
     },
     "Loading meetings..." : {
+
+    },
+    "Loading..." : {
 
     },
     "Login" : {

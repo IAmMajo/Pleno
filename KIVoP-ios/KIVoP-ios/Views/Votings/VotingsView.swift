@@ -87,6 +87,7 @@ struct VotingsView: View {
                         selectedVoting = voting
                         Task {
                            if (selectedVoting != nil) {
+                              hasVoted = false
                               hasVoted = VotingStateTracker.hasVoted(for: voting.id)
                               await loadVotingResults(voting: voting)
                            }
@@ -141,9 +142,9 @@ struct VotingsView: View {
 //         }
          .onAppear {
             Task {
-               try await AuthController.shared.login(email: "admin@kivop.ipv64.net", password: "admin")
-               let token = try await AuthController.shared.getAuthToken()
-               print("Token: \(token)")
+//               try await AuthController.shared.login(email: "admin@kivop.ipv64.net", password: "admin")
+//               let token = try await AuthController.shared.getAuthToken()
+//               print("Token: \(token)")
 
                await loadVotings()
 //               votings = mockVotings
