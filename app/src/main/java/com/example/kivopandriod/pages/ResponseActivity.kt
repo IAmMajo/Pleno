@@ -18,7 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.example.kivopandriod.components.ResponseItem
 import com.example.kivopandriod.components.ResponseList
-import com.example.kivopandriod.components.responseList
+import com.example.kivopandriod.services.responseList
 
 class ResponseActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
