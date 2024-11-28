@@ -116,7 +116,7 @@ struct MainPage: View {
                             }
                         }
                         
-                        NavigationLink(destination: AnwesenheitView()) {
+                        NavigationLink(destination: AttendanceView()) {
                             HStack {
                                 Image(systemName: "person.crop.circle.fill.badge.checkmark")
                                     .foregroundColor(.accentColor)
@@ -271,16 +271,5 @@ struct MainPage: View {
 struct MainPage_Previews: PreviewProvider {
     static var previews: some View {
         MainPage()
-    }
-}
-
-
-
-// Sample Views für die anderen Punkte nach hinzufügen bitte löschen!!!
-
-struct ProtokolleView: View {
-    var body: some View {
-        Text("Protokolle")
-            .font(.largeTitle)
     }
 }
