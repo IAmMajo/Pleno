@@ -50,9 +50,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.kivopandriod.pages.AnwesenheitScreen
 import com.example.kivopandriod.pages.HomeScreen
 import com.example.kivopandriod.pages.LoginScreen
-import com.example.kivopandriod.pages.MeetingActivity
 import com.example.kivopandriod.pages.ProtokolleScreen
 import com.example.kivopandriod.pages.SitzungenScreen
 import com.example.kivopandriod.ui.theme.KIVoPAndriodTheme
@@ -107,6 +107,10 @@ fun navigation(navController: NavHostController){
         // Sitzungen
         composable(Screen.Sitzungen.rout){
             SitzungenScreen(navController = navController)
+        }
+        // Anwesenheit
+        composable(route = Screen.Anwesenheit.rout){
+            AnwesenheitScreen(navController = navController)
         }
         // Protokolle
         composable(route = Screen.Protokolle.rout){
@@ -301,6 +305,30 @@ fun DrawerContent(
             selected = if (navController.currentDestination?.route == Screen.Protokolle.rout) true else false,           // Ist das gerade die Seite, auf der wir sind?
             onClick = {
                 navController.navigate("protokolle")
+                coroutineScope.launch {
+                    drawerState.close() // close drawer
+                }},      // Logik für onClick Events
+            shape = RoundedCornerShape(8.dp),
+            colors =  NavigationDrawerItemDefaults.colors(Primary_dark_20,Color.Transparent),
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        NavigationDrawerItem(
+            modifier = Modifier
+                .height(42.dp)
+                .fillMaxWidth(),
+            icon = { Icon(
+                imageVector = Icons.Rounded.Edit,
+                contentDescription = "Anwesenheit") },
+            label = {
+                Text(
+                    text = "Anwesenheit",   //Titel der Seite
+                    //fontSize = 16.dp,
+                    modifier = Modifier.padding(12.dp)
+                )
+            },
+            selected = if (navController.currentDestination?.route == Screen.Anwesenheit.rout) true else false,           // Ist das gerade die Seite, auf der wir sind?
+            onClick = {
+                navController.navigate("anwesenheit")
                 coroutineScope.launch {
                     drawerState.close() // close drawer
                 }},      // Logik für onClick Events

@@ -3,12 +3,10 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -16,16 +14,10 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.kivopandriod.components.TermindCard
 import com.example.kivopandriod.components.TermindData
-import com.example.kivopandriod.components.meetingsList
-import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.LocalDateTime
-import com.example.kivopandriod.components.MeetingData
-import java.time.LocalTime
 
 @Composable
 fun GenerateTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
@@ -117,35 +109,3 @@ fun AppointmentTabContent(tabs: List<String>, appointments: List<TermindData>) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun getTab(jwt: String? = null) {
-    val tabs = listOf("anstehende Sitzungen", "vergangenen Sitzungen")
-    val scope = rememberCoroutineScope()
-    var meetings by remember { mutableStateOf<List<MeetingData>>(emptyList()) }
-
-    // Daten abrufen
-    LaunchedEffect(Unit) {
-        scope.launch {
-            val result = meetingsList() // Meetings abrufen (bereits in MeetingData-Objekte umgewandelt)
-            meetings = result
-        }
-    }
-
-    // Konvertierung in TermindData (falls nötig)
-    val appointments = meetings.mapIndexed { index, meeting ->
-        TermindData(
-            title = meeting.name,
-            date = meeting.date,
-            time = meeting.time,
-            status = 0
-        )
-    }
-
-    // Ergebnisse anzeigen
-    AppointmentTabContent(
-        tabs = tabs,
-        appointments = appointments
-    )
-}

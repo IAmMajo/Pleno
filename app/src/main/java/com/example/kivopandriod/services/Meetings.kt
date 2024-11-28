@@ -1,6 +1,5 @@
-package com.example.kivopandriod.components
+package com.example.kivopandriod.services
 
-import Login
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
@@ -18,7 +17,7 @@ import kotlinx.coroutines.withContext
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun main() = runBlocking {
-    Login(email = "admin@kivop.ipv64.net", password = "admin") // Login aufrufen
+    //Login(email = "admin@kivop.ipv64.net", password = "admin") // Login aufrufen
 
     val meetings = meetingsList() // Meetings abrufen
 
@@ -38,7 +37,8 @@ fun main() = runBlocking {
 data class MeetingData(
     val name: String,
     val date: LocalDate,
-    val time: LocalTime
+    val time: LocalTime,
+    val id: String
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -68,13 +68,14 @@ suspend fun meetingsList(): List<MeetingData> = withContext(Dispatchers.IO) {
                     val meeting = element.asJsonObject
                     val name = meeting.get("name").asString
                     val start = meeting.get("start").asString
+                    val id = meeting.get("id").asString
 
-                    // Datum und Uhrzeit aus `start` extrahieren
+                    // Datum und Uhrzeit aus start extrahieren
                     val zonedDateTime = ZonedDateTime.parse(start, DateTimeFormatter.ISO_ZONED_DATE_TIME)
                     val date = zonedDateTime.toLocalDate()
                     val time = zonedDateTime.toLocalTime()
 
-                    MeetingData(name, date, time)
+                    MeetingData(name, date, time,id)
                 }
             } else {
                 println("Fehler: Leere Antwort erhalten.")
