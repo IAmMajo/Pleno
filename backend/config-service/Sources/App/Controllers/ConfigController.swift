@@ -9,13 +9,23 @@ struct ConfigController: RouteCollection{
         settings.get(":id", use: show)
         settings.patch(":id", use: update)
         settings.patch(use: bulkUpdate)
-        settings.get("service", ":serviceID", use: settingsForService)
+        
+        let services = routes.grouped("service")
+        services.get(":serviceID", use: settingsForService)
     }
     
     // GET /config
     @Sendable
     func index(req: Request) async throws -> Response {
-        let settings = try await Setting.query(on: req.db).all()
+        // Abfrage der Einstellungen, die mit aktiven Services verknüpft sind
+        let settings = try await Setting.query(on: req.db)
+            .join(ServiceSetting.self, on: \Setting.$id == \ServiceSetting.$setting.$id)
+            .join(Service.self, on: \Service.$id == \ServiceSetting.$service.$id)
+            .filter(Service.self, \.$active == true)
+            .unique()
+            .all()
+
+        // Mapping der Einstellungen auf DTOs
         let responseDTOs = settings.map { setting in
             SettingResponseDTO(
                 id: setting.id,
@@ -25,12 +35,14 @@ struct ConfigController: RouteCollection{
                 description: setting.description
             )
         }
+
         let data = try JSONEncoder().encode(responseDTOs)
         var headers = HTTPHeaders()
-        headers.add(name: .contentType, value: "application/json")
+        headers.contentType = .json
         return Response(status: .ok, headers: headers, body: .init(data: data))
     }
-    
+
+
     // GET /config/:id
     @Sendable
     func show(req: Request) async throws -> Response {

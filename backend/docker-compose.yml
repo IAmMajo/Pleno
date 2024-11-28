@@ -195,6 +195,51 @@ services:
       traefik.http.routers.notifications-service.rule: PathPrefix(`/email`)
 
 #
+# Vapor: poster-service
+#
+  poster-service:
+    image: kivop-poster-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/poster-service/Dockerfile
+    container_name: kivop-poster-service
+    depends_on:
+     - config-service
+    environment:
+      <<: *shared_environment
+    labels:
+      traefik.enable: true
+      traefik.http.routers.poster-service.rule: PathPrefix(`/poster`)
+
+  poster-service-migration:
+    profiles:
+      - not-default
+    image: kivop-poster-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/poster-service/Dockerfile
+    container_name: kivop-poster-service-migration
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - postgres
+    command: ["migrate", "--yes"]
+
+  poster-service-revert:
+    profiles:
+      - not-default
+    image: kivop-poster-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/poster-service/Dockerfile
+    container_name: kivop-poster-service-revert
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - postgres
+    command: ["migrate", "--revert", "--yes"]
+
+#
 # Volumes
 #
 volumes:
