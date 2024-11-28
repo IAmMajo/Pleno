@@ -7,8 +7,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -24,7 +26,9 @@ fun CustomInputField(
     modifier: Modifier = Modifier,
     isPasswort: Boolean = false,
     horizontalPadding: Dp = 16.dp,
-    verticalPadding: Dp = 8.dp
+    verticalPadding: Dp = 8.dp,
+    value: String,
+    onValueChange: (String) -> Unit,
 ) {
     val textState = remember { mutableStateOf(TextFieldValue()) }
 
@@ -41,8 +45,8 @@ fun CustomInputField(
         val visualTransformation = if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None
         OutlinedTextField(
             visualTransformation = visualTransformation,
-            value = textState.value,
-            onValueChange = { textState.value = it },
+            value = value,
+            onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text(text = placeholder)
             }
@@ -52,21 +56,23 @@ fun CustomInputField(
 @Preview(showBackground = true)
 @Composable
 fun CustomInputFieldPreview() {
+        var username by remember { mutableStateOf("")}
         Column()
         {
             // Erstes CustomInputField
             CustomInputField(
                 label = "Vorname",
                 placeholder = "Gib deinen Vornamen ein",
-
+                value = username,
+                onValueChange = {username = it}
             )
 
-            // Zweites CustomInputField
-            CustomInputField(
-                label = "Nachname",
-                placeholder = "Gib deinen Nachnamen ein",
-
-            )
+//            // Zweites CustomInputField
+//            CustomInputField(
+//                label = "Nachname",
+//                placeholder = "Gib deinen Nachnamen ein",
+//
+//            )
         }
     }
 

@@ -1,4 +1,4 @@
-package com.example.kivopandriod
+package com.example.kivopandriod.pages
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController

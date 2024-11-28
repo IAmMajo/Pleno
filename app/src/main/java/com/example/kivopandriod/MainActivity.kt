@@ -1,7 +1,6 @@
 package com.example.kivopandriod
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateFloatAsState
@@ -31,7 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemColors
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -45,16 +43,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.kivopandriod.pages.HomeScreen
+import com.example.kivopandriod.pages.LoginScreen
+import com.example.kivopandriod.pages.MeetingActivity
+import com.example.kivopandriod.pages.ProtokolleScreen
+import com.example.kivopandriod.pages.SitzungenScreen
 import com.example.kivopandriod.ui.theme.KIVoPAndriodTheme
 import com.example.kivopandriod.ui.theme.Primary_dark_20
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -69,43 +71,52 @@ class MainActivity : ComponentActivity() {
 
                     color = Color(0xfffafaee),   //TODO - Android Background Light)
                 ) {
-                    val navController = rememberNavController()
-                    NavHost(
-                        navController = navController,
-                        startDestination = Screen.Home.rout,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(           //TODO - Padding anpassen
-                                top = 60.dp,
-                                start = 12.dp,
-                                end = 12.dp,
-                                bottom = 12.dp
-                            )
-                            .background(Color(0xfffafaee)),   //TODO - Android Background Light
-                    ){
-                        // StartScreen
-
-                        composable(Screen.Home.rout){
-                            HomeScreen(navController = navController)
-                        }
-                        // Sitzungen
-                        composable(Screen.Sitzungen.rout){
-                            SitzungenScreen(navController = navController)
-                        }
-                        // Protokolle
-                        composable(route = Screen.Protokolle.rout){
-                            ProtokolleScreen(navController = navController)
-                        }
-                    }
+                    val navController: NavHostController = rememberNavController()
                     Nav(navController)
                 }
             }
         }
     }
 }
+//TODO - Navigation anpassen name anpassen
+@Composable
+fun navigation(navController: NavHostController){
+    //val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Login.rout,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(           //TODO - Padding anpassen
+                top = 60.dp,
+                start = 12.dp,
+                end = 12.dp,
+                bottom = 12.dp
+            )
+            .background(Color(0xfffafaee)),   //TODO - Android Background Light
+    ){
+        // LoginScreen
+        composable(Screen.Login.rout){
+            LoginScreen(navController = navController)
+        }
+        // StartScreen
+
+        composable(Screen.Home.rout){
+            HomeScreen(navController = navController)
+        }
+        // Sitzungen
+        composable(Screen.Sitzungen.rout){
+            SitzungenScreen(navController = navController)
+        }
+        // Protokolle
+        composable(route = Screen.Protokolle.rout){
+            ProtokolleScreen(navController = navController)
+        }
+    }
+}
 
 @Composable
-fun Nav(navController: NavController, modifier: Modifier = Modifier) {
+fun Nav(navController: NavHostController, modifier: Modifier = Modifier) {
     var drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     // Berechnung der Breite des Drawers (2/3 Bildschirmbreite)
@@ -137,6 +148,7 @@ fun Nav(navController: NavController, modifier: Modifier = Modifier) {
                 }
             }
         )
+        navigation(navController)
     }
 }
 

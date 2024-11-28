@@ -1,4 +1,4 @@
-package com.example.kivopandriod
+package com.example.kivopandriod.pages
 
 
 import AppointmentTabContent
@@ -35,36 +35,5 @@ class MeetingActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainApp() {
-    val tabs = listOf("anstehende Sitzungen", "vergangenen Sitzungen")
-    val scope = rememberCoroutineScope()
-    var meetings by remember { mutableStateOf<List<MeetingData>>(emptyList()) }
 
-    LaunchedEffect(Unit) {
-        scope.launch {
-            // Login zuerst ausführen
-            Login(email = "admin@kivop.ipv64.net", password = "admin")
-            Log.d("Login", "Login erfolgreich: ${TokenManager.jwtToken}")
-
-            // Meetings abrufen
-            val result = meetingsList()
-            println("Meetings abgerufen: ${result.size} Einträge.")
-            meetings = result
-        }
-    }
-
-    // Konvertierung in TermindData (falls nötig)
-    val appointments = meetings.mapIndexed { index, meeting ->
-        TermindData(
-            title = meeting.name,
-            date = meeting.date,
-            time = meeting.time,
-            status = 0
-        )
-    }
-
-    // Ergebnisse anzeigen
-    AppointmentTabContent(
-        tabs = tabs,
-        appointments = appointments
-    )
 }
