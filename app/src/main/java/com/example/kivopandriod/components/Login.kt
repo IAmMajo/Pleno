@@ -1,18 +1,20 @@
-import okhttp3.*
-import com.google.gson.JsonObject
 import com.google.gson.Gson
+import com.google.gson.JsonObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
 object TokenManager {
-    var jwtToken: String? = null // Globale Speicherung des Tokens
+    var jwtToken: String? = null
 }
 
-fun authenticateUser(email: String, password: String) {
+suspend fun Login(email: String, password: String) {
     val url = "https://kivop.ipv64.net/auth/login"
     val client = OkHttpClient()
 
-    // JSON-Payload mit Gson erstellen
     val jsonPayload = JsonObject().apply {
         addProperty("email", email)
         addProperty("password", password)
@@ -24,32 +26,34 @@ fun authenticateUser(email: String, password: String) {
         .post(requestBody)
         .build()
 
-    try {
-        val response = client.newCall(request).execute() // Synchrone Ausführung
-        if (response.isSuccessful) {
-            val responseBody = response.body?.string()
-            if (responseBody != null) {
-                val jsonResponse = Gson().fromJson(responseBody, JsonObject::class.java)
-                val token = jsonResponse.get("token")?.asString // Token aus JSON extrahieren
-                if (!token.isNullOrEmpty()) {
-                    TokenManager.jwtToken = token // Token in TokenManager speichern
+    withContext(Dispatchers.IO) {
+        try {
+            println("Login: Sende Anfrage an $url mit Payload: $jsonPayload")
+            val response = client.newCall(request).execute()
+            if (response.isSuccessful) {
+                val responseBody = response.body?.string()
+                if (responseBody != null) {
+                    val jsonResponse = Gson().fromJson(responseBody, JsonObject::class.java)
+                    val token = jsonResponse.get("token")?.asString
+                    if (!token.isNullOrEmpty()) {
+                        TokenManager.jwtToken = token
+                        println("TokenManager: Token erfolgreich gespeichert: $token")
+                    } else {
+                        println("TokenManager: Kein Token im Response gefunden: $jsonResponse")
+                    }
                 } else {
-                    println("Fehler: Kein Token gefunden")
+                    println("TokenManager: Fehler: Leerer Response")
                 }
             } else {
-                println("Fehler: Leerer Response")
+                println("TokenManager: Fehler bei der Anfrage: ${response.code}, ${response.body?.string()}")
             }
-        } else {
-            println("Fehler bei der Anfrage: ${response.message}")
+        } catch (e: Exception) {
+            println("TokenManager: Fehler: ${e.message}")
         }
-    } catch (e: Exception) {
-        println("Fehler: ${e.message}")
     }
 }
 
-/*
-fun main() {
-    authenticateUser("admin@kivop.ipv64.net", "admin")
-    println(TokenManager.jwtToken)
+suspend fun main() {
+    Login("admin@kivop.ipv64.net", "admin")
+    println("TokenManager: Token ist ${TokenManager.jwtToken}")
 }
-*/
