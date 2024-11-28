@@ -31,12 +31,11 @@ extension GetVotingOptionDTO: @retroactive Identifiable {
 extension GetVotingOptionDTO: @retroactive Equatable {}
 extension GetVotingOptionDTO: @retroactive Hashable {
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(votingId)
         hasher.combine(index)
     }
 
     public static func == (lhs: GetVotingOptionDTO, rhs: GetVotingOptionDTO) -> Bool {
-        return lhs.votingId == rhs.votingId && lhs.index == rhs.index
+        return lhs.index == rhs.index
     }
 }
 

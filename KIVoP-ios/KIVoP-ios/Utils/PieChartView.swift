@@ -56,7 +56,7 @@ let colorMapping: [UInt8: Color] = [
 
 struct PieChartView: View {
 
-   let voting: GetVotingDTO
+   let optionTextMap: [UInt8: String]
    let votingResults: GetVotingResultsDTO
 
    var body: some View {
@@ -68,7 +68,7 @@ struct PieChartView: View {
          )
          .cornerRadius(6)
 //         .foregroundStyle(colorMapping[option.index] ?? .black)
-         .foregroundStyle(by: .value("Option", voting.options[Int(result.index)].text))
+         .foregroundStyle(by: .value("Option", optionTextMap[result.index] ?? ""))
       }
       .scaledToFit()
       // Später eigene Legende bauen, um mehr als 7 Farben zu haben? Optionen Limit?
@@ -79,5 +79,10 @@ struct PieChartView: View {
 #Preview {
    var votingsView: VotingsView = .init()
    
-   PieChartView(voting: votingsView.mockVotings[0], votingResults: votingsView.mockVotingResults)
+   PieChartView(optionTextMap: [
+      0: "Enthaltung",
+      1: "Rot",
+      2: "Grün",
+      3: "Blau"
+   ], votingResults: votingsView.mockVotingResults)
 }

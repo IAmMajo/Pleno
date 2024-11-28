@@ -16,40 +16,48 @@ struct Votings_VotingsSectionView: View {
    var onVotingSelected: (GetVotingDTO) -> Void
    
    @State private var meetingName: String = ""
-   @State private var voteCastedSymbolColor: Color = .black
-   @State private var voteCastedStatus: String = ""
+   @State private var votingViewModels: [VotingViewModel] = []
+   @State private var isVotingFinished: Bool = false
+
 
    @State private var isLoading = false
    @State private var error: String?
    
     var body: some View {
        Section(header: Text(meetingName)) {
-          ForEach(votingGroup, id: \.self) { voting in
-             HStack {
-                Text(voting.question)
-                   .frame(maxWidth: .infinity, alignment: .leading)
-                Spacer()
-                Image(systemName: "\(voteCastedStatus)")
-                   .foregroundStyle(voteCastedSymbolColor)
-                Spacer()
-             }
-             .contentShape(Rectangle())
-             .onTapGesture {
-                onVotingSelected(voting)
-             }
-             .onAppear {
-                Task {
-                   await setSymbolColorAndStatus(voting: voting)
-                }
+          ForEach(votingViewModels) { viewModel in
+             if (viewModel.voting.startedAt == nil) {
+             } else {
+//                HStack {
+//                   Text(viewModel.voting.question)
+//                      .frame(maxWidth: .infinity, alignment: .leading)
+//                   Spacer()
+//                   Image(systemName: "\(viewModel.status)")
+//                      .foregroundStyle(viewModel.symbolColor)
+//                   Spacer()
+//                }
+//                .contentShape(Rectangle())
+//                .onTapGesture {
+//                   onVotingSelected(viewModel.voting)
+//                }
+//                .task {
+//                   await viewModel.loadSymbolColorAndStatus()
+//                }
+                Votings_VotingRowView(viewModel: viewModel, onVotingSelected: onVotingSelected)
              }
           }
        }
        .onAppear {
           Task {
-             await loadMeetingName(votingGroup: votingGroup)
+             await initializeViewModelsAndMeetingName()
           }
        }
     }
+   
+   private func initializeViewModelsAndMeetingName() async {
+          votingViewModels = votingGroup.map { VotingViewModel(voting: $0) }
+          await loadMeetingName(votingGroup: votingGroup)
+      }
    
    private func loadMeetingName(votingGroup: [GetVotingDTO]) async {
       isLoading = true
@@ -64,28 +72,33 @@ struct Votings_VotingsSectionView: View {
             meetingName = "\(meeting.name) - \(DateTimeFormatter.formatDate(meeting.start))"
          }
       } catch {
-         self.error = error.localizedDescription
+         print("error: ", error)
       }
       isLoading = false
    }
    
-   func setSymbolColorAndStatus(voting: GetVotingDTO) async {
-      isLoading = true
-      error = nil
-      do {
-         let results = try await APIService.shared.fetchVotingResults(by: voting.id)
-         if (results.myVote != nil) {
-            voteCastedSymbolColor = .blue
-            voteCastedStatus = "checkmark"
-         } else {
-            voteCastedSymbolColor = voting.isOpen ? .orange : .black
-            voteCastedStatus = voting.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
-         }
-      } catch {
-         self.error = error.localizedDescription
-      }
-      isLoading = false
-   }
+//   func setSymbolColorAndStatus(voting: GetVotingDTO) async {
+//      isLoading = true
+//      error = nil
+//      do {
+//         let results = try await APIService.shared.fetchVotingResults(by: voting.id)
+////         let results = mockVotingResults
+//         if (results.myVote != nil) {
+//            voteCastedSymbolColor = .blue
+//            voteCastedStatus = "checkmark"
+//         } else {
+//            voteCastedSymbolColor = voting.isOpen ? .orange : .black
+//            voteCastedStatus = voting.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
+//         }
+//      } catch {
+//         print("error: ", error)
+//         voteCastedSymbolColor = voting.isOpen ? .orange : .black
+//         print("voteCastedSymbolColor: \(voteCastedSymbolColor)")
+//         voteCastedStatus = voting.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
+//         print("voteCastStatus: \(voteCastedStatus)")
+//      }
+//      isLoading = false
+//   }
    
    
    //   func getMeetingName(votingGroup: [GetVotingDTO]) -> String {

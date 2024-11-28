@@ -54,9 +54,6 @@
     "%.2f%%" : {
 
     },
-    "%@" : {
-
-    },
     "%lld" : {
 
     },
@@ -234,6 +231,9 @@
           }
         }
       }
+    },
+    "Abstimmungs-Ergebnis" : {
+
     },
     "Account löschen" : {
       "localizations" : {
@@ -534,6 +534,9 @@
     "Dezember 2023" : {
 
     },
+    "Die Abstimmung läuft noch" : {
+
+    },
     "Dies ist nur eine vorläufige Umfrage, um festzustellen, wie viele Mitglieder kommen." : {
       "localizations" : {
         "de" : {
@@ -549,6 +552,9 @@
           }
         }
       }
+    },
+    "Du hast bereits abgestimmt. In Zukunft werden hier die Live-Ergebnisse einer offenen Abstimmung angezeigt." : {
+
     },
     "Du kannst deine Wahl danach nciht mehr ändern!" : {
 

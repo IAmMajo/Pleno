@@ -107,12 +107,15 @@ struct Votings_VoteView: View {
             print("selection is nil")
          }
       } catch {
-          self.error = error.localizedDescription
+         print("error: ", error)
       }
       isLoading = false
    }
    
    func updateMyVote(selection: GetVotingOptionDTO?) -> GetVotingResultsDTO {
+      
+      VotingStateTracker.saveVote(votingId: voting.id, voteIndex: selection?.index ?? 0)
+
       var results = votingResults
       results.myVote = selection?.index
       return results
