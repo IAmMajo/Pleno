@@ -1,237 +1,227 @@
+//
+//  APIService.swift
+//  KIVoP-ios
+//
+//  Created by Hanna Steffen on 24.11.24.
+//
+
 import Foundation
 import MeetingServiceDTOs
 
-struct VotingAPI {
-    static let baseURL = "https://kivop.ipv64.net/meetings"
+// Extension der DTOs
+extension GetMeetingDTO: @retroactive @unchecked Sendable {}
 
-    // MARK: - Alle Umfragen abfragen
-    static func fetchAllVotings(completion: @escaping (Result<[GetVotingDTO], Error>) -> Void) {
-        let urlString = "\(baseURL)/votings"
-        guard let url = URL(string: urlString) else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
-            return
-        }
-
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No data", code: 500, userInfo: nil)))
-                return
-            }
-
-            // Debug-Ausgabe der Rohdaten
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("API Response JSON: \(jsonString)")
-            } else {
-                print("Fehler: Keine JSON-Daten decodiert")
-            }
-
-            do {
-                let decodedVotings = try JSONDecoder().decode([GetVotingDTO].self, from: data)
-                completion(.success(decodedVotings))
-            } catch {
-                // Fehlerdetails beim Decoding ausgeben
-                print("Decoding-Fehler: \(error.localizedDescription)")
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    print("Fehlerhafte JSON-Daten: \(jsonString)")
-                }
-                completion(.failure(error))
-            }
-        }
-        task.resume()
+extension GetVotingDTO: @retroactive Identifiable {}
+extension GetVotingDTO: @retroactive Equatable {}
+extension GetVotingDTO: @retroactive Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
-
-
-
-    // MARK: - Umfrage erstellen
-    static func createVoting(voting: CreateVotingDTO, completion: @escaping (Result<GetVotingDTO, Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/votings") else {
-            completion(.failure(APIError.invalidURL))
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        do {
-            let jsonData = try JSONEncoder().encode(voting)
-            request.httpBody = jsonData
-        } catch {
-            completion(.failure(error))
-            return
-        }
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            guard let data = data else {
-                completion(.failure(APIError.noData))
-                return
-            }
-
-            do {
-                let createdVoting = try JSONDecoder().decode(GetVotingDTO.self, from: data)
-                completion(.success(createdVoting))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-
-        task.resume()
-    }
-
-    // MARK: - Umfrage updaten
-    static func updateVoting(id: UUID, voting: PatchVotingDTO, completion: @escaping (Result<GetVotingDTO, Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/votings/\(id)") else {
-            completion(.failure(APIError.invalidURL))
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "PATCH"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        do {
-            let jsonData = try JSONEncoder().encode(voting)
-            request.httpBody = jsonData
-        } catch {
-            completion(.failure(error))
-            return
-        }
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            guard let data = data else {
-                completion(.failure(APIError.noData))
-                return
-            }
-
-            do {
-                let updatedVoting = try JSONDecoder().decode(GetVotingDTO.self, from: data)
-                completion(.success(updatedVoting))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-
-        task.resume()
-    }
-    
-    // MARK: - Close Voting
-        static func closeVoting(votingId: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
-            let urlString = "\(baseURL)/\(votingId)/close"
-            guard let url = URL(string: urlString) else {
-                completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
-                return
-            }
-
-            var request = URLRequest(url: url)
-            request.httpMethod = "PUT"
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            // Hier ggf. Authentifizierungstoken hinzufügen, falls erforderlich
-            // request.addValue("Bearer <TOKEN>", forHTTPHeaderField: "Authorization")
-
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 500
-                    let error = NSError(domain: "API Error", code: statusCode, userInfo: nil)
-                    completion(.failure(error))
-                    return
-                }
-
-                completion(.success(()))
-            }
-            task.resume()
-        }
-
-    // MARK: - Umfrage löschen
-    static func deleteVoting(id: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/votings/\(id)") else {
-            completion(.failure(APIError.invalidURL))
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-
-        let task = URLSession.shared.dataTask(with: request) { _, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 204 else {
-                completion(.failure(APIError.invalidResponse))
-                return
-            }
-
-            completion(.success(()))
-        }
-
-        task.resume()
-    }
-
-    // MARK: - Ergebnisse einer Umfrage abrufen
-    static func fetchVotingResults(id: UUID, completion: @escaping (Result<GetVotingResultsDTO, Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/votings/\(id)/results") else {
-            completion(.failure(APIError.invalidURL))
-            return
-        }
-
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            guard let data = data else {
-                completion(.failure(APIError.noData))
-                return
-            }
-
-            do {
-                let results = try JSONDecoder().decode(GetVotingResultsDTO.self, from: data)
-                completion(.success(results))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-
-        task.resume()
-    }
-
-    // MARK: - Fehlerdefinition
-    enum APIError: Error, LocalizedError {
-        case invalidURL
-        case noData
-        case invalidResponse
-
-        var errorDescription: String? {
-            switch self {
-            case .invalidURL:
-                return "Ungültige URL."
-            case .noData:
-                return "Keine Daten erhalten."
-            case .invalidResponse:
-                return "Ungültige Antwort vom Server."
-            }
-        }
+    public static func == (lhs: GetVotingDTO, rhs: GetVotingDTO) -> Bool {
+        return lhs.id == rhs.id
     }
 }
+extension GetVotingDTO: @unchecked @retroactive Sendable {}
+
+extension GetVotingOptionDTO: @retroactive Identifiable {
+   public var id: UInt8 {
+      self.index
+   }
+}
+extension GetVotingOptionDTO: @retroactive Equatable {}
+extension GetVotingOptionDTO: @retroactive Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(index)
+    }
+
+    public static func == (lhs: GetVotingOptionDTO, rhs: GetVotingOptionDTO) -> Bool {
+        return lhs.index == rhs.index
+    }
+}
+
+extension GetVotingResultsDTO: @retroactive @unchecked Sendable {}
+
+extension GetVotingResultDTO: @retroactive Identifiable {
+   public var id: UInt8 {
+      self.index
+   }
+}
+extension GetVotingResultDTO: @retroactive Equatable {}
+extension GetVotingResultDTO: @retroactive Hashable {
+   public func hash(into hasher: inout Hasher) {
+      hasher.combine(index) // Use `index` as the hashable property
+   }
+   
+   public static func == (lhs: GetVotingResultDTO, rhs: GetVotingResultDTO) -> Bool {
+      return lhs.index == rhs.index // Compare instances based on `index`
+   }
+}
+
+extension CreateVotingDTO: @retroactive @unchecked Sendable {}
+
+///////////////////////////////////////////////////////
+
+class VotingAPI {
+    private let baseURL = "https://kivop.ipv64.net"
+
+    // Singleton instance
+    static let shared = VotingAPI()
+    private init() {}
+
+   private func performRequest<U: Codable>(
+       path: String,
+       method: String,
+       responseType: U.Type
+   ) async throws -> U {
+       return try await performRequest(path: path, method: method, body: Optional<EmptyBody>.none, responseType: responseType)
+   }
+
+//   private func performRequest<T: Codable, U: Codable>(
+//       path: String,
+//       method: String,
+//       body: T?,
+//       responseType: U.Type
+//   ) async throws -> U {
+//       guard let url = URL(string: baseURL + path) else {
+//           throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+//       }
+//
+//       var request = URLRequest(url: url)
+//       request.httpMethod = method
+//       request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//
+//       // Add JWT token
+//       let token = try await AuthController.shared.getAuthToken()
+//       request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+//
+//       // Encode the body if provided
+//       if let body = body {
+//           let encoder = JSONEncoder()
+//           request.httpBody = try encoder.encode(body)
+//       }
+//
+//       // Perform the network request
+//       let (data, response) = try await URLSession.shared.data(for: request)
+//       guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+//           throw NSError(domain: "Invalid response", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: nil)
+//       }
+//
+//       // Decode the response data
+//       let decoder = JSONDecoder()
+//       decoder.dateDecodingStrategy = .iso8601
+//       return try decoder.decode(responseType, from: data)
+//   }
+   
+   private func performRequest<T: Codable, U>(
+       path: String,
+       method: String,
+       body: T? = nil,
+       responseType: U.Type
+   ) async throws -> U {
+       guard let url = URL(string: baseURL + path) else {
+           throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+       }
+
+       var request = URLRequest(url: url)
+       request.httpMethod = method
+       request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+       // Add JWT token
+       let token = try await AuthController.shared.getAuthToken()
+       request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+       // Encode the body if provided
+       if let body = body {
+           let encoder = JSONEncoder()
+           request.httpBody = try encoder.encode(body)
+       }
+
+       // Perform the network request
+       let (data, response) = try await URLSession.shared.data(for: request)
+       guard let httpResponse = response as? HTTPURLResponse else {
+           throw NSError(domain: "Invalid response", code: 500, userInfo: nil)
+       }
+
+       // Handle 204 No Content
+       if httpResponse.statusCode == 204 {
+           if U.self == Void.self {
+               return () as! U // Return Void for 204 responses
+           } else {
+               throw NSError(domain: "Expected a non-empty response", code: 204, userInfo: nil)
+           }
+       }
+
+       // Ensure status code is OK
+       guard httpResponse.statusCode == 200 else {
+           throw NSError(domain: "Invalid response", code: httpResponse.statusCode, userInfo: nil)
+       }
+
+       // Decode the response if applicable
+       if let decodableType = U.self as? Decodable.Type {
+           let decoder = JSONDecoder()
+           decoder.dateDecodingStrategy = .iso8601
+           guard let decodedResponse = try decoder.decode(decodableType, from: data) as? U else {
+               throw NSError(domain: "Failed to decode response", code: 500, userInfo: nil)
+           }
+           return decodedResponse
+       }
+
+       throw NSError(domain: "Unexpected Void response decoding attempt", code: 500, userInfo: nil)
+   }
+
+   /// A helper struct for when no body is required.
+   private struct EmptyBody: Codable {}
+   
+   
+   func fetchAllMeetings() async throws -> [GetMeetingDTO] {
+      try await performRequest(path: "/meetings", method: "GET", responseType: [GetMeetingDTO].self)
+   }
+   
+   // Fetch a meeting
+   func fetchMeeting(by id: UUID) async throws -> GetMeetingDTO {
+      try await performRequest(path: "/meetings/\(id)", method: "GET", responseType: GetMeetingDTO.self)
+   }
+   
+   // begin a meeting
+   func beginMeeting(by id: UUID) async throws {
+      try await performRequest(path: "/meetings/\(id)/begin", method: "PUT", body: EmptyBody(), responseType: Void.self)
+   }
+   
+   // Fetch all votings
+   func fetchAllVotings() async throws -> [GetVotingDTO] {
+      try await performRequest(path: "/meetings/votings", method: "GET", responseType: [GetVotingDTO].self)
+   }
+   
+   // Fetch a voting
+   func fetchVoting(by id: UUID) async throws -> GetVotingDTO {
+      try await performRequest(path: "/meetings/votings/\(id)", method: "GET", responseType: GetVotingDTO.self)
+   }
+   
+   // Fetch voting results
+   func fetchVotingResults(by id: UUID) async throws -> GetVotingResultsDTO {
+      try await performRequest(path: "/meetings/votings/\(id)/results", method: "GET", responseType: GetVotingResultsDTO.self)
+   }
+   
+   // vote for an option of a voting
+   func castVote(of votingId: UUID, with optionIndex: UInt8) async throws {
+      try await performRequest(path: "/meetings/votings/\(votingId)/vote/\(optionIndex)", method: "PUT", body: EmptyBody(), responseType: Void.self)
+   }
+   
+//   // Update a voting
+//   func updateVoting(id: UUID, with dto: PatchVotingDTO) async throws -> GetVotingDTO {
+//      try await performRequest(path: "/meetings/votings/\(id)", method: "PATCH", body: dto, responseType: GetVotingDTO.self)
+//   }
+   
+   // Create a voting
+   func createVoting(_ voting: CreateVotingDTO) async throws -> GetVotingDTO {
+      try await performRequest(path: "/meetings/votings", method: "POST", body: voting, responseType: GetVotingDTO.self)
+   }
+   
+   // Delete a voting
+//   func deleteVoting(id: UUID) async throws {
+//      let _ = try await performRequest(path: "/meetings/votings/\(id)", method: "DELETE", responseType: EmptyResponse.self)
+//   }
+}
+
+// Empty response placeholder
+struct EmptyResponse: Codable {}

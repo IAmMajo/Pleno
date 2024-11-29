@@ -4,7 +4,7 @@ public struct GetMeetingDTO: Codable {
     public var id: UUID
     public var name: String
     public var description: String
-    public var status: MeetingStatus 
+    public var status: MeetingStatus
     public var start: Date
     public var duration: UInt16?
     public var location: GetLocationDTO?
@@ -20,6 +20,7 @@ public struct GetMeetingDTO: Codable {
         self.duration = duration
         self.location = location
         self.chair = chair
+        self.code = code
     }
 }
 
@@ -28,3 +29,4 @@ public enum MeetingStatus: String, Codable {
     case inSession
     case completed
 }
+

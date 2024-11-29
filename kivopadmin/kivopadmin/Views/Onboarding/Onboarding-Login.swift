@@ -1,4 +1,5 @@
 import SwiftUI
+import LocalAuthentication
 import AuthServiceDTOs
 
 struct Onboarding_Login: View {
@@ -7,14 +8,16 @@ struct Onboarding_Login: View {
     @State private var errorMessage: String? = nil
     @State private var isLoading: Bool = false
     @State private var loginSuccessful: Bool = false
-    @State private var isBiometricPromptShown: Bool = false
+    @State private var faceIDTriggered = false
+    @State private var isKeychainAvailable = false
+    @State private var isActive = true // Verfolgt, ob die View aktiv ist
 
     var body: some View {
         NavigationStack {
             VStack {
                 Spacer().frame(height: 40)
-                
-                // Titel "Login"
+
+                // Login title
                 ZStack(alignment: .bottom) {
                     Text("Login")
                         .font(.title)
@@ -28,19 +31,19 @@ struct Onboarding_Login: View {
                 }
                 .padding(.bottom, 40)
                 .padding(.top, 40)
-                
-                // Eingabefeld für die E-Mail
+
+                // Email TextField
                 inputField(title: "E-Mail", text: $email)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
-                
-                // Eingabefeld für das Passwort
+
+                // Password TextField
                 inputField(title: "Passwort", text: $password, isSecure: true)
-                
+
                 Spacer()
-                
-                // Login-Button
+
+                // Login Button
                 Button(action: {
                     loginUser()
                 }) {
@@ -62,16 +65,16 @@ struct Onboarding_Login: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 10)
                 .disabled(isLoading || email.isEmpty || password.isEmpty)
-                
-                // Fehlermeldung anzeigen
+
+                // Error Message
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .font(.footnote)
                         .padding(.horizontal, 24)
                 }
-                
-                // Registrieren-Button
+
+                // Register Button
                 NavigationLink(destination: Onboarding_Register()) {
                     Text("Registrieren")
                         .foregroundColor(.blue)
@@ -81,8 +84,8 @@ struct Onboarding_Login: View {
                         .cornerRadius(10)
                 }
                 .padding(.horizontal, 24)
-                
-                // Zurück-Button
+
+                // Back Button
                 NavigationLink(destination: Onboarding()) {
                     Text("Zurück")
                         .foregroundColor(.gray)
@@ -91,7 +94,7 @@ struct Onboarding_Login: View {
                 }
                 .padding(.top, 10)
                 .padding(.bottom, 20)
-                
+
                 Spacer().frame(height: 20)
             }
             .background(Color(UIColor.systemGray6))
@@ -101,24 +104,27 @@ struct Onboarding_Login: View {
                 MainPage()
             }
             .onAppear {
-                attemptBiometricLogin()
+                isActive = true // View ist aktiv
+                checkKeychainAvailability()
+            }
+            .onDisappear {
+                isActive = false // View ist nicht mehr aktiv
             }
         }
     }
-    
-    // Funktion für den Login
+
     private func loginUser() {
         isLoading = true
         errorMessage = nil
-        
+
         let loginDTO = UserLoginDTO(email: email, password: password)
         OnboardingAPI.loginUser(with: loginDTO) { result in
             DispatchQueue.main.async {
                 isLoading = false
                 switch result {
                 case .success(let token):
-                    // Token speichern und zur Hauptseite navigieren
                     UserDefaults.standard.set(token, forKey: "jwtToken")
+                    saveCredentialsToKeychain()
                     loginSuccessful = true
                 case .failure(let error):
                     errorMessage = error.localizedDescription
@@ -126,30 +132,43 @@ struct Onboarding_Login: View {
             }
         }
     }
-    
-    // Funktion zur biometrischen Anmeldung
-    private func attemptBiometricLogin() {
-        // Überprüfen, ob Zugangsdaten im Schlüsselbund gespeichert sind
-        if let storedEmail = KeychainHelper.load(key: "userEmail"),
-           let storedPassword = KeychainHelper.load(key: "userPassword"),
-           !isBiometricPromptShown {
-            
-            // Biometrische Authentifizierung auslösen
-            isBiometricPromptShown = true
-            Task {
-                let isAuthenticated = await BiometricAuth.authenticate()
-                DispatchQueue.main.async {
-                    if isAuthenticated {
-                        email = storedEmail
-                        password = storedPassword
-                        loginUser()
-                    }
-                }
+
+    private func saveCredentialsToKeychain() {
+        KeychainHelper.save(key: "email", value: email)
+        KeychainHelper.save(key: "password", value: password)
+    }
+
+    private func attemptLoginWithKeychain() {
+        if let savedEmail = KeychainHelper.load(key: "email"),
+           let savedPassword = KeychainHelper.load(key: "password") {
+            email = savedEmail
+            password = savedPassword
+            loginUser()
+        }
+    }
+
+    private func triggerFaceID() {
+        guard isKeychainAvailable, !faceIDTriggered, isActive else { return }
+        faceIDTriggered = true
+
+        Task {
+            let isAuthenticated = await BiometricAuth.authenticate()
+            if isAuthenticated {
+                attemptLoginWithKeychain()
             }
         }
     }
-    
-    // Eingabefeld-Komponente
+
+    private func checkKeychainAvailability() {
+        isKeychainAvailable = KeychainHelper.load(key: "email") != nil && KeychainHelper.load(key: "password") != nil
+        if isKeychainAvailable {
+            // Verzögerung für FaceID
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                triggerFaceID()
+            }
+        }
+    }
+
     private func inputField(title: String, text: Binding<String>, isSecure: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
@@ -157,7 +176,7 @@ struct Onboarding_Login: View {
                 .foregroundColor(.gray)
                 .padding(.top, 5)
                 .padding(.horizontal, 5)
-            
+
             if isSecure {
                 SecureField(title, text: text)
                     .padding()
@@ -174,6 +193,7 @@ struct Onboarding_Login: View {
         .padding(.bottom, 10)
     }
 }
+
 
 struct Onboarding_Login_Previews: PreviewProvider {
     static var previews: some View {

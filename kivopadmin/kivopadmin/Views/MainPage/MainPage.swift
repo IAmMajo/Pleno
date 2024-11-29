@@ -123,7 +123,7 @@ struct MainPage: View {
                     case .funktionen:
                         FunktionenView()
                     case .umfrage:
-                        Voting_MainPage()
+                        VotingListView()
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
