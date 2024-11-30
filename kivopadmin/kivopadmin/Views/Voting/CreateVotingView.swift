@@ -109,7 +109,7 @@ struct CreateVotingView: View {
         let validOptions = options.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
         print("Gültige Optionen: \(validOptions)")
         
-        let optionDTOs = validOptions.enumerated().map { GetVotingOptionDTO(index: UInt8($0.offset), text: $0.element) }
+        let optionDTOs = validOptions.enumerated().map { GetVotingOptionDTO(index: UInt8($0.offset + 1), text: $0.element) }
         print("OptionDTOs: \(optionDTOs)")
         
         let newVoting = CreateVotingDTO(

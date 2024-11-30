@@ -12,6 +12,7 @@ struct VotingListView: View {
     let meetingId: UUID = UUID()
 
     enum FilterType: String, CaseIterable {
+        case planning = "In Planung"
         case active = "Aktiv"
         case inactive = "Abgeschlossen"
     }
@@ -22,32 +23,39 @@ struct VotingListView: View {
     }
 
     var filteredVotings: [GetVotingDTO] {
-        let votingsByStatus = votingService.votings.filter { filter == .active ? $0.isOpen : !$0.isOpen }
-        if searchText.isEmpty {
-            return votingsByStatus
-        } else {
-            return votingsByStatus.filter { $0.question.localizedCaseInsensitiveContains(searchText) }
+        switch filter {
+        case .planning:
+            return votingService.votings.filter { $0.startedAt == nil }
+        case .active:
+            return votingService.votings.filter { $0.isOpen }
+        case .inactive:
+            return votingService.votings.filter { !$0.isOpen && $0.startedAt != nil }
         }
     }
+
 
     var body: some View {
         NavigationView {
             Group {
-                if let voting = selectedVoting {
-                    VotingDetailView(
-                        voting: voting,
-                        onBack: { selectedVoting = nil },
-                        onDelete: { deleteVoting(votingId: voting.id) },
-                        onClose: { closeVoting(votingId: voting.id) }
-                    )
-                } else {
-                    VStack(spacing: 10) {
-                        filterPicker
-                        searchBar
-                        votingList
+                        if let voting = selectedVoting {
+                            VotingDetailView(
+                                votingId: voting.id, // Übergebe nur die ID
+                                onBack: { selectedVoting = nil },
+                                onDelete: { deleteVoting(votingId: voting.id) },
+                                onClose: { closeVoting(votingId: voting.id) },
+                                onOpen: { openVoting(votingId: voting.id) },
+                                onEdit: { editedVoting in
+                                    editVoting(editedVoting)
+                                }
+                            )
+                        } else {
+                            VStack(spacing: 10) {
+                                filterPicker
+                                searchBar
+                                votingList
+                            }
+                        }
                     }
-                }
-            }
             .navigationTitle("Umfragen")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -58,13 +66,13 @@ struct VotingListView: View {
             }
             .sheet(isPresented: $showCreateVoting) {
                 CreateVotingView(
-                    meetingManager: MeetingManager(), // Falls ein MeetingManager erforderlich ist
+                    meetingManager: MeetingManager(),
                     onCreate: { newVoting in
-                        votingService.votings.append(newVoting)
-                    }
+                                votingService.votings.append(newVoting)
+                                loadVotings() // Lade die Liste neu
+                            }
                 )
             }
-
             .alert(item: $alertMessage) { alert in
                 Alert(title: Text("Fehler"), message: Text(alert.message), dismissButton: .default(Text("OK")))
             }
@@ -82,6 +90,7 @@ struct VotingListView: View {
         .pickerStyle(SegmentedPickerStyle())
         .padding(.horizontal)
     }
+
 
     private var searchBar: some View {
         HStack {
@@ -106,9 +115,10 @@ struct VotingListView: View {
                         Text(voting.question)
                             .font(.headline)
                             .foregroundColor(.black)
-                        Text(voting.isOpen ? "Aktiv" : "Abgeschlossen")
+                        Text(voting.startedAt == nil ? "In Planung" : (voting.isOpen ? "Aktiv" : "Abgeschlossen"))
                             .font(.subheadline)
-                            .foregroundColor(voting.isOpen ? .green : .red)
+                            .foregroundColor(voting.startedAt == nil ? .orange : (voting.isOpen ? .green : .red))
+
                     }
                 }
                 .listRowBackground(Color.white)
@@ -164,7 +174,27 @@ struct VotingListView: View {
             }
         }
     }
+
+    private func openVoting(votingId: UUID) {
+        votingService.openVoting(votingId: votingId) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    loadVotings()
+                case .failure(let error):
+                    alertMessage = AlertMessage(message: "Fehler beim Öffnen: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    private func editVoting(_ editedVoting: GetVotingDTO) {
+        if let index = votingService.votings.firstIndex(where: { $0.id == editedVoting.id }) {
+            votingService.votings[index] = editedVoting
+        }
+    }
 }
+
 
 struct VotingListView_Previews: PreviewProvider {
     static var previews: some View {

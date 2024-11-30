@@ -8,76 +8,87 @@
 import SwiftUI
 import MeetingServiceDTOs
 
-
 struct EditVotingView: View {
-    let voting: GetVotingDTO
-    @State private var question: String
-    @State private var description: String
-    @State private var anonymous: Bool
-    @State private var options: [GetVotingOptionDTO]
-    @Environment(\.presentationMode) var presentationMode
-    var onSave: (GetVotingDTO) -> Void
+    @Environment(\.dismiss) private var dismiss // Um die Ansicht zu schließen
+    @State var voting: GetVotingDTO
+    let onSave: (GetVotingDTO) -> Void
 
-    init(voting: GetVotingDTO, onSave: @escaping (GetVotingDTO) -> Void) {
-        self.voting = voting
-        self._question = State(initialValue: voting.question)
-        self._description = State(initialValue: voting.description)
-        self._anonymous = State(initialValue: voting.anonymous)
-        self._options = State(initialValue: voting.options)
-        self.onSave = onSave
-    }
+    @State private var question = ""
+    @State private var description = ""
+    @State private var options: [String] = []
 
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("Frage")) {
-                    TextField("Frage", text: $question)
+                    TextField("Frage eingeben", text: $question)
                 }
 
                 Section(header: Text("Beschreibung")) {
-                    TextField("Beschreibung", text: $description)
-                }
-
-                Section(header: Text("Anonym")) {
-                    Toggle("Anonyme Abstimmung", isOn: $anonymous)
+                    TextField("Beschreibung eingeben", text: $description)
                 }
 
                 Section(header: Text("Optionen")) {
-                    ForEach($options, id: \.index) { $option in
-                        TextField("Option", text: $option.text)
+                    ForEach($options.indices, id: \.self) { index in
+                        TextField("Option \(index + 1)", text: $options[index])
+                    }
+                    .onDelete { indexSet in
+                        options.remove(atOffsets: indexSet)
+                    }
+
+                    Button("Option hinzufügen") {
+                        options.append("")
                     }
                 }
             }
-            .navigationTitle("Bearbeiten")
+            .navigationTitle("Umfrage bearbeiten")
             .navigationBarItems(
                 leading: Button("Abbrechen") {
-                    presentationMode.wrappedValue.dismiss()
+                    dismiss() // Ansicht schließen
                 },
                 trailing: Button("Speichern") {
                     saveChanges()
+                    dismiss() // Änderungen speichern und Ansicht schließen
                 }
+                .disabled(!isFormValid())
             )
+            .onAppear(perform: populateFields)
         }
     }
 
+    private func populateFields() {
+        question = voting.question
+        description = voting.description
+        options = voting.options.map { $0.text }
+    }
+
     private func saveChanges() {
-        let patchDTO = PatchVotingDTO(
+        // Prüfen, ob der Index bei 1 beginnen soll
+        let optionDTOs = options.enumerated().map { index, text in
+            GetVotingOptionDTO(index: UInt8(index + 1), text: text) // Offset von 1 hinzugefügt
+        }
+
+        let updatedVoting = GetVotingDTO(
+            id: voting.id,
+            meetingId: voting.meetingId,
             question: question,
             description: description,
-            anonymous: anonymous,
-            options: options
+            isOpen: voting.isOpen,
+            anonymous: voting.anonymous,
+            options: optionDTOs
         )
 
-        VotingService.shared.patchVoting(votingId: voting.id, patch: patchDTO) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let updatedVoting):
-                    onSave(updatedVoting)
-                    presentationMode.wrappedValue.dismiss()
-                case .failure(let error):
-                    print("Fehler beim Speichern: \(error.localizedDescription)")
-                }
-            }
-        }
+        // Debugging: Gesendete Daten anzeigen
+        print("Gespeicherte Änderungen:")
+        print("Frage: \(updatedVoting.question)")
+        print("Beschreibung: \(updatedVoting.description ?? "Keine Beschreibung")")
+        print("Optionen: \(updatedVoting.options)")
+
+        onSave(updatedVoting)
+    }
+
+
+    private func isFormValid() -> Bool {
+        !question.isEmpty && !options.contains { $0.isEmpty }
     }
 }

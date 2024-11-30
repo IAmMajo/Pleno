@@ -323,6 +323,7 @@ class MeetingManager: ObservableObject {
         
         
     }
+    
     func startMeeting(meetingId: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
         // Erstellen der URL mit der Meeting-ID
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/begin") else {
