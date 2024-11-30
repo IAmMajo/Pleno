@@ -55,4 +55,7 @@ dto-main-staging-mrs:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-
+build-backend-docker-images:
+  stage: build
+  script:
+    - docker compose build meeting-service
