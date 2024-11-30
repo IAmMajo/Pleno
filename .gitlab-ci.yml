@@ -58,4 +58,5 @@ dto-main-staging-mrs:
 build-backend-docker-images:
   stage: build
   script:
+    - touch .env
     - docker compose build meeting-service
