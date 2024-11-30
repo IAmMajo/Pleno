@@ -2,19 +2,19 @@ stages:
   - build
 
 dto-swiftkotlin:
-    stage: build
-    script:
-        - ./translate-dtos.sh
-        - git add *
-        - git status
-        - git commit -m "${SWIFTKOTLIN_COMMIT_MESSAGE}"
-        - git push -o ci.skip "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:${CI_COMMIT_BRANCH}
-    rules:
-      - if: $CI_COMMIT_BRANCH == $DTOS_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
-        changes:
-          - DTOs/Sources/**/*
-          - translate-dtos.sh
-        when: always
+  stage: build
+  script:
+      - ./translate-dtos.sh
+      - git add *
+      - git status
+      - git commit -m "${SWIFTKOTLIN_COMMIT_MESSAGE}"
+      - git push -o ci.skip "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:${CI_COMMIT_BRANCH}
+  rules:
+    - if: $CI_COMMIT_BRANCH == $DTOS_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - DTOs/Sources/**/*
+        - translate-dtos.sh
+      when: always
 
 dto-main-staging-mrs:
   stage: build
@@ -55,4 +55,62 @@ dto-main-staging-mrs:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
+build-backend-docker-image-config-service:
+  stage: build
+  script:
+    - docker build . -f backend/config-service/Dockerfile -t kivop-config-service
+  rules:
+    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/config-service/**/*
+      when: always
 
+build-backend-docker-image-auth-service:
+  stage: build
+  script:
+    - docker build . -f backend/auth-service/Dockerfile -t kivop-auth-service
+  rules:
+    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/auth-service/**/*
+      when: always
+
+build-backend-docker-image-meeting-service:
+  stage: build
+  script:
+    - docker build . -f backend/meeting-service/Dockerfile -t kivop-meeting-service
+  rules:
+    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/meeting-service/**/*
+      when: always
+
+build-backend-docker-image-notifications-service:
+  stage: build
+  script:
+    - docker build . -f backend/notifications-service/Dockerfile -t kivop-notifications-service
+  rules:
+    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/notifications-service/**/*
+      when: always
+
+build-backend-docker-image-poster-service:
+  stage: build
+  script:
+    - docker build . -f backend/poster-service/Dockerfile -t kivop-poster-service
+  rules:
+    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/poster-service/**/*
+      when: always
+
+# build-backend-docker-image-carpool-service:
+#   stage: build
+#   script:
+#     - docker build . -f backend/carpool-service/Dockerfile -t kivop-carpool-service
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+#       changes:
+#         - backend/carpool-service/**/*
+#       when: always
