@@ -5,7 +5,7 @@ stages:
   - deploy
 
 variables:
-  SERVER_BRANCH: $BACKEND_STAGING_BRANCH
+  SERVER_BRANCH: staging-backend# $BACKEND_STAGING_BRANCH s. https://gitlab.com/gitlab-org/gitlab/-/issues/327780
 
 dto-swiftkotlin:
   stage: build
