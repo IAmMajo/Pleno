@@ -127,7 +127,7 @@ deploy-containers-on-main:
 #     - MR_BRANCH_NAME=$(echo $MERGE_REQ | jq -r '.[0].source_branch')
 #     - if [[ "$MR_BRANCH_NAME" != "$BACKEND_STAGING_BRANCH" ]]; then exit 0; fi
     - cd /opt/kivop
-    - if [[ "$(git branch --show-current))" != "$CI_COMMIT_BRANCH" ]]; then echo "Production server is currently not operating on branch '${CI_COMMIT_BRANCH}'!"; exit 0; fi
+    - if [[ "$(git branch --show-current)" != "$CI_COMMIT_BRANCH" ]]; then echo "Production server is currently not operating on branch '${CI_COMMIT_BRANCH}'!"; exit 0; fi
     - git fetch "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" ${CI_COMMIT_BRANCH}
     - git pull "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" ${CI_COMMIT_BRANCH}
     - docker compose build
