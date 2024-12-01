@@ -183,14 +183,17 @@ struct ConfigController: RouteCollection{
     }
 
 
+  // Funktion zum Senden der Webhook-Benachrichtigung
     // Funktion zum Senden der Webhook-Benachrichtigung
     private func sendWebhookNotification(req: Request, event: String, setting: Setting, oldValue: String) async throws {
-        // Aktive Services mit webhook_url abrufen
+        // Aktive Services mit webhook_url abrufen, die mit dem übergebenen Setting verknüpft sind
         let services = try await Service.query(on: req.db)
-            .filter(\.$webhook_url != nil)
-            .filter(\.$active == true)
+            .join(ServiceSetting.self, on: \Service.$id == \ServiceSetting.$service.$id)
+            .filter(ServiceSetting.self, \ServiceSetting.$setting.$id == setting.id!)
+            .filter(\Service.$webhook_url != nil)
+            .filter(\Service.$active == true)
             .all()
-        
+
         for service in services {
             guard let webhookURL = service.webhook_url else {
                 continue
@@ -228,6 +231,8 @@ struct ConfigController: RouteCollection{
             }
         }
     }
+
+    
 
 }
 
