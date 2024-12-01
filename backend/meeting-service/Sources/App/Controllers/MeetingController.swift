@@ -137,8 +137,8 @@ struct MeetingController: RouteCollection {
             throw Abort(.badRequest, reason: "Cannot delete meeting that is not scheduled (status is '\(meeting.status)').")
         }
         try await req.db.transaction { db in
-            try await meeting.attendances.delete(on: db)
-            try await meeting.votings.delete(on: db) // cascades through voting_options and votes
+            try await meeting.$attendances.get(on: db).delete(on: db)
+            try await meeting.$votings.get(on: db).delete(on: db) // cascades through voting_options and votes
             try await meeting.delete(on: db)
         }
         return .noContent

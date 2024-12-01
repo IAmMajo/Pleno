@@ -187,7 +187,7 @@ struct VotingController: RouteCollection {
         }
         try await req.db.transaction { db in
             if let options = patchVotingDTO.options {
-                try await voting.votingOptions.delete(on: db)
+                try await voting.$votingOptions.get(on: db).delete(on: db)
                 try await voting.$votingOptions.create(options.map({ getVotingOptionDTO in
                     try .init(id: .init(voting: voting, index: getVotingOptionDTO.index), text: getVotingOptionDTO.text)
                 }), on: db)
@@ -214,7 +214,7 @@ struct VotingController: RouteCollection {
         }
         
         try await req.db.transaction { db in
-            try await voting.votingOptions.delete(on: db)
+            try await voting.$votingOptions.get(on: db).delete(on: db)
             try await voting.delete(on: db)
         }
         
