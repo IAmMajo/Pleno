@@ -1,7 +1,11 @@
 stages:
+  - pull
   - build
   - distribute
   - deploy
+
+variables:
+  SERVER_BRANCH: $BACKEND_STAGING_BRANCH
 
 dto-swiftkotlin:
   stage: build
@@ -58,67 +62,152 @@ dto-main-staging-mrs:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
+pull-changes-on-prod-server:
+  stage: pull
+  script:
+    - cd "$PROD_DIR_LOCATION"
+    - if [[ "$(git branch --show-current)" != "$CI_COMMIT_BRANCH" ]]; then echo "Production server is currently not operating on branch '${CI_COMMIT_BRANCH}'!"; exit 1; fi
+    - git fetch "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" ${CI_COMMIT_BRANCH}
+    - git pull "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" ${CI_COMMIT_BRANCH}
+  rules:
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: prepare
+    deployment_tier: production
+
 build-backend-docker-image-config-service:
   stage: build
   script:
-    - docker build . -f backend/config-service/Dockerfile -t kivop-config-service
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose build config-service
   rules:
-    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
       changes:
         - backend/config-service/**/*
-      when: always
+    - changes:
+        - backend/models/**/*
+        - DTOs/**/*
+      when: never
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: prepare
+    deployment_tier: production
 
 build-backend-docker-image-auth-service:
   stage: build
   script:
-    - docker build . -f backend/auth-service/Dockerfile -t kivop-auth-service
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose build auth-service
   rules:
-    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
       changes:
         - backend/auth-service/**/*
-      when: always
+    - changes:
+        - backend/models/**/*
+        - DTOs/**/*
+      when: never
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: prepare
+    deployment_tier: production
 
 build-backend-docker-image-meeting-service:
   stage: build
   script:
-    - docker build . -f backend/meeting-service/Dockerfile -t kivop-meeting-service
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose build meeting-service
   rules:
-    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
       changes:
         - backend/meeting-service/**/*
-      when: always
+    - changes:
+        - backend/models/**/*
+        - DTOs/**/*
+      when: never
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: prepare
+    deployment_tier: production
 
 build-backend-docker-image-notifications-service:
   stage: build
   script:
-    - docker build . -f backend/notifications-service/Dockerfile -t kivop-notifications-service
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose build notifications-service
   rules:
-    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
       changes:
         - backend/notifications-service/**/*
-      when: always
+    - changes:
+        - backend/models/**/*
+        - DTOs/**/*
+      when: never
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: prepare
+    deployment_tier: production
 
-build-backend-docker-image-poster-service:
-  stage: build
-  script:
-    - docker build . -f backend/poster-service/Dockerfile -t kivop-poster-service
-  rules:
-    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
-      changes:
-        - backend/poster-service/**/*
-      when: always
+# build-backend-docker-image-poster-service:
+#   stage: build
+#   script:
+#     - cd "$PROD_DIR_LOCATION"
+#     - docker compose build poster-service
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+#       changes:
+#         - backend/poster-service/**/*
+#     - changes:
+#         - backend/models/**/*
+#         - DTOs/**/*
+#       when: never
+#   environment:
+#     name: Production
+#     url: https://kivop.ipv64.net
+#     action: prepare
+#     deployment_tier: production
 
 # build-backend-docker-image-carpool-service:
 #   stage: build
 #   script:
-#     - docker build . -f backend/carpool-service/Dockerfile -t kivop-carpool-service
+#     - cd "$PROD_DIR_LOCATION"
+#     - docker compose build carpool-service
 #   rules:
 #     - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
 #       changes:
 #         - backend/carpool-service/**/*
-#       when: always
+#     - changes:
+#         - backend/models/**/*
+#         - DTOs/**/*
+#       when: never
+#   environment:
+#     name: Production
+#     url: https://kivop.ipv64.net
+#     action: prepare
+#     deployment_tier: production
 
-deploy-containers-on-main:
+build-backend-docker-image-all-services:
+  stage: build
+  script:
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose build
+  rules:
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/models/**/*
+        - DTOs/**/*
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: prepare
+    deployment_tier: production
+
+deploy-containers-on-prod-server:
   stage: deploy
 #   variables:
 #     COMMIT_MERGE_REQ_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/commits/$CI_COMMIT_SHA/merge_requests"
@@ -126,12 +215,14 @@ deploy-containers-on-main:
 #     - 'MERGE_REQ=$(curl -s --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN" $COMMIT_MERGE_REQ_URL)'
 #     - MR_BRANCH_NAME=$(echo $MERGE_REQ | jq -r '.[0].source_branch')
 #     - if [[ "$MR_BRANCH_NAME" != "$BACKEND_STAGING_BRANCH" ]]; then exit 0; fi
-    - cd /opt/kivop
-    - if [[ "$(git branch --show-current)" != "$CI_COMMIT_BRANCH" ]]; then echo "Production server is currently not operating on branch '${CI_COMMIT_BRANCH}'!"; exit 0; fi
-    - git fetch "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" ${CI_COMMIT_BRANCH}
-    - git pull "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" ${CI_COMMIT_BRANCH}
-    - docker compose build
+    - cd "$PROD_DIR_LOCATION"
     - docker compose down
     - docker compose up -d
   rules:
-    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH # $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: start
+    deployment_tier: production
+
