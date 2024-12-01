@@ -39,7 +39,7 @@ struct CreateService: AsyncMigration {
             Service(
                 id: UUID(uuidString: "d3c1f7b9-8aaf-4b8e-9c56-4e2a8c0c3f7c")!,
                 name: "Poster-Service",
-                webhook_url: "http://kivop-config-service/webhook",
+                webhook_url: "http://kivop-poster-service/webhook",
                 description: "Manages Poster positions",
                 active: true
             )
