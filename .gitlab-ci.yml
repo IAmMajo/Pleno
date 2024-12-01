@@ -1,5 +1,7 @@
 stages:
   - build
+  - distribute
+  - deploy
 
 dto-swiftkotlin:
   stage: build
@@ -7,6 +9,7 @@ dto-swiftkotlin:
       - ./translate-dtos.sh
       - git add *
       - git status
+      - if [ "$(git status --porcelain | wc -l)" -eq "0" ]; then exit 0; fi
       - git commit -m "${SWIFTKOTLIN_COMMIT_MESSAGE}"
       - git push -o ci.skip "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:${CI_COMMIT_BRANCH}
   rules:
@@ -17,7 +20,7 @@ dto-swiftkotlin:
       when: always
 
 dto-main-staging-mrs:
-  stage: build
+  stage: distribute
   variables:
     COMMIT_MERGE_REQ_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/commits/$CI_COMMIT_SHA/merge_requests"
   script:
@@ -114,3 +117,21 @@ build-backend-docker-image-poster-service:
 #       changes:
 #         - backend/carpool-service/**/*
 #       when: always
+
+deploy-containers-on-main:
+  stage: deploy
+#   variables:
+#     COMMIT_MERGE_REQ_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/commits/$CI_COMMIT_SHA/merge_requests"
+  script:
+#     - 'MERGE_REQ=$(curl -s --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN" $COMMIT_MERGE_REQ_URL)'
+#     - MR_BRANCH_NAME=$(echo $MERGE_REQ | jq -r '.[0].source_branch')
+#     - if [[ "$MR_BRANCH_NAME" != "$BACKEND_STAGING_BRANCH" ]]; then exit 0; fi
+    - cd /opt/kivop
+    - if [[ "$(git branch --show-current))" != "$CI_COMMIT_BRANCH" ]]; then echo "Production server is currently not operating on branch '${CI_COMMIT_BRANCH}'!"; exit 0; fi
+    - git fetch "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" ${CI_COMMIT_BRANCH}
+    - git pull "https://gitlab-ci-token:${PROJECT_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" ${CI_COMMIT_BRANCH}
+    - docker compose build
+    - docker compose down
+    - docker compose up -d
+  rules:
+    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH # $CI_DEFAULT_BRANCH
