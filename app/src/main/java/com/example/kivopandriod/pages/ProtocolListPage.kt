@@ -1,9 +1,9 @@
-package com.example.kivopandriod
+package com.example.kivopandriod.pages
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 
 @Composable
-fun ProtokolleScreen(navController: NavController){
+fun ProtocolListPage(navController: NavController){
 
 }

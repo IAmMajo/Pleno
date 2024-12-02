@@ -18,6 +18,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.kivopandriod.R
+import com.example.kivopandriod.ui.theme.Background_secondary_light
+import com.example.kivopandriod.ui.theme.Text_light
 
 data class ResponseItem(
     val name: String,
@@ -30,9 +32,8 @@ fun ResponseList(responses: List<ResponseItem>, headerText: String) {
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
-            .padding(16.dp)
             .clip(MaterialTheme.shapes.medium)
-            .background(Color(0xFFE0E0E0))
+            .background(Background_secondary_light)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             val nonOpenCount = responses.count { it.statusIconResId > 0 }
@@ -43,6 +44,7 @@ fun ResponseList(responses: List<ResponseItem>, headerText: String) {
             ) {
                 Text(
                     text = headerText,
+                    color = Text_light,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -50,6 +52,7 @@ fun ResponseList(responses: List<ResponseItem>, headerText: String) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
                         painter = painterResource(id = R.drawable.ic_groups),
+                      //TODO  tint = Text_light,
                         contentDescription = null,
                         modifier = Modifier.size(24.dp)
                     )
@@ -90,7 +93,7 @@ fun ResponseItemRow(item: ResponseItem) {
         ) {
             Text(
                 text = initial,
-                color = Color.Black,
+                color = Text_light,
                 fontSize = 18.sp,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold
@@ -101,6 +104,7 @@ fun ResponseItemRow(item: ResponseItem) {
 
         Text(
             text = item.name,
+            color = Text_light,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium

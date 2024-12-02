@@ -3,6 +3,7 @@ package com.example.kivopandriod.components
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -31,13 +32,16 @@ data class TermindData(
     val title: String,
     val date: LocalDate,
     val time: LocalTime,
-    val status: Int
+    val status: Int,
+    val id: String,
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TermindCard(
-    termindData: TermindData
+    termindData: TermindData,
+    onClick: () -> Unit = {}
+
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
@@ -61,6 +65,7 @@ fun TermindCard(
             .clip(RoundedCornerShape(8.dp))
             .background(colorH)
             .padding(8.dp)
+            .clickable(onClick = onClick)
     ){
         Column {
             // Titeltext
@@ -118,38 +123,38 @@ fun TermindCard(
 }
 
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun TermindCardPreview() {
-    MaterialTheme {
-        Surface {
-            Column {
-                TermindCard(
-                    termindData = TermindData(
-                        title = "Vorstandswahl",
-                        date = LocalDate.now(),
-                        time = LocalTime.now(),
-                        status = 1
-                    )
-                )
-                TermindCard(
-                    termindData = TermindData(
-                        title = "Vorstandswahl",
-                        date = LocalDate.now(),
-                        time = LocalTime.now(),
-                        status = 2
-                    )
-                )
-                TermindCard(
-                    termindData = TermindData(
-                        title = "Vorstandswahl",
-                        date = LocalDate.now(),
-                        time = LocalTime.now(),
-                        status = 0
-                    )
-                )
-            }
-        }
-    }
-}
+//@RequiresApi(Build.VERSION_CODES.O)
+//@Preview(showBackground = true)
+//@Composable
+//fun TermindCardPreview() {
+//    MaterialTheme {
+//        Surface {
+//            Column {
+//                TermindCard(
+//                    termindData = TermindData(
+//                        title = "Vorstandswahl",
+//                        date = LocalDate.now(),
+//                        time = LocalTime.now(),
+//                        status = 1
+//                    )
+//                )
+//                TermindCard(
+//                    termindData = TermindData(
+//                        title = "Vorstandswahl",
+//                        date = LocalDate.now(),
+//                        time = LocalTime.now(),
+//                        status = 2
+//                    )
+//                )
+//                TermindCard(
+//                    termindData = TermindData(
+//                        title = "Vorstandswahl",
+//                        date = LocalDate.now(),
+//                        time = LocalTime.now(),
+//                        status = 0
+//                    )
+//                )
+//            }
+//        }
+//    }
+//}

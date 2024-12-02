@@ -1,28 +1,16 @@
-package com.example.kivopandriod.components
+//todo: delete this file
+package com.example.kivopandriod.services.api
 
 
-import Login
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.JsonArray
-import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 
-suspend fun main() {
-    Login(email = "admin@kivop.ipv64.net", password = "admin")
-    val id = "E5EBB6A8-AA2F-42FD-9B55-F30B8D68605D"
-    val response = responseList(id)
-    println(response)
-}
 
 // Datenmodell für die Antwort
 data class ResponseData(
@@ -31,10 +19,11 @@ data class ResponseData(
 )
 
 
-suspend fun responseList(id: String): List<ResponseData> = withContext(Dispatchers.IO) {
+suspend fun responseList(id: String,context: Context): List<ResponseData> = withContext(Dispatchers.IO) {
+    val auth = AuthApi(context)
     val url = "https://kivop.ipv64.net/meetings/$id/attendances"
     val client = OkHttpClient()
-    val token = TokenManager.jwtToken
+    val token = auth.getToken()
 
     if (token.isNullOrEmpty()) {
         println("Fehler: Kein Token verfügbar")
