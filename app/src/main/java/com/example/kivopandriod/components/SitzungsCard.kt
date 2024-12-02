@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.kivopandriod.R
 import com.example.kivopandriod.ui.theme.Background_secondary_light
+import com.example.kivopandriod.ui.theme.Text_light
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -49,9 +50,11 @@ fun SitzungsCard(title: String, date: LocalDate) {
         Column(
             modifier = Modifier
             .padding(12.dp)
+                .background(Color.Transparent)
         ) {
             Text(
                 text = title,
+                color = Text_light,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -59,12 +62,14 @@ fun SitzungsCard(title: String, date: LocalDate) {
             Row {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
+                        tint = Text_light,
                         painter = painterResource(id = R.drawable.ic_calendar),
                         contentDescription = "Icon Kalender"
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = date.format(formatter),
+                        color = Text_light,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -74,11 +79,13 @@ fun SitzungsCard(title: String, date: LocalDate) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_schedule_24px),
+                        tint = Text_light,
                         contentDescription = "Icon Uhrzeit"
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "16:30 Uhr (90Min.)",
+                        color = Text_light,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold
 
@@ -89,11 +96,13 @@ fun SitzungsCard(title: String, date: LocalDate) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Outlined.Place,
+                    tint = Text_light,
                     contentDescription = "Icon Standort"
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Sitzungssaal 1",
+                    color = Text_light,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )

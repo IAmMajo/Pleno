@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -20,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.kivopandriod.components.ResponseItem
@@ -36,7 +38,7 @@ fun ResponseScreen(
 
 ) {
     //TODO: FIX THIS
-        Surface {
+        Surface() {
             // Zustand für die Antworten (Liste von ResponseItem)
             var responses by remember { mutableStateOf<List<ResponseItem>>(emptyList()) }
             // API-Anfrage ausführen
@@ -50,7 +52,10 @@ fun ResponseScreen(
             println(responses)
             // UI anzeigen
             val eventDate = LocalDate.of(2024, 10, 24) // 24.10.2024
-            Column {
+            Column(
+                modifier = Modifier.background(Color.Transparent)
+            ) {
+
                 SitzungsCard(title = "Vorstandswahl", date = eventDate)
                 Spacer(Modifier.size(12.dp))
                 ResponseList(responses = responses, "Rückmeldungen")
