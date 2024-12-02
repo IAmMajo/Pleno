@@ -70,13 +70,14 @@ struct PosterController: RouteCollection, Sendable {
         
         // Gruppierung für Poster-Routen
         let posters = authProtected.grouped("posters")
+        posters.get(use: getPosters)
         posters.post(use: createPoster)
-        posters.get("displayed", use: getDisplayedPosters)
-        posters.get("to-be-taken-down", use: getPostersToBeTakenDown)
         posters.patch(":posterId", use: updatePoster)
         
         // Gruppierung für PosterPosition-Routen
         let posterPositions = authProtected.grouped("poster-positions")
+        posterPositions.get(use: getDisplayedPosters)
+        posterPositions.get("to-be-taken-down", use: getPostersToBeTakenDown)
         posterPositions.post(use: createPosterPosition)
         posterPositions.patch(":positionId", use: updatePosterPosition)
         
@@ -93,8 +94,6 @@ struct PosterController: RouteCollection, Sendable {
         headers.contentType = .json
         return Response(status: .ok, headers: headers, body: .init(data: responseData))
     }
-    
-    // Struktur zur Entgegennahme von Poster-Daten
     
 
     // 1. Neues Poster erstellen
@@ -136,7 +135,7 @@ struct PosterController: RouteCollection, Sendable {
         }
 
         // Poster erstellen
-        let poster = Poster(
+        let poster:Poster = Poster(
             name: posterData.name,
             description: posterData.description,
             imageUrl: imageUrl
@@ -150,7 +149,7 @@ struct PosterController: RouteCollection, Sendable {
         }
 
         // Erstelle das Response DTO
-        let responseDTO = PosterResponseDTO(
+        let responseDTO:PosterResponseDTO = PosterResponseDTO(
             id: poster.id!,
             name: poster.name,
             description: poster.description,
@@ -164,8 +163,8 @@ struct PosterController: RouteCollection, Sendable {
     // 2. Alle Poster abrufen
     @Sendable
     func getPosters(req: Request) async throws -> Response {
-        let posters = try await Poster.query(on: req.db).all()
-        let responseDTOs = posters.map { poster in
+        let posters:[Poster] = try await Poster.query(on: req.db).all()
+        let responseDTOs:[PosterResponseDTO] = posters.map { poster in
             PosterResponseDTO(
                 id: poster.id!,
                 name: poster.name,
@@ -177,25 +176,44 @@ struct PosterController: RouteCollection, Sendable {
     }
     
     
-    // 3. Alle aufgehängten Poster zurückgeben
+    // 3. Alle aufgehängten oder nicht aufgehängten Poster zurückgeben
     @Sendable
     func getDisplayedPosters(req: Request) async throws -> Response {
-        let positions = try await PosterPosition.query(on: req.db)
-            .filter(\.$is_Displayed == true)
-            .with(\.$poster)
-            .all()
         
-        let responseDTOs = positions.map { position in
-            PosterResponseDTO(
-                id: position.poster.id!,
-                name: position.poster.name,
-                description: position.poster.description,
-                imageUrl: position.poster.image_url
-            )
+        let isDisplayed:Bool = (try? req.query.get(Bool.self, at: "displayed")) ?? true
+        let positions:[PosterPosition]
+        
+        if isDisplayed {
+            positions = try await PosterPosition.query(on: req.db)
+                .filter(\.$is_Displayed == isDisplayed)
+                .all()
+        }
+        
+        else {
+            let currentDate:Date = Date()
+                
+            positions = try await PosterPosition.query(on: req.db)
+                .filter(\.$is_Displayed == false)
+                .filter(\.$expires_at > currentDate)
+                .all()
+        }
+        
+        let responseDTOs:[PosterToBeTakenDownDTO] = positions.map { position in
+            PosterToBeTakenDownDTO(
+                posterId: position.id!,
+                responsibleUserId: position.responsibleUser.id!,
+                latitude:position.latitude,
+                longitude:position.longitude,
+                isDisplayed: position.is_Displayed,
+                imageURL: position.image_url,
+                expiresAt:position.expires_at!
+             )
+            
         }
         
         return try await createResponse(with: responseDTOs, on: req)
     }
+    
     
     // 4. Alle Poster, die abgehangen werden müssen
     @Sendable
@@ -217,19 +235,22 @@ struct PosterController: RouteCollection, Sendable {
         let positions = try await PosterPosition.query(on: req.db)
             .filter(\.$is_Displayed == true)
             .filter(\.$expires_at <= thresholdDate)
-            .with(\.$poster)
             .all()
 
-        // Transformiere die PosterPositionen in DTOs
+        
         let responseDTOs: [PosterToBeTakenDownDTO] = positions.map { position in
-            let poster = position.poster
+            
             return PosterToBeTakenDownDTO(
-                id: poster.id!,
-                name: poster.name,
-                description: poster.description,
-                imageUrl: poster.image_url
+                posterId: position.id!,
+                responsibleUserId: position.responsibleUser.id!,
+                latitude:position.latitude,
+                longitude:position.longitude,
+                isDisplayed: position.is_Displayed,
+                imageURL: position.image_url,
+                expiresAt:position.expires_at!
             )
         }
+        
 
         // Erstelle und gebe die Antwort zurück
         return try await createResponse(with: responseDTOs, on: req)
@@ -289,7 +310,7 @@ struct PosterController: RouteCollection, Sendable {
            }
         
         let dto = try req.content.decode(CreatePosterPositionDTO.self)
-        
+        // bedingung einbauen
         let imageUrl = try await saveImage(dto.image, in: "Storage/Images/PosterPositions", on: req)
         
         let posterPosition = PosterPosition(
@@ -333,8 +354,8 @@ struct PosterController: RouteCollection, Sendable {
            }
 
         
-        let dto = try req.content.decode(UpdatePosterPositionDTO.self)
-        guard let position = try await PosterPosition.find(positionId, on: req.db) else {
+        let dto:UpdatePosterPositionDTO = try req.content.decode(UpdatePosterPositionDTO.self)
+        guard let position:PosterPosition = try await PosterPosition.find(positionId, on: req.db) else {
             throw Abort(.notFound, reason: "PosterPosition nicht gefunden.")
         }
         
@@ -349,6 +370,12 @@ struct PosterController: RouteCollection, Sendable {
         }
         if let expiresAt = dto.expiresAt{
             position.expires_at = expiresAt
+        }
+        if let resonsibleUserId = dto.responsibleUserId {
+            position.$responsibleUser.id = resonsibleUserId
+        }
+        if let posterId = dto.posterId {
+            position.$poster.id = posterId
         }
         if let image = dto.image {
             let imageUrl = try await saveImage(image, in: "Storage/Images/PosterPositions", on: req)
@@ -374,7 +401,7 @@ struct PosterController: RouteCollection, Sendable {
     
    
 
-    // 9. Route zum Abrufen der Bilddatei
+    // 8. Route zum Abrufen der Bilddatei
     @Sendable
     func getImageFile(req: Request) async throws -> Response {
         guard let imageURL = req.parameters.get("imageURL", as: String.self) else {
@@ -421,5 +448,7 @@ struct PosterController: RouteCollection, Sendable {
         // Gib den Pfad relativ zum Arbeitsverzeichnis zurück
         return "\(directory)/\(uniqueFileName)"
     }
+    
+
 
 }

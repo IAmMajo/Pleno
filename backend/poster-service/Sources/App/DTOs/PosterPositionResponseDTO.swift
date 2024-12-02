@@ -12,7 +12,7 @@ public struct PosterPositionResponseDTO: Codable {
     public var latitude: Double
     public var longitude: Double
     public var isDisplayed: Bool
-    public var imageUrl: String // Hinzugefügt
+    public var imageUrl: String 
     public var expiresAt:Date
     public var postedAt:Date
 
