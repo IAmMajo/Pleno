@@ -1,51 +1,29 @@
-package com.example.kivopandriod.services
+package com.example.kivopandriod.services.api
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.content.Context
+import com.example.kivopandriod.moduls.MeetingData
 import com.google.gson.Gson
 import com.google.gson.JsonArray
-import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
-
-@RequiresApi(Build.VERSION_CODES.O)
-fun main() = runBlocking {
-    //Login(email = "admin@kivop.ipv64.net", password = "admin") // Login aufrufen
-
-    val meetings = meetingsList() // Meetings abrufen
-
-    if (meetings.isEmpty()) {
-        println("Keine Meetings gefunden.")
-    } else {
-        println("Meetings:")
-        meetings.forEach { meeting ->
-            println("Name: ${meeting.name}, Date: ${meeting.date}, Time: ${meeting.time}")
-        }
-    }
+class MeetingsApi(context: Context) {
+    //TODO: Get Meetings
+    //TODO: Get Meeting by id
+    //TODO: Get Meetings locations
+    //TODO: Get Meeting location by id
 }
 
-
-
-// Datenmodell für ein Meeting
-data class MeetingData(
-    val name: String,
-    val date: LocalDate,
-    val time: LocalTime,
-    val id: String
-)
-
-@RequiresApi(Build.VERSION_CODES.O)
-suspend fun meetingsList(): List<MeetingData> = withContext(Dispatchers.IO) {
+//todo: fix this
+suspend fun meetingsList(context: Context): List<MeetingData> = withContext(Dispatchers.IO) {
+    val auth = AuthApi(context)
     val url = "https://kivop.ipv64.net/meetings"
     val client = OkHttpClient()
-    val token = TokenManager.jwtToken
+    val token = auth.getToken()
 
     if (token.isNullOrEmpty()) {
         println("Fehler: Kein Token verfügbar")

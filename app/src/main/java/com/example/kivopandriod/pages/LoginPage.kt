@@ -1,6 +1,6 @@
 package com.example.kivopandriod.pages
 
-import Login
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.kivopandriod.components.CustomButton
 import com.example.kivopandriod.components.CustomInputField
+import com.example.kivopandriod.services.api.AuthApi
 import com.example.kivopandriod.ui.theme.Background_light
 import com.example.kivopandriod.ui.theme.Primary_dark
 import com.example.kivopandriod.ui.theme.Text_light
@@ -38,6 +39,7 @@ var couroutineScope = CoroutineScope(Dispatchers.IO)
 
 @Composable
 fun LoginScreen(navController: NavController){
+    val auth = AuthApi(navController.context)
     Column(modifier = Modifier
         .background(color = Background_light)
         .padding(12.dp),
@@ -83,7 +85,7 @@ fun LoginScreen(navController: NavController){
                 text = "Login",
                 onClick = {
                     couroutineScope.launch {
-                        Login("admin@kivop.ipv64.net", "admin")
+                        auth.login("admin@kivop.ipv64.net", "admin")
                         //navController.navigate("home")
                     }
                     navController.navigate("home")

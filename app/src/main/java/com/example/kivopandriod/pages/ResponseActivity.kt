@@ -1,18 +1,11 @@
 package com.example.kivopandriod.pages
 
 
-import Login
-import android.os.Build
-import android.os.Bundle
-import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +20,7 @@ import androidx.navigation.NavController
 import com.example.kivopandriod.components.ResponseItem
 import com.example.kivopandriod.components.ResponseList
 import com.example.kivopandriod.components.SitzungsCard
-import com.example.kivopandriod.services.responseList
+import com.example.kivopandriod.services.api.responseList
 import java.time.LocalDate
 
 
@@ -44,7 +37,7 @@ fun ResponseScreen(
             // API-Anfrage ausführen
             LaunchedEffect(meetingId)
             {
-                val responseData = responseList(meetingId) // Dynamische Daten abrufen
+                val responseData = responseList(meetingId, navController!!.context) // Dynamische Daten abrufen
                 responses = responseData.map { response ->
                     ResponseItem(name = response.name, statusIconResId = response.status)
                 }

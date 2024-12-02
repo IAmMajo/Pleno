@@ -10,7 +10,7 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-class Auth(private val context: Context) {
+class AuthApi(private val context: Context) {
     suspend fun login(email: String, password: String){
         withContext(Dispatchers.IO) {
             val url = "https://kivop.ipv64.net/auth/login"

@@ -9,9 +9,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
-import com.example.kivopandriod.services.MeetingData
 import com.example.kivopandriod.components.TermindData
-import com.example.kivopandriod.services.meetingsList
+import com.example.kivopandriod.moduls.MeetingData
+import com.example.kivopandriod.services.api.meetingsList
 import kotlinx.coroutines.launch
 
 @Composable
@@ -25,7 +25,7 @@ fun AnwesenheitScreen(navController: NavController){
             // Login zuerst ausführen
 
             // Meetings abrufen
-            val result = meetingsList()
+            val result = meetingsList(navController.context)
             println("Meetings abgerufen: ${result.size} Einträge.")
             meetings = result
         }
