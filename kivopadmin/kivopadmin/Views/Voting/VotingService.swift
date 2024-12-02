@@ -12,6 +12,7 @@ import MeetingServiceDTOs
 
 class VotingService: ObservableObject {
     static let shared = VotingService()
+    private let baseURL = "https://kivop.ipv64.net/meetings/votings/"
     
     @Published var votings: [GetVotingDTO] = []
     
@@ -95,7 +96,7 @@ class VotingService: ObservableObject {
     
     func patchVoting(votingId: UUID, patch: PatchVotingDTO, completion: @escaping (Result<GetVotingDTO, Error>) -> Void) {
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/votings/\(votingId)") else {
-            let error = NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+            let error = NSError(domain: "Invalid URL", code: 400, userInfo: [NSLocalizedDescriptionKey: "Die URL für die Anfrage ist ungültig."])
             print("Fehler: \(error.localizedDescription)")
             completion(.failure(error))
             return
@@ -105,32 +106,34 @@ class VotingService: ObservableObject {
         request.httpMethod = "PATCH"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
+        // Token prüfen und hinzufügen
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         } else {
-            let error = NSError(domain: "Unauthorized", code: 401, userInfo: nil)
-            print("Fehler: JWT Token fehlt")
+            let error = NSError(domain: "Unauthorized", code: 401, userInfo: [NSLocalizedDescriptionKey: "JWT-Token fehlt. Benutzer nicht autorisiert."])
+            print("Fehler: \(error.localizedDescription)")
             completion(.failure(error))
             return
         }
 
         do {
+            // PatchVotingDTO in JSON konvertieren
             let encoder = JSONEncoder()
-            encoder.outputFormatting = .prettyPrinted
+            encoder.outputFormatting = .prettyPrinted // Für lesbare Debug-Ausgaben
             let jsonData = try encoder.encode(patch)
-
-            // Debugging: Gesendete Daten
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("Daten gesendet: \(jsonString)")
-            }
-
             request.httpBody = jsonData
+
+            // Debugging: Gesendete JSON-Daten anzeigen
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("Gesendete JSON-Daten:\n\(jsonString)")
+            }
         } catch {
             print("Fehler beim Kodieren der JSON-Daten: \(error.localizedDescription)")
             completion(.failure(error))
             return
         }
 
+        // Anfrage ausführen
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Netzwerkfehler: \(error.localizedDescription)")
@@ -139,98 +142,99 @@ class VotingService: ObservableObject {
             }
 
             guard let httpResponse = response as? HTTPURLResponse else {
-                let error = NSError(domain: "Invalid Response", code: 500, userInfo: nil)
-                print("Fehler: Ungültige Serverantwort")
+                let error = NSError(domain: "Invalid Response", code: 500, userInfo: [NSLocalizedDescriptionKey: "Ungültige Serverantwort erhalten."])
+                print("Fehler: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
 
+            // Debugging: HTTP-Statuscode ausgeben
             print("HTTP-Statuscode: \(httpResponse.statusCode)")
 
+            // Überprüfung des Statuscodes
             guard (200...299).contains(httpResponse.statusCode) else {
-                if let data = data, let responseText = String(data: data, encoding: .utf8) {
-                    print("Serverfehler: \(responseText)")
+                if let data = data, let serverResponse = String(data: data, encoding: .utf8) {
+                    print("Serverfehler: \(serverResponse)")
                 }
-                let error = NSError(domain: "Server Error", code: httpResponse.statusCode, userInfo: nil)
+                let error = NSError(domain: "Server Error", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Serverantwort nicht erfolgreich."])
                 completion(.failure(error))
                 return
             }
 
             guard let data = data else {
-                let error = NSError(domain: "No Data", code: 204, userInfo: nil)
-                print("Fehler: Keine Daten erhalten")
+                let error = NSError(domain: "No Data", code: 204, userInfo: [NSLocalizedDescriptionKey: "Keine Daten vom Server erhalten."])
+                print("Fehler: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
 
-            // Debugging: Serverantwort
+            // Debugging: Serverantwort anzeigen
             if let responseText = String(data: data, encoding: .utf8) {
-                print("Antwortdaten: \(responseText)")
+                print("Antwortdaten vom Server:\n\(responseText)")
             }
 
             do {
+                // JSON-Daten dekodieren
                 let decoder = JSONDecoder()
                 let updatedVoting = try decoder.decode(GetVotingDTO.self, from: data)
-                print("Erfolgreich aktualisiert: \(updatedVoting)")
+
+                // Debugging: Erfolgreiche Dekodierung
+                print("Erfolgreich aktualisierte Umfrage:\n\(updatedVoting)")
                 completion(.success(updatedVoting))
             } catch {
-                print("Fehler beim Dekodieren der Antwort: \(error.localizedDescription)")
+                print("Fehler beim Dekodieren der JSON-Daten: \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }.resume()
     }
 
     
+    // MARK: - Delete Voting
     func deleteVoting(votingId: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let url = URL(string: "https://kivop.ipv64.net/meetings/votings/\(votingId)") else {
-            let error = NSError(domain: "Invalid URL", code: 400, userInfo: nil)
-            print("Fehler: \(error.localizedDescription)")
-            completion(.failure(error))
+        // Erstellen der URL mit der Voting-ID
+        guard let url = URL(string: "https://kivop.ipv64.net/meetings/votings/\(votingId.uuidString)") else {
+            completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL."])))
             return
         }
-
+        
         var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
+        request.httpMethod = "DELETE"  // Setze HTTP-Methode auf DELETE
+        
+        // Füge den Bearer-Token hinzu, wenn vorhanden
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         } else {
-            let error = NSError(domain: "Unauthorized", code: 401, userInfo: [NSLocalizedDescriptionKey: "JWT Token fehlt"])
-            print("Fehler: \(error.localizedDescription)")
-            completion(.failure(error))
+            completion(.failure(NSError(domain: "Unauthorized", code: 2, userInfo: [NSLocalizedDescriptionKey: "JWT-Token fehlt."])))
             return
         }
-
-        print("Senden DELETE-Request an URL: \(url)") // Debugging
-
+        
+        // Sende die Anfrage
         URLSession.shared.dataTask(with: request) { data, response, error in
+            // Fehlerbehandlung
             if let error = error {
-                print("Netzwerkfehler beim Löschen: \(error.localizedDescription)") // Debugging
                 completion(.failure(error))
                 return
             }
-
-            guard let httpResponse = response as? HTTPURLResponse else {
-                let error = NSError(domain: "Invalid Response", code: 500, userInfo: nil)
-                print("Fehler: Keine gültige HTTP-Antwort erhalten.")
-                completion(.failure(error))
-                return
-            }
-
-            print("HTTP-Statuscode: \(httpResponse.statusCode)") // Debugging
-
-            if httpResponse.statusCode == 204 {
-                print("Umfrage erfolgreich gelöscht.")
-                completion(.success(()))
+            
+            // Überprüfe den Statuscode der Antwort
+            if let response = response as? HTTPURLResponse {
+                if response.statusCode == 204 {
+                    // Erfolgreiches Löschen
+                    completion(.success(()))
+                } else {
+                    // Fehler beim Löschen
+                    let errorMessage = String(data: data ?? Data(), encoding: .utf8) ?? "Unbekannter Fehler"
+                    let error = NSError(domain: "Delete Error", code: response.statusCode, userInfo: [NSLocalizedDescriptionKey: "Fehler beim Löschen: \(errorMessage)"])
+                    completion(.failure(error))
+                }
             } else {
-                let errorData = String(data: data ?? Data(), encoding: .utf8) ?? "Keine Daten"
-                print("Fehler: HTTP Status \(httpResponse.statusCode), Antwort: \(errorData)")
-                let error = NSError(domain: "Server Error", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorData])
+                let error = NSError(domain: "Invalid Response", code: 500, userInfo: [NSLocalizedDescriptionKey: "Ungültige Antwort vom Server."])
                 completion(.failure(error))
             }
         }.resume()
     }
+
+
 
 
     func closeVoting(votingId: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -386,11 +390,15 @@ class VotingService: ObservableObject {
                 return
             }
             
-            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                completion(.failure(NSError(domain: "Server Error", code: 500, userInfo: nil)))
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(.failure(NSError(domain: "Invalid Server Response", code: 0, userInfo: nil)))
                 return
             }
             
+            guard (200...299).contains(httpResponse.statusCode) else {
+                completion(.failure(NSError(domain: "Error", code: httpResponse.statusCode, userInfo: nil)))
+                return
+            }
             completion(.success(()))
         }.resume()
     }

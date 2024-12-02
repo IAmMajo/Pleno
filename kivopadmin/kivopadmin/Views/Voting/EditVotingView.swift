@@ -1,21 +1,18 @@
-//
-//  EditVotingView.swift
-//  kivopadmin
-//
-//  Created by Amine Ahamri on 29.11.24.
-//
-
 import SwiftUI
 import MeetingServiceDTOs
 
 struct EditVotingView: View {
-    @Environment(\.dismiss) private var dismiss // Um die Ansicht zu schließen
+    @Environment(\.dismiss) private var dismiss
     @State var voting: GetVotingDTO
+    let onReload: () -> Void
     let onSave: (GetVotingDTO) -> Void
+
 
     @State private var question = ""
     @State private var description = ""
     @State private var options: [String] = []
+    @State private var isSaving = false
+    @State private var errorMessage: String?
 
     var body: some View {
         NavigationView {
@@ -40,17 +37,28 @@ struct EditVotingView: View {
                         options.append("")
                     }
                 }
+
+                if let errorMessage = errorMessage {
+                    Section {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                            .font(.subheadline)
+                    }
+                }
             }
             .navigationTitle("Umfrage bearbeiten")
             .navigationBarItems(
                 leading: Button("Abbrechen") {
-                    dismiss() // Ansicht schließen
+                    dismiss()
                 },
-                trailing: Button("Speichern") {
-                    saveChanges()
-                    dismiss() // Änderungen speichern und Ansicht schließen
+                trailing: Button(action: saveChanges) {
+                    if isSaving {
+                        ProgressView()
+                    } else {
+                        Text("Speichern")
+                    }
                 }
-                .disabled(!isFormValid())
+                .disabled(!isFormValid() || isSaving)
             )
             .onAppear(perform: populateFields)
         }
@@ -63,30 +71,34 @@ struct EditVotingView: View {
     }
 
     private func saveChanges() {
-        // Prüfen, ob der Index bei 1 beginnen soll
-        let optionDTOs = options.enumerated().map { index, text in
-            GetVotingOptionDTO(index: UInt8(index + 1), text: text) // Offset von 1 hinzugefügt
-        }
+        isSaving = true
+        errorMessage = nil
 
-        let updatedVoting = GetVotingDTO(
-            id: voting.id,
-            meetingId: voting.meetingId,
+        // Daten vorbereiten
+        let patchVoting = PatchVotingDTO(
             question: question,
-            description: description,
-            isOpen: voting.isOpen,
+            description: description.isEmpty ? nil : description,
             anonymous: voting.anonymous,
-            options: optionDTOs
+            options: options.enumerated().map { index, text in
+                GetVotingOptionDTO(index: UInt8(index + 1), text: text)
+            }
         )
 
-        // Debugging: Gesendete Daten anzeigen
-        print("Gespeicherte Änderungen:")
-        print("Frage: \(updatedVoting.question)")
-        print("Beschreibung: \(updatedVoting.description ?? "Keine Beschreibung")")
-        print("Optionen: \(updatedVoting.options)")
-
-        onSave(updatedVoting)
+        // Backend-Aufruf
+        VotingService.shared.patchVoting(votingId: voting.id, patch: patchVoting) { result in
+            DispatchQueue.main.async {
+                isSaving = false
+                switch result {
+                case .success:
+                    print("Umfrage erfolgreich bearbeitet.")
+                    dismiss() // Schließt die `EditVotingView`
+                    onReload() // Signalisiert der `InPlanungView`, die Ansicht neu zu laden
+                case .failure(let error):
+                    errorMessage = "Fehler beim Speichern der Umfrage: \(error.localizedDescription)"
+                }
+            }
+        }
     }
-
 
     private func isFormValid() -> Bool {
         !question.isEmpty && !options.contains { $0.isEmpty }
