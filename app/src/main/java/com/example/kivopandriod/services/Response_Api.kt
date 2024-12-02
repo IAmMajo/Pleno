@@ -2,6 +2,7 @@ package com.example.kivopandriod.services
 
 
 import Login
+import com.example.kivopandriod.services.api.Auth
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import okhttp3.OkHttpClient

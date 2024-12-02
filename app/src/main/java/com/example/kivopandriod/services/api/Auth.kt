@@ -1,4 +1,4 @@
-package com.example.kivopandriod.services
+package com.example.kivopandriod.services.api
 
 import android.content.Context
 import android.util.Log
