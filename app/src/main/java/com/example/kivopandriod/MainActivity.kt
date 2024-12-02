@@ -53,11 +53,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.kivopandriod.pages.AnwesenheitScreen
-import com.example.kivopandriod.pages.HomeScreen
+import com.example.kivopandriod.pages.HomePage
 import com.example.kivopandriod.pages.LoginScreen
-import com.example.kivopandriod.pages.ProtokolleScreen
-import com.example.kivopandriod.pages.ResponseScreen
-import com.example.kivopandriod.pages.SitzungenScreen
+import com.example.kivopandriod.pages.ProtocolListPage
+import com.example.kivopandriod.pages.AttendancesCoordinationPage
+import com.example.kivopandriod.pages.MeetingsListPage
 import com.example.kivopandriod.ui.theme.KIVoPAndriodTheme
 import com.example.kivopandriod.ui.theme.Primary_dark_20
 import com.example.kivopandriod.ui.theme.Text_light
@@ -106,17 +106,17 @@ fun navigation(navController: NavHostController){
         // StartScreen
 
         composable(Screen.Home.rout){
-            HomeScreen(navController = navController)
+            HomePage(navController = navController)
         }
         // Sitzungen
         composable(Screen.Sitzungen.rout){
-            SitzungenScreen(navController = navController)
+            MeetingsListPage(navController = navController)
         }
-        // Anwesenheit
+        // Anwesenheit liste
         composable(route = Screen.Anwesenheit.rout){
             AnwesenheitScreen(navController = navController)
         }
-        // Anwesenheit Response
+        // Anwesenheit
         composable(
             route = Screen.Anwesenheit.rout +"/{meetingID}",
             arguments = listOf(
@@ -124,11 +124,11 @@ fun navigation(navController: NavHostController){
             ))
             { backStackEntry ->
             val meetingID = backStackEntry.arguments?.getString("meetingID") ?: ""
-            ResponseScreen(navController = navController, meetingId = meetingID)
+            AttendancesCoordinationPage(navController = navController, meetingId = meetingID)
         }
         // Protokolle
         composable(route = Screen.Protokolle.rout){
-            ProtokolleScreen(navController = navController)
+            ProtocolListPage(navController = navController)
         }
     }
 }

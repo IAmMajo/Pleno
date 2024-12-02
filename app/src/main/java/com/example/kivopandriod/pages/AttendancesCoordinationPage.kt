@@ -25,7 +25,7 @@ import java.time.LocalDate
 
 
 @Composable
-fun ResponseScreen(
+fun AttendancesCoordinationPage(
     navController: NavController? = null,
     meetingId: String
 
