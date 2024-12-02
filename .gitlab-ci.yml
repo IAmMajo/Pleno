@@ -10,7 +10,7 @@ variables:
 debug-pull:
   stage: pull
   script:
-    - echo '$CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"''
+    - echo '$CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"'
     - echo "$CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == \"push\""
 
 dto-swiftkotlin:
