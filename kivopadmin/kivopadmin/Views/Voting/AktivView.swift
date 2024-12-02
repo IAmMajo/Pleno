@@ -33,35 +33,28 @@ struct AktivView: View {
                     .font(.title2)
                     .padding()
 
-                // Ergebnisse und Auswahlmöglichkeiten anzeigen
-                if let results = votingResults {
-                    if results.results.isEmpty {
-                        Text("Keine Abstimmungsergebnisse verfügbar.")
-                            .foregroundColor(.gray)
-                            .padding()
-                    } else {
-                        // PieChart für Ergebnisse
-                        PieChartView(optionTextMap: optionTextMap, votingResults: results)
-                            .frame(height: 200)
-                            .padding()
+                // Ergebnisse oder Optionen anzeigen
+                if let results = votingResults, !results.results.isEmpty {
+                    // PieChart und detaillierte Ergebnisse anzeigen
+                    PieChartView(optionTextMap: optionTextMap, votingResults: results)
+                        .frame(height: 200)
+                        .padding()
 
-                        // Detaillierte Ergebnisse anzeigen
-                        VStack(alignment: .leading, spacing: 8) {
-                            ForEach(results.results, id: \.index) { result in
-                                HStack {
-                                    Text(optionTextMap[result.index] ?? "Unbekannt")
-                                        .font(.headline)
-                                    Spacer()
-                                    Text("\(result.total) Stimmen (\(percentage(for: result))%)")
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
-                                }
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(results.results, id: \.index) { result in
+                            HStack {
+                                Text(optionTextMap[result.index] ?? "Unbekannt")
+                                    .font(.headline)
+                                Spacer()
+                                Text("\(result.total) Stimmen (\(percentage(for: result))%)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
                             }
                         }
-                        .padding()
                     }
+                    .padding()
                 } else {
-                    // Wenn keine Ergebnisse vorhanden sind
+                    // Optionen anzeigen, wenn keine Stimmen vorhanden sind
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(voting.options, id: \.index) { option in
                             Text("• \(option.text)")
