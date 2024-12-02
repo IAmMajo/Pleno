@@ -119,6 +119,9 @@ struct VotingController: RouteCollection {
         let totalVotesCount = totalVoteAmounts.reduce(0) { partialResult, votes in
             partialResult + votes
         }
+        guard totalVotesCount > 0 else {
+            return getVotingResultsDTO
+        }
         var percentageCutoffs: [percentageCutoff] = totalVoteAmounts.enumerated().map { index, votes in
             let percentage = (Double(votes) / Double(totalVotesCount))
             let roundedDownPercentage = (percentage * 10000.0).rounded(.down) / 100.0
@@ -128,11 +131,11 @@ struct VotingController: RouteCollection {
         percentageCutoffs.sort { percentageCutoff1, percentageCutoff2 in
             percentageCutoff1.cutoff > percentageCutoff2.cutoff
         }
-        let totalPercentage = percentageCutoffs.reduce(0) { partialResult, percentageCutoff in
+        let totalPercentage = percentageCutoffs.reduce(0.0) { partialResult, percentageCutoff in
             partialResult + percentageCutoff.percentage
         }
         
-        for i in 0..<(Int(100.0 - totalPercentage)*100) {
+        for i in 0..<(Int((100.0 - totalPercentage)*100.0)) {
             percentageCutoffs[i].percentage += 0.01
         }
         percentageCutoffs.sort { percentageCutoff1, percentageCutoff2 in
