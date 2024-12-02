@@ -35,10 +35,7 @@ fun AttendanceCard(
     textColor: Color = profileTextColor
 ) {
     var currentAttendance by remember {
-        mutableStateOf(initialAttendance.coerceAtMost(maxAttendance))
-    }
-    var isButtonEnabled by remember {
-        mutableStateOf(currentAttendance < maxAttendance)
+        mutableStateOf(initialAttendance)
     }
 
     Card(
@@ -55,16 +52,11 @@ fun AttendanceCard(
         ) {
             Button(
                 onClick = {
-                    if (currentAttendance < maxAttendance) {
-                        currentAttendance++
-                        onAttendanceUpdate(currentAttendance)
-                        isButtonEnabled = currentAttendance < maxAttendance
-                    }
+                    currentAttendance++
+                    onAttendanceUpdate(currentAttendance)
                 },
-                enabled = isButtonEnabled,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = buttonEnabledColor,
-                    disabledContainerColor = buttonDisabledColor
+                    containerColor = buttonEnabledColor
                 ),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
