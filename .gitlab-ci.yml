@@ -5,13 +5,9 @@ stages:
   - deploy
 
 variables:
-  SERVER_BRANCH: staging-backend# $BACKEND_STAGING_BRANCH s. https://gitlab.com/gitlab-org/gitlab/-/issues/327780
+  SERVER_BRANCH: staging-backend
+# SERVER_BRANCH: $BACKEND_STAGING_BRANCH s. https://gitlab.com/gitlab-org/gitlab/-/issues/327780
 
-debug-pull:
-  stage: pull
-  script:
-    - echo '$CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"'
-    - echo "$CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == \"push\""
 
 dto-swiftkotlin:
   stage: build
