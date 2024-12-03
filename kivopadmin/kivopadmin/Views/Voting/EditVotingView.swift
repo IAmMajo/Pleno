@@ -7,7 +7,6 @@ struct EditVotingView: View {
     let onReload: () -> Void
     let onSave: (GetVotingDTO) -> Void
 
-
     @State private var question = ""
     @State private var description = ""
     @State private var options: [String] = []
@@ -19,15 +18,30 @@ struct EditVotingView: View {
             Form {
                 Section(header: Text("Frage")) {
                     TextField("Frage eingeben", text: $question)
+                        .textFieldStyle(DefaultTextFieldStyle())
                 }
 
                 Section(header: Text("Beschreibung")) {
                     TextField("Beschreibung eingeben", text: $description)
+                        .textFieldStyle(DefaultTextFieldStyle())
                 }
 
                 Section(header: Text("Optionen")) {
                     ForEach($options.indices, id: \.self) { index in
-                        TextField("Option \(index + 1)", text: $options[index])
+                        HStack {
+                            TextField("Option \(index + 1)", text: $options[index])
+                                .textFieldStyle(DefaultTextFieldStyle())
+
+                            // Löschen-Button nur für leere Felder
+                            if options[index].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                Button(action: {
+                                    options.remove(at: index)
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
+                                }
+                            }
+                        }
                     }
                     .onDelete { indexSet in
                         options.remove(atOffsets: indexSet)
@@ -74,12 +88,15 @@ struct EditVotingView: View {
         isSaving = true
         errorMessage = nil
 
+        // Leere Optionen entfernen
+        let filteredOptions = options.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+
         // Daten vorbereiten
         let patchVoting = PatchVotingDTO(
             question: question,
             description: description.isEmpty ? nil : description,
             anonymous: voting.anonymous,
-            options: options.enumerated().map { index, text in
+            options: filteredOptions.enumerated().map { index, text in
                 GetVotingOptionDTO(index: UInt8(index + 1), text: text)
             }
         )
@@ -91,8 +108,21 @@ struct EditVotingView: View {
                 switch result {
                 case .success:
                     print("Umfrage erfolgreich bearbeitet.")
-                    dismiss() // Schließt die `EditVotingView`
-                    onReload() // Signalisiert der `InPlanungView`, die Ansicht neu zu laden
+                    let updatedVoting = GetVotingDTO(
+                        id: voting.id,
+                        meetingId: voting.meetingId,
+                        question: question,
+                        description: description,
+                        isOpen: voting.isOpen,
+                        startedAt: voting.startedAt,
+                        closedAt: voting.closedAt,
+                        anonymous: voting.anonymous,
+                        options: filteredOptions.enumerated().map { index, text in
+                            GetVotingOptionDTO(index: UInt8(index + 1), text: text)
+                        }
+                    )
+                    onSave(updatedVoting) // Änderungen weitergeben
+                    dismiss() // View schließen
                 case .failure(let error):
                     errorMessage = "Fehler beim Speichern der Umfrage: \(error.localizedDescription)"
                 }
@@ -101,6 +131,6 @@ struct EditVotingView: View {
     }
 
     private func isFormValid() -> Bool {
-        !question.isEmpty && !options.contains { $0.isEmpty }
+        !question.isEmpty && options.contains { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     }
 }

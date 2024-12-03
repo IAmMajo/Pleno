@@ -58,6 +58,7 @@ struct InPlanungView: View {
                     showEditPopup = false
                     onEdit(updatedVoting) // Update-Funktion aufrufen
                     onReload() // Daten nach Bearbeitung neu laden
+                    onDelete()
                 }
             )
         }
