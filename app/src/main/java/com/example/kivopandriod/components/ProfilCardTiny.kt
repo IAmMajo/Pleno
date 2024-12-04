@@ -1,4 +1,4 @@
-package com.example.ui.components
+package com.example.kivopandriod.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,42 +14,45 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.kivopandriod.ui.theme.Tertiary_light
+import com.example.kivopandriod.ui.theme.Text_light
 
-// Farben anpassen (Beispiele)
-private val profileCardBackgroundColor = Color(0xFFBFEFB1)
-private val profilePlaceholderBackgroundColor = Color(0xFFCCCCCC)
-private val profileTextColor = Color(0xFF000000)
 
 @Composable
-fun ProfileCard(name: String, role: String?, profileImageUrl: String? = null) {
+fun ProfileCardSmall(
+    name: String,
+    role: String?,
+    profileImageUrl: String? = null,
+    backgroundColor: Color,
+    backgroundColorProfile: Color
+    ) {
     val initial = remember(name) { name.split(" ").lastOrNull()?.firstOrNull()?.toString().orEmpty() }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            // .padding(8.dp)
             .clip(RoundedCornerShape(8.dp)),
-        colors = CardDefaults.cardColors(containerColor = profileCardBackgroundColor)
+        colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(vertical = 4.dp)
         ) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(if (profileImageUrl == null) profilePlaceholderBackgroundColor else Color.Transparent)
+                    .background(if (profileImageUrl == null) backgroundColorProfile else Color.Transparent)
             ) {
                 if (profileImageUrl == null) {
                     androidx.compose.material3.Text(
                         text = initial,
-                        color = profileTextColor,
-                        fontSize = 20.sp,
+                        color = Text_light,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
                 } else {
@@ -60,19 +63,15 @@ fun ProfileCard(name: String, role: String?, profileImageUrl: String? = null) {
             Column {
                 androidx.compose.material3.Text(
                     text = name,
-                    color = profileTextColor,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    color = Text_light,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
                 )
                 role?.let {
                     androidx.compose.material3.Text(
                         text = it,
-                        color = profileTextColor.copy(alpha = 0.65f),
-                        fontSize = 12.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        color = Text_light.copy(alpha = 0.65f),
+                        fontSize = 12.sp
                     )
                 }
             }
@@ -83,9 +82,14 @@ fun ProfileCard(name: String, role: String?, profileImageUrl: String? = null) {
 @Preview
 @Composable
 fun PreviewProfileCard() {
-    ProfileCard(
+    Box(modifier = Modifier.width(300.dp)) {
+    ProfileCardSmall(
         name = "Thorsten Trauer",
-        role = "Protokollant",
-        profileImageUrl = null // Beispiel ohne Bild
+        role = null,
+        profileImageUrl = null, // Beispiel ohne Bild
+        backgroundColor = Tertiary_light,
+        backgroundColorProfile = Color.Cyan
+
     )
+    }
 }
