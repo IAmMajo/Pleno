@@ -1,5 +1,5 @@
 //
-//  AnwesenheitAktuellView.swift
+//  AttendanceCurrentView.swift
 //  KIVoP-ios
 //
 //  Created by Henrik Peltzer on 02.11.24.
@@ -9,6 +9,7 @@ import SwiftUI
 import MeetingServiceDTOs
 
 struct AttendanceCurrentView: View {
+    @State private var isShowingScanner = false
     @Environment(\.dismiss) var dismiss
     @StateObject var viewModel: AttendanceCurrentViewModel
     
@@ -60,10 +61,17 @@ struct AttendanceCurrentView: View {
                         Text("Teilnahme bestätigen")
                             .padding(.top)
                             .padding(.horizontal)
-
+                    
+                        // Status Message
+                        if let message = viewModel.statusMessage {
+                            Text(message)
+                                .foregroundColor(.green)
+                                .padding()
+                        }
+                        
                         // QR Code Button
                         Button(action: {
-                            // Funktion für QR Code scannen wird später implementiert
+                            isShowingScanner = true
                         }) {
                             HStack {
                                 Image(systemName: "qrcode")
@@ -75,7 +83,15 @@ struct AttendanceCurrentView: View {
                             .foregroundColor(.white)
                             .cornerRadius(10)
                         }
+                        .sheet(isPresented: $isShowingScanner) {
+                            QRCodeScannerView { code in
+                                self.viewModel.participationCode = code
+                                self.viewModel.joinMeeting() // Meeting beitreten
+                                self.isShowingScanner = false
+                            }
+                        }
                         .padding(.horizontal)
+
 
                         // "oder" Schriftzug
                         Text("oder")
@@ -91,7 +107,17 @@ struct AttendanceCurrentView: View {
                             .background(RoundedRectangle(cornerRadius: 0).fill(Color.white))
                             .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.black, lineWidth: 2))
                             .frame(width: 200)
-                        
+                            .onSubmit {
+                                viewModel.joinMeeting() // Meeting beitreten
+                            }
+
+                        // Antwort ob Beitritt zum Meeting erfolgreich ist.
+                        if let message = viewModel.statusMessage {
+                            Text(message)
+                                .foregroundColor(.green)
+                                .padding()
+                        }
+
                         // Teilnahme Status Icons
                         HStack {
                             Spacer()
