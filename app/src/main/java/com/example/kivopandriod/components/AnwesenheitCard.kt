@@ -11,7 +11,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.R
+import com.example.ui.components.R
 
 // Standardfarben
 private val attendanceCardBackgroundColor = Color(0xFFF8F8F8)
@@ -27,7 +27,7 @@ fun AttendanceCard(
     onAttendanceUpdate: (currentAttendance: Int) -> Unit = {},
     buttonText: String = "Anwesenheit bestätigen",
     participantsLabel: String = "Teilnehmer",
-    iconResource: Int = R.drawable.baseline_groups_24,
+    iconResource: Int = R.drawable.ic_groups,
     iconDescription: String = "Icon of people",
     cardBackgroundColor: Color = attendanceCardBackgroundColor,
     buttonEnabledColor: Color = buttonEnabledColor,
