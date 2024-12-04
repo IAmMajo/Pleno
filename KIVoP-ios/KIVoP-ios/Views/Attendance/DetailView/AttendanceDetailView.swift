@@ -127,9 +127,6 @@ struct AttendanceDetailView: View {
             }
         }
         .navigationBarHidden(true)
-        .onAppear {
-            viewModel.fetchAttendances()
-        }
     }
 }
 

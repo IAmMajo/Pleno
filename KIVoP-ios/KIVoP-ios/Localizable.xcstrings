@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     " deines Vereins dich aufnehmen." : {
       "localizations" : {
         "de" : {
@@ -51,28 +54,16 @@
     "(ca. %u min.)" : {
 
     },
+    "(ca. 160 min.)" : {
+
+    },
     "%.2f%%" : {
 
     },
     "%lld" : {
 
     },
-    "%lld%%" : {
-
-    },
-    "•" : {
-
-    },
-    "01.11.23" : {
-
-    },
-    "01.12.23" : {
-
-    },
     "03.12.2023" : {
-
-    },
-    "04.11.23" : {
 
     },
     "07.01.2024" : {
@@ -82,7 +73,6 @@
 
     },
     "10" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -111,7 +101,6 @@
 
     },
     "18:06" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -310,7 +299,6 @@
       }
     },
     "Aktuelle Sitzung" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -546,14 +534,10 @@
         }
       }
     },
-<<<<<<< KIVoP-ios/KIVoP-ios/Localizable.xcstrings
     "Dezember - 2023" : {
 
     },
-    "Dezember 2023" : {
-=======
     "Die Abstimmung läuft noch" : {
->>>>>>> KIVoP-ios/KIVoP-ios/Localizable.xcstrings
 
     },
     "Dies ist nur eine vorläufige Umfrage, um festzustellen, wie viele Mitglieder kommen." : {
@@ -596,52 +580,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seçimini daha sonra değiştiremezsin!"
-          }
-        }
-      }
-    },
-    "E-Mail" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "E-Mail"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "E-Mail"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "E-Mail"
-          }
-        }
-      }
-    },
-    "E-MAIL" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "E-MAIL"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "E-MAIL"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "E-MAIL"
           }
         }
       }
@@ -725,6 +663,9 @@
     "Fast Fertig" : {
 
     },
+    "Franz" : {
+
+    },
     "Galerie" : {
       "localizations" : {
         "de" : {
@@ -799,9 +740,6 @@
 
     },
     "In der alten Turnhalle hinter dem Friedhof\nAltes Grab 5 b, 42069 Hölle" : {
-
-    },
-    "In der alten Turnhalle hinter dem Friedhof, Altes Grab 5 b, 42069 Hölle" : {
 
     },
     "Ja" : {
@@ -886,6 +824,9 @@
           }
         }
       }
+    },
+    "Keine aktuelle Sitzung verfügbar" : {
+
     },
     "Keine anstehenden Sitzungen." : {
 
@@ -1034,29 +975,6 @@
         }
       }
     },
-    "Mitteilung." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : " Mitteilung."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "notification."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mesaj"
-          }
-        }
-      }
-    },
     "MM" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1127,29 +1045,6 @@
         }
       }
     },
-    "NAME" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "NAME"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "NAME"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "İSIM"
-          }
-        }
-      }
-    },
     "Name eingeben" : {
 
     },
@@ -1168,6 +1063,9 @@
           }
         }
       }
+    },
+    "Neu laden" : {
+
     },
     "Neues Passwort" : {
       "localizations" : {

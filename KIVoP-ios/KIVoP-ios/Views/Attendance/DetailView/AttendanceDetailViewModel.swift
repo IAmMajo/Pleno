@@ -8,10 +8,9 @@
 import Foundation
 import MeetingServiceDTOs
 
+@MainActor
 class AttendanceDetailViewModel: ObservableObject {
     @Published var searchText: String = ""
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String? = nil
     @Published var attendances: [GetAttendanceDTO] = []
     
     private let baseURL = "https://kivop.ipv64.net"
@@ -19,6 +18,7 @@ class AttendanceDetailViewModel: ObservableObject {
     
     init(meeting: GetMeetingDTO) {
         self.meeting = meeting
+        fetchAttendances()
     }
     
     public func fetchAttendances() {
