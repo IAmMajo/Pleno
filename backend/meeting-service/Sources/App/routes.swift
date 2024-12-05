@@ -1,6 +1,7 @@
 import Fluent
 import JWTKit
 import Vapor
+import VaporToOpenAPI
 
 func routes(_ app: Application) throws {
     app.get { req async in

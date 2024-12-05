@@ -1,5 +1,6 @@
 import Fluent
 import Vapor
+import VaporToOpenAPI
 
 func routes(_ app: Application) throws {
     app.get { req async in
