@@ -4,7 +4,8 @@ import Foundation
 import Models
 @preconcurrency import JWTKit
 
-// Fehlerdefinitionen für Poster-Erstellung und -Verwaltung
+// MARK: - Fehlerdefinitionen für Poster-Erstellung und -Verwaltung
+
 enum PosterCreationError: AbortError {
     case invalidContentType
     case invalidFormData(reason: String)
@@ -19,13 +20,10 @@ enum PosterCreationError: AbortError {
             return .unsupportedMediaType
         case .invalidFormData:
             return .badRequest
-        case .imageSaveFailed:
-            return .internalServerError
-        case .databaseSaveFailed:
-            return .internalServerError
-        case .settingFetchFailed:
-            return .internalServerError
-        case .unknownError:
+        case .imageSaveFailed,
+             .databaseSaveFailed,
+             .settingFetchFailed,
+             .unknownError:
             return .internalServerError
         }
     }
@@ -41,51 +39,69 @@ enum PosterCreationError: AbortError {
         case .databaseSaveFailed:
             return "Fehler beim Speichern des Posters in der Datenbank"
         case .settingFetchFailed(let reason):
-            return "Fehler beim Abrufen der poster_deletion_interval Einstellung: \(reason)"
+            return "Fehler beim Abrufen der 'poster_deletion_interval' Einstellung: \(reason)"
         case .unknownError:
             return "Unbekannter Fehler"
         }
     }
 }
 
+// MARK: - PosterController
 
-// Controller für Poster und PosterPositionen
+/// Controller für Poster und PosterPositionen.
+/// Dieser Controller enthält Routen zum Erstellen, Aktualisieren, Löschen und Abrufen von Postern und deren Positionen.
 struct PosterController: RouteCollection, Sendable {
-    // JWT Signer und Auth Middleware
     let jwtSigner: JWTSigner
     let authMiddleware: Middleware
+    let adminMiddleware: Middleware
 
+    /// Initialisiert den `PosterController` mit JWT-basiertem Auth und Admin-Middleware.
+    /// Der JWT-Secret-Key wird aus einer Umgebungsvariablen gelesen, um Hardcoding zu vermeiden.
     init() throws {
-        // Verwenden Sie einen sicheren Schlüssel in der Produktion
+        //guard let jwtSecret = Environment.get("JWT_SECRET"),
+        //      let keyData = jwtSecret.data(using: .utf8) else {
+        //    throw Abort(.internalServerError, reason: "JWT_SECRET Umgebungsvariable nicht gesetzt oder ungültig.")
         guard let keyData = "Ganzgeheimespasswort".data(using: .utf8) else {
-            throw Abort(.internalServerError, reason: "Fehler beim Erstellen des JWT-Signers")
+                throw Abort(.internalServerError, reason: "Fehler beim Erstellen des JWT-Signers")
         }
         self.jwtSigner = JWTSigner.hs256(key: keyData)
         self.authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
+        self.adminMiddleware = AdminMiddleware()
     }
 
+    /// Registriert alle Routen des Controllers.
     func boot(routes: RoutesBuilder) throws {
-        // Alle Routen mit Authentifizierung
+        // Authentifizierte Routen
         let authProtected = routes.grouped(authMiddleware)
         
-        // Gruppierung für Poster-Routen
+        // Poster-Routen
         let posters = authProtected.grouped("posters")
+        posters.get(use: getPosters)
         posters.post(use: createPoster)
-        posters.get("displayed", use: getDisplayedPosters)
-        posters.get("to-be-taken-down", use: getPostersToBeTakenDown)
         posters.patch(":posterId", use: updatePoster)
+
+        let adminRoutesPoster = posters.grouped(adminMiddleware)
+        adminRoutesPoster.delete(":id", use: deletePoster)
+        adminRoutesPoster.delete("batch", use: deletePosters)
         
-        // Gruppierung für PosterPosition-Routen
+        // PosterPosition-Routen
         let posterPositions = authProtected.grouped("poster-positions")
+        posterPositions.get(use: getDisplayedPosters)
+        posterPositions.get("to-be-taken-down", use: getPostersToBeTakenDown)
         posterPositions.post(use: createPosterPosition)
         posterPositions.patch(":positionId", use: updatePosterPosition)
+
+        let adminRoutesPosterPositions = posterPositions.grouped(adminMiddleware)
+        adminRoutesPosterPositions.delete(":id", use: deletePosterPosition)
+        adminRoutesPosterPositions.delete("batch", use: deletePosterPositions)
         
         // Bild-Routen
         authProtected.get("images", ":imageURL", use: getImageFile)
-        
     }
 
-    // Hilfsfunktion zum Erstellen einer Response
+    // MARK: - Hilfsfunktionen
+
+    /// Erstellt eine HTTP-Response mit JSON-Inhalt aus einem codierbaren DTO.
     @Sendable
     private func createResponse<T: Codable>(with dto: T, on req: Request) async throws -> Response {
         let responseData = try JSONEncoder().encode(dto)
@@ -94,13 +110,13 @@ struct PosterController: RouteCollection, Sendable {
         return Response(status: .ok, headers: headers, body: .init(data: responseData))
     }
     
-    // Struktur zur Entgegennahme von Poster-Daten
-    
+    // MARK: - Poster-Routen
 
-    // 1. Neues Poster erstellen
+    /// Erstellt ein neues Poster aus multipart/form-data.
+    /// Erwartet mindestens `name`, `description` und `image` im Request Body.
     @Sendable
     func createPoster(req: Request) async throws -> Response {
-        // Überprüfen, ob die Anfrage multipart/form-data ist
+        // Überprüfen des Content-Types
         guard let contentType = req.headers.contentType,
               contentType.type == "multipart",
               contentType.subType == "form-data" else {
@@ -109,24 +125,21 @@ struct PosterController: RouteCollection, Sendable {
 
         let posterData: CreatePosterDTO
         do {
-            // Dekodieren der Formulardaten
             posterData = try req.content.decode(CreatePosterDTO.self)
         } catch {
             throw PosterCreationError.invalidFormData(reason: "Fehler beim Dekodieren der Formulardaten.")
         }
 
-        // Zusätzliche Validierung der Formulardaten
         guard !posterData.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw PosterCreationError.invalidFormData(reason: "Name darf nicht leer sein.")
         }
 
-        // Validierung des Bildtyps und der Größe
         let allowedMimeTypes = ["image/jpeg", "image/png", "image/gif"]
         guard allowedMimeTypes.contains(posterData.image.contentType?.description ?? "") else {
             throw PosterCreationError.invalidFormData(reason: "Ungültiger Bildtyp. Erlaubt sind JPEG, PNG und GIF.")
         }
 
-        // Bild speichern außerhalb des Public-Ordners
+        // Bild speichern
         let imageUrl: String
         do {
             imageUrl = try await saveImage(posterData.image, in: "Storage/Images/Posters", on: req)
@@ -135,7 +148,7 @@ struct PosterController: RouteCollection, Sendable {
             throw PosterCreationError.imageSaveFailed
         }
 
-        // Poster erstellen
+        // Poster in DB speichern
         let poster = Poster(
             name: posterData.name,
             description: posterData.description,
@@ -149,7 +162,6 @@ struct PosterController: RouteCollection, Sendable {
             throw PosterCreationError.databaseSaveFailed
         }
 
-        // Erstelle das Response DTO
         let responseDTO = PosterResponseDTO(
             id: poster.id!,
             name: poster.name,
@@ -157,11 +169,10 @@ struct PosterController: RouteCollection, Sendable {
             imageUrl: poster.image_url
         )
 
-        // Erstelle und gebe die Antwort zurück
         return try await createResponse(with: responseDTO, on: req)
     }
     
-    // 2. Alle Poster abrufen
+    /// Gibt alle verfügbaren Poster zurück.
     @Sendable
     func getPosters(req: Request) async throws -> Response {
         let posters = try await Poster.query(on: req.db).all()
@@ -176,85 +187,24 @@ struct PosterController: RouteCollection, Sendable {
         return try await createResponse(with: responseDTOs, on: req)
     }
     
-    
-    // 3. Alle aufgehängten Poster zurückgeben
-    @Sendable
-    func getDisplayedPosters(req: Request) async throws -> Response {
-        let positions = try await PosterPosition.query(on: req.db)
-            .filter(\.$is_Displayed == true)
-            .with(\.$poster)
-            .all()
-        
-        let responseDTOs = positions.map { position in
-            PosterResponseDTO(
-                id: position.poster.id!,
-                name: position.poster.name,
-                description: position.poster.description,
-                imageUrl: position.poster.image_url
-            )
-        }
-        
-        return try await createResponse(with: responseDTOs, on: req)
-    }
-    
-    // 4. Alle Poster, die abgehangen werden müssen
-    @Sendable
-    func getPostersToBeTakenDown(req: Request) async throws -> Response {
-        // Asynchron das posterDeletionInterval abrufen
-        async let posterDeletionInterval: Int? = SettingsManager.shared.getSetting(forKey: "poster_deletion_interval")
-
-        // Warten auf das Ergebnis des Einstellungsabrufs
-        guard let deletionInterval = await posterDeletionInterval else {
-            req.logger.error("Einstellung 'poster_deletion_interval' nicht gefunden oder ungültig.")
-            throw PosterCreationError.settingFetchFailed(reason: "Einstellung 'poster_deletion_interval' nicht gefunden oder ungültig.")
-        }
-
-        // Berechne das Schwellen-Datum
-        let now = Date()
-        let thresholdDate = now.addingTimeInterval(TimeInterval(deletionInterval))
-
-        // Führe die Datenbankabfrage durch
-        let positions = try await PosterPosition.query(on: req.db)
-            .filter(\.$is_Displayed == true)
-            .filter(\.$expires_at <= thresholdDate)
-            .with(\.$poster)
-            .all()
-
-        // Transformiere die PosterPositionen in DTOs
-        let responseDTOs: [PosterToBeTakenDownDTO] = positions.map { position in
-            let poster = position.poster
-            return PosterToBeTakenDownDTO(
-                id: poster.id!,
-                name: poster.name,
-                description: poster.description,
-                imageUrl: poster.image_url
-            )
-        }
-
-        // Erstelle und gebe die Antwort zurück
-        return try await createResponse(with: responseDTOs, on: req)
-    }
-    
-    // 5. Poster updaten
+    /// Aktualisiert ein bestehendes Poster (Name, Beschreibung und/oder Bild).
     @Sendable
     func updatePoster(req: Request) async throws -> Response {
         guard let posterId = req.parameters.get("posterId", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Ungültige Poster-ID.")
         }
-        
-        // Überprüfen, ob die Anfrage multipart/form-data ist
+
         guard let contentType = req.headers.contentType,
-                 contentType.type == "multipart",
-                 contentType.subType == "form-data" else {
-               throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
-           }
-        
-        
+              contentType.type == "multipart",
+              contentType.subType == "form-data" else {
+            throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
+        }
+
         let dto = try req.content.decode(UpdatePosterDTO.self)
         guard let poster = try await Poster.find(posterId, on: req.db) else {
             throw Abort(.notFound, reason: "Poster nicht gefunden.")
         }
-        
+
         if let name = dto.name {
             poster.name = name
         }
@@ -265,33 +215,169 @@ struct PosterController: RouteCollection, Sendable {
             let imageUrl = try await saveImage(image, in: "Storage/Images/Posters", on: req)
             poster.image_url = imageUrl
         }
-        
+
         try await poster.update(on: req.db)
-        
+
         let responseDTO = PosterResponseDTO(
             id: poster.id!,
             name: poster.name,
             description: poster.description,
             imageUrl: poster.image_url
         )
-        
+
         return try await createResponse(with: responseDTO, on: req)
     }
     
-    // 6. Neue PosterPosition erstellen
+    /// Löscht ein einzelnes Poster und dessen zugehörige Bilddatei.
+    @Sendable
+    func deletePoster(req: Request) async throws -> HTTPStatus {
+        guard let posterID = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Ungültige Poster-ID.")
+        }
+
+        guard let poster = try await Poster.find(posterID, on: req.db) else {
+            throw Abort(.notFound, reason: "Poster mit der ID \(posterID) wurde nicht gefunden.")
+        }
+
+        let imageUrl = poster.image_url
+        let filePath = req.application.directory.workingDirectory + imageUrl
+
+        let fileManager = FileManager.default
+        do {
+            try fileManager.removeItem(atPath: filePath)
+        } catch {
+            req.logger.error("Fehler beim Löschen der Bilddatei: \(error.localizedDescription)")
+            // Hier wird das Poster dennoch gelöscht, um Datenkonsistenz zu gewährleisten.
+        }
+
+        try await poster.delete(on: req.db)
+
+        return .noContent
+    }
+
+    /// Löscht mehrere Poster und deren zugehörige Bilddateien in einem Batch.
+    @Sendable
+    func deletePosters(req: Request) async throws -> HTTPStatus {
+        let deleteDTO = try req.content.decode(DeleteDTO.self)
+        let posterIDs = deleteDTO.ids
+
+        guard !posterIDs.isEmpty else {
+            throw Abort(.badRequest, reason: "Es müssen mindestens eine Poster-ID übergeben werden.")
+        }
+
+        let postersToDelete = try await Poster.query(on: req.db)
+            .filter(\.$id ~~ posterIDs)
+            .all()
+
+        if postersToDelete.count != posterIDs.count {
+            let foundIDs = Set(postersToDelete.compactMap { $0.id })
+            let notFoundIDs = posterIDs.filter { !foundIDs.contains($0) }
+            throw Abort(.notFound, reason: "Poster mit den folgenden IDs wurden nicht gefunden: \(notFoundIDs.map { $0.uuidString }.joined(separator: ", "))")
+        }
+
+        try await req.db.transaction { database in
+            for poster in postersToDelete {
+                let imageUrl = poster.image_url
+                let filePath = req.application.directory.workingDirectory + imageUrl
+                let fileManager = FileManager.default
+
+                do {
+                    try fileManager.removeItem(atPath: filePath)
+                } catch {
+                    req.logger.error("Fehler beim Löschen der Bilddatei für Poster ID \(poster.id?.uuidString ?? "Unbekannt"): \(error.localizedDescription)")
+                    throw Abort(.internalServerError, reason: "Fehler beim Löschen der Bilddatei für Poster ID \(poster.id?.uuidString ?? "Unbekannt")")
+                }
+
+                try await poster.delete(on: database)
+            }
+        }
+
+        return .noContent
+    }
+    
+    // MARK: - PosterPosition-Routen
+
+    /// Gibt alle angezeigten oder nicht angezeigten PosterPositionen zurück.
+    /// Parameter `displayed` in der Query bestimmt, ob nur angezeigte oder nicht angezeigte zurückgegeben werden.
+    @Sendable
+    func getDisplayedPosters(req: Request) async throws -> Response {
+        let isDisplayed = (try? req.query.get(Bool.self, at: "displayed")) ?? true
+        let positions: [PosterPosition]
+
+        if isDisplayed {
+            positions = try await PosterPosition.query(on: req.db)
+                .filter(\.$is_Displayed == true)
+                .all()
+        } else {
+            let currentDate = Date()
+            positions = try await PosterPosition.query(on: req.db)
+                .filter(\.$is_Displayed == false)
+                .filter(\.$expires_at > currentDate)
+                .all()
+        }
+
+        let responseDTOs = positions.map { position in
+            PosterToBeTakenDownDTO(
+                posterId: position.id!,
+                responsibleUserId: position.responsibleUser.id!,
+                latitude: position.latitude,
+                longitude: position.longitude,
+                isDisplayed: position.is_Displayed,
+                imageURL: position.image_url,
+                expiresAt: position.expires_at!
+            )
+        }
+
+        return try await createResponse(with: responseDTOs, on: req)
+    }
+
+    /// Gibt alle PosterPositionen zurück, die demnächst abgehangen werden müssen.
+    /// Die Zeitspanne wird über die Einstellung `poster_deletion_interval` bestimmt.
+    @Sendable
+    func getPostersToBeTakenDown(req: Request) async throws -> Response {
+        async let posterDeletionInterval: Int? = SettingsManager.shared.getSetting(forKey: "poster_deletion_interval")
+        guard let deletionInterval = await posterDeletionInterval else {
+            req.logger.error("Einstellung 'poster_deletion_interval' nicht gefunden oder ungültig.")
+            throw PosterCreationError.settingFetchFailed(reason: "Einstellung 'poster_deletion_interval' nicht gefunden oder ungültig.")
+        }
+
+        let now = Date()
+        let thresholdDate = now.addingTimeInterval(TimeInterval(deletionInterval))
+
+        let positions = try await PosterPosition.query(on: req.db)
+            .filter(\.$is_Displayed == true)
+            .filter(\.$expires_at <= thresholdDate)
+            .all()
+
+        let responseDTOs = positions.map { position in
+            PosterToBeTakenDownDTO(
+                posterId: position.id!,
+                responsibleUserId: position.responsibleUser.id!,
+                latitude: position.latitude,
+                longitude: position.longitude,
+                isDisplayed: position.is_Displayed,
+                imageURL: position.image_url,
+                expiresAt: position.expires_at!
+            )
+        }
+
+        return try await createResponse(with: responseDTOs, on: req)
+    }
+
+
+
+    /// Erstellt eine neue PosterPosition mit Bild und speichert sie in der Datenbank.
     @Sendable
     func createPosterPosition(req: Request) async throws -> Response {
-        // Überprüfen, ob die Anfrage multipart/form-data ist
         guard let contentType = req.headers.contentType,
-                 contentType.type == "multipart",
-                 contentType.subType == "form-data" else {
-               throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
-           }
-        
+              contentType.type == "multipart",
+              contentType.subType == "form-data" else {
+            throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
+        }
+
         let dto = try req.content.decode(CreatePosterPositionDTO.self)
-        
         let imageUrl = try await saveImage(dto.image, in: "Storage/Images/PosterPositions", on: req)
-        
+
         let posterPosition = PosterPosition(
             posterId: dto.posterId,
             responsibleUserID: dto.responsibleUserId,
@@ -300,9 +386,9 @@ struct PosterController: RouteCollection, Sendable {
             imageUrl: imageUrl,
             expiresAt: dto.expiresAt
         )
-        
+
         try await posterPosition.create(on: req.db)
-        
+
         let responseDTO = PosterPositionResponseDTO(
             id: posterPosition.id!,
             posterId: dto.posterId,
@@ -314,30 +400,28 @@ struct PosterController: RouteCollection, Sendable {
             expiresAt: posterPosition.expires_at!,
             postedAt: posterPosition.posted_at!
         )
-        
+
         return try await createResponse(with: responseDTO, on: req)
     }
-    
-    // 7. PosterPosition updaten
+
+    /// Aktualisiert eine vorhandene PosterPosition (Location, Anzeigezustand, Ablaufdatum, Verantwortlicher, Poster-ID, Bild).
     @Sendable
     func updatePosterPosition(req: Request) async throws -> Response {
         guard let positionId = req.parameters.get("positionId", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Ungültige Position-ID.")
         }
-        
-        // Überprüfen, ob die Anfrage multipart/form-data ist
-        guard let contentType = req.headers.contentType,
-                 contentType.type == "multipart",
-                 contentType.subType == "form-data" else {
-               throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
-           }
 
-        
+        guard let contentType = req.headers.contentType,
+              contentType.type == "multipart",
+              contentType.subType == "form-data" else {
+            throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
+        }
+
         let dto = try req.content.decode(UpdatePosterPositionDTO.self)
         guard let position = try await PosterPosition.find(positionId, on: req.db) else {
             throw Abort(.notFound, reason: "PosterPosition nicht gefunden.")
         }
-        
+
         if let latitude = dto.latitude {
             position.latitude = latitude
         }
@@ -347,16 +431,22 @@ struct PosterController: RouteCollection, Sendable {
         if let isDisplayed = dto.isDisplayed {
             position.is_Displayed = isDisplayed
         }
-        if let expiresAt = dto.expiresAt{
+        if let expiresAt = dto.expiresAt {
             position.expires_at = expiresAt
+        }
+        if let responsibleUserId = dto.responsibleUserId {
+            position.$responsibleUser.id = responsibleUserId
+        }
+        if let posterId = dto.posterId {
+            position.$poster.id = posterId
         }
         if let image = dto.image {
             let imageUrl = try await saveImage(image, in: "Storage/Images/PosterPositions", on: req)
             position.image_url = imageUrl
         }
-        
+
         try await position.update(on: req.db)
-        
+
         let responseDTO = PosterPositionResponseDTO(
             id: position.id!,
             posterId: position.$poster.id,
@@ -368,58 +458,123 @@ struct PosterController: RouteCollection, Sendable {
             expiresAt: position.expires_at!,
             postedAt: position.posted_at!
         )
-        
+
         return try await createResponse(with: responseDTO, on: req)
     }
-    
-   
 
-    // 9. Route zum Abrufen der Bilddatei
+
+    /// Löscht eine einzelne PosterPosition und deren zugehörige Bilddatei.
+    @Sendable
+    func deletePosterPosition(req: Request) async throws -> HTTPStatus {
+        guard let positionID = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Ungültige PosterPosition-ID.")
+        }
+
+        guard let position = try await PosterPosition.find(positionID, on: req.db) else {
+            throw Abort(.notFound, reason: "PosterPosition mit der ID \(positionID) wurde nicht gefunden.")
+        }
+
+        let imageUrl = position.image_url
+        let filePath = req.application.directory.workingDirectory + imageUrl
+
+        let fileManager = FileManager.default
+        do {
+            try fileManager.removeItem(atPath: filePath)
+        } catch {
+            req.logger.error("Fehler beim Löschen der Bilddatei: \(error.localizedDescription)")
+            throw Abort(.internalServerError, reason: "Fehler beim Löschen der Bilddatei für PosterPosition-ID \(positionID)")
+        }
+
+        try await position.delete(on: req.db)
+        return .noContent
+    }
+
+    /// Löscht mehrere PosterPositionen und deren zugehörige Bilddateien in einem Batch.
+    @Sendable
+    func deletePosterPositions(req: Request) async throws -> HTTPStatus {
+        let deleteDTO = try req.content.decode(DeleteDTO.self)
+        let positionIDs = deleteDTO.ids
+
+        guard !positionIDs.isEmpty else {
+            throw Abort(.badRequest, reason: "Es müssen mindestens eine PosterPosition-ID übergeben werden.")
+        }
+
+        let positionsToDelete = try await PosterPosition.query(on: req.db)
+            .filter(\.$id ~~ positionIDs)
+            .all()
+
+        if positionsToDelete.count != positionIDs.count {
+            let foundIDs = Set(positionsToDelete.compactMap { $0.id })
+            let notFoundIDs = positionIDs.filter { !foundIDs.contains($0) }
+            throw Abort(.notFound, reason: "PosterPositionen mit den folgenden IDs wurden nicht gefunden: \(notFoundIDs.map { $0.uuidString }.joined(separator: ", "))")
+        }
+
+        try await req.db.transaction { database in
+            let fileManager = FileManager.default
+            for position in positionsToDelete {
+                let imageUrl = position.image_url
+                let filePath = req.application.directory.workingDirectory + imageUrl
+
+                do {
+                    try fileManager.removeItem(atPath: filePath)
+                } catch {
+                    req.logger.error("Fehler beim Löschen der Bilddatei für PosterPosition-ID \(position.id?.uuidString ?? "Unbekannt"): \(error.localizedDescription)")
+                    throw Abort(.internalServerError, reason: "Fehler beim Löschen der Bilddatei für PosterPosition-ID \(position.id?.uuidString ?? "Unbekannt")")
+                }
+
+                try await position.delete(on: database)
+            }
+        }
+
+        return .noContent
+    }
+
+    // MARK: - Bild-Handling
+
+    /// Speichert ein hochgeladenes Bild in einem angegebenen Verzeichnis außerhalb des Public-Ordners.
+    /// Wirft einen Fehler, wenn das Bild ungültige Daten enthält oder nicht gespeichert werden kann.
+    private func saveImage(_ file: File, in directory: String, on req: Request) async throws -> String {
+        let supportedExtensions = ["jpg", "jpeg", "png", "gif"]
+        let fileExtension = (file.extension ?? "jpg").lowercased()
+        let validExtension = supportedExtensions.contains(fileExtension) ? fileExtension : "jpg"
+
+        let uniqueFileName = "\(UUID().uuidString).\(validExtension)"
+        let saveDirectory = req.application.directory.workingDirectory + directory
+        let savePath = saveDirectory + "/" + uniqueFileName
+
+        let directoryURL = URL(fileURLWithPath: saveDirectory, isDirectory: true)
+        try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+
+        guard let imageData = file.data.getData(at: 0, length: file.data.readableBytes) else {
+            throw Abort(.badRequest, reason: "Ungültige Bilddaten.")
+        }
+
+        let fileURL = URL(fileURLWithPath: savePath)
+        do {
+            try imageData.write(to: fileURL)
+        } catch {
+            req.logger.error("Fehler beim Speichern der Bilddatei: \(error.localizedDescription)")
+            throw PosterCreationError.imageSaveFailed
+        }
+
+        return "\(directory)/\(uniqueFileName)"
+    }
+    
+    /// Gibt eine gespeicherte Bilddatei zurück.
+    /// Diese Route streamt die Datei direkt aus dem geschützten Verzeichnis.
     @Sendable
     func getImageFile(req: Request) async throws -> Response {
         guard let imageURL = req.parameters.get("imageURL", as: String.self) else {
             throw Abort(.badRequest, reason: "Ungültige Bild-ID")
         }
 
-        
-        // Der Pfad zu Ihrem geschützten Ordner
         let imagePath = req.application.directory.workingDirectory + imageURL
 
-        // Prüfen, ob die Datei existiert
         guard FileManager.default.fileExists(atPath: imagePath) else {
             throw Abort(.notFound, reason: "Bilddatei nicht gefunden")
         }
 
         return req.fileio.streamFile(at: imagePath)
-    }
-
-    // Hilfsfunktion zum Speichern von Bildern außerhalb des Public-Ordners
-    private func saveImage(_ file: File, in directory: String, on req: Request) async throws -> String {
-        let supportedExtensions = ["jpg", "jpeg", "png", "gif"]
-        
-        let fileExtension = (file.extension ?? "jpg").lowercased()
-        // Validierung der Dateiendung
-        let validExtension = supportedExtensions.contains(fileExtension) ? fileExtension : "jpg"
-        
-        let uniqueFileName = "\(UUID().uuidString).\(validExtension)"
-        let saveDirectory = "\(req.application.directory.workingDirectory)/\(directory)"
-        let savePath = "\(saveDirectory)/\(uniqueFileName)"
-        
-        // Stelle sicher, dass das Verzeichnis existiert
-        let directoryURL = URL(fileURLWithPath: saveDirectory, isDirectory: true)
-        try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
-        
-        // Lese die Bilddaten
-        guard let imageData = file.data.getData(at: 0, length: file.data.readableBytes) else {
-            throw Abort(.badRequest, reason: "Ungültige Bilddaten.")
-        }
-        
-        // Speichere die Bilddaten direkt ohne Skalierung
-        let fileURL = URL(fileURLWithPath: savePath)
-        try imageData.write(to: fileURL)
-        
-        // Gib den Pfad relativ zum Arbeitsverzeichnis zurück
-        return "\(directory)/\(uniqueFileName)"
     }
 
 }

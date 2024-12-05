@@ -8,7 +8,7 @@ import Fluent
 import Foundation
 
 public final class PosterPosition: Model,@unchecked Sendable {
-    public static let schema = "PosterPosition"
+    public static let schema = "poster_positions"
 
     @ID(key: .id)
     public var id: UUID?
@@ -49,9 +49,9 @@ public init(
     expiresAt: Date
 ) {
     self.id = id
-    self.latitude = latitude
-    self.longitude = longitude
-    self.$poster.id = posterId 
+    self.latitude = round(latitude * 1_000_000) / 1_000_000
+    self.longitude = round(longitude * 1_000_000) / 1_000_000
+    self.$poster.id = posterId
     self.$responsibleUser.id = responsibleUserID 
     self.posted_at = Date()
     self.is_Displayed = true
