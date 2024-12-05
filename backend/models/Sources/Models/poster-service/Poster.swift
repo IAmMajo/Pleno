@@ -12,7 +12,7 @@ import Foundation
 /// It is recommended you write your model with sendability checking on and then suppress the warning
 /// afterwards with `@unchecked Sendable`.
 public final class Poster: Model, @unchecked Sendable {
-    public static let schema = "Poster"
+    public static let schema = "posters"
     
     @ID(key: .id)
     public var id: UUID?
