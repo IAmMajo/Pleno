@@ -61,7 +61,10 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.config-service.rule: Host(`kivop.ipv64.net`) && PathPrefix(`/config`)
+      traefik.http.routers.config-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/config-service`) || PathPrefix(`/config`))
+      traefik.http.routers.config-service.middlewares: config-service-replace-path-regex
+      traefik.http.middlewares.config-service-replace-path-regex.replacepathregex.regex: ^/config-service(:/(.*))?
+      traefik.http.middlewares.config-service-replace-path-regex.replacepathregex.replacement: /$$1
       traefik.http.routers.config-service.entrypoints: https
       traefik.http.routers.config-service.tls: true
       traefik.http.routers.config-service.tls.certresolver: myresolver
@@ -91,7 +94,10 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.auth-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/auth`) || PathPrefix(`/users`))
+      traefik.http.routers.auth-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/auth-service`) || PathPrefix(`/auth`) || PathPrefix(`/users`))
+      traefik.http.routers.auth-service.middlewares: auth-service-replace-path-regex
+      traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.regex: ^/auth-service(:/(.*))?
+      traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.replacement: /$$1
       traefik.http.routers.auth-service.entrypoints: https
       traefik.http.routers.auth-service.tls: true
       traefik.http.routers.auth-service.tls.certresolver: myresolver
@@ -121,7 +127,10 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.meeting-service.rule: Host(`kivop.ipv64.net`) && PathPrefix(`/meeting`)
+      traefik.http.routers.meeting-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/meeting-service`) || PathPrefix(`/meeting`))
+      traefik.http.routers.meeting-service.middlewares: meeting-service-replace-path-regex
+      traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.regex: ^/meeting-service(:/(.*))?
+      traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.replacement: /$$1
       traefik.http.routers.meeting-service.entrypoints: https
       traefik.http.routers.meeting-service.tls: true
       traefik.http.routers.meeting-service.tls.certresolver: myresolver
@@ -151,7 +160,10 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.notifications-service.rule: Host(`kivop.ipv64.net`) && PathPrefix(`/email`)
+      traefik.http.routers.notifications-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/notifications-service`) || PathPrefix(`/email`))
+      traefik.http.routers.notifications-service.middlewares: notifications-service-replace-path-regex
+      traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.regex: ^/notifications-service(:/(.*))?
+      traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.replacement: /$$1
       traefik.http.routers.notifications-service.entrypoints: https
       traefik.http.routers.notifications-service.tls: true
       traefik.http.routers.notifications-service.tls.certresolver: myresolver

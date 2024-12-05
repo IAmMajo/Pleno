@@ -21,7 +21,8 @@ let package = Package(
         .package(path: "../models"),
         // 🎁 KIVoP DTOs
         .package(path: "../../DTOs"),
-            
+        // 📄 Generate OpenAPI documentation from Vapor routes
+        .package(url: "https://github.com/dankinsoid/VaporToOpenAPI.git", from: "4.7.1")
     ],
     targets: [
         .executableTarget(
@@ -35,6 +36,7 @@ let package = Package(
                 .product(name: "JWT", package: "jwt"),
                 .product(name: "Models", package: "models"),
                 .product(name: "PosterServiceDTOs", package: "dtos"),
+                .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
             ],
             swiftSettings: swiftSettings
         ),

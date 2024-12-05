@@ -17,12 +17,14 @@ let package = Package(
         .package(url: "https://github.com/vapor/leaf.git", from: "4.3.0"),
         // 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
-        // 📧 SMTP protocol support for the Vapor web framework
-        .package(url: "https://github.com/Mikroservices/Smtp.git", from: "3.1.2"),
         // 🧬 KIVoP Models
         .package(path: "../models"),
         // 🎁 KIVoP DTOs
-        .package(path: "../../DTOs")  
+        .package(path: "../../DTOs"),
+        // 📄 Generate OpenAPI documentation from Vapor routes
+        .package(url: "https://github.com/dankinsoid/VaporToOpenAPI.git", from: "4.7.1"),
+        // 📧 SMTP protocol support for the Vapor web framework
+        .package(url: "https://github.com/Mikroservices/Smtp.git", from: "3.1.2")
     ],
     targets: [
         .executableTarget(
@@ -34,9 +36,10 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
-                .product(name: "Smtp", package: "Smtp"),
                 .product(name: "Models", package: "models"),
-                .product(name: "NotificationsServiceDTOs", package: "dtos")
+                .product(name: "NotificationsServiceDTOs", package: "dtos"),
+                .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI"),
+                .product(name: "Smtp", package: "Smtp"),
             ],
             swiftSettings: swiftSettings
         ),

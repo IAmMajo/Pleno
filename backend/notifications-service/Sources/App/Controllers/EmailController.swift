@@ -1,10 +1,16 @@
 import Smtp
 import Vapor
+import VaporToOpenAPI
 
 struct EmailController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let email = routes.grouped("email")
-        email.post(use: send)
+        email.post(use: send).openAPI(
+            summary: "Send an email",
+            description: "Send an email to a recipient",
+            body: .type(SendEmailDTO.self),
+            contentType: .application(.json)
+        )
     }
 
     func send(req: Request) async throws -> HTTPStatus {

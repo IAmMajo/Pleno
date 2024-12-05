@@ -18,7 +18,9 @@ let package = Package(
         // 🧬 KIVoP Models
         .package(path: "../models"),
         // 🎁 KIVoP DTOs
-        .package(path: "../../DTOs")
+        .package(path: "../../DTOs"),
+        // 📄 Generate OpenAPI documentation from Vapor routes
+        .package(url: "https://github.com/dankinsoid/VaporToOpenAPI.git", from: "4.7.1")
     ],
     targets: [
         .executableTarget(
@@ -30,7 +32,8 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "Models", package: "models"),
-                .product(name: "FIRST_LETTER_CAPITAL_SRVNAME_PLACEHOLDERServiceDTOs", package: "dtos")
+                .product(name: "FIRST_LETTER_CAPITAL_SRVNAME_PLACEHOLDERServiceDTOs", package: "dtos"),
+                .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
             ],
             swiftSettings: swiftSettings
         ),
