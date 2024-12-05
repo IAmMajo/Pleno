@@ -335,14 +335,14 @@ struct PosterController: RouteCollection, Sendable {
     /// Die Zeitspanne wird über die Einstellung `poster_deletion_interval` bestimmt.
     @Sendable
     func getPostersToBeTakenDown(req: Request) async throws -> Response {
-        async let posterDeletionInterval: Int? = SettingsManager.shared.getSetting(forKey: "poster_deletion_interval")
-        guard let deletionInterval = await posterDeletionInterval else {
+        async let toBeTakenDown: Int? = SettingsManager.shared.getSetting(forKey: "poster_to_be_taken_down_interval")
+        guard let takenDownInterval = await toBeTakenDown else {
             req.logger.error("Einstellung 'poster_deletion_interval' nicht gefunden oder ungültig.")
             throw PosterCreationError.settingFetchFailed(reason: "Einstellung 'poster_deletion_interval' nicht gefunden oder ungültig.")
         }
 
         let now = Date()
-        let thresholdDate = now.addingTimeInterval(TimeInterval(deletionInterval))
+        let thresholdDate = now.addingTimeInterval(TimeInterval(takenDownInterval))
 
         let positions = try await PosterPosition.query(on: req.db)
             .filter(\.$is_Displayed == true)

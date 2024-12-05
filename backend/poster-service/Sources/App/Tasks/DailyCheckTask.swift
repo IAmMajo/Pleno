@@ -23,9 +23,11 @@ struct DailyCheckTask: LifecycleHandler {
     
     /// Führt die tägliche Prüfung aus und sendet ggf. Emails
     private func performDailyCheck(_ app: Application) async {
+        
+        let posterReminder: Int? = await SettingsManager.shared.getSetting(forKey: "poster_reminder_interval")
+        
         let now = Date()
-        // Thresholds absprechen
-        let thresholdDate = now
+        let thresholdDate = now.addingTimeInterval(TimeInterval(posterReminder ?? 3))
         
         do {
             
