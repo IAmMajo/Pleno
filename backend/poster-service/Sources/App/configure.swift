@@ -7,6 +7,11 @@ import Vapor
 
 // Konfiguriert deine Anwendung
 public func configure(_ app: Application) async throws {
+    app.middleware.use(FileMiddleware(
+        publicDirectory: app.directory.publicDirectory,
+        defaultFile: "index.html"
+    ))
+
     // Datenbankkonfiguration
     app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(
         hostname: Environment.get("DATABASE_HOST") ?? "localhost",

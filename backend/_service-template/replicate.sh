@@ -75,7 +75,10 @@ COMPOSE_TEMPLATE="# Vapor: ${SRVNAME}-service
       <<: *shared_environment
     labels:
       traefik.enable: true
-      traefik.http.routers.${SRVNAME}-service.rule: PathPrefix(\`/${SRVNAME}\`)
+      traefik.http.routers.${SRVNAME}-service.rule: PathPrefix(\`/${SRVNAME}-service\`) || PathPrefix(\`/${SRVNAME}\`)
+      traefik.http.routers.${SRVNAME}-service.middlewares: ${SRVNAME}-service-replace-path-regex
+      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.regex: ^/${SRVNAME}-service(:/(.*))?
+      traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.replacement: /\$\$1
 
   ${SRVNAME}-service-migration:
     profiles:
@@ -118,11 +121,11 @@ find "../${SRVNAME}-service/" -type f -name '*FIRST_LETTER_CAPITAL_SRVNAME_PLACE
 done
 
 # Replace placeholders in files
-find "../${SRVNAME}-service/" -type f -print0 | xargs -0 sed -i '' -e "s/FIRST_LETTER_CAPITAL_SRVNAME_PLACEHOLDER/${FIRST_LETTER_CAPITAL_SRVNAME}/g"
-find "../${SRVNAME}-service/" -type f -print0 | xargs -0 sed -i '' -e "s/SRVNAME_PLACEHOLDER/${SRVNAME}/g"
+find "../${SRVNAME}-service/" -type f ! -name "*.png" -print0 | xargs -0 sed -i '' -e "s/FIRST_LETTER_CAPITAL_SRVNAME_PLACEHOLDER/${FIRST_LETTER_CAPITAL_SRVNAME}/g"
+find "../${SRVNAME}-service/" -type f ! -name "*.png" -print0 | xargs -0 sed -i '' -e "s/SRVNAME_PLACEHOLDER/${SRVNAME}/g"
 
 # Add service  to /backend/docker-compose.yml
-sed -i '' -e "s|^# Volumes$|${ESCAPED_COMPOSE_TEMPLATE}|" ../docker-compose.yml
+sed -i '' -e "s;^# Volumes$;${ESCAPED_COMPOSE_TEMPLATE};" ../docker-compose.yml
 
 echo ''
 echo -e "${GRAY}>>>${RESET_COLOR} ${BOLD_CYAN}DONE${RESET_COLOR} ${GRAY}<<<${RESET_COLOR}"
