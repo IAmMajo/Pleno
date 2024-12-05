@@ -6,7 +6,7 @@ struct EmailController: RouteCollection {
         let email = routes.grouped("email")
         email.post(use: send)
     }
-
+    
     func send(req: Request) async throws -> HTTPStatus {
         let dto = try req.content.decode(SendEmailDTO.self)
         let email = Environment.get("SMTP_EMAIL") ?? ""

@@ -44,12 +44,9 @@ public func configure(_ app: Application) async throws {
     // Migrations registrieren
     app.migrations.add(CreatePosters())
     app.migrations.add(CreatePosterPositions())
-    
-    // Middleware konfigurieren (z.B. FileMiddleware für statische Dateien)
-    app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
-    
-    // Migrationen ausführen
-    //try await app.autoMigrate()
+
+    // Erinnerungen für aufgehangene Poster versenden
+    app.lifecycle.use(DailyCheckTask())
     
     // Routen registrieren
     try routes(app)
