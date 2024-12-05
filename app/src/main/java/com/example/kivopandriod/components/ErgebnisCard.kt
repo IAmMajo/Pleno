@@ -1,9 +1,7 @@
 package com.example.kivopandriod.components
 
 import android.annotation.SuppressLint
-import android.graphics.Color.CYAN
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,15 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.kivopandriod.moduls.VotingResults
@@ -60,7 +54,7 @@ fun ErgebnisCard(
                         Spacer(modifier = Modifier.size(3.dp))
                         Text(result.label,color = Text_light)
                         Spacer(modifier = Modifier.weight(1f))
-                        Text((String.format("%.2f%%",(result.votes.toFloat() / totalVotes) * 100)),color = Text_light)
+                        Text(text = result.percentage.toString()+"%",color = Text_light)
                     }
                 }
             }
@@ -72,8 +66,9 @@ fun ErgebnisCard(
 private fun PreviewErgebnisCard(){
     ErgebnisCard(
         votingResults = listOf(
-            VotingResults("Option 1", 10),
-            VotingResults("Option 2", 20),
-            VotingResults("Option 3", 30),
+            VotingResults("Option 1", 10,10.0),
+            VotingResults("Option 2", 20, 20.0),
+            VotingResults("Option 3", 30, 30.0),
+            VotingResults("Option 3", 40,40.0),
         ))
 }
