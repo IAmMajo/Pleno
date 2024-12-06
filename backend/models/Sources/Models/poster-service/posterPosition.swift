@@ -7,6 +7,7 @@
 import Fluent
 import Foundation
 
+
 public final class PosterPosition: Model,@unchecked Sendable {
     public static let schema = "poster_positions"
 
@@ -35,7 +36,7 @@ public final class PosterPosition: Model,@unchecked Sendable {
     public var expires_at: Date?
     
     @Field(key:"image_url")
-    public var image_url: String
+    public var image_url: String?
 
     public init() { }
 
@@ -45,14 +46,14 @@ public init(
     responsibleUserID: UUID,
     latitude: Double,
     longitude: Double,
-    imageUrl: String,
+    imageUrl: String?,
     expiresAt: Date
 ) {
     self.id = id
     self.latitude = round(latitude * 1_000_000) / 1_000_000
     self.longitude = round(longitude * 1_000_000) / 1_000_000
     self.$poster.id = posterId
-    self.$responsibleUser.id = responsibleUserID 
+    self.$responsibleUser.id = responsibleUserID
     self.posted_at = Date()
     self.is_Displayed = true
     self.expires_at = expiresAt

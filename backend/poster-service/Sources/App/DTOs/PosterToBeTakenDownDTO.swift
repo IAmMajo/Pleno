@@ -8,6 +8,7 @@
 import Foundation
 
 public struct PosterToBeTakenDownDTO: Codable {
+    public var positionId: UUID
     public var posterId: UUID
     public var responsibleUserId: UUID
     public var latitude: Double
@@ -15,7 +16,8 @@ public struct PosterToBeTakenDownDTO: Codable {
     public var imageURL: String
     public var expiresAt:Date
     
-    public init(posterId: UUID, responsibleUserId: UUID, latitude: Double, longitude: Double, isDisplayed: Bool, imageURL: String,expiresAt:Date) {
+    public init(positionId:UUID, posterId: UUID, responsibleUserId: UUID , latitude: Double, longitude: Double, isDisplayed: Bool, imageURL: String,expiresAt:Date) {
+        self.positionId = positionId
         self.posterId = posterId
         self.responsibleUserId = responsibleUserId
         self.latitude = latitude
