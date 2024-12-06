@@ -148,7 +148,6 @@ fun ListsItemPreview() {
                         date = LocalDate.now(),
                         time = LocalTime.now(),
                         id = "test",
-                        meetingStatus = "d",
                         membersCoud = 12,
                         attendanceStatus = 1
                     )
@@ -159,7 +158,6 @@ fun ListsItemPreview() {
                         date = LocalDate.now(),
                         time = LocalTime.now(),
                         id = "test",
-                        meetingStatus = "d",
                         membersCoud = 23,
                         attendanceStatus = 1
                     )
@@ -170,7 +168,6 @@ fun ListsItemPreview() {
                         date = LocalDate.now(),
                         time = LocalTime.now(),
                         id = "test",
-                        meetingStatus = "",
                        // membersCoud = null,
                         attendanceStatus = 1,
                         icon = false

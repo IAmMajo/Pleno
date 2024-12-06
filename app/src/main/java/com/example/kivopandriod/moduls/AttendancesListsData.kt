@@ -7,7 +7,7 @@ data class AttendancesListsData(
     val title: String,
     val date: LocalDate?,
     val time: LocalTime?,
-    val attendanceStatus: Int?,
+    val attendanceStatus: Int? = null,
     val membersCoud: Int? = null,
     val id: String,
     val icon: Boolean? = true
