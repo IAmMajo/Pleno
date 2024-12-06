@@ -19,21 +19,6 @@ public func configure(_ app: Application) async throws {
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
 
-
-      // Settings beim Start laden
-    Task {
-        do {
-            let configServiceURL = Environment.get("CONFIG_SERVICE_URL") ?? "https://config-service-url"
-            let serviceIDString = Environment.get("SERVICE_ID") ?? "76f93894-7573-4ccd-a067-66c2180750e0"
-            guard let serviceID = UUID(uuidString: serviceIDString) else {
-                app.logger.error("Ungültige Service-ID.")
-                return
-            }
-            try await SettingsManager.shared.loadSettings(from: configServiceURL, serviceID: serviceID, client: app.client, logger: app.logger)
-        } catch {
-            app.logger.error("Fehler beim Laden der Einstellungen: \(error.localizedDescription)")
-        }
-    }
     // register routes
     try routes(app)
 }
