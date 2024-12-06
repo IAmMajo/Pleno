@@ -3,6 +3,8 @@ import Vapor
 import VaporToOpenAPI
 
 func routes(_ app: Application) throws {
+    
+    try app.register(collection: RideController())
 
     app.get("openapi.json") { req in
       app.routes.openAPI(
