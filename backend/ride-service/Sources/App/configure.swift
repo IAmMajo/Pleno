@@ -19,6 +19,8 @@ public func configure(_ app: Application) async throws {
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
 
+    app.jwt.signers.use(.hs256(key: "Ganzgeheimespasswort"))
+    
     // register routes
     try routes(app)
 }

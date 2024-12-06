@@ -15,10 +15,12 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.8.0"),
         // 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
+        // JWT Package
+        .package(url: "https://github.com/vapor/jwt.git", from: "4.0.0"),
         // 🧬 KIVoP Models
         .package(path: "../models"),
         // 🎁 KIVoP DTOs
-        //.package(path: "../../DTOs"),
+        .package(path: "../../DTOs"),
         // 📄 Generate OpenAPI documentation from Vapor routes
         .package(url: "https://github.com/dankinsoid/VaporToOpenAPI.git", from: "4.7.1")
     ],
@@ -31,6 +33,7 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
+                .product(name: "JWT", package: "jwt"),
                 .product(name: "Models", package: "models"),
                 //.product(name: "RideServiceDTOs", package: "dtos"),
                 .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
