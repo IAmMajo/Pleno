@@ -1,10 +1,3 @@
-//
-//  AktivView.swift
-//  kivopadmin
-//
-//  Created by Amine Ahamri on 01.12.24.
-//
-
 import SwiftUI
 import MeetingServiceDTOs
 
@@ -30,39 +23,43 @@ struct AktivView: View {
             VStack(spacing: 16) {
                 // Frage anzeigen
                 Text(voting.question)
-                    .font(.title2)
+                    .font(.title)
+                    .bold()
                     .padding()
 
-                // Ergebnisse oder Optionen anzeigen
+                // Beschreibung anzeigen (falls vorhanden)
+                if !voting.description.isEmpty {
+                    Text(voting.description)
+                        .font(.body)
+                        .foregroundColor(.gray)
+                        .padding([.leading, .trailing])
+                }
+
                 if let results = votingResults, !results.results.isEmpty {
-                    // PieChart und detaillierte Ergebnisse anzeigen
+                    // Grafische Ergebnisse (Pie Chart)
+                    Text("Ergebnisse")
+                        .font(.headline)
+                        .padding(.top)
+
                     PieChartView(optionTextMap: optionTextMap, votingResults: results)
                         .frame(height: 200)
                         .padding()
 
+                    // Tabellarische Ergebnisse
                     VStack(alignment: .leading, spacing: 8) {
-                        ForEach(results.results, id: \.index) { result in
-                            HStack {
-                                Text(optionTextMap[result.index] ?? "Unbekannt")
-                                    .font(.headline)
-                                Spacer()
-                                Text("\(result.total) Stimmen (\(percentage(for: result))%)")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                            }
-                        }
+                        TableView2(results: results.results, optionTextMap: optionTextMap, totalVotes: totalVotes)
                     }
-                    .padding()
+                    .padding([.leading, .trailing])
                 } else {
-                    // Optionen anzeigen, wenn keine Stimmen vorhanden sind
+                    // Optionen in moderner Tabelle anzeigen
                     VStack(alignment: .leading, spacing: 8) {
-                        ForEach(voting.options, id: \.index) { option in
-                            Text("• \(option.text)")
-                                .font(.headline)
-                                .padding(.vertical, 4)
-                        }
+                        Text("Auswahlmöglichkeiten")
+                            .font(.headline)
+                            .padding(.bottom, 8)
+
+                        TableView(options: voting.options)
                     }
-                    .padding()
+                    .padding([.leading, .trailing])
 
                     Text("Keine Ergebnisse verfügbar.")
                         .foregroundColor(.gray)
@@ -136,8 +133,59 @@ struct AktivView: View {
             }
         }
     }
+}
 
-    private func percentage(for result: GetVotingResultDTO) -> String {
+// MARK: - Hilfskomponenten
+struct TableView2: View {
+    let options: [GetVotingOptionDTO]?
+    let results: [GetVotingResultDTO]?
+    let optionTextMap: [UInt8: String]?
+    let totalVotes: Int?
+
+    init(options: [GetVotingOptionDTO]) {
+        self.options = options
+        self.results = nil
+        self.optionTextMap = nil
+        self.totalVotes = nil
+    }
+
+    init(results: [GetVotingResultDTO], optionTextMap: [UInt8: String], totalVotes: Int) {
+        self.options = nil
+        self.results = results
+        self.optionTextMap = optionTextMap
+        self.totalVotes = totalVotes
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let options = options {
+                ForEach(options, id: \.index) { option in
+                    HStack {
+                        Text("Option \(option.index):")
+                            .font(.body)
+                            .bold()
+                        Text(option.text)
+                            .font(.body)
+                    }
+                    Divider()
+                }
+            } else if let results = results, let optionTextMap = optionTextMap, let totalVotes = totalVotes {
+                ForEach(results, id: \.index) { result in
+                    HStack {
+                        Text(optionTextMap[result.index] ?? "Enthaltung")
+                            .font(.body)
+                            .bold()
+                        Spacer()
+                        Text("\(result.total) Stimmen (\(percentage(for: result, totalVotes: totalVotes))%)")
+                            .font(.body)
+                    }
+                    Divider()
+                }
+            }
+        }
+    }
+
+    private func percentage(for result: GetVotingResultDTO, totalVotes: Int) -> String {
         guard totalVotes > 0 else { return "0" }
         let percent = Double(result.total) / Double(totalVotes) * 100
         return String(format: "%.1f", percent)

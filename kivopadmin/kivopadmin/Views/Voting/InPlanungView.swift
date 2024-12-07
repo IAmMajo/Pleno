@@ -8,8 +8,7 @@ struct InPlanungView: View {
     let onOpen: () -> Void
     let onReload: () -> Void
     @Environment(\.presentationMode) private var presentationMode
-    
-    @State private var lastDeleteTime: Date?
+
     @State private var isProcessing = false
     @State private var showEditPopup = false
     @State private var errorMessage: String?
@@ -19,17 +18,27 @@ struct InPlanungView: View {
             VStack(spacing: 16) {
                 // Frage anzeigen
                 Text(voting.question)
-                    .font(.title2)
+                    .font(.title)
+                    .bold()
                     .padding()
 
-                // Auswahlmöglichkeiten anzeigen
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(voting.options, id: \.index) { option in
-                        Text("• \(option.text)")
-                            .font(.headline)
-                    }
+                // Beschreibung anzeigen (falls vorhanden)
+                if !voting.description.isEmpty {
+                    Text(voting.description)
+                        .font(.body)
+                        .foregroundColor(.gray)
+                        .padding([.leading, .trailing])
                 }
-                .padding()
+
+                // Tabelle für Auswahlmöglichkeiten
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Auswahlmöglichkeiten")
+                        .font(.headline)
+                        .padding(.bottom, 8)
+
+                    TableView(options: voting.options)
+                }
+                .padding([.leading, .trailing])
 
                 // Fehlermeldung anzeigen
                 if let errorMessage = errorMessage {
@@ -103,7 +112,7 @@ struct InPlanungView: View {
                 switch result {
                 case .success:
                     print("Umfrage erfolgreich eröffnet: \(self.voting.id)")
-                    onOpen() // Callback ausführen, um zur ListView zurückzukehren oder weitere Aktionen auszulösen
+                    onOpen()
                 case .failure(let error):
                     self.errorMessage = "Fehler beim Öffnen der Umfrage: \(error.localizedDescription)"
                     print("Fehler beim Öffnen: \(error)")
@@ -111,8 +120,6 @@ struct InPlanungView: View {
             }
         }
     }
-
-
 
     private func deleteVoting() {
         guard !isProcessing else {
@@ -129,7 +136,7 @@ struct InPlanungView: View {
                 switch result {
                 case .success:
                     print("Umfrage erfolgreich gelöscht: \(self.voting.id)")
-                    onDelete() // Stelle sicher, dass der Callback verwendet wird
+                    onDelete()
                 case .failure(let error):
                     self.errorMessage = "Fehler beim Löschen der Umfrage: \(error.localizedDescription)"
                     print("Fehler beim Löschen: \(error)")
@@ -137,7 +144,25 @@ struct InPlanungView: View {
             }
         }
     }
+}
 
+// MARK: - TableView Component
+struct TableView: View {
+    let options: [GetVotingOptionDTO]
 
-
+    var body: some View {
+        VStack(alignment: .leading) {
+            ForEach(options, id: \.index) { option in
+                HStack {
+                    Text("Option \(option.index):")
+                        .font(.body)
+                        .bold()
+                    Text(option.text)
+                        .font(.body)
+                }
+                .padding(.vertical, 4)
+                Divider()
+            }
+        }
+    }
 }

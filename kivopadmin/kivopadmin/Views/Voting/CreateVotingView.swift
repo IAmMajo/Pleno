@@ -41,35 +41,23 @@ struct CreateVotingView: View {
                 Section(header: Text("Frage")) {
                     TextField("Frage eingeben", text: $question)
                         .autocapitalization(.sentences)
-                        .onChange(of: question) { newValue in
-                            print("Frage aktualisiert: \(newValue)")
-                        }
                 }
                 
                 // Beschreibung
                 Section(header: Text("Beschreibung")) {
                     TextField("Beschreibung eingeben", text: $description)
                         .autocapitalization(.sentences)
-                        .onChange(of: description) { newValue in
-                            print("Beschreibung aktualisiert: \(newValue)")
-                        }
                 }
                 
                 // Anonyme Abstimmung
                 Section(header: Text("Anonym")) {
                     Toggle("Anonyme Abstimmung", isOn: $anonymous)
-                        .onChange(of: anonymous) { newValue in
-                            print("Anonyme Abstimmung: \(newValue)")
-                        }
                 }
                 
                 // Optionen
                 Section(header: Text("Optionen")) {
                     ForEach($options.indices, id: \.self) { index in
                         TextField("Option \(index + 1)", text: $options[index])
-                            .onChange(of: options[index]) { newValue in
-                                print("Option \(index + 1) aktualisiert: \(newValue)")
-                            }
                     }
                     .onDelete { indexSet in
                         options.remove(atOffsets: indexSet)
