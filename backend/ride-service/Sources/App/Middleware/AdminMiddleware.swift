@@ -4,9 +4,7 @@ import Vapor
 struct AdminMiddleware: AsyncMiddleware {
     func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
         // JWT-Payload abfragen
-        guard let payload = request.jwtPayload else {
-          throw Abort(.unauthorized)
-        }
+        let payload = request.jwtPayload
 
         // Prüfen auf Admin
         guard payload.isAdmin == true else {

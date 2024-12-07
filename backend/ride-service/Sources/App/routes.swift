@@ -5,7 +5,9 @@ import JWT
 
 func routes(_ app: Application) throws {
     
-    try app.register(collection: RideController())
+    let authProtected = app.grouped(AuthMiddleware())
+    
+    try authProtected.register(collection: RideController())
 
 //    app.get("openapi.json") { req in
 //      app.routes.openAPI(

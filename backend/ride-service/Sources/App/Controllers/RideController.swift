@@ -5,17 +5,12 @@ import JWT
 
 struct RideController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        // auth middleware
-        let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
-        let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
-        
-        // admin middleware
-//        let adminMiddleware = AdminMiddleware()
-        
+
         let rideRoutes = routes.grouped("rides")
-        let protectedRoutes = rideRoutes.grouped(authMiddleware)
+        let adminRideRoutes = rideRoutes.grouped(AdminMiddleware())
         rideRoutes.get("", use: getAllRides)
-        protectedRoutes.post("", use: newRide)
+        adminRideRoutes.post("", use: newRide)
+        
     }
     
     @Sendable
@@ -31,13 +26,8 @@ struct RideController: RouteCollection {
             throw Abort(.badRequest, reason: "Invalid request body! Expected CreateRideDTO.")
         }
         
-        // make sure that user id is present
-        guard let userID = req.jwtPayload?.userID else {
-            throw Abort(.badRequest, reason: "No user id found!")
-        }
-        
         // create new ride
-        let ride = Ride(name: createRideDTO.name, description: createRideDTO.description, starts: createRideDTO.starts, latitude: createRideDTO.latitude, longitude: createRideDTO.longitude, organizerId: userID)
+        let ride = Ride(name: createRideDTO.name, description: createRideDTO.description, starts: createRideDTO.starts, latitude: createRideDTO.latitude, longitude: createRideDTO.longitude, organizerId: req.jwtPayload.userID)
         
         // save ride in database
         try await ride.save(on: req.db)
