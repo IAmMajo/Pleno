@@ -35,7 +35,7 @@ find "$DEST" -type f -name '*.swift' | while read -r file; do
     # Remove inits
     perl -i -0777pe 's/public init.*?\}//gs' $file
     # struct -> data class
-    perl -pi -e 's/^public struct ([A-Za-z0-9_]+): Codable \{$/public data class \1 {/g' $file
+    perl -pi -e 's/^public struct ([A-Za-z0-9_]+): Codable \{$/data class \1 (/g' $file
     # Basic data type translations
     for key in "${!basicdatatypes[@]}"; do
         perl -pi -e "s/(?<=: )$key|(?<=\[)$key/${basicdatatypes[$key]}/g" $file
@@ -46,6 +46,8 @@ find "$DEST" -type f -name '*.swift' | while read -r file; do
     perl -pi -e 's/\[([A-Za-z0-9_]+\??): ([A-Za-z0-9_]+\??)\]/Map<\1, \2>/g' $file
     # Add space before colon
     perl -pi -e 's/(?<=public var [A-Za-z0-9_]{1,244}):/ :/g' $file
+    # Add comma after each variable
+    perl -pi -e 's/(?<=public var [A-Za-z0-9_]{1,244} : [A-Za-z0-9_]{1,244}(?:<[A-Za-z0-9_]{1,244}>)?\??)(?=\s)/,/g' $file
     # Remove imports and empty lines
     perl -pi -e 's/^(from \w+ )?import \w+(\r?\n)//g' $file
     perl -pi -e 's/^\s*\r?\n//g' $file
@@ -53,6 +55,12 @@ find "$DEST" -type f -name '*.swift' | while read -r file; do
     perl -pi -e 's/^public enum ([A-Za-z0-9_]+): String, Codable \{$/public enum class \1 {/g' $file
     # Remove case in enums / enum classes
     perl -pi -e 's/^(\s*)case (\w+),?/\1\2,/g' $file
+    # Remove public keyword from vars
+    perl -pi -e 's/public (?=var)//g' $file
+    # Swap `}` with `)`
+    perl -pi -e 's/^}$/)/g' $file
+    # Add package declaration
+    perl -i -0777pe 's/^/package net.ipv64.kivop.dtos\n\n/gs' $file
     ### Change .swift to .kt
     mv "$file" "`echo $file | sed "s/swift$/kt/g"`"
 done
