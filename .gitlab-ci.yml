@@ -230,7 +230,7 @@ deploy-containers-on-prod-server:
 
 format-android:
   rules:
-    - if: $CI_COMMIT_BRANCH == '204-android-ci-hinzufugen'
+    - if: $CI_COMMIT_BRANCH == 'staging-android'
   stage: format
   script:
     - wget https://repo1.maven.org/maven2/com/facebook/ktfmt/0.53/ktfmt-0.53-jar-with-dependencies.jar
@@ -245,7 +245,7 @@ format-android:
 
 build-android:
   rules:
-    - if: $CI_COMMIT_BRANCH == '204-android-ci-hinzufugen'
+    - if: $CI_COMMIT_BRANCH == 'staging-android'
   stage: build
   script:
     - |
