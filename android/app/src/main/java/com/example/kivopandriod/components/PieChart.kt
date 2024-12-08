@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
 import com.example.kivopandriod.moduls.VotingResults
-import com.example.kivopandriod.ui.theme.LightGreen
+import com.example.kivopandriod.ui.theme.Secondary_dark
 import kotlin.math.*
 
 
@@ -31,7 +31,7 @@ fun PieChart(
 ){
     Column(modifier = Modifier
         .fillMaxWidth()
-        .background(LightGreen, shape = RoundedCornerShape(8.dp))
+        .background(Secondary_dark, shape = RoundedCornerShape(8.dp))
         .padding(15.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ){

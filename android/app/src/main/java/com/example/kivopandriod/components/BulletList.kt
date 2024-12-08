@@ -23,10 +23,10 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.kivopandriod.moduls.EventItem
-import com.example.kivopandriod.ui.theme.BulletDotGrey
-import com.example.kivopandriod.ui.theme.ForestGreen
-import com.example.kivopandriod.ui.theme.LightGreen
 
+import com.example.kivopandriod.ui.theme.Primary_dark
+import com.example.kivopandriod.ui.theme.Secondary_dark
+import com.example.kivopandriod.ui.theme.Text_light
 
 
 @Composable
@@ -38,7 +38,7 @@ fun BulletList(
 
     Column(modifier = Modifier
         .background(
-            color = LightGreen,
+            color = Secondary_dark,
             shape = RoundedCornerShape(8.dp)
         )
         .padding(15.dp)
@@ -78,10 +78,10 @@ fun DrawScope.line(items: Int, gap: Float){
     val offsetCircleStart = Offset(0.0f, elementHeight/2+gap)
 
 
-    drawLine(BulletDotGrey, offsetStart,offsetEnd,6.0f, StrokeCap.Round)
+    drawLine(Text_light, offsetStart,offsetEnd,6.0f, StrokeCap.Round)
     for (i in 0..<items){
 
-        drawCircle(BulletDotGrey,12.0f, Offset(offsetCircleStart.x,offsetCircleStart.y + jump*i))
+        drawCircle(Text_light,12.0f, Offset(offsetCircleStart.x,offsetCircleStart.y + jump*i))
     }
 }
 
@@ -96,7 +96,7 @@ fun Eintrag(
         .then(
             if (event.isHighlighted){
                 Modifier.background(
-                    color = ForestGreen,
+                    color = Primary_dark,
                     shape = RoundedCornerShape(4.dp)
                 )
             }else{
