@@ -9,14 +9,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.R
+import com.example.kivopandriod.R
 
 // Standardfarben
 private val attendanceCardBackgroundColor = Color(0xFFF8F8F8)
-private val buttonEnabledColor = Color(0xFF00796B)
-private val buttonDisabledColor = Color(0xFFBDBDBD)
+private val attendanceButtonEnabledColor = Color(0xFF00796B)
+private val attendanceButtonDisabledColor = Color(0xFFBDBDBD)
 private val profileTextColor = Color(0xFF000000)
 
 @Composable
@@ -27,11 +28,11 @@ fun AttendanceCard(
     onAttendanceUpdate: (currentAttendance: Int) -> Unit = {},
     buttonText: String = "Anwesenheit bestätigen",
     participantsLabel: String = "Teilnehmer",
-    iconResource: Int = R.drawable.baseline_groups_24,
+    iconResource: Int = R.drawable.ic_groups,
     iconDescription: String = "Icon of people",
     cardBackgroundColor: Color = attendanceCardBackgroundColor,
-    buttonEnabledColor: Color = buttonEnabledColor,
-    buttonDisabledColor: Color = buttonDisabledColor,
+    buttonEnabledColor: Color = attendanceButtonEnabledColor,
+    buttonDisabledColor: Color = attendanceButtonDisabledColor,
     textColor: Color = profileTextColor
 ) {
     var currentAttendance by remember {
