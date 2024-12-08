@@ -1,8 +1,10 @@
-public data class PatchMeetingDTO {
-    public var name : String?
-    public var description : String?
-    public var start : Date?
-    public var duration : UShort?
-    public var locationId : Uuid?
-    public var location : CreateLocationDTO?
-}
+package net.ipv64.kivop.dtos
+
+data class PatchMeetingDTO (
+    var name : String?,
+    var description : String?,
+    var start : Date?,
+    var duration : UShort?,
+    var locationId : UUID?,
+    var location : CreateLocationDTO?,
+)
