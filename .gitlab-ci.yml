@@ -233,18 +233,11 @@ format-android:
     - if: $CI_COMMIT_BRANCH == '204-android-ci-hinzufugen'
   stage: format
   script:
-    - |
-      if ! [[ $(java -version) ]]; then
-        sudo apt update
-        sudo apt install openjdk-21-jre-headless
-      fi
     - wget https://repo1.maven.org/maven2/com/facebook/ktfmt/0.53/ktfmt-0.53-jar-with-dependencies.jar
     - find \( -name "*.kt" -o -name "*.kts" \) -exec java -jar ktfmt-0.53-jar-with-dependencies.jar {} +
     - rm ktfmt-0.53-jar-with-dependencies.jar
     - |
       if [[ $(git status --porcelain) ]]; then
-        git config user.name 'GitLab CI'
-        git config user.email ci@noreply.gitlab.com
         git commit -am Format
         git push "https://gitlab-ci-token:$PROJECT_ACCESS_MAINTAINER_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git" HEAD:$CI_COMMIT_BRANCH
         exit 1
@@ -255,16 +248,6 @@ build-android:
     - if: $CI_COMMIT_BRANCH == '204-android-ci-hinzufugen'
   stage: build
   script:
-    - |
-      if ! [[ $(unzip -v) ]]; then
-        sudo apt update
-        sudo apt install unzip
-      fi
-    - |
-      if ! [[ $(java -version) ]]; then
-        sudo apt update
-        sudo apt install openjdk-21-jre-headless
-      fi
     - |
       if ! [[ -d ~/Android/Sdk ]]; then
         wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
