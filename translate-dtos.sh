@@ -57,8 +57,8 @@ find "$DEST" -type f -name '*.swift' | while read -r file; do
     perl -pi -e 's/^(\s*)case (\w+),?/\1\2,/g' $file
     # Remove public keyword from vars
     perl -pi -e 's/public (?=var)//g' $file
-    # Swap `}` with `)`
-    perl -pi -e 's/^}$/)/g' $file
+    # Swap `}` of data classes with `)`
+    perl -i -0777pe 's/(data class.*?)\}/\1)/gs' $file
     # Add package declaration
     perl -i -0777pe 's/^/package net.ipv64.kivop.dtos\n\n/gs' $file
     ### Change .swift to .kt
