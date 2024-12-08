@@ -1,0 +1,214 @@
+services:                                                                                                                                      
+  traefik:
+    image: traefik:v3.2.0
+    container_name: kivop-traefik
+    restart: unless-stopped
+    command:
+      - "--api.insecure=false"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.http.address=:80"
+      - "--entryPoints.http.http.redirections.entryPoint.to=https"
+      - "--entryPoints.http.http.redirections.entryPoint.scheme=https"
+      - "--entryPoints.https.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http"
+#      - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.email=${LC_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - traefik-letsencrypt:/letsencrypt
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      traefik.enable: true
+      traefik.http.routers.dashboard.entrypoints: https
+      traefik.http.routers.dashboard.rule: Host(`dashboard.kivop.ipv64.net`)
+      traefik.http.routers.dashboard.middlewares: dashboard-auth
+      traefik.http.routers.dashboard.tls: true
+      traefik.http.routers.dashboard.service: api@internal
+      traefik.http.routers.dashboard.tls.certresolver: myresolver
+      traefik.http.middlewares.dashboard-auth.basicauth.users: ${DASHBOARD_ADMIN}
+
+#
+# Database
+#
+  postgres:
+    image: postgres:17.0-bookworm
+    container_name: kivop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vapor # only for development
+      POSTGRES_PASSWORD: example # only for development
+    volumes:
+      - ./backend/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
+      - postgres-data:/var/lib/postgresql/data
+
+#
+# Vapor: config-service
+#
+  config-service:
+    extends:
+      file: ./backend/docker-compose.yml
+      service: config-service
+    container_name: kivop-config-service
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.config-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/config-service`) || PathPrefix(`/config`))
+      traefik.http.routers.config-service.middlewares: config-service-replace-path-regex
+      traefik.http.middlewares.config-service-replace-path-regex.replacepathregex.regex: ^/config-service(:/(.*))?
+      traefik.http.middlewares.config-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.config-service.entrypoints: https
+      traefik.http.routers.config-service.tls: true
+      traefik.http.routers.config-service.tls.certresolver: myresolver
+
+  config-service-migration:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: config-service-migration
+
+  config-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: config-service-migration
+
+#
+# Vapor: auth-service
+#
+  auth-service:
+    extends:
+      file: ./backend/docker-compose.yml
+      service: auth-service
+    container_name: kivop-auth-service
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.auth-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/auth-service`) || PathPrefix(`/auth`) || PathPrefix(`/users`))
+      traefik.http.routers.auth-service.middlewares: auth-service-replace-path-regex
+      traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.regex: ^/auth-service(:/(.*))?
+      traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.auth-service.entrypoints: https
+      traefik.http.routers.auth-service.tls: true
+      traefik.http.routers.auth-service.tls.certresolver: myresolver
+
+  auth-service-migration:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: auth-service-migration
+
+  auth-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: auth-service-migration
+
+#
+# Vapor: meeting-service
+#
+  meeting-service:
+    extends:
+      file: ./backend/docker-compose.yml
+      service: meeting-service
+    container_name: kivop-meeting-service
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.meeting-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/meeting-service`) || PathPrefix(`/meeting`))
+      traefik.http.routers.meeting-service.middlewares: meeting-service-replace-path-regex
+      traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.regex: ^/meeting-service(:/(.*))?
+      traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.meeting-service.entrypoints: https
+      traefik.http.routers.meeting-service.tls: true
+      traefik.http.routers.meeting-service.tls.certresolver: myresolver
+
+  meeting-service-migration:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: meeting-service-migration
+
+  meeting-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: meeting-service-migration
+
+#
+# Vapor: notifications-service
+#
+  notifications-service:
+    extends:
+      file: ./backend/docker-compose.yml
+      service: notifications-service
+    container_name: kivop-notifications-service
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.notifications-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/notifications-service`) || PathPrefix(`/email`))
+      traefik.http.routers.notifications-service.middlewares: notifications-service-replace-path-regex
+      traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.regex: ^/notifications-service(:/(.*))?
+      traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.notifications-service.entrypoints: https
+      traefik.http.routers.notifications-service.tls: true
+      traefik.http.routers.notifications-service.tls.certresolver: myresolver
+
+#
+# Vapor: tdums-service // NICHT IP-RELEVANT (abgesprochen)
+#
+  tdums-service:
+    extends:
+      file: ./backend/docker-compose.yml
+      service: tdums-service
+    container_name: tdums-service
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.meeting-service.rule: Host(`weihnachts-wuensche-ev.de`)
+      traefik.http.routers.meeting-service.entrypoints: https
+      traefik.http.routers.meeting-service.tls: true
+      traefik.http.routers.meeting-service.tls.certresolver: myresolver
+
+  tdums-postgres:
+    image: postgres:17.0-bookworm
+    container_name: tdums-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vapor # only for development
+      POSTGRES_PASSWORD: example # only for development
+    volumes:
+      - ./backend/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
+      - tdums-data:/var/lib/postgresql/data
+
+#
+# Volumes
+#
+volumes:
+  postgres-data:
+    name: "kivop-postgres-data"
+  traefik-letsencrypt:
+    name: "kivop-traefik-letsencrypt"
+  tdums-data:
+    name: "tdums-postgres-data"
+
+#
+# Networks
+#
+networks:
+  default:
+    name: "kivop-net"

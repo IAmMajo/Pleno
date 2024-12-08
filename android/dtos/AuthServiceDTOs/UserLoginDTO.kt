@@ -1,4 +1,6 @@
-public data class UserLoginDTO {
-    public var email : String?
-    public var password : String?
-}
+package net.ipv64.kivop.dtos
+
+data class UserLoginDTO (
+    var email : String?,
+    var password : String?,
+)
