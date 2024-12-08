@@ -1,7 +1,9 @@
-public data class CreateVotingDTO {
-    public var meetingId : Uuid
-    public var question : String
-    public var description : String?
-    public var anonymous : Boolean
-    public var options : List<GetVotingOptionDTO>
-}
+package net.ipv64.kivop.dtos
+
+data class CreateVotingDTO (
+    var meetingId : UUID,
+    var question : String,
+    var description : String?,
+    var anonymous : Boolean,
+    var options : List<GetVotingOptionDTO>,
+)
