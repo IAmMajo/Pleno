@@ -239,7 +239,7 @@ format-android:
     - |
       if [[ $(git status --porcelain) ]]; then
         git commit -am Format
-        git push "https://gitlab-ci-token:$PROJECT_ACCESS_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git" HEAD:$CI_COMMIT_BRANCH
+        git push "https://gitlab-ci-token:$PROJECT_ACCESS_MAINTAINER_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git" HEAD:$CI_COMMIT_BRANCH
         exit 1
       fi
 
