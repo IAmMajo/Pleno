@@ -23,98 +23,82 @@ import java.time.LocalDateTime
 
 @Composable
 fun GenerateTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
-    TabRow(
-        selectedTabIndex = selectedTabIndex,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        containerColor = Color.Transparent,
-        indicator = { tabPositions ->
-            Box(
-                modifier = Modifier
-                    .tabIndicatorOffset(tabPositions[selectedTabIndex])
+  TabRow(
+      selectedTabIndex = selectedTabIndex,
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+      containerColor = Color.Transparent,
+      indicator = { tabPositions ->
+        Box(
+            modifier =
+                Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex])
                     .height(3.dp)
                     .background(
                         color = Color.Black,
-                        shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)
-                    )
-            )
-        }
-    ) {
+                        shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)))
+      }) {
         tabs.forEachIndexed { index, title ->
-            Tab(
-                selected = selectedTabIndex == index,
-                onClick = { onTabSelected(index) },
-                text = {
-                    Text(
-                        text = title,
-                        color = if (selectedTabIndex == index) Color.Black else Color.Gray,
-                    )
-                }
-            )
+          Tab(
+              selected = selectedTabIndex == index,
+              onClick = { onTabSelected(index) },
+              text = {
+                Text(
+                    text = title,
+                    color = if (selectedTabIndex == index) Color.Black else Color.Gray,
+                )
+              })
         }
-    }
+      }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AppointmentTabContent(navigation: NavController, tabs: List<String>, appointments: List<TermindData>) {
-    var selectedTabIndex by remember { mutableStateOf(0) }
-    val now = LocalDateTime.now() // Aktuelles Datum und Uhrzeit
+fun AppointmentTabContent(
+    navigation: NavController,
+    tabs: List<String>,
+    appointments: List<TermindData>
+) {
+  var selectedTabIndex by remember { mutableStateOf(0) }
+  val now = LocalDateTime.now() // Aktuelles Datum und Uhrzeit
 
+  Column(modifier = Modifier.fillMaxSize()) {
+    // Tabs werden oben eingebunden
+    GenerateTabs(
+        tabs = tabs, selectedTabIndex = selectedTabIndex, onTabSelected = { selectedTabIndex = it })
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Tabs werden oben eingebunden
-        GenerateTabs(
-            tabs = tabs,
-            selectedTabIndex = selectedTabIndex,
-            onTabSelected = { selectedTabIndex = it }
-        )
-
-        // Inhalt unterhalb der Tabs
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            when (selectedTabIndex) {
-                0 -> {
-                    // Anstehende Sitzungen
-                    val upcomingAppointments = appointments.filter {
-                        LocalDateTime.of(it.date, it.time) >= now
-                    }
-                    if (upcomingAppointments.isNotEmpty()) {
-                        items(upcomingAppointments.size) { index ->
-                            TermindCard(termindData = upcomingAppointments[index],
-                                onClick = {
-                                    navigation.navigate("anwesenheit/${upcomingAppointments[index].id}")
-                                })
-                        }
-                    } else {
-                        item { Text("Keine anstehenden Sitzungen", color = Color.Gray) }
-                    }
-                }
-
-                1 -> {
-                    // Vergangene Sitzungen (vor jetzt)
-                    val pastAppointments = appointments.filter {
-                        LocalDateTime.of(it.date, it.time) < now
-                    }
-                    if (pastAppointments.isNotEmpty()) {
-                        items(pastAppointments.size) { index ->
-                            TermindCard(
-                                termindData = pastAppointments[index],
-                                onClick = {
-                                    navigation.navigate("anwesenheit/${pastAppointments[index].id}")
-                                })
-                        }
-                    } else {
-                        item { Text("Keine vergangenen Sitzungen", color = Color.Gray) }
-                    }
-                }
+    // Inhalt unterhalb der Tabs
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+      when (selectedTabIndex) {
+        0 -> {
+          // Anstehende Sitzungen
+          val upcomingAppointments =
+              appointments.filter { LocalDateTime.of(it.date, it.time) >= now }
+          if (upcomingAppointments.isNotEmpty()) {
+            items(upcomingAppointments.size) { index ->
+              TermindCard(
+                  termindData = upcomingAppointments[index],
+                  onClick = {
+                    navigation.navigate("anwesenheit/${upcomingAppointments[index].id}")
+                  })
             }
+          } else {
+            item { Text("Keine anstehenden Sitzungen", color = Color.Gray) }
+          }
         }
-    }
-}
 
+        1 -> {
+          // Vergangene Sitzungen (vor jetzt)
+          val pastAppointments = appointments.filter { LocalDateTime.of(it.date, it.time) < now }
+          if (pastAppointments.isNotEmpty()) {
+            items(pastAppointments.size) { index ->
+              TermindCard(
+                  termindData = pastAppointments[index],
+                  onClick = { navigation.navigate("anwesenheit/${pastAppointments[index].id}") })
+            }
+          } else {
+            item { Text("Keine vergangenen Sitzungen", color = Color.Gray) }
+          }
+        }
+      }
+    }
+  }
+}

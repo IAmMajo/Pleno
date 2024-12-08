@@ -26,70 +26,56 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun AbstimmungCard(title: String, eventType: String, date: LocalDate) {
 
-    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+  val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-    // Kartenlayout
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFFBFEFB1))
-            .padding(16.dp)
-    ) {
+  // Kartenlayout
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(16.dp)
+              .clip(RoundedCornerShape(8.dp))
+              .background(Color(0xFFBFEFB1))
+              .padding(16.dp)) {
         Column {
+          Text(
+              text = title,
+              style = MaterialTheme.typography.titleLarge,
+              fontWeight = FontWeight.Bold)
+          Spacer(modifier = Modifier.height(8.dp))
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(painter = painterResource(id = R.drawable.ic_calendar), contentDescription = null)
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_calendar),
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = date.format(formatter),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
-
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_groups),
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = eventType,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                text = date.format(formatter),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold)
+          }
+          Spacer(modifier = Modifier.height(8.dp))
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(painter = painterResource(id = R.drawable.ic_groups), contentDescription = null)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = eventType,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold)
+          }
         }
-    }
+      }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun AbstimmungCardPreview() {
-    MaterialTheme {
-        Surface {
-                Column {
-                    // Beispiel für ein Datum
-                    val eventDate = LocalDate.of(2024, 10, 24) // 24.10.2024
+  MaterialTheme {
+    Surface {
+      Column {
+        // Beispiel für ein Datum
+        val eventDate = LocalDate.of(2024, 10, 24) // 24.10.2024
 
-                    AbstimmungCard(
-                        title = "Vorstandswahl",
-                        eventType = "Jahreshauptversammlung",
-                        date = eventDate
-                    )
-                }
-            }
-        }
+        AbstimmungCard(
+            title = "Vorstandswahl", eventType = "Jahreshauptversammlung", date = eventDate)
+      }
     }
+  }
+}

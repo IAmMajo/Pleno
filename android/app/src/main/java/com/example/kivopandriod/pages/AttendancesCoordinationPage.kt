@@ -1,7 +1,5 @@
 package com.example.kivopandriod.pages
 
-
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,37 +21,29 @@ import com.example.kivopandriod.components.SitzungsCard
 import com.example.kivopandriod.services.api.responseList
 import java.time.LocalDate
 
-
 @Composable
-fun AttendancesCoordinationPage(
-    navController: NavController? = null,
-    meetingId: String
+fun AttendancesCoordinationPage(navController: NavController? = null, meetingId: String) {
 
-) {
-    //TODO: FIX THIS
-        Surface() {
-            // Zustand für die Antworten (Liste von ResponseItem)
-            var responses by remember { mutableStateOf<List<ResponseItem>>(emptyList()) }
-            // API-Anfrage ausführen
-            LaunchedEffect(meetingId)
-            {
-                val responseData = responseList(meetingId, navController!!.context) // Dynamische Daten abrufen
-                responses = responseData.map { response ->
-                    ResponseItem(name = response.name, statusIconResId = response.status)
-                }
-            }
-            println(responses)
-            // UI anzeigen
-            val eventDate = LocalDate.of(2024, 10, 24) // 24.10.2024
-            Column(
-                modifier = Modifier.background(Color.Transparent)
-            ) {
-
-                SitzungsCard(title = "Vorstandswahl", date = eventDate)
-                Spacer(Modifier.size(12.dp))
-                ResponseList(responses = responses, "Rückmeldungen")
-            }
-        }
+  // TODO: FIX THIS
+  Surface() {
+    // Zustand für die Antworten (Liste von ResponseItem)
+    var responses by remember { mutableStateOf<List<ResponseItem>>(emptyList()) }
+    // API-Anfrage ausführen
+    LaunchedEffect(meetingId) {
+      val responseData =
+          responseList(meetingId, navController!!.context) // Dynamische Daten abrufen
+      responses =
+          responseData.map { response ->
+            ResponseItem(name = response.name, statusIconResId = response.status)
+          }
     }
-
-
+    println(responses)
+    // UI anzeigen
+    val eventDate = LocalDate.of(2024, 10, 24) // 24.10.2024
+    Column(modifier = Modifier.background(Color.Transparent)) {
+      SitzungsCard(title = "Vorstandswahl", date = eventDate)
+      Spacer(Modifier.size(12.dp))
+      ResponseList(responses = responses, "Rückmeldungen")
+    }
+  }
+}

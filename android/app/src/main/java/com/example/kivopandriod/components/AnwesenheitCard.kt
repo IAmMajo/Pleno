@@ -35,74 +35,55 @@ fun AttendanceCard(
     buttonDisabledColor: Color = attendanceButtonDisabledColor,
     textColor: Color = profileTextColor
 ) {
-    var currentAttendance by remember {
-        mutableStateOf(initialAttendance)
-    }
+  var currentAttendance by remember { mutableStateOf(initialAttendance) }
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-        ) {
-            Button(
-                onClick = {
-                    currentAttendance++
-                    onAttendanceUpdate(currentAttendance)
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = buttonEnabledColor
-                ),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(bottom = 8.dp)
-                    .width(200.dp)
-            ) {
+  Card(
+      modifier = modifier.fillMaxWidth().padding(16.dp),
+      colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
+      shape = RoundedCornerShape(8.dp)) {
+        Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+          Button(
+              onClick = {
+                currentAttendance++
+                onAttendanceUpdate(currentAttendance)
+              },
+              colors = ButtonDefaults.buttonColors(containerColor = buttonEnabledColor),
+              modifier =
+                  Modifier.align(Alignment.CenterHorizontally)
+                      .padding(bottom = 8.dp)
+                      .width(200.dp)) {
                 Text(text = buttonText, color = Color.White)
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = participantsLabel,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = textColor
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = "$currentAttendance/$maxAttendance",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = textColor
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    painter = painterResource(id = iconResource),
-                    contentDescription = iconDescription,
-                    tint = textColor,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+              }
+          Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = participantsLabel,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                color = textColor)
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "$currentAttendance/$maxAttendance",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                color = textColor)
+            Spacer(modifier = Modifier.width(8.dp))
+            Icon(
+                painter = painterResource(id = iconResource),
+                contentDescription = iconDescription,
+                tint = textColor,
+                modifier = Modifier.size(24.dp))
+          }
         }
-    }
+      }
 }
 
 @Preview
 @Composable
 fun PreviewAttendanceCard() {
-    AttendanceCard(
-        initialAttendance = 5,
-        maxAttendance = 20,
-        onAttendanceUpdate = { newAttendance ->
-            println("Current attendance updated: $newAttendance")
-        }
-    )
+  AttendanceCard(
+      initialAttendance = 5,
+      maxAttendance = 20,
+      onAttendanceUpdate = { newAttendance ->
+        println("Current attendance updated: $newAttendance")
+      })
 }
