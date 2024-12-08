@@ -10,4 +10,4 @@ public enum class AttendanceStatus {
     present,
     absent,
     accepted,
-)
+}

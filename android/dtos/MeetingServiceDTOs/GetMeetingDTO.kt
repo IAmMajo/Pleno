@@ -10,9 +10,10 @@ data class GetMeetingDTO (
     var location : GetLocationDTO?,
     var chair : GetIdentityDTO?,
     var code : String?,
+    var myAttendanceStatus : AttendanceStatus?,
 )
 public enum class MeetingStatus {
     scheduled,
     inSession,
     completed,
-)
+}

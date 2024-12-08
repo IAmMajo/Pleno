@@ -12,4 +12,4 @@ public struct SettingResponseDTO: Codable{
     var datatype : String,
     var value : String,
     var description : String?,
-)
+}

@@ -11,4 +11,4 @@ public enum class RecordStatus {
     underway,
     submitted,
     approved,
-)
+}

@@ -8,4 +8,4 @@ package net.ipv64.kivop.dtos
 //
 public struct SettingUpdateDTO: Codable{
     var value : String,
-)
+}
