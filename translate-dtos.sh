@@ -47,7 +47,7 @@ find "$DEST" -type f -name '*.swift' | while read -r file; do
     # Add space before colon
     perl -pi -e 's/(?<=public var [A-Za-z0-9_]{1,244}):/ :/g' $file
     # Add comma after each variable
-    perl -pi -e 's/(?<=public var [A-Za-z0-9_]{1,244} : [A-Za-z0-9_]{1,244}(?:<[A-Za-z0-9_]{1,244}>)?\??)(?=\s)/,/g' $file
+    perl -pi -e 's/(?<=public var [A-Za-z0-9_]{1,117} : (?:List<[A-Za-z0-9_]{1,117}>|[A-Za-z0-9_]{1,123})\??)(?=\s)/,/g' $file
     # Remove imports and empty lines
     perl -pi -e 's/^(from \w+ )?import \w+(\r?\n)//g' $file
     perl -pi -e 's/^\s*\r?\n//g' $file
