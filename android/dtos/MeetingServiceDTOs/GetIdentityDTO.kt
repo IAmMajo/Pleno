@@ -1,4 +1,6 @@
-public data class GetIdentityDTO {
-    public var id : Uuid
-    public var name : String
-}
+package net.ipv64.kivop.dtos
+
+data class GetIdentityDTO (
+    var id : Uuid
+    var name : String
+)

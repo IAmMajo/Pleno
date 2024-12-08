@@ -1,10 +1,12 @@
+package net.ipv64.kivop.dtos
+
 //
 //  BulkUpdateResponseDTO.swift
 //  config-service
 //
 //  Created by Dennis Sept on 19.11.24.
 //
-public data class BulkUpdateResponseDTO {
-    public var updated : List<Uuid>
-    public var failed : Map<Uuid, String>
-}
+data class BulkUpdateResponseDTO (
+    var updated : List<Uuid>
+    var failed : Map<Uuid, String>
+)

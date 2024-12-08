@@ -1,9 +1,11 @@
-public data class GetLocationDTO {
-    public var id : Uuid
-    public var name : String
-    public var street : String
-    public var number : String
-    public var letter : String
-    public var postalCode : String?
-    public var place : String?
-}
+package net.ipv64.kivop.dtos
+
+data class GetLocationDTO (
+    var id : Uuid
+    var name : String
+    var street : String
+    var number : String
+    var letter : String
+    var postalCode : String?
+    var place : String?
+)

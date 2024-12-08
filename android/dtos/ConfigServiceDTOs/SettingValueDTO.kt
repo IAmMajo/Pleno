@@ -1,5 +1,7 @@
+package net.ipv64.kivop.dtos
+
 public struct SettingValueDTO: Codable{
-    public var key : String
-    public var datatype : String
-    public var value : String
-}
+    var key : String
+    var datatype : String
+    var value : String
+)

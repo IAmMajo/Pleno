@@ -1,11 +1,13 @@
-public data class GetVotingResultsDTO {
-    public var votingId : Uuid
-    public var myVote : UByte? // Index 0: Abstention | nil: did not vote at all
-    public var results : List<GetVotingResultDTO>
-}
-public data class GetVotingResultDTO {
-    public var index : UByte // Index 0: Abstention
-    public var total : UByte
-    public var percentage : Double
-    public var identities : List<GetIdentityDTO>?
-}
+package net.ipv64.kivop.dtos
+
+data class GetVotingResultsDTO (
+    var votingId : Uuid
+    var myVote : UByte? // Index 0: Abstention | nil: did not vote at all
+    var results : List<GetVotingResultDTO>
+)
+data class GetVotingResultDTO (
+    var index : UByte // Index 0: Abstention
+    var total : UByte
+    var percentage : Double
+    var identities : List<GetIdentityDTO>?
+)

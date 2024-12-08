@@ -1,5 +1,7 @@
-public data class JWTPayloadDTO {
-    public var userID : Uuid?
-    public var exp : Date
-    public var isAdmin : Boolean?
-}
+package net.ipv64.kivop.dtos
+
+data class JWTPayloadDTO (
+    var userID : Uuid?
+    var exp : Date
+    var isAdmin : Boolean?
+)
