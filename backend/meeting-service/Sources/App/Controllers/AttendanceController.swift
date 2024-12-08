@@ -35,12 +35,6 @@ struct AttendanceController: RouteCollection {
         var getAttendanceDTOs = try attendances.map { attendance in
             try attendance.toGetAttendanceDTO()
         }
-        if let index = getAttendanceDTOs.firstIndex(where: { dto in
-            identityIds.contains(dto.identity.id)
-        }) {
-            let elem = getAttendanceDTOs.remove(at: index)
-            getAttendanceDTOs.insert(elem, at: 0)
-        }
         
         if meeting.status == .scheduled {
             getAttendanceDTOs.append(contentsOf: try await Identity.query(on: req.db)
@@ -52,6 +46,18 @@ struct AttendanceController: RouteCollection {
                 .map { identity in
                         try .init(meetingId: meeting.requireID(), identity: identity.toGetIdentityDTO())
                 })
+        }
+        
+        getAttendanceDTOs.sort { lhs, rhs in
+            lhs.status < rhs.status
+        }
+        
+        if let index = getAttendanceDTOs.firstIndex(where: { dto in
+            identityIds.contains(dto.identity.id)
+        }) {
+            var elem = getAttendanceDTOs.remove(at: index)
+            elem.itsame = true
+            getAttendanceDTOs.insert(elem, at: 0)
         }
         
         return getAttendanceDTOs
