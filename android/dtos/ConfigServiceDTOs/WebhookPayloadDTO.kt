@@ -1,6 +1,8 @@
-public data class WebhookPayloadDTO {
-    public var event : String
-    public var settings_id : Uuid
-    public var new_value : SettingValueDTO?
-    public var old_value : SettingValueDTO?
-}
+package net.ipv64.kivop.dtos
+
+data class WebhookPayloadDTO (
+    var event : String,
+    var settings_id : UUID,
+    var new_value : SettingValueDTO?,
+    var old_value : SettingValueDTO?,
+)
