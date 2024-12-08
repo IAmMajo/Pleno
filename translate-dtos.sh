@@ -55,8 +55,8 @@ find "$DEST" -type f -name '*.swift' | while read -r file; do
     perl -pi -e 's/^public enum ([A-Za-z0-9_]+): String, Codable \{$/public enum class \1 {/g' $file
     # Remove case in enums / enum classes
     perl -pi -e 's/^(\s*)case (\w+),?/\1\2,/g' $file
-    # Remove public keyword from vars
-    perl -pi -e 's/public (?=var)//g' $file
+    # Remove public keyword from vars and enums
+    perl -pi -e 's/public (?=var|enum)//g' $file
     # Swap `}` of data classes with `)`
     perl -i -0777pe 's/(data class.*?)\}/\1)/gs' $file
     # Add package declaration
