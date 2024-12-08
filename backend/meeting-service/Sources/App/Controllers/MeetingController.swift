@@ -2,6 +2,7 @@ import Fluent
 import Vapor
 import Models
 import MeetingServiceDTOs
+import AsyncAlgorithms
 
 struct MeetingController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -25,14 +26,15 @@ struct MeetingController: RouteCollection {
     /// **GET** `/meetings`
     @Sendable func getAllMeetings(req: Request) async throws -> [GetMeetingDTO] {
         let isAdmin = req.jwtPayload?.isAdmin ?? false
-        let meetings = try await Meeting.query(on: req.db)
+        return try await Meeting.query(on: req.db)
             .with(\.$chair)
             .with(\.$location) {location in
                 location.with(\.$place)
             }.all()
-        return try meetings.map { meeting in
-            return try meeting.toGetMeetingDTO(showCode: isAdmin)
-        }
+            .map { meeting in
+                try meeting.toGetMeetingDTO(showCode: isAdmin)
+            }
+            .withMyAttendanceStatus(req: req)
     }
     
     /// **GET** `/meetings/{id}`
@@ -44,7 +46,7 @@ struct MeetingController: RouteCollection {
         try await meeting.$chair.load(on: req.db)
         try await meeting.$location.load(on: req.db)
         try await meeting.location?.$place.load(on: req.db)
-        return try meeting.toGetMeetingDTO(showCode: isAdmin)
+        return try await meeting.toGetMeetingDTO(showCode: isAdmin).withMyAttendanceStatus(req: req)
     }
     
     /// **POST** `/meetings/`
@@ -179,8 +181,9 @@ struct MeetingController: RouteCollection {
             try await meeting.$location.load(on: db)
             try await meeting.location?.$place.load(on: db)
         }
-        
-        return try meeting.toGetMeetingDTO(showCode: true)
+        var getMeetingDTO = try meeting.toGetMeetingDTO(showCode: true)
+        getMeetingDTO.myAttendanceStatus = .present
+        return getMeetingDTO
     }
     
     /// **PUT** `/meetings/{id}/end`
