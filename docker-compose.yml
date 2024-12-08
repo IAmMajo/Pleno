@@ -184,6 +184,17 @@ services:
       traefik.http.routers.meeting-service.tls: true
       traefik.http.routers.meeting-service.tls.certresolver: myresolver
 
+  tdums-postgres:
+    image: postgres:17.0-bookworm
+    container_name: tdums-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vapor # only for development
+      POSTGRES_PASSWORD: example # only for development
+    volumes:
+      - ./backend/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
+      - tdums-data:/var/lib/postgresql/data
+
 #
 # Volumes
 #
