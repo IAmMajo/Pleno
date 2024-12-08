@@ -7,5 +7,5 @@ package net.ipv64.kivop.dtos
 //  Created by Dennis Sept on 02.11.24.
 //
 public struct SettingUpdateDTO: Codable{
-    var value : String
+    var value : String,
 )

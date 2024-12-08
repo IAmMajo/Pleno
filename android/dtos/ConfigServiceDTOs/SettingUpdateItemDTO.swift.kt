@@ -7,6 +7,6 @@ package net.ipv64.kivop.dtos
 //  Created by Dennis Sept on 19.11.24.
 //
 data class SettingUpdateItemDTO (
-    var id : Uuid
-    var value : String
+    var id : Uuid,
+    var value : String,
 )
