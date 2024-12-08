@@ -6,7 +6,7 @@ data class GetAttendanceDTO (
     var status : AttendanceStatus?,
     var itsame : Boolean, // it's-a me
 )
-public enum class AttendanceStatus {
+enum class AttendanceStatus {
     present,
     absent,
     accepted,

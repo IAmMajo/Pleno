@@ -12,7 +12,7 @@ data class GetMeetingDTO (
     var code : String?,
     var myAttendanceStatus : AttendanceStatus?,
 )
-public enum class MeetingStatus {
+enum class MeetingStatus {
     scheduled,
     inSession,
     completed,

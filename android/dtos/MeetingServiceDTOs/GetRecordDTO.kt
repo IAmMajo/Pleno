@@ -7,7 +7,7 @@ data class GetRecordDTO (
     var status : RecordStatus,
     var content : String,
 )
-public enum class RecordStatus {
+enum class RecordStatus {
     underway,
     submitted,
     approved,
