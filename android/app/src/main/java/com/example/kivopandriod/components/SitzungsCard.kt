@@ -34,126 +34,98 @@ import com.example.kivopandriod.ui.theme.Text_light
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SitzungsCard(title: String, date: LocalDate) {
-    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+  val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-    // Kartenlayout
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFFBFEFB1))
-    ) {
-        Column(
-            modifier = Modifier
-            .padding(12.dp)
-                .background(Color.Transparent)
-        ) {
-            Text(
-                text = title,
-                color = Text_light,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        tint = Text_light,
-                        painter = painterResource(id = R.drawable.ic_calendar),
-                        contentDescription = "Icon Kalender"
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = date.format(formatter),
-                        color = Text_light,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_schedule_24px),
-                        tint = Text_light,
-                        contentDescription = "Icon Uhrzeit"
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "16:30 Uhr (90Min.)",
-                        color = Text_light,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
-
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+  // Kartenlayout
+  Box(
+      modifier =
+          Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(Color(0xFFBFEFB1))) {
+        Column(modifier = Modifier.padding(12.dp).background(Color.Transparent)) {
+          Text(
+              text = title,
+              color = Text_light,
+              style = MaterialTheme.typography.titleLarge,
+              fontWeight = FontWeight.Bold)
+          Spacer(modifier = Modifier.height(8.dp))
+          Row {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Outlined.Place,
-                    tint = Text_light,
-                    contentDescription = "Icon Standort"
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "Sitzungssaal 1",
-                    color = Text_light,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
-                )
+              Icon(
+                  tint = Text_light,
+                  painter = painterResource(id = R.drawable.ic_calendar),
+                  contentDescription = "Icon Kalender")
+              Spacer(modifier = Modifier.width(4.dp))
+              Text(
+                  text = date.format(formatter),
+                  color = Text_light,
+                  style = MaterialTheme.typography.bodyLarge,
+                  fontWeight = FontWeight.Bold)
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            ProfilCardKlein()
-            Spacer(modifier = Modifier.height(4.dp))
 
+            Spacer(modifier = Modifier.width(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                  painter = painterResource(id = R.drawable.ic_schedule_24px),
+                  tint = Text_light,
+                  contentDescription = "Icon Uhrzeit")
+              Spacer(modifier = Modifier.width(4.dp))
+              Text(
+                  text = "16:30 Uhr (90Min.)",
+                  color = Text_light,
+                  style = MaterialTheme.typography.bodyLarge,
+                  fontWeight = FontWeight.Bold)
+            }
+          }
+          Spacer(modifier = Modifier.height(8.dp))
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Outlined.Place,
+                tint = Text_light,
+                contentDescription = "Icon Standort")
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "Sitzungssaal 1",
+                color = Text_light,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold)
+          }
+          Spacer(modifier = Modifier.height(8.dp))
+          ProfilCardKlein()
+          Spacer(modifier = Modifier.height(4.dp))
         }
-    }
+      }
 }
 
 @Composable
 fun ProfilCardKlein() {
-    val name = "T"
-    Row() {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(Background_secondary_light)
-        ) {
-            // Buchstabe in Box (round)
-            Text(
-                text = name,
-                color = Color(0xff1a1c15),
-                fontSize = 18.sp,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold
-            )
-
+  val name = "T"
+  Row() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.size(40.dp).clip(CircleShape).background(Background_secondary_light)) {
+          // Buchstabe in Box (round)
+          Text(
+              text = name,
+              color = Color(0xff1a1c15),
+              fontSize = 18.sp,
+              style = MaterialTheme.typography.bodyLarge,
+              fontWeight = FontWeight.Bold)
         }
-        Spacer(modifier = Modifier.width(4.dp))
-        Column(
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-        ){
-            Text(
-                text = "Thorsten Teebeutel",
-                color = Color(0xff1a1c15),
-                fontSize = 18.sp,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Sitzungsleiter",     //ToDo - Rolle anpassen
-                color = Color(0xff1a1c15),
-                fontSize = 12.sp,
-            )
-        }
-
+    Spacer(modifier = Modifier.width(4.dp))
+    Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+      Text(
+          text = "Thorsten Teebeutel",
+          color = Color(0xff1a1c15),
+          fontSize = 18.sp,
+          style = MaterialTheme.typography.bodyLarge,
+          fontWeight = FontWeight.Bold)
+      Text(
+          text = "Sitzungsleiter", // ToDo - Rolle anpassen
+          color = Color(0xff1a1c15),
+          fontSize = 12.sp,
+      )
     }
+  }
 }

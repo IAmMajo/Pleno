@@ -1,6 +1,5 @@
 package com.example.kivopandriod.pages
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,64 +32,59 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
 var couroutineScope = CoroutineScope(Dispatchers.IO)
 
 @Composable
-fun LoginScreen(navController: NavController){
-    val auth = AuthApi(navController.context)
-    Column(modifier = Modifier
-        .background(color = Background_light)
-        .padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-        ){
-        //TODO: CHANGE LOGIN PAGE!!!
+fun LoginScreen(navController: NavController) {
+  val auth = AuthApi(navController.context)
+  Column(
+      modifier = Modifier.background(color = Background_light).padding(12.dp),
+      horizontalAlignment = Alignment.CenterHorizontally) {
+        // TODO: CHANGE LOGIN PAGE!!!
         val annotatedString = buildAnnotatedString {
-            append("Log dich in deinen ")
-            withStyle(style = SpanStyle(color = Primary_dark)) {
-                append("Account")
-            }
-            append(" ein!")
+          append("Log dich in deinen ")
+          withStyle(style = SpanStyle(color = Primary_dark)) { append("Account") }
+          append(" ein!")
         }
-        Text(text = annotatedString,fontSize = 24.sp, color = Text_light,fontWeight = FontWeight.Bold)
+        Text(
+            text = annotatedString,
+            fontSize = 24.sp,
+            color = Text_light,
+            fontWeight = FontWeight.Bold)
         Column(
-            modifier = Modifier
-                .fillMaxHeight(),
-
+            modifier = Modifier.fillMaxHeight(),
             verticalArrangement = Arrangement.Center,
         ) {
-            var username by remember { mutableStateOf("") }
-            CustomInputField(
-                label = "Username",
-                placeholder = "Enter your username",
-                horizontalPadding = 0.dp,
-                verticalPadding = 0.dp,
-                value = username,
-                onValueChange = {username = it}
-            )
-            Spacer(Modifier.size(12.dp))
-            var password by remember { mutableStateOf("")}
-            CustomInputField(
-                label = "Passwort",
-                placeholder = "Enter your passwort",
-                isPasswort = true,
-                horizontalPadding = 0.dp,
-                verticalPadding = 0.dp,
-                value = password,
-                onValueChange = {password = it}
-            )
-            Spacer(Modifier.size(12.dp))
-            CustomButton(
-                text = "Login",
-                onClick = {
-                    couroutineScope.launch {
-                        auth.login("admin@kivop.ipv64.net", "admin")
-                        //navController.navigate("home")
-                    }
-                    navController.navigate("home")
-                },
-                color = Primary_dark,
-                fontColor = Text_light)
+          var username by remember { mutableStateOf("") }
+          CustomInputField(
+              label = "Username",
+              placeholder = "Enter your username",
+              horizontalPadding = 0.dp,
+              verticalPadding = 0.dp,
+              value = username,
+              onValueChange = { username = it })
+          Spacer(Modifier.size(12.dp))
+          var password by remember { mutableStateOf("") }
+          CustomInputField(
+              label = "Passwort",
+              placeholder = "Enter your passwort",
+              isPasswort = true,
+              horizontalPadding = 0.dp,
+              verticalPadding = 0.dp,
+              value = password,
+              onValueChange = { password = it })
+          Spacer(Modifier.size(12.dp))
+          CustomButton(
+              text = "Login",
+              onClick = {
+                couroutineScope.launch {
+                  auth.login("admin@kivop.ipv64.net", "admin")
+                  // navController.navigate("home")
+                }
+                navController.navigate("home")
+              },
+              color = Primary_dark,
+              fontColor = Text_light)
         }
-    }
+      }
 }
