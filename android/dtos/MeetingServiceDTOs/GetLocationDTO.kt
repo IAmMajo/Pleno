@@ -1,7 +1,7 @@
 package net.ipv64.kivop.dtos
 
 data class GetLocationDTO (
-    var id : Uuid,
+    var id : UUID,
     var name : String,
     var street : String,
     var number : String,

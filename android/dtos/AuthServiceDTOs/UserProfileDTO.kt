@@ -1,7 +1,7 @@
 package net.ipv64.kivop.dtos
 
 data class UserProfileDTO (
-    var uid : Uuid?,
+    var uid : UUID?,
     var email : String?,
     var name : String?,
     var profileImage : Data?,

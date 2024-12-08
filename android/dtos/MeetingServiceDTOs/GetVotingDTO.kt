@@ -1,8 +1,8 @@
 package net.ipv64.kivop.dtos
 
 data class GetVotingDTO (
-    var id : Uuid,
-    var meetingId : Uuid,
+    var id : UUID,
+    var meetingId : UUID,
     var question : String,
     var description : String,
     var isOpen : Boolean,

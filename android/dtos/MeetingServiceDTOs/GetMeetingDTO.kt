@@ -1,7 +1,7 @@
 package net.ipv64.kivop.dtos
 
 data class GetMeetingDTO (
-    var id : Uuid,
+    var id : UUID,
     var name : String,
     var description : String,
     var status : MeetingStatus, 

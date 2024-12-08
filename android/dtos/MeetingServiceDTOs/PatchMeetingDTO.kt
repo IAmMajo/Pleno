@@ -5,6 +5,6 @@ data class PatchMeetingDTO (
     var description : String?,
     var start : Date?,
     var duration : UShort?,
-    var locationId : Uuid?,
+    var locationId : UUID?,
     var location : CreateLocationDTO?,
 )
