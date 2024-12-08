@@ -4,3 +4,4 @@ KIVoP-ios.xcodeproj/
 *.xcuserstate
 .swiftpm
 .DS_Store
+.env

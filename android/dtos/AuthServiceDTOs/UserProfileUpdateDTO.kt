@@ -1,5 +1,7 @@
-public data class UserProfileUpdateDTO {
-    public var name : String?
-    public var isActive : Boolean?
-    public var isAdmin : Boolean?
-}
+package net.ipv64.kivop.dtos
+
+data class UserProfileUpdateDTO (
+    var name : String?,
+    var isActive : Boolean?,
+    var isAdmin : Boolean?,
+)
