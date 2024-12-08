@@ -1,3 +1,5 @@
-public data class TokenResponseDTO {
-    public var token : String?
-}
+package net.ipv64.kivop.dtos
+
+data class TokenResponseDTO (
+    var token : String?,
+)
