@@ -7,6 +7,10 @@ func routes(_ app: Application) throws {
     
     // Presentation routes
     
+    app.get { req in
+        req.redirect(to: "/homepage/de")
+    }
+    
     app.get("**") { req in
         req.redirect(to: "/homepage/de")
     }
