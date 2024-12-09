@@ -16,24 +16,25 @@ struct EditVotingView: View {
     var body: some View {
         NavigationView {
             Form {
+                // Frage
                 Section(header: Text("Frage")) {
                     TextField("Frage eingeben", text: $question)
-                        .textFieldStyle(DefaultTextFieldStyle())
+                        .autocapitalization(.sentences)
                 }
 
+                // Beschreibung
                 Section(header: Text("Beschreibung")) {
                     TextField("Beschreibung eingeben", text: $description)
-                        .textFieldStyle(DefaultTextFieldStyle())
+                        .autocapitalization(.sentences)
                 }
 
+                // Optionen
                 Section(header: Text("Optionen")) {
                     ForEach($options.indices, id: \.self) { index in
                         HStack {
                             TextField("Option \(index + 1)", text: $options[index])
-                                .textFieldStyle(DefaultTextFieldStyle())
-
-                            // Löschen-Button nur für leere Felder
-                            if options[index].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            
+                            if options.count > 1 {
                                 Button(action: {
                                     options.remove(at: index)
                                 }) {
@@ -43,12 +44,8 @@ struct EditVotingView: View {
                             }
                         }
                     }
-                    .onDelete { indexSet in
-                        options.remove(atOffsets: indexSet)
-                    }
-
-                    Button("Option hinzufügen") {
-                        options.append("")
+                    Button(action: { options.append("") }) {
+                        Label("Option hinzufügen", systemImage: "plus")
                     }
                 }
 
@@ -88,10 +85,8 @@ struct EditVotingView: View {
         isSaving = true
         errorMessage = nil
 
-        // Leere Optionen entfernen
         let filteredOptions = options.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
-        // Daten vorbereiten
         let patchVoting = PatchVotingDTO(
             question: question,
             description: description.isEmpty ? nil : description,
@@ -101,7 +96,6 @@ struct EditVotingView: View {
             }
         )
 
-        // Backend-Aufruf
         VotingService.shared.patchVoting(votingId: voting.id, patch: patchVoting) { result in
             DispatchQueue.main.async {
                 isSaving = false
@@ -121,8 +115,8 @@ struct EditVotingView: View {
                             GetVotingOptionDTO(index: UInt8(index + 1), text: text)
                         }
                     )
-                    onSave(updatedVoting) // Änderungen weitergeben
-                    dismiss() // View schließen
+                    onSave(updatedVoting)
+                    dismiss()
                 case .failure(let error):
                     errorMessage = "Fehler beim Speichern der Umfrage: \(error.localizedDescription)"
                 }

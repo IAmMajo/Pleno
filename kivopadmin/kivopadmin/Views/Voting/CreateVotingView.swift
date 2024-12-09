@@ -18,12 +18,23 @@ struct CreateVotingView: View {
                 // Meeting-Auswahl
                 Section(header: Text("Meeting auswählen")) {
                     if !meetingManager.meetings.isEmpty {
-                        Picker("Meeting", selection: $selectedMeetingId) {
+                        Menu {
                             ForEach(meetingManager.meetings.filter { $0.status == .inSession }, id: \.id) { meeting in
-                                Text(meeting.name).tag(meeting.id as UUID?)
+                                Button(action: {
+                                    selectedMeetingId = meeting.id
+                                }) {
+                                    Text(meeting.name)
+                                }
+                            }
+                        } label: {
+                            HStack {
+                                Text(selectedMeetingName())
+                                    .foregroundColor(selectedMeetingId == nil ? .gray : .primary)
+                                Spacer()
+                                Image(systemName: "chevron.down")
+                                    .foregroundColor(.gray)
                             }
                         }
-                        .pickerStyle(MenuPickerStyle())
                     } else {
                         Text("Meetings werden geladen...")
                             .foregroundColor(.gray)
@@ -57,12 +68,18 @@ struct CreateVotingView: View {
                 // Optionen
                 Section(header: Text("Optionen")) {
                     ForEach($options.indices, id: \.self) { index in
-                        TextField("Option \(index + 1)", text: $options[index])
-                    }
-                    .onDelete { indexSet in
-                        options.remove(atOffsets: indexSet)
-                        if options.isEmpty { options.append("") }
-                        print("Aktuelle Optionen: \(options)")
+                        HStack {
+                            TextField("Option \(index + 1)", text: $options[index])
+                            
+                            if options.count > 1 {
+                                Button(action: {
+                                    options.remove(at: index)
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
+                                }
+                            }
+                        }
                     }
                     Button(action: { options.append("") }) {
                         Label("Option hinzufügen", systemImage: "plus")
@@ -84,6 +101,13 @@ struct CreateVotingView: View {
                 meetingManager.fetchAllMeetings()
             }
         }
+    }
+    
+    private func selectedMeetingName() -> String {
+        if let meeting = meetingManager.meetings.first(where: { $0.id == selectedMeetingId }) {
+            return meeting.name
+        }
+        return "Meeting auswählen"
     }
     
     private func createVoting() {
