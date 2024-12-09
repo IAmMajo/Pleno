@@ -9,6 +9,7 @@ struct RideController: RouteCollection {
         let rideRoutes = routes.grouped("rides")
         let adminRideRoutes = rideRoutes.grouped(AdminMiddleware())
         rideRoutes.get("", use: getAllRides)
+        rideRoutes.get(":id", "participate", use: getParticipate)
         rideRoutes.post(":id", "participate", use: newParticipate)
         adminRideRoutes.post("", use: newRide)
         
@@ -38,6 +39,24 @@ struct RideController: RouteCollection {
         try await ride.save(on: req.db)
         
         return .ok
+    }
+    
+    @Sendable
+    func getParticipate(req: Request) async throws -> ParticipateDTO {
+        // parse ride id as UUID
+        guard let ride_id = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing ride ID")
+        }
+        
+        guard let participat = try await Participant.query(on: req.db)
+            .filter(\.$user.$id == req.jwtPayload.userID)
+            .filter(\.$ride.$id == ride_id)
+            .first()
+        else {
+            throw Abort(.notFound, reason: "No participation found!")
+        }
+        
+        return participat.toParticipateDTO()
     }
     
     @Sendable

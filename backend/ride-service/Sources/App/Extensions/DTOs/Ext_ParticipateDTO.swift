@@ -1,7 +1,7 @@
 import Foundation
 import Vapor
 
-extension ParticipateDTO {
+extension ParticipateDTO: @retroactive Content {
     func isValid() -> Bool {
         // wenn kein driver, passenger_count sollte nil sein
         if !self.driver {
