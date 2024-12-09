@@ -11,6 +11,7 @@ struct RideController: RouteCollection {
         rideRoutes.get("", use: getAllRides)
         rideRoutes.get(":id", "participate", use: getParticipate)
         rideRoutes.post(":id", "participate", use: newParticipate)
+        rideRoutes.delete(":id", "participate", use: deleteParticipate)
         adminRideRoutes.post("", use: newRide)
         
     }
@@ -100,4 +101,19 @@ struct RideController: RouteCollection {
         return .ok
     }
     
+    @Sendable
+    func deleteParticipate(req: Request) async throws -> HTTPStatus {
+        // parse ride id as UUID
+        guard let ride_id = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing ride ID")
+        }
+        
+        // delete participant
+        try await Participant.query(on: req.db)
+            .filter(\.$user.$id == req.jwtPayload.userID)
+            .filter(\.$ride.$id == ride_id)
+            .delete()
+        
+        return .ok
+    }
 }
