@@ -14,8 +14,12 @@ struct RideController: RouteCollection {
     }
     
     @Sendable
-    func getAllRides(req: Request) async throws -> HTTPStatus {
-        return .ok
+    func getAllRides(req: Request) async throws -> [GetRideOverviewDTO] {
+        let rides = try await Ride.query(on: req.db).all().map{ ride in
+            try ride.toGetRideOverviewDTO()
+        }
+        
+        return rides
     }
     
     @Sendable
