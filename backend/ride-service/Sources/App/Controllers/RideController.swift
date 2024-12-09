@@ -11,6 +11,7 @@ struct RideController: RouteCollection {
         rideRoutes.get("", use: getAllRides)
         rideRoutes.get(":id", "participate", use: getParticipate)
         rideRoutes.post(":id", "participate", use: newParticipate)
+        rideRoutes.patch(":id", "participate", use: patchParticipate)
         rideRoutes.delete(":id", "participate", use: deleteParticipate)
         adminRideRoutes.post("", use: newRide)
         
@@ -97,6 +98,36 @@ struct RideController: RouteCollection {
         
         // save participant
         try await participant.save(on: req.db)
+        
+        return .ok
+    }
+    
+    @Sendable
+    func patchParticipate(req: Request) async throws -> HTTPStatus {
+        // parse DTO
+        guard let patchParticipateDTO = try? req.content.decode(PatchParticipateDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected PatchParticipateDTO.")
+        }
+        
+        // parse ride id as UUID
+        guard let ride_id = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing ride ID")
+        }
+        
+        // get participant
+        guard let participat = try await Participant.query(on: req.db)
+            .filter(\.$user.$id == req.jwtPayload.userID)
+            .filter(\.$ride.$id == ride_id)
+            .first()
+        else {
+            throw Abort(.notFound, reason: "No participation found!")
+        }
+        
+        // try to update Participant
+        try participat.patchWithDTO(dto: patchParticipateDTO)
+        
+        // save changes
+        try await participat.update(on: req.db)
         
         return .ok
     }
