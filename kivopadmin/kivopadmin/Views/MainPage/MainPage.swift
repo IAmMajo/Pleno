@@ -235,6 +235,8 @@ struct MainPage: View {
                             .padding()
                     case .nutzerverwaltung:
                         NutzerverwaltungView()
+                    case .umfrage:
+                        VotingListView()
                     case .funktionen:
                         FunktionenView()
                     case .meetingAdmin:
@@ -391,6 +393,7 @@ enum SidebarOption {
     case vereinseinstellungen
     case nutzerverwaltung
     case funktionen
+    case umfrage
     case meetingAdmin
 }
 
