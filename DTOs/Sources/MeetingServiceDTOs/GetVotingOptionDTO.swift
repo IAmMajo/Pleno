@@ -1,5 +1,3 @@
-import Foundation
-
 public struct GetVotingOptionDTO: Codable {
     public var index: UInt8
     public var text: String

@@ -1,6 +1,11 @@
-public data class UserProfileDTO {
-    public var email : String?
-    public var name : String?
-    public var isAdmin : Boolean?
-    public var createdAt : Date?
-}
+package net.ipv64.kivop.dtos
+
+data class UserProfileDTO (
+    var uid : UUID?,
+    var email : String?,
+    var name : String?,
+    var profileImage : Data?,
+    var isAdmin : Boolean?,
+    var isActive : Boolean?,
+    var createdAt : Date?,
+)

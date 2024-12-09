@@ -13,6 +13,12 @@ struct MainPage: View {
     @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
 
+    @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
+    
+    private var User: String {
+        Name.components(separatedBy: " ").first ?? ""
+    }
+    
     var body: some View {
         NavigationView {
             HStack(spacing: 0) {
@@ -97,6 +103,30 @@ struct MainPage: View {
                             }) {
                                 sidebarButton(icon: "chart.bar.fill", title: "Umfragen", isSelected: selectedView == .umfrage)
                             }
+                            .padding(.horizontal, 24)
+                            
+                            Button(action: {
+                                selectedView = .meetingAdmin
+                            }) {
+                                HStack(alignment: .center, spacing: 15) {
+                                    Image(systemName: "calendar.badge.clock")
+                                        .foregroundColor(.accentColor)
+                                        .frame(width: 20)
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Sitzungen verwalten")
+                                            .foregroundColor(Color.primary)
+                                            .multilineTextAlignment(.leading)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: selectedView == .funktionen ? "chevron.down" : "chevron.right")
+                                        .foregroundColor(Color.secondary)
+                                }
+                            }
+                            .padding(.horizontal, 24)
                         }
                         .padding(.top, 10)
                     }
@@ -104,9 +134,94 @@ struct MainPage: View {
                     Spacer()
 
                     // Box für Sitzung am unteren Rand
-                    if meetingExists {
-                        meetingBox
+                    if let currentMeeting = meetingManager.currentMeeting {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text(currentMeeting.name)
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            
+                            HStack {
+                                Image(systemName: "calendar")
+                                    .foregroundColor(.white)
+                                Text(formattedDate(currentMeeting.start))
+                                    .foregroundColor(.white)
+                                
+                                Spacer()
+                                
+                                HStack(spacing: 4) {
+                                    Text("10") // Beispiel für Teilnehmeranzahl, aktualisiere je nach Daten
+                                        .foregroundColor(.white)
+                                    Image(systemName: "person.3")
+                                        .foregroundColor(.white)
+                                }
+                            }
+                            
+                            HStack {
+                                Image(systemName: "clock")
+                                    .foregroundColor(.white)
+                                Text(formattedTime(currentMeeting.start))
+                                    .foregroundColor(.white)
+                                
+                                Spacer()
+                            }
+                            
+                            Button(action: {
+                                // Aktion für aktuelle Sitzung
+                                print("Navigiere zur aktuellen Sitzung \(currentMeeting.name)")
+                            }) {
+                                Text("Zur aktuellen Sitzung")
+                                    .font(.footnote)
+                                    .fontWeight(.bold)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color(UIColor.systemBackground))
+                                    .foregroundColor(.accentColor)
+                                    .cornerRadius(10)
+                            }
+                        }
+                        .padding()
+                        .background(LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.8), Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .cornerRadius(15)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 20)
+                        
+                        Button(action: {
+                            meetingManager.fetchAllMeetings()
+                        }) {
+                            HStack {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.headline)
+                                Text("Neu laden")
+                                    .font(.headline)
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
+                    } else {
+                        // Optionale Ansicht, wenn kein aktuelles Meeting verfügbar ist
+                        Text("Keine aktuelle Sitzung verfügbar")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                        Button(action: {
+                            meetingManager.fetchAllMeetings()
+                        }) {
+                            HStack {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.headline)
+                                Text("Neu laden")
+                                    .font(.headline)
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
                     }
+
                 }
                 .frame(width: 320) // Feste Breite für Seitenleiste
                 .background(Color(UIColor.systemBackground)) // Dynamische Hintergrundfarbe für Dark/Light Mode
@@ -122,9 +237,10 @@ struct MainPage: View {
                         NutzerverwaltungView()
                     case .funktionen:
                         FunktionenView()
-                    case .umfrage:
-                        VotingListView()
+                    case .meetingAdmin:
+                        MeetingAdminView()
                     }
+
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(UIColor.systemGroupedBackground))
@@ -138,6 +254,19 @@ struct MainPage: View {
             loadCurrentMeeting()
         }
     }
+    
+    func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+
+    func formattedTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+
 
     // MARK: - Sidebar Button Helper
     private func sidebarButton(icon: String, title: String, isSelected: Bool) -> some View {
@@ -262,7 +391,7 @@ enum SidebarOption {
     case vereinseinstellungen
     case nutzerverwaltung
     case funktionen
-    case umfrage
+    case meetingAdmin
 }
 
 struct ContentView_Previews: PreviewProvider {

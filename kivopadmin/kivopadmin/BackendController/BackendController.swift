@@ -9,13 +9,7 @@ class BackendController: ObservableObject {
     
     private var cancellables: Set<AnyCancellable> = []
     
-    // Funktion zum Abrufen der Nutzerdaten
-    func fetchUsers() {
-        // Hier sollte die Backend-Logik zum Abrufen der Nutzerdaten stehen
-        // Zum Beispiel: API-Aufruf zum Server
-        // Beispiel für Dummy-Daten:
-        self.users = ["Max Mustermann", "Maxine Musterfrau", "Maximilian Musterkind"]
-    }
+    // Funktion zum Abrufen der Nutzerdate
     
     // Funktion zum Abrufen der ausstehenden Anfragen
     func fetchPendingRequests() {

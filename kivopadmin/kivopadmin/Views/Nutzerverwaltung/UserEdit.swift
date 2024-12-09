@@ -1,10 +1,12 @@
 import SwiftUI
+import AuthServiceDTOs
 
-// Neue Ansicht, in der der Benutzer bearbeitet werden kann
 struct UserEditView: View {
-    @Binding var user: String
+    @Binding var user: UserProfileDTO // Benutzer-Objekt als Binding
     @Binding var selectedRole: String
     @Binding var wip: String
+
+    @State private var name: String = "" // Initial leer
     
     let roles = ["Nutzer", "Protokollant", "Admin", "Prüfer"]
 
@@ -15,8 +17,8 @@ struct UserEditView: View {
                     .fill(Color.gray)
                     .frame(width: 110, height: 110)
                     .overlay(
-                        Text(user.prefix(2))
-                            .font(.system(size: 50, weight: .bold)) // Schriftgröße festlegen
+                        Text(user.name?.prefix(2) ?? "NN") // Sicherstellen, dass kein nil verwendet wird
+                            .font(.system(size: 50, weight: .bold))
                             .foregroundColor(.white)
                     )
                 
@@ -24,13 +26,14 @@ struct UserEditView: View {
                     .font(.caption)
                     .foregroundColor(.blue)
             }
+            
+            // Name bearbeiten
             HStack {
                 Text("Name")
                 Spacer()
-                TextField("Name bearbeiten", text: $user)
+                TextField("Name bearbeiten", text: $name)
                     .foregroundColor(.blue)
-                    .cornerRadius(5)
-                    .multilineTextAlignment(.trailing) // Text im TextField rechtsbündig ausrichten
+                    .multilineTextAlignment(.trailing)
             }
 
             Divider()
@@ -44,37 +47,42 @@ struct UserEditView: View {
                         Text(role)
                     }
                 }
-                .pickerStyle(MenuPickerStyle()) // Der Picker erscheint als Dropdown
+                .pickerStyle(MenuPickerStyle())
             }
 
             Divider()
 
-            // WIP bearbeiten (TextField)
+            // WIP bearbeiten
             HStack {
                 Text("WIP")
                 Spacer()
                 TextField("WIP bearbeiten", text: $wip)
                     .foregroundColor(.blue)
-                    .cornerRadius(5)
-                    .multilineTextAlignment(.trailing) // Text im TextField rechtsbündig ausrichten
+                    .multilineTextAlignment(.trailing)
             }
+            
             Spacer()
-
-
+            
+            // Löschen-Button
             Button("Account löschen") {
-                // Account löschen
-                
+                // Account löschen (Aktion hinzufügen)
             }
             .padding()
             .frame(width: 400)
             .background(Color.red)
             .foregroundColor(.white)
             .cornerRadius(10)
-            Divider()
-            Text("Änderungen speichern")
-                .foregroundStyle(.blue)
+            
+            // Speichern
+            Button("Änderungen speichern") {
+                user.name = name // Aktualisiert den gebundenen Wert
+            }
+            .foregroundColor(.blue)
         }
         .padding()
-    
+        .onAppear {
+            // Initialisiere name mit dem aktuellen Wert von user.name
+            name = user.name ?? ""
+        }
     }
 }
