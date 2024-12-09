@@ -29,6 +29,10 @@ struct UserController: RouteCollection {
         protectedRoutes.get("profile-image", "identity", ":id", use: self.getImageIdentity)
         // GET /users/profile-image/user/:user_id
         protectedRoutes.get("profile-image", "user", ":id", use: self.getImageUser)
+        // GET /users/identites
+        protectedRoutes.get("identities", use: self.userGetIdentities)
+        // DELETE /users/delete
+        protectedRoutes.delete("delete", use: self.userDeleteEntry)
     }
     
     @Sendable
@@ -359,5 +363,45 @@ struct UserController: RouteCollection {
         }
         return Response(status: .ok, body: .init(data: user.profileImage ?? Data()))
     }
-
+    
+    @Sendable
+    func userGetIdentities(req: Request) async throws -> [Identity] {
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        let identities = try await Identity.query(on: req.db)
+            .join(IdentityHistory.self, on: \Identity.$id == \IdentityHistory.$identity.$id)
+            .filter(IdentityHistory.self, \.$user.$id == payload.userID)
+            .all()
+        guard !identities.isEmpty else {
+            throw Abort(.notFound, reason: "No identities found for user")
+        }
+        return identities
+    }
+    
+    @Sendable
+    func userDeleteEntry(req: Request) async throws -> Response {
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$id == payload.userID!)
+            .first() else {
+            throw Abort(.notFound, reason: "User not found")
+        }
+        if user.isAdmin {
+            let adminCount = try await User.query(on: req.db)
+                .filter(\.$isAdmin == true)
+                .count()
+            if adminCount <= 1 {
+                throw Abort(.forbidden, reason: "Cannot delete the last admin user")
+            }
+        }
+        do {
+            try await user.delete(on: req.db)
+            return Response(status: .noContent)
+        } catch {
+            throw Abort(.internalServerError, reason: "Error deleting user: \(error.localizedDescription)")
+        }
+    }
 }
