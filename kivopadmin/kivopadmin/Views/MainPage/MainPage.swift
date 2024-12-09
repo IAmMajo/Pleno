@@ -1,11 +1,17 @@
 import SwiftUI
 
 struct MainPage: View {
-    @State private var Name: String = "Max Mustermann"
-    @State private var ShortName: String = "V"
-    @State private var Meeting: String = "Jahreshauptversammlung"
+    @State private var name: String = ""
+    @State private var shortName: String = "V"
+    @State private var meeting: String = ""
+    @State private var meetingDate: String = ""
+    @State private var meetingTime: String = ""
+    @State private var attendeesCount: Int = 0
+    @State private var meetingExists: Bool = false
     @State private var selectedView: SidebarOption = .nutzerverwaltung
     @State private var isAdminExpanded: Bool = true
+    @State private var isLoading: Bool = true
+    @State private var errorMessage: String? = nil
 
     @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
     
@@ -20,19 +26,19 @@ struct MainPage: View {
                 VStack(alignment: .leading, spacing: 0) {
                     // Begrüßungsbereich
                     VStack(alignment: .leading, spacing: 5) {
-                        Text("Hallo Admin, \(User)")
+                        Text("Hallo Admin, \(name.components(separatedBy: " ").first ?? "Admin")")
                             .font(.title)
                             .fontWeight(.bold)
                             .foregroundColor(Color.primary)
-                        
+
                         HStack {
                             Text("Adminbereich")
                                 .font(.caption)
                                 .bold()
                                 .foregroundColor(Color.secondary)
-                            
+
                             Spacer()
-                            
+
                             Button(action: {
                                 isAdminExpanded.toggle()
                             }) {
@@ -44,7 +50,7 @@ struct MainPage: View {
                     }
                     .padding(.horizontal, 24)
                     .padding(.top, 30)
-                    
+
                     // Einklappbarer Adminbereich
                     if isAdminExpanded {
                         // Bereich für "Vereinseinstellungen"
@@ -55,8 +61,8 @@ struct MainPage: View {
                                 Circle()
                                     .fill(Color.gray.opacity(0.8))
                                     .frame(width: 50, height: 50)
-                                    .overlay(Text(ShortName).foregroundColor(.white).font(.caption))
-                                
+                                    .overlay(Text(shortName).foregroundColor(.white).font(.caption))
+
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("Vereinseinstellungen")
                                         .font(.headline)
@@ -66,9 +72,9 @@ struct MainPage: View {
                                         .lineLimit(1)
                                         .foregroundColor(Color.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: selectedView == .vereinseinstellungen ? "chevron.down" : "chevron.right")
                                     .foregroundColor(Color.secondary)
                             }
@@ -77,45 +83,25 @@ struct MainPage: View {
                             .cornerRadius(15)
                             .padding(.bottom, 10)
                         }
-                        
+
                         // Optionen in der Seitenleiste
                         VStack(alignment: .leading, spacing: 15) {
                             Button(action: {
                                 selectedView = .nutzerverwaltung
                             }) {
-                                HStack(alignment: .center, spacing: 15) {
-                                    Image(systemName: "person.3.fill")
-                                        .foregroundColor(.accentColor)
-                                        .frame(width: 20)
-                                    Text("Nutzerverwaltung")
-                                        .foregroundColor(Color.primary)
-                                    Spacer()
-                                    Image(systemName: selectedView == .nutzerverwaltung ? "chevron.down" : "chevron.right")
-                                        .foregroundColor(Color.secondary)
-                                }
+                                sidebarButton(icon: "person.3.fill", title: "Nutzerverwaltung", isSelected: selectedView == .nutzerverwaltung)
                             }
-                            .padding(.horizontal, 24)
-                            
+
                             Button(action: {
                                 selectedView = .funktionen
                             }) {
-                                HStack(alignment: .center, spacing: 15) {
-                                    Image(systemName: "gearshape.fill")
-                                        .foregroundColor(.accentColor)
-                                        .frame(width: 20)
-                                    
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("Konfiguration der Funktionen")
-                                            .foregroundColor(Color.primary)
-                                            .multilineTextAlignment(.leading)
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    
-                                    Spacer()
-                                    
-                                    Image(systemName: selectedView == .funktionen ? "chevron.down" : "chevron.right")
-                                        .foregroundColor(Color.secondary)
-                                }
+                                sidebarButton(icon: "gearshape.fill", title: "Konfiguration der Funktionen", isSelected: selectedView == .funktionen)
+                            }
+
+                            Button(action: {
+                                selectedView = .umfrage
+                            }) {
+                                sidebarButton(icon: "chart.bar.fill", title: "Umfragen", isSelected: selectedView == .umfrage)
                             }
                             .padding(.horizontal, 24)
                             
@@ -144,9 +130,9 @@ struct MainPage: View {
                         }
                         .padding(.top, 10)
                     }
-                    
+
                     Spacer()
-                    
+
                     // Box für Sitzung am unteren Rand
                     if let currentMeeting = meetingManager.currentMeeting {
                         VStack(alignment: .leading, spacing: 10) {
@@ -239,7 +225,7 @@ struct MainPage: View {
                 }
                 .frame(width: 320) // Feste Breite für Seitenleiste
                 .background(Color(UIColor.systemBackground)) // Dynamische Hintergrundfarbe für Dark/Light Mode
-                
+
                 // Hauptanzeige rechts
                 VStack {
                     switch selectedView {
@@ -257,13 +243,16 @@ struct MainPage: View {
 
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(UIColor.systemBackground)) // Hintergrund für Dark/Light Mode
+                .background(Color(UIColor.systemGroupedBackground))
             }
             .navigationBarHidden(true)
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .navigationBarBackButtonHidden(true)
-
+        .onAppear {
+            loadUserProfile()
+            loadCurrentMeeting()
+        }
     }
     
     func formattedDate(_ date: Date) -> String {
@@ -279,6 +268,123 @@ struct MainPage: View {
     }
 
 
+    // MARK: - Sidebar Button Helper
+    private func sidebarButton(icon: String, title: String, isSelected: Bool) -> some View {
+        HStack(spacing: 15) {
+            Image(systemName: icon)
+                .foregroundColor(isSelected ? .blue : .accentColor)
+                .frame(width: 20)
+
+            Text(title)
+                .foregroundColor(isSelected ? .blue : Color.primary)
+
+            Spacer()
+
+            Image(systemName: isSelected ? "chevron.down" : "chevron.right")
+                .foregroundColor(isSelected ? .blue : Color.secondary)
+        }
+        .padding(.horizontal, 24)
+    }
+
+    // MARK: - Meeting Box
+    private var meetingBox: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(meeting)
+                .font(.headline)
+                .foregroundColor(.white)
+
+            HStack {
+                Image(systemName: "calendar")
+                    .foregroundColor(.white)
+                Text(meetingDate)
+                    .foregroundColor(.white)
+
+                Spacer()
+
+                HStack(spacing: 4) {
+                    Text("\(attendeesCount)")
+                        .foregroundColor(.white)
+                    Image(systemName: "person.3")
+                        .foregroundColor(.white)
+                }
+            }
+
+            HStack {
+                Image(systemName: "clock")
+                    .foregroundColor(.white)
+                Text(meetingTime)
+                    .foregroundColor(.white)
+
+                Spacer()
+            }
+
+            Button(action: {
+                // Aktion für aktuelle Sitzung
+            }) {
+                Text("Zur aktuellen Sitzung")
+                    .font(.footnote)
+                    .fontWeight(.bold)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color(UIColor.systemBackground))
+                    .foregroundColor(.accentColor)
+                    .cornerRadius(10)
+            }
+        }
+        .padding()
+        .background(LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.8), Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing))
+        .cornerRadius(15)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 20)
+    }
+
+    // MARK: - API-Logik
+    private func loadUserProfile() {
+        MainPageAPI.fetchUserProfile { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let profile):
+                    name = profile.name ?? "Admin"
+                    shortName = MainPageAPI.calculateShortName(from: profile.name ?? "A")
+                case .failure(let error):
+                    errorMessage = "Fehler beim Laden des Profils: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+
+    private func loadCurrentMeeting() {
+        MainPageAPI.fetchCurrentMeeting { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let meeting):
+                    if let meeting = meeting {
+                        self.meetingExists = true
+                        self.meeting = meeting.name
+                        self.meetingDate = formatDate(meeting.start)
+                        self.meetingTime = formatTime(meeting.start)
+                        self.attendeesCount = Int(meeting.duration ?? 0)
+                    } else {
+                        self.meetingExists = false
+                    }
+                case .failure:
+                    self.meetingExists = false
+                }
+            }
+        }
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+
+    private func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
 }
 
 enum SidebarOption {
@@ -287,6 +393,18 @@ enum SidebarOption {
     case funktionen
     case meetingAdmin
 }
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        MainPage()
+    }
+}
+
+
+
+
+
+
 
 
 
@@ -298,8 +416,3 @@ struct FunktionenView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainPage()
-    }
-}

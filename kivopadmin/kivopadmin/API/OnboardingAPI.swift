@@ -2,7 +2,6 @@
 //  OnboardingAPI.swift
 //  KIVoP-ios
 //
-//  Created by Amine Ahamri on 25.11.24.
 //
 
 import Foundation
