@@ -20,7 +20,6 @@ public func configure(_ app: Application) async throws {
     ), as: .psql)
     
     app.migrations.add(CreateRide())
-    app.migrations.add(CreateParticipantLocation())
     app.migrations.add(CreateParticipant())
 
     app.jwt.signers.use(.hs256(key: "Ganzgeheimespasswort"))
