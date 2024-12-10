@@ -16,9 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.kivopandriod.components.TermindCard
-import com.example.kivopandriod.components.TermindData
-import com.example.kivopandriod.navigation
+import com.example.kivopandriod.components.ListenItem
+import com.example.kivopandriod.moduls.AttendancesListsData
 import java.time.LocalDateTime
 
 @Composable
@@ -50,12 +49,12 @@ fun GenerateTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int)
       }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+
 @Composable
 fun AppointmentTabContent(
     navigation: NavController,
     tabs: List<String>,
-    appointments: List<TermindData>
+    appointments: List<AttendancesListsData>
 ) {
   var selectedTabIndex by remember { mutableStateOf(0) }
   val now = LocalDateTime.now() // Aktuelles Datum und Uhrzeit
@@ -74,8 +73,8 @@ fun AppointmentTabContent(
               appointments.filter { LocalDateTime.of(it.date, it.time) >= now }
           if (upcomingAppointments.isNotEmpty()) {
             items(upcomingAppointments.size) { index ->
-              TermindCard(
-                  termindData = upcomingAppointments[index],
+              ListenItem(
+                  attendancesListsData = upcomingAppointments[index],
                   onClick = {
                     navigation.navigate("anwesenheit/${upcomingAppointments[index].id}")
                   })
@@ -90,8 +89,8 @@ fun AppointmentTabContent(
           val pastAppointments = appointments.filter { LocalDateTime.of(it.date, it.time) < now }
           if (pastAppointments.isNotEmpty()) {
             items(pastAppointments.size) { index ->
-              TermindCard(
-                  termindData = pastAppointments[index],
+              ListenItem(
+                  attendancesListsData = pastAppointments[index],
                   onClick = { navigation.navigate("anwesenheit/${pastAppointments[index].id}") })
             }
           } else {
