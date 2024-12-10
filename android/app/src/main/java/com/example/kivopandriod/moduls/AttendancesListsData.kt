@@ -10,5 +10,6 @@ data class AttendancesListsData(
     val attendanceStatus: Int? = null,
     val membersCoud: Int? = null,
     val id: String,
-    val icon: Boolean? = true
+    val iconRend: Boolean? = true,
+    val timeRend: Boolean? = true
 )
