@@ -3,6 +3,25 @@ import SwiftUI
 
 struct MeetingAdminView: View {
     @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
+    @State private var selectedStatus: FilterType = .scheduled
+    enum FilterType: String, CaseIterable {
+        case scheduled = "In Planung"
+        case inSession = "Aktiv"
+        case completed = "Abgeschlossen"
+    }
+
+    
+    var filteredMeetings: [GetMeetingDTO] {
+        switch selectedStatus {
+        case .scheduled:
+            return meetingManager.meetings.filter { $0.status == .scheduled }
+        case .inSession:
+            return meetingManager.meetings.filter { $0.status == .inSession }
+        case .completed:
+            return meetingManager.meetings.filter { $0.status == .completed }
+        }
+    }
+
 
     var body: some View {
         NavigationStack {
@@ -17,7 +36,16 @@ struct MeetingAdminView: View {
                     Text("No meetings available.")
                         .foregroundColor(.secondary)
                 } else {
-                    List(meetingManager.meetings, id: \.id) { meeting in
+                    Picker("Filter", selection: $selectedStatus) {
+                        ForEach(FilterType.allCases, id: \.self) { filter in
+                            Text(filter.rawValue).tag(filter)
+                        }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal)
+
+
+                    List(filteredMeetings, id: \.id) { meeting in
                         NavigationLink(destination: MeetingDetailAdminView(meeting: meeting)) {
                             VStack(alignment: .leading) {
                                 Text(meeting.name)
@@ -49,6 +77,7 @@ struct MeetingAdminView: View {
             }
         }
     }
+
 }
 
 #Preview {
