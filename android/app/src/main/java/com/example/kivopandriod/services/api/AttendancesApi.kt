@@ -45,7 +45,7 @@ suspend fun responseList(id: String, context: Context): List<ResponseData> =
               val status_in =
                   when (status) {
                     "accepted" -> 1
-                    "declined" -> 2
+                    "absent" -> 2
                     else -> 0
                   }
               ResponseData(name, status_in) // Relevante Daten extrahieren
