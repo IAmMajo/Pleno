@@ -8,12 +8,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import com.example.kivopandriod.moduls.AttendancesListsData
 import com.example.kivopandriod.services.api.meetingsList
-import kotlinx.coroutines.launch
 import com.example.kivopandriod.ui.theme.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun AttendancesListPage(navController: NavController) {
@@ -21,12 +20,11 @@ fun AttendancesListPage(navController: NavController) {
   val scope = rememberCoroutineScope()
   var meetings by remember { mutableStateOf<List<AttendancesListsData>>(emptyList()) }
 
-//    val colorH: Color = when (STATUS) {
-//        0 -> Background_secondary_light
-//        1 -> Primary_dark_20
-//        else -> Error_dark_20
-//    }
-
+  //    val colorH: Color = when (STATUS) {
+  //        0 -> Background_secondary_light
+  //        1 -> Primary_dark_20
+  //        else -> Error_dark_20
+  //    }
 
   LaunchedEffect(Unit) {
     scope.launch {
@@ -35,7 +33,6 @@ fun AttendancesListPage(navController: NavController) {
       // Meetings abrufen
       val result = meetingsList(navController.context)
       meetings = result
-
     }
   }
 
@@ -48,7 +45,6 @@ fun AttendancesListPage(navController: NavController) {
             time = meeting.time,
             attendanceStatus = 0,
             id = meeting.id)
-
       }
 
   // Ergebnisse anzeigen

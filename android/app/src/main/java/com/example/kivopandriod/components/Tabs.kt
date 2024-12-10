@@ -1,5 +1,3 @@
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,7 +46,6 @@ fun GenerateTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int)
         }
       }
 }
-
 
 @Composable
 fun AppointmentTabContent(
