@@ -1,18 +1,18 @@
 import Foundation
 import Vapor
 
-extension ParticipateDTO: @retroactive Content {
+extension ParticipationDTO: @retroactive Content {
     func isValid() -> Bool {
-        // wenn kein driver, passenger_count sollte nil sein
+        // wenn kein driver, passengers_count sollte nil sein
         if !self.driver {
-            if self.passenger_count == nil {
+            if self.passengers_count == nil {
                 return true
             }
             return false
         }
         
-        // wenn driver, passenger_count muss groesser 0 sein
-        guard let passenger_count = self.passenger_count else {
+        // wenn driver, passengers_count muss groesser 0 sein
+        guard let passenger_count = self.passengers_count else {
             return false
         }
         

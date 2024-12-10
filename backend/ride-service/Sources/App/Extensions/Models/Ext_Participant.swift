@@ -3,11 +3,11 @@ import Models
 import Vapor
 
 extension Participant {
-    func toParticipateDTO() -> ParticipateDTO {
-        return .init(driver: self.driver, passenger_count: self.passengers_count, latitude: self.latitude, longitude: self.longitude)
+    func toParticipationDTO() -> ParticipationDTO {
+        return .init(driver: self.driver, passengers_count: self.passengers_count, latitude: self.latitude, longitude: self.longitude)
     }
     
-    func patchWithDTO(dto: PatchParticipateDTO) throws {
+    func patchWithDTO(dto: PatchParticipationDTO) throws {
         if let latitude = dto.latitude {
             self.latitude = latitude
         }
@@ -20,7 +20,7 @@ extension Participant {
             self.driver = driver
         }
         
-        self.passengers_count = dto.passenger_count
+        self.passengers_count = dto.passengers_count
         
         // check if update is valid
         if !self.isValid() {
@@ -29,7 +29,7 @@ extension Participant {
     }
     
     func isValid() -> Bool {
-        // wenn kein driver, passenger_count sollte nil sein
+        // wenn kein driver, passengers_count sollte nil sein
         if !self.driver {
             if self.passengers_count == nil {
                 return true
@@ -37,7 +37,7 @@ extension Participant {
             return false
         }
         
-        // wenn driver, passenger_count muss groesser 0 sein
+        // wenn driver, passengers_count muss groesser 0 sein
         guard let passengers_count = self.passengers_count else {
             return false
         }

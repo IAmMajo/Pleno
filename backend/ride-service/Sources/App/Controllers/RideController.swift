@@ -9,10 +9,10 @@ struct RideController: RouteCollection {
         let rideRoutes = routes.grouped("rides")
         let adminRideRoutes = rideRoutes.grouped(AdminMiddleware())
         rideRoutes.get("", use: getAllRides)
-        rideRoutes.get(":id", "participate", use: getParticipate)
-        rideRoutes.post(":id", "participate", use: newParticipate)
-        rideRoutes.patch(":id", "participate", use: patchParticipate)
-        rideRoutes.delete(":id", "participate", use: deleteParticipate)
+        rideRoutes.get(":id", "participation", use: getParticipation)
+        rideRoutes.post(":id", "participation", use: newParticipation)
+        rideRoutes.patch(":id", "participation", use: patchParticipation)
+        rideRoutes.delete(":id", "participation", use: deleteParticipation)
         adminRideRoutes.post("", use: newRide)
         
     }
@@ -44,7 +44,7 @@ struct RideController: RouteCollection {
     }
     
     @Sendable
-    func getParticipate(req: Request) async throws -> ParticipateDTO {
+    func getParticipation(req: Request) async throws -> ParticipationDTO {
         // parse ride id as UUID
         guard let ride_id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid or missing ride ID")
@@ -58,13 +58,13 @@ struct RideController: RouteCollection {
             throw Abort(.notFound, reason: "No participation found!")
         }
         
-        return participat.toParticipateDTO()
+        return participat.toParticipationDTO()
     }
     
     @Sendable
-    func newParticipate(req: Request) async throws -> HTTPStatus {
+    func newParticipation(req: Request) async throws -> HTTPStatus {
         // parse DTO
-        guard let participateDTO = try? req.content.decode(ParticipateDTO.self) else {
+        guard let participateDTO = try? req.content.decode(ParticipationDTO.self) else {
             throw Abort(.badRequest, reason: "Invalid request body! Expected ParticipateDTO.")
         }
         
@@ -94,7 +94,7 @@ struct RideController: RouteCollection {
         }
         
         // create participant
-        let participant = Participant(rideId: ride_id, userId: req.jwtPayload.userID, driver: participateDTO.driver, passengers_count: participateDTO.passenger_count, latitude: participateDTO.latitude, longitude: participateDTO.longitude)
+        let participant = Participant(rideId: ride_id, userId: req.jwtPayload.userID, driver: participateDTO.driver, passengers_count: participateDTO.passengers_count, latitude: participateDTO.latitude, longitude: participateDTO.longitude)
         
         // save participant
         try await participant.save(on: req.db)
@@ -103,9 +103,9 @@ struct RideController: RouteCollection {
     }
     
     @Sendable
-    func patchParticipate(req: Request) async throws -> HTTPStatus {
+    func patchParticipation(req: Request) async throws -> HTTPStatus {
         // parse DTO
-        guard let patchParticipateDTO = try? req.content.decode(PatchParticipateDTO.self) else {
+        guard let patchParticipateDTO = try? req.content.decode(PatchParticipationDTO.self) else {
             throw Abort(.badRequest, reason: "Invalid request body! Expected PatchParticipateDTO.")
         }
         
@@ -133,7 +133,7 @@ struct RideController: RouteCollection {
     }
     
     @Sendable
-    func deleteParticipate(req: Request) async throws -> HTTPStatus {
+    func deleteParticipation(req: Request) async throws -> HTTPStatus {
         // parse ride id as UUID
         guard let ride_id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid or missing ride ID")
