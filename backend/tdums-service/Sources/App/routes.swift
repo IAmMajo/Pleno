@@ -15,6 +15,15 @@ func routes(_ app: Application) throws {
         req.redirect(to: "/homepage/de")
     }
     
+    app.get("ip-address") { req in
+        guard let ipAddress = req.remoteAddress?.ipAddress else {
+            throw Abort(.unauthorized, reason: "IP-Address could not be determined.")
+        }
+        req.logger.notice("/ip-address (\(ipAddress)):")
+        req.logger.notice("\(req.remoteAddress!.description)")
+        return ipAddress
+    }
+    
     app.group("homepage") { route in
         route.get("de") { req async -> Response in
             req.fileio.streamFile(at: "Resources/homepage-de.html")
