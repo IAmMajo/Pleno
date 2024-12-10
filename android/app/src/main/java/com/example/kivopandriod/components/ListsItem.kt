@@ -37,16 +37,30 @@ fun ListenItem(
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     var iconPainter: Painter = painterResource(id = R.drawable.ic_groups)
     var iconColor: Color = Text_light
+    var backgroundColorT: Color = backgroundColor
 
-    if (attendancesListsData.membersCoud == null && attendancesListsData.icon == true) {
-        val (iconPainterM: Painter, iconColorM: Color) = when (attendancesListsData.attendanceStatus) {
-            0 -> painterResource(id = R.drawable.ic_open) to Text_light
-            1 -> painterResource(id = R.drawable.ic_check_circle) to Primary_dark
-            else -> painterResource(id = R.drawable.ic_cancel) to Error_dark
+    if (attendancesListsData.membersCoud == null && attendancesListsData.iconRend == true) {
+        val iconData = when (attendancesListsData.attendanceStatus) {
+            0 -> Triple(
+                painterResource(id = R.drawable.ic_event_open),
+                Text_light,
+                Background_secondary_light
+            )
+            1 -> Triple(
+                painterResource(id = R.drawable.ic_event_check),
+                Primary_dark,
+                Primary_dark_20
+            )
+            else -> Triple(
+                painterResource(id = R.drawable.ic_event_cancel),
+                Error_dark,
+                Error_dark_20
+            )
         }
-        iconPainter = iconPainterM
-        iconColor = iconColorM
 
+        iconPainter = iconData.first
+        iconColor = iconData.second
+        backgroundColorT = iconData.third
     }
 
 
@@ -55,7 +69,7 @@ fun ListenItem(
             .fillMaxWidth()
             .padding(6.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(backgroundColor)
+            .background(backgroundColorT)
             .padding(8.dp)
             .clickable(onClick = onClick)
     ){
@@ -91,20 +105,22 @@ fun ListenItem(
                     Spacer(modifier = Modifier.width(8.dp))
 
                     // Uhr-Icon und Zeit
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_clock),
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${attendancesListsData.time?.format(timeFormatter)} Uhr",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 12.sp
-                    )
+                    if (attendancesListsData.timeRend == true) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_clock),
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${attendancesListsData.time?.format(timeFormatter)} Uhr",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 12.sp
+                        )
+                    }
                 }
 
-                if (attendancesListsData.membersCoud == null&& attendancesListsData.icon == true) {
+                if (attendancesListsData.membersCoud == null&& attendancesListsData.iconRend == true) {
                     Icon(
                         painter = iconPainter,
                         contentDescription = null,
@@ -112,7 +128,7 @@ fun ListenItem(
                     //    modifier = Modifier.size(30.dp)
                     )
 
-                }else if (attendancesListsData.icon == true) {
+                }else if (attendancesListsData.iconRend == true) {
                     Row() {
                         Icon(
                             painter = iconPainter,
@@ -142,15 +158,41 @@ fun ListsItemPreview() {
     MaterialTheme {
 
             Column {
+//                ListenItem(
+//                    attendancesListsData = AttendancesListsData(
+//                        title = "Vorstandswahl",
+//                        date = LocalDate.now(),
+//                        time = LocalTime.now(),
+//                        id = "test",
+//                        membersCoud = 12,
+//                      //  attendanceStatus = 1
+//                    )
+//                )
+//                ListenItem(
+//                    attendancesListsData = AttendancesListsData(
+//                        title = "Vorstandswahl",
+//                        date = LocalDate.now(),
+//                        time = LocalTime.now(),
+//                        id = "test",
+//                        membersCoud = 23,
+//                        attendanceStatus = 1,
+//                        iconRend = false,
+//                        timeRend = false
+//                    ),
+//                    backgroundColor = Primary_dark_20
+//                )
                 ListenItem(
                     attendancesListsData = AttendancesListsData(
                         title = "Vorstandswahl",
                         date = LocalDate.now(),
                         time = LocalTime.now(),
                         id = "test",
-                        membersCoud = 12,
-                        attendanceStatus = 1
-                    )
+                        attendanceStatus = 0,
+
+                    ),
+
+
+
                 )
                 ListenItem(
                     attendancesListsData = AttendancesListsData(
@@ -158,21 +200,26 @@ fun ListsItemPreview() {
                         date = LocalDate.now(),
                         time = LocalTime.now(),
                         id = "test",
-                        membersCoud = 23,
-                        attendanceStatus = 1
+                        attendanceStatus = 2,
+
+                        ),
+
+
+
                     )
-                )
                 ListenItem(
                     attendancesListsData = AttendancesListsData(
                         title = "Vorstandswahl",
                         date = LocalDate.now(),
                         time = LocalTime.now(),
                         id = "test",
-                       // membersCoud = null,
                         attendanceStatus = 1,
-                        icon = false
+
+                        ),
+
+
+
                     )
-                )
             }
 
     }
