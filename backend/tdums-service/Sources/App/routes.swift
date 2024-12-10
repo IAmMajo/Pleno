@@ -15,13 +15,16 @@ func routes(_ app: Application) throws {
         req.redirect(to: "/homepage/de")
     }
     
-    app.get("ip-address") { req in
-        guard let ipAddress = req.remoteAddress?.ipAddress else {
-            throw Abort(.unauthorized, reason: "IP-Address could not be determined.")
+    app.get("ip-address") { req -> HTTPStatus in
+        req.logger.notice("===============================")
+        req.logger.notice("==========/ip-address==========")
+        req.headers.forwarded.forEach { f in
+            req.logger.notice("by: '\(String(describing: f.by))' | for: '\(String(describing: f.for))' | host: '\(String(describing: f.host))' | proto: '\(String(describing: f.proto))'")
         }
-        req.logger.notice("/ip-address (\(ipAddress)):")
-        req.logger.notice("\(req.remoteAddress!.description)")
-        return ipAddress
+        req.headers.forEach { (name: String, value: String) in
+            req.logger.notice("\(name): \(value)")
+        }
+        return .ok
     }
     
     app.group("homepage") { route in
