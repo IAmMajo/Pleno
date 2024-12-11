@@ -19,12 +19,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import net.ipv64.kivop.R
-import net.ipv64.kivop.moduls.AttendancesListsData
-import net.ipv64.kivop.ui.theme.*
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import net.ipv64.kivop.R
+import net.ipv64.kivop.moduls.AttendancesListsData
+import net.ipv64.kivop.ui.theme.*
 
 @Composable
 fun ListenItem(

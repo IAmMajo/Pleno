@@ -22,15 +22,15 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.ipv64.kivop.components.CustomButton
 import net.ipv64.kivop.components.CustomInputField
 import net.ipv64.kivop.services.api.AuthApi
 import net.ipv64.kivop.ui.theme.Background_light
 import net.ipv64.kivop.ui.theme.Primary_dark
 import net.ipv64.kivop.ui.theme.Text_light
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 var couroutineScope = CoroutineScope(Dispatchers.IO)
 

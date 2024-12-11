@@ -18,9 +18,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import net.ipv64.kivop.R
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import net.ipv64.kivop.R
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

@@ -14,9 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import java.time.LocalDateTime
 import net.ipv64.kivop.components.ListenItem
 import net.ipv64.kivop.moduls.AttendancesListsData
-import java.time.LocalDateTime
 
 @Composable
 fun GenerateTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {

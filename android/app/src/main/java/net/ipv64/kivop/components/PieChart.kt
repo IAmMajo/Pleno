@@ -17,9 +17,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
+import kotlin.math.*
 import net.ipv64.kivop.moduls.VotingResults
 import net.ipv64.kivop.ui.theme.Secondary_dark
-import kotlin.math.*
 
 @Composable
 fun PieChart(list: List<VotingResults>, explodeDistance: Float = 30f) {

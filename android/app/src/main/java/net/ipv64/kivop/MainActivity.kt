@@ -52,8 +52,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import net.ipv64.kivop.pages.AttendancesListPage
+import kotlinx.coroutines.launch
 import net.ipv64.kivop.pages.AttendancesCoordinationPage
+import net.ipv64.kivop.pages.AttendancesListPage
 import net.ipv64.kivop.pages.HomePage
 import net.ipv64.kivop.pages.LoginScreen
 import net.ipv64.kivop.pages.MeetingsListPage
@@ -61,8 +62,6 @@ import net.ipv64.kivop.pages.ProtocolListPage
 import net.ipv64.kivop.ui.theme.KIVoPAndriodTheme
 import net.ipv64.kivop.ui.theme.Primary_dark_20
 import net.ipv64.kivop.ui.theme.Text_light
-import kotlinx.coroutines.launch
-
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,7 +102,9 @@ fun navigation(navController: NavHostController) {
     // Sitzungen
     composable(Screen.Sitzungen.rout) { MeetingsListPage(navController = navController) }
     // Anwesenheit liste
-    composable(route = Screen.Anwesenheit.rout) { AttendancesListPage(navController = navController) }
+    composable(route = Screen.Anwesenheit.rout) {
+      AttendancesListPage(navController = navController)
+    }
     // Anwesenheit
     composable(
         route = Screen.Anwesenheit.rout + "/{meetingID}",

@@ -9,10 +9,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 import net.ipv64.kivop.moduls.AttendancesListsData
 import net.ipv64.kivop.services.api.meetingsList
 import net.ipv64.kivop.ui.theme.*
-import kotlinx.coroutines.launch
 
 @Composable
 fun AttendancesListPage(navController: NavController) {
