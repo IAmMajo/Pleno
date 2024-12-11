@@ -16,7 +16,7 @@ struct MainPage: View {
     @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
     
     private var User: String {
-        Name.components(separatedBy: " ").first ?? ""
+        name.components(separatedBy: " ").first ?? ""
     }
     
     var body: some View {
