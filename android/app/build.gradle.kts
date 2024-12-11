@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-  namespace = "com.example.kivopandriod"
+  namespace = "net.ipv64.kivop"
   compileSdk = 34
 
   defaultConfig {
-    applicationId = "com.example.kivopandriod"
+    applicationId = "net.ipv64.kivop"
     minSdk = 26
     targetSdk = 34
     versionCode = 1
