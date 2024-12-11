@@ -3,15 +3,12 @@ import Fluent
 struct CreateVictim: AsyncMigration {
     func prepare(on database: Database) async throws {
         let experiment = try await database.enum("experiment")
-            .case("weihnachtsmarkt")
-            .case("mensa")
+            .case("labyrinth")
             .case("briefkasten")
             .create()
         try await database.schema(Victim.schema)
             .id()
-            .field("count", .uint8, .required)
-            .field("status", experiment, .required)
-            .field("unused", .bool, .required, .sql(.default(false)))
+            .field("experiment", experiment, .required)
             .create()
     }
 

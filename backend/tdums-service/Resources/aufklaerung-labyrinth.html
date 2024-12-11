@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hinweis</title>
+</head>
+
+<body onload="changeLanguage(false)">
+    <div id="container-de" class="container">
+        <button onclick="changeLanguage(true)">Switch to English</button>
+        <h1>Sie sind soeben "Opfer" eines <u>friedlichen</u> Social Engineering Angriffs geworden.</h1>
+        <div class="content">
+            <hr>
+            <div class="libli">
+                <p>Dieser Angriff ist im Rahmen eines Studierendenexperiments durchgeführt worden und hat <b>keinerlei
+                        Schaden für Sie</b> verursacht.</p>
+                <p>Die Aktion <b>Weihnachtswünsche</b> ist <b><u>frei erfunden und rein fiktiv</u></b>. Es gibt
+                    <b><u>kein</u></b> Gewinnspiel.
+                </p>
+            </div>
+            <hr>
+
+            <h2>Hintergrund zu diesem Experiment:</h2>
+            <p>Sie haben an einem harmlosen Experiment teilgenommen, das spielerisch Social Engineering demonstriert.
+                Das Minigame wurde unter dem Vorwand eines Gewinnspiels auf USB-Sticks verteilt.</p>
+
+            <p>Dieses Vorgehen zeigt, wie leicht Menschen durch Vertrauen in eine unbedachte Handlung geführt werden
+                können.</p>
+
+            <h2>Gefahren von Social Engineering:</h2>
+            <ul>
+                <li><b>Manipulation von Vertrauen</b>: Angreifer nutzen persönliche Informationen, um Vertrauen zu
+                    gewinnen.</li>
+                <li><b>Phishing</b>: Täuschende Nachrichten, die nach sensiblen Informationen fragen.</li>
+                <li><b>Identitätsdiebstahl</b>: Unbefugte Nutzung von persönlichen Informationen für kriminelle Zwecke.
+                </li>
+            </ul>
+
+            <h2>Informationsquellen:</h2>
+            <ul>
+                <li><a href="https://www.bsi.bund.de/DE/Themen/Vertraulichkeit/Phishing/phishing_node.html"
+                        target="_blank">BSI: Informationen zu Phishing</a></li>
+                <li><a href="https://www.verbraucherzentrale.de/wissen/digitale-welt/datenschutz/social-engineering-so-geht-s-12955"
+                        target="_blank">Verbraucherzentrale: Social Engineering</a></li>
+                <li><a href="https://www.hsm.eu/ratgeber/social-engineering" target="_blank">HSM: Aufklärung zu Social
+                        Engineering</a></li>
+                <li><a href="https://de.wikipedia.org/wiki/Social_Engineering_(Sicherheit)" target="_blank">Wikipedia:
+                        Social Engineering</a></li>
+            </ul>
+        </div>
+        <button onClick="window.close()">Programm beenden</button>
+    </div>
+    <div id="container-en" class="container">
+        <button onclick="changeLanguage(false)">Zu Deutsch wechseln</button>
+        <h1>You have just become the "victim" of a <u>peaceful</u> social engineering attack.</h1>
+        <div class="content">
+            <hr>
+            <div class="libli">
+                <p>This attack was part of a student experiment and <b>has caused no harm to you</b>.</p>
+                <p>The <b>Weihnachtswünsche</b> campaign is <b><u>completely fictional</u></b>. There is <b><u>no</u></b>
+                    competition.</p>
+            </div>
+            <hr>
+
+            <h2>Background of this experiment:</h2>
+            <p>You participated in a harmless experiment that playfully demonstrates social engineering. The mini-game
+                was distributed on USB sticks under the pretext of a contest.</p>
+
+            <p>This approach shows how easily people can be led by trust into an impulsive action.</p>
+
+            <h2>Risks of Social Engineering:</h2>
+            <ul>
+                <li><b>Manipulation of trust</b>: Attackers use personal information to gain trust.</li>
+                <li><b>Phishing</b>: Deceptive messages that ask for sensitive information.</li>
+                <li><b>Identity theft</b>: Unauthorized use of personal information for criminal purposes.</li>
+            </ul>
+
+            <h2>Information sources:</h2>
+            <ul>
+                <li><a href="https://www.bsi.bund.de/EN/Themen/Verbraucherinnen-und-Verbraucher/Cyber-Sicherheitslage/Methoden-der-Cyber-Kriminalitaet/Social-Engineering/social-engineering_node.html"
+                        target="_blank">BSI: Social Engineering – the "Human Factor"</a></li>
+                <li><a href="https://www.kaspersky.com/resource-center/definitions/what-is-social-engineering"
+                        target="_blank">Kaspersky: What is Social Engineering?</a></li>
+                <li><a href="https://www.kaspersky.com/resource-center/threats/how-to-avoid-social-engineering-attacks"
+                    target="_blank">Kaspersky: Social Engineering – Protection &amp; Prevention</a></li>
+                <li><a href="https://www.geeksforgeeks.org/social-engineering-the-attack-on-human-brain-and-trust/"
+                    target="_blank">GeeksforGeeks: Social Engineering: The Attack on Human Brain and Trust</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Social_engineering_(security)"
+                    target="_blank">Wikipedia: Social Engineering (security)</a></li>
+            </ul>
+        </div>
+        <button onClick="window.close()">Close Program</button>
+    </div>
+</body>
+
+</html>
+
+<script>
+    function changeLanguage(english) {
+        document.getElementById(`container-${english ? "de" : "en"}`).style.display = "none"
+        document.getElementById(`container-${english ? "en" : "de"}`).style.display = ""
+    }
+</script>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f4f4f9;
+    }
+
+    .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        width: 100%;
+        text-align: center;
+    }
+
+    h1 {
+        color: #d9534f;
+        /* Rot wie im Spiel */
+    }
+
+    h2 {
+        margin-top: 20px;
+        color: #333;
+    }
+
+    p {
+        margin: 10px 0;
+    }
+
+    ul {
+        text-align: left;
+        list-style-position: inside;
+        margin: 10px 0;
+        padding-left: 20px;
+    }
+
+    a {
+        color: #337ab7;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .libli {
+        background-color: beige;
+        padding: 15px;
+    }
+
+    button {
+        background-color: white;
+        border-radius: 5px 5px 5px 5px;
+        border: 0.1px solid gray;
+        padding: 5px;
+    }
+
+    button:hover {
+        background-color: azure;
+        cursor: pointer;
+    }
+</style>

@@ -1,3 +1,4 @@
+import Vapor
 import Fluent
 import Foundation
 import struct Foundation.UUID
@@ -12,27 +13,38 @@ final class Victim: Model, @unchecked Sendable {
     @ID(key: .id)
     var id: UUID?
     
-    @Field(key: "count")
-    var count: UInt8
-    
     @Field(key: "experiment")
     var experiment: Experiment
     
-    @Field(key: "unused")
-    var unused: Bool
+    @Children(for: \.$victim)
+    var fools: [Fool]
     
     init() { }
     
-    init(id: UUID? = nil, count: UInt8 = 0, experiment: Experiment) {
+    init(id: UUID? = nil, experiment: Experiment) {
         self.id = id
-        self.count = count
         self.experiment = experiment
-        self.unused = false
+        let x: [String] = []
     }
 }
 
 enum Experiment: String, Codable {
-    case weihnachtsmarkt
-    case mensa
+    case labyrinth
     case briefkasten
+}
+
+extension Victim {
+    func toGetVictimDTO() throws -> GetVictimDTO {
+        try .init(id: self.requireID(), fooledCount: self.fools.count, fooledAt: self.fools.map({ fool in
+            fool.fooledAt!
+        }), experiment: self.experiment)
+    }
+}
+
+extension [Victim] {
+    func toGetVictimDTO() throws -> [GetVictimDTO] {
+        try self.map { victim throws in
+            try victim.toGetVictimDTO()
+        }
+    }
 }
