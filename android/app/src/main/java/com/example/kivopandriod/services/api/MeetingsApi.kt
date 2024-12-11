@@ -1,7 +1,7 @@
 package com.example.kivopandriod.services.api
 
 import android.content.Context
-import com.example.kivopandriod.moduls.MeetingData
+import com.example.kivopandriod.moduls.AttendancesListsData
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import java.time.ZonedDateTime
@@ -19,7 +19,7 @@ class MeetingsApi(context: Context) {
 }
 
 // todo: fix this
-suspend fun meetingsList(context: Context): List<MeetingData> =
+suspend fun meetingsList(context: Context): List<AttendancesListsData> =
     withContext(Dispatchers.IO) {
       val auth = AuthApi(context)
       val url = "https://kivop.ipv64.net/meetings"
@@ -28,7 +28,7 @@ suspend fun meetingsList(context: Context): List<MeetingData> =
 
       if (token.isNullOrEmpty()) {
         println("Fehler: Kein Token verfügbar")
-        return@withContext emptyList<MeetingData>()
+        return@withContext emptyList<AttendancesListsData>()
       }
 
       val request =
@@ -42,7 +42,7 @@ suspend fun meetingsList(context: Context): List<MeetingData> =
             val meetingsArray = Gson().fromJson(responseBody, JsonArray::class.java)
             meetingsArray.map { element ->
               val meeting = element.asJsonObject
-              val name = meeting.get("name").asString
+              val title = meeting.get("name").asString
               val start = meeting.get("start").asString
               val id = meeting.get("id").asString
 
@@ -51,7 +51,7 @@ suspend fun meetingsList(context: Context): List<MeetingData> =
               val date = zonedDateTime.toLocalDate()
               val time = zonedDateTime.toLocalTime()
 
-              MeetingData(name, date, time, id)
+              AttendancesListsData(title, date, time, id = id)
             }
           } else {
             println("Fehler: Leere Antwort erhalten.")
