@@ -25,6 +25,7 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateUser())
     app.migrations.add(CreateIdentityHistory())
     app.migrations.add(CreateEmailVerification())
+    app.migrations.add(CreatePasswordResetToken())
     
     app.jwt.signers.use(.hs256(key: "Ganzgeheimespasswort"))
     

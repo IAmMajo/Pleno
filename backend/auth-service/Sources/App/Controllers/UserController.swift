@@ -10,6 +10,8 @@ struct UserController: RouteCollection {
         userRoutes.on(.POST, "register", body: .collect(maxSize: "500kb"), use: self.register)
         userRoutes.get("profile", use: self.getProfile)
         userRoutes.put("profile", use: self.updateProfile)
+        userRoutes.post("password", "reset-request", use: self.requestPasswordReset)
+        userRoutes.post("password", "reset", use: self.userResetPasswort)
         
         let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
         let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
@@ -33,6 +35,8 @@ struct UserController: RouteCollection {
         protectedRoutes.get("identities", use: self.userGetIdentities)
         // DELETE /users/delete
         protectedRoutes.delete("delete", use: self.userDeleteEntry)
+        // PATCH /users/change-password
+        protectedRoutes.patch("change-password", use: self.userChangePassword)
     }
     
     @Sendable
@@ -403,5 +407,84 @@ struct UserController: RouteCollection {
         } catch {
             throw Abort(.internalServerError, reason: "Error deleting user: \(error.localizedDescription)")
         }
+    }
+    
+    @Sendable
+    func userChangePassword(req: Request) async throws -> Response {
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        guard let body = try? req.content.decode(ChangePasswordDTO.self) else {
+            throw Abort(.badRequest, reason: "Body does not match ChangePasswordDTO")
+        }
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$id == payload.userID!)
+            .first() else {
+            throw Abort(.notFound, reason: "User not found")
+        }
+        let isCurrentPasswordValid = try Bcrypt.verify(body.oldPassword!, created: user.passwordHash)
+        guard isCurrentPasswordValid else {
+            throw Abort(.unauthorized, reason: "Current password is incorrect")
+        }
+        do {
+            user.passwordHash = try Bcrypt.hash(body.newPassword!)
+            try await user.save(on: req.db)
+        } catch {
+            throw Abort(.internalServerError, reason: "Failed to update password: \(error.localizedDescription)")
+        }
+        
+        return Response(status: .ok, body: .init(string: "Password changed successfully"))
+    }
+    
+    @Sendable
+    func requestPasswordReset(req: Request) async throws -> Response {
+        guard let body = try? req.content.decode(RequestPasswordResetDTO.self) else {
+            throw Abort(.badRequest, reason: "Body does not match RequestPasswordResetDTO")
+        }
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$email == body.email!)
+            .first() else {
+            return Response(status: .ok, body: .init(string: "If the email exists, a reset code has been sent."))
+        }
+        let resetCode = String((100000...999999).randomElement()!)
+        
+        let tokenEntry = PasswordResetToken(
+            userID: user.id!,
+            token: resetCode,
+            expiresAt: Date().addingTimeInterval(3600) // 1 Stunde gültig
+        )
+        try await tokenEntry.create(on: req.db)
+        
+        // Hier muss der Code per Mail gesendet werden
+        print("Sending reset code \(resetCode) to email \(user.email)")
+        
+        return Response(status: .ok, body: .init(string: "If the email exists, a reset code has been sent."))
+    }
+    
+    @Sendable
+    func userResetPasswort(req: Request) async throws -> Response {
+        guard let body = try? req.content.decode(ResetPasswordDTO.self) else {
+            throw Abort(.badRequest, reason: "Body does not match ResetPasswordDTO")
+        }
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$email == body.email!)
+            .first() else {
+            throw Abort(.notFound, reason: "Invalid email or reset code")
+        }
+        guard let tokenEntry = try await PasswordResetToken.query(on: req.db)
+            .filter(\.$user.$id == user.id!)
+            .filter(\.$token == body.resetCode!)
+            .filter(\.$expiresAt > Date())
+            .first() else {
+            throw Abort(.badRequest, reason: "Invalid or missing reset code")
+        }
+        do {
+            user.passwordHash = try Bcrypt.hash(body.newPassword!)
+            try await user.save(on: req.db)
+            try await tokenEntry.delete(on: req.db)
+        } catch {
+            throw Abort(.internalServerError, reason: "Failed to reset password: \(error.localizedDescription)")
+        }
+        return Response(status: .ok, body: .init(string: "Password has been reset successfully"))
     }
 }
