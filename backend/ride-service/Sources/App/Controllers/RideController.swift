@@ -15,7 +15,7 @@ struct RideController: RouteCollection {
         rideRoutes.patch(":id", "participation", use: patchParticipation)
         rideRoutes.delete(":id", "participation", use: deleteParticipation)
         adminRideRoutes.post("", use: newRide)
-        
+        adminRideRoutes.patch(":id", use: patchRide)
     }
     
     @Sendable
@@ -72,6 +72,24 @@ struct RideController: RouteCollection {
         
         // save ride in database
         try await ride.save(on: req.db)
+        
+        return .ok
+    }
+    
+    @Sendable
+    func patchRide(req: Request) async throws -> HTTPStatus {
+        guard let ride = try await Ride.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        // parse DTO
+        guard let patchRideDTO = try? req.content.decode(PatchRideDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected PatchRideDTO.")
+        }
+        
+        // patch ride
+        ride.patchWithDTO(dto: patchRideDTO)
+        try await ride.update(on: req.db)
         
         return .ok
     }
