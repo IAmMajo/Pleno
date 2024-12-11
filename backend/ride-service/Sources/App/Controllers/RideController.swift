@@ -9,6 +9,7 @@ struct RideController: RouteCollection {
         let rideRoutes = routes.grouped("rides")
         let adminRideRoutes = rideRoutes.grouped(AdminMiddleware())
         rideRoutes.get("", use: getAllRides)
+        rideRoutes.get(":id", use: getRide)
         rideRoutes.get(":id", "participation", use: getParticipation)
         rideRoutes.post(":id", "participation", use: newParticipation)
         rideRoutes.patch(":id", "participation", use: patchParticipation)
@@ -24,6 +25,38 @@ struct RideController: RouteCollection {
         }
         
         return rides
+    }
+    
+    @Sendable
+    func getRide(req: Request) async throws -> GetRideDetailDTO {
+        guard let ride = try await Ride.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+
+        let ride_id = try ride.requireID()
+        
+        var seatsSum = 0
+        var passengersSum = 0
+        let participants = try await Participant.query(on: req.db)
+            .filter(\.$ride.$id == ride_id)
+            .join(User.self, on: \Participant.$user.$id == \User.$id)
+            .join(Identity.self, on: \User.$identity.$id == \Identity.$id)
+            .all()
+            .map{ participant in
+                if participant.driver {
+                    seatsSum += participant.passengers_count!
+                } else {
+                    passengersSum += 1
+                }
+                let participantID = try participant.requireID()
+                let userID = try participant.joined(User.self).requireID()
+                let identity = try participant.joined(Identity.self)
+                let itsMe = userID == req.jwtPayload.userID
+                return GetParticipantDTO(id: participantID, name: identity.name, driver: participant.driver, passengers_count: participant.passengers_count, latitude: participant.latitude, longitude: participant.longitude, itsMe: itsMe)
+            }
+        
+        return GetRideDetailDTO(name: ride.name, starts: ride.starts, participants: participants, latitude: ride.latitude, longitude: ride.longitude, participantSum: participants.count, seatsSum: seatsSum, passengersSum: passengersSum)
+
     }
     
     @Sendable
