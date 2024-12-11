@@ -18,7 +18,7 @@ class OnboardingAPI {
     ///   - completion: Callback mit einem optionalen Fehler und einer Erfolgsmeldung.
     static func registerUser(
         with registrationDTO: UserRegistrationDTO,
-        completion: @escaping (Result<Void, Error>) -> Void
+        completion: @escaping (Result<String, Error>) -> Void
     ) {
         guard let url = URL(string: "\(baseURL)/users/register") else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL"])))
@@ -33,7 +33,7 @@ class OnboardingAPI {
             let jsonData = try JSONEncoder().encode(registrationDTO)
             request.httpBody = jsonData
         } catch {
-            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Fehler beim Verarbeiten der Daten."])))
+            completion(.failure(error))
             return
         }
         
@@ -49,13 +49,26 @@ class OnboardingAPI {
             }
             
             if httpResponse.statusCode == 201 {
-                completion(.success(()))
+                print("Registrierung erfolgreich. Starte Login...")
+                
+                // Automatisch einloggen
+                let loginDTO = UserLoginDTO(email: registrationDTO.email, password: registrationDTO.password)
+                loginUser(with: loginDTO) { loginResult in
+                    switch loginResult {
+                    case .success(let token):
+                        completion(.success(token)) // Token vom Login zurückgeben
+                    case .failure(let loginError):
+                        completion(.failure(loginError))
+                    }
+                }
             } else {
                 let errorMessage = "Registrierung fehlgeschlagen. Status: \(httpResponse.statusCode)"
                 completion(.failure(NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])))
             }
         }.resume()
     }
+
+
     
     /// Loggt einen Benutzer ein.
     /// - Parameters:
