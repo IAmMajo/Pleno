@@ -55,7 +55,7 @@ struct RideController: RouteCollection {
                 return GetParticipantDTO(id: participantID, name: identity.name, driver: participant.driver, passengers_count: participant.passengers_count, latitude: participant.latitude, longitude: participant.longitude, itsMe: itsMe)
             }
         
-        return GetRideDetailDTO(name: ride.name, starts: ride.starts, participants: participants, latitude: ride.latitude, longitude: ride.longitude, participantSum: participants.count, seatsSum: seatsSum, passengersSum: passengersSum)
+        return GetRideDetailDTO(name: ride.name, starts: ride.starts, participants: participants, latitude: ride.latitude, longitude: ride.longitude, participantsSum: participants.count, seatsSum: seatsSum, passengersSum: passengersSum)
 
     }
     
@@ -97,13 +97,13 @@ struct RideController: RouteCollection {
     @Sendable
     func newParticipation(req: Request) async throws -> HTTPStatus {
         // parse DTO
-        guard let participateDTO = try? req.content.decode(ParticipationDTO.self) else {
-            throw Abort(.badRequest, reason: "Invalid request body! Expected ParticipateDTO.")
+        guard let participationDTO = try? req.content.decode(ParticipationDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected ParticipationDTO.")
         }
         
         // validate DTO
-        if !participateDTO.isValid() {
-            throw Abort(.badRequest, reason: "ParticipateDTO is not valid!")
+        if !participationDTO.isValid() {
+            throw Abort(.badRequest, reason: "ParticipationDTO is not valid!")
         }
         
         // parse ride id as UUID
@@ -127,7 +127,7 @@ struct RideController: RouteCollection {
         }
         
         // create participant
-        let participant = Participant(rideId: ride_id, userId: req.jwtPayload.userID, driver: participateDTO.driver, passengers_count: participateDTO.passengers_count, latitude: participateDTO.latitude, longitude: participateDTO.longitude)
+        let participant = Participant(rideId: ride_id, userId: req.jwtPayload.userID, driver: participationDTO.driver, passengers_count: participationDTO.passengers_count, latitude: participationDTO.latitude, longitude: participationDTO.longitude)
         
         // save participant
         try await participant.save(on: req.db)
@@ -138,8 +138,8 @@ struct RideController: RouteCollection {
     @Sendable
     func patchParticipation(req: Request) async throws -> HTTPStatus {
         // parse DTO
-        guard let patchParticipateDTO = try? req.content.decode(PatchParticipationDTO.self) else {
-            throw Abort(.badRequest, reason: "Invalid request body! Expected PatchParticipateDTO.")
+        guard let patchParticipationDTO = try? req.content.decode(PatchParticipationDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected PatchParticipationDTO.")
         }
         
         // parse ride id as UUID
@@ -148,7 +148,7 @@ struct RideController: RouteCollection {
         }
         
         // get participant
-        guard let participat = try await Participant.query(on: req.db)
+        guard let participant = try await Participant.query(on: req.db)
             .filter(\.$user.$id == req.jwtPayload.userID)
             .filter(\.$ride.$id == ride_id)
             .first()
@@ -157,10 +157,10 @@ struct RideController: RouteCollection {
         }
         
         // try to update Participant
-        try participat.patchWithDTO(dto: patchParticipateDTO)
+        try participant.patchWithDTO(dto: patchParticipationDTO)
         
         // save changes
-        try await participat.update(on: req.db)
+        try await participant.update(on: req.db)
         
         return .ok
     }

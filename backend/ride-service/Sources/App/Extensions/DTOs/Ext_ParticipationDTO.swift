@@ -12,11 +12,11 @@ extension ParticipationDTO: @retroactive Content {
         }
         
         // wenn driver, passengers_count muss groesser 0 sein
-        guard let passenger_count = self.passengers_count else {
+        guard let passengers_count = self.passengers_count else {
             return false
         }
         
-        if passenger_count > 0 {
+        if passengers_count > 0 {
             return true
         }
         
