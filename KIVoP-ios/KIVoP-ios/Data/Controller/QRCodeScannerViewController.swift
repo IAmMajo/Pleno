@@ -76,12 +76,4 @@ class QRCodeScannerViewController: UIViewController, AVCaptureMetadataOutputObje
         onCodeFound?(code) // Rückgabe an SwiftUI
         dismiss(animated: true)
     }
-
-    override var prefersStatusBarHidden: Bool {
-        return true
-    }
-
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return .portrait
-    }
 }

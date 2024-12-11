@@ -9,7 +9,6 @@ import SwiftUI
 import UIKit
 
 struct QRCodeScannerView: UIViewControllerRepresentable {
-    typealias UIViewControllerType = QRCodeScannerViewController
     var onCodeFound: (String) -> Void
 
     func makeUIViewController(context: Context) -> QRCodeScannerViewController {

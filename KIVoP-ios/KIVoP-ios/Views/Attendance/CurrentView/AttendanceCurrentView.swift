@@ -61,14 +61,7 @@ struct AttendanceCurrentView: View {
                         Text("Teilnahme bestätigen")
                             .padding(.top)
                             .padding(.horizontal)
-                    
-                        // Status Message
-                        if let message = viewModel.statusMessage {
-                            Text(message)
-                                .foregroundColor(.green)
-                                .padding()
-                        }
-                        
+
                         // QR Code Button
                         Button(action: {
                             isShowingScanner = true
@@ -136,7 +129,7 @@ struct AttendanceCurrentView: View {
                                 Text("\(viewModel.acceptedCount)")
                                     .font(.largeTitle)
                                 Image(systemName: "person.fill.questionmark")
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(.orange)
                                     .font(.largeTitle)
                             }
                             Spacer()
@@ -164,12 +157,12 @@ struct AttendanceCurrentView: View {
                                         
                                         // Inline-Statusbehandlung und Anzeige von Symbolen
                                         Image(systemName:
-                                            attendance.status == .present ? "checkmark" :
-                                            "questionmark.circle"
+                                            attendance.status == .present ? "checkmark.circle" :
+                                            "checkmark.circle.badge.questionmark"
                                         )
                                         .foregroundColor(
                                             attendance.status == .present ? .blue :
-                                            .gray
+                                                    .orange
                                         )
                                         .font(.system(size: 18))
                                     }
