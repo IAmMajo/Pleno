@@ -7,7 +7,7 @@ struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let userRoutes = routes.grouped("users")
         
-        userRoutes.on(.POST, "register", body: .collect(maxSize: "500kb"), use: self.register)
+        userRoutes.on(.POST, "register", body: .collect(maxSize: "7000kb"), use: self.register)
         userRoutes.get("profile", use: self.getProfile)
         userRoutes.put("profile", use: self.updateProfile)
         
