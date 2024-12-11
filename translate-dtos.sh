@@ -60,7 +60,7 @@ find "$DEST" -type f -name '*.swift' | while read -r file; do
     # Swap `}` of data classes with `)`
     perl -i -0777pe 's/(data class.*?)\}/\1)/gs' $file
     # Add package declaration and necessary imports
-    perl -i -0777pe "s/^/package net.ipv64.kivop.dtos.$(echo "$file"| perl -nle 'print $1 if /\/(\w+)(?=\/[^\/]+$)/')\n\nimport java.util.UUID\n\nimport java.time.LocalDateTime\n\n/gs" $file
+    perl -i -0777pe "s/^/package net.ipv64.kivop.dtos.$(echo "$file"| perl -nle 'print $1 if /\/(\w+)(?=\/[^\/]+$)/')\n\nimport java.util.UUID\nimport java.time.LocalDateTime\n\n/gs" $file
     ### Change .swift to .kt
     mv "$file" "`echo $file | sed "s/swift$/kt/g"`"
 done
