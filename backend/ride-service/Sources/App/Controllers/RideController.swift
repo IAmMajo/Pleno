@@ -16,6 +16,7 @@ struct RideController: RouteCollection {
         rideRoutes.delete(":id", "participation", use: deleteParticipation)
         adminRideRoutes.post("", use: newRide)
         adminRideRoutes.patch(":id", use: patchRide)
+        adminRideRoutes.delete(":id", use: deleteRide)
     }
     
     @Sendable
@@ -90,6 +91,23 @@ struct RideController: RouteCollection {
         // patch ride
         ride.patchWithDTO(dto: patchRideDTO)
         try await ride.update(on: req.db)
+        
+        return .ok
+    }
+    
+    @Sendable
+    func deleteRide(req: Request) async throws -> HTTPStatus {
+        guard let ride = try await Ride.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        let ride_id = try ride.requireID()
+        
+        try await Participant.query(on: req.db)
+            .filter(\.$ride.$id == ride_id)
+            .delete()
+        
+        try await ride.delete(on: req.db)
         
         return .ok
     }
