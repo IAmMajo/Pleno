@@ -8,7 +8,7 @@ public struct UpdatePosterPositionDTO: Codable {
     public var expiresAt:Date
 
 
-    public init(latitude: Double?, longitude: Double?, isDisplayed: Bool?, imageBase64: String?,expiresAt:Date) {
+    public init(latitude: Double?, longitude: Double?, isDisplayed: Bool?, imageBase64: String?, expiresAt: Date) {
         self.latitude = latitude
         self.longitude = longitude
         self.isDisplayed = isDisplayed

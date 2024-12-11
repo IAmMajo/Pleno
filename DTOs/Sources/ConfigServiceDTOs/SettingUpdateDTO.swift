@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SettingUpdateDTO: Codable{
+public struct SettingUpdateDTO: Codable {
     public var value: String
     
     

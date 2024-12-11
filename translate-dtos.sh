@@ -35,7 +35,7 @@ find "$DEST" -type f -name '*.swift' | while read -r file; do
     # Remove inits
     perl -i -0777pe 's/public init.*?\}//gs' $file
     # struct -> data class
-    perl -pi -e 's/^public struct ([A-Za-z0-9_]+): Codable \{$/data class \1 (/g' $file
+    perl -pi -e 's/^public struct ([A-Za-z0-9_]+): Codable ?\{$/data class \1 (/g' $file
     # Basic data type translations
     for key in "${!basicdatatypes[@]}"; do
         perl -pi -e "s/(?<=: )$key|(?<=\[)$key/${basicdatatypes[$key]}/g" $file
