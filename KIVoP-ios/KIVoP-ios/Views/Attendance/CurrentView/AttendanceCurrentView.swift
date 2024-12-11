@@ -1,5 +1,5 @@
 //
-//  AnwesenheitAktuellView.swift
+//  AttendanceCurrentView.swift
 //  KIVoP-ios
 //
 //  Created by Henrik Peltzer on 02.11.24.
@@ -9,6 +9,7 @@ import SwiftUI
 import MeetingServiceDTOs
 
 struct AttendanceCurrentView: View {
+    @State private var isShowingScanner = false
     @Environment(\.dismiss) var dismiss
     @StateObject var viewModel: AttendanceCurrentViewModel
     
@@ -63,7 +64,7 @@ struct AttendanceCurrentView: View {
 
                         // QR Code Button
                         Button(action: {
-                            // Funktion für QR Code scannen wird später implementiert
+                            isShowingScanner = true
                         }) {
                             HStack {
                                 Image(systemName: "qrcode")
@@ -75,7 +76,15 @@ struct AttendanceCurrentView: View {
                             .foregroundColor(.white)
                             .cornerRadius(10)
                         }
+                        .sheet(isPresented: $isShowingScanner) {
+                            QRCodeScannerView { code in
+                                self.viewModel.participationCode = code
+                                self.viewModel.joinMeeting() // Meeting beitreten
+                                self.isShowingScanner = false
+                            }
+                        }
                         .padding(.horizontal)
+
 
                         // "oder" Schriftzug
                         Text("oder")
@@ -91,7 +100,17 @@ struct AttendanceCurrentView: View {
                             .background(RoundedRectangle(cornerRadius: 0).fill(Color.white))
                             .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.black, lineWidth: 2))
                             .frame(width: 200)
-                        
+                            .onSubmit {
+                                viewModel.joinMeeting() // Meeting beitreten
+                            }
+
+                        // Antwort ob Beitritt zum Meeting erfolgreich ist.
+                        if let message = viewModel.statusMessage {
+                            Text(message)
+                                .foregroundColor(.green)
+                                .padding()
+                        }
+
                         // Teilnahme Status Icons
                         HStack {
                             Spacer()
@@ -110,7 +129,7 @@ struct AttendanceCurrentView: View {
                                 Text("\(viewModel.acceptedCount)")
                                     .font(.largeTitle)
                                 Image(systemName: "person.fill.questionmark")
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(.orange)
                                     .font(.largeTitle)
                             }
                             Spacer()
@@ -138,12 +157,12 @@ struct AttendanceCurrentView: View {
                                         
                                         // Inline-Statusbehandlung und Anzeige von Symbolen
                                         Image(systemName:
-                                            attendance.status == .present ? "checkmark" :
-                                            "questionmark.circle"
+                                            attendance.status == .present ? "checkmark.circle" :
+                                            "checkmark.circle.badge.questionmark"
                                         )
                                         .foregroundColor(
                                             attendance.status == .present ? .blue :
-                                            .gray
+                                                    .orange
                                         )
                                         .font(.system(size: 18))
                                     }

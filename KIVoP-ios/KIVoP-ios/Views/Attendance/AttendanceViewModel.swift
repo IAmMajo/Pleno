@@ -25,6 +25,7 @@ class AttendanceViewModel: ObservableObject {
             do {
                 // Statischer Login zum Testen, bis die Funktion implementiert wurde.
                 try await AuthController.shared.login(email: "henrik.peltzer@gmail.com", password: "Test123")
+
                 let token = try await AuthController.shared.getAuthToken()
                 
                 // Meetings abrufen
@@ -65,8 +66,8 @@ class AttendanceViewModel: ObservableObject {
     }
     
     // Aktuelle Sitzung (falls vorhanden)
-    var currentMeeting: GetMeetingDTO? {
-        meetings.first(where: { $0.status == .inSession })
+    var currentMeetings: [GetMeetingDTO] {
+        meetings.filter { $0.status == .inSession }
     }
 
     // Gruppiert die Sitzungen nach Monat und Jahr

@@ -110,8 +110,8 @@ struct AttendanceDetailView: View {
                                         
                                         // Inline-Statusbehandlung und Anzeige von Symbolen
                                         Image(systemName:
-                                            attendance.status == .present ? "checkmark" :
-                                            "xmark"
+                                            attendance.status == .present ? "checkmark.circle" :
+                                            "xmark.circle"
                                         )
                                         .foregroundColor(
                                             attendance.status == .present ? .blue :
