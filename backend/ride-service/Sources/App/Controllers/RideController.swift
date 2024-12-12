@@ -61,7 +61,7 @@ struct RideController: RouteCollection {
     }
     
     @Sendable
-    func newRide(req: Request) async throws -> HTTPStatus {
+    func newRide(req: Request) async throws -> Response {
         
         // parse DTO
         guard let createRideDTO = try? req.content.decode(CreateRideDTO.self) else {
@@ -74,7 +74,7 @@ struct RideController: RouteCollection {
         // save ride in database
         try await ride.save(on: req.db)
         
-        return .ok
+        return try await ride.toGetRideOverviewDTO().encodeResponse(status: .created, for: req)
     }
     
     @Sendable
@@ -92,7 +92,7 @@ struct RideController: RouteCollection {
         ride.patchWithDTO(dto: patchRideDTO)
         try await ride.update(on: req.db)
         
-        return .ok
+        return .ok // 200 GetRideOverviewDTO
     }
     
     @Sendable
@@ -109,7 +109,7 @@ struct RideController: RouteCollection {
         
         try await ride.delete(on: req.db)
         
-        return .ok
+        return .ok // 204 not content
     }
     
     @Sendable
@@ -168,7 +168,7 @@ struct RideController: RouteCollection {
         // save participant
         try await participant.save(on: req.db)
         
-        return .ok
+        return .ok // 203 ParticipantDTO
     }
     
     @Sendable
@@ -198,7 +198,7 @@ struct RideController: RouteCollection {
         // save changes
         try await participant.update(on: req.db)
         
-        return .ok
+        return .ok // 200 ParticipantDTO
     }
     
     @Sendable
@@ -214,6 +214,6 @@ struct RideController: RouteCollection {
             .filter(\.$ride.$id == ride_id)
             .delete()
         
-        return .ok
+        return .ok // 204 no content
     }
 }
