@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import java.time.LocalDateTime
+import com.example.kivopandriod.components.Subtitles
 import net.ipv64.kivop.components.ListenItem
 import net.ipv64.kivop.moduls.AttendancesListsData
 
@@ -54,7 +54,6 @@ fun AppointmentTabContent(
     appointments: List<AttendancesListsData>
 ) {
   var selectedTabIndex by remember { mutableStateOf(0) }
-  val now = LocalDateTime.now() // Aktuelles Datum und Uhrzeit
 
   Column(modifier = Modifier.fillMaxSize()) {
     // Tabs werden oben eingebunden
@@ -63,13 +62,23 @@ fun AppointmentTabContent(
 
     // Inhalt unterhalb der Tabs
     LazyColumn(modifier = Modifier.fillMaxSize()) {
+      var previousYear: Int? = null // Zustand für das vorherige Jahr
+
       when (selectedTabIndex) {
         0 -> {
           // Anstehende Sitzungen
           val upcomingAppointments =
-              appointments.filter { LocalDateTime.of(it.date, it.time) >= now }
+              appointments.filter { appointment ->
+                appointment.meetingStatus == "scheduled" || appointment.meetingStatus == "inSession"
+              }
           if (upcomingAppointments.isNotEmpty()) {
             items(upcomingAppointments.size) { index ->
+              val currentYear = upcomingAppointments[index].date?.year
+              val shouldRenderSubtitle = currentYear != previousYear
+              if (shouldRenderSubtitle) {
+                previousYear = currentYear
+                Subtitles(subText = currentYear?.toString() ?: "")
+              }
               ListenItem(
                   attendancesListsData = upcomingAppointments[index],
                   onClick = {
@@ -82,10 +91,17 @@ fun AppointmentTabContent(
         }
 
         1 -> {
-          // Vergangene Sitzungen (vor jetzt)
-          val pastAppointments = appointments.filter { LocalDateTime.of(it.date, it.time) < now }
+          // Vergangene Sitzungen
+          val pastAppointments =
+              appointments.filter { appointment -> appointment.meetingStatus == "completed" }
           if (pastAppointments.isNotEmpty()) {
             items(pastAppointments.size) { index ->
+              val currentYear = pastAppointments[index].date?.year
+              val shouldRenderSubtitle = currentYear != previousYear
+              if (shouldRenderSubtitle) {
+                previousYear = currentYear
+                Subtitles(subText = currentYear?.toString() ?: "")
+              }
               ListenItem(
                   attendancesListsData = pastAppointments[index],
                   onClick = { navigation.navigate("anwesenheit/${pastAppointments[index].id}") })

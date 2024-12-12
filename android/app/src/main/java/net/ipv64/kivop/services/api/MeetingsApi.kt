@@ -15,14 +15,8 @@ import net.ipv64.kivop.moduls.AttendancesListsData
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-class MeetingsApi(context: Context) {
-  // TODO: Get Meetings
-  // TODO: Get Meeting by id
-  // TODO: Get Meetings locations
-  // TODO: Get Meeting location by id
-}
+// TODO: Get Meeting location by id
 
-// todo: fix this
 suspend fun meetingsList(context: Context): List<AttendancesListsData> =
     withContext(Dispatchers.IO) {
       val auth = AuthApi(context)
@@ -31,7 +25,7 @@ suspend fun meetingsList(context: Context): List<AttendancesListsData> =
       val token = auth.getToken()
 
       if (token.isNullOrEmpty()) {
-        println("Fehler: Kein Token verfügbar")
+        println("Fehler: Kein Token verfÃ¼gbar")
         return@withContext emptyList<AttendancesListsData>()
       }
 
@@ -49,13 +43,21 @@ suspend fun meetingsList(context: Context): List<AttendancesListsData> =
               val title = meeting.get("name").asString
               val start = meeting.get("start").asString
               val id = meeting.get("id").asString
+              val meetingStatus = meeting.get("status").asString
+              val myAttendanceStatus = meeting.get("myAttendanceStatus")?.asString
 
               // Datum und Uhrzeit aus start extrahieren
               val zonedDateTime = ZonedDateTime.parse(start, DateTimeFormatter.ISO_ZONED_DATE_TIME)
               val date = zonedDateTime.toLocalDate()
               val time = zonedDateTime.toLocalTime()
 
-              AttendancesListsData(title, date, time, id = id)
+              AttendancesListsData(
+                  title,
+                  date,
+                  time,
+                  meetingStatus = meetingStatus,
+                  id = id,
+                  myAttendanceStatus = myAttendanceStatus)
             }
           } else {
             println("Fehler: Leere Antwort erhalten.")
