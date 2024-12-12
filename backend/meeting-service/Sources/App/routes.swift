@@ -26,6 +26,7 @@ func routes(_ app: Application) throws {
     app.get("brew", "coffee") { req -> HTTPStatus in // 418
         .imATeapot
     }
+    .excludeFromOpenAPI()
 
     app.get("openapi.json") { req in
       app.routes.openAPI(
