@@ -105,6 +105,22 @@ struct MeetingDetailAdminView: View {
                             }
                         }
                     }
+                    if let meetingCode = meeting.code {
+                                            // QR-Code
+                                            Section("Meeting-Code") {
+                                                HStack {
+                                                    Spacer()
+                                                    QRCodeImage(dataString: meetingCode)
+                                                        .frame(width: 400, height: 400)
+                                                    Spacer()
+                                                }
+                                                HStack {
+                                                    Spacer()
+                                                    Text(meetingCode)
+                                                    Spacer()
+                                                }
+                                            }
+                                        }
                 }
                 
                 Spacer()
