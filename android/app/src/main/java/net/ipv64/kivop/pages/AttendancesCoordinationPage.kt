@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.kivopandriod.moduls.SitzungsCardData
-import java.time.LocalDate
 import net.ipv64.kivop.components.ResponseItem
 import net.ipv64.kivop.components.ResponseList
 import net.ipv64.kivop.components.SitzungsCard
@@ -25,33 +24,28 @@ import net.ipv64.kivop.services.api.responseList
 
 @Composable
 fun AttendancesCoordinationPage(navController: NavController? = null, meetingId: String) {
-  
+
   // Zustand für die Antworten (Liste von ResponseItem)
   var responses by remember { mutableStateOf<List<ResponseItem>>(emptyList()) }
   var responseSitzungsCard by remember { mutableStateOf<SitzungsCardData?>(null) }
 
   // API-Anfrage ausführen Response
   LaunchedEffect(meetingId) {
-    val responseData =
-      responseList(meetingId, navController!!.context) // Dynamische Daten abrufen
+    val responseData = responseList(meetingId, navController!!.context) // Dynamische Daten abrufen
     responses =
-      responseData.map { response ->
-        ResponseItem(name = response.name, statusIconResId = response.status)
-      }
+        responseData.map { response ->
+          ResponseItem(name = response.name, statusIconResId = response.status)
+        }
   }
 
   // API-Anfrage ausführen SitzungsCard
   LaunchedEffect(meetingId) {
-    responseSitzungsCard = navController?.let { getMeetingsByID(it.context,id = meetingId) }
+    responseSitzungsCard = navController?.let { getMeetingsByID(it.context, id = meetingId) }
   }
-
-
 
   // UI anzeigen
   Column(modifier = Modifier.background(Color.Transparent)) {
-    responseSitzungsCard?.let { sitzungsCardData ->
-      SitzungsCard(sitzungsCardData)
-    }
+    responseSitzungsCard?.let { sitzungsCardData -> SitzungsCard(sitzungsCardData) }
     Log.d("Test-log-page", "AttendancesCoordinationPage: $responseSitzungsCard")
     Spacer(Modifier.size(12.dp))
     ResponseList(responses = responses, "Rückmeldungen")
