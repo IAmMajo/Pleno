@@ -14,75 +14,79 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 
-// Farben anpassen
-private val cardBackgroundColor = Color(0xFFEEEFE3) // Hintergrundfarbe
-private val textColor = Color(0xFF1A1C15) // Textfarbe
+// Farben definieren (einfache Anpassung der Farbpalette)
+private val cardBackgroundColor = Color(0xFFEEEFE3) // Hintergrundfarbe der Karte
+private val textColor = Color(0xFF1A1C15) // Textfarbe für Titel und Optionen
 
 @Composable
 fun VotingCard(
-    title: String = "Abstimmung",
-    options: List<String> = listOf("Option 1", "Option 2", "Option 3", "Enthalten"),
-    onOptionSelected: (String) -> Unit = {}
+    title: String = "Abstimmung", // Titel der Abstimmung
+    options: List<String> = listOf("Option 1", "Option 2", "Option 3", "Enthalten"), // Auswahlmöglichkeiten
+    onOptionSelected: (String) -> Unit = {} // Callback, der bei Auswahl einer Option aufgerufen wird
 ) {
+    // Zustandsvariable zum Speichern der ausgewählten Option
     var selectedOption by remember { mutableStateOf<String?>(null) }
 
+    // Karte, die die gesamte Abstimmungskomponente umgibt
     Card(
         modifier = Modifier
-            .width(550.dp)
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
-        shape = RoundedCornerShape(12.dp) // Abgerundete Ecken
+            .width(550.dp) // Breite der Karte (kann angepasst werden, z.B. für Responsivität)
+            .padding(16.dp), // Außenabstand (Margin) der Karte
+        colors = CardDefaults.cardColors(containerColor = cardBackgroundColor), // Hintergrundfarbe der Karte
+        shape = RoundedCornerShape(12.dp) // Abgerundete Ecken für ein moderneres Design
     ) {
+        // Spalte zur vertikalen Anordnung der Inhalte innerhalb der Karte
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
+                .padding(16.dp) // Innenabstand (Padding) innerhalb der Karte
+                .fillMaxWidth() // Breite der Spalte auf die volle Kartenbreite erweitern
         ) {
-            // Überschrift mit Stil
+            // Titel der Abstimmung
             Text(
-                text = title,
+                text = title, // Titeltext, z.B. "Abstimmung"
                 style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    letterSpacing = 0.25.sp,
-                    color = textColor
+                    fontWeight = FontWeight.Bold, // Fettschrift für den Titel
+                    fontSize = 18.sp, // Schriftgröße
+                    letterSpacing = 0.25.sp, // Buchstabenabstand
+                    color = textColor // Textfarbe
                 ),
-                modifier = Modifier.padding(bottom = 12.dp)
+                modifier = Modifier.padding(bottom = 12.dp) // Abstand unter dem Titel
             )
 
-            // Auswahlmöglichkeiten
+            // Iteration über die Liste der Optionen
             options.forEach { option ->
+                // Eine Zeile pro Option (Text + Checkbox)
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically, // Vertikale Ausrichtung in der Zeile
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 2.dp)
-                        .toggleable(
-                            value = (selectedOption == option),
-                            onValueChange = {
-                                selectedOption = if (it) option else null
-                                if (it) onOptionSelected(option)  // Callback on selection
+                        .fillMaxWidth() // Zeile nimmt die gesamte Breite ein
+                        .padding(vertical = 2.dp) // Vertikaler Abstand zwischen den Zeilen
+                        .toggleable( // Ermöglicht das Umschalten zwischen Optionen
+                            value = (selectedOption == option), // Überprüft, ob die aktuelle Option ausgewählt ist
+                            onValueChange = { isChecked -> // Reaktion auf Änderung
+                                selectedOption = if (isChecked) option else null // Zustandsvariable aktualisieren
+                                if (isChecked) onOptionSelected(option) // Callback auslösen, wenn ausgewählt
                             }
                         )
                 ) {
-                    // Optionen am linken Rand
+                    // Text der Option links
                     Text(
-                        text = option,
+                        text = option, // Text der aktuellen Option
                         style = TextStyle(
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 18.sp,
-                            letterSpacing = 0.25.sp,
-                            color = textColor
+                            fontWeight = FontWeight.Medium, // Mittlere Schriftstärke
+                            fontSize = 18.sp, // Schriftgröße
+                            letterSpacing = 0.25.sp, // Buchstabenabstand
+                            color = textColor // Textfarbe
                         ),
-                        modifier = Modifier.weight(1f) // Links ausrichten
+                        modifier = Modifier.weight(1f) // Text nimmt verfügbaren Platz ein (links ausgerichtet)
                     )
 
-                    // Kästchen am rechten Rand
+                    // Checkbox rechts
                     Checkbox(
-                        checked = selectedOption == option,
-                        onCheckedChange = { isChecked ->
-                            selectedOption = if (isChecked) option else null
-                            if (isChecked) onOptionSelected(option)
+                        checked = selectedOption == option, // Markiert, wenn die Option ausgewählt ist
+                        onCheckedChange = { isChecked -> // Reaktion auf Klick auf die Checkbox
+                            selectedOption = if (isChecked) option else null // Zustandsvariable aktualisieren
+                            if (isChecked) onOptionSelected(option) // Callback auslösen
                         }
                     )
                 }
@@ -91,12 +95,13 @@ fun VotingCard(
     }
 }
 
+// Vorschau für die VotingCard-Komponente (nur in der Entwicklungsumgebung sichtbar)
 @Preview
 @Composable
 fun PreviewVotingCard() {
     VotingCard(
-        onOptionSelected = { selectedOption ->
-            println("Option selected: $selectedOption")
+        onOptionSelected = { selectedOption -> 
+            println("Option ausgewählt: $selectedOption") // Konsolenausgabe zur Überprüfung der Auswahl
         }
     )
 }
