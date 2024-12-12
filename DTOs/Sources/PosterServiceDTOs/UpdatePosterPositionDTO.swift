@@ -1,9 +1,3 @@
-//
-//  UpdatePosterPositionDTO.swift
-//  poster-service
-//
-//  Created by Dennis Sept on 26.11.24.
-//
 import Foundation
 
 public struct UpdatePosterPositionDTO: Codable {
@@ -14,7 +8,7 @@ public struct UpdatePosterPositionDTO: Codable {
     public var expiresAt:Date
 
 
-    public init(latitude: Double?, longitude: Double?, isDisplayed: Bool?, imageBase64: String?,expiresAt:Date) {
+    public init(latitude: Double?, longitude: Double?, isDisplayed: Bool?, imageBase64: String?, expiresAt: Date) {
         self.latitude = latitude
         self.longitude = longitude
         self.isDisplayed = isDisplayed

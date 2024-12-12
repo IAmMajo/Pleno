@@ -1,10 +1,3 @@
-//
-//  CreatePosterPositionDTO.swift
-//  poster-service
-//
-//  Created by Dennis Sept on 26.11.24.
-//
-
 import Foundation
 
 public struct CreatePosterPositionDTO: Codable {
@@ -15,7 +8,7 @@ public struct CreatePosterPositionDTO: Codable {
     public var imageBase64: String // Bild als Base64-String
     public var expiresAt:Date
 
-    public init(posterId: UUID, responsibleUserId: UUID, latitude: Double, longitude: Double, isDisplayed: Bool, imageBase64: String,expiresAt:Date) {
+    public init(posterId: UUID, responsibleUserId: UUID, latitude: Double, longitude: Double, isDisplayed: Bool, imageBase64: String, expiresAt: Date) {
         self.posterId = posterId
         self.responsibleUserId = responsibleUserId
         self.latitude = latitude

@@ -1,13 +1,6 @@
-//
-//  settings.swift
-//  config-service
-//
-//  Created by Dennis Sept on 02.11.24.
-//
-
 import Foundation
 
-public struct SettingResponseDTO: Codable{
+public struct SettingResponseDTO: Codable {
     public var id: UUID?
     public var key: String
     public var datatype: String
