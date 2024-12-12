@@ -87,15 +87,14 @@ fun navigation(navController: NavHostController) {
   // val navController = rememberNavController()
   NavHost(
       navController = navController,
-      startDestination = Screen.Login.rout,
+      startDestination = Screen.Home.rout,
       modifier =
           Modifier.fillMaxWidth()
               .padding( // TODO - Padding anpassen
                   top = 60.dp, start = 12.dp, end = 12.dp, bottom = 12.dp)
               .background(Color(0xfffafaee)), // TODO - Android Background Light
   ) {
-    // LoginScreen
-    composable(Screen.Login.rout) { LoginScreen(navController = navController) }
+
     // StartScreen
 
     composable(Screen.Home.rout) { HomePage(navController = navController) }
