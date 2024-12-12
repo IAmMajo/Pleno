@@ -23,8 +23,16 @@ let colorMapRing: [Int: Color] = [
    1: .gray
 ]
 
-struct RingChartView: View {
+struct ProgressRingView: View {
    let data: [PosterCount]
+   let status: Status
+   
+   var colorMapRing: [Int: Color] {
+      return [
+      0: status == .hung ? .blue : .green,
+      1: .gray
+      ]
+   }
    
    var body: some View {
       Chart(data, id: \.index) { item in
@@ -41,6 +49,6 @@ struct RingChartView: View {
 }
 
 #Preview {
-   RingChartView(data: byIndex)
+   ProgressRingView(data: byIndex, status: Status.takenDown)
 }
 

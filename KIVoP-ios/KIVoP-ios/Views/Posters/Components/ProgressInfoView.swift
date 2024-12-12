@@ -28,26 +28,44 @@ struct ProgressInfoView: View {
    var value: CGFloat {
       switch status {
       case .hung:
-         return 90
+         return 100
       case .takenDown:
-         return 130
+         return 140
       case .notDisplayed:
-         return 160
+         return 170
       case .expiresInOneDay:
-         return 90
+         return 100
       case .expired:
-         return 90
+         return 100
+      }
+   }
+   
+   var color: Color {
+      switch status {
+      case .hung:
+         return .blue
+      case .takenDown:
+         return .green
+      case .notDisplayed:
+         return .gray
+      case .expiresInOneDay:
+         return .orange
+      case .expired:
+         return .red
       }
    }
    
     var body: some View {
        Rectangle()
-           .fill(.black.opacity(0.0))
-           .frame(width: value, height: 22)
+          .fill(color.opacity(0.15))
+           .frame(width: value, height: 28)
            .overlay( // border as an overlay
              RoundedRectangle(cornerRadius: 10)
-                .stroke(.black, lineWidth: 1)
-                .overlay(Text("Plakat \(getDateProgressText(status: status))").font(.footnote))
+               .stroke(color.opacity(0.15), lineWidth: 1)
+                .overlay(Text("Plakat \(getDateProgressText(status: status))")
+                  .foregroundStyle(color.mix(with: .black, by: 0.25))
+                  .font(.footnote))
+                  .fontWeight(.semibold)
            )
            .cornerRadius(10)
     }

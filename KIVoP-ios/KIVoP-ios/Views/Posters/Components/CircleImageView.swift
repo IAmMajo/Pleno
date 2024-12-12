@@ -8,11 +8,39 @@
 import SwiftUI
 
 struct CircleImageView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
+   let status: Status
+   
+   var body: some View {
+      if status == .notDisplayed {
+         Rectangle()
+//            .fill(Color(UIColor.systemGray4))
+            .fill(.white)
+            .frame(width: 165, height: 165)
+            .overlay(
+               VStack {
+                  Image(systemName: "camera.fill")
+                     .foregroundStyle(.gray)
+                     .font(.system(size: 50))
+                     .padding(.bottom, 2)
+                  Text("Aufhängen\nbestätigen")
+                     .font(.callout)
+                     .fontWeight(.semibold)
+                     .foregroundStyle(.gray)
+               }
+            )
+            .cornerRadius(500)
+            .shadow(radius: 5)
+      } else {
+         Image("TestPositionImage")
+            .resizable()
+            .scaledToFill()
+            .frame(width: 165, height: 165)
+            .clipShape(Circle())
+            .shadow(radius: 5)
+      }
+   }
 }
 
 #Preview {
-    CircleImageView()
+   CircleImageView(status: Status.hung)
 }
