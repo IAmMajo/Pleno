@@ -124,6 +124,15 @@ struct MainPage: View {
                                     .foregroundColor(Color.primary)
                             }
                         }
+                       
+                       NavigationLink(destination: PostersView()) {
+                           HStack {
+                              Image(systemName: "text.rectangle.page.fill")
+                                   .foregroundColor(.accentColor)
+                               Text("Plakate")
+                                   .foregroundColor(Color.primary)
+                           }
+                       }
                     }
                 }
                 .listStyle(InsetGroupedListStyle())

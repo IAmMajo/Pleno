@@ -60,7 +60,16 @@
     "%.2f%%" : {
 
     },
+    "%@" : {
+
+    },
     "%lld" : {
+
+    },
+    "1/4" : {
+
+    },
+    "2/3" : {
 
     },
     "03.12.2023" : {
@@ -169,6 +178,12 @@
         }
       }
     },
+    "Abgehangen" : {
+
+    },
+    "Abhängedatum:" : {
+
+    },
     "Abmelden" : {
       "localizations" : {
         "de" : {
@@ -260,6 +275,9 @@
     "Adresse" : {
 
     },
+    "Adresse in der Nähe" : {
+
+    },
     "AKTIONEN" : {
       "localizations" : {
         "de" : {
@@ -281,6 +299,9 @@
           }
         }
       }
+    },
+    "Aktuell" : {
+
     },
     "Aktuell ist keine Sitzung im Gange." : {
       "extractionState" : "stale",
@@ -381,6 +402,9 @@
         }
       }
     },
+    "Am Grabstein 6,\n12345 Transilvanien \nDeutschland \n51.500603516488205, 6.545327532716446" : {
+
+    },
     "Anschließend kann der " : {
       "localizations" : {
         "de" : {
@@ -446,6 +470,15 @@
           }
         }
       }
+    },
+    "Archiviert" : {
+
+    },
+    "Aufgehangen" : {
+
+    },
+    "Aufhängen\nbestätigen" : {
+
     },
     "Auswahl" : {
 
@@ -941,6 +974,9 @@
         }
       }
     },
+    "Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position" : {
+
+    },
     "Mit " : {
       "localizations" : {
         "de" : {
@@ -1115,6 +1151,9 @@
         }
       }
     },
+    "No expiration date" : {
+
+    },
     "No meetings available." : {
 
     },
@@ -1271,6 +1310,12 @@
           }
         }
       }
+    },
+    "Plakat %@" : {
+
+    },
+    "Plakate" : {
+
     },
     "Profil" : {
       "localizations" : {
@@ -1501,6 +1546,9 @@
         }
       }
     },
+    "Standorte (3)" : {
+
+    },
     "Suchen" : {
       "localizations" : {
         "de" : {
@@ -1589,6 +1637,9 @@
           }
         }
       }
+    },
+    "Verantwortliche (2)" : {
+
     },
     "Vereinsfarbe" : {
       "localizations" : {

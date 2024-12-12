@@ -39,9 +39,9 @@ class VotingViewModel: ObservableObject, Identifiable {
             status = "checkmark"
          } else {
             symbolColor = voting.isOpen ? .orange : .black
-            print("symbolColor: \(symbolColor)")
+//            print("symbolColor: \(symbolColor)")
             status = voting.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
-            print("status: \(status)")
+//            print("status: \(status)")
          }
       }
       isLoading = false
