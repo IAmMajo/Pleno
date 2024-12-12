@@ -9,12 +9,12 @@ struct VotingController: RouteCollection {
     var votingClientWebSocketContainer = VotingClientWebSocketContainer()
     
     func boot(routes: RoutesBuilder) throws {
-        let openAPITag = TagObject(name: "Attendances")
+        let openAPITag = TagObject(name: "Abstimmungen")
         let adminMiddleware = AdminMiddleware()
         self.votingClientWebSocketContainer.eventLoop = eventLoop
         
         routes.get(":id", "votings", use: getVotingsOfMeeting)
-            .openAPI(tags: openAPITag, summary: "Alle Abstimmungen eines Meetings abfragen", path: .type(Meeting.IDValue.self), response: .type([GetVotingDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+            .openAPI(tags: openAPITag, summary: "Alle Abstimmungen einer Sitzung abfragen", path: .type(Meeting.IDValue.self), response: .type([GetVotingDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
         
         routes.group("votings") { votingRoutes in
             votingRoutes.get(use: getAllVotings)

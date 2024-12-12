@@ -6,32 +6,32 @@ import SwiftOpenAPI
 
 struct RecordController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let openAPITag = TagObject(name: "Records")
+        let openAPITag = TagObject(name: "Protokolle")
         let adminMiddleware = AdminMiddleware()
         
         routes.group(":id", "records") { recordRoutes in
             recordRoutes.get(use: getAllRecords)
-                .openAPI(tags: openAPITag, summary: "Alle Records eines Meetings abfragen", response: .type([GetRecordDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+                .openAPI(tags: openAPITag, summary: "Alle Protokolle einer Sitzung abfragen", response: .type([GetRecordDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
             
             recordRoutes.group(":lang") { singleRecordRoutes in
                 let adminRoutes = singleRecordRoutes.grouped(adminMiddleware)
                 singleRecordRoutes.get(use: getSingleRecord)
-                    .openAPI(tags: openAPITag, summary: "Ein Record einer Sprache eines Meetings abfragen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+                    .openAPI(tags: openAPITag, summary: "Ein Protokoll einer Sprache einer Sitzung abfragen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
                 
                 singleRecordRoutes.patch(use: updateRecord)
-                    .openAPI(tags: openAPITag, summary: "Ein Record einer Sprache eines Meetings updaten", description: "Nur gestattet, wenn Status noch underway ist und der Bearbeiter der im Protokoll eingetragene oder ein Admin ist. Wenn PatchRecordDTO.identity gesetzt ist, wird der Status automatisch auf underway gesetzt.", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), body: .type(PatchRecordDTO.self), contentType: .application(.json), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+                    .openAPI(tags: openAPITag, summary: "Ein Protokoll einer Sprache einer Sitzung updaten", description: "Nur gestattet, wenn Status noch underway ist und der Bearbeiter der im Protokoll eingetragene oder ein Admin ist. Wenn PatchRecordDTO.identity gesetzt ist, wird der Status automatisch auf underway gesetzt.", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), body: .type(PatchRecordDTO.self), contentType: .application(.json), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
                 
                 adminRoutes.delete(use: deleteRecord)
-                    .openAPI(tags: openAPITag, summary: "Ein Record einer Sprache eines Meetings löschen", description: "Nur gestattet, wenn Status noch underway ist und der Bearbeiter der im Protokoll eingetragene oder ein Admin ist. Das Protokoll der Standardsprache des Vereins kann nicht gelöscht werden.", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), statusCode: .noContent, auth: AdminMiddleware.schemeObject)
+                    .openAPI(tags: openAPITag, summary: "Ein Protokoll einer Sprache einer Sitzung löschen", description: "Nur gestattet, wenn Status noch underway ist und der Bearbeiter der im Protokoll eingetragene oder ein Admin ist. Das Protokoll der Standardsprache des Vereins kann nicht gelöscht werden.", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), statusCode: .noContent, auth: AdminMiddleware.schemeObject)
                 
                 singleRecordRoutes.put("submit", use: submitRecord)
-                    .openAPI(tags: openAPITag, summary: "Ein Record einer Sprache eines Meetings einreichen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+                    .openAPI(tags: openAPITag, summary: "Ein Protokoll einer Sprache einer Sitzung einreichen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
                 
                 adminRoutes.put("approve", use: approveRecord)
-                    .openAPI(tags: openAPITag, summary: "Ein Record einer Sprache eines Meetings genehmigen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
+                    .openAPI(tags: openAPITag, summary: "Ein Protokoll einer Sprache einer Sitzung genehmigen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
                 
                 adminRoutes.put("translate", ":lang2", use: translateRecord)
-                    .openAPI(tags: openAPITag, summary: "Ein Record einer Sprache eines Meetings in eine neue Sprache übersetzen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self), .type(String.self)), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
+                    .openAPI(tags: openAPITag, summary: "Ein Protokoll einer Sprache einer Sitzung in eine neue Sprache übersetzen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self), .type(String.self)), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
             }
         }
     }
