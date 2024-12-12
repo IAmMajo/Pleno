@@ -111,6 +111,7 @@ fun LoginScreen(context: Context) {
               text = "Login",
               onClick = {
                 coroutineScope.launch {
+                  //Todo: use email and password val
                   auth.login("admin@kivop.ipv64.net", "admin")
                   val intent = Intent(context, MainActivity::class.java)
                   context.startActivity(intent)
