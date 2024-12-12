@@ -1,10 +1,12 @@
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -16,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.kivopandriod.components.Subtitles
 import net.ipv64.kivop.components.ListenItem
-import net.ipv64.kivop.moduls.AttendancesListsData
+import net.ipv64.kivop.moduls.ItemListData
 
 @Composable
 fun GenerateTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
@@ -51,7 +53,7 @@ fun GenerateTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int)
 fun AppointmentTabContent(
     navigation: NavController,
     tabs: List<String>,
-    appointments: List<AttendancesListsData>
+    appointments: List<ItemListData>
 ) {
   var selectedTabIndex by remember { mutableStateOf(0) }
 
@@ -80,10 +82,11 @@ fun AppointmentTabContent(
                 Subtitles(subText = currentYear?.toString() ?: "")
               }
               ListenItem(
-                  attendancesListsData = upcomingAppointments[index],
+                  itemListData = upcomingAppointments[index],
                   onClick = {
                     navigation.navigate("anwesenheit/${upcomingAppointments[index].id}")
                   })
+              Spacer(modifier = Modifier.size(8.dp))
             }
           } else {
             item { Text("Keine anstehenden Sitzungen", color = Color.Gray) }
@@ -103,8 +106,10 @@ fun AppointmentTabContent(
                 Subtitles(subText = currentYear?.toString() ?: "")
               }
               ListenItem(
-                  attendancesListsData = pastAppointments[index],
-                  onClick = { navigation.navigate("anwesenheit/${pastAppointments[index].id}") })
+                  itemListData = pastAppointments[index],
+                  onClick = { navigation.navigate("anwesenheit/${pastAppointments[index].id}") 
+                  })
+              Spacer(modifier = Modifier.size(8.dp))
             }
           } else {
             item { Text("Keine vergangenen Sitzungen", color = Color.Gray) }
