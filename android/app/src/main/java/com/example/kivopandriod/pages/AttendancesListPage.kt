@@ -1,6 +1,7 @@
 package com.example.kivopandriod.pages
 
 import AppointmentTabContent
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,8 +56,9 @@ fun AttendancesListPage(navController: NavController) {
             },
             meetingStatus = meeting.meetingStatus,
             id = meeting.id)
-      }
+      }.sortedByDescending { it.date?.year } //todo wird entfernt sobald die sortierung von backend da ist
 
+  // Log.i("AttendancesListPage", "Appointments: ${appointments}")
   // Ergebnisse anzeigen
   AppointmentTabContent(navController, tabs = tabs, appointments = appointments)
 }
