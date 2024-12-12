@@ -1,7 +1,6 @@
 import Fluent
 import Vapor
 import Models
-import JWT
 
 struct RideController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
