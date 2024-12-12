@@ -56,7 +56,6 @@ import kotlinx.coroutines.launch
 import net.ipv64.kivop.pages.AttendancesCoordinationPage
 import net.ipv64.kivop.pages.AttendancesListPage
 import net.ipv64.kivop.pages.HomePage
-import net.ipv64.kivop.pages.LoginScreen
 import net.ipv64.kivop.pages.MeetingsListPage
 import net.ipv64.kivop.pages.ProtocolListPage
 import net.ipv64.kivop.ui.theme.KIVoPAndriodTheme

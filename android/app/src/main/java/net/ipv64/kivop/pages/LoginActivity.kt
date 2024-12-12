@@ -30,14 +30,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.MainActivity
-import net.ipv64.kivop.Nav
 import net.ipv64.kivop.components.CustomButton
 import net.ipv64.kivop.components.CustomInputField
 import net.ipv64.kivop.services.api.AuthApi
@@ -56,10 +52,9 @@ class LoginActivity : ComponentActivity() {
       KIVoPAndriodTheme {
         // A surface container using the 'background' color from the theme
         Surface(
-          modifier = Modifier.fillMaxSize(),
-          color = Color(0xfffafaee), // TODO - Android Background Light)
+            modifier = Modifier.fillMaxSize(),
+            color = Color(0xfffafaee), // TODO - Android Background Light)
         ) {
-          
           LoginScreen(context)
         }
       }
@@ -111,7 +106,7 @@ fun LoginScreen(context: Context) {
               text = "Login",
               onClick = {
                 coroutineScope.launch {
-                  //Todo: use email and password val
+                  // Todo: use email and password val
                   auth.login("admin@kivop.ipv64.net", "admin")
                   val intent = Intent(context, MainActivity::class.java)
                   context.startActivity(intent)
