@@ -45,13 +45,14 @@ suspend fun meetingsList(context: Context): List<AttendancesListsData> =
               val title = meeting.get("name").asString
               val start = meeting.get("start").asString
               val id = meeting.get("id").asString
-
+              val meetingStatus = meeting.get("status").asString
+              val myAttendanceStatus = meeting.get("myAttendanceStatus").asString
               // Datum und Uhrzeit aus start extrahieren
               val zonedDateTime = ZonedDateTime.parse(start, DateTimeFormatter.ISO_ZONED_DATE_TIME)
               val date = zonedDateTime.toLocalDate()
               val time = zonedDateTime.toLocalTime()
 
-              AttendancesListsData(title, date, time, id = id)
+              AttendancesListsData(title, date, time, meetingStatus = meetingStatus, id = id)
             }
           } else {
             println("Fehler: Leere Antwort erhalten.")
