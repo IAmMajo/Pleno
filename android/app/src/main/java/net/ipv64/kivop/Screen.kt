@@ -1,8 +1,6 @@
 package net.ipv64.kivop
 
 sealed class Screen(val rout: String) {
-  object Login : Screen("login")
-
   object Home : Screen("home")
 
   object Sitzungen : Screen("sitzungen")
