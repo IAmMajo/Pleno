@@ -38,25 +38,25 @@ fun AttendancesListPage(navController: NavController) {
 
   // Konvertierung in TermindData (falls nötig)
   val appointments =
-    meetings
-      .mapIndexed { index, meeting ->
-        ItemListData(
-          title = meeting.title,
-          date = meeting.date,
-          time = meeting.time,
-          attendanceStatus =
-          when (meeting.myAttendanceStatus) {
-            "accepted" -> 1
-            "present" -> 1
-            "absent" -> 2
-            else -> 0
-          },
-          meetingStatus = meeting.meetingStatus,
-          id = meeting.id)
-      }
-      .sortedByDescending {
-        it.date?.year
-      } // todo wird entfernt sobald die sortierung von backend da ist
+      meetings
+          .mapIndexed { index, meeting ->
+            ItemListData(
+                title = meeting.title,
+                date = meeting.date,
+                time = meeting.time,
+                attendanceStatus =
+                    when (meeting.myAttendanceStatus) {
+                      "accepted" -> 1
+                      "present" -> 1
+                      "absent" -> 2
+                      else -> 0
+                    },
+                meetingStatus = meeting.meetingStatus,
+                id = meeting.id)
+          }
+          .sortedByDescending {
+            it.date?.year
+          } // todo wird entfernt sobald die sortierung von backend da ist
 
   // Log.i("AttendancesListPage", "Appointments: ${appointments}")
   // Ergebnisse anzeigen

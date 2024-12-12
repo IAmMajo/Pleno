@@ -107,8 +107,7 @@ fun AppointmentTabContent(
               }
               ListenItem(
                   itemListData = pastAppointments[index],
-                  onClick = { navigation.navigate("anwesenheit/${pastAppointments[index].id}") 
-                  })
+                  onClick = { navigation.navigate("anwesenheit/${pastAppointments[index].id}") })
               Spacer(modifier = Modifier.size(8.dp))
             }
           } else {

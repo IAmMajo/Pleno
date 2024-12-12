@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,21 +15,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.format.DateTimeFormatter
 import net.ipv64.kivop.R
 import net.ipv64.kivop.moduls.ItemListData
 import net.ipv64.kivop.ui.theme.*
-import java.time.LocalDate
-import java.time.LocalTime
 
 @Composable
 fun ListenItem(
-  itemListData: ItemListData,
-  onClick: () -> Unit = {},
-  backgroundColor: Color = Background_secondary_light
+    itemListData: ItemListData,
+    onClick: () -> Unit = {},
+    backgroundColor: Color = Background_secondary_light
 ) {
   val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
   val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
@@ -60,7 +56,6 @@ fun ListenItem(
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              
               .clip(RoundedCornerShape(8.dp))
               .background(backgroundColorT)
               .padding(8.dp)
@@ -101,8 +96,7 @@ fun ListenItem(
                   }
                 }
 
-                if (itemListData.membersCount == null &&
-                    itemListData.iconRend == true) {
+                if (itemListData.membersCount == null && itemListData.iconRend == true) {
                   Icon(
                       painter = iconPainter,
                       contentDescription = null,
@@ -128,4 +122,3 @@ fun ListenItem(
         }
       }
 }
-

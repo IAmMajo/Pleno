@@ -8,8 +8,8 @@ sealed class Screen(val rout: String) {
   object Anwesenheit : Screen("anwesenheit")
 
   object Protokolle : Screen("protokolle")
-  object Abstimmungen : Screen("abstimmungen")
 
+  object Abstimmungen : Screen("abstimmungen")
 }
 
 // routing später anpassen: navController.

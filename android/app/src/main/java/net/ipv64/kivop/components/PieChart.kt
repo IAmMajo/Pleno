@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.*
 import net.ipv64.kivop.moduls.VotingResults
 import net.ipv64.kivop.ui.theme.Background_secondary_light
-import net.ipv64.kivop.ui.theme.Secondary_dark
 
 @Composable
 fun PieChart(list: List<VotingResults>, explodeDistance: Float = 30f) {
@@ -33,14 +32,14 @@ fun PieChart(list: List<VotingResults>, explodeDistance: Float = 30f) {
         Box(
             modifier =
                 Modifier.fillMaxWidth().aspectRatio(1f).drawBehind {
-                  if(list.sumOf { it.votes } != 0){
-                      drawPieChart(list,explodeDistance = explodeDistance)
-                  }
-                  else{
-                      val noVotings = listOf(
-                          VotingResults("Keine Stimmen", 1,100.0),
-                      )
-                      drawPieChart(noVotings,1.0f)
+                  if (list.sumOf { it.votes } != 0) {
+                    drawPieChart(list, explodeDistance = explodeDistance)
+                  } else {
+                    val noVotings =
+                        listOf(
+                            VotingResults("Keine Stimmen", 1, 100.0),
+                        )
+                    drawPieChart(noVotings, 1.0f)
                   }
                 }) {}
       }

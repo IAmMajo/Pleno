@@ -1,14 +1,9 @@
 package com.example.kivopandriod.pages
 
-import android.net.Uri
 import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,58 +24,54 @@ import net.ipv64.kivop.components.ListenItem
 import net.ipv64.kivop.moduls.GetVotingDTO
 import net.ipv64.kivop.moduls.GetVotings
 import net.ipv64.kivop.moduls.ItemListData
-import net.ipv64.kivop.ui.theme.Background_secondary_light
 
 @Composable
-fun VotingsListPage(navController: NavController){
-    var votings by remember { mutableStateOf<List<GetVotingDTO>>(emptyList()) }
-    val scope = rememberCoroutineScope()
+fun VotingsListPage(navController: NavController) {
+  var votings by remember { mutableStateOf<List<GetVotingDTO>>(emptyList()) }
+  val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        scope.launch {
-            val result = GetVotings(navController.context)
-            votings = result
-        }
+  LaunchedEffect(Unit) {
+    scope.launch {
+      val result = GetVotings(navController.context)
+      votings = result
     }
+  }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Text(text = "Votings")
-        LazyColumn(){
-            items(votings) { voting ->
-              var votingData = ItemListData(
+  Column(modifier = Modifier.fillMaxSize()) {
+    Text(text = "Votings")
+    LazyColumn() {
+      items(votings) { voting ->
+        var votingData =
+            ItemListData(
                 title = voting.question,
                 id = voting.id.toString(),
                 date = null,
                 time = null,
                 meetingStatus = "",
                 timeRend = false,
-                iconRend = false
-              )
-              try {
-                votingData = ItemListData(
-                    title = voting.question,
-                    id = voting.id.toString(),
-                    date = stringToLocalDate(voting.startedAt),
-                    time = null,
-                    meetingStatus = "",
-                    timeRend = false,
-                    iconRend = false
-                  )
-              }catch (e: Exception){
-                Log.d("test", e.message.toString())
-                Log.d("test", voting.question)
-              }
-              ListenItem(
-                votingData,
-                onClick = {
-                  val route = "abstimmungen/${voting.id}"
-                  navController.navigate(route)
-                }
-              )
-              Spacer(modifier = Modifier.size(8.dp))
-            }
+                iconRend = false)
+        try {
+          votingData =
+              ItemListData(
+                  title = voting.question,
+                  id = voting.id.toString(),
+                  date = stringToLocalDate(voting.startedAt),
+                  time = null,
+                  meetingStatus = "",
+                  timeRend = false,
+                  iconRend = false)
+        } catch (e: Exception) {
+          Log.d("test", e.message.toString())
+          Log.d("test", voting.question)
         }
+        ListenItem(
+            votingData,
+            onClick = {
+              val route = "abstimmungen/${voting.id}"
+              navController.navigate(route)
+            })
+        Spacer(modifier = Modifier.size(8.dp))
+      }
     }
+  }
 }
