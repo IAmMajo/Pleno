@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SettingResponseDTO: Codable{
+public struct SettingResponseDTO: Codable {
     public var id: UUID?
     public var key: String
     public var datatype: String
