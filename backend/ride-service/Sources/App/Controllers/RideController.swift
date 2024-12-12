@@ -21,6 +21,7 @@ struct RideController: RouteCollection {
     
     @Sendable
     func getAllRides(req: Request) async throws -> [GetRideOverviewDTO] {
+        // query all ride and convert to GetRideOverviewDTO
         let rides = try await Ride.query(on: req.db).all().map{ ride in
             ride.toGetRideOverviewDTO()
         }
@@ -30,12 +31,15 @@ struct RideController: RouteCollection {
     
     @Sendable
     func getRide(req: Request) async throws -> GetRideDetailDTO {
+        // get ride by id
         guard let ride = try await Ride.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
 
+        // extract ride id
         let ride_id = try ride.requireID()
         
+        // query all data for reponse
         var seatsSum = 0
         var passengersSum = 0
         let participants = try await Participant.query(on: req.db)
@@ -56,6 +60,7 @@ struct RideController: RouteCollection {
                 return GetParticipantDTO(id: participantID, name: identity.name, driver: participant.driver, passengers_count: participant.passengers_count, latitude: participant.latitude, longitude: participant.longitude, itsMe: itsMe)
             }
         
+        // build response dto
         return GetRideDetailDTO(name: ride.name, starts: ride.starts, participants: participants, latitude: ride.latitude, longitude: ride.longitude, participantsSum: participants.count, seatsSum: seatsSum, passengersSum: passengersSum)
 
     }
@@ -79,6 +84,7 @@ struct RideController: RouteCollection {
     
     @Sendable
     func patchRide(req: Request) async throws -> GetRideOverviewDTO {
+        // query ride by id
         guard let ride = try await Ride.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -90,6 +96,8 @@ struct RideController: RouteCollection {
         
         // patch ride
         ride.patchWithDTO(dto: patchRideDTO)
+        
+        // save changes
         try await ride.update(on: req.db)
         
         return ride.toGetRideOverviewDTO()
@@ -97,16 +105,20 @@ struct RideController: RouteCollection {
     
     @Sendable
     func deleteRide(req: Request) async throws -> HTTPStatus {
+        // query ride id
         guard let ride = try await Ride.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
         
+        // extract ride id
         let ride_id = try ride.requireID()
         
+        // delete all participants for ride
         try await Participant.query(on: req.db)
             .filter(\.$ride.$id == ride_id)
             .delete()
         
+        // delete ride
         try await ride.delete(on: req.db)
         
         return .noContent
@@ -119,6 +131,7 @@ struct RideController: RouteCollection {
             throw Abort(.badRequest, reason: "Invalid or missing ride ID")
         }
         
+        // get participant by userID and rideID
         guard let participat = try await Participant.query(on: req.db)
             .filter(\.$user.$id == req.jwtPayload.userID)
             .filter(\.$ride.$id == ride_id)
@@ -168,6 +181,7 @@ struct RideController: RouteCollection {
         // save participant
         try await participant.save(on: req.db)
         
+        // query data for response
         let participantID = try participant.requireID()
         let username = try await User.query(on: req.db)
             .filter(\.$id == req.jwtPayload.userID)
@@ -182,7 +196,7 @@ struct RideController: RouteCollection {
     
     @Sendable
     func patchParticipation(req: Request) async throws -> GetParticipantDTO {
-        print("Patch Participation")
+        
         // parse DTO
         guard let patchParticipationDTO = try? req.content.decode(PatchParticipationDTO.self) else {
             throw Abort(.badRequest, reason: "Invalid request body! Expected PatchParticipationDTO.")
@@ -207,6 +221,7 @@ struct RideController: RouteCollection {
         // save changes
         try await participant.update(on: req.db)
         
+        // query data for response
         let participantID = try participant.requireID()
         let username = try await User.query(on: req.db)
             .filter(\.$id == req.jwtPayload.userID)

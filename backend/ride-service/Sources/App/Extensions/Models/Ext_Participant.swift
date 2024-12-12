@@ -21,7 +21,7 @@ extension Participant {
         }
         
         if let passengers_count = dto.passengers_count {
-            self.passengers_count = dto.passengers_count
+            self.passengers_count = passengers_count
         }
         
         // check if update is valid
