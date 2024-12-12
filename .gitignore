@@ -1,6 +1,5 @@
 node_modules/
 build/
-KIVoP-ios.xcodeproj/
 *.xcuserstate
 .swiftpm
 .DS_Store
