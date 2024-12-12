@@ -17,85 +17,62 @@ struct CreateMeetingView: View {
     @StateObject private var meetingManager = MeetingManager() // MeetingManager verwenden
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Create Meeting")
-                .font(.largeTitle)
-                .bold()
+        NavigationStack {
+            Form {
+                Section(header: Text("Meeting Details")) {
+                    TextField("Meeting Name", text: $name)
+                    
+                    TextField("Description (optional)", text: $description)
+                    
+                    DatePicker("Start Date", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
+                    
+                    TextField("Duration (minutes)", text: $duration)
+                        .keyboardType(.numberPad)
+                }
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 15) {
-                    Group {
-                        Text("Meeting Details")
-                            .font(.headline)
-
-                        TextField("Meeting Name", text: $name)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                        TextField("Description (optional)", text: $description)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                        DatePicker("Start Date", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
-                            .datePickerStyle(CompactDatePickerStyle())
-
-                        TextField("Duration (minutes)", text: $duration)
-                            .keyboardType(.numberPad)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                Section(header: Text("Location Details")) {
+                    TextField("Location Name", text: $locationName)
+                    
+                    TextField("Street (optional)", text: $locationStreet)
+                    
+                    HStack {
+                        TextField("Number (optional)", text: $locationNumber)
+                        
+                        TextField("Letter (optional)", text: $locationLetter)
                     }
+                    
+                    TextField("Postal Code (optional)", text: $locationPostalCode)
+                    
+                    TextField("Place (optional)", text: $locationPlace)
+                }
 
-                    Divider()
-
-                    Group {
-                        Text("Location Details")
-                            .font(.headline)
-
-                        TextField("Location Name", text: $locationName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                        TextField("Street (optional)", text: $locationStreet)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                        HStack {
-                            TextField("Number (optional)", text: $locationNumber)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                            TextField("Letter (optional)", text: $locationLetter)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                        }
-
-                        TextField("Postal Code (optional)", text: $locationPostalCode)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                        TextField("Place (optional)", text: $locationPlace)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                    }
-
-                    Divider()
-
+                Section {
                     Button(action: saveMeeting) {
                         if meetingManager.isLoading {
                             ProgressView()
                         } else {
                             Text("Create Meeting")
                                 .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
                         }
                     }
-                    .disabled(meetingManager.isLoading) // Button deaktivieren, wenn eine Anfrage läuft
-                    .padding(.top, 20)
+                    .disabled(meetingManager.isLoading)
 
                     if let error = meetingManager.errorMessage {
                         Text(error)
                             .foregroundColor(.red)
-                            .padding(.top, 10)
                     }
                 }
-                .padding()
+            }
+            .navigationTitle("Create Meeting")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
             }
         }
-        .padding()
     }
 
     private func saveMeeting() {
@@ -126,8 +103,6 @@ struct CreateMeetingView: View {
         meetingManager.createMeeting(meeting)
         clearForm()
         dismiss()
-
-
     }
 
     private func clearForm() {

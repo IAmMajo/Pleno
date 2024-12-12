@@ -4,6 +4,9 @@ import SwiftUI
 struct MeetingAdminView: View {
     @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
     @State private var selectedStatus: FilterType = .scheduled
+    @State private var searchText: String = ""
+    @State private var showCreateMeeting = false
+    
     enum FilterType: String, CaseIterable {
         case scheduled = "In Planung"
         case inSession = "Aktiv"
@@ -24,7 +27,7 @@ struct MeetingAdminView: View {
 
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             VStack {
                 if meetingManager.isLoading {
                     ProgressView("Loading meetings...") // Ladeanzeige
@@ -36,6 +39,7 @@ struct MeetingAdminView: View {
                     Text("No meetings available.")
                         .foregroundColor(.secondary)
                 } else {
+                    // Picker
                     Picker("Filter", selection: $selectedStatus) {
                         ForEach(FilterType.allCases, id: \.self) { filter in
                             Text(filter.rawValue).tag(filter)
@@ -43,40 +47,57 @@ struct MeetingAdminView: View {
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     .padding(.horizontal)
-
-
-                    List(filteredMeetings, id: \.id) { meeting in
-                        NavigationLink(destination: MeetingDetailAdminView(meeting: meeting)) {
-                            VStack(alignment: .leading) {
-                                Text(meeting.name)
-                                    .font(.headline)
-                                Text("Start: \(meeting.start.formatted(date: .abbreviated, time: .shortened))")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                    
+                    // Searchbar
+                    HStack {
+                        HStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.gray)
+                            TextField("Nach Frage suchen", text: $searchText)
+                                .textFieldStyle(PlainTextFieldStyle())
+                        }
+                        .padding(8)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
+                    }
+                    .padding(.horizontal)
+                    
+                    // Liste der Meetings
+                    List {
+                        ForEach(filteredMeetings, id: \.id) { meeting in
+                            NavigationLink(destination: MeetingDetailAdminView(meeting: meeting)) {
+                                VStack(alignment: .leading, spacing: 5) {
+                                    Text(meeting.name)
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+                                    Text("Start: \(meeting.start.formatted(date: .abbreviated, time: .shortened))")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
                             }
+                            .listRowBackground(Color(.systemBackground))
                         }
                     }
-                    .listStyle(InsetGroupedListStyle())
-                }
-
-                // Button, um ein neues Meeting zu erstellen
-                NavigationLink(destination: CreateMeetingView()) {
-                    Text("Create Meeting")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                        .padding(.top, 20)
+                    .listStyle(PlainListStyle())
                 }
             }
-            .padding()
-            .navigationTitle("Meeting Administration")
+            .navigationTitle("Sitzungen") // Navigation Title
             .onAppear {
                 meetingManager.fetchAllMeetings() // Meetings laden, wenn die View erscheint
             }
-        }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showCreateMeeting = true }) {
+                        Label("Erstellen", systemImage: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showCreateMeeting) {
+                CreateMeetingView()
+            }
+        }.navigationViewStyle(StackNavigationViewStyle())
     }
+
 
 }
 
