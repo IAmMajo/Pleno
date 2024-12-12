@@ -37,26 +37,26 @@ struct VotingListView: View {
     var body: some View {
         NavigationView {
             Group {
-                        if let voting = selectedVoting {
-                            VotingDetailView(
-                                votingId: voting.id, // Übergebe nur die ID
-                                onBack: { selectedVoting = nil },
-                                onDelete: { deleteVoting(votingId: voting.id) },
-                                onClose: { closeVoting(votingId: voting.id) },
-                                onOpen: { openVoting(votingId: voting.id) },
-                                onEdit: { editedVoting in
-                                    editVoting(editedVoting)
-                                }
-                            )
-                        } else {
-                            VStack(spacing: 10) {
-                                filterPicker
-                                searchBar
-                                votingList
-                            }
+                if let voting = selectedVoting {
+                    VotingDetailView(
+                        votingId: voting.id, // Übergebe nur die ID
+                        onBack: { selectedVoting = nil },
+                        onDelete: { deleteVoting(votingId: voting.id) },
+                        onClose: { closeVoting(votingId: voting.id) },
+                        onOpen: { openVoting(votingId: voting.id) },
+                        onEdit: { editedVoting in
+                            editVoting(editedVoting)
                         }
+                    )
+                } else {
+                    VStack(spacing: 10) {
+                        filterPicker
+                        searchBar
+                        votingList
                     }
-            .navigationTitle("Umfragen")
+                }
+            }
+            .navigationTitle("Abstimmungen")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showCreateVoting = true }) {

@@ -105,29 +105,48 @@ struct MeetingDetailAdminView: View {
                             }
                         }
                     }
+                    if let meetingCode = meeting.code {
+                                            // QR-Code
+                                            Section("Meeting-Code") {
+                                                HStack {
+                                                    Spacer()
+                                                    QRCodeImage(dataString: meetingCode)
+                                                        .frame(width: 400, height: 400)
+                                                    Spacer()
+                                                }
+                                                HStack {
+                                                    Spacer()
+                                                    Text(meetingCode)
+                                                    Spacer()
+                                                }
+                                            }
+                                        }
                 }
                 
                 Spacer()
-                
-                // Button am unteren Rand
-                Button(action: {
-                    // Aktion basierend auf dem Status setzen
-                    if meeting.status == .inSession {
-                        actionType = .end
-                    } else if meeting.status == .scheduled {
-                        actionType = .start
+
+                // Button nur anzeigen, wenn das Meeting nicht "completed" ist
+                if meeting.status != .completed {
+                    Button(action: {
+                        // Aktion basierend auf dem Status setzen
+                        if meeting.status == .inSession {
+                            actionType = .end
+                        } else if meeting.status == .scheduled {
+                            actionType = .start
+                        }
+                        showConfirmationAlert = true
+                    }) {
+                        Text(meeting.status == .inSession ? "Sitzung beenden" : "Sitzung starten")
+                            .fontWeight(.bold)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .foregroundColor(.white)
+                            .background(meeting.status == .inSession ? Color.red : Color.green)
+                            .cornerRadius(10)
+                            .padding(.horizontal)
                     }
-                    showConfirmationAlert = true
-                }) {
-                    Text(meeting.status == .inSession ? "Sitzung beenden" : "Sitzung starten")
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .foregroundColor(.white)
-                        .background(meeting.status == .inSession ? Color.red : Color.green)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
                 }
+
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

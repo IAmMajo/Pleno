@@ -97,11 +97,27 @@ struct MainPage: View {
                             }) {
                                 sidebarButton(icon: "gearshape.fill", title: "Konfiguration der Funktionen", isSelected: selectedView == .funktionen)
                             }
-
+                            
                             Button(action: {
                                 selectedView = .umfrage
                             }) {
-                                sidebarButton(icon: "chart.bar.fill", title: "Umfragen", isSelected: selectedView == .umfrage)
+                                HStack(alignment: .center, spacing: 15) {
+                                    Image(systemName: "chart.bar.fill")
+                                        .foregroundColor(.accentColor)
+                                        .frame(width: 20)
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Abstimmungen")
+                                            .foregroundColor(Color.primary)
+                                            .multilineTextAlignment(.leading)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: selectedView == .umfrage ? "chevron.down" : "chevron.right")
+                                        .foregroundColor(Color.secondary)
+                                }
                             }
                             .padding(.horizontal, 24)
                             
