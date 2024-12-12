@@ -7,9 +7,9 @@ sealed class Screen(val rout: String) {
 
   object Anwesenheit : Screen("anwesenheit")
 
-  object Response : Screen("response") // TODO: anwesenheit von meeting
-
   object Protokolle : Screen("protokolle")
+  object Abstimmungen : Screen("abstimmungen")
+
 }
 
 // routing später anpassen: navController.

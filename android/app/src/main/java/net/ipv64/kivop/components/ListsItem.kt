@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,18 +16,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.format.DateTimeFormatter
 import net.ipv64.kivop.R
-import net.ipv64.kivop.moduls.AttendancesListsData
+import net.ipv64.kivop.moduls.ItemListData
 import net.ipv64.kivop.ui.theme.*
+import java.time.LocalDate
+import java.time.LocalTime
 
 @Composable
 fun ListenItem(
-    attendancesListsData: AttendancesListsData,
-    onClick: () -> Unit = {},
-    backgroundColor: Color = Background_secondary_light
+  itemListData: ItemListData,
+  onClick: () -> Unit = {},
+  backgroundColor: Color = Background_secondary_light
 ) {
   val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
   val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
@@ -34,9 +38,9 @@ fun ListenItem(
   var iconColor: Color = Text_light
   var backgroundColorT: Color = backgroundColor
 
-  if (attendancesListsData.membersCoud == null && attendancesListsData.iconRend == true) {
+  if (itemListData.membersCount == null && itemListData.iconRend == true) {
     val iconData =
-        when (attendancesListsData.attendanceStatus) {
+        when (itemListData.attendanceStatus) {
           0 ->
               Triple(
                   painterResource(id = R.drawable.ic_event_open),
@@ -56,14 +60,14 @@ fun ListenItem(
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              .padding(6.dp)
+              
               .clip(RoundedCornerShape(8.dp))
               .background(backgroundColorT)
               .padding(8.dp)
               .clickable(onClick = onClick)) {
         Column {
           // Titeltext
-          Text(text = attendancesListsData.title, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+          Text(text = itemListData.title, fontWeight = FontWeight.Bold, fontSize = 14.sp)
 
           // Datum- und Zeitzeile
           Row(
@@ -78,34 +82,34 @@ fun ListenItem(
                       modifier = Modifier.size(16.dp))
                   Spacer(modifier = Modifier.width(4.dp))
                   Text(
-                      text = "${attendancesListsData.date?.format(dateFormatter)}",
+                      text = "${itemListData.date?.format(dateFormatter)}",
                       fontWeight = FontWeight.SemiBold,
                       fontSize = 12.sp)
                   Spacer(modifier = Modifier.width(8.dp))
 
                   // Uhr-Icon und Zeit
-                  if (attendancesListsData.timeRend == true) {
+                  if (itemListData.timeRend == true) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_clock),
                         contentDescription = null,
                         modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${attendancesListsData.time?.format(timeFormatter)} Uhr",
+                        text = "${itemListData.time?.format(timeFormatter)} Uhr",
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 12.sp)
                   }
                 }
 
-                if (attendancesListsData.membersCoud == null &&
-                    attendancesListsData.iconRend == true) {
+                if (itemListData.membersCount == null &&
+                    itemListData.iconRend == true) {
                   Icon(
                       painter = iconPainter,
                       contentDescription = null,
                       tint = iconColor,
                       //    modifier = Modifier.size(30.dp)
                   )
-                } else if (attendancesListsData.iconRend == true) {
+                } else if (itemListData.iconRend == true) {
                   Row() {
                     Icon(
                         painter = iconPainter,
@@ -115,7 +119,7 @@ fun ListenItem(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         modifier = Modifier.padding(top = 4.dp),
-                        text = "${attendancesListsData.membersCoud}",
+                        text = "${itemListData.membersCount}",
                         fontWeight = FontWeight.Medium,
                         fontSize = 12.sp)
                   }
@@ -124,3 +128,4 @@ fun ListenItem(
         }
       }
 }
+

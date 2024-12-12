@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
 import kotlin.math.*
 import net.ipv64.kivop.moduls.VotingResults
+import net.ipv64.kivop.ui.theme.Background_secondary_light
 import net.ipv64.kivop.ui.theme.Secondary_dark
 
 @Composable
@@ -26,14 +27,21 @@ fun PieChart(list: List<VotingResults>, explodeDistance: Float = 30f) {
   Column(
       modifier =
           Modifier.fillMaxWidth()
-              .background(Secondary_dark, shape = RoundedCornerShape(8.dp))
+              .background(Background_secondary_light, shape = RoundedCornerShape(8.dp))
               .padding(15.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier =
                 Modifier.fillMaxWidth().aspectRatio(1f).drawBehind {
-                  drawPieChart(
-                      list.sortedByDescending { it.votes }, explodeDistance = explodeDistance)
+                  if(list.sumOf { it.votes } != 0){
+                      drawPieChart(list,explodeDistance = explodeDistance)
+                  }
+                  else{
+                      val noVotings = listOf(
+                          VotingResults("Keine Stimmen", 1,100.0),
+                      )
+                      drawPieChart(noVotings,1.0f)
+                  }
                 }) {}
       }
 }
@@ -85,7 +93,7 @@ fun DrawScope.drawPieChart(list: List<VotingResults>, explodeDistance: Float) {
     // set text name
     val textName = list[i].label
     // calc set percentage
-    val textPercentage = ((list[i].votes * 100) / totalVotes).toString() + "%"
+    val textPercentage = list[i].percentage.toString() + "%"
     // get the text name width
     val textWidth = textPaint.measureText(textName)
     // check if the text fits in the slice

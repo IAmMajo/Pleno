@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,6 +53,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.kivopandriod.pages.VotingResultPage
+import com.example.kivopandriod.pages.VotingsListPage
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.pages.AttendancesCoordinationPage
 import net.ipv64.kivop.pages.AttendancesListPage
@@ -115,6 +118,20 @@ fun navigation(navController: NavHostController) {
         }
     // Protokolle
     composable(route = Screen.Protokolle.rout) { ProtocolListPage(navController = navController) }
+    // Abstimmungen Listen Page
+    composable(route = Screen.Abstimmungen.rout){
+        VotingsListPage(navController = navController)
+    }
+    // Abstimmungs Resultat Page
+    composable(
+        route = Screen.Abstimmungen.rout +"/{votingID}",
+        arguments = listOf(
+            navArgument("votingID") {type = NavType.StringType},
+        ))
+    { backStackEntry ->
+        val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
+        VotingResultPage(navController = navController, votingID = votingID)
+    }
   }
 }
 
@@ -321,6 +338,31 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
         }, // Logik für onClick Events
         shape = RoundedCornerShape(8.dp),
         colors = NavigationDrawerItemDefaults.colors(Primary_dark_20, Color.Transparent),
+    )
+    NavigationDrawerItem(
+        modifier = Modifier
+            .height(42.dp)
+            .fillMaxWidth(),
+        icon = { Icon(
+            painter = painterResource(id = R.drawable.ic_votings_page_24),
+            contentDescription = "Abstimmungen",
+            tint = Text_light) },
+        label = {
+            Text(
+                text = "Abstimmungen",   //Titel der Seite
+                color = Text_light,
+                //fontSize = 16.dp,
+                modifier = Modifier.padding(12.dp)
+            )
+        },
+        selected = if (navController.currentDestination?.route == Screen.Anwesenheit.rout) true else false,           // Ist das gerade die Seite, auf der wir sind?
+        onClick = {
+            navController.navigate("abstimmungen")
+            coroutineScope.launch {
+                drawerState.close() // close drawer
+            }},      // Logik für onClick Events
+        shape = RoundedCornerShape(8.dp),
+        colors =  NavigationDrawerItemDefaults.colors(Primary_dark_20,Color.Transparent),
     )
   }
 }

@@ -53,7 +53,7 @@ fun ErgebnisCard(votingResults: List<VotingResults>) {
                 Text(result.label, color = Text_light)
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    (String.format("%.2f%%", (result.votes.toFloat() / totalVotes) * 100)),
+                    text = result.percentage.toString()+"%",
                     color = Text_light)
               }
             }
@@ -68,8 +68,9 @@ private fun PreviewErgebnisCard() {
   ErgebnisCard(
       votingResults =
           listOf(
-              VotingResults("Option 1", 10),
-              VotingResults("Option 2", 20),
-              VotingResults("Option 3", 30),
+              VotingResults("Option 1", 10,10.0),
+              VotingResults("Option 2", 20, 20.0),
+              VotingResults("Option 3", 30, 30.0),
+              VotingResults("Option 3", 40,40.0),
           ))
 }

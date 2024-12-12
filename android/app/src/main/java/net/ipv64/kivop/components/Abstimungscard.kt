@@ -32,10 +32,9 @@ fun AbstimmungCard(title: String, eventType: String, date: LocalDate) {
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              .padding(16.dp)
               .clip(RoundedCornerShape(8.dp))
               .background(Color(0xFFBFEFB1))
-              .padding(16.dp)) {
+              .padding(8.dp)) {
         Column {
           Text(
               text = title,
