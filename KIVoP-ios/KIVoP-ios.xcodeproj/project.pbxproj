@@ -1,0 +1,665 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		23DADFFB2CF7A5DC004B15C1 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 23DADFFA2CF7A5DC004B15C1 /* MarkdownUI */; };
+		AF04581B2CECCA540071EDF8 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581A2CECCA540071EDF8 /* AuthServiceDTOs */; };
+		AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581C2CECCA540071EDF8 /* MeetingServiceDTOs */; };
+		AF04581F2CECCA540071EDF8 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581E2CECCA540071EDF8 /* NotificationsServiceDTOs */; };
+		AF0EDF152CEFA8F100582C70 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF142CEFA8F100582C70 /* AuthServiceDTOs */; };
+		AF0EDF172CEFA8F100582C70 /* ConfigServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF162CEFA8F100582C70 /* ConfigServiceDTOs */; };
+		AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF182CEFA8F100582C70 /* MeetingServiceDTOs */; };
+		AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A81ABAA32CD130F20026F492 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A81ABA8A2CD130F00026F492 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A81ABA912CD130F00026F492;
+			remoteInfo = "KIVoP-ios";
+		};
+		A81ABAAD2CD130F20026F492 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A81ABA8A2CD130F00026F492 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A81ABA912CD130F00026F492;
+			remoteInfo = "KIVoP-ios";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A81ABA922CD130F00026F492 /* KIVoP-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KIVoP-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A81ABAA22CD130F20026F492 /* KIVoP-iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "KIVoP-iosTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A81ABAAC2CD130F20026F492 /* KIVoP-iosUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "KIVoP-iosUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		B513162C2CE8B75600B2BB11 /* Exceptions for "KIVoP-ios" folder in "KIVoP-ios" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A81ABA912CD130F00026F492 /* KIVoP-ios */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		A81ABA942CD130F00026F492 /* KIVoP-ios */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B513162C2CE8B75600B2BB11 /* Exceptions for "KIVoP-ios" folder in "KIVoP-ios" target */,
+			);
+			path = "KIVoP-ios";
+			sourceTree = "<group>";
+		};
+		A81ABAA52CD130F20026F492 /* KIVoP-iosTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "KIVoP-iosTests";
+			sourceTree = "<group>";
+		};
+		A81ABAAF2CD130F20026F492 /* KIVoP-iosUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "KIVoP-iosUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A81ABA8F2CD130F00026F492 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF0EDF152CEFA8F100582C70 /* AuthServiceDTOs in Frameworks */,
+				AF0EDF172CEFA8F100582C70 /* ConfigServiceDTOs in Frameworks */,
+				AF04581F2CECCA540071EDF8 /* NotificationsServiceDTOs in Frameworks */,
+				23DADFFB2CF7A5DC004B15C1 /* MarkdownUI in Frameworks */,
+				AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */,
+				AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */,
+				AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */,
+				AF04581B2CECCA540071EDF8 /* AuthServiceDTOs in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A81ABA9F2CD130F20026F492 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A81ABAA92CD130F20026F492 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A81ABA892CD130F00026F492 = {
+			isa = PBXGroup;
+			children = (
+				A81ABA942CD130F00026F492 /* KIVoP-ios */,
+				A81ABAA52CD130F20026F492 /* KIVoP-iosTests */,
+				A81ABAAF2CD130F20026F492 /* KIVoP-iosUITests */,
+				A81ABA932CD130F00026F492 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A81ABA932CD130F00026F492 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A81ABA922CD130F00026F492 /* KIVoP-ios.app */,
+				A81ABAA22CD130F20026F492 /* KIVoP-iosTests.xctest */,
+				A81ABAAC2CD130F20026F492 /* KIVoP-iosUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A81ABA912CD130F00026F492 /* KIVoP-ios */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A81ABAB62CD130F20026F492 /* Build configuration list for PBXNativeTarget "KIVoP-ios" */;
+			buildPhases = (
+				A81ABA8E2CD130F00026F492 /* Sources */,
+				A81ABA8F2CD130F00026F492 /* Frameworks */,
+				A81ABA902CD130F00026F492 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A81ABA942CD130F00026F492 /* KIVoP-ios */,
+			);
+			name = "KIVoP-ios";
+			packageProductDependencies = (
+				AF04581A2CECCA540071EDF8 /* AuthServiceDTOs */,
+				AF04581C2CECCA540071EDF8 /* MeetingServiceDTOs */,
+				AF04581E2CECCA540071EDF8 /* NotificationsServiceDTOs */,
+				AF0EDF142CEFA8F100582C70 /* AuthServiceDTOs */,
+				AF0EDF162CEFA8F100582C70 /* ConfigServiceDTOs */,
+				AF0EDF182CEFA8F100582C70 /* MeetingServiceDTOs */,
+				AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */,
+				23DADFFA2CF7A5DC004B15C1 /* MarkdownUI */,
+			);
+			productName = "KIVoP-ios";
+			productReference = A81ABA922CD130F00026F492 /* KIVoP-ios.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A81ABAA12CD130F20026F492 /* KIVoP-iosTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A81ABAB92CD130F20026F492 /* Build configuration list for PBXNativeTarget "KIVoP-iosTests" */;
+			buildPhases = (
+				A81ABA9E2CD130F20026F492 /* Sources */,
+				A81ABA9F2CD130F20026F492 /* Frameworks */,
+				A81ABAA02CD130F20026F492 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A81ABAA42CD130F20026F492 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A81ABAA52CD130F20026F492 /* KIVoP-iosTests */,
+			);
+			name = "KIVoP-iosTests";
+			packageProductDependencies = (
+			);
+			productName = "KIVoP-iosTests";
+			productReference = A81ABAA22CD130F20026F492 /* KIVoP-iosTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		A81ABAAB2CD130F20026F492 /* KIVoP-iosUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A81ABABC2CD130F20026F492 /* Build configuration list for PBXNativeTarget "KIVoP-iosUITests" */;
+			buildPhases = (
+				A81ABAA82CD130F20026F492 /* Sources */,
+				A81ABAA92CD130F20026F492 /* Frameworks */,
+				A81ABAAA2CD130F20026F492 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A81ABAAE2CD130F20026F492 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A81ABAAF2CD130F20026F492 /* KIVoP-iosUITests */,
+			);
+			name = "KIVoP-iosUITests";
+			packageProductDependencies = (
+			);
+			productName = "KIVoP-iosUITests";
+			productReference = A81ABAAC2CD130F20026F492 /* KIVoP-iosUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A81ABA8A2CD130F00026F492 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					A81ABA912CD130F00026F492 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					A81ABAA12CD130F20026F492 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = A81ABA912CD130F00026F492;
+					};
+					A81ABAAB2CD130F20026F492 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = A81ABA912CD130F00026F492;
+					};
+				};
+			};
+			buildConfigurationList = A81ABA8D2CD130F00026F492 /* Build configuration list for PBXProject "KIVoP-ios" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				de,
+				tr,
+			);
+			mainGroup = A81ABA892CD130F00026F492;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */,
+				23DADFF92CF7A5DC004B15C1 /* XCRemoteSwiftPackageReference "MarkdownUI" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = A81ABA932CD130F00026F492 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A81ABA912CD130F00026F492 /* KIVoP-ios */,
+				A81ABAA12CD130F20026F492 /* KIVoP-iosTests */,
+				A81ABAAB2CD130F20026F492 /* KIVoP-iosUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A81ABA902CD130F00026F492 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A81ABAA02CD130F20026F492 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A81ABAAA2CD130F20026F492 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A81ABA8E2CD130F00026F492 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A81ABA9E2CD130F20026F492 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A81ABAA82CD130F20026F492 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A81ABAA42CD130F20026F492 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A81ABA912CD130F00026F492 /* KIVoP-ios */;
+			targetProxy = A81ABAA32CD130F20026F492 /* PBXContainerItemProxy */;
+		};
+		A81ABAAE2CD130F20026F492 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A81ABA912CD130F00026F492 /* KIVoP-ios */;
+			targetProxy = A81ABAAD2CD130F20026F492 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A81ABAB42CD130F20026F492 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A81ABAB52CD130F20026F492 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A81ABAB72CD130F20026F492 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"KIVoP-ios/Preview Content\"";
+				DEVELOPMENT_TEAM = G395PB833W;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "KIVoP-ios/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Test.KIVoP-ios2test";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A81ABAB82CD130F20026F492 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"KIVoP-ios/Preview Content\"";
+				DEVELOPMENT_TEAM = G395PB833W;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "KIVoP-ios/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Test.KIVoP-ios2test";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A81ABABA2CD130F20026F492 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Test.KIVoP-iosTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KIVoP-ios.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/KIVoP-ios";
+			};
+			name = Debug;
+		};
+		A81ABABB2CD130F20026F492 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Test.KIVoP-iosTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KIVoP-ios.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/KIVoP-ios";
+			};
+			name = Release;
+		};
+		A81ABABD2CD130F20026F492 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Test.KIVoP-iosUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "KIVoP-ios";
+			};
+			name = Debug;
+		};
+		A81ABABE2CD130F20026F492 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Test.KIVoP-iosUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "KIVoP-ios";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A81ABA8D2CD130F00026F492 /* Build configuration list for PBXProject "KIVoP-ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A81ABAB42CD130F20026F492 /* Debug */,
+				A81ABAB52CD130F20026F492 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A81ABAB62CD130F20026F492 /* Build configuration list for PBXNativeTarget "KIVoP-ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A81ABAB72CD130F20026F492 /* Debug */,
+				A81ABAB82CD130F20026F492 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A81ABAB92CD130F20026F492 /* Build configuration list for PBXNativeTarget "KIVoP-iosTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A81ABABA2CD130F20026F492 /* Debug */,
+				A81ABABB2CD130F20026F492 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A81ABABC2CD130F20026F492 /* Build configuration list for PBXNativeTarget "KIVoP-iosUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A81ABABD2CD130F20026F492 /* Debug */,
+				A81ABABE2CD130F20026F492 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../DTOs;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		23DADFF92CF7A5DC004B15C1 /* XCRemoteSwiftPackageReference "MarkdownUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/MarkdownUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		23DADFFA2CF7A5DC004B15C1 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 23DADFF92CF7A5DC004B15C1 /* XCRemoteSwiftPackageReference "MarkdownUI" */;
+			productName = MarkdownUI;
+		};
+		AF04581A2CECCA540071EDF8 /* AuthServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AuthServiceDTOs;
+		};
+		AF04581C2CECCA540071EDF8 /* MeetingServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MeetingServiceDTOs;
+		};
+		AF04581E2CECCA540071EDF8 /* NotificationsServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NotificationsServiceDTOs;
+		};
+		AF0EDF142CEFA8F100582C70 /* AuthServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AuthServiceDTOs;
+		};
+		AF0EDF162CEFA8F100582C70 /* ConfigServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ConfigServiceDTOs;
+		};
+		AF0EDF182CEFA8F100582C70 /* MeetingServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MeetingServiceDTOs;
+		};
+		AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NotificationsServiceDTOs;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A81ABA8A2CD130F00026F492 /* Project object */;
+}
