@@ -15,61 +15,61 @@ import net.ipv64.kivop.moduls.AttendancesListsData
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-class MeetingsApi(context: Context) {
-  // TODO: Get Meetings
-  // TODO: Get Meeting by id
-  // TODO: Get Meetings locations
+
   // TODO: Get Meeting location by id
-}
 
-// todo: fix this
+
 suspend fun meetingsList(context: Context): List<AttendancesListsData> =
-    withContext(Dispatchers.IO) {
-      val auth = AuthApi(context)
-      val url = "https://kivop.ipv64.net/meetings"
-      val client = OkHttpClient()
-      val token = auth.getToken()
+  withContext(Dispatchers.IO) {
+    val auth = AuthApi(context)
+    val url = "https://kivop.ipv64.net/meetings"
+    val client = OkHttpClient()
+    val token = auth.getToken()
 
-      if (token.isNullOrEmpty()) {
-        println("Fehler: Kein Token verfügbar")
-        return@withContext emptyList<AttendancesListsData>()
-      }
+    if (token.isNullOrEmpty()) {
+      println("Fehler: Kein Token verfÃ¼gbar")
+      return@withContext emptyList<AttendancesListsData>()
+    }
 
-      val request =
-          Request.Builder().url(url).addHeader("Authorization", "Bearer $token").get().build()
+    val request =
+      Request.Builder().url(url).addHeader("Authorization", "Bearer $token").get().build()
 
-      return@withContext try {
-        val response = client.newCall(request).execute()
-        if (response.isSuccessful) {
-          val responseBody = response.body?.string()
-          if (responseBody != null) {
-            val meetingsArray = Gson().fromJson(responseBody, JsonArray::class.java)
-            meetingsArray.map { element ->
-              val meeting = element.asJsonObject
-              val title = meeting.get("name").asString
-              val start = meeting.get("start").asString
-              val id = meeting.get("id").asString
+    return@withContext try {
+      val response = client.newCall(request).execute()
+      if (response.isSuccessful) {
+        val responseBody = response.body?.string()
+        if (responseBody != null) {
+          val meetingsArray = Gson().fromJson(responseBody, JsonArray::class.java)
+          meetingsArray.map { element ->
+            val meeting = element.asJsonObject
+            val title = meeting.get("name").asString
+            val start = meeting.get("start").asString
+            val id = meeting.get("id").asString
+            val meetingStatus = meeting.get("status").asString
+            val myAttendanceStatus = meeting.get("myAttendanceStatus")?.asString
 
-              // Datum und Uhrzeit aus start extrahieren
-              val zonedDateTime = ZonedDateTime.parse(start, DateTimeFormatter.ISO_ZONED_DATE_TIME)
-              val date = zonedDateTime.toLocalDate()
-              val time = zonedDateTime.toLocalTime()
+            // Datum und Uhrzeit aus start extrahieren
+            val zonedDateTime = ZonedDateTime.parse(start, DateTimeFormatter.ISO_ZONED_DATE_TIME)
+            val date = zonedDateTime.toLocalDate()
+            val time = zonedDateTime.toLocalTime()
 
-              AttendancesListsData(title, date, time, id = id)
-            }
-          } else {
-            println("Fehler: Leere Antwort erhalten.")
-            emptyList()
+
+
+            AttendancesListsData(title, date, time, meetingStatus = meetingStatus, id = id,myAttendanceStatus = myAttendanceStatus)
           }
         } else {
-          println("Fehler bei der Anfrage: ${response.message}")
+          println("Fehler: Leere Antwort erhalten.")
           emptyList()
         }
-      } catch (e: Exception) {
-        println("Fehler: ${e.message}")
+      } else {
+        println("Fehler bei der Anfrage: ${response.message}")
         emptyList()
       }
+    } catch (e: Exception) {
+      println("Fehler: ${e.message}")
+      emptyList()
     }
+  }
 
 suspend fun getMeetingsByID(context: Context, id: String): SitzungsCardData? =
     withContext(Dispatchers.IO) {
