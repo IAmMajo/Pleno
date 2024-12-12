@@ -1,4 +1,3 @@
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.kivopandriod.components.Subtitles
-import java.time.LocalDateTime
 import net.ipv64.kivop.components.ListenItem
 import net.ipv64.kivop.moduls.AttendancesListsData
 
@@ -56,13 +54,12 @@ fun AppointmentTabContent(
     appointments: List<AttendancesListsData>
 ) {
   var selectedTabIndex by remember { mutableStateOf(0) }
-  
 
   Column(modifier = Modifier.fillMaxSize()) {
     // Tabs werden oben eingebunden
     GenerateTabs(
         tabs = tabs, selectedTabIndex = selectedTabIndex, onTabSelected = { selectedTabIndex = it })
-    
+
     // Inhalt unterhalb der Tabs
     LazyColumn(modifier = Modifier.fillMaxSize()) {
       var previousYear: Int? = null // Zustand für das vorherige Jahr
@@ -70,9 +67,10 @@ fun AppointmentTabContent(
       when (selectedTabIndex) {
         0 -> {
           // Anstehende Sitzungen
-          val upcomingAppointments = appointments.filter { appointment ->
-            appointment.meetingStatus == "scheduled" || appointment.meetingStatus == "inSession"
-          }
+          val upcomingAppointments =
+              appointments.filter { appointment ->
+                appointment.meetingStatus == "scheduled" || appointment.meetingStatus == "inSession"
+              }
           if (upcomingAppointments.isNotEmpty()) {
             items(upcomingAppointments.size) { index ->
               val currentYear = upcomingAppointments[index].date?.year
@@ -82,11 +80,10 @@ fun AppointmentTabContent(
                 Subtitles(subText = currentYear?.toString() ?: "")
               }
               ListenItem(
-                attendancesListsData = upcomingAppointments[index],
-                onClick = {
-                  navigation.navigate("anwesenheit/${upcomingAppointments[index].id}")
-                }
-              )
+                  attendancesListsData = upcomingAppointments[index],
+                  onClick = {
+                    navigation.navigate("anwesenheit/${upcomingAppointments[index].id}")
+                  })
             }
           } else {
             item { Text("Keine anstehenden Sitzungen", color = Color.Gray) }
@@ -95,9 +92,8 @@ fun AppointmentTabContent(
 
         1 -> {
           // Vergangene Sitzungen
-          val pastAppointments = appointments.filter { appointment ->
-            appointment.meetingStatus == "completed"
-          }
+          val pastAppointments =
+              appointments.filter { appointment -> appointment.meetingStatus == "completed" }
           if (pastAppointments.isNotEmpty()) {
             items(pastAppointments.size) { index ->
               val currentYear = pastAppointments[index].date?.year
@@ -107,11 +103,8 @@ fun AppointmentTabContent(
                 Subtitles(subText = currentYear?.toString() ?: "")
               }
               ListenItem(
-                attendancesListsData = pastAppointments[index],
-                onClick = {
-                  navigation.navigate("anwesenheit/${pastAppointments[index].id}")
-                }
-              )
+                  attendancesListsData = pastAppointments[index],
+                  onClick = { navigation.navigate("anwesenheit/${pastAppointments[index].id}") })
             }
           } else {
             item { Text("Keine vergangenen Sitzungen", color = Color.Gray) }
