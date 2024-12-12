@@ -20,7 +20,9 @@ extension Participant {
             self.driver = driver
         }
         
-        self.passengers_count = dto.passengers_count
+        if let passengers_count = dto.passengers_count {
+            self.passengers_count = dto.passengers_count
+        }
         
         // check if update is valid
         if !self.isValid() {
