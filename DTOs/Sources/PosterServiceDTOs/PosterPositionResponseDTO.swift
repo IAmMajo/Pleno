@@ -1,9 +1,3 @@
-//
-//  PosterPositionResponseDTO.swift
-//  poster-service
-//
-//  Created by Dennis Sept on 26.11.24.
-//
 import Foundation
 public struct PosterPositionResponseDTO: Codable {
     public var id: UUID?
@@ -16,7 +10,7 @@ public struct PosterPositionResponseDTO: Codable {
     public var expiresAt:Date
     public var postedAt:Date
 
-    public init(id: UUID?, posterId: UUID, responsibleUserId: UUID, latitude: Double, longitude: Double, isDisplayed: Bool, imageBase64: String,expiresAt:Date,postedAt:Date) {
+    public init(id: UUID?, posterId: UUID, responsibleUserId: UUID, latitude: Double, longitude: Double, isDisplayed: Bool, imageBase64: String, expiresAt: Date, postedAt: Date) {
         self.id = id
         self.posterId = posterId
         self.responsibleUserId = responsibleUserId
