@@ -2,12 +2,11 @@ import Foundation
 
 public struct UserProfileUpdateDTO: Codable {
     public var name: String?
-    public var isActive: Bool?
-    public var isAdmin: Bool?
+    public var profileImage: Data?
     
-    public init(name: String? = nil, isActive: Bool? = nil, isAdmin: Bool? = nil) {
+    public init(name: String? = nil, profileImage: Data? = nil) {
         self.name = name
-        self.isActive = isActive
-        self.isAdmin = isAdmin
+        self.profileImage = profileImage
+        
     }
 }
