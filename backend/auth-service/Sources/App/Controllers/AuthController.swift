@@ -9,22 +9,42 @@ struct AuthController: RouteCollection {
         let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
         // Auth-Routen
         let authRoutes = routes.grouped("auth");
-        authRoutes.post("login", use: self.login)
+        authRoutes.post("login", use: self.login).openAPI(
+            summary: "User login",
+            description: "App login with user credentials",
+            body: .type(UserLoginDTO.self),
+            contentType: .application(.json),
+            response: .type(TokenResponseDTO.self),
+            responseContentType: .application(.json)
+        )
         // geschützte Auth-Routen
         let protectedRoutes = authRoutes.grouped(authMiddleware)
-        protectedRoutes.get("token-verify", use: self.verifyJWTToken)
-        protectedRoutes.get("token-test", use: self.tokenTest)
+        protectedRoutes.get("token-verify", use: self.verifyJWTToken).openAPI(
+            summary: "Test given JWT-Token",
+            description: "Test if JWT-Token is valid",
+            response: .type(HTTPResponseStatus.self),
+            auth: .bearer()
+        )
+        
+        protectedRoutes.get("token-test", use: self.tokenTest).openAPI(
+            summary: "Get token payload",
+            description: "Get payload infos",
+            response: .type(JWTPayloadDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+        )
     }
     
     @Sendable
-    func tokenTest(req: Request) async throws -> String {
+    func tokenTest(req: Request) async throws -> JWTPayloadDTO {
         guard let payload = req.jwtPayload else {
             throw Abort(.unauthorized)
         }
-        let userID: UUID = payload.userID!
-        let exp: ExpirationClaim = payload.exp
-        let isAdmin: Bool = payload.isAdmin!
-        return "User ID: \(userID), Exp: \(exp), isAdmin: \(isAdmin)"
+        return JWTPayloadDTO(
+            userID: payload.userID,
+            exp: payload.exp.value,
+            isAdmin: payload.isAdmin
+        )
     }
     
     @Sendable
