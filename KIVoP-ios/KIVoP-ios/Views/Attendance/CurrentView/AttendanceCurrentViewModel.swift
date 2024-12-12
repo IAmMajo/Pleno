@@ -8,7 +8,9 @@
 import SwiftUI
 import MeetingServiceDTOs
 
+@MainActor
 class AttendanceCurrentViewModel: ObservableObject {
+    @Published var statusMessage: String?
     @Published var searchText: String = ""
     @Published var participationCode: String = ""
     @Published var attendances: [GetAttendanceDTO] = []
@@ -21,7 +23,7 @@ class AttendanceCurrentViewModel: ObservableObject {
         fetchAttendances()
     }
     
-    public func fetchAttendances() {
+    func fetchAttendances() {
         Task {
             do {
                 // Authentifizierung und Token holen
@@ -63,6 +65,42 @@ class AttendanceCurrentViewModel: ObservableObject {
             }
         }
     }
+    
+    func joinMeeting() {
+        Task {
+            do {
+                // Token abrufen
+                let token = try await AuthController.shared.getAuthToken()
+                
+                // URL und Request vorbereiten
+                guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/attend/\(participationCode)") else {
+                    print("Ungültige URL.")
+                    return
+                }
+                
+                var request = URLRequest(url: url)
+                request.httpMethod = "PUT"
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                
+                // API-Aufruf und Antwort verarbeiten
+                let (_, response) = try await URLSession.shared.data(for: request)
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    print("Ungültige Antwort vom Server.")
+                    return
+                }
+                
+                if httpResponse.statusCode == 204 {
+                    print("Erfolgreich am Meeting teilgenommen!")
+                    fetchAttendances()
+                } else {
+                    print("Fehler: \(httpResponse.statusCode) beim Beitritt zum Meeting.")
+                }
+            } catch {
+                print("Fehler: \(error.localizedDescription)")
+            }
+        }
+    }
+
     
     // Statuszählung
     var presentCount: Int {

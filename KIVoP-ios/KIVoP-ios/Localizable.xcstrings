@@ -304,6 +304,7 @@
 
     },
     "Aktuell ist keine Sitzung im Gange." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -318,6 +319,9 @@
           }
         }
       }
+    },
+    "Aktuell sind keine Sitzungen im Gange." : {
+
     },
     "Aktuelle Sitzung" : {
       "localizations" : {

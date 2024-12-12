@@ -1,5 +1,5 @@
 //
-//  AnwesenheitView.swift
+//  AttendanceView.swift
 //  KIVoP-ios
 //
 //  Created by Henrik Peltzer on 02.11.24.
@@ -62,30 +62,32 @@ struct AttendanceView: View {
                                 .fontWeight(.semibold)
                                 .foregroundColor(.gray)
                                 .padding(.leading, 10)
-                            
-                            if let currentMeeting = viewModel.currentMeeting {
-                                NavigationLink(destination: destinationView(for: currentMeeting)) {
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text(currentMeeting.name)
-                                                .foregroundColor(.white)
-                                            Text(DateTimeFormatter.formatDate(currentMeeting.start))
-                                                .font(.subheadline)
+
+                            if !viewModel.currentMeetings.isEmpty {
+                                ForEach(viewModel.currentMeetings, id: \.id) { currentMeeting in
+                                    NavigationLink(destination: destinationView(for: currentMeeting)) {
+                                        HStack {
+                                            VStack(alignment: .leading) {
+                                                Text(currentMeeting.name)
+                                                    .foregroundColor(.white)
+                                                Text(DateTimeFormatter.formatDate(currentMeeting.start))
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.white)
+                                            }
+                                            .padding(.vertical, 4)
+                                            Spacer()
+                                            // Image comes here: pending or checked?
+                                            Image(systemName: "chevron.right")
                                                 .foregroundColor(.white)
                                         }
-                                        .padding(.vertical, 4)
-                                        Spacer()
-                                        // Image comes here: pending or checked?
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.white)
+                                        .padding(.horizontal)
+                                        .padding(.vertical, 2)
+                                        .background(Color.blue)
+                                        .cornerRadius(10)
                                     }
-                                    .padding(.horizontal)
-                                    .padding(.vertical, 2)
-                                    .background(Color.blue)
-                                    .cornerRadius(10)
                                 }
                             } else {
-                                Text("Aktuell ist keine Sitzung im Gange.")
+                                Text("Aktuell sind keine Sitzungen im Gange.")
                                     .font(.subheadline)
                                     .foregroundColor(.gray.opacity(0.7))
                                     .padding(.leading)
