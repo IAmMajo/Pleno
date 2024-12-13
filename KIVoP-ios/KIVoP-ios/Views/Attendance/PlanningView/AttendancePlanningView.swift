@@ -96,7 +96,7 @@ struct AttendancePlanningView: View {
                     // Teilnehmerliste
                     List {
                         Section(header: Text("Mitglieder")) {
-                            ForEach(viewModel.filteredAttendances, id: \.identity.id) { attendance in
+                            ForEach(viewModel.attendances, id: \.identity.id) { attendance in
                                 HStack {
                                     // Profilbild (Platzhalter)
                                     Circle()
@@ -104,11 +104,9 @@ struct AttendancePlanningView: View {
                                         .frame(width: 40, height: 40)
                                     
                                     // Name (der eigene Name wird fett gedruckt)
-                                    VStack(alignment: .leading) {
-                                        Text(attendance.identity.name)
-                                            .font(.body)
-                                            .fontWeight(attendance.itsame ? .bold : .regular)
-                                    }
+                                    Text(attendance.identity.name)
+                                        .font(.body)
+                                        .fontWeight(attendance.itsame ? .bold : .regular)
                                     
                                     Spacer()
                                     
@@ -127,6 +125,22 @@ struct AttendancePlanningView: View {
                                 }
                             }
                         }
+                    }
+                }
+                .listStyle(.insetGrouped)
+                .overlay {
+                    if viewModel.isLoading {
+                      ProgressView("Lädt...")
+                   }
+                }
+                .onAppear {
+                   Task {
+                       viewModel.fetchAttendances()
+                   }
+                }
+                .refreshable {
+                    Task {
+                        viewModel.fetchAttendances()
                     }
                 }
             }

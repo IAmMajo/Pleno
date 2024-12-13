@@ -99,7 +99,7 @@ struct AttendanceCurrentView: View {
                     // Teilnehmerliste
                     List {
                         Section(header: Text("Mitglieder")) {
-                            ForEach(viewModel.filteredAttendances, id: \.identity.id) { attendance in
+                            ForEach(viewModel.attendances, id: \.identity.id) { attendance in
                                 HStack {
                                     // Profilbild (Platzhalter)
                                     Circle()
@@ -128,6 +128,22 @@ struct AttendanceCurrentView: View {
                                 }
                             }
                         }
+                    }
+                }
+                .listStyle(.insetGrouped)
+                .overlay {
+                    if viewModel.isLoading {
+                      ProgressView("Lädt...")
+                   }
+                }
+                .onAppear {
+                   Task {
+                       viewModel.fetchAttendances()
+                   }
+                }
+                .refreshable {
+                    Task {
+                        viewModel.fetchAttendances()
                     }
                 }
             }

@@ -16,22 +16,16 @@ class AttendanceViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedTab: Int = 0
     @Published var meetings: [GetMeetingDTO] = []
+    @Published var isLoading: Bool = false
     
     init() {
-        fetchMeetings()
-        
         // Konfigurieren der Navbar
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.titleTextAttributes = [
-            .font: UIFont.boldSystemFont(ofSize: 18), // Fettschrift
+            .font: UIFont.boldSystemFont(ofSize: 18),
             .foregroundColor: UIColor.black
         ]
-        appearance.largeTitleTextAttributes = [
-            .font: UIFont.boldSystemFont(ofSize: 32), // Fettschrift für großen Titel
-            .foregroundColor: UIColor.black
-        ]
-        
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
     }
@@ -40,7 +34,10 @@ class AttendanceViewModel: ObservableObject {
     func fetchMeetings() {
         Task {
             do {
-                // Meetings abrufen
+                // Setze isLoading auf true, wenn der Ladevorgang startet
+                self.isLoading = true
+                self.meetings.removeAll() // sicherstellen, das das Array leer ist bevor es gefüllt wird
+                
                 guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
                     throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
                 }
@@ -51,6 +48,7 @@ class AttendanceViewModel: ObservableObject {
                     request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
                 } else {
                     errorMessage = "Unauthorized: Token not found."
+                    self.isLoading = false
                     return
                 }
                 
@@ -63,20 +61,22 @@ class AttendanceViewModel: ObservableObject {
                 do {
                     let decoder = JSONDecoder()
                     decoder.dateDecodingStrategy = .iso8601
-                    // Die Dekodierung und die Fehlerbehandlung innerhalb der Hauptwarteschlange
+                    
                     DispatchQueue.main.async {
                         do {
                             let fetchedMeetings = try decoder.decode([GetMeetingDTO].self, from: data)
-                            self.meetings.append(contentsOf: fetchedMeetings)
+                            self.meetings = fetchedMeetings
+                            self.isLoading = false
                         } catch {
                             print("Fehler beim Dekodieren der Meetings: \(error.localizedDescription)")
+                            self.isLoading = false
                         }
                     }
                 }
             } catch {
-                // Fehlerbehandlung auf dem Hauptthread
                 DispatchQueue.main.async {
                     print("\(error.localizedDescription)")
+                    self.isLoading = false
                 }
             }
         }

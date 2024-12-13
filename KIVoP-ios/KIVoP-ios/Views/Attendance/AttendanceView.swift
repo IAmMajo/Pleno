@@ -117,6 +117,21 @@ struct AttendanceView: View {
                     }
                 }
                 .listStyle(.insetGrouped)
+                .overlay {
+                    if viewModel.isLoading {
+                      ProgressView("Lädt...")
+                   }
+                }
+                .onAppear {
+                   Task {
+                       viewModel.fetchMeetings()
+                   }
+                }
+                .refreshable {
+                    Task {
+                        viewModel.fetchMeetings()
+                    }
+                }
             }
             .navigationTitle("Anwesenheit")
             .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
