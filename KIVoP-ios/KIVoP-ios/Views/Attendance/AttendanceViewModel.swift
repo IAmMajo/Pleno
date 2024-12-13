@@ -9,25 +9,37 @@ import Foundation
 import SwiftUI
 import MeetingServiceDTOs
 
+@MainActor
 class AttendanceViewModel: ObservableObject {
 
+    @Published var errorMessage: String? = nil
     @Published var searchText: String = ""
     @Published var selectedTab: Int = 0
     @Published var meetings: [GetMeetingDTO] = []
     
     init() {
         fetchMeetings()
+        
+        // Konfigurieren der Navbar
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.titleTextAttributes = [
+            .font: UIFont.boldSystemFont(ofSize: 18), // Fettschrift
+            .foregroundColor: UIColor.black
+        ]
+        appearance.largeTitleTextAttributes = [
+            .font: UIFont.boldSystemFont(ofSize: 32), // Fettschrift für großen Titel
+            .foregroundColor: UIColor.black
+        ]
+        
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
     }
     
     // Abruf der Meetings von der API
     func fetchMeetings() {
         Task {
             do {
-                // Statischer Login zum Testen, bis die Funktion implementiert wurde.
-                try await AuthController.shared.login(email: "henrik.peltzer@gmail.com", password: "Test123")
-
-                let token = try await AuthController.shared.getAuthToken()
-                
                 // Meetings abrufen
                 guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
                     throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -35,7 +47,12 @@ class AttendanceViewModel: ObservableObject {
                 
                 var request = URLRequest(url: url)
                 request.httpMethod = "GET"
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                } else {
+                    errorMessage = "Unauthorized: Token not found."
+                    return
+                }
                 
                 let (data, response) = try await URLSession.shared.data(for: request)
                 
@@ -67,7 +84,9 @@ class AttendanceViewModel: ObservableObject {
     
     // Aktuelle Sitzung (falls vorhanden)
     var currentMeetings: [GetMeetingDTO] {
-        meetings.filter { $0.status == .inSession }
+        meetings
+            .filter { $0.status == .inSession }
+            .sorted { $0.start < $1.start }
     }
 
     // Gruppiert die Sitzungen nach Monat und Jahr
@@ -112,6 +131,21 @@ class AttendanceViewModel: ObservableObject {
             return meetings.filter { $0.status == .scheduled }
         default:
             return []
+        }
+    }
+    
+    // Wechsel zwischen den destinations je nach meeting Status
+    func destinationView(for meeting: GetMeetingDTO) -> some View {
+        switch meeting.status {
+        case .inSession:
+            let viewModel = AttendanceCurrentViewModel(meeting: meeting)
+            return AnyView(AttendanceCurrentView(viewModel: viewModel))
+        case .completed:
+            let viewModel = AttendanceDetailViewModel(meeting: meeting)
+            return AnyView(AttendanceDetailView(viewModel: viewModel))
+        case .scheduled:
+            let viewModel = AttendancePlanningViewModel(meeting: meeting)
+            return AnyView(AttendancePlanningView(viewModel: viewModel))
         }
     }
 }

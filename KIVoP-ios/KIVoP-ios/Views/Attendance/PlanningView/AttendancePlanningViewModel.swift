@@ -11,6 +11,7 @@ import MeetingServiceDTOs
 @MainActor
 class AttendancePlanningViewModel: ObservableObject {
     @Published var searchText: String = ""
+    @Published var errorMessage: String? = nil
     @Published var attendances: [GetAttendanceDTO] = []
     
     private let baseURL = "https://kivop.ipv64.net"
@@ -24,9 +25,6 @@ class AttendancePlanningViewModel: ObservableObject {
     public func fetchAttendances() {
         Task {
             do {
-                // Authentifizierung und Token holen
-                let token = try await AuthController.shared.getAuthToken()
-                
                 // URL und Request erstellen
                 guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/attendances") else {
                     print("Ungültige URL.")
@@ -35,7 +33,12 @@ class AttendancePlanningViewModel: ObservableObject {
                 
                 var request = URLRequest(url: url)
                 request.httpMethod = "GET"
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                } else {
+                    errorMessage = "Unauthorized: Token not found."
+                    return
+                }
                 
                 // API-Aufruf und Antwort verarbeiten
                 let (data, response) = try await URLSession.shared.data(for: request)
