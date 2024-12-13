@@ -65,45 +65,54 @@ class AttendanceCurrentViewModel: ObservableObject {
     
     func joinMeeting() {
         isLoading = true
+        statusMessage = nil  // Vor jedem Versuch die Nachricht zurücksetzen
         Task {
             do {
                 // URL und Request vorbereiten
                 guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/attend/\(participationCode)") else {
                     print("Ungültige URL.")
-                    isLoading = false  // Ladezustand deaktivieren
+                    isLoading = false
+                    statusMessage = "Beim betreten der Sitzung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
                     return
                 }
-                
+
                 var request = URLRequest(url: url)
                 request.httpMethod = "PUT"
                 if let token = UserDefaults.standard.string(forKey: "jwtToken") {
                     request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
                 } else {
                     errorMessage = "Unauthorized: Token not found."
-                    isLoading = false  // Ladezustand deaktivieren
+                    isLoading = false
+                    statusMessage = "Beim betreten der Sitzung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
                     return
                 }
-                
+
                 // API-Aufruf und Antwort verarbeiten
                 let (_, response) = try await URLSession.shared.data(for: request)
                 guard let httpResponse = response as? HTTPURLResponse else {
                     print("Ungültige Antwort vom Server.")
                     isLoading = false
+                    statusMessage = "Beim betreten der Sitzung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
                     return
                 }
-                
+
                 if httpResponse.statusCode == 204 {
                     print("Erfolgreich am Meeting teilgenommen!")
-                    fetchAttendances()
+                    statusMessage = "Erfolgreich der Sitzung beigetreten."
+                    fetchAttendances() // Attendances nach erfolgreichem Beitritt neu laden
                 } else {
                     print("Fehler: \(httpResponse.statusCode) beim Beitritt zum Meeting.")
+                    statusMessage = "Beim betreten der Sitzung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
                 }
             } catch {
                 print("Fehler: \(error.localizedDescription)")
+                statusMessage = "Beim betreten der Sitzung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
             }
+
             isLoading = false
         }
     }
+
     
     // Statuszählung
     var presentCount: Int {

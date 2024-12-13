@@ -67,7 +67,7 @@ struct AttendanceCurrentView: View {
                     // Antwort ob Beitritt zum Meeting erfolgreich ist.
                     if let message = viewModel.statusMessage {
                         Text(message)
-                            .foregroundColor(.green)
+                            .foregroundColor(message == "Erfolgreich der Sitzung beigetreten." ? .green : .red)
                             .padding()
                     }
 
