@@ -270,6 +270,7 @@ services:
       DATABASE_USERNAME: vapor
       DATABASE_PASSWORD: example
       DATABASE_NAME: kivop
+    env_file: ./../.env
     labels:
       traefik.enable: true
       traefik.http.routers.tdums-service.rule: PathPrefix(`/tdums`)

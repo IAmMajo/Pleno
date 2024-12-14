@@ -32,7 +32,7 @@ func routes(_ app: Application) throws {
                   let victim = try await Victim.find(uuid, on: req.db) else {
                 throw Abort(.unauthorized)
             }
-            var fool = try Fool(victim: victim)
+            let fool = try Fool(victim: victim)
             try await fool.create(on: req.db)
             return req.fileio.streamFile(at: "Resources/aufklaerung-briefkasten.html")
         }
@@ -47,7 +47,7 @@ func routes(_ app: Application) throws {
                 victim = Victim(id: uuid, experiment: .labyrinth)
                 try await victim.create(on: req.db)
             }
-            var fool = try Fool(victim: victim)
+            let fool = try Fool(victim: victim)
             try await fool.create(on: req.db)
             return req.fileio.streamFile(at: "Resources/aufklaerung-labyrinth.html")
         }
@@ -72,7 +72,7 @@ func routes(_ app: Application) throws {
         }
         
         route.post("briefkasten") { req in
-            var victim = Victim(experiment: .briefkasten)
+            let victim = Victim(experiment: .briefkasten)
             try await victim.create(on: req.db)
             return try await victim.requireID().uuidString.encodeResponse(status: .created, for: req)
         }
