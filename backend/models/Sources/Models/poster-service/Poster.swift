@@ -31,7 +31,7 @@ public final class Poster: Model, @unchecked Sendable {
    
     public init() { }
 
-    public init(id: UUID? = nil, name: String,  description: String?, imageUrl: String) {
+    public init(id: UUID? = nil, name: String,  description: String? = "", imageUrl: String) {
         self.id = id
         self.name = name
         self.description = description
