@@ -3,6 +3,7 @@ import Vapor
 import Foundation
 import Models
 @preconcurrency import JWTKit
+import VaporToOpenAPI
 
 // MARK: - Fehlerdefinitionen für Poster-Erstellung und -Verwaltung
 
@@ -68,7 +69,7 @@ struct PosterController: RouteCollection, Sendable {
         self.authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
         self.adminMiddleware = AdminMiddleware()
     }
-
+  
     /// Registriert alle Routen des Controllers.
     func boot(routes: RoutesBuilder) throws {
         // Authentifizierte Routen
@@ -76,27 +77,111 @@ struct PosterController: RouteCollection, Sendable {
         
         // Poster-Routen
         let posters = authProtected.grouped("posters")
-        posters.get(use: getPosters)
-        posters.post(use: createPoster)
-        posters.patch(":posterId", use: updatePoster)
+        posters.get(use: getPosters).openAPI(
+            summary: "Alle verfügbaren Poster abfragen",
+            description: "Gibt alle verfügbaren Poster zurück. Unterstützt optionale Pagination über Query-Parameter.",
+            query:["page":.integer,"per":.integer],
+            body: nil,
+            response: .type(PagedResponseDTO<PosterResponseDTO>.self),
+            responseContentType: .application(.json)
+        )
+        posters.post(use: createPoster).openAPI(
+            summary: "Erstellt ein neues Poster",
+            description: "Erstellt ein neues Poster mithilfe eines multipart/form-data Requests. Erwartet mindestens name und image.",
+            query:[],
+            body: .type(CreatePosterDTO.self),
+            contentType: .multipart(.formData),
+            response: .type(PosterResponseDTO.self),
+            responseContentType: .application(.json)
+        )
+        posters.patch(":posterId", use: updatePoster).openAPI(
+            summary: "Updatet ein Poster",
+            description: "Updatet ein Poster anhand seiner ID mithilfe eines multipart/form-data Requests.",
+            query:[],
+            path: .type(Poster.IDValue.self),
+            body: .type(UpdatePosterDTO.self),
+            contentType: .multipart(.formData),
+            response: .type(PosterResponseDTO.self),
+            responseContentType: .application(.json)
+        )
 
         let adminRoutesPoster = posters.grouped(adminMiddleware)
-        adminRoutesPoster.delete(":id", use: deletePoster)
-        adminRoutesPoster.delete("batch", use: deletePosters)
+        adminRoutesPoster.delete(":id", use: deletePoster).openAPI(
+            summary: "Löscht ein Poster",
+            description: "Löscht ein Poster anhand seiner ID.",
+            query:[],
+            path: .type(Poster.IDValue.self)
+        )
+        adminRoutesPoster.delete("batch", use: deletePosters).openAPI(
+            summary: "Löscht mehrere Poster",
+            description: "Löscht mehrere Poster anhand der übergebenen IDs.",
+            query:[],
+            body: .type(DeleteDTO.self),
+            contentType: .application(.json)
+            
+        )
         
         // PosterPosition-Routen
         let posterPositions = authProtected.grouped("poster-positions")
-        posterPositions.get(use: getDisplayedPosters)
-        posterPositions.get("to-be-taken-down", use: getPostersToBeTakenDown)
-        posterPositions.post(use: createPosterPosition)
-        posterPositions.patch(":positionId", use: updatePosterPosition)
+        posterPositions.get(use: getDisplayedPosters).openAPI(
+            summary: "Poster Positionen abfragen",
+            description: "Gibt alle verfügbaren Poster zurück. Unterstützt optionale Pagination über Query-Parameter. Des weiteren kann innerhalb der Query-Parameter optional unterschieden werden ob alle Poster Positionen, welche aufgehangen sind angezeigt werden oder Positionen, welche noch aufgehangen werden müssen",
+            query:["page":.integer,"per":.integer,"displayed":.boolean],
+            body: nil,
+            response: .type(PagedResponseDTO<PosterPositionResponseDTO>.self),
+            responseContentType: .application(.json)
+        )
+        posterPositions.get("to-be-taken-down", use: getPostersToBeTakenDown).openAPI(
+            summary: "Gibt abzuhängende Poster zurück",
+            description: "Gibt alle abzuhängende Poster zurück. Unterstützt optionale Pagination über Query-Parameter. Des weiteren kann der Admin die Einstellung 'poster_to_be_taken_down_interval' konfigurieren.",
+            query:["page":.integer,"per":.integer],
+            body: nil,
+            response: .type(PagedResponseDTO<PosterPositionResponseDTO>.self),
+            responseContentType: .application(.json)
+        )
+        posterPositions.post(use: createPosterPosition).openAPI(
+            summary: "Erstellt eine neu Poster Position",
+            description: "Erstellt eine neue Poster Position mithilfe eines multipart/form-data Requests.",
+            query:[],
+            body: .type(CreatePosterDTO.self),
+            contentType: .multipart(.formData),
+            response: .type(PosterPositionResponseDTO.self),
+            responseContentType: .application(.json)
+        )
+        posterPositions.patch(":positionId", use: updatePosterPosition).openAPI(
+            summary: "Updatet eine Poster Position",
+            description: "Updatet eine Poster Position anhand seiner ID mithilfe eines multipart/form-data Requests.",
+            query:[],
+            path: .type(PosterPosition.IDValue.self),
+            body: .type(UpdatePosterPositionDTO.self),
+            contentType: .multipart(.formData),
+            response: .type(PosterPositionResponseDTO.self),
+            responseContentType: .application(.json)
+        )
 
         let adminRoutesPosterPositions = posterPositions.grouped(adminMiddleware)
-        adminRoutesPosterPositions.delete(":id", use: deletePosterPosition)
-        adminRoutesPosterPositions.delete("batch", use: deletePosterPositions)
+        adminRoutesPosterPositions.delete(":id", use: deletePosterPosition).openAPI(
+            summary: "Löscht ein Poster",
+            description: "Löscht ein Poster anhand seiner ID.",
+            query:[],
+            path: .type(PosterPosition.IDValue.self)
+        )
+        adminRoutesPosterPositions.delete("batch", use: deletePosterPositions).openAPI(
+            summary: "Löscht mehrere Poster Positonen",
+            description: "Löscht mehrere Poster Positionen anhand der übergebenen IDs.",
+            query:[],
+            body: .type(DeleteDTO.self),
+            contentType: .application(.json)
+        )
         
         // Bild-Routen
-        authProtected.get("images", ":imageURL", use: getImageFile)
+        authProtected.get("images", ":imageURL", use: getImageFile).openAPI(
+            summary: "Gibt ein gespeichertes Bild zurück",
+            description: "Diese Route gibt eine zuvor gespeicherte Bilddatei zurück.Der Pfadparameter imageURL gibt den relativen Speicherort bzw. Dateinamen an.",
+            path: ["imageURL": .string],
+            body: nil,
+            responseContentType: .init("image/jpeg")
+        )
     }
 
     // MARK: - Hilfsfunktionen
@@ -113,7 +198,7 @@ struct PosterController: RouteCollection, Sendable {
     // MARK: - Poster-Routen
 
     /// Erstellt ein neues Poster aus multipart/form-data.
-    /// Erwartet mindestens `name`, `description` und `image` im Request Body.
+    /// Erwartet mindestens `name` und `image` im Request Body.
     @Sendable
     func createPoster(req: Request) async throws -> Response {
         // Überprüfen des Content-Types
@@ -172,7 +257,7 @@ struct PosterController: RouteCollection, Sendable {
         return try await createResponse(with: responseDTO, on: req)
     }
     
-    /// Gibt alle verfügbaren Poster zurück.
+    /// Gibt alle verfügbaren Poster zurück oder Poster basierend auf Anzahl der gewählten Menge und Seite
     @Sendable
     func getPosters(req: Request) async throws -> Response {
         let page = try? req.query.get(Int.self, at: "page")
