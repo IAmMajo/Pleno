@@ -6,6 +6,9 @@ import com.google.gson.Gson
 import com.google.gson.JsonArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.ipv64.kivop.services.AuthController
+import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
+import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
@@ -17,10 +20,10 @@ data class ResponseData(
 
 suspend fun responseList(id: String, context: Context): List<ResponseData> =
     withContext(Dispatchers.IO) {
-      val auth = AuthApi(context)
-      val url = "https://kivop.ipv64.net/meetings/$id/attendances"
-      val client = OkHttpClient()
-      val token = auth.getToken()
+      val auth = AuthController(context)
+      val path = "/meetings/$id/attendances"
+      
+      val token = auth.getSessionToken()
 
       if (token.isNullOrEmpty()) {
         println("Fehler: Kein Token verfügbar")
@@ -28,10 +31,10 @@ suspend fun responseList(id: String, context: Context): List<ResponseData> =
       }
 
       val request =
-          Request.Builder().url(url).addHeader("Authorization", "Bearer $token").get().build()
+          Request.Builder().url(BASE_URL + path).addHeader("Authorization", "Bearer $token").get().build()
 
       try {
-        val response = client.newCall(request).execute()
+        val response = okHttpClient.newCall(request).execute()
         if (response.isSuccessful) {
           val responseBody = response.body?.string()
           if (responseBody != null) {
