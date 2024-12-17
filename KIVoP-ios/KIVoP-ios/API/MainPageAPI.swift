@@ -134,7 +134,7 @@ struct MainPageAPI {
         print("Verwendetes JWT-Token: \(jwtToken)")
 
         var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
+        request.httpMethod = "PATCH"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
 
@@ -164,6 +164,49 @@ struct MainPageAPI {
             completion(.success(()))
         }.resume()
     }
+    
+    // MARK: - Profilbild aktualisieren
+    static func updateUserProfileImage(profileImage: UIImage?, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "https://kivop.ipv64.net/users/profile") else {
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+
+        guard let jwtToken = UserDefaults.standard.string(forKey: "jwtToken") else {
+            completion(.failure(APIError.invalidRequest))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
+
+        let compressedImageData = profileImage?.jpegData(compressionQuality: 0.6)
+        let updateDTO = UserProfileUpdateDTO(name: nil, profileImage: compressedImageData)
+
+        do {
+            request.httpBody = try JSONEncoder().encode(updateDTO)
+        } catch {
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                completion(.failure(APIError.invalidResponse))
+                return
+            }
+
+            completion(.success(()))
+        }.resume()
+    }
+
 
     // MARK: - Passwort aktualisieren/ändern
     static func updatePassword(currentPassword: String, newPassword: String, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -217,89 +260,6 @@ struct MainPageAPI {
         return "\(firstInitial)\(lastInitial)".uppercased()
     }
     
-    // MARK: - Profilbild
-    static func fetchProfilePicture(completion: @escaping (Result<UIImage, Error>) -> Void) {
-            guard let url = URL(string: "https://kivop.ipv64.net/users/profile/picture") else {
-                completion(.failure(APIError.invalidURL))
-                return
-            }
-
-            var request = URLRequest(url: url)
-            request.httpMethod = "GET"
-            request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-
-            URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
-                      let data = data, let image = UIImage(data: data) else {
-                    completion(.failure(APIError.invalidResponse))
-                    return
-                }
-
-                completion(.success(image))
-            }.resume()
-        }
-
-        static func uploadProfilePicture(image: UIImage, completion: @escaping (Result<Void, Error>) -> Void) {
-            guard let url = URL(string: "https://kivop.ipv64.net/users/profile/picture") else {
-                completion(.failure(APIError.invalidURL))
-                return
-            }
-
-            guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-                completion(.failure(APIError.invalidData))
-                return
-            }
-
-            var request = URLRequest(url: url)
-            request.httpMethod = "PUT"
-            request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-            request.addValue("image/jpeg", forHTTPHeaderField: "Content-Type")
-            request.httpBody = imageData
-
-            URLSession.shared.dataTask(with: request) { _, response, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    completion(.failure(APIError.invalidResponse))
-                    return
-                }
-
-                completion(.success(()))
-            }.resume()
-        }
-
-        static func deleteProfilePicture(completion: @escaping (Result<Void, Error>) -> Void) {
-            guard let url = URL(string: "https://kivop.ipv64.net/users/profile/picture") else {
-                completion(.failure(APIError.invalidURL))
-                return
-            }
-
-            var request = URLRequest(url: url)
-            request.httpMethod = "DELETE"
-            request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-
-            URLSession.shared.dataTask(with: request) { _, response, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    completion(.failure(APIError.invalidResponse))
-                    return
-                }
-
-                completion(.success(()))
-            }.resume()
-        }
 
     // MARK: - Fehlerarten
     enum APIError: Error {

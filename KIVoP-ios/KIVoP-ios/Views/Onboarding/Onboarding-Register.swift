@@ -9,6 +9,7 @@ struct Onboarding_Register: View {
     @State private var errorMessage: String? = nil
     @State private var isLoading: Bool = false
     @State private var registrationSuccessful: Bool = false
+    @State private var selectedImage: UIImage? = nil // Für das Profilbild
 
     var body: some View {
         NavigationStack {
@@ -30,13 +31,24 @@ struct Onboarding_Register: View {
                 .padding(.bottom, 40)
                 .padding(.top, 40)
                 
-                // Profil-Bild placeholder
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 100, height: 100)
-                    .overlay(Text("Profilbild").foregroundColor(.gray))
+                // Profilbild
+                ZStack {
+                    if let image = selectedImage {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 100, height: 100)
+                            .clipShape(Circle())
+                    } else {
+                        Circle()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 100, height: 100)
+                            .overlay(Text("Profilbild").foregroundColor(.gray))
+                    }
+                }
+                .padding(.bottom, 10)
                 
-                NavigationLink(destination: MainPage_ProfilView_ProfilPicture()) {
+                NavigationLink(destination: Onboarding_ProfilePicture(selectedImage: $selectedImage)) {
                     Text("Bearbeiten")
                         .foregroundColor(.blue)
                         .font(.footnote)
@@ -151,7 +163,33 @@ struct Onboarding_Register: View {
             return
         }
         
-        let registrationDTO = UserRegistrationDTO(name: name, email: email, password: password)
+        // Bild komprimieren und skalieren
+        let profileImageData = selectedImage.flatMap { compressImage($0) }
+        
+        // DTO erstellen
+        let registrationDTO = UserRegistrationDTO(
+            name: name,
+            email: email,
+            password: password,
+            profileImage: profileImageData
+        )
+        
+        // JSON Encoding und Payload-Größe messen
+        do {
+            let jsonData = try JSONEncoder().encode(registrationDTO)
+            let sizeInMB = Double(jsonData.count) / (1024 * 1024) // Größe in MB
+            print(String(format: "Payload-Größe: %.2f MB", sizeInMB))
+        } catch {
+            print("Fehler beim Encoding der JSON-Daten: \(error.localizedDescription)")
+            errorMessage = "Fehler beim Verarbeiten der Daten."
+            isLoading = false
+            return
+        }
+    
+        
+
+        
+        // Registrierung durchführen
         OnboardingAPI.registerUser(with: registrationDTO) { result in
             DispatchQueue.main.async {
                 isLoading = false
@@ -165,6 +203,7 @@ struct Onboarding_Register: View {
             }
         }
     }
+
     
     private func validatePassword(_ password: String) -> Bool {
         let passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$&*]).{8,}$"
@@ -192,7 +231,31 @@ struct Onboarding_Register: View {
         .padding(.horizontal, 24)
         .padding(.bottom, 10)
     }
+    
+    private func compressImage(_ image: UIImage) -> Data? {
+        let targetSize = CGSize(width: 200, height: 200) // Zielgröße für das Profilbild
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        
+        // Bild auf Zielgröße skalieren
+        let resizedImage = renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: targetSize))
+        }
+        
+        // Komprimieren mit dynamischer Qualität
+        var compressionQuality: CGFloat = 0.9 // Startqualität
+        var compressedData = resizedImage.jpegData(compressionQuality: compressionQuality)
+        
+        // Schleife zur weiteren Komprimierung, bis die Datei klein genug ist (< 200 KB z. B.)
+        while let data = compressedData, data.count > 200 * 1024 && compressionQuality > 0.1 {
+            compressionQuality -= 0.1
+            compressedData = resizedImage.jpegData(compressionQuality: compressionQuality)
+        }
+        
+        return compressedData
+    }
+
 }
+
 
 struct Onboarding_Register_Previews: PreviewProvider {
     static var previews: some View {
