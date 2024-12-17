@@ -21,7 +21,7 @@ data class ResponseData(
 suspend fun responseList(id: String, context: Context): List<ResponseData> =
     withContext(Dispatchers.IO) {
       val auth = AuthController(context)
-      val path = "/meetings/$id/attendances"
+      val path = "meetings/$id/attendances"
       
       val token = auth.getSessionToken()
 

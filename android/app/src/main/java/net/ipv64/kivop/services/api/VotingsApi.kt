@@ -16,7 +16,7 @@ import okhttp3.Request
 suspend fun GetVotings(context: Context): List<GetVotingDTO> =
     withContext(Dispatchers.IO) {
       var auth = AuthController(context)
-      val path = "/meetings/votings"
+      val path = "meetings/votings"
 
       val token = auth.getSessionToken()
 
@@ -81,7 +81,7 @@ suspend fun GetVotings(context: Context): List<GetVotingDTO> =
 suspend fun GetVotingResultByID(context: Context, id: UUID): GetVotingResultsDTO? =
     withContext(Dispatchers.IO) {
       var auth = AuthController(context)
-      val path = "/meetings/votings/$id/results"
+      val path = "meetings/votings/$id/results"
       
       val token = auth.getSessionToken()
 

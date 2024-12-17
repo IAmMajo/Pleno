@@ -24,7 +24,7 @@ import okhttp3.Request
 suspend fun meetingsList(context: Context): List<AttendancesListsData> =
     withContext(Dispatchers.IO) {
       val auth = AuthController(context)
-      val path = "https://kivop.ipv64.net/meetings"
+      val path = "meetings"
 
       val token = auth.getSessionToken()
 
@@ -80,7 +80,7 @@ suspend fun meetingsList(context: Context): List<AttendancesListsData> =
 suspend fun getMeetingsByID(context: Context, id: String): SitzungsCardData? =
     withContext(Dispatchers.IO) {
       val auth = AuthController(context)
-      val path = "/meetings/$id"
+      val path = "meetings/$id"
       
       val token = auth.getSessionToken()
 
