@@ -3,18 +3,19 @@ import UIKit
 
 struct MainPage_ProfilView_ProfilPicture: View {
     @State private var showImagePicker = false
-    @State private var sourceType: UIImagePickerController.SourceType = .camera
+    @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary // Standard auf Galerie
     @State private var selectedImage: UIImage? = nil
-    @State private var shortName: String = "NN" // Standard-Shortname
+    @State private var shortName: String = "NN"
     @State private var errorMessage: String? = nil
     @State private var isLoading: Bool = true
+    @State private var isUpdating: Bool = false
 
     var body: some View {
         NavigationStack {
             ZStack {
                 Color(UIColor.systemBackground)
                     .edgesIgnoringSafeArea(.all)
-                
+
                 VStack(spacing: 30) {
                     if isLoading {
                         ProgressView("Lade Profilbild...")
@@ -25,7 +26,6 @@ struct MainPage_ProfilView_ProfilPicture: View {
                             .multilineTextAlignment(.center)
                             .padding()
                     } else {
-                        // Profilbild oder ShortName anzeigen
                         ZStack {
                             if let image = selectedImage {
                                 Image(uiImage: image)
@@ -33,7 +33,6 @@ struct MainPage_ProfilView_ProfilPicture: View {
                                     .scaledToFill()
                                     .frame(width: 200, height: 200)
                                     .clipShape(Circle())
-                                    .overlay(Circle().stroke(Color.primary, lineWidth: 3))
                             } else {
                                 Circle()
                                     .fill(Color.gray.opacity(0.3))
@@ -45,15 +44,15 @@ struct MainPage_ProfilView_ProfilPicture: View {
                                     )
                             }
                         }
-                        
-                        // Löschen-Button
+
+                        // Profilbild löschen
                         Button("Löschen") {
                             deleteProfileImage()
                         }
                         .font(.headline)
                         .foregroundColor(.red)
-                        .disabled(selectedImage == nil) // Deaktivieren, falls kein Bild vorhanden
-                        
+                        .disabled(selectedImage == nil || isUpdating)
+
                         // Kamera- und Galerie-Aktionen
                         HStack(spacing: 50) {
                             Button(action: {
@@ -74,7 +73,7 @@ struct MainPage_ProfilView_ProfilPicture: View {
                                 .background(Color(UIColor.systemGray6))
                                 .cornerRadius(15)
                             }
-                            
+
                             Button(action: {
                                 sourceType = .photoLibrary
                                 showImagePicker = true
@@ -102,12 +101,14 @@ struct MainPage_ProfilView_ProfilPicture: View {
                 }
             }
             .sheet(isPresented: $showImagePicker) {
-                ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
+                ImagePicker(selectedImage: $selectedImage, sourceType: sourceType) { updatedImage in
+                    self.updateProfileImage(with: updatedImage)
+                }
             }
         }
     }
 
-    // MARK: - Profilbild vom Server abrufen
+    // MARK: - Profilbild abrufen
     func fetchProfileImage() {
         isLoading = true
         errorMessage = nil
@@ -122,7 +123,6 @@ struct MainPage_ProfilView_ProfilPicture: View {
                     } else {
                         self.selectedImage = nil
                     }
-                    // Dynamischen ShortName basierend auf dem Namen setzen
                     self.shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
                 case .failure(let error):
                     self.errorMessage = "Fehler beim Laden des Profilbilds: \(error.localizedDescription)"
@@ -131,17 +131,42 @@ struct MainPage_ProfilView_ProfilPicture: View {
         }
     }
 
-    // MARK: - Profilbild löschen (Dummy)
+    // MARK: - Profilbild aktualisieren
+    func updateProfileImage(with updatedImage: UIImage?) {
+        guard let updatedImage = updatedImage else {
+            self.errorMessage = "Kein Bild ausgewählt."
+            return
+        }
+
+        isUpdating = true
+        errorMessage = nil
+
+        MainPageAPI.updateUserProfileImage(profileImage: updatedImage) { result in
+            DispatchQueue.main.async {
+                self.isUpdating = false
+                switch result {
+                case .success:
+                    print("Profilbild erfolgreich aktualisiert.")
+                    self.selectedImage = updatedImage
+                case .failure(let error):
+                    self.errorMessage = "Fehler beim Aktualisieren des Profilbilds: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+
+    // MARK: - Profilbild löschen
     func deleteProfileImage() {
-        self.selectedImage = nil
-        print("Profilbild gelöscht.")
+        selectedImage = nil
+        updateProfileImage(with: nil)
     }
 
     // MARK: - ImagePicker
     struct ImagePicker: UIViewControllerRepresentable {
         @Binding var selectedImage: UIImage?
         var sourceType: UIImagePickerController.SourceType
-        
+        var onImagePicked: (UIImage?) -> Void
+
         func makeUIViewController(context: Context) -> UIImagePickerController {
             let picker = UIImagePickerController()
             picker.delegate = context.coordinator
@@ -149,24 +174,31 @@ struct MainPage_ProfilView_ProfilPicture: View {
             picker.allowsEditing = true
             return picker
         }
-        
-        func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-        
+
+        func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {
+            // Sicherstellen, dass der sourceType bei jedem Update korrekt gesetzt ist
+            uiViewController.sourceType = sourceType
+        }
+
         func makeCoordinator() -> Coordinator {
             Coordinator(self)
         }
-        
+
         class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
             let parent: ImagePicker
-            
+
             init(_ parent: ImagePicker) {
                 self.parent = parent
             }
-            
+
             func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
                 if let image = info[.editedImage] as? UIImage ?? info[.originalImage] as? UIImage {
-                    parent.selectedImage = image
+                    parent.onImagePicked(image)
                 }
+                picker.dismiss(animated: true)
+            }
+
+            func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
                 picker.dismiss(animated: true)
             }
         }

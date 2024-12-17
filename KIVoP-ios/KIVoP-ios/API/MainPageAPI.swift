@@ -134,7 +134,7 @@ struct MainPageAPI {
         print("Verwendetes JWT-Token: \(jwtToken)")
 
         var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
+        request.httpMethod = "PATCH"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
 
@@ -165,40 +165,48 @@ struct MainPageAPI {
         }.resume()
     }
     
-    static func updateUserProfile(updateDTO: UserProfileUpdateDTO, completion: @escaping (Result<Void, Error>) -> Void) {
-            guard let url = URL(string: "https://kivop.ipv64.net/users/profile") else {
-                completion(.failure(APIError.invalidURL))
-                return
-            }
+    // MARK: - Profilbild aktualisieren
+    static func updateUserProfileImage(profileImage: UIImage?, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "https://kivop.ipv64.net/users/profile") else {
+            completion(.failure(APIError.invalidURL))
+            return
+        }
 
-            var request = URLRequest(url: url)
-            request.httpMethod = "PUT"
-            request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            
-            do {
-                let jsonData = try JSONEncoder().encode(updateDTO)
-                request.httpBody = jsonData
-            } catch {
+        guard let jwtToken = UserDefaults.standard.string(forKey: "jwtToken") else {
+            completion(.failure(APIError.invalidRequest))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
+
+        let compressedImageData = profileImage?.jpegData(compressionQuality: 0.6)
+        let updateDTO = UserProfileUpdateDTO(name: nil, profileImage: compressedImageData)
+
+        do {
+            request.httpBody = try JSONEncoder().encode(updateDTO)
+        } catch {
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
                 completion(.failure(error))
                 return
             }
 
-            URLSession.shared.dataTask(with: request) { _, response, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    completion(.failure(APIError.invalidResponse))
-                    return
-                }
-                
-                completion(.success(()))
-            }.resume()
-        }
-    
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                completion(.failure(APIError.invalidResponse))
+                return
+            }
+
+            completion(.success(()))
+        }.resume()
+    }
+
 
     // MARK: - Passwort aktualisieren/ändern
     static func updatePassword(currentPassword: String, newPassword: String, completion: @escaping (Result<Void, Error>) -> Void) {

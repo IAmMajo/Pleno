@@ -45,7 +45,6 @@ struct MainPage: View {
                                 .scaledToFill()
                                 .frame(width: 50, height: 50)
                                 .clipShape(Circle())
-                                .overlay(Circle().stroke(Color.primary, lineWidth: 2))
                         } else {
                             // Shortname-Kreis als Fallback
                             Circle()
@@ -164,8 +163,8 @@ struct MainPage: View {
                     self.errorMessage = nil
                     self.name = profile.name ?? ""
                     self.shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
-                    if let imageData = profile.profileImage {
-                        self.profileImage = UIImage(data: imageData)
+                    if let imageData = profile.profileImage, let image = UIImage(data: imageData) {
+                        self.profileImage = image
                     } else {
                         self.profileImage = nil
                     }

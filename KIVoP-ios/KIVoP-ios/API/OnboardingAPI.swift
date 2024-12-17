@@ -24,39 +24,43 @@ class OnboardingAPI {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL"])))
             return
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+
         do {
             let jsonData = try JSONEncoder().encode(registrationDTO)
             request.httpBody = jsonData
         } catch {
-            completion(.failure(error))
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Fehler beim Verarbeiten der Daten."])))
             return
         }
-        
+
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return
             }
-            
+
             guard let httpResponse = response as? HTTPURLResponse else {
                 completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Ungültige Antwort vom Server."])))
                 return
             }
-            
+
             if httpResponse.statusCode == 201 {
-                print("Registrierung erfolgreich. Starte Login...")
-                
-                // Automatisch einloggen
+                // Registrierung erfolgreich, automatischer Login
+                print("Registrierung erfolgreich. Starte automatischen Login...")
+
                 let loginDTO = UserLoginDTO(email: registrationDTO.email, password: registrationDTO.password)
+
                 loginUser(with: loginDTO) { loginResult in
                     switch loginResult {
                     case .success(let token):
-                        completion(.success(token)) // Token vom Login zurückgeben
+                        // Token speichern
+                        UserDefaults.standard.setValue(token, forKey: "jwtToken")
+                        print("JWT-Token erfolgreich gespeichert: \(token)")
+                        completion(.success(token))
                     case .failure(let loginError):
                         completion(.failure(loginError))
                     }
