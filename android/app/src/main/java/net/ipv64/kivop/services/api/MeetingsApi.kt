@@ -12,7 +12,9 @@ import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.ipv64.kivop.moduls.AttendancesListsData
-import okhttp3.OkHttpClient
+import net.ipv64.kivop.services.AuthController
+import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
+import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.Request
 
 // TODO: Get Meeting location by id
@@ -21,10 +23,10 @@ import okhttp3.Request
 
 suspend fun meetingsList(context: Context): List<AttendancesListsData> =
     withContext(Dispatchers.IO) {
-      val auth = AuthApi(context)
-      val url = "https://kivop.ipv64.net/meetings"
-      val client = OkHttpClient()
-      val token = auth.getToken()
+      val auth = AuthController(context)
+      val path = "meetings"
+
+      val token = auth.getSessionToken()
 
       if (token.isNullOrEmpty()) {
         println("Fehler: Kein Token verfÃ¼gbar")
@@ -32,10 +34,10 @@ suspend fun meetingsList(context: Context): List<AttendancesListsData> =
       }
 
       val request =
-          Request.Builder().url(url).addHeader("Authorization", "Bearer $token").get().build()
+          Request.Builder().url(BASE_URL + path).addHeader("Authorization", "Bearer $token").get().build()
 
       return@withContext try {
-        val response = client.newCall(request).execute()
+        val response = okHttpClient.newCall(request).execute()
         if (response.isSuccessful) {
           val responseBody = response.body?.string()
           if (responseBody != null) {
@@ -77,10 +79,10 @@ suspend fun meetingsList(context: Context): List<AttendancesListsData> =
 
 suspend fun getMeetingsByID(context: Context, id: String): SitzungsCardData? =
     withContext(Dispatchers.IO) {
-      val auth = AuthApi(context)
-      val url = "https://kivop.ipv64.net/meetings/$id"
-      val client = OkHttpClient()
-      val token = auth.getToken()
+      val auth = AuthController(context)
+      val path = "meetings/$id"
+      
+      val token = auth.getSessionToken()
 
       if (token.isNullOrEmpty()) {
         println("Fehler: Kein Token verfügbar")
@@ -88,10 +90,10 @@ suspend fun getMeetingsByID(context: Context, id: String): SitzungsCardData? =
       }
 
       val request =
-          Request.Builder().url(url).addHeader("Authorization", "Bearer $token").get().build()
+          Request.Builder().url(BASE_URL + path).addHeader("Authorization", "Bearer $token").get().build()
 
       return@withContext try {
-        val response = client.newCall(request).execute()
+        val response = okHttpClient.newCall(request).execute()
         if (response.isSuccessful) {
           val responseBody = response.body?.string()
           if (responseBody != null) {

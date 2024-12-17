@@ -1,5 +1,7 @@
 package net.ipv64.kivop
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -59,8 +61,10 @@ import kotlinx.coroutines.launch
 import net.ipv64.kivop.pages.AttendancesCoordinationPage
 import net.ipv64.kivop.pages.AttendancesListPage
 import net.ipv64.kivop.pages.HomePage
+import net.ipv64.kivop.pages.LoginActivity
 import net.ipv64.kivop.pages.MeetingsListPage
 import net.ipv64.kivop.pages.ProtocolListPage
+import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.ui.theme.KIVoPAndriodTheme
 import net.ipv64.kivop.ui.theme.Primary_dark_20
 import net.ipv64.kivop.ui.theme.Text_light
@@ -81,6 +85,14 @@ class MainActivity : ComponentActivity() {
       }
     }
   }
+}
+
+fun handleLogout(context: Context) {
+  val auth = AuthController(context)
+  auth.logout()
+
+  val intent = Intent(context, LoginActivity::class.java)
+  context.startActivity(intent)
 }
 
 // TODO - Navigation anpassen name anpassen
