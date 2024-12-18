@@ -3,6 +3,7 @@ import Vapor
 import Foundation
 import Models
 @preconcurrency import JWTKit
+import VaporToOpenAPI
 
 // MARK: - Fehlerdefinitionen für Poster-Erstellung und -Verwaltung
 
@@ -68,7 +69,7 @@ struct PosterController: RouteCollection, Sendable {
         self.authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
         self.adminMiddleware = AdminMiddleware()
     }
-
+  
     /// Registriert alle Routen des Controllers.
     func boot(routes: RoutesBuilder) throws {
         // Authentifizierte Routen
@@ -76,27 +77,111 @@ struct PosterController: RouteCollection, Sendable {
         
         // Poster-Routen
         let posters = authProtected.grouped("posters")
-        posters.get(use: getPosters)
-        posters.post(use: createPoster)
-        posters.patch(":posterId", use: updatePoster)
+        posters.get(use: getPosters).openAPI(
+            summary: "Alle verfügbaren Poster abfragen",
+            description: "Gibt alle verfügbaren Poster zurück. Unterstützt optionale Pagination über Query-Parameter.",
+            query:["page":.integer,"per":.integer],
+            body: nil,
+            response: .type(PagedResponseDTO<PosterResponseDTO>.self),
+            responseContentType: .application(.json)
+        )
+        posters.post(use: createPoster).openAPI(
+            summary: "Erstellt ein neues Poster",
+            description: "Erstellt ein neues Poster mithilfe eines multipart/form-data Requests. Erwartet mindestens name und image.",
+            query:[],
+            body: .type(CreatePosterDTO.self),
+            contentType: .multipart(.formData),
+            response: .type(PosterResponseDTO.self),
+            responseContentType: .application(.json)
+        )
+        posters.patch(":posterId", use: updatePoster).openAPI(
+            summary: "Updatet ein Poster",
+            description: "Updatet ein Poster anhand seiner ID mithilfe eines multipart/form-data Requests.",
+            query:[],
+            path: .type(Poster.IDValue.self),
+            body: .type(UpdatePosterDTO.self),
+            contentType: .multipart(.formData),
+            response: .type(PosterResponseDTO.self),
+            responseContentType: .application(.json)
+        )
 
         let adminRoutesPoster = posters.grouped(adminMiddleware)
-        adminRoutesPoster.delete(":id", use: deletePoster)
-        adminRoutesPoster.delete("batch", use: deletePosters)
+        adminRoutesPoster.delete(":id", use: deletePoster).openAPI(
+            summary: "Löscht ein Poster",
+            description: "Löscht ein Poster anhand seiner ID.",
+            query:[],
+            path: .type(Poster.IDValue.self)
+        )
+        adminRoutesPoster.delete("batch", use: deletePosters).openAPI(
+            summary: "Löscht mehrere Poster",
+            description: "Löscht mehrere Poster anhand der übergebenen IDs.",
+            query:[],
+            body: .type(DeleteDTO.self),
+            contentType: .application(.json)
+            
+        )
         
         // PosterPosition-Routen
         let posterPositions = authProtected.grouped("poster-positions")
-        posterPositions.get(use: getDisplayedPosters)
-        posterPositions.get("to-be-taken-down", use: getPostersToBeTakenDown)
-        posterPositions.post(use: createPosterPosition)
-        posterPositions.patch(":positionId", use: updatePosterPosition)
+        posterPositions.get(use: getDisplayedPosters).openAPI(
+            summary: "Poster Positionen abfragen",
+            description: "Gibt alle verfügbaren Poster zurück. Unterstützt optionale Pagination über Query-Parameter. Des weiteren kann innerhalb der Query-Parameter optional unterschieden werden ob alle Poster Positionen, welche aufgehangen sind angezeigt werden oder Positionen, welche noch aufgehangen werden müssen",
+            query:["page":.integer,"per":.integer,"displayed":.boolean],
+            body: nil,
+            response: .type(PagedResponseDTO<PosterPositionResponseDTO>.self),
+            responseContentType: .application(.json)
+        )
+        posterPositions.get("to-be-taken-down", use: getPostersToBeTakenDown).openAPI(
+            summary: "Gibt abzuhängende Poster zurück",
+            description: "Gibt alle abzuhängende Poster zurück. Unterstützt optionale Pagination über Query-Parameter. Des weiteren kann der Admin die Einstellung 'poster_to_be_taken_down_interval' konfigurieren.",
+            query:["page":.integer,"per":.integer],
+            body: nil,
+            response: .type(PagedResponseDTO<PosterPositionResponseDTO>.self),
+            responseContentType: .application(.json)
+        )
+        posterPositions.post(use: createPosterPosition).openAPI(
+            summary: "Erstellt eine neu Poster Position",
+            description: "Erstellt eine neue Poster Position mithilfe eines multipart/form-data Requests.",
+            query:[],
+            body: .type(CreatePosterDTO.self),
+            contentType: .multipart(.formData),
+            response: .type(PosterPositionResponseDTO.self),
+            responseContentType: .application(.json)
+        )
+        posterPositions.patch(":positionId", use: updatePosterPosition).openAPI(
+            summary: "Updatet eine Poster Position",
+            description: "Updatet eine Poster Position anhand seiner ID mithilfe eines multipart/form-data Requests.",
+            query:[],
+            path: .type(PosterPosition.IDValue.self),
+            body: .type(UpdatePosterPositionDTO.self),
+            contentType: .multipart(.formData),
+            response: .type(PosterPositionResponseDTO.self),
+            responseContentType: .application(.json)
+        )
 
         let adminRoutesPosterPositions = posterPositions.grouped(adminMiddleware)
-        adminRoutesPosterPositions.delete(":id", use: deletePosterPosition)
-        adminRoutesPosterPositions.delete("batch", use: deletePosterPositions)
+        adminRoutesPosterPositions.delete(":id", use: deletePosterPosition).openAPI(
+            summary: "Löscht ein Poster",
+            description: "Löscht ein Poster anhand seiner ID.",
+            query:[],
+            path: .type(PosterPosition.IDValue.self)
+        )
+        adminRoutesPosterPositions.delete("batch", use: deletePosterPositions).openAPI(
+            summary: "Löscht mehrere Poster Positonen",
+            description: "Löscht mehrere Poster Positionen anhand der übergebenen IDs.",
+            query:[],
+            body: .type(DeleteDTO.self),
+            contentType: .application(.json)
+        )
         
         // Bild-Routen
-        authProtected.get("images", ":imageURL", use: getImageFile)
+        authProtected.get("images", ":imageURL", use: getImageFile).openAPI(
+            summary: "Gibt ein gespeichertes Bild zurück",
+            description: "Diese Route gibt eine zuvor gespeicherte Bilddatei zurück.Der Pfadparameter imageURL gibt den relativen Speicherort bzw. Dateinamen an.",
+            path: ["imageURL": .string],
+            body: nil,
+            responseContentType: .init("image/jpeg")
+        )
     }
 
     // MARK: - Hilfsfunktionen
@@ -113,7 +198,7 @@ struct PosterController: RouteCollection, Sendable {
     // MARK: - Poster-Routen
 
     /// Erstellt ein neues Poster aus multipart/form-data.
-    /// Erwartet mindestens `name`, `description` und `image` im Request Body.
+    /// Erwartet mindestens `name` und `image` im Request Body.
     @Sendable
     func createPoster(req: Request) async throws -> Response {
         // Überprüfen des Content-Types
@@ -172,20 +257,65 @@ struct PosterController: RouteCollection, Sendable {
         return try await createResponse(with: responseDTO, on: req)
     }
     
-    /// Gibt alle verfügbaren Poster zurück.
+    /// Gibt alle verfügbaren Poster zurück oder Poster basierend auf Anzahl der gewählten Menge und Seite
     @Sendable
     func getPosters(req: Request) async throws -> Response {
-        let posters = try await Poster.query(on: req.db).all()
-        let responseDTOs = posters.map { poster in
-            PosterResponseDTO(
-                id: poster.id!,
-                name: poster.name,
-                description: poster.description,
-                imageUrl: poster.image_url
+        let page = try? req.query.get(Int.self, at: "page")
+        let per = try? req.query.get(Int.self, at: "per")
+        
+        if let page = page, let per = per {
+            let paginatedData = try await Poster.query(on: req.db)
+                .paginate(PageRequest(page: page, per: per))
+            
+            let responseDTOs = paginatedData.items.map { poster in
+                PosterResponseDTO(
+                    id: poster.id!,
+                    name: poster.name,
+                    description: poster.description,
+                    imageUrl: poster.image_url
+                )
+            }
+            let currentPage = paginatedData.metadata.page
+                   let perPage = paginatedData.metadata.per
+                   let totalItems = paginatedData.metadata.total
+                   let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
+            
+            // Mapping der Vapor-PageMetadata auf den eigenen Typ
+            let customMeta = CustomPageMetadata(
+                        currentPage: currentPage,
+                        perPage: perPage,
+                        totalItems: totalItems,
+                        totalPages: totalPages
+                    )
+            
+            let response = PagedResponseDTO(
+                items: responseDTOs,
+                metadata: customMeta
             )
+            
+            return try await createResponse(with: response, on: req)
+            
+        } else {
+            let posters = try await Poster.query(on: req.db).all()
+            let responseDTOs = posters.map { poster in
+                PosterResponseDTO(
+                    id: poster.id!,
+                    name: poster.name,
+                    description: poster.description,
+                    imageUrl: poster.image_url
+                )
+            }
+            
+            // Ohne Pagination kein Metadata
+            let response = PagedResponseDTO<PosterResponseDTO>(
+                items: responseDTOs,
+                metadata: nil
+            )
+            
+            return try await createResponse(with: response, on: req)
         }
-        return try await createResponse(with: responseDTOs, on: req)
     }
+
     
     /// Aktualisiert ein bestehendes Poster (Name, Beschreibung und/oder Bild).
     @Sendable
@@ -302,66 +432,165 @@ struct PosterController: RouteCollection, Sendable {
     @Sendable
     func getDisplayedPosters(req: Request) async throws -> Response {
         let isDisplayed = (try? req.query.get(Bool.self, at: "displayed")) ?? true
-        let positions: [PosterPosition]
+        let page = try? req.query.get(Int.self, at: "page")
+        let per = try? req.query.get(Int.self, at: "per")
+
+        // Baue den Basis-Query auf, abhängig von `isDisplayed`
+        let query = PosterPosition.query(on: req.db)
 
         if isDisplayed {
-            positions = try await PosterPosition.query(on: req.db)
-                .filter(\.$is_Displayed == true)
-                .all()
+            query.filter(\.$is_Displayed == true)
         } else {
             let currentDate = Date()
-            positions = try await PosterPosition.query(on: req.db)
-                .filter(\.$is_Displayed == false)
-                .filter(\.$expires_at > currentDate)
-                .all()
+            query.filter(\.$is_Displayed == false)
+            query.filter(\.$expires_at > currentDate)
         }
 
-        let responseDTOs = positions.map { position in
-            PosterToBeTakenDownDTO(
-                posterId: position.id!,
-                responsibleUserId: position.responsibleUser.id!,
-                latitude: position.latitude,
-                longitude: position.longitude,
-                isDisplayed: position.is_Displayed,
-                imageURL: position.image_url,
-                expiresAt: position.expires_at!
+        if let page = page, let per = per {
+            // Paginierte Abfrage
+            let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
+
+            let responseDTOs = paginatedData.items.map { position in
+                PosterToBeTakenDownDTO(
+                    positionId: position.id!,
+                    posterId: position.$poster.id,
+                    responsibleUserId: position.$responsibleUser.id,
+                    latitude: position.latitude,
+                    longitude: position.longitude,
+                    isDisplayed: position.is_Displayed,
+                    imageURL: position.image_url ?? "",
+                    expiresAt: position.expires_at!
+                )
+            }
+
+            let currentPage = paginatedData.metadata.page
+            let perPage = paginatedData.metadata.per
+            let totalItems = paginatedData.metadata.total
+            let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
+
+            let customMeta = CustomPageMetadata(
+                currentPage: currentPage,
+                perPage: perPage,
+                totalItems: totalItems,
+                totalPages: totalPages
             )
-        }
 
-        return try await createResponse(with: responseDTOs, on: req)
+            let response = PagedResponseDTO(
+                items: responseDTOs,
+                metadata: customMeta
+            )
+
+            return try await createResponse(with: response, on: req)
+
+        } else {
+            // Keine Pagination-Parameter, alle laden
+            let positions = try await query.all()
+
+            let responseDTOs = positions.map { position in
+                PosterToBeTakenDownDTO(
+                    positionId: position.id!,
+                    posterId: position.$poster.id,
+                    responsibleUserId: position.responsibleUser.id!,
+                    latitude: position.latitude,
+                    longitude: position.longitude,
+                    isDisplayed: position.is_Displayed,
+                    imageURL: position.image_url ?? "",
+                    expiresAt: position.expires_at!
+                )
+            }
+
+            // Kein Paging -> metadata = nil
+            let response = PagedResponseDTO(
+                items: responseDTOs,
+                metadata: nil
+            )
+
+            return try await createResponse(with: response, on: req)
+        }
     }
+
 
     /// Gibt alle PosterPositionen zurück, die demnächst abgehangen werden müssen.
     /// Die Zeitspanne wird über die Einstellung `poster_deletion_interval` bestimmt.
     @Sendable
     func getPostersToBeTakenDown(req: Request) async throws -> Response {
-        async let posterDeletionInterval: Int? = SettingsManager.shared.getSetting(forKey: "poster_deletion_interval")
-        guard let deletionInterval = await posterDeletionInterval else {
+        async let toBeTakenDown: Int? = SettingsManager.shared.getSetting(forKey: "poster_to_be_taken_down_interval")
+        guard let takenDownInterval = await toBeTakenDown else {
             req.logger.error("Einstellung 'poster_deletion_interval' nicht gefunden oder ungültig.")
             throw PosterCreationError.settingFetchFailed(reason: "Einstellung 'poster_deletion_interval' nicht gefunden oder ungültig.")
         }
 
-        let now = Date()
-        let thresholdDate = now.addingTimeInterval(TimeInterval(deletionInterval))
+        // Paging Parameter auslesen
+        let page = try? req.query.get(Int.self, at: "page")
+        let per = try? req.query.get(Int.self, at: "per")
 
-        let positions = try await PosterPosition.query(on: req.db)
+        let now = Date()
+        let thresholdDate = now.addingTimeInterval(TimeInterval(takenDownInterval))
+
+        // Basis-Query vorbereiten
+        let query = PosterPosition.query(on: req.db)
             .filter(\.$is_Displayed == true)
             .filter(\.$expires_at <= thresholdDate)
-            .all()
 
-        let responseDTOs = positions.map { position in
-            PosterToBeTakenDownDTO(
-                posterId: position.id!,
-                responsibleUserId: position.responsibleUser.id!,
-                latitude: position.latitude,
-                longitude: position.longitude,
-                isDisplayed: position.is_Displayed,
-                imageURL: position.image_url,
-                expiresAt: position.expires_at!
+        if let page = page, let per = per {
+            // Paginierte Abfrage
+            let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
+
+            let responseDTOs = paginatedData.items.map { position in
+                PosterToBeTakenDownDTO(
+                    positionId: position.id!,
+                    posterId: position.$poster.id,
+                    responsibleUserId: position.$responsibleUser.id,
+                    latitude: position.latitude,
+                    longitude: position.longitude,
+                    isDisplayed: position.is_Displayed,
+                    imageURL: position.image_url ?? "",
+                    expiresAt: position.expires_at!
+                )
+            }
+
+            let currentPage = paginatedData.metadata.page
+            let perPage = paginatedData.metadata.per
+            let totalItems = paginatedData.metadata.total
+            let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
+
+            let customMeta = CustomPageMetadata(
+                currentPage: currentPage,
+                perPage: perPage,
+                totalItems: totalItems,
+                totalPages: totalPages
             )
-        }
 
-        return try await createResponse(with: responseDTOs, on: req)
+            let response = PagedResponseDTO(
+                items: responseDTOs,
+                metadata: customMeta
+            )
+
+            return try await createResponse(with: response, on: req)
+        } else {
+            // Keine Paging-Parameter: alle Einträge laden
+            let positions = try await query.all()
+
+            let responseDTOs = positions.map { position in
+                PosterToBeTakenDownDTO(
+                    positionId: position.id!,
+                    posterId: position.$poster.id,
+                    responsibleUserId: position.$responsibleUser.id ,
+                    latitude: position.latitude,
+                    longitude: position.longitude,
+                    isDisplayed: position.is_Displayed,
+                    imageURL: position.image_url ?? "",
+                    expiresAt: position.expires_at!
+                )
+            }
+
+            let response = PagedResponseDTO(
+                items: responseDTOs,
+                metadata: nil
+            )
+
+            return try await createResponse(with: response, on: req)
+        }
     }
 
 
@@ -376,11 +605,29 @@ struct PosterController: RouteCollection, Sendable {
         }
 
         let dto = try req.content.decode(CreatePosterPositionDTO.self)
-        let imageUrl = try await saveImage(dto.image, in: "Storage/Images/PosterPositions", on: req)
 
+
+        // latitude und longitude in einem sinnvollen Bereich
+        guard (-90...90).contains(dto.latitude) else {
+            throw Abort(.badRequest, reason: "latitude muss zwischen -90 und 90 liegen.")
+        }
+
+        guard (-180...180).contains(dto.longitude) else {
+            throw Abort(.badRequest, reason: "longitude muss zwischen -180 und 180 liegen.")
+        }
+
+        // Wenn image vorhanden ist, Bild speichern. Wenn nicht, bleibt imageUrl nil.
+        let imageUrl: String
+        if let imageData = dto.image {
+            imageUrl = try await saveImage(imageData, in: "Storage/Images/PosterPositions", on: req)
+        } else {
+            imageUrl = ""
+        }
+
+        
         let posterPosition = PosterPosition(
             posterId: dto.posterId,
-            responsibleUserID: dto.responsibleUserId,
+            responsibleUserID: dto.responsibleUserId!,
             latitude: dto.latitude,
             longitude: dto.longitude,
             imageUrl: imageUrl,
@@ -391,18 +638,19 @@ struct PosterController: RouteCollection, Sendable {
 
         let responseDTO = PosterPositionResponseDTO(
             id: posterPosition.id!,
-            posterId: dto.posterId,
-            responsibleUserId: dto.responsibleUserId,
-            latitude: dto.latitude,
-            longitude: dto.longitude,
+            posterId: posterPosition.$poster.id,
+            responsibleUserId: posterPosition.$responsibleUser.id,
+            latitude: posterPosition.latitude,
+            longitude: posterPosition.longitude,
             isDisplayed: posterPosition.is_Displayed,
-            imageUrl: posterPosition.image_url,
+            imageUrl: posterPosition.image_url ?? "",
             expiresAt: posterPosition.expires_at!,
             postedAt: posterPosition.posted_at!
         )
 
         return try await createResponse(with: responseDTO, on: req)
     }
+
 
     /// Aktualisiert eine vorhandene PosterPosition (Location, Anzeigezustand, Ablaufdatum, Verantwortlicher, Poster-ID, Bild).
     @Sendable
@@ -475,15 +723,19 @@ struct PosterController: RouteCollection, Sendable {
         }
 
         let imageUrl = position.image_url
-        let filePath = req.application.directory.workingDirectory + imageUrl
+        
+        if let url = imageUrl {
+            let filePath = req.application.directory.workingDirectory + url
 
-        let fileManager = FileManager.default
-        do {
-            try fileManager.removeItem(atPath: filePath)
-        } catch {
-            req.logger.error("Fehler beim Löschen der Bilddatei: \(error.localizedDescription)")
-            throw Abort(.internalServerError, reason: "Fehler beim Löschen der Bilddatei für PosterPosition-ID \(positionID)")
+            let fileManager = FileManager.default
+            do {
+                try fileManager.removeItem(atPath: filePath)
+            } catch {
+                req.logger.error("Fehler beim Löschen der Bilddatei: \(error.localizedDescription)")
+                throw Abort(.internalServerError, reason: "Fehler beim Löschen der Bilddatei für PosterPosition-ID \(positionID)")
+            }
         }
+      
 
         try await position.delete(on: req.db)
         return .noContent
@@ -513,13 +765,15 @@ struct PosterController: RouteCollection, Sendable {
             let fileManager = FileManager.default
             for position in positionsToDelete {
                 let imageUrl = position.image_url
-                let filePath = req.application.directory.workingDirectory + imageUrl
+                if let url = imageUrl{
+                    let filePath = req.application.directory.workingDirectory + url
 
-                do {
-                    try fileManager.removeItem(atPath: filePath)
-                } catch {
-                    req.logger.error("Fehler beim Löschen der Bilddatei für PosterPosition-ID \(position.id?.uuidString ?? "Unbekannt"): \(error.localizedDescription)")
-                    throw Abort(.internalServerError, reason: "Fehler beim Löschen der Bilddatei für PosterPosition-ID \(position.id?.uuidString ?? "Unbekannt")")
+                    do {
+                        try fileManager.removeItem(atPath: filePath)
+                    } catch {
+                        req.logger.error("Fehler beim Löschen der Bilddatei für PosterPosition-ID \(position.id?.uuidString ?? "Unbekannt"): \(error.localizedDescription)")
+                        throw Abort(.internalServerError, reason: "Fehler beim Löschen der Bilddatei für PosterPosition-ID \(position.id?.uuidString ?? "Unbekannt")")
+                    }
                 }
 
                 try await position.delete(on: database)

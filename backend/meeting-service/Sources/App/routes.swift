@@ -4,14 +4,6 @@ import Vapor
 import VaporToOpenAPI
 
 func routes(_ app: Application) throws {
-    app.get { req async in
-        "It works!"
-    }
-
-    app.get("hello") { req async -> String in
-        "Hello, world!"
-    }
-
     // Einbinden der Middleware und des JWTSigner
     let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
     let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
@@ -26,6 +18,7 @@ func routes(_ app: Application) throws {
     app.get("brew", "coffee") { req -> HTTPStatus in // 418
         .imATeapot
     }
+    .excludeFromOpenAPI()
 
     app.get("openapi.json") { req in
       app.routes.openAPI(

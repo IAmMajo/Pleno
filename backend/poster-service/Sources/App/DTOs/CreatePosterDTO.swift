@@ -10,7 +10,7 @@ import Vapor
 public struct CreatePosterDTO: Codable {
     public var name: String
     public var description: String?
-    public var image: File // Bild als Base64-String
+    public var image: File 
 
     public init(name: String, description: String?, image: File) {
         self.name = name

@@ -7,28 +7,116 @@ struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let userRoutes = routes.grouped("users")
         
-        userRoutes.on(.POST, "register", body: .collect(maxSize: "500kb"), use: self.register)
-        userRoutes.get("profile", use: self.getProfile)
-        userRoutes.put("profile", use: self.updateProfile)
-        
         let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
         let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
         let protectedRoutes = userRoutes.grouped(authMiddleware)
         
+        userRoutes.on(.POST, "register", body: .collect(maxSize: "7000kb"), use: self.register).openAPI(
+            summary: "Register an account",
+            description: "Register an account to new Members",
+            body: .type(UserRegistrationDTO.self),
+            contentType: .application(.json),
+            response: .type(UserRegistrationDTO.self)
+        )
+        userRoutes.get("profile", use: self.getProfile).openAPI(
+            summary: "Get profile",
+            description: "Get current profile of user",
+            body: .none,
+            response: .type(UserProfileDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+        )
+        protectedRoutes.on(.PATCH, "profile", body: .collect(maxSize: "7000kb"), use: self.updateProfile).openAPI(
+            summary: "Update profile",
+            description: "Update identity and/or profileImage",
+            body: .type(UserProfileUpdateDTO.self),
+            response: .type(HTTPResponseStatus.self),
+            auth: .bearer()
+        )
+        
+        
         // GET /users -> alle User
-        protectedRoutes.get(use: self.getAllUsers)
+        protectedRoutes.get(use: self.getAllUsers).openAPI(
+            summary: "Admin get all users",
+            description: "List all user profiles",
+            body: .none,
+            response: .type(UserProfileDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+
+        )
         // GET /users/:id -> ein User
-        protectedRoutes.get(":id", use: self.getUser)
+        protectedRoutes.get(":id", use: self.getUser).openAPI(
+            summary: "Admin get a user profile",
+            description: "Get User with user id",
+            body: .none,
+            response: .type(UserProfileDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+
+            
+        )
         // GET /users/identities/:id
-        protectedRoutes.get("identities", ":id", use: self.getIdentities)
+        protectedRoutes.get("identities", ":id", use: self.getIdentities).openAPI(
+            summary: "Admin get all user identites",
+            description: "Get all identites with user id",
+            response: .type(Identity.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+
+        )
         // PATCH /users/:id
-        protectedRoutes.patch(":id", use: self.updateUserStatus)
+        protectedRoutes.patch(":id", use: self.updateUserStatus).openAPI(
+            summary: "Patch isActive or isAdmin",
+            description: "Admin Patch user profile status",
+            body: .type(UserUpdateAccountDTO.self),
+            contentType: .application(.json),
+            response: .type(HTTPResponseStatus.self),
+            auth: .bearer()
+
+        )
         // DELETE /users/:id
-        protectedRoutes.delete(":id", use: self.deleteUser)
+        protectedRoutes.delete(":id", use: self.deleteUser).openAPI(
+            summary: "Admin delete user account",
+            description: "Admin can delete user account with user id",
+            response: .type(HTTPResponseStatus.self),
+            auth: .bearer()
+
+        )
         // GET /users/profile-image/identity/:identity_id
-        protectedRoutes.get("profile-image", "identity", ":id", use: self.getImageIdentity)
+        protectedRoutes.get("profile-image", "identity", ":id", use: self.getImageIdentity).openAPI(
+            summary: "Get profile image",
+            description: "Get profile image with identity id",
+            responseContentType: .application(.json),
+            auth: .bearer()
+
+        )
         // GET /users/profile-image/user/:user_id
-        protectedRoutes.get("profile-image", "user", ":id", use: self.getImageUser)
+        protectedRoutes.get("profile-image", "user", ":id", use: self.getImageUser).openAPI(
+            summary: "Get profile image",
+            description: "Get profile image with user id",
+            responseContentType: .application(.json),
+            auth: .bearer()
+
+            
+        )
+        // GET /users/identities
+        protectedRoutes.get("identities", use: self.userGetIdentities).openAPI(
+            summary: "Get identities",
+            description: "Get own identities with JWT-Token",
+            response: .type(Identity.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+
+        )
+        // DELETE /users/delete
+        protectedRoutes.delete("delete", use: self.userDeleteEntry).openAPI(
+            summary: "Delete user account",
+            description: "Delete own user account with JWT-Token",
+            response: .type(HTTPResponseStatus.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+        )
     }
     
     @Sendable
@@ -50,17 +138,21 @@ struct UserController: RouteCollection {
         // clone identity
         let updatedIdentity = user.identity.clone()
         
-        // update identity
-        updatedIdentity.name = update.name!
+        if let newName = update.name {
+            updatedIdentity.name = newName
+        }
+        if updatedIdentity.hasChanges {
+            try await updatedIdentity.save(on: req.db)
+        }
         
-        // save updated identity
-        try await updatedIdentity.save(on: req.db)
-        
-        // extract identity id
         let identityID = try updatedIdentity.requireID()
         
         // update current identity
         user.$identity.id = identityID
+        
+        if let newProfileImage = update.profileImage {
+            user.profileImage = newProfileImage
+        }
         
         // save update
         try await user.update(on: req.db)
@@ -278,7 +370,7 @@ struct UserController: RouteCollection {
         guard let userID = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid or missing user ID")
         }
-        let update = try req.content.decode(UserProfileUpdateDTO.self)
+        let update = try req.content.decode(UserUpdateAccountDTO.self)
         
         guard let user = try await User.query(on: req.db)
             .filter(\.$id == userID)
@@ -359,5 +451,45 @@ struct UserController: RouteCollection {
         }
         return Response(status: .ok, body: .init(data: user.profileImage ?? Data()))
     }
-
+    
+    @Sendable
+    func userGetIdentities(req: Request) async throws -> [Identity] {
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        let identities = try await Identity.query(on: req.db)
+            .join(IdentityHistory.self, on: \Identity.$id == \IdentityHistory.$identity.$id)
+            .filter(IdentityHistory.self, \.$user.$id == payload.userID)
+            .all()
+        guard !identities.isEmpty else {
+            throw Abort(.notFound, reason: "No identities found for user")
+        }
+        return identities
+    }
+    
+    @Sendable
+    func userDeleteEntry(req: Request) async throws -> Response {
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$id == payload.userID!)
+            .first() else {
+            throw Abort(.notFound, reason: "User not found")
+        }
+        if user.isAdmin {
+            let adminCount = try await User.query(on: req.db)
+                .filter(\.$isAdmin == true)
+                .count()
+            if adminCount <= 1 {
+                throw Abort(.forbidden, reason: "Cannot delete the last admin user")
+            }
+        }
+        do {
+            try await user.delete(on: req.db)
+            return Response(status: .noContent)
+        } catch {
+            throw Abort(.internalServerError, reason: "Error deleting user: \(error.localizedDescription)")
+        }
+    }
 }

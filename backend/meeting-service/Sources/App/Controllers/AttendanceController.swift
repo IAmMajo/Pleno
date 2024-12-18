@@ -2,15 +2,23 @@ import Fluent
 import Vapor
 import Models
 import MeetingServiceDTOs
+import SwiftOpenAPI
+import VaporToOpenAPI
 
 struct AttendanceController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
+        let openAPITag = TagObject(name: "Anwesenheiten")
+        
         routes.group(":id") { meetingRoutes in
             meetingRoutes.get("attendances", use: getAllAttendances)
+                .openAPI(tags: openAPITag, summary: "Alle Anwesenheiten einer Sitzung abfragen", path: .type(Meeting.IDValue.self), response: .type([GetAttendanceDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
             meetingRoutes.put("attend", ":code", use: attendMeeting)
+                .openAPI(tags: openAPITag, summary: "An einer Sitzung teilnehmen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), statusCode: .noContent, auth: AuthMiddleware.schemeObject)
             meetingRoutes.group("plan-attendance") { planAttendanceRoutes in
                 planAttendanceRoutes.put("present", use: planAttendancePresent)
+                    .openAPI(tags: openAPITag, summary: "Planen, an einer Sitzung teilzunehmen", path: .type(Meeting.IDValue.self), statusCode: .noContent, auth: AuthMiddleware.schemeObject)
                 planAttendanceRoutes.put("absent", use: planAttendanceAbsent)
+                    .openAPI(tags: openAPITag, summary: "Planen, an einer Sitzung nicht teilzunehmen", path: .type(Meeting.IDValue.self), statusCode: .noContent, auth: AuthMiddleware.schemeObject)
             }
         }
     }
@@ -35,12 +43,6 @@ struct AttendanceController: RouteCollection {
         var getAttendanceDTOs = try attendances.map { attendance in
             try attendance.toGetAttendanceDTO()
         }
-        if let index = getAttendanceDTOs.firstIndex(where: { dto in
-            identityIds.contains(dto.identity.id)
-        }) {
-            let elem = getAttendanceDTOs.remove(at: index)
-            getAttendanceDTOs.insert(elem, at: 0)
-        }
         
         if meeting.status == .scheduled {
             getAttendanceDTOs.append(contentsOf: try await Identity.query(on: req.db)
@@ -52,6 +54,18 @@ struct AttendanceController: RouteCollection {
                 .map { identity in
                         try .init(meetingId: meeting.requireID(), identity: identity.toGetIdentityDTO())
                 })
+        }
+        
+        getAttendanceDTOs.sort { lhs, rhs in
+            lhs.status < rhs.status
+        }
+        
+        if let index = getAttendanceDTOs.firstIndex(where: { dto in
+            identityIds.contains(dto.identity.id)
+        }) {
+            var elem = getAttendanceDTOs.remove(at: index)
+            elem.itsame = true
+            getAttendanceDTOs.insert(elem, at: 0)
         }
         
         return getAttendanceDTOs

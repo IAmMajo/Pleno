@@ -3,7 +3,7 @@ import Vapor
 import Models
 @preconcurrency import JWT
 
-public struct JWTPayloadDTO: JWTPayload, Authenticatable, Sendable {
+public struct JWTPayloadDTO: JWTPayload, Authenticatable, Sendable, Content {
     public var userID: UUID?
     public var exp: ExpirationClaim
     public var isAdmin: Bool?

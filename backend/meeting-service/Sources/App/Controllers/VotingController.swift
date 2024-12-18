@@ -2,30 +2,52 @@ import Fluent
 import Vapor
 import Models
 import MeetingServiceDTOs
+import SwiftOpenAPI
 
 struct VotingController: RouteCollection {
     var eventLoop: EventLoop
     var votingClientWebSocketContainer = VotingClientWebSocketContainer()
     
     func boot(routes: RoutesBuilder) throws {
+        let openAPITag = TagObject(name: "Abstimmungen")
         let adminMiddleware = AdminMiddleware()
         self.votingClientWebSocketContainer.eventLoop = eventLoop
         
         routes.get(":id", "votings", use: getVotingsOfMeeting)
+            .openAPI(tags: openAPITag, summary: "Alle Abstimmungen einer Sitzung abfragen", path: .type(Meeting.IDValue.self), response: .type([GetVotingDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+        
         routes.group("votings") { votingRoutes in
             votingRoutes.get(use: getAllVotings)
+                .openAPI(tags: openAPITag, summary: "Alle Abstimmungen abfragen", response: .type([GetVotingDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+            
             votingRoutes.grouped(adminMiddleware).post(use: createVoting)
+                .openAPI(tags: openAPITag, summary: "Abstimmung erstellen", body: .type(CreateVotingDTO.self), contentType: .application(.json), response: .type(GetVotingDTO.self), responseContentType: .application(.json), statusCode: .created, auth: AdminMiddleware.schemeObject)
+            
             votingRoutes.group(":id") { singleVotingRoutes in
                 singleVotingRoutes.get(use: getSingleVoting)
+                    .openAPI(tags: openAPITag, summary: "Eine Abstimmung abfragen", path: .type(Voting.IDValue.self), response: .type(GetVotingDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+                
                 singleVotingRoutes.get("results", use: getVotingResults)
+                    .openAPI(tags: openAPITag, summary: "Ergebnisse einer Abstimmung abfragen", path: .type(Voting.IDValue.self), response: .type(GetVotingResultsDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+                
                 singleVotingRoutes.group(adminMiddleware) { adminRoutes in
                     adminRoutes.patch(use: updateVoting)
+                        .openAPI(tags: openAPITag, summary: "Eine Abstimmung updaten", description: "Abstimmungen können nur upgedated werden, solange sie noch nicht gestartet wurden.", path: .type(Voting.IDValue.self), body: .type(PatchVotingDTO.self), contentType: .application(.json), response: .type(GetVotingDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
+                    
                     adminRoutes.delete(use: deleteVoting)
+                        .openAPI(tags: openAPITag, summary: "Eine Abstimmung löschen", description: "Abstimmungen können nur gelöscht werden, solange sie noch nicht gestartet wurden. Löscht ebenfalls alle zugehörigen Optionen.", path: .type(Voting.IDValue.self), statusCode: .noContent, auth: AdminMiddleware.schemeObject)
+                    
                     adminRoutes.put("open", use: openVoting)
+                        .openAPI(tags: openAPITag, summary: "Eine Abstimmung eröffnen", path: .type(Voting.IDValue.self), response: .type(GetVotingDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
+                    
                     adminRoutes.put("close", use: closeVoting)
+                        .openAPI(tags: openAPITag, summary: "Eine Abstimmung abschließen", path: .type(Voting.IDValue.self), response: .type(GetVotingDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
                 }
                 singleVotingRoutes.put("vote", ":index", use: voteOnVoting)
+                    .openAPI(tags: openAPITag, summary: "Für eine Option bei einer Abstimmung abstimmen", path: .all(of: .type(Voting.IDValue.self), .type(UInt8.self)), response: .type(GetVotingDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
+                
                 singleVotingRoutes.webSocket("live-status", onUpgrade: votingLiveStatusWebSocket)
+                    .openAPI(customMethod: .trace, tags: openAPITag, summary: "WebSocket: Live-Status einer laufenden Abstimmung (TRACE stimmt nicht)", description: "# Mögliche Text-Antworten\n\n- Bei einem Fehler: `'ERROR: <Fehlermeldung>'`\n\n- Wenn jemand abgestimmt hat: `'<n>/<total>'` (Anzahl der Stimmen)\n\n# Mögliche Binary-Antworten\n\n- Bei Schluss der Abstimmung: `GetVotingsResultsDTO`\n\n  - Anschließend schließt sich der Tunnel serverseitig automatisch", path: .type(Voting.IDValue.self), response: .type(GetVotingDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
             }
         }
     }
