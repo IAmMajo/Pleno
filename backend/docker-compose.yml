@@ -255,6 +255,52 @@ services:
     command: ["migrate", "--revert", "--yes"]
 
 #
+# Vapor: ride-service
+#
+  ride-service:
+    image: kivop-ride-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/ride-service/Dockerfile
+    container_name: kivop-ride-service
+    environment:
+      <<: *shared_environment
+    labels:
+      traefik.enable: true
+      traefik.http.routers.ride-service.rule: PathPrefix(`/ride-service`) || PathPrefix(`/ride`)
+      traefik.http.routers.ride-service.middlewares: ride-service-replace-path-regex
+      traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.regex: ^/ride-service(:/(.*))?
+      traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.replacement: /$$1
+
+  ride-service-migration:
+    profiles:
+      - not-default
+    image: kivop-ride-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/ride-service/Dockerfile
+    container_name: kivop-ride-service-migration
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - postgres
+    command: ["migrate", "--yes"]
+
+  ride-service-revert:
+    profiles:
+      - not-default
+    image: kivop-ride-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/ride-service/Dockerfile
+    container_name: kivop-ride-service-revert
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - postgres
+    command: ["migrate", "--revert", "--yes"]
+
+#
 # Vapor: tdums-service
 #
   tdums-service:
