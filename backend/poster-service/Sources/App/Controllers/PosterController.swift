@@ -123,7 +123,7 @@ struct PosterController: RouteCollection, Sendable {
         
         // PosterPosition-Routen
         let posterPositions = authProtected.grouped("poster-positions")
-        posterPositions.get(use: getDisplayedPosters).openAPI(
+        posterPositions.get(use: getPostersPositions).openAPI(
             summary: "Poster Positionen abfragen",
             description: "Gibt alle verfügbaren Poster zurück. Unterstützt optionale Pagination über Query-Parameter. Des weiteren kann innerhalb der Query-Parameter optional unterschieden werden ob alle Poster Positionen, welche aufgehangen sind angezeigt werden oder Positionen, welche noch aufgehangen werden müssen",
             query:["page":.integer,"per":.integer,"displayed":.boolean],
@@ -430,7 +430,7 @@ struct PosterController: RouteCollection, Sendable {
     /// Gibt alle angezeigten oder nicht angezeigten PosterPositionen zurück.
     /// Parameter `displayed` in der Query bestimmt, ob nur angezeigte oder nicht angezeigte zurückgegeben werden.
     @Sendable
-    func getDisplayedPosters(req: Request) async throws -> Response {
+    func getPostersPositions(req: Request) async throws -> Response {
         let isDisplayed = (try? req.query.get(Bool.self, at: "displayed")) ?? true
         let page = try? req.query.get(Int.self, at: "page")
         let per = try? req.query.get(Int.self, at: "per")

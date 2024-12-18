@@ -14,8 +14,8 @@ public final class PosterPosition: Model,@unchecked Sendable {
     @ID(key: .id)
     public var id: UUID?
     
-    @Parent(key: "poster_id")
-    public var poster: Poster
+    @OptionalParent(key: "poster_id")
+    public var poster: Poster?
     
     @Field(key: "latitude")
     public var latitude: Double
@@ -45,8 +45,7 @@ public final class PosterPosition: Model,@unchecked Sendable {
 
 public init(
     id: UUID? = nil,
-    posterId: UUID,
-    responsibleUserID: UUID,
+    posterId: UUID? = nil,
     latitude: Double,
     longitude: Double,
     imageUrl: String?,
