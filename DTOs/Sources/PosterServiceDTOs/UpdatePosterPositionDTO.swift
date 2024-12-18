@@ -5,7 +5,6 @@
 //  Created by Dennis Sept on 26.11.24.
 //
 import Foundation
-import Vapor
 
 public struct UpdatePosterPositionDTO: Codable {
     
