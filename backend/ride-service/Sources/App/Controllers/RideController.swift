@@ -14,7 +14,7 @@ struct RideController: RouteCollection {
         rideRoutes.get(":id", use: getRide)
             .openAPI(tags: openAPITag, summary: "Einzelnen Rides abfragen", path: .type(Ride.IDValue.self), response: .type(GetRideDetailDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
         rideRoutes.get(":id", "participation", use: getParticipation)
-            .openAPI(tags: openAPITag, summary: "Teilnahme zu einem Ride abfragen", path: .type(Ride.IDValue.self), response: .type(ParticipationDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+            .openAPI(tags: openAPITag, summary: "Teilnahme zu einem Ride abfragen", path: .type(Ride.IDValue.self), response: .type(GetParticipantDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
         rideRoutes.post(":id", "participation", use: newParticipation)
             .openAPI(tags: openAPITag, summary: "An einem Ride teilnehmen", path: .type(Ride.IDValue.self), body: .type(ParticipationDTO.self), contentType: .application(.json), response: .type(GetParticipantDTO.self), responseContentType: .application(.json), statusCode: .created, auth: AuthMiddleware.schemeObject)
         rideRoutes.patch(":id", "participation", use: patchParticipation)
@@ -135,14 +135,14 @@ struct RideController: RouteCollection {
     }
     
     @Sendable
-    func getParticipation(req: Request) async throws -> ParticipationDTO {
+    func getParticipation(req: Request) async throws -> GetParticipantDTO {
         // parse ride id as UUID
         guard let ride_id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid or missing ride ID")
         }
         
         // get participant by userID and rideID
-        guard let participat = try await Participant.query(on: req.db)
+        guard let participant = try await Participant.query(on: req.db)
             .filter(\.$user.$id == req.jwtPayload.userID)
             .filter(\.$ride.$id == ride_id)
             .first()
@@ -150,7 +150,17 @@ struct RideController: RouteCollection {
             throw Abort(.notFound, reason: "No participation found!")
         }
         
-        return participat.toParticipationDTO()
+        // query data for response
+        let participantID = try participant.requireID()
+        let username = try await User.query(on: req.db)
+            .filter(\.$id == req.jwtPayload.userID)
+            .with(\.$identity)
+            .first()
+            .map { user in
+                user.identity.name
+            }
+        
+        return GetParticipantDTO(id: participantID, name: username ?? "", driver: participant.driver, passengers_count: participant.passengers_count, latitude: participant.latitude, longitude: participant.longitude, itsMe: true)
     }
     
     @Sendable
