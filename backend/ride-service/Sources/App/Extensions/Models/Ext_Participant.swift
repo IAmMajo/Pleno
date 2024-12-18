@@ -24,6 +24,10 @@ extension Participant {
             self.passengers_count = passengers_count
         }
         
+        if !self.driver {
+            self.passengers_count = nil
+        }
+        
         // check if update is valid
         if !self.isValid() {
             throw Abort(.badRequest)
