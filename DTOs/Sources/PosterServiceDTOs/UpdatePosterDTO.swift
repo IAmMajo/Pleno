@@ -4,7 +4,7 @@
 //
 //  Created by Dennis Sept on 26.11.24.
 //
-import Vapor
+
 public struct UpdatePosterDTO: Codable {
     public var name: String?
     public var description: String?
