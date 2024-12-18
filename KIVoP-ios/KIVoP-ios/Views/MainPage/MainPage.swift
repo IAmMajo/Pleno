@@ -142,10 +142,13 @@ struct MainPage: View {
                 .listStyle(InsetGroupedListStyle())
                 .background(Color.clear)
                 .padding(.top, -10)
+                .refreshable{
+                    meetingManager.fetchAllMeetings()
+                }
 
                 Spacer()
 
-                MainPageCurrentMeetingView()
+                CurrentMeetingBottomView()
             }
             .background(Color(UIColor.systemGroupedBackground))
         }
