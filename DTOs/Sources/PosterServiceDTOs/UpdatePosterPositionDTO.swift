@@ -1,19 +1,40 @@
+//
+//  UpdatePosterPositionDTO.swift
+//  poster-service
+//
+//  Created by Dennis Sept on 26.11.24.
+//
 import Foundation
+import Vapor
 
 public struct UpdatePosterPositionDTO: Codable {
-    public var latitude: Double?
-    public var longitude: Double?
-    public var isDisplayed: Bool?
-    public var imageBase64: String? // Optionaler Base64-String für das Bild
-    public var expiresAt:Date
+    
+    public var posterId: UUID?
+    public var latitude: Double
+    public var longitude: Double
+    public var expires_at:Date
+    public var responsible_users: [UUID]
+    public var image: Data?
+    
 
-
-    public init(latitude: Double?, longitude: Double?, isDisplayed: Bool?, imageBase64: String?, expiresAt: Date) {
-        self.latitude = latitude
-        self.longitude = longitude
-        self.isDisplayed = isDisplayed
-        self.imageBase64 = imageBase64
-        self.expiresAt = expiresAt
-
+    public init(
+                posterId: UUID? = nil,
+                latitude: Double,
+                longitude: Double,
+                imageUrl: String?,
+                expiresAt: Date,
+                responsibleUsers:[UUID],
+                image: Data?
+                )
+    {
+        self.latitude = latitude 
+        self.longitude = longitude 
+        self.posterId = posterId
+        self.expires_at = expiresAt
+        self.responsible_users = responsibleUsers
+        self.image = image
     }
 }
+
+
+
