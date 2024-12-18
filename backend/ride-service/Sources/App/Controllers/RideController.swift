@@ -1,21 +1,32 @@
 import Fluent
 import Vapor
 import Models
+import VaporToOpenAPI
 
 struct RideController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
+        let openAPITag = TagObject(name: "Rides")
 
         let rideRoutes = routes.grouped("rides")
         let adminRideRoutes = rideRoutes.grouped(AdminMiddleware())
         rideRoutes.get("", use: getAllRides)
+            .openAPI(tags: openAPITag, summary: "Alle Rides abfragen", response: .type([GetRideOverviewDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
         rideRoutes.get(":id", use: getRide)
+            .openAPI(tags: openAPITag, summary: "Einzelnen Rides abfragen", path: .type(Ride.IDValue.self), response: .type(GetRideDetailDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
         rideRoutes.get(":id", "participation", use: getParticipation)
+            .openAPI(tags: openAPITag, summary: "Teilnahme zu einem Ride abfragen", path: .type(Ride.IDValue.self), response: .type(ParticipationDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
         rideRoutes.post(":id", "participation", use: newParticipation)
+            .openAPI(tags: openAPITag, summary: "An einem Ride teilnehmen", path: .type(Ride.IDValue.self), body: .type(ParticipationDTO.self), contentType: .application(.json), response: .type(GetParticipantDTO.self), responseContentType: .application(.json), statusCode: .created, auth: AuthMiddleware.schemeObject)
         rideRoutes.patch(":id", "participation", use: patchParticipation)
+            .openAPI(tags: openAPITag, summary: "Teilnahme zu einem Ride ändern", path: .type(Ride.IDValue.self), body: .type(PatchParticipationDTO.self), contentType: .application(.json), response: .type(GetParticipantDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
         rideRoutes.delete(":id", "participation", use: deleteParticipation)
+            .openAPI(tags: openAPITag, summary: "Teilnahme zu einem Ride entfernen", path: .type(Ride.IDValue.self), statusCode: .noContent, auth: AuthMiddleware.schemeObject)
         adminRideRoutes.post("", use: newRide)
+            .openAPI(tags: openAPITag, summary: "Neuen Ride erstellen", body: .type(CreateRideDTO.self), contentType: .application(.json), response: .type(GetRideOverviewDTO.self), responseContentType: .application(.json), statusCode: .created, auth: AdminMiddleware.schemeObject)
         adminRideRoutes.patch(":id", use: patchRide)
+            .openAPI(tags: openAPITag, summary: "Ride anpassen", body: .type(PatchRideDTO.self), contentType: .application(.json), response: .type(GetRideOverviewDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
         adminRideRoutes.delete(":id", use: deleteRide)
+            .openAPI(tags: openAPITag, summary: "Ride löschen", statusCode: .noContent, auth: AdminMiddleware.schemeObject)
     }
     
     @Sendable
