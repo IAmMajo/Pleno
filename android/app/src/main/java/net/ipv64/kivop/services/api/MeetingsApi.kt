@@ -99,7 +99,7 @@ suspend fun getMeetings(context: Context): List<GetMeetingDTO> =
       }
     }
 
-suspend fun getMeetingsByID(context: Context, id: String): GetMeetingDTO? =
+suspend fun getMeetingByID(context: Context, id: String): GetMeetingDTO? =
     withContext(Dispatchers.IO) {
       val auth = AuthController(context)
       val path = "meetings/$id"
@@ -130,27 +130,25 @@ suspend fun getMeetingsByID(context: Context, id: String): GetMeetingDTO? =
             val status = meeting.get("status").asString.let { MeetingStatus.valueOf(it) }
             val start = meeting.get("start").asString.let { stringToLocalDateTime(it) }
             val duration = meeting.get("duration")?.asInt?.toUShort()
-            val location =
-                meeting.get("location")?.asJsonObject?.let { location ->
-                  GetLocationDTO(
-                      location.get("id").asString.let { UUID.fromString(it) },
-                      location.get("name").asString,
-                      location.get("street").asString,
-                      location.get("number").asString,
-                      location.get("letter").asString,
-                      location.get("postalCode").asString,
-                      location.get("place").asString,
-                  )
-                }
-            val chair =
-                meeting.get("chair")?.asJsonObject?.let { chair ->
-                  GetIdentityDTO(
-                      chair.get("id").asString.let { UUID.fromString(it) },
-                      chair.get("name").asString)
-                }
+            val location = meeting.get("location")?.asJsonObject?.let { location ->
+              GetLocationDTO(
+                location.get("id").asString.let { UUID.fromString(it) },
+                location.get("name").asString,
+                location.get("street").asString,
+                location.get("number").asString,
+                location.get("letter").asString,
+                location.get("postalCode")?.asString,
+                location.get("place")?.asString,
+              )
+            }
+            val chair = meeting.get("chair")?.asJsonObject?.let { chair ->
+              GetIdentityDTO(
+                chair.get("id").asString.let { UUID.fromString(it) },
+                chair.get("name").asString
+              )
+            }
             val code = meeting.get("code")?.asString
-            val myAttendanceStatus =
-                meeting.get("myAttendanceStatus")?.asString?.let { AttendanceStatus.valueOf(it) }
+            val myAttendanceStatus = meeting.get("myAttendanceStatus")?.asString?.let { AttendanceStatus.valueOf(it) }
 
             GetMeetingDTO(
                 meetingID,
