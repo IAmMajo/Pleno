@@ -11,9 +11,9 @@ import java.time.LocalDateTime
 //
 data class UpdatePosterPositionDTO (
     var posterId : UUID?,
-    var latitude : Double,
-    var longitude : Double,
-    var expires_at :Date
-    var responsible_users : List<UUID>,
+    var latitude : Double?,
+    var longitude : Double?,
+    var expires_at :Date?
+    var responsible_users : List<UUID>?,
     var image : ByteArray?,
 )

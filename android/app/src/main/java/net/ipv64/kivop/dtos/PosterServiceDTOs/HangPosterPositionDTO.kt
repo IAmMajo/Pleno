@@ -12,4 +12,5 @@ import java.time.LocalDateTime
 data class HangPosterPositionDTO (
     var user : UUID,
     var poster_position : UUID,
+    var image :Data
 )

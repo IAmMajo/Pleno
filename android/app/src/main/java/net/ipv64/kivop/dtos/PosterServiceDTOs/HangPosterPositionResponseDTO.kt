@@ -13,4 +13,5 @@ data class HangPosterPositionResponseDTO (
     var poster_position : UUID,
     var posted_at : LocalDateTime,
     var posted_by : UUID,
+    var image_url :String
 )

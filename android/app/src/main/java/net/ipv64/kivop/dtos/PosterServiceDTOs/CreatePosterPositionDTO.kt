@@ -15,5 +15,4 @@ data class CreatePosterPositionDTO (
     var longitude : Double,
     var responsible_users : List<UUID>,
     var expires_at :Date
-    var image : ByteArray?,
 )

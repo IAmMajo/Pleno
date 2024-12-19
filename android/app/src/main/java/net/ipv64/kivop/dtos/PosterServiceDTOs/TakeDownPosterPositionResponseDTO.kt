@@ -13,4 +13,5 @@ data class TakeDownPosterPositionResponseDTO (
     var poster_position : UUID,
     var removed_at : LocalDateTime,
     var removed_by : UUID,
+    var image_url :String
 )

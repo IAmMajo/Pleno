@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 //  Created by Dennis Sept on 26.11.24.
 //
 data class PosterResponseDTO (
-    var id : UUID?,
+    var id : UUID,
     var name : String,
     var description : String?,
     var imageUrl : String,
