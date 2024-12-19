@@ -1,14 +1,15 @@
-package net.ipv64.kivop.moduls
+package net.ipv64.kivop.models
 
 import java.time.LocalDate
 import java.time.LocalTime
 
-data class AttendancesListsData(
+// todo: change id to UUID
+data class ItemListData(
     val title: String,
     val date: LocalDate?,
     val time: LocalTime?,
     val attendanceStatus: Int? = null,
-    val membersCoud: Int? = null,
+    val membersCount: Int? = null,
     val id: String,
     val iconRend: Boolean? = true,
     val timeRend: Boolean? = true,

@@ -10,15 +10,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-import net.ipv64.kivop.moduls.AttendancesListsData
-import net.ipv64.kivop.moduls.ItemListData
-import net.ipv64.kivop.services.api.meetingsList
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
+import net.ipv64.kivop.models.ItemListData
+import net.ipv64.kivop.services.api.getMeetings
 
 @Composable
 fun AttendancesListPage(navController: NavController) {
   val tabs = listOf("anstehende Sitzungen", "vergangenen Sitzungen")
   val scope = rememberCoroutineScope()
-  var meetings by remember { mutableStateOf<List<AttendancesListsData>>(emptyList()) }
+  var meetings by remember { mutableStateOf<List<GetMeetingDTO>>(emptyList()) }
 
   //    val colorH: Color = when (STATUS) {
   //        0 -> Background_secondary_light
@@ -31,7 +31,7 @@ fun AttendancesListPage(navController: NavController) {
       // Login zuerst ausführen
 
       // Meetings abrufen
-      val result = meetingsList(navController.context)
+      val result = getMeetings(navController.context)
       meetings = result
     }
   }
@@ -41,18 +41,18 @@ fun AttendancesListPage(navController: NavController) {
       meetings
           .mapIndexed { index, meeting ->
             ItemListData(
-                title = meeting.title,
-                date = meeting.date,
-                time = meeting.time,
+                title = meeting.name,
+                date = meeting.start.toLocalDate(),
+                time = meeting.start.toLocalTime(),
                 attendanceStatus =
-                    when (meeting.myAttendanceStatus) {
+                    when (meeting.myAttendanceStatus.toString()) {
                       "accepted" -> 1
                       "present" -> 1
                       "absent" -> 2
                       else -> 0
                     },
-                meetingStatus = meeting.meetingStatus,
-                id = meeting.id)
+                meetingStatus = meeting.status.toString(),
+                id = meeting.id.toString())
           }
           .sortedByDescending {
             it.date?.year

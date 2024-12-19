@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.kivopandriod.components.Subtitles
 import net.ipv64.kivop.components.ListenItem
-import net.ipv64.kivop.moduls.ItemListData
+import net.ipv64.kivop.models.ItemListData
 
 @Composable
 fun GenerateTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {

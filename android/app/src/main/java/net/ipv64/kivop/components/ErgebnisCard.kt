@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import net.ipv64.kivop.moduls.VotingResults
+import net.ipv64.kivop.models.VotingResults
 import net.ipv64.kivop.services.interpolateColor
 import net.ipv64.kivop.ui.theme.Background_secondary_light
 import net.ipv64.kivop.ui.theme.Text_light

@@ -18,12 +18,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.kivopandriod.services.stringToLocalDate
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.components.ListenItem
-import net.ipv64.kivop.moduls.GetVotingDTO
-import net.ipv64.kivop.moduls.GetVotings
-import net.ipv64.kivop.moduls.ItemListData
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
+import net.ipv64.kivop.models.GetVotings
+import net.ipv64.kivop.models.ItemListData
 
 @Composable
 fun VotingsListPage(navController: NavController) {
@@ -55,7 +54,7 @@ fun VotingsListPage(navController: NavController) {
               ItemListData(
                   title = voting.question,
                   id = voting.id.toString(),
-                  date = stringToLocalDate(voting.startedAt),
+                  date = voting.startedAt!!.toLocalDate(),
                   time = null,
                   meetingStatus = "",
                   timeRend = false,

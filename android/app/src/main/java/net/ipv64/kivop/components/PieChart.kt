@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
 import kotlin.math.*
-import net.ipv64.kivop.moduls.VotingResults
+import net.ipv64.kivop.models.VotingResults
 import net.ipv64.kivop.ui.theme.Background_secondary_light
 
 @Composable

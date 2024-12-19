@@ -26,17 +26,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.kivopandriod.moduls.Location
-import com.example.kivopandriod.moduls.SitzungsCardData
-import java.time.LocalDate
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import net.ipv64.kivop.R
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetLocationDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
 import net.ipv64.kivop.ui.theme.Background_secondary_light
 import net.ipv64.kivop.ui.theme.Text_light
+import java.time.LocalDateTime
+import java.util.UUID
 
 @Composable
-fun SitzungsCard(sitzungCardData: SitzungsCardData) {
+fun SitzungsCard(GetMeetingDTO: GetMeetingDTO) {
   val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
   val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
@@ -46,7 +49,7 @@ fun SitzungsCard(sitzungCardData: SitzungsCardData) {
           Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(Color(0xFFBFEFB1))) {
         Column(modifier = Modifier.padding(12.dp).background(Color.Transparent)) {
           Text(
-              text = sitzungCardData.meetingTitle,
+              text = GetMeetingDTO.name,
               color = Text_light,
               style = MaterialTheme.typography.titleLarge,
               fontWeight = FontWeight.Bold)
@@ -59,7 +62,7 @@ fun SitzungsCard(sitzungCardData: SitzungsCardData) {
                   contentDescription = "Icon Kalender")
               Spacer(modifier = Modifier.width(4.dp))
               Text(
-                  text = "${sitzungCardData.date?.format(dateFormatter)}",
+                  text = GetMeetingDTO.start.format(dateFormatter),
                   color = Text_light,
                   style = MaterialTheme.typography.bodyMedium,
                   fontWeight = FontWeight.Bold)
@@ -74,7 +77,7 @@ fun SitzungsCard(sitzungCardData: SitzungsCardData) {
               Spacer(modifier = Modifier.width(4.dp))
               Text(
                   text =
-                      "${sitzungCardData.time?.format(timeFormatter)} Uhr (${sitzungCardData.duration} Min.)",
+                      "${GetMeetingDTO.start.format(timeFormatter)} Uhr (${GetMeetingDTO.duration} Min.)",
                   color = Text_light,
                   style = MaterialTheme.typography.bodyMedium,
                   fontWeight = FontWeight.Bold)
@@ -94,35 +97,35 @@ fun SitzungsCard(sitzungCardData: SitzungsCardData) {
               // Name der Location
               Text(
                   text =
-                      "${sitzungCardData.location?.name}${if (!sitzungCardData.location?.street.isNullOrBlank()) "," else ""}",
+                      "${GetMeetingDTO.location?.name}${if (!GetMeetingDTO.location?.street.isNullOrBlank()) "," else ""}",
                   color = Text_light,
                   style = MaterialTheme.typography.bodyMedium,
                   fontWeight = FontWeight.Bold)
               // Adresse der Location
-              if (!sitzungCardData.location?.street.isNullOrBlank())
+              if (!GetMeetingDTO.location?.street.isNullOrBlank())
                   Text(
                       text =
                           buildString {
                             // Füge die Straße hinzu
-                            append(sitzungCardData.location?.street ?: "")
+                            append(GetMeetingDTO.location?.street ?: "")
 
                             // Füge "Str." und die Nummer hinzu, falls die Nummer nicht null ist
-                            if (!sitzungCardData.location?.number.isNullOrBlank()) {
+                            if (!GetMeetingDTO.location?.number.isNullOrBlank()) {
                               Log.d(
                                   "Test-zu",
-                                  "AttendancesCoordinationPage:${sitzungCardData.location?.street!!?.length} <--")
-                              append(" Str. ${sitzungCardData.location?.number}")
+                                  "AttendancesCoordinationPage:${GetMeetingDTO.location?.street!!?.length} <--")
+                              append(" Str. ${GetMeetingDTO.location?.number}")
                             }
 
                             // Füge ein Komma hinzu, falls postalCode oder place nicht null sind
-                            if (!sitzungCardData.location?.postalCode.isNullOrBlank() ||
-                                !sitzungCardData.location?.place.isNullOrBlank()) {
+                            if (!GetMeetingDTO.location?.postalCode.isNullOrBlank() ||
+                                !GetMeetingDTO.location?.place.isNullOrBlank()) {
                               append(", ")
                             }
 
                             // Füge postalCode und place hinzu
-                            append(sitzungCardData.location?.postalCode ?: "")
-                            append(" ${sitzungCardData.location?.place ?: ""}")
+                            append(GetMeetingDTO.location?.postalCode ?: "")
+                            append(" ${GetMeetingDTO.location?.place ?: ""}")
                           },
                       color = Text_light,
                       style = MaterialTheme.typography.bodyMedium,
@@ -173,21 +176,26 @@ fun ProfilCardKlein() {
 @Composable
 fun SitzungsCardPreview() {
   val location =
-      Location(
+      GetLocationDTO(
           letter = "A",
           street = "keineanung",
           name = "Gemeindesaal",
-          locationId = "sd",
+          id = "sd".let { UUID.fromString(it) },
           number = "",
           place = "Kam",
           postalCode = "2425")
   val test =
-      SitzungsCardData(
-          meetingTitle = "Jahreshauptversammlung",
-          date = LocalDate.now(),
-          time = LocalTime.now(),
-          meetingId = "123",
-          duration = 90,
-          location = location)
-  SitzungsCard(sitzungCardData = test)
+      GetMeetingDTO(
+        name = "Jahreshauptversammlung",
+        start = LocalDateTime.now(),
+        id = "123".let { UUID.fromString(it) },
+        duration = 90.toUShort(),
+        location = location,
+        description = "",
+        status = MeetingStatus.completed,
+        chair = GetIdentityDTO("123".let { UUID.fromString(it) }, "Thorsten Teebeutel"),
+        code = "23",
+        myAttendanceStatus = AttendanceStatus.present
+      )
+  SitzungsCard(GetMeetingDTO = test)
 }

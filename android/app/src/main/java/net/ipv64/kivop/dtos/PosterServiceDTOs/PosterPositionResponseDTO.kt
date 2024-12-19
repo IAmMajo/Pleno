@@ -11,6 +11,6 @@ data class PosterPositionResponseDTO (
     var longitude : Double,
     var isDisplayed : Boolean,
     var imageBase64 : String, // Hinzugefügt
-    var expiresAt :Date
-    var postedAt :Date
+    var expiresAt :LocalDateTime,
+    var postedAt :LocalDateTime
 )

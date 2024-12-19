@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import net.ipv64.kivop.moduls.EventItem
+import net.ipv64.kivop.models.EventItem
 import net.ipv64.kivop.ui.theme.Primary_dark
 import net.ipv64.kivop.ui.theme.Secondary_dark
 import net.ipv64.kivop.ui.theme.Text_light
