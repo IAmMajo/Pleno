@@ -4,7 +4,7 @@ import MeetingServiceDTOs
 struct AktivView: View {
     let voting: GetVotingDTO
     let votingResults: GetVotingResultsDTO?
-    let onClose: () -> Void
+    let onBack: () -> Void
 
     @State private var isClosing = false
     @State private var errorMessage: String?
@@ -75,102 +75,69 @@ struct AktivView: View {
                 }
 
                 // Umfrage abschließen
-                Button(action: closeVoting) {
-                    if isClosing {
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.gray)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                    } else {
-                        Label("Umfrage abschließen", systemImage: "checkmark")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.orange)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                    }
-                }
-                .padding(.horizontal)
-                .disabled(isClosing)
+                actionButton(title: "Umfrage abschließen", icon: "checkmark", color: .orange, action: closeVoting)
             }
         }
         .background(Color.white)
-        .onAppear(perform: logInitialState)
     }
 
-    private func logInitialState() {
-        print("AktivView geladen für Voting-ID: \(voting.id)")
-        print("Frage: \(voting.question)")
-        if let results = votingResults {
-            print("Ergebnisse: \(results.results)")
-        } else {
-            print("Keine Ergebnisse verfügbar.")
+    private func actionButton(title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            if isClosing {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            } else {
+                Label(title, systemImage: icon)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(color)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }
         }
+        .padding(.horizontal)
+        .disabled(isClosing)
     }
 
     private func closeVoting() {
+        guard !isClosing else {
+            print("Warnung: closeVoting bereits in Bearbeitung.")
+            return
+        }
+
         isClosing = true
         errorMessage = nil
 
-        print("Anfrage zum Abschließen der Umfrage gestartet für Voting-ID: \(voting.id)")
-
         VotingService.shared.closeVoting(votingId: voting.id) { result in
             DispatchQueue.main.async {
-                isClosing = false
+                self.isClosing = false
                 switch result {
                 case .success:
-                    print("Umfrage erfolgreich abgeschlossen für Voting-ID: \(voting.id)")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                        print("Navigiere zurück zur ListView nach Abschluss der Umfrage.")
-                        onClose()
-                    }
+                    print("Umfrage erfolgreich abgeschlossen: \(self.voting.id)")
+                    onBack() // Zurück zur Voting-Liste navigieren
                 case .failure(let error):
-                    print("Fehler beim Abschließen der Umfrage: \(error.localizedDescription)")
                     self.errorMessage = "Fehler beim Abschließen der Umfrage: \(error.localizedDescription)"
+                    print("Fehler beim Abschließen: \(error)")
                 }
             }
         }
     }
 }
 
-// MARK: - Hilfskomponenten
+// MARK: - TableView2 Component
 struct TableView2: View {
-    let options: [GetVotingOptionDTO]?
     let results: [GetVotingResultDTO]?
     let optionTextMap: [UInt8: String]?
     let totalVotes: Int?
 
-    init(options: [GetVotingOptionDTO]) {
-        self.options = options
-        self.results = nil
-        self.optionTextMap = nil
-        self.totalVotes = nil
-    }
-
-    init(results: [GetVotingResultDTO], optionTextMap: [UInt8: String], totalVotes: Int) {
-        self.options = nil
-        self.results = results
-        self.optionTextMap = optionTextMap
-        self.totalVotes = totalVotes
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if let options = options {
-                ForEach(options, id: \.index) { option in
-                    HStack {
-                        Text("Option \(option.index):")
-                            .font(.body)
-                            .bold()
-                        Text(option.text)
-                            .font(.body)
-                    }
-                    Divider()
-                }
-            } else if let results = results, let optionTextMap = optionTextMap, let totalVotes = totalVotes {
-                ForEach(results, id: \.index) { result in
+            if let results = results, let optionTextMap = optionTextMap, let totalVotes = totalVotes {
+                ForEach(results, id: \ .index) { result in
                     HStack {
                         Text(optionTextMap[result.index] ?? "Enthaltung")
                             .font(.body)
@@ -191,3 +158,4 @@ struct TableView2: View {
         return String(format: "%.1f", percent)
     }
 }
+

@@ -126,7 +126,7 @@ struct MainPageAPI {
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
+        request.httpMethod = "PATCH"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

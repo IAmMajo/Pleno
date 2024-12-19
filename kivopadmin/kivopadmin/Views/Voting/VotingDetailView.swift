@@ -37,7 +37,14 @@ struct VotingDetailView: View {
                     )
 
                 } else if voting.isOpen {
-                    AktivView(voting: voting, votingResults: votingResults, onClose: onClose)
+                    AktivView(
+                        voting: voting,
+                        votingResults: votingResults, // Übergebe die geladenen Ergebnisse (kann nil sein)
+                        onBack: {
+                            print("Zurück zur Voting-Liste.") // Debugging
+                            onBack() // Navigation zur Voting-Liste
+                        }
+                    )
                 } else {
                     AbgeschlossenView(voting: voting, votingResults: votingResults)
                 }
