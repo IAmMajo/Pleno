@@ -88,7 +88,7 @@ struct PosterController: RouteCollection, Sendable {
                 """,
             query:["page":.integer,"per":.integer],
             body: nil,
-            response: .type(PagedResponseDTO<PosterResponseDTO>.self),
+            response: .type(PosterResponseDTO.self),
             responseContentType: .application(.json)
         )
         posters.post(use: createPoster).openAPI(
@@ -179,7 +179,7 @@ struct PosterController: RouteCollection, Sendable {
             """,
             query:["page":.integer,"per":.integer,"status":.string],
             body: nil,
-            response: .type(PagedResponseDTO<PosterPositionResponseDTO>.self),
+            response: .type(PosterPositionResponseDTO.self),
             responseContentType: .application(.json)
         )
         
@@ -316,6 +316,7 @@ struct PosterController: RouteCollection, Sendable {
 
         return Response(status: .ok, headers: headers, body: .init(data: responseData))
     }
+
 
     // Hilfsfunktion zum Mappen von PosterPosition in PosterPositionResponseDTO
     @Sendable
@@ -774,19 +775,13 @@ struct PosterController: RouteCollection, Sendable {
             let toHangDTOs = mapToDTO(toHangPositions, status: "toHang")
             let overdueDTOs = mapToDTO(overduePositions, status: "overdue")
             
-            var combined = hangsDTOs + toHangDTOs + overdueDTOs
+            let combined = hangsDTOs + toHangDTOs + overdueDTOs
             
             // Wenn page und per gesetzt sind, manuelle Pagination im Speicher
             if let page = page, let per = per {
                 let (pagedItems, totalItems) = paginate(combined, page: page, per: per)
                 let totalPages = Int((Double(totalItems) / Double(per)).rounded(.up))
                 
-                let customMeta = CustomPageMetadata(
-                    currentPage: page,
-                    perPage: per,
-                    totalItems: totalItems,
-                    totalPages: totalPages
-                )
                 
                 var headers = HTTPHeaders()
                         headers.contentType = .json
@@ -795,7 +790,7 @@ struct PosterController: RouteCollection, Sendable {
                         headers.add(name: "Pagnation-Total-Items", value: "\(totalItems)")
                         headers.add(name: "Pagnation-Total-Pages", value: "\(totalPages)")
                 
-                return try await createResponse(with: combined, on: req, additionalHeaders: headers)
+                return try await createResponse(with: pagedItems, on: req, additionalHeaders: headers)
             } else {
                 // Ohne Paginierung
                 return try await createResponse(with: combined, on: req)
