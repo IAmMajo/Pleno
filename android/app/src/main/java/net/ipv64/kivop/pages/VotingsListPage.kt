@@ -21,8 +21,8 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.components.ListenItem
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
-import net.ipv64.kivop.moduls.GetVotings
-import net.ipv64.kivop.moduls.ItemListData
+import net.ipv64.kivop.models.GetVotings
+import net.ipv64.kivop.models.ItemListData
 
 @Composable
 fun VotingsListPage(navController: NavController) {

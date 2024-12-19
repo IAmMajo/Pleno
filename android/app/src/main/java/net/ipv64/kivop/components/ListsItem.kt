@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.format.DateTimeFormatter
 import net.ipv64.kivop.R
-import net.ipv64.kivop.moduls.ItemListData
+import net.ipv64.kivop.models.ItemListData
 import net.ipv64.kivop.ui.theme.*
 
 @Composable

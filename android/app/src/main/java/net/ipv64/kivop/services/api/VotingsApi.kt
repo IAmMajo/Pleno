@@ -1,4 +1,4 @@
-package net.ipv64.kivop.moduls
+package net.ipv64.kivop.models
 
 import android.content.Context
 import android.util.Log

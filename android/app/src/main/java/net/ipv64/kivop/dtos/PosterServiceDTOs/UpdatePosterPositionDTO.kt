@@ -8,5 +8,5 @@ data class UpdatePosterPositionDTO (
     var longitude : Double?,
     var isDisplayed : Boolean?,
     var imageBase64 : String?, // Optionaler Base64-String für das Bild
-    var expiresAt :Date
+    var expiresAt :LocalDateTime
 )

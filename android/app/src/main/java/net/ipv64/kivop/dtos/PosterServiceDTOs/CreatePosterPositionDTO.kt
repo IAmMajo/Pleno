@@ -9,5 +9,5 @@ data class CreatePosterPositionDTO (
     var latitude : Double,
     var longitude : Double,
     var imageBase64 : String, // Bild als Base64-String
-    var expiresAt :Date
+    var expiresAt : LocalDateTime
 )

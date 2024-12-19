@@ -1,4 +1,4 @@
-package net.ipv64.kivop.moduls
+package net.ipv64.kivop.models
 
 import java.time.LocalDate
 import java.time.LocalTime
