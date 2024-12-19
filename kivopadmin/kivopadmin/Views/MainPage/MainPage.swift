@@ -1,7 +1,7 @@
 import SwiftUI
 import AuthServiceDTOs
 
-enum Pages: Hashable{
+enum Pages: Hashable {
     case vereinseinstellungen, nutzerverwaltung, abstimmungen, sitzungen
 }
 
@@ -19,8 +19,9 @@ struct MainPage: View {
     }
     
     var body: some View {
-        NavigationStack {
+        //NavigationStack {
             // Optionen in der Seitenleiste
+
             TabView(selection: $page){
                 Tab("Vereinseinstellungen", systemImage: "gearshape.fill", value: .vereinseinstellungen){
                     Text("Vereinseinstellungen")
@@ -31,15 +32,17 @@ struct MainPage: View {
                 Tab("Abstimmungen", systemImage: "chart.bar.fill", value: .abstimmungen){
                     VotingListView()
                 }
-                Tab("Sitzungen", systemImage: "calendar.badge.clock", value: .sitzungen){
+                Tab("Sitzungen", systemImage: "calendar.badge.clock", value: .sitzungen) {
                     MeetingAdminView()
                 }
 
+
             }.tabViewStyle(.sidebarAdaptable)
-                .tabViewSidebarBottomBar{
-                    CurrentMeetingBottomView()
-                        .padding(.vertical, 70)
+            .tabViewSidebarBottomBar{
+                CurrentMeetingBottomView()
+                    .padding(.vertical, 70)
             }
+            // Header mit Begrüßung
             .tabViewSidebarHeader {
                 HStack{
                     VStack(alignment: .leading, spacing: 5) {
@@ -56,14 +59,15 @@ struct MainPage: View {
 
 
             }
-            .navigationSplitViewStyle(.balanced)
             .onAppear{
                 meetingManager.fetchAllMeetings()
             }
+            .refreshable {
+                meetingManager.fetchAllMeetings()
+            }
             .navigationBarHidden(true)
-        }
-        .navigationViewStyle(StackNavigationViewStyle())
-        .navigationBarBackButtonHidden(true)
+        //}
+        //.navigationBarBackButtonHidden(true)
         .onAppear {
             loadUserProfile()
         }

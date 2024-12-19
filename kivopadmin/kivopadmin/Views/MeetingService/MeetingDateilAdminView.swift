@@ -15,9 +15,11 @@ struct MeetingDetailAdminView: View {
         case end
     }
     
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
         NavigationStack {
-            VStack (alignment: .leading){
+            VStack(alignment: .leading) {
                 VStack {
                     Text(meeting.name)
                         .font(.title)
@@ -105,26 +107,27 @@ struct MeetingDetailAdminView: View {
                             }
                         }
                     }
+                    
                     if let meetingCode = meeting.code {
-                                            // QR-Code
-                                            Section("Meeting-Code") {
-                                                HStack {
-                                                    Spacer()
-                                                    QRCodeImage(dataString: meetingCode)
-                                                        .frame(width: 400, height: 400)
-                                                    Spacer()
-                                                }
-                                                HStack {
-                                                    Spacer()
-                                                    Text(meetingCode)
-                                                    Spacer()
-                                                }
-                                            }
-                                        }
+                        // QR-Code
+                        Section("Meeting-Code") {
+                            HStack {
+                                Spacer()
+                                QRCodeImage(dataString: meetingCode)
+                                    .frame(width: 400, height: 400)
+                                Spacer()
+                            }
+                            HStack {
+                                Spacer()
+                                Text(meetingCode)
+                                Spacer()
+                            }
+                        }
+                    }
                 }
                 
                 Spacer()
-
+                
                 // Button nur anzeigen, wenn das Meeting nicht "completed" ist
                 if meeting.status != .completed {
                     Button(action: {
@@ -146,7 +149,6 @@ struct MeetingDetailAdminView: View {
                             .padding(.horizontal)
                     }
                 }
-
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -170,12 +172,14 @@ struct MeetingDetailAdminView: View {
                         } else {
                             stopMeeting()
                         }
+                        dismiss() // Schließt die View nach der Bestätigung
                     },
                     secondaryButton: .cancel(Text("Abbrechen"))
                 )
             }
         }
     }
+    
     // Funktion zum Starten des Meetings
     func startMeeting() {
         meetingManager.startMeeting(meetingId: meeting.id) { result in
@@ -189,7 +193,6 @@ struct MeetingDetailAdminView: View {
                 }
             }
         }
-        print("Meeting gestartet!")
     }
     
     // Funktion zum Beenden des Meetings
@@ -205,9 +208,7 @@ struct MeetingDetailAdminView: View {
                 }
             }
         }
-        print("Meeting beendet!")
     }
-    
 }
 
 struct PlaceholderView: View {
@@ -226,12 +227,12 @@ struct PlaceholderView: View {
         postalCode: "42069",
         place: "Hölle"
     )
-
+    
     let exampleChair = GetIdentityDTO(
         id: UUID(),
         name: "Heinz-Peters"
     )
-
+    
     let exampleMeeting = GetMeetingDTO(
         id: UUID(),
         name: "Jahreshauptversammlung",

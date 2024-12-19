@@ -1,17 +1,11 @@
-//
-//  kivopadminApp.swift
-//  kivopadmin
-//
-//  Created by Amine Ahamri on 14.11.24.
-//
-
 import SwiftUI
 
 @main
-struct kivopadminApp: App {
+struct KIVoP_iosApp: App {
     var body: some Scene {
         WindowGroup {
             Onboarding()
+                .environmentObject(AuthController.shared)
         }
     }
 }
