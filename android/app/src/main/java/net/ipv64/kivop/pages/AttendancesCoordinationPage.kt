@@ -19,6 +19,7 @@ import com.example.kivopandriod.moduls.SitzungsCardData
 import net.ipv64.kivop.components.ResponseItem
 import net.ipv64.kivop.components.ResponseList
 import net.ipv64.kivop.components.SitzungsCard
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.services.api.getMeetingsByID
 import net.ipv64.kivop.services.api.responseList
 
@@ -27,7 +28,7 @@ fun AttendancesCoordinationPage(navController: NavController? = null, meetingId:
 
   // Zustand für die Antworten (Liste von ResponseItem)
   var responses by remember { mutableStateOf<List<ResponseItem>>(emptyList()) }
-  var responseSitzungsCard by remember { mutableStateOf<SitzungsCardData?>(null) }
+  var responseSitzungsCard by remember { mutableStateOf<GetMeetingDTO?>(null) }
 
   // API-Anfrage ausführen Response
   LaunchedEffect(meetingId) {
