@@ -1,5 +1,6 @@
 import Foundation
 import Vapor
+import RideServiceDTOs
 
 extension ParticipationDTO: @retroactive Content {
     func isValid() -> Bool {
