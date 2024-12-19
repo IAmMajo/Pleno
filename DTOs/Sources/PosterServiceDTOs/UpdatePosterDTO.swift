@@ -10,7 +10,7 @@ public struct UpdatePosterDTO: Codable {
     public var description: String?
     public var image: Data?
     
-    public init(name: String?, description: String?, image: Data?) {
+    public init(name: String? = nil, description: String? = nil, image: Data? = nil) {
         self.name = name
         self.description = description
         self.image = image
