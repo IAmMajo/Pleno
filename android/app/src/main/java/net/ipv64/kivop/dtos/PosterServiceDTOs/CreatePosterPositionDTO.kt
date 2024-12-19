@@ -4,10 +4,9 @@ import java.util.UUID
 import java.time.LocalDateTime
 
 data class CreatePosterPositionDTO (
-    var posterId : UUID,
-    var responsibleUserId : UUID,
+    var posterId : UUID?,
     var latitude : Double,
     var longitude : Double,
-    var imageBase64 : String, // Bild als Base64-String
-    var expiresAt :Date
+    var responsible_users : List<UUID>,
+    var expires_at : LocalDateTime,
 )

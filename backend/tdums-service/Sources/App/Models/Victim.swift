@@ -13,7 +13,7 @@ final class Victim: Model, @unchecked Sendable {
     @ID(key: .id)
     var id: UUID?
     
-    @Field(key: "experiment")
+    @Enum(key: "experiment")
     var experiment: Experiment
     
     @Children(for: \.$victim)
@@ -24,7 +24,6 @@ final class Victim: Model, @unchecked Sendable {
     init(id: UUID? = nil, experiment: Experiment) {
         self.id = id
         self.experiment = experiment
-        let x: [String] = []
     }
 }
 
