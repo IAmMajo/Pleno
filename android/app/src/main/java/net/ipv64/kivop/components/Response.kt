@@ -18,8 +18,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.ipv64.kivop.R
-import net.ipv64.kivop.ui.theme.Background_secondary_light
-import net.ipv64.kivop.ui.theme.Text_light
+import net.ipv64.kivop.ui.theme.Background_secondary
+import net.ipv64.kivop.ui.theme.Text_prime
 
 data class ResponseItem(val name: String, val statusIconResId: Int)
 
@@ -31,7 +31,7 @@ fun ResponseList(responses: List<ResponseItem>, headerText: String) {
           Modifier.wrapContentHeight()
               .fillMaxWidth()
               .clip(MaterialTheme.shapes.medium)
-              .background(Background_secondary_light)) {
+              .background(Background_secondary)) {
         Column(modifier = Modifier.padding(8.dp)) {
           val nonOpenCount = responses.count { it.statusIconResId > 0 }
           Row(
@@ -40,7 +40,7 @@ fun ResponseList(responses: List<ResponseItem>, headerText: String) {
               horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
                     text = headerText,
-                    color = Text_light,
+                    color = Text_prime,
                     style = MaterialTheme.typography.titleMedium)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                   Text(text = "$nonOpenCount / ${responses.size}")
@@ -76,7 +76,7 @@ fun ResponseItemRow(item: ResponseItem) {
             modifier = Modifier.size(40.dp).clip(CircleShape).background(Color(0xFFBFEFB1))) {
               Text(
                   text = initial,
-                  color = Text_light,
+                  color = Text_prime,
                   fontSize = 18.sp,
                   style = MaterialTheme.typography.bodyLarge,
                   fontWeight = FontWeight.Bold)
@@ -86,7 +86,7 @@ fun ResponseItemRow(item: ResponseItem) {
 
         Text(
             text = item.name,
-            color = Text_light,
+            color = Text_prime,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium)

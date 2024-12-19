@@ -23,16 +23,16 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.ipv64.kivop.models.EventItem
-import net.ipv64.kivop.ui.theme.Primary_dark
-import net.ipv64.kivop.ui.theme.Secondary_dark
-import net.ipv64.kivop.ui.theme.Text_light
+import net.ipv64.kivop.ui.theme.Primary
+import net.ipv64.kivop.ui.theme.Secondary
+import net.ipv64.kivop.ui.theme.Text_prime
 
 @Composable
 fun BulletList(title: String, list: List<EventItem>, gap: Dp = 16.dp) {
 
   Column(
       modifier =
-          Modifier.background(color = Secondary_dark, shape = RoundedCornerShape(8.dp))
+          Modifier.background(color = Secondary, shape = RoundedCornerShape(8.dp))
               .padding(15.dp)
               .height(IntrinsicSize.Min),
   ) {
@@ -61,10 +61,10 @@ fun DrawScope.line(items: Int, gap: Float) {
   val jump = elementHeight + gap
   val offsetCircleStart = Offset(0.0f, elementHeight / 2 + gap)
 
-  drawLine(Text_light, offsetStart, offsetEnd, 6.0f, StrokeCap.Round)
+  drawLine(Text_prime, offsetStart, offsetEnd, 6.0f, StrokeCap.Round)
   for (i in 0..<items) {
 
-    drawCircle(Text_light, 12.0f, Offset(offsetCircleStart.x, offsetCircleStart.y + jump * i))
+    drawCircle(Text_prime, 12.0f, Offset(offsetCircleStart.x, offsetCircleStart.y + jump * i))
   }
 }
 
@@ -75,7 +75,7 @@ fun Eintrag(event: EventItem, gap: Dp) {
           Modifier.fillMaxWidth()
               .then(
                   if (event.isHighlighted) {
-                    Modifier.background(color = Primary_dark, shape = RoundedCornerShape(4.dp))
+                    Modifier.background(color = Primary, shape = RoundedCornerShape(4.dp))
                   } else {
                     Modifier
                   })

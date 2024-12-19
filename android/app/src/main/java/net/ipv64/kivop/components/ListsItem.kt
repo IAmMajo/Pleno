@@ -26,12 +26,12 @@ import net.ipv64.kivop.ui.theme.*
 fun ListenItem(
     itemListData: ItemListData,
     onClick: () -> Unit = {},
-    backgroundColor: Color = Background_secondary_light
+    backgroundColor: Color = Background_secondary
 ) {
   val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
   val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
   var iconPainter: Painter = painterResource(id = R.drawable.ic_groups)
-  var iconColor: Color = Text_light
+  var iconColor: Color = Text_prime
   var backgroundColorT: Color = backgroundColor
 
   if (itemListData.membersCount == null && itemListData.iconRend == true) {
@@ -40,10 +40,10 @@ fun ListenItem(
           0 ->
               Triple(
                   painterResource(id = R.drawable.ic_event_open),
-                  Text_light,
-                  Background_secondary_light)
+                  Text_prime,
+                  Background_secondary)
           1 ->
-              Triple(painterResource(id = R.drawable.ic_event_check), Primary_dark, Primary_dark_20)
+              Triple(painterResource(id = R.drawable.ic_event_check), Primary, Primary_20)
           else ->
               Triple(painterResource(id = R.drawable.ic_event_cancel), Error_dark, Error_dark_20)
         }
