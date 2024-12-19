@@ -39,11 +39,8 @@ fun ListenItem(
         when (itemListData.attendanceStatus) {
           0 ->
               Triple(
-                  painterResource(id = R.drawable.ic_event_open),
-                  Text_prime,
-                  Background_secondary)
-          1 ->
-              Triple(painterResource(id = R.drawable.ic_event_check), Primary, Primary_20)
+                  painterResource(id = R.drawable.ic_event_open), Text_prime, Background_secondary)
+          1 -> Triple(painterResource(id = R.drawable.ic_event_check), Primary, Primary_20)
           else ->
               Triple(painterResource(id = R.drawable.ic_event_cancel), Error_dark, Error_dark_20)
         }

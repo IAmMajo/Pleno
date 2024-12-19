@@ -17,4 +17,3 @@ val Background_tertiary = Color(0xFFCDEAF7)
 
 val Error_dark = Color(0xFFFF5449)
 val Error_dark_20 = Color(0x33FF5449)
-
