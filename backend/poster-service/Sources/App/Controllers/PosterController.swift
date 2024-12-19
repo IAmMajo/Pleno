@@ -77,6 +77,9 @@ struct PosterController: RouteCollection, Sendable {
         
         // Poster-Routen
         let posters = authProtected.grouped("posters")
+        
+        posters.get(":posterId",use: getPoster)
+        
         posters.get(use: getPosters).openAPI(
             summary: "Alle verfügbaren Poster abfragen",
             description: """
@@ -159,6 +162,9 @@ struct PosterController: RouteCollection, Sendable {
         
         // PosterPosition-Routen
         let posterPositions = authProtected.grouped("poster-positions")
+        
+        posterPositions.get(":positionId",use: getPostersPosition)
+        
         posterPositions.get(use: getPostersPositions).openAPI(
             summary: "Poster Positionen abfragen",
             description: """
@@ -320,7 +326,7 @@ struct PosterController: RouteCollection, Sendable {
 
     // Hilfsfunktion zum Mappen von PosterPosition in PosterPositionResponseDTO
     @Sendable
-    private func mapToDTO(_ positions: [PosterPosition], status: String) -> [PosterPositionResponseDTO] {
+    private func posterPositionMapToDTO(_ positions: [PosterPosition], status: String) -> [PosterPositionResponseDTO] {
         return positions.map { position in
             let responsibleUsers = position.responsibilities.compactMap { $0.$user.id }
             return PosterPositionResponseDTO(
@@ -339,6 +345,26 @@ struct PosterController: RouteCollection, Sendable {
             )
         }
     }
+    
+
+    private func posterPositionMapToDTOSingle(_ position: PosterPosition, status: String) -> PosterPositionResponseDTO {
+        let responsibleUsers = position.responsibilities.compactMap { $0.$user.id }
+        return PosterPositionResponseDTO(
+            id: position.id!,
+            posterId: position.$poster.id,
+            latitude: position.latitude,
+            longitude: position.longitude,
+            postedBy: position.$posted_by.id,
+            postedAt: position.posted_at,
+            expiresAt: position.expires_at!,
+            removedBy: position.$removed_by.id,
+            removedAt: position.removed_at,
+            imageUrl: position.image_url,
+            responsibleUsers: responsibleUsers,
+            status: status
+        )
+    }
+
     
     // Hilfsfunktion um nach page & per zu paginieren
     @Sendable
@@ -414,6 +440,24 @@ struct PosterController: RouteCollection, Sendable {
         return try await createResponse(with: responseDTO, on: req)
     }
     
+    @Sendable
+    func getPoster(req: Request) async throws -> Response {
+        guard let posterId = req.parameters.get("positionId", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Ungültige Position-ID.")
+        }
+        guard let poster = try await Poster.find(posterId, on: req.db) else {
+            throw Abort(.notFound, reason: "PosterPosition nicht gefunden.")
+        }
+        let response =
+            PosterResponseDTO(
+                id: poster.id!,
+                name: poster.name,
+                description: poster.description,
+                imageUrl: poster.image_url
+            )
+
+        return try await createResponse(with: response, on: req)
+    }
     /// Gibt alle verfügbaren Poster zurück oder Poster basierend auf Anzahl der gewählten Menge und Seite
     @Sendable
     func getPosters(req: Request) async throws -> Response {
@@ -642,6 +686,18 @@ struct PosterController: RouteCollection, Sendable {
         return try await createResponse(with: responseDTO, on: req)
     }
     
+    @Sendable
+    func getPostersPosition(req: Request) async throws -> Response {
+        guard let positionId = req.parameters.get("positionId", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Ungültige Position-ID.")
+        }
+        guard let position = try await PosterPosition.find(positionId, on: req.db) else {
+            throw Abort(.notFound, reason: "PosterPosition nicht gefunden.")
+        }
+        let response = posterPositionMapToDTOSingle(position,status: "Details")
+        
+        return try await createResponse(with: response, on: req)
+    }
     
     /// Gibt alle angezeigten oder nicht angezeigten PosterPositionen zurück.
     /// Parameter `displayed` in der Query bestimmt, ob nur angezeigte oder nicht angezeigte zurückgegeben werden.
@@ -665,7 +721,7 @@ struct PosterController: RouteCollection, Sendable {
             if let page = page, let per = per {
                 // Paginieren über die Datenbank
                 let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
-                let response = mapToDTO(paginatedData.items, status: "hangs")
+                let response = posterPositionMapToDTO(paginatedData.items, status: "hangs")
                 
                 let currentPage = paginatedData.metadata.page
                 let perPage = paginatedData.metadata.per
@@ -684,7 +740,7 @@ struct PosterController: RouteCollection, Sendable {
             } else {
                 // Ohne Paginierung
                 let positions = try await query.all()
-                let response = mapToDTO(positions, status: "hangs")
+                let response = posterPositionMapToDTO(positions, status: "hangs")
                 return try await createResponse(with: response, on: req)
             }
             
@@ -696,7 +752,7 @@ struct PosterController: RouteCollection, Sendable {
             
             if let page = page, let per = per {
                 let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
-                let response = mapToDTO(paginatedData.items, status: "toHang")
+                let response = posterPositionMapToDTO(paginatedData.items, status: "toHang")
                 
                 let currentPage = paginatedData.metadata.page
                 let perPage = paginatedData.metadata.per
@@ -715,7 +771,7 @@ struct PosterController: RouteCollection, Sendable {
             } else {
                 // Ohne Paginierung
                 let positions = try await query.all()
-                let response = mapToDTO(positions, status: "toHang")
+                let response = posterPositionMapToDTO(positions, status: "toHang")
                 return try await createResponse(with: response, on: req)
             }
             
@@ -728,7 +784,7 @@ struct PosterController: RouteCollection, Sendable {
             
             if let page = page, let per = per {
                 let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
-                let response = mapToDTO(paginatedData.items, status: "overdue")
+                let response = posterPositionMapToDTO(paginatedData.items, status: "overdue")
                 
                 let currentPage = paginatedData.metadata.page
                 let perPage = paginatedData.metadata.per
@@ -747,7 +803,7 @@ struct PosterController: RouteCollection, Sendable {
             } else {
                 // Ohne Paginierung
                 let positions = try await query.all()
-                let response = mapToDTO(positions, status: "overdue")
+                let response = posterPositionMapToDTO(positions, status: "overdue")
                 return try await createResponse(with: response, on: req)
             }
             
@@ -771,9 +827,9 @@ struct PosterController: RouteCollection, Sendable {
                 overdueQuery.all()
             )
             
-            let hangsDTOs = mapToDTO(hangsPositions, status: "hangs")
-            let toHangDTOs = mapToDTO(toHangPositions, status: "toHang")
-            let overdueDTOs = mapToDTO(overduePositions, status: "overdue")
+            let hangsDTOs = posterPositionMapToDTO(hangsPositions, status: "hangs")
+            let toHangDTOs = posterPositionMapToDTO(toHangPositions, status: "toHang")
+            let overdueDTOs = posterPositionMapToDTO(overduePositions, status: "overdue")
             
             let combined = hangsDTOs + toHangDTOs + overdueDTOs
             
