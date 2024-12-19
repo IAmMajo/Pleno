@@ -71,7 +71,7 @@ suspend fun getAttendances(context: Context, id: String): List<GetAttendanceDTO>
   }
 }
 
-suspend fun planAttendance(context: Context,meetingId: String, status: PlanAttendance):Boolean = withContext(Dispatchers.IO) {
+suspend fun putPlanAttendance(context: Context,meetingId: String, status: PlanAttendance):Boolean = withContext(Dispatchers.IO) {
   var auth = AuthController(context)
   val path = "/meetings/$meetingId/plan-attendance/${status.name}"
 
@@ -105,3 +105,39 @@ suspend fun planAttendance(context: Context,meetingId: String, status: PlanAtten
     false
   }
 }
+
+suspend fun putAttend(context: Context,meetingId: String, code: String):Boolean = withContext(Dispatchers.IO) {
+  var auth = AuthController(context)
+  val path = "/meetings/$meetingId/attend/$code"
+
+  val token = auth.getSessionToken()
+
+  if (token.isNullOrEmpty()) {
+    println("Fehler: Kein Token verfügbar")
+    return@withContext false
+  }
+
+  val emptyBody = ByteArray(0).toRequestBody(null)
+
+  val request =
+    Request.Builder()
+      .url(BASE_URL + path)
+      .addHeader("Authorization", "Bearer $token")
+      .put(emptyBody)
+      .build()
+
+  return@withContext try {
+    val response = okHttpClient.newCall(request).execute()
+    if (response.isSuccessful) {
+      true
+    } else {
+      println("Fehler bei der Anfrage: ${response.message}")
+      false
+    }
+  } catch (e: Exception) {
+    Log.e("put", "Fehler: ${e.message}")
+    false
+  }
+}
+
+
