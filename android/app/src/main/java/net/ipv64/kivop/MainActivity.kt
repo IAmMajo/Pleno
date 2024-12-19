@@ -66,8 +66,8 @@ import net.ipv64.kivop.pages.MeetingsListPage
 import net.ipv64.kivop.pages.ProtocolListPage
 import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.ui.theme.KIVoPAndriodTheme
-import net.ipv64.kivop.ui.theme.Primary_dark_20
-import net.ipv64.kivop.ui.theme.Text_light
+import net.ipv64.kivop.ui.theme.Primary_20
+import net.ipv64.kivop.ui.theme.Text_prime
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -198,7 +198,7 @@ fun TopBar(onOpenDrawer: () -> Unit) {
         Icon(
             imageVector = Icons.Default.Menu,
             contentDescription = "Menu",
-            tint = Text_light,
+            tint = Text_prime,
             modifier = Modifier.padding(12.dp).size(22.dp).clickable { onOpenDrawer() })
       },
       title = {
@@ -207,7 +207,7 @@ fun TopBar(onOpenDrawer: () -> Unit) {
             style =
                 MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.SemiBold), // SemiBold Text)
-            color = Text_light,
+            color = Text_prime,
             modifier = Modifier.padding(7.dp))
       },
       actions = {
@@ -216,7 +216,7 @@ fun TopBar(onOpenDrawer: () -> Unit) {
         Icon(
             imageVector = Icons.Default.Notifications,
             contentDescription = "Notification",
-            tint = Text_light,
+            tint = Text_prime,
             modifier =
                 Modifier.padding(12.dp)
                     // Größe anpassen
@@ -243,14 +243,14 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
     NavigationDrawerItem(
         modifier = Modifier.background(Color.Transparent).height(42.dp).fillMaxWidth(),
         icon = {
-          Icon(imageVector = Icons.Rounded.Home, contentDescription = "Home", tint = Text_light)
+          Icon(imageVector = Icons.Rounded.Home, contentDescription = "Home", tint = Text_prime)
         },
         label = {
           Text(
               text = "Home", // Titel der Seite
               fontSize = 16.sp,
               modifier = Modifier.padding(12.dp),
-              color = Text_light,
+              color = Text_prime,
           )
         },
         selected =
@@ -263,7 +263,7 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
           }
         }, // Logik für onClick Events
         shape = RoundedCornerShape(8.dp),
-        colors = NavigationDrawerItemDefaults.colors(Primary_dark_20, Color.Transparent),
+        colors = NavigationDrawerItemDefaults.colors(Primary_20, Color.Transparent),
     )
 
     Spacer(modifier = Modifier.height(4.dp))
@@ -271,14 +271,14 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
         modifier = Modifier.height(42.dp).fillMaxWidth(),
         icon = {
           Icon(
-              imageVector = Icons.Rounded.List, contentDescription = "Sitzungen", tint = Text_light)
+              imageVector = Icons.Rounded.List, contentDescription = "Sitzungen", tint = Text_prime)
         },
         label = {
           Text(
               text = "Sitzungen", // Titel der Seite
               fontSize = 16.sp,
               modifier = Modifier.padding(12.dp),
-              color = Text_light,
+              color = Text_prime,
           )
         },
         selected =
@@ -291,7 +291,7 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
           }
         }, // Logik für onClick Events
         shape = RoundedCornerShape(8.dp),
-        colors = NavigationDrawerItemDefaults.colors(Primary_dark_20, Color.Transparent),
+        colors = NavigationDrawerItemDefaults.colors(Primary_20, Color.Transparent),
     )
     Spacer(modifier = Modifier.height(4.dp))
     NavigationDrawerItem(
@@ -300,12 +300,12 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
           Icon(
               imageVector = Icons.Rounded.Edit,
               contentDescription = "Protokolle",
-              tint = Text_light)
+              tint = Text_prime)
         },
         label = {
           Text(
               text = "Protokolle", // Titel der Seite
-              color = Text_light,
+              color = Text_prime,
               // fontSize = 16.dp,
               modifier = Modifier.padding(12.dp))
         },
@@ -319,7 +319,7 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
           }
         }, // Logik für onClick Events
         shape = RoundedCornerShape(8.dp),
-        colors = NavigationDrawerItemDefaults.colors(Primary_dark_20, Color.Transparent),
+        colors = NavigationDrawerItemDefaults.colors(Primary_20, Color.Transparent),
     )
     Spacer(modifier = Modifier.height(4.dp))
     NavigationDrawerItem(
@@ -328,12 +328,12 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
           Icon(
               imageVector = Icons.Rounded.Edit,
               contentDescription = "Anwesenheit",
-              tint = Text_light)
+              tint = Text_prime)
         },
         label = {
           Text(
               text = "Anwesenheit", // Titel der Seite
-              color = Text_light,
+              color = Text_prime,
               // fontSize = 16.dp,
               modifier = Modifier.padding(12.dp))
         },
@@ -347,7 +347,7 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
           }
         }, // Logik für onClick Events
         shape = RoundedCornerShape(8.dp),
-        colors = NavigationDrawerItemDefaults.colors(Primary_dark_20, Color.Transparent),
+        colors = NavigationDrawerItemDefaults.colors(Primary_20, Color.Transparent),
     )
     NavigationDrawerItem(
         modifier = Modifier.height(42.dp).fillMaxWidth(),
@@ -355,12 +355,12 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
           Icon(
               painter = painterResource(id = R.drawable.ic_votings_page_24),
               contentDescription = "Abstimmungen",
-              tint = Text_light)
+              tint = Text_prime)
         },
         label = {
           Text(
               text = "Abstimmungen", // Titel der Seite
-              color = Text_light,
+              color = Text_prime,
               // fontSize = 16.dp,
               modifier = Modifier.padding(12.dp))
         },
@@ -374,7 +374,7 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
           }
         }, // Logik für onClick Events
         shape = RoundedCornerShape(8.dp),
-        colors = NavigationDrawerItemDefaults.colors(Primary_dark_20, Color.Transparent),
+        colors = NavigationDrawerItemDefaults.colors(Primary_20, Color.Transparent),
     )
   }
 }

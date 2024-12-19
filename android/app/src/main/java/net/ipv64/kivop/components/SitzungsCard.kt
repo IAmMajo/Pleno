@@ -35,8 +35,8 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetLocationDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
-import net.ipv64.kivop.ui.theme.Background_secondary_light
-import net.ipv64.kivop.ui.theme.Text_light
+import net.ipv64.kivop.ui.theme.Background_secondary
+import net.ipv64.kivop.ui.theme.Text_prime
 
 @Composable
 fun SitzungsCard(GetMeetingDTO: GetMeetingDTO) {
@@ -50,20 +50,20 @@ fun SitzungsCard(GetMeetingDTO: GetMeetingDTO) {
         Column(modifier = Modifier.padding(12.dp).background(Color.Transparent)) {
           Text(
               text = GetMeetingDTO.name,
-              color = Text_light,
+              color = Text_prime,
               style = MaterialTheme.typography.titleLarge,
               fontWeight = FontWeight.Bold)
           Spacer(modifier = Modifier.height(8.dp))
           Row {
             Row(verticalAlignment = Alignment.CenterVertically) {
               Icon(
-                  tint = Text_light,
+                  tint = Text_prime,
                   painter = painterResource(id = R.drawable.ic_calendar),
                   contentDescription = "Icon Kalender")
               Spacer(modifier = Modifier.width(4.dp))
               Text(
                   text = GetMeetingDTO.start.format(dateFormatter),
-                  color = Text_light,
+                  color = Text_prime,
                   style = MaterialTheme.typography.bodyMedium,
                   fontWeight = FontWeight.Bold)
             }
@@ -72,13 +72,13 @@ fun SitzungsCard(GetMeetingDTO: GetMeetingDTO) {
             Row(verticalAlignment = Alignment.CenterVertically) {
               Icon(
                   painter = painterResource(id = R.drawable.ic_clock),
-                  tint = Text_light,
+                  tint = Text_prime,
                   contentDescription = "Icon Uhrzeit")
               Spacer(modifier = Modifier.width(4.dp))
               Text(
                   text =
                       "${GetMeetingDTO.start.format(timeFormatter)} Uhr (${GetMeetingDTO.duration} Min.)",
-                  color = Text_light,
+                  color = Text_prime,
                   style = MaterialTheme.typography.bodyMedium,
                   fontWeight = FontWeight.Bold)
             }
@@ -88,7 +88,7 @@ fun SitzungsCard(GetMeetingDTO: GetMeetingDTO) {
             // Icon für Standort
             Icon(
                 painter = painterResource(id = R.drawable.ic_place),
-                tint = Text_light,
+                tint = Text_prime,
                 contentDescription = "Icon Standort",
                 modifier = Modifier.padding(end = 8.dp) // Abstand zwischen Icon und Text
                 )
@@ -98,7 +98,7 @@ fun SitzungsCard(GetMeetingDTO: GetMeetingDTO) {
               Text(
                   text =
                       "${GetMeetingDTO.location?.name}${if (!GetMeetingDTO.location?.street.isNullOrBlank()) "," else ""}",
-                  color = Text_light,
+                  color = Text_prime,
                   style = MaterialTheme.typography.bodyMedium,
                   fontWeight = FontWeight.Bold)
               // Adresse der Location
@@ -127,7 +127,7 @@ fun SitzungsCard(GetMeetingDTO: GetMeetingDTO) {
                             append(GetMeetingDTO.location?.postalCode ?: "")
                             append(" ${GetMeetingDTO.location?.place ?: ""}")
                           },
-                      color = Text_light,
+                      color = Text_prime,
                       style = MaterialTheme.typography.bodyMedium,
                       fontWeight = FontWeight.Bold)
             }
@@ -146,11 +146,11 @@ fun ProfilCardKlein() {
   Row() {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.size(40.dp).clip(CircleShape).background(Background_secondary_light)) {
+        modifier = Modifier.size(40.dp).clip(CircleShape).background(Background_secondary)) {
           // Buchstabe in Box (round)
           Text(
               text = name,
-              color = Text_light,
+              color = Text_prime,
               fontSize = 18.sp,
               style = MaterialTheme.typography.bodyLarge,
               fontWeight = FontWeight.Bold)
@@ -159,13 +159,13 @@ fun ProfilCardKlein() {
     Column(modifier = Modifier.align(Alignment.CenterVertically)) {
       Text(
           text = "Thorsten Teebeutel",
-          color = Text_light,
+          color = Text_prime,
           // fontSize = 18.sp,
           style = MaterialTheme.typography.bodyMedium,
           fontWeight = FontWeight.Bold)
       Text(
           text = "Sitzungsleiter", // ToDo - Rolle anpassen
-          color = Text_light,
+          color = Text_prime,
           fontSize = 12.sp,
       )
     }

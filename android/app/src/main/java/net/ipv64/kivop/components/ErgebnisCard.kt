@@ -20,8 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.ipv64.kivop.models.VotingResults
 import net.ipv64.kivop.services.interpolateColor
-import net.ipv64.kivop.ui.theme.Background_secondary_light
-import net.ipv64.kivop.ui.theme.Text_light
+import net.ipv64.kivop.ui.theme.Background_secondary
+import net.ipv64.kivop.ui.theme.Text_prime
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -31,10 +31,10 @@ fun ErgebnisCard(votingResults: List<VotingResults>) {
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              .background(color = Background_secondary_light, shape = RoundedCornerShape(6.dp))
+              .background(color = Background_secondary, shape = RoundedCornerShape(6.dp))
               .padding(6.dp)) {
         Column() {
-          Text("Ergenbnisse", color = Text_light)
+          Text("Ergenbnisse", color = Text_prime)
           Column {
             votingResults.forEach { result ->
               Row(
@@ -50,9 +50,9 @@ fun ErgebnisCard(votingResults: List<VotingResults>) {
                 // Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = "wahl", tint =
                 // colors[votingResults.indexOf(result)])
                 Spacer(modifier = Modifier.size(3.dp))
-                Text(result.label, color = Text_light)
+                Text(result.label, color = Text_prime)
                 Spacer(modifier = Modifier.weight(1f))
-                Text(text = result.percentage.toString() + "%", color = Text_light)
+                Text(text = result.percentage.toString() + "%", color = Text_prime)
               }
             }
           }

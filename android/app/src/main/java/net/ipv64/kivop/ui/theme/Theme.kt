@@ -14,14 +14,13 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import net.ipv64.kivop.ui.theme.*
 
 private val DarkColorScheme =
-    darkColorScheme(primary = Primary_dark, secondary = Secondary_dark, tertiary = Tertiary_light)
+    darkColorScheme(primary = Primary, secondary = Secondary, tertiary = Tertiary)
 
 private val LightColorScheme =
     lightColorScheme(
-        primary = Primary_dark, secondary = Secondary_dark, tertiary = Tertiary_light
+        primary = Primary, secondary = Secondary, tertiary = Tertiary
 
         /* Other default colors to override
         background = Color(0xFFFFFBFE),

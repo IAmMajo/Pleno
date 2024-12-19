@@ -32,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,10 +40,10 @@ import net.ipv64.kivop.MainActivity
 import net.ipv64.kivop.components.CustomButton
 import net.ipv64.kivop.components.CustomInputField
 import net.ipv64.kivop.services.AuthController
-import net.ipv64.kivop.ui.theme.Background_light
+import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.KIVoPAndriodTheme
-import net.ipv64.kivop.ui.theme.Primary_dark
-import net.ipv64.kivop.ui.theme.Text_light
+import net.ipv64.kivop.ui.theme.Primary
+import net.ipv64.kivop.ui.theme.Text_prime
 
 var coroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -78,18 +77,18 @@ fun LoginScreen(context: Context) {
   }
   if (isLoggedIn == false) {
     Column(
-        modifier = Modifier.background(color = Background_light).padding(12.dp),
+        modifier = Modifier.background(color = Background_prime).padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
           // TODO: CHANGE LOGIN PAGE!!!
           val annotatedString = buildAnnotatedString {
             append("Log dich in deinen ")
-            withStyle(style = SpanStyle(color = Primary_dark)) { append("Account") }
+            withStyle(style = SpanStyle(color = Primary)) { append("Account") }
             append(" ein!")
           }
           Text(
               text = annotatedString,
               fontSize = 24.sp,
-              color = Text_light,
+              color = Text_prime,
               fontWeight = FontWeight.Bold)
           Column(
               modifier = Modifier.fillMaxHeight(),
@@ -136,8 +135,8 @@ fun LoginScreen(context: Context) {
                     }
                   }
                 },
-                color = Primary_dark,
-                fontColor = Text_light)
+                color = Primary,
+                fontColor = Text_prime)
           }
         }
   }

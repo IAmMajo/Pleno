@@ -19,14 +19,14 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
 import kotlin.math.*
 import net.ipv64.kivop.models.VotingResults
-import net.ipv64.kivop.ui.theme.Background_secondary_light
+import net.ipv64.kivop.ui.theme.Background_secondary
 
 @Composable
 fun PieChart(list: List<VotingResults>, explodeDistance: Float = 30f) {
   Column(
       modifier =
           Modifier.fillMaxWidth()
-              .background(Background_secondary_light, shape = RoundedCornerShape(8.dp))
+              .background(Background_secondary, shape = RoundedCornerShape(8.dp))
               .padding(15.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
