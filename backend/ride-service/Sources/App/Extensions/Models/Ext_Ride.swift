@@ -1,4 +1,5 @@
 import Models
+import RideServiceDTOs
 
 extension Ride {
     public func toGetRideOverviewDTO() -> GetRideOverviewDTO {

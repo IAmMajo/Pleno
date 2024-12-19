@@ -2,6 +2,7 @@ import Fluent
 import Vapor
 import Models
 import VaporToOpenAPI
+import RideServiceDTOs
 
 struct RideController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {

@@ -1,6 +1,7 @@
 import Foundation
 import Models
 import Vapor
+import RideServiceDTOs
 
 extension Participant {
     func toParticipationDTO() -> ParticipationDTO {
