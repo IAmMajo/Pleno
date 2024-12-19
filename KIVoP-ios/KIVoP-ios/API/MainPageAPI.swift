@@ -57,29 +57,56 @@ struct MainPageAPI {
 
     // MARK: - Benutzerkonto löschen
     static func deleteUserAccount(completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let url = URL(string: "https://kivop.ipv64.net/users") else {
+        // Swagger Endpoint für das Löschen des Benutzerkontos
+        guard let url = URL(string: "https://kivop.ipv64.net/users/delete") else {
+            print("[DEBUG] Ungültige URL")
             completion(.failure(APIError.invalidURL))
             return
         }
 
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
-        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
 
-        URLSession.shared.dataTask(with: request) { _, response, error in
+        // JWT-Token aus den UserDefaults hinzufügen
+        if let jwtToken = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
+        } else {
+            print("[DEBUG] JWT-Token fehlt")
+            completion(.failure(APIError.missingToken))
+            return
+        }
+
+        // HTTP-Request ausführen
+        URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
+                print("[DEBUG] Fehler beim Löschen des Accounts: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
 
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("[DEBUG] Keine gültige HTTP-Antwort erhalten")
                 completion(.failure(APIError.invalidResponse))
                 return
             }
 
-            completion(.success(()))
+            print("[DEBUG] HTTP-Statuscode: \(httpResponse.statusCode)")
+
+            // Überprüfen, ob der HTTP-Statuscode 204 ist
+            if httpResponse.statusCode == 204  {
+                print("[DEBUG] Account erfolgreich gelöscht")
+                UserDefaults.standard.removeObject(forKey: "jwtToken")
+                UserDefaults.standard.removeObject(forKey: "jwtToken")
+                completion(.success(()))
+            } else {
+                print("[DEBUG] Unerwarteter Statuscode: \(httpResponse.statusCode)")
+                completion(.failure(APIError.invalidResponse))
+            }
         }.resume()
     }
+
+
+
 
     // MARK: - Benutzer abmelden
     static func logoutUser() {
@@ -268,6 +295,7 @@ struct MainPageAPI {
         case invalidRequest
         case invalidData
         case unknown
+        case missingToken
     }
 }
 

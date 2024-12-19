@@ -135,8 +135,15 @@ struct MainPage_ProfilView: View {
                         Button("Abbrechen", role: .cancel) {}
                         Button("Löschen", role: .destructive) {
                             MainPageAPI.deleteUserAccount { result in
-                                if case .success = result {
-                                    navigateToLogin = true
+                                DispatchQueue.main.async {
+                                    if case .success = result {
+                                        KeychainHelper.delete(key: "username")
+                                        KeychainHelper.delete(key: "password")
+                                        MainPageAPI.logoutUser()
+                                        navigateToLogin = true
+                                    } else if case .failure(let error) = result {
+                                        errorMessage = "Fehler: \(error.localizedDescription)"
+                                    }
                                 }
                             }
                         }
