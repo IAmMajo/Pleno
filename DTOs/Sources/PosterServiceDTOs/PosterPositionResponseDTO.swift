@@ -1,24 +1,31 @@
 import Foundation
+
 public struct PosterPositionResponseDTO: Codable {
-    public var id: UUID?
-    public var posterId: UUID
-    public var responsibleUserId: UUID
+    public var id: UUID
+    public var posterId: UUID?
     public var latitude: Double
     public var longitude: Double
-    public var isDisplayed: Bool
-    public var imageBase64: String // Hinzugefügt
-    public var expiresAt:Date
-    public var postedAt:Date
+    public var posted_by: UUID?
+    public var postedAt: Date?
+    public var expires_at: Date
+    public var removed_by: UUID?
+    public var removed_at: Date?
+    public var imageUrl: String?
+    public var responsible_users: [UUID]
+    public var status: String
 
-    public init(id: UUID?, posterId: UUID, responsibleUserId: UUID, latitude: Double, longitude: Double, isDisplayed: Bool, imageBase64: String, expiresAt: Date, postedAt: Date) {
+    public init(id: UUID, posterId: UUID? = nil, latitude: Double, longitude: Double, postedBy: UUID? = nil, postedAt: Date? = nil, expiresAt: Date, removedBy: UUID? = nil, removedAt: Date? = nil, imageUrl: String? = nil, responsibleUsers: [UUID], status: String) {
         self.id = id
         self.posterId = posterId
-        self.responsibleUserId = responsibleUserId
-        self.latitude = latitude
-        self.longitude = longitude
-        self.isDisplayed = isDisplayed
-        self.imageBase64 = imageBase64
-        self.expiresAt = expiresAt
+        self.latitude = latitude 
+        self.longitude = longitude 
+        self.posted_by = postedBy
         self.postedAt = postedAt
+        self.expires_at = expiresAt
+        self.removed_by = removedBy
+        self.removed_at = removedAt
+        self.imageUrl = imageUrl
+        self.responsible_users = responsibleUsers
+        self.status = status
     }
 }
