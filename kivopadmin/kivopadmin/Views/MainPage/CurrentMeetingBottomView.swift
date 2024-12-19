@@ -53,13 +53,13 @@ struct CurrentMeetingBottomView: View {
             HStack {
                 Image(systemName: "calendar")
                     .foregroundColor(.white)
-                Text("21.02.2024") // Beispiel: Datum
+                Text(DateTimeFormatter.formatDate(meeting.start)) // Beispiel: Datum
                     .foregroundColor(.white)
                 
                 Spacer()
                 
                 HStack(spacing: 4) {
-                    Text("10") // Beispiel: Teilnehmeranzahl
+                    Text("4") // Beispiel: Teilnehmeranzahl
                         .foregroundColor(.white)
                     Image(systemName: "person.3")
                         .foregroundColor(.white)
@@ -69,15 +69,13 @@ struct CurrentMeetingBottomView: View {
             HStack {
                 Image(systemName: "clock")
                     .foregroundColor(.white)
-                Text("20:00") // Beispiel: Uhrzeit
+                Text(DateTimeFormatter.formatTime(meeting.start)) // Beispiel: Uhrzeit
                     .foregroundColor(.white)
                 
                 Spacer()
             }
             
-            Button(action: {
-                print("Navigiere zur aktuellen Sitzung: \(meeting.name)")
-            }) {
+            NavigationLink(destination: MeetingDetailAdminView(meeting: meeting)) {
                 Text("Zur aktuellen Sitzung")
                     .font(.footnote)
                     .fontWeight(.bold)
@@ -87,6 +85,7 @@ struct CurrentMeetingBottomView: View {
                     .foregroundColor(.accentColor)
                     .cornerRadius(10)
             }
+
         }
         .padding()
         .background(LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.8), Color.blue]), startPoint: .topLeading, endPoint: .bottomTrailing))

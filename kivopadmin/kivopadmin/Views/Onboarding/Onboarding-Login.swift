@@ -198,8 +198,8 @@ struct Onboarding_Login: View {
 struct Onboarding_Login_Previews: PreviewProvider {
     static var previews: some View {
         Onboarding_Login()
-            .environment(\.colorScheme, .light) // Vorschau im hellen Modus
+            .environment(\.colorScheme, .light)
         Onboarding_Login()
-            .environment(\.colorScheme, .dark) // Vorschau im dunklen Modus
+            .environment(\.colorScheme, .dark)
     }
 }

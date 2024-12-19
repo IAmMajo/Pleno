@@ -2,7 +2,7 @@ import SwiftUI
 import MeetingServiceDTOs
 
 struct EditMeetingView: View {
-    @Environment(\.presentationMode) private var presentationMode
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var meetingManager = MeetingManager()
 
     @State private var name: String
@@ -104,7 +104,7 @@ struct EditMeetingView: View {
         )
 
         meetingManager.updateMeeting(meetingId: meetingId, patchDTO: patchDTO) {
-            presentationMode.wrappedValue.dismiss()
+            dismiss()
         }
     }
 
@@ -115,7 +115,7 @@ struct EditMeetingView: View {
             switch result {
             case .success:
                 // Meeting wurde erfolgreich gelöscht, navigiere zurück oder schließe die Ansicht
-                presentationMode.wrappedValue.dismiss()
+                dismiss()
             case .failure(let error):
                 // Fehler beim Löschen des Meetings
                 meetingManager.errorMessage = "Failed to delete meeting: \(error.localizedDescription)"
