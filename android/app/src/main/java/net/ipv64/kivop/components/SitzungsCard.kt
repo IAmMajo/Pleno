@@ -26,7 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 import net.ipv64.kivop.R
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
@@ -35,8 +37,6 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
 import net.ipv64.kivop.ui.theme.Background_secondary_light
 import net.ipv64.kivop.ui.theme.Text_light
-import java.time.LocalDateTime
-import java.util.UUID
 
 @Composable
 fun SitzungsCard(GetMeetingDTO: GetMeetingDTO) {
@@ -186,16 +186,15 @@ fun SitzungsCardPreview() {
           postalCode = "2425")
   val test =
       GetMeetingDTO(
-        name = "Jahreshauptversammlung",
-        start = LocalDateTime.now(),
-        id = "123".let { UUID.fromString(it) },
-        duration = 90.toUShort(),
-        location = location,
-        description = "",
-        status = MeetingStatus.completed,
-        chair = GetIdentityDTO("123".let { UUID.fromString(it) }, "Thorsten Teebeutel"),
-        code = "23",
-        myAttendanceStatus = AttendanceStatus.present
-      )
+          name = "Jahreshauptversammlung",
+          start = LocalDateTime.now(),
+          id = "123".let { UUID.fromString(it) },
+          duration = 90.toUShort(),
+          location = location,
+          description = "",
+          status = MeetingStatus.completed,
+          chair = GetIdentityDTO("123".let { UUID.fromString(it) }, "Thorsten Teebeutel"),
+          code = "23",
+          myAttendanceStatus = AttendanceStatus.present)
   SitzungsCard(GetMeetingDTO = test)
 }

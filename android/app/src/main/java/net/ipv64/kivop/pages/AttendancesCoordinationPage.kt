@@ -1,30 +1,13 @@
 package net.ipv64.kivop.pages
 
-import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import net.ipv64.kivop.components.ResponseItem
-import net.ipv64.kivop.components.ResponseList
-import net.ipv64.kivop.components.SitzungsCard
-import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
-import net.ipv64.kivop.services.api.getMeetingsByID
-import net.ipv64.kivop.services.api.getAttendances
 
 @Composable
 fun AttendancesCoordinationPage(navController: NavController? = null, meetingId: String) {
-/*
+  /*
   // Zustand für die Antworten (Liste von ResponseItem)
   var responses by remember { mutableStateOf<List<ResponseItem>>(emptyList()) }
   var responseSitzungsCard by remember { mutableStateOf<GetMeetingDTO?>(null) }

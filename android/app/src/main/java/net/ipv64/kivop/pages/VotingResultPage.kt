@@ -51,10 +51,9 @@ fun VotingResultPage(navController: NavController, votingID: String) {
     if (votingData != null) {
       votingData!!.let {
         AbstimmungCard(
-          title = it.description,
-          eventType = "Todo meeting name",
-          date = it.startedAt!!.toLocalDate()
-        )
+            title = it.description,
+            eventType = "Todo meeting name",
+            date = it.startedAt!!.toLocalDate())
       }
     }
     Spacer(modifier = Modifier.size(16.dp))
