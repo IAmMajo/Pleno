@@ -1,3 +1,5 @@
+import Foundation
+
 public struct UpdatePosterDTO: Codable {
     public var name: String?
     public var description: String?
