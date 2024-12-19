@@ -40,7 +40,10 @@ public final class PosterPosition: Model,@unchecked Sendable {
     
     @Field(key:"image_url")
     public var image_url: String?
-
+    
+    @Children(for: \.$poster_position)
+    public var responsibilities: [PosterPositionResponsibilities]
+    
     public init() { }
 
 public init(
@@ -48,22 +51,13 @@ public init(
     posterId: UUID? = nil,
     latitude: Double,
     longitude: Double,
-    imageUrl: String?,
-    postedBy:UUID? = nil,
-    expiresAt: Date,
-    removedBy:UUID? = nil,
-    removedAt:Date?
+    expiresAt: Date
 ) {
     self.id = id
     self.latitude = round(latitude * 1_000_000) / 1_000_000
     self.longitude = round(longitude * 1_000_000) / 1_000_000
     self.$poster.id = posterId
-    self.posted_at = Date()
-    self.$posted_by.id = postedBy
     self.expires_at = expiresAt
-    self.$removed_by.id = removedBy
-    self.removed_at = removedAt
-    self.image_url = imageUrl
 }
 
 }
