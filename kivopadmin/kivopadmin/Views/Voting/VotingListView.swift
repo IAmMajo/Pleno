@@ -23,13 +23,21 @@ struct VotingListView: View {
     }
 
     var filteredVotings: [GetVotingDTO] {
+        let filtered: [GetVotingDTO]
         switch filter {
         case .planning:
-            return votingService.votings.filter { $0.startedAt == nil }
+            filtered = votingService.votings.filter { $0.startedAt == nil }
         case .active:
-            return votingService.votings.filter { $0.isOpen }
+            filtered = votingService.votings.filter { $0.isOpen }
         case .inactive:
-            return votingService.votings.filter { !$0.isOpen && $0.startedAt != nil }
+            filtered = votingService.votings.filter { !$0.isOpen && $0.startedAt != nil }
+        }
+        
+        // Sortiere basierend auf startedAt und closedAt, wobei nil als älteste behandelt wird
+        return filtered.sorted {
+            let date0 = $0.closedAt ?? $0.startedAt ?? Date.distantPast
+            let date1 = $1.closedAt ?? $1.startedAt ?? Date.distantPast
+            return date0 > date1
         }
     }
 
@@ -39,14 +47,12 @@ struct VotingListView: View {
             Group {
                 if let voting = selectedVoting {
                     VotingDetailView(
-                        votingId: voting.id, // Übergebe nur die ID
+                        votingId: voting.id,
                         onBack: { selectedVoting = nil },
                         onDelete: { deleteVoting(votingId: voting.id) },
                         onClose: { closeVoting(votingId: voting.id) },
                         onOpen: { openVoting(votingId: voting.id) },
-                        onEdit: { editedVoting in
-                            editVoting(editedVoting)
-                        }
+                        onEdit: { editedVoting in editVoting(editedVoting) }
                     )
                 } else {
                     VStack(spacing: 10) {
@@ -68,9 +74,9 @@ struct VotingListView: View {
                 CreateVotingView(
                     meetingManager: MeetingManager(),
                     onCreate: { newVoting in
-                                votingService.votings.append(newVoting)
-                                loadVotings() // Lade die Liste neu
-                            }
+                        votingService.votings.append(newVoting)
+                        loadVotings()
+                    }
                 )
             }
             .alert(item: $alertMessage) { alert in
@@ -90,7 +96,6 @@ struct VotingListView: View {
         .pickerStyle(SegmentedPickerStyle())
         .padding(.horizontal)
     }
-
 
     private var searchBar: some View {
         HStack {
@@ -118,7 +123,6 @@ struct VotingListView: View {
                         Text(voting.startedAt == nil ? "In Planung" : (voting.isOpen ? "Aktiv" : "Abgeschlossen"))
                             .font(.subheadline)
                             .foregroundColor(voting.startedAt == nil ? .orange : (voting.isOpen ? .green : .red))
-
                     }
                 }
                 .listRowBackground(Color.white)
@@ -201,3 +205,4 @@ struct VotingListView_Previews: PreviewProvider {
         VotingListView()
     }
 }
+
