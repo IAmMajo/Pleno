@@ -4,8 +4,8 @@ import java.util.UUID
 import java.time.LocalDateTime
 
 data class PosterResponseDTO (
-    var id : UUID?,
+    var id : UUID,
     var name : String,
     var description : String?,
-    var imageBase64 : String, // Hinzugefügt
+    var imageUrl : String,
 )

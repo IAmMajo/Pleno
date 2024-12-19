@@ -1,19 +1,22 @@
 import Foundation
 
 public struct UpdatePosterPositionDTO: Codable {
+    public var posterId: UUID?
     public var latitude: Double?
     public var longitude: Double?
-    public var isDisplayed: Bool?
-    public var imageBase64: String? // Optionaler Base64-String für das Bild
-    public var expiresAt:Date
-
-
-    public init(latitude: Double?, longitude: Double?, isDisplayed: Bool?, imageBase64: String?, expiresAt: Date) {
-        self.latitude = latitude
-        self.longitude = longitude
-        self.isDisplayed = isDisplayed
-        self.imageBase64 = imageBase64
-        self.expiresAt = expiresAt
-
+    public var expires_at: Date?
+    public var responsible_users: [UUID]?
+    public var image: Data?
+    
+    public init(posterId: UUID? = nil, latitude: Double? = nil, longitude: Double? = nil, imageUrl: String? = nil, expiresAt: Date? = nil, responsibleUsers: [UUID]? = nil, image: Data? = nil) {
+        self.latitude = latitude 
+        self.longitude = longitude 
+        self.posterId = posterId
+        self.expires_at = expiresAt
+        self.responsible_users = responsibleUsers
+        self.image = image
     }
 }
+
+
+
