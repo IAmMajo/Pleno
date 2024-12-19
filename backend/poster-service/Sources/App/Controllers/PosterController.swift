@@ -14,7 +14,7 @@ enum PosterCreationError: AbortError {
     case databaseSaveFailed
     case unknownError
     case settingFetchFailed(reason: String)
-
+    
     var status: HTTPResponseStatus {
         switch self {
         case .invalidContentType:
@@ -22,13 +22,13 @@ enum PosterCreationError: AbortError {
         case .invalidFormData:
             return .badRequest
         case .imageSaveFailed,
-             .databaseSaveFailed,
-             .settingFetchFailed,
-             .unknownError:
+                .databaseSaveFailed,
+                .settingFetchFailed,
+                .unknownError:
             return .internalServerError
         }
     }
-
+    
     var reason: String {
         switch self {
         case .invalidContentType:
@@ -55,7 +55,7 @@ struct PosterController: RouteCollection, Sendable {
     let jwtSigner: JWTSigner
     let authMiddleware: Middleware
     let adminMiddleware: Middleware
-
+    
     /// Initialisiert den `PosterController` mit JWT-basiertem Auth und Admin-Middleware.
     /// Der JWT-Secret-Key wird aus einer Umgebungsvariablen gelesen, um Hardcoding zu vermeiden.
     init() throws {
@@ -63,13 +63,13 @@ struct PosterController: RouteCollection, Sendable {
         //      let keyData = jwtSecret.data(using: .utf8) else {
         //    throw Abort(.internalServerError, reason: "JWT_SECRET Umgebungsvariable nicht gesetzt oder ungültig.")
         guard let keyData = "Ganzgeheimespasswort".data(using: .utf8) else {
-                throw Abort(.internalServerError, reason: "Fehler beim Erstellen des JWT-Signers")
+            throw Abort(.internalServerError, reason: "Fehler beim Erstellen des JWT-Signers")
         }
         self.jwtSigner = JWTSigner.hs256(key: keyData)
         self.authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
         self.adminMiddleware = AdminMiddleware()
     }
-  
+    
     /// Registriert alle Routen des Controllers.
     func boot(routes: RoutesBuilder) throws {
         // Authentifizierte Routen
@@ -82,7 +82,7 @@ struct PosterController: RouteCollection, Sendable {
             description: """
                 Diese Route gibt eine Liste aller verfügbaren Poster zurück. Optional kann über die Query-Parameter
                 `page` und `per` eine Pagination vorgenommen werden, um große Datenmengen seitenweise abzurufen.
-
+                
                 **Beispiel:**
                 - `GET /posters?page=2&per=10` gibt die zweite Seite mit jeweils 10 Einträgen zurück.
                 """,
@@ -97,7 +97,7 @@ struct PosterController: RouteCollection, Sendable {
                 Diese Route ermöglicht das Erstellen eines neuen Posters. Der Request muss als `multipart/form-data` gesendet werden
                 und sollte mindestens einen Namen (`name`) sowie ein Bild (`image`) enthalten. Optional können Sie auch
                 eine Beschreibung (`description`) übergeben.
-
+                
                 **Ablauf:**
                 - Senden Sie im Body ein `CreatePosterDTO` mit den erforderlichen Daten.
                 - Das übertragene Bild wird auf dem Server gespeichert.
@@ -114,7 +114,7 @@ struct PosterController: RouteCollection, Sendable {
             description: """
                 Aktualisiert ein vorhandenes Poster basierend auf seiner ID. Der Request muss als `multipart/form-data` gesendet werden
                 und kann Felder wie `name`, `description` oder ein neues `image` enthalten. Nur Felder, die angegeben werden, werden aktualisiert.
-
+                
                 **Ablauf:**
                 - Geben Sie die ID des zu aktualisierenden Posters als Pfadparameter `:posterId` an.
                 - Senden Sie ein `UpdatePosterDTO` mit den zu ändernden Feldern. Nicht übergebene Felder bleiben unverändert.
@@ -128,13 +128,13 @@ struct PosterController: RouteCollection, Sendable {
             response: .type(PosterResponseDTO.self),
             responseContentType: .application(.json)
         )
-
+        
         let adminRoutesPoster = posters.grouped(adminMiddleware)
         adminRoutesPoster.delete(":id", use: deletePoster).openAPI(
             summary: "Löscht ein Poster",
             description: """
                 Löscht ein vorhandenes Poster anhand seiner ID. Das zugehörige Bild wird ebenfalls entfernt.
-
+                
                 **Ablauf:**
                 - Geben Sie die ID des zu löschenden Posters als Pfadparameter `:id` an.
                 - Bei Erfolg wird ein HTTP-Status `204 No Content` zurückgegeben.
@@ -146,7 +146,7 @@ struct PosterController: RouteCollection, Sendable {
             summary: "Löscht mehrere Poster",
             description: """
                 Löscht mehrere Poster anhand einer Liste von IDs. Die zugehörigen Bilder werden ebenfalls entfernt.
-
+                
                 **Ablauf:**
                 - Senden Sie ein `DeleteDTO` mit einem Array von Poster-IDs.
                 - Falls eine oder mehrere IDs nicht gefunden werden, wird ein Fehler zurückgegeben.
@@ -182,13 +182,13 @@ struct PosterController: RouteCollection, Sendable {
             response: .type(PagedResponseDTO<PosterPositionResponseDTO>.self),
             responseContentType: .application(.json)
         )
-    
+        
         posterPositions.post(use: createPosterPosition).openAPI(
             summary: "Erstellt eine neue Poster-Position",
             description: """
                 Erstellt eine neue Poster-Position mit optionalem Poster-Bezug, Koordinaten, Verantwortlichen und Ablaufdatum.
                 Der Request muss als `multipart/form-data` gesendet werden und kann ein Bild enthalten.
-
+                
                 **Ablauf:**
                 - Senden Sie ein `CreatePosterPositionDTO` mit den erforderlichen Daten.
                 - Falls ein Bild übertragen wird, wird es gespeichert.
@@ -200,14 +200,14 @@ struct PosterController: RouteCollection, Sendable {
             response: .type(PosterPositionResponseDTO.self),
             responseContentType: .application(.json)
         )
-
+        
         posterPositions.patch(":positionId", use: updatePosterPosition).openAPI(
             summary: "Aktualisiert eine bestehende Poster-Position",
             description: """
                 Aktualisiert eine vorhandene Poster-Position anhand ihrer ID. Der Request muss als `multipart/form-data` gesendet werden.
                 Nur die Felder, die im `UpdatePosterPositionDTO` gesetzt sind, werden aktualisiert. Neue Verantwortliche können hinzugefügt,
                 bestehende entfernt und ein neues Bild hochgeladen werden (das alte wird dann gelöscht).
-
+                
                 **Ablauf:**
                 - Pfadparameter `:positionId` für die ID der zu aktualisierenden Position angeben.
                 - `UpdatePosterPositionDTO` im Body senden, nur die Felder setzen, die geändert werden sollen.
@@ -220,13 +220,13 @@ struct PosterController: RouteCollection, Sendable {
             response: .type(PosterPositionResponseDTO.self),
             responseContentType: .application(.json)
         )
-
+        
         posterPositions.put("/hang", use: hangPosterPosition).openAPI(
             summary: "Hängt eine Poster-Position auf",
             description: """
                 Markiert eine bestimmte Poster-Position als aufgehängt. Die Aktion wird als `multipart/form-data` gesendet, kann ein neues Bild enthalten
                 und setzt `posted_at` sowie `posted_by`.
-
+                
                 **Ablauf:**
                 - Senden Sie ein `HangPosterPositionDTO` mit `user` und `poster_position`.
                 - Optional ein Bild mitschicken, um die aktuelle Ansicht zu dokumentieren.
@@ -238,13 +238,13 @@ struct PosterController: RouteCollection, Sendable {
             response: .type(HangPosterPositionResponseDTO.self),
             responseContentType: .application(.json)
         )
-
+        
         posterPositions.put("/take-down", use: takeDownPosterPosition).openAPI(
             summary: "Hängt eine Poster-Position ab",
             description: """
                 Markiert eine bestimmte Poster-Position als abgehängt. Die Aktion wird als `multipart/form-data` gesendet, kann ein neues Bild enthalten
                 und setzt `removed_at` sowie `removed_by`.
-
+                
                 **Ablauf:**
                 - Senden Sie ein `TakeDownPosterPositionDTO` mit `user` und `poster_position`.
                 - Optional ein Bild mitschicken, um den Zustand nach dem Abhängen zu dokumentieren.
@@ -256,14 +256,14 @@ struct PosterController: RouteCollection, Sendable {
             response: .type(TakeDownPosterPositionResponseDTO.self),
             responseContentType: .application(.json)
         )
-
+        
         
         let adminRoutesPosterPositions = posterPositions.grouped(adminMiddleware)
         adminRoutesPosterPositions.delete(":id", use: deletePosterPosition).openAPI(
             summary: "Löscht ein Poster",
             description: """
                 Löscht eine vorhandene Poster-Position anhand ihrer ID. Das zugehörige Bild wird ebenfalls entfernt.
-
+                
                 **Ablauf:**
                 - Geben Sie die ID der zu löschenden Poster-Position als Pfadparameter `:id` an.
                 - Bei Erfolg wird ein HTTP-Status `204 No Content` zurückgegeben.
@@ -274,7 +274,7 @@ struct PosterController: RouteCollection, Sendable {
             summary: "Löscht mehrere Poster Positonen",
             description: """
                 Löscht mehrere Poster-Positionen anhand einer übergebenen Liste von IDs. Die zugehörigen Bilder werden ebenfalls entfernt.
-
+                
                 **Ablauf:**
                 - Senden Sie ein `DeleteDTO` mit einem Array von PosterPositions-IDs.
                 - Falls eine oder mehrere IDs nicht gefunden werden, wird ein Fehler zurückgegeben.
@@ -294,9 +294,9 @@ struct PosterController: RouteCollection, Sendable {
             responseContentType: .init("image/jpeg")
         )
     }
-
+    
     // MARK: - Hilfsfunktionen
-
+    
     /// Erstellt eine HTTP-Response mit JSON-Inhalt aus einem codierbaren DTO.
     @Sendable
     private func createResponse<T: Codable>(with dto: T, on req: Request) async throws -> Response {
@@ -327,7 +327,7 @@ struct PosterController: RouteCollection, Sendable {
             )
         }
     }
-
+    
     // Hilfsfunktion um nach page & per zu paginieren
     @Sendable
     private func paginate<T>(_ items: [T], page: Int, per: Int) -> (pagedItems: [T], totalItems: Int) {
@@ -341,7 +341,7 @@ struct PosterController: RouteCollection, Sendable {
     }
     
     // MARK: - Poster-Routen
-
+    
     /// Erstellt ein neues Poster aus multipart/form-data.
     /// Erwartet mindestens `name` und `image` im Request Body.
     @Sendable
@@ -352,23 +352,23 @@ struct PosterController: RouteCollection, Sendable {
               contentType.subType == "form-data" else {
             throw PosterCreationError.invalidContentType
         }
-
+        
         let posterData: CreatePosterDTO
         do {
             posterData = try req.content.decode(CreatePosterDTO.self)
         } catch {
             throw PosterCreationError.invalidFormData(reason: "Fehler beim Dekodieren der Formulardaten.")
         }
-
+        
         guard !posterData.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw PosterCreationError.invalidFormData(reason: "Name darf nicht leer sein.")
         }
-
+        
         let allowedMimeTypes = ["image/jpeg", "image/png"]
         guard allowedMimeTypes.contains(posterData.image.contentType?.description ?? "") else {
             throw PosterCreationError.invalidFormData(reason: "Ungültiger Bildtyp. Erlaubt sind JPEG, PNG")
         }
-
+        
         // Bild speichern
         let imageUrl: String
         do {
@@ -377,28 +377,28 @@ struct PosterController: RouteCollection, Sendable {
             req.logger.error("Bildspeicherung fehlgeschlagen: \(error.localizedDescription)")
             throw PosterCreationError.imageSaveFailed
         }
-
+        
         // Poster in DB speichern
         let poster = Poster(
             name: posterData.name,
             description: posterData.description,
             imageUrl: imageUrl
         )
-
+        
         do {
             try await poster.create(on: req.db)
         } catch {
             req.logger.error("Datenbankspeicherung fehlgeschlagen: \(error.localizedDescription)")
             throw PosterCreationError.databaseSaveFailed
         }
-
+        
         let responseDTO = PosterResponseDTO(
             id: poster.id!,
             name: poster.name,
             description: poster.description,
             imageUrl: poster.image_url
         )
-
+        
         return try await createResponse(with: responseDTO, on: req)
     }
     
@@ -412,7 +412,7 @@ struct PosterController: RouteCollection, Sendable {
             let paginatedData = try await Poster.query(on: req.db)
                 .paginate(PageRequest(page: page, per: per))
             
-            let responseDTOs = paginatedData.items.map { poster in
+            let response = paginatedData.items.map { poster in
                 PosterResponseDTO(
                     id: poster.id!,
                     name: poster.name,
@@ -421,22 +421,16 @@ struct PosterController: RouteCollection, Sendable {
                 )
             }
             let currentPage = paginatedData.metadata.page
-                   let perPage = paginatedData.metadata.per
-                   let totalItems = paginatedData.metadata.total
-                   let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
+            let perPage = paginatedData.metadata.per
+            let totalItems = paginatedData.metadata.total
+            let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
             
-            // Mapping der Vapor-PageMetadata auf den eigenen Typ
-            let customMeta = CustomPageMetadata(
-                        currentPage: currentPage,
-                        perPage: perPage,
-                        totalItems: totalItems,
-                        totalPages: totalPages
-                    )
-            
-            let response = PagedResponseDTO(
-                items: responseDTOs,
-                metadata: customMeta
-            )
+            var headers = HTTPHeaders()
+                    headers.contentType = .json
+                    headers.add(name: "X-Current-Page", value: "\(currentPage)")
+                    headers.add(name: "X-Per-Page", value: "\(perPage)")
+                    headers.add(name: "X-Total-Items", value: "\(totalItems)")
+                    headers.add(name: "X-Total-Pages", value: "\(totalPages)")
             
             return try await createResponse(with: response, on: req)
             
@@ -460,7 +454,7 @@ struct PosterController: RouteCollection, Sendable {
             return try await createResponse(with: response, on: req)
         }
     }
-
+    
     
     /// Aktualisiert ein bestehendes Poster (Name, Beschreibung und/oder Bild).
     @Sendable
@@ -468,18 +462,18 @@ struct PosterController: RouteCollection, Sendable {
         guard let posterId = req.parameters.get("posterId", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Ungültige Poster-ID.")
         }
-
+        
         guard let contentType = req.headers.contentType,
               contentType.type == "multipart",
               contentType.subType == "form-data" else {
             throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
         }
-
+        
         let dto = try req.content.decode(UpdatePosterDTO.self)
         guard let poster = try await Poster.find(posterId, on: req.db) else {
             throw Abort(.notFound, reason: "Poster nicht gefunden.")
         }
-
+        
         if let name = dto.name {
             poster.name = name
         }
@@ -492,24 +486,24 @@ struct PosterController: RouteCollection, Sendable {
             do {
                 try FileManager.default.removeItem(atPath: oldFilePath)
             } catch {
-                    req.logger.warning("Altes Bild konnte nicht gelöscht werden: \(error)")
-                    // Nicht unbedingt aborten, da das Poster dennoch aktualisiert werden kann.
+                req.logger.warning("Altes Bild konnte nicht gelöscht werden: \(error)")
+                // Nicht unbedingt aborten, da das Poster dennoch aktualisiert werden kann.
             }
-
+            
             // Neues Bild speichern
             let imageUrl = try await saveImage(image, in: "Storage/Images/Posters", on: req)
             poster.image_url = imageUrl
         }
-
+        
         try await poster.update(on: req.db)
-
+        
         let responseDTO = PosterResponseDTO(
             id: poster.id!,
             name: poster.name,
             description: poster.description,
             imageUrl: poster.image_url
         )
-
+        
         return try await createResponse(with: responseDTO, on: req)
     }
     
@@ -519,14 +513,14 @@ struct PosterController: RouteCollection, Sendable {
         guard let posterID = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Ungültige Poster-ID.")
         }
-
+        
         guard let poster = try await Poster.find(posterID, on: req.db) else {
             throw Abort(.notFound, reason: "Poster mit der ID \(posterID) wurde nicht gefunden.")
         }
-
+        
         let imageUrl = poster.image_url
         let filePath = req.application.directory.workingDirectory + imageUrl
-
+        
         let fileManager = FileManager.default
         do {
             try fileManager.removeItem(atPath: filePath)
@@ -534,54 +528,54 @@ struct PosterController: RouteCollection, Sendable {
             req.logger.error("Fehler beim Löschen der Bilddatei: \(error.localizedDescription)")
             // Hier wird das Poster dennoch gelöscht, um Datenkonsistenz zu gewährleisten.
         }
-
+        
         try await poster.delete(on: req.db)
-
+        
         return .noContent
     }
-
+    
     /// Löscht mehrere Poster und deren zugehörige Bilddateien in einem Batch.
     @Sendable
     func deletePosters(req: Request) async throws -> HTTPStatus {
         let deleteDTO = try req.content.decode(DeleteDTO.self)
         let posterIDs = deleteDTO.ids
-
+        
         guard !posterIDs.isEmpty else {
             throw Abort(.badRequest, reason: "Es müssen mindestens eine Poster-ID übergeben werden.")
         }
-
+        
         let postersToDelete = try await Poster.query(on: req.db)
             .filter(\.$id ~~ posterIDs)
             .all()
-
+        
         if postersToDelete.count != posterIDs.count {
             let foundIDs = Set(postersToDelete.compactMap { $0.id })
             let notFoundIDs = posterIDs.filter { !foundIDs.contains($0) }
             throw Abort(.notFound, reason: "Poster mit den folgenden IDs wurden nicht gefunden: \(notFoundIDs.map { $0.uuidString }.joined(separator: ", "))")
         }
-
+        
         try await req.db.transaction { database in
             for poster in postersToDelete {
                 let imageUrl = poster.image_url
                 let filePath = req.application.directory.workingDirectory + imageUrl
                 let fileManager = FileManager.default
-
+                
                 do {
                     try fileManager.removeItem(atPath: filePath)
                 } catch {
                     req.logger.error("Fehler beim Löschen der Bilddatei für Poster ID \(poster.id?.uuidString ?? "Unbekannt"): \(error.localizedDescription)")
                     throw Abort(.internalServerError, reason: "Fehler beim Löschen der Bilddatei für Poster ID \(poster.id?.uuidString ?? "Unbekannt")")
                 }
-
+                
                 try await poster.delete(on: database)
             }
         }
-
+        
         return .noContent
     }
     
     // MARK: - PosterPosition-Routen
-
+    
     /// Gibt alle angezeigten oder nicht angezeigten PosterPositionen zurück.
     /// Parameter `displayed` in der Query bestimmt, ob nur angezeigte oder nicht angezeigte zurückgegeben werden.
     @Sendable
@@ -589,7 +583,7 @@ struct PosterController: RouteCollection, Sendable {
         let statusQuery = try? req.query.get(String.self, at: "status")
         let page = try? req.query.get(Int.self, at: "page")
         let per = try? req.query.get(Int.self, at: "per")
-
+        
         let currentDate = Date()
         
         // Abhängig von statusQuery unterschiedlichen Code ausführen
@@ -600,109 +594,109 @@ struct PosterController: RouteCollection, Sendable {
                 .filter(\.$posted_by.$id != nil)
                 .filter(\.$removed_by.$id == nil)
                 .sort(\.$expires_at, .ascending)
-
+            
             if let page = page, let per = per {
                 // Paginieren über die Datenbank
                 let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
                 let responseDTOs = mapToDTO(paginatedData.items, status: "hangs")
-
+                
                 let currentPage = paginatedData.metadata.page
                 let perPage = paginatedData.metadata.per
                 let totalItems = paginatedData.metadata.total
                 let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
-
+                
                 let customMeta = CustomPageMetadata(
                     currentPage: currentPage,
                     perPage: perPage,
                     totalItems: totalItems,
                     totalPages: totalPages
                 )
-
+                
                 let response = PagedResponseDTO(
                     items: responseDTOs,
                     metadata: customMeta
                 )
                 return try await createResponse(with: response, on: req)
-
+                
             } else {
                 // Ohne Paginierung
                 let positions = try await query.all()
                 let responseDTOs = mapToDTO(positions, status: "hangs")
                 return try await createResponse(with: responseDTOs, on: req)
             }
-
+            
         case "toHang":
             // toHang: posted_by == nil && expires_at > currentDate
             let query = PosterPosition.query(on: req.db)
                 .filter(\.$posted_by.$id == nil)
                 .filter(\.$expires_at > currentDate)
-
+            
             if let page = page, let per = per {
                 let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
                 let responseDTOs = mapToDTO(paginatedData.items, status: "toHang")
-
+                
                 let currentPage = paginatedData.metadata.page
                 let perPage = paginatedData.metadata.per
                 let totalItems = paginatedData.metadata.total
                 let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
-
+                
                 let customMeta = CustomPageMetadata(
                     currentPage: currentPage,
                     perPage: perPage,
                     totalItems: totalItems,
                     totalPages: totalPages
                 )
-
+                
                 let response = PagedResponseDTO(
                     items: responseDTOs,
                     metadata: customMeta
                 )
-
+                
                 return try await createResponse(with: response, on: req)
-
+                
             } else {
                 // Ohne Paginierung
                 let positions = try await query.all()
                 let responseDTOs = mapToDTO(positions, status: "toHang")
                 return try await createResponse(with: responseDTOs, on: req)
             }
-
+            
         case "overdue":
             // overdue: posted_by != nil, removed_by == nil, expires_at <= currentDate
             let query = PosterPosition.query(on: req.db)
                 .filter(\.$posted_by.$id != nil)
                 .filter(\.$removed_by.$id == nil)
                 .filter(\.$expires_at <= currentDate)
-
+            
             if let page = page, let per = per {
                 let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
                 let responseDTOs = mapToDTO(paginatedData.items, status: "overdue")
-
+                
                 let currentPage = paginatedData.metadata.page
                 let perPage = paginatedData.metadata.per
                 let totalItems = paginatedData.metadata.total
                 let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
-
+                
                 let customMeta = CustomPageMetadata(
                     currentPage: currentPage,
                     perPage: perPage,
                     totalItems: totalItems,
                     totalPages: totalPages
                 )
-
+                
                 let response = PagedResponseDTO(
                     items: responseDTOs,
                     metadata: customMeta
                 )
                 return try await createResponse(with: response, on: req)
-
+                
             } else {
                 // Ohne Paginierung
                 let positions = try await query.all()
                 let responseDTOs = mapToDTO(positions, status: "overdue")
                 return try await createResponse(with: responseDTOs, on: req)
             }
-
+            
         case nil:
             // Kein Status übergeben: Alle drei Sets holen und zusammenführen
             let hangsQuery = PosterPosition.query(on: req.db)
@@ -716,46 +710,46 @@ struct PosterController: RouteCollection, Sendable {
                 .filter(\.$posted_by.$id != nil)
                 .filter(\.$removed_by.$id == nil)
                 .filter(\.$expires_at <= currentDate)
-
+            
             let (hangsPositions, toHangPositions, overduePositions) = try await (
                 hangsQuery.all(),
                 toHangQuery.all(),
                 overdueQuery.all()
             )
-
+            
             let hangsDTOs = mapToDTO(hangsPositions, status: "hangs")
             let toHangDTOs = mapToDTO(toHangPositions, status: "toHang")
             let overdueDTOs = mapToDTO(overduePositions, status: "overdue")
-
+            
             var combined = hangsDTOs + toHangDTOs + overdueDTOs
-
+            
             // Wenn page und per gesetzt sind, manuelle Pagination im Speicher
             if let page = page, let per = per {
                 let (pagedItems, totalItems) = paginate(combined, page: page, per: per)
                 let totalPages = Int((Double(totalItems) / Double(per)).rounded(.up))
-
+                
                 let customMeta = CustomPageMetadata(
                     currentPage: page,
                     perPage: per,
                     totalItems: totalItems,
                     totalPages: totalPages
                 )
-
+                
                 let response = PagedResponseDTO(items: pagedItems, metadata: customMeta)
                 return try await createResponse(with: response, on: req)
             } else {
                 // Ohne Paginierung
                 return try await createResponse(with: combined, on: req)
             }
-
+            
         default:
             // Ungültiger Status-Wert
             throw Abort(.badRequest, reason: "Invalid status parameter. Must be one of hangs, toHang, overdue or omitted.")
         }
     }
-
-
-
+    
+    
+    
     /// Erstellt eine neue PosterPosition mit Bild und speichert sie in der Datenbank.
     @Sendable
     func createPosterPosition(req: Request) async throws -> Response {
@@ -764,18 +758,18 @@ struct PosterController: RouteCollection, Sendable {
               contentType.subType == "form-data" else {
             throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
         }
-
+        
         let dto = try req.content.decode(CreatePosterPositionDTO.self)
-
+        
         // Plausibilitätsprüfungen für Koordinaten
         guard (-90...90).contains(dto.latitude) else {
             throw Abort(.badRequest, reason: "latitude muss zwischen -90 und 90 liegen.")
         }
-
+        
         guard (-180...180).contains(dto.longitude) else {
             throw Abort(.badRequest, reason: "longitude muss zwischen -180 und 180 liegen.")
         }
-
+        
         // Neue PosterPosition erstellen
         let posterPosition = PosterPosition(
             posterId: dto.posterId,
@@ -783,21 +777,21 @@ struct PosterController: RouteCollection, Sendable {
             longitude: dto.longitude,
             expiresAt: dto.expires_at
         )
-
+        
         try await posterPosition.create(on: req.db)
-
+        
         // Zu jeder User-Id in responsible_users einen Eintrag in PosterPositionResponsibilities erstellen
         for userId in dto.responsible_users {
             let responsibility = PosterPositionResponsibilities(userID: userId, posterPositionID: posterPosition.id!)
             try await responsibility.save(on: req.db)
         }
-
+        
         // Verantwortliche Nutzer erneut laden, um sie in die Response aufzunehmen
         let responsibilities = try await PosterPositionResponsibilities.query(on: req.db)
             .filter(\.$poster_position.$id == posterPosition.id!)
             .all()
         let responsibleUserIds = responsibilities.compactMap { $0.$user.id }
-
+        
         // PosterPositionResponseDTO erstellen
         let responseDTO = PosterPositionResponseDTO(
             id: posterPosition.id!,
@@ -813,48 +807,48 @@ struct PosterController: RouteCollection, Sendable {
             responsibleUsers: responsibleUserIds,
             status: "Created"
         )
-
+        
         return try await createResponse(with: responseDTO, on: req)
     }
-
-
-
+    
+    
+    
     /// Aktualisiert eine vorhandene PosterPosition (Location, Anzeigezustand, Ablaufdatum, Verantwortlicher, Poster-ID, Bild).
     @Sendable
     func updatePosterPosition(req: Request) async throws -> Response {
         guard let positionId = req.parameters.get("positionId", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Ungültige Position-ID.")
         }
-
+        
         guard let contentType = req.headers.contentType,
               contentType.type == "multipart",
               contentType.subType == "form-data" else {
             throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
         }
-
+        
         let dto = try req.content.decode(UpdatePosterPositionDTO.self)
-
+        
         guard let position = try await PosterPosition.find(positionId, on: req.db) else {
             throw Abort(.notFound, reason: "PosterPosition nicht gefunden.")
         }
-
+        
         // Nur updaten, was im DTO vorhanden ist (nicht-nil)
         if let newLatitude = dto.latitude {
             position.latitude = round(newLatitude * 1_000_000) / 1_000_000
         }
-
+        
         if let newLongitude = dto.longitude {
             position.longitude = round(newLongitude * 1_000_000) / 1_000_000
         }
-
+        
         if let newExpiresAt = dto.expires_at {
             position.expires_at = newExpiresAt
         }
-
+        
         if let newPosterId = dto.posterId {
             position.$poster.id = newPosterId
         }
-
+        
         // Verantwortlichkeiten updaten, nur wenn übergeben
         if let newResponsibleUsers = dto.responsible_users {
             // Aktuelle Verantwortlichkeiten laden
@@ -881,7 +875,7 @@ struct PosterController: RouteCollection, Sendable {
                     .delete()
             }
         }
-
+        
         // Bild updaten, falls übergeben
         if let newImage = dto.image {
             // Altes Bild löschen, wenn vorhanden
@@ -893,23 +887,23 @@ struct PosterController: RouteCollection, Sendable {
                     req.logger.warning("Altes Bild konnte nicht gelöscht werden: \(error)")
                 }
             }
-
+            
             // Neues Bild speichern
             let imageUrl = try await saveImage(newImage, in: "Storage/Images/PosterPositions", on: req)
             position.image_url = imageUrl
         }
-
-
+        
+        
         // Position in der DB updaten
         try await position.update(on: req.db)
-
+        
         // Neu geladene Verantwortlichkeiten für Response
         let updatedResponsibilities = try await PosterPositionResponsibilities.query(on: req.db)
             .filter(\.$poster_position.$id == positionId)
             .all()
         let responsibleUserIds = updatedResponsibilities.compactMap { $0.$user.id }
-
-
+        
+        
         let responseDTO = PosterPositionResponseDTO(
             id: position.id!,
             posterId: position.$poster.id,
@@ -924,7 +918,7 @@ struct PosterController: RouteCollection, Sendable {
             responsibleUsers: responsibleUserIds,
             status: "Updated"
         )
-
+        
         return try await createResponse(with: responseDTO, on: req)
     }
     
@@ -960,7 +954,7 @@ struct PosterController: RouteCollection, Sendable {
         
         return try await createResponse(with: responseDTO, on: req)
     }
-
+    
     @Sendable
     func takeDownPosterPosition(req: Request) async throws -> Response {
         let dto = try req.content.decode(TakeDownPosterPositionDTO.self)
@@ -1001,24 +995,24 @@ struct PosterController: RouteCollection, Sendable {
         
         return try await createResponse(with: responseDTO, on: req)
     }
-
-
+    
+    
     /// Löscht eine einzelne PosterPosition und deren zugehörige Bilddatei.
     @Sendable
     func deletePosterPosition(req: Request) async throws -> HTTPStatus {
         guard let positionID = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Ungültige PosterPosition-ID.")
         }
-
+        
         guard let position = try await PosterPosition.find(positionID, on: req.db) else {
             throw Abort(.notFound, reason: "PosterPosition mit der ID \(positionID) wurde nicht gefunden.")
         }
-
+        
         let imageUrl = position.image_url
         
         if let url = imageUrl {
             let filePath = req.application.directory.workingDirectory + url
-
+            
             let fileManager = FileManager.default
             do {
                 try fileManager.removeItem(atPath: filePath)
@@ -1027,39 +1021,39 @@ struct PosterController: RouteCollection, Sendable {
                 throw Abort(.internalServerError, reason: "Fehler beim Löschen der Bilddatei für PosterPosition-ID \(positionID)")
             }
         }
-      
-
+        
+        
         try await position.delete(on: req.db)
         return .noContent
     }
-
+    
     /// Löscht mehrere PosterPositionen und deren zugehörige Bilddateien in einem Batch.
     @Sendable
     func deletePosterPositions(req: Request) async throws -> HTTPStatus {
         let deleteDTO = try req.content.decode(DeleteDTO.self)
         let positionIDs = deleteDTO.ids
-
+        
         guard !positionIDs.isEmpty else {
             throw Abort(.badRequest, reason: "Es müssen mindestens eine PosterPosition-ID übergeben werden.")
         }
-
+        
         let positionsToDelete = try await PosterPosition.query(on: req.db)
             .filter(\.$id ~~ positionIDs)
             .all()
-
+        
         if positionsToDelete.count != positionIDs.count {
             let foundIDs = Set(positionsToDelete.compactMap { $0.id })
             let notFoundIDs = positionIDs.filter { !foundIDs.contains($0) }
             throw Abort(.notFound, reason: "PosterPositionen mit den folgenden IDs wurden nicht gefunden: \(notFoundIDs.map { $0.uuidString }.joined(separator: ", "))")
         }
-
+        
         try await req.db.transaction { database in
             let fileManager = FileManager.default
             for position in positionsToDelete {
                 let imageUrl = position.image_url
                 if let url = imageUrl{
                     let filePath = req.application.directory.workingDirectory + url
-
+                    
                     do {
                         try fileManager.removeItem(atPath: filePath)
                     } catch {
@@ -1067,34 +1061,34 @@ struct PosterController: RouteCollection, Sendable {
                         throw Abort(.internalServerError, reason: "Fehler beim Löschen der Bilddatei für PosterPosition-ID \(position.id?.uuidString ?? "Unbekannt")")
                     }
                 }
-
+                
                 try await position.delete(on: database)
             }
         }
-
+        
         return .noContent
     }
-
+    
     // MARK: - Bild-Handling
-
+    
     /// Speichert ein hochgeladenes Bild in einem angegebenen Verzeichnis außerhalb des Public-Ordners.
     /// Wirft einen Fehler, wenn das Bild ungültige Daten enthält oder nicht gespeichert werden kann.
     private func saveImage(_ file: File, in directory: String, on req: Request) async throws -> String {
         let supportedExtensions = ["jpg", "jpeg", "png"]
         let fileExtension = (file.extension ?? "jpg").lowercased()
         let validExtension = supportedExtensions.contains(fileExtension) ? fileExtension : "jpg"
-
+        
         let uniqueFileName = "\(UUID().uuidString).\(validExtension)"
         let saveDirectory = req.application.directory.workingDirectory + directory
         let savePath = saveDirectory + "/" + uniqueFileName
-
+        
         let directoryURL = URL(fileURLWithPath: saveDirectory, isDirectory: true)
         try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
-
+        
         guard let imageData = file.data.getData(at: 0, length: file.data.readableBytes) else {
             throw Abort(.badRequest, reason: "Ungültige Bilddaten.")
         }
-
+        
         let fileURL = URL(fileURLWithPath: savePath)
         do {
             try imageData.write(to: fileURL)
@@ -1102,7 +1096,7 @@ struct PosterController: RouteCollection, Sendable {
             req.logger.error("Fehler beim Speichern der Bilddatei: \(error.localizedDescription)")
             throw PosterCreationError.imageSaveFailed
         }
-
+        
         return "\(directory)/\(uniqueFileName)"
     }
     
@@ -1113,14 +1107,14 @@ struct PosterController: RouteCollection, Sendable {
         guard let imageURL = req.parameters.get("imageURL", as: String.self) else {
             throw Abort(.badRequest, reason: "Ungültige Bild-ID")
         }
-
+        
         let imagePath = req.application.directory.workingDirectory + imageURL
-
+        
         guard FileManager.default.fileExists(atPath: imagePath) else {
             throw Abort(.notFound, reason: "Bilddatei nicht gefunden")
         }
-
+        
         return req.fileio.streamFile(at: imagePath)
     }
-
+    
 }
