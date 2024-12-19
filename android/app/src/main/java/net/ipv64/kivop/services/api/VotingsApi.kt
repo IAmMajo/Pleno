@@ -2,12 +2,18 @@ package net.ipv64.kivop.moduls
 
 import android.content.Context
 import android.util.Log
+import com.example.kivopandriod.services.stringToLocalDateTime
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingOptionDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
 import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
@@ -41,8 +47,8 @@ suspend fun GetVotings(context: Context): List<GetVotingDTO> =
               val question = voting.get("question").asString
               val description = voting.get("description").asString
               val isOpen = voting.get("isOpen").asBoolean
-              val startedAt = voting.get("startedAt")?.asString ?: null
-              val closedAt = voting.get("closedAt")?.asString ?: null
+              val startedAt = voting.get("startedAt")?.asString?.let { stringToLocalDateTime(it) }
+              val closedAt = voting.get("closedAt")?.asString?.let { stringToLocalDateTime(it) }
               val anonymous = voting.get("anonymous").asBoolean
               val optionsArray = voting.get("options").asJsonArray
               val options =
@@ -162,8 +168,8 @@ suspend fun GetVotingByID(context: Context, ID: UUID): GetVotingDTO? =
             val question = votingJson.get("question").asString
             val description = votingJson.get("description").asString
             val isOpen = votingJson.get("isOpen").asBoolean
-            val startedAt = votingJson.get("startedAt")?.asString ?: null
-            val closedAt = votingJson.get("closedAt")?.asString ?: null
+            val startedAt = votingJson.get("startedAt")?.asString?.let { stringToLocalDateTime(it) }
+            val closedAt = votingJson.get("closedAt")?.asString?.let { stringToLocalDateTime(it) }
             val anonymous = votingJson.get("anonymous").asBoolean
             val optionsArray = votingJson.get("options").asJsonArray
             val options =

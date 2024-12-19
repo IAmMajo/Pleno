@@ -11,7 +11,6 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
-import net.ipv64.kivop.moduls.AttendancesListsData
 import net.ipv64.kivop.moduls.ItemListData
 import net.ipv64.kivop.services.api.getMeetings
 

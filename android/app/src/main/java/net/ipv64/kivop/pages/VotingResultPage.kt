@@ -14,16 +14,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.kivopandriod.services.stringToLocalDate
+import com.example.kivopandriod.services.stringToLocalDateTime
 import java.util.UUID
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.components.AbstimmungCard
 import net.ipv64.kivop.components.ErgebnisCard
 import net.ipv64.kivop.components.PieChart
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
 import net.ipv64.kivop.moduls.GetVotingByID
-import net.ipv64.kivop.moduls.GetVotingDTO
 import net.ipv64.kivop.moduls.GetVotingResultByID
-import net.ipv64.kivop.moduls.GetVotingResultsDTO
 import net.ipv64.kivop.moduls.VotingResults
 
 @Composable
@@ -50,10 +50,13 @@ fun VotingResultPage(navController: NavController, votingID: String) {
 
   Column {
     if (votingData != null) {
-      AbstimmungCard(
-          title = votingData!!.description,
+      votingData!!.let {
+        AbstimmungCard(
+          title = it.description,
           eventType = "Todo meeting name",
-          date = stringToLocalDate(votingData!!.startedAt))
+          date = it.startedAt!!.toLocalDate()
+        )
+      }
     }
     Spacer(modifier = Modifier.size(16.dp))
     //

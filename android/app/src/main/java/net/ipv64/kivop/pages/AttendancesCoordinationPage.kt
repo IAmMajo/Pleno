@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.kivopandriod.moduls.SitzungsCardData
 import net.ipv64.kivop.components.ResponseItem
 import net.ipv64.kivop.components.ResponseList
 import net.ipv64.kivop.components.SitzungsCard
