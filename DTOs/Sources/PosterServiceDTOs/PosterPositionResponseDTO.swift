@@ -1,9 +1,3 @@
-//
-//  PosterPositionResponseDTO.swift
-//  poster-service
-//
-//  Created by Dennis Sept on 26.11.24.
-//
 import Foundation
 
 public struct PosterPositionResponseDTO: Codable {
@@ -11,29 +5,16 @@ public struct PosterPositionResponseDTO: Codable {
     public var posterId: UUID?
     public var latitude: Double
     public var longitude: Double
-    public var posted_by:UUID?
-    public var postedAt:Date?
-    public var expires_at:Date
+    public var posted_by: UUID?
+    public var postedAt: Date?
+    public var expires_at: Date
     public var removed_by: UUID?
     public var removed_at: Date?
     public var imageUrl: String?
     public var responsible_users: [UUID]
     public var status: String
-    public init(
-                id: UUID,
-                posterId: UUID? = nil,
-                latitude: Double,
-                longitude: Double,
-                postedBy:UUID? = nil,
-                postedAt:Date? = nil,
-                expiresAt: Date,
-                removedBy:UUID? = nil,
-                removedAt:Date? = nil,
-                imageUrl: String? = nil,
-                responsibleUsers:[UUID],
-                status:String
-                )
-    {
+
+    public init(id: UUID, posterId: UUID? = nil, latitude: Double, longitude: Double, postedBy: UUID? = nil, postedAt: Date? = nil, expiresAt: Date, removedBy: UUID? = nil, removedAt: Date? = nil, imageUrl: String? = nil, responsibleUsers: [UUID], status: String) {
         self.id = id
         self.posterId = posterId
         self.latitude = latitude 

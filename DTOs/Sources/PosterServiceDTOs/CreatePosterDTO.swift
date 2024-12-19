@@ -1,11 +1,4 @@
-//
-//  CreatePosterDTO.swift
-//  poster-service
-//
-//  Created by Dennis Sept on 26.11.24.
-//
 import Foundation
-
 
 public struct CreatePosterDTO: Codable {
     public var name: String
