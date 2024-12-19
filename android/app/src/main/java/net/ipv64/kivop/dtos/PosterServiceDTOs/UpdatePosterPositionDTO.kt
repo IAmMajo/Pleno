@@ -4,9 +4,10 @@ import java.util.UUID
 import java.time.LocalDateTime
 
 data class UpdatePosterPositionDTO (
+    var posterId : UUID?,
     var latitude : Double?,
     var longitude : Double?,
-    var isDisplayed : Boolean?,
-    var imageBase64 : String?, // Optionaler Base64-String für das Bild
-    var expiresAt :Date
+    var expires_at : LocalDateTime?,
+    var responsible_users : List<UUID>?,
+    var image : ByteArray?,
 )
