@@ -3,14 +3,17 @@ package net.ipv64.kivop.dtos.PosterServiceDTOs
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class PosterPositionResponseDTO(
-    var id: UUID?,
-    var posterId: UUID,
-    var responsibleUserId: UUID,
-    var latitude: Double,
-    var longitude: Double,
-    var isDisplayed: Boolean,
-    var imageBase64: String, // Hinzugefügt
-    var expiresAt: LocalDateTime,
-    var postedAt: LocalDateTime
+data class PosterPositionResponseDTO (
+    var id : UUID,
+    var posterId : UUID?,
+    var latitude : Double,
+    var longitude : Double,
+    var posted_by : UUID?,
+    var postedAt : LocalDateTime?,
+    var expires_at : LocalDateTime,
+    var removed_by : UUID?,
+    var removed_at : LocalDateTime?,
+    var imageUrl : String?,
+    var responsible_users : List<UUID>,
+    var status : String,
 )
