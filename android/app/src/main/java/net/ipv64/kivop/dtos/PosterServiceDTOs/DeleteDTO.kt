@@ -4,5 +4,5 @@ import java.util.UUID
 import java.time.LocalDateTime
 
 data class DeleteDTO (
-    public let ids: List<UUID>
+    var ids : List<UUID>,
 )
