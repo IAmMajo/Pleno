@@ -25,7 +25,7 @@ public struct PosterPositionResponseDTO: Codable {
         self.removedBy = removedBy
         self.removedAt = removedAt
         self.imageUrl = imageUrl
-        self.responsible_users = responsibleUsers
+        self.responsibleUsers = responsibleUsers
         self.status = status
     }
 }
