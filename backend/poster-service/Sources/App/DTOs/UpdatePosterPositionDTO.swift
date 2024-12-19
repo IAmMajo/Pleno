@@ -19,12 +19,12 @@ public struct UpdatePosterPositionDTO: Codable {
 
     public init(
                 posterId: UUID? = nil,
-                latitude: Double?,
-                longitude: Double?,
-                imageUrl: String?,
-                expiresAt: Date?,
-                responsibleUsers:[UUID]?,
-                image: File?
+                latitude: Double? = nil,
+                longitude: Double? = nil,
+                imageUrl: String? = nil,
+                expiresAt: Date? = nil,
+                responsibleUsers:[UUID]? = nil,
+                image: File? = nil
                 )
     {
         self.latitude = round((latitude ?? 0) * 1_000_000) / 1_000_000

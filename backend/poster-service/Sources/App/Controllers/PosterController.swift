@@ -312,13 +312,13 @@ struct PosterController: RouteCollection, Sendable {
         return positions.map { position in
             let responsibleUsers = position.responsibilities.compactMap { $0.$user.id }
             return PosterPositionResponseDTO(
-                id: position.id,
+                id: position.id!,
                 posterId: position.$poster.id,
                 latitude: position.latitude,
                 longitude: position.longitude,
                 postedBy: position.$posted_by.id,
                 postedAt: position.posted_at,
-                expiresAt: position.expires_at ?? Date(),
+                expiresAt: position.expires_at!,
                 removedBy: position.$removed_by.id,
                 removedAt: position.removed_at,
                 imageUrl: position.image_url,
@@ -800,13 +800,13 @@ struct PosterController: RouteCollection, Sendable {
 
         // PosterPositionResponseDTO erstellen
         let responseDTO = PosterPositionResponseDTO(
-            id: posterPosition.id,
+            id: posterPosition.id!,
             posterId: posterPosition.$poster.id,
             latitude: posterPosition.latitude,
             longitude: posterPosition.longitude,
             postedBy: posterPosition.$posted_by.id,
             postedAt: posterPosition.posted_at,
-            expiresAt: posterPosition.expires_at ?? Date(),
+            expiresAt: posterPosition.expires_at!,
             removedBy: posterPosition.$removed_by.id,
             removedAt: posterPosition.removed_at,
             imageUrl: posterPosition.image_url,
@@ -911,13 +911,13 @@ struct PosterController: RouteCollection, Sendable {
 
 
         let responseDTO = PosterPositionResponseDTO(
-            id: position.id,
+            id: position.id!,
             posterId: position.$poster.id,
             latitude: position.latitude,
             longitude: position.longitude,
             postedBy: position.$posted_by.id,
             postedAt: position.posted_at,
-            expiresAt: position.expires_at ?? Date(),
+            expiresAt: position.expires_at!,
             removedBy: position.$removed_by.id,
             removedAt: position.removed_at,
             imageUrl: position.image_url,

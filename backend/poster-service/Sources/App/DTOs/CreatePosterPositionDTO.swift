@@ -14,7 +14,7 @@ public struct CreatePosterPositionDTO: Codable {
     public var latitude: Double
     public var longitude: Double
     public var responsible_users: [UUID]
-    public var expires_at:Date
+    public var expires_at: Date
     
     public init(
                 posterId: UUID? = nil,

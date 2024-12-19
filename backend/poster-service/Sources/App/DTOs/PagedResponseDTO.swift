@@ -6,7 +6,7 @@
 //
 
 public struct PagedResponseDTO<Item: Codable>: Codable {
-   public  var items: [Item]
+   public var items: [Item]
     public var metadata: CustomPageMetadata?
     
     public init(items:[Item],metadata:CustomPageMetadata?){

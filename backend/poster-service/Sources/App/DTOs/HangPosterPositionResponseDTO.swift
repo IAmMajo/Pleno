@@ -18,7 +18,7 @@ public struct HangPosterPositionResponseDTO: Codable {
         postedAt: Date,
         postedBy:UUID,
         imageUrl:String
-                )
+    )
     {
         self.poster_position = posterPosition
         self.posted_at = postedAt

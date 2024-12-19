@@ -7,7 +7,7 @@
 import Foundation
 
 public struct PosterPositionResponseDTO: Codable {
-    public var id: UUID?
+    public var id: UUID
     public var posterId: UUID?
     public var latitude: Double
     public var longitude: Double
@@ -20,19 +20,19 @@ public struct PosterPositionResponseDTO: Codable {
     public var responsible_users: [UUID]
     public var status: String
     public init(
-                id: UUID?,
-                posterId: UUID? = nil,
-                latitude: Double,
-                longitude: Double,
-                postedBy:UUID? = nil,
-                postedAt:Date?,
-                expiresAt: Date,
-                removedBy:UUID? = nil,
-                removedAt:Date?,
-                imageUrl: String?,
-                responsibleUsers:[UUID],
-                status:String
-                )
+        id: UUID,
+        posterId: UUID? = nil,
+        latitude: Double,
+        longitude: Double,
+        postedBy:UUID? = nil,
+        postedAt:Date? = nil,
+        expiresAt: Date,
+        removedBy:UUID? = nil,
+        removedAt:Date? = nil,
+        imageUrl: String? = nil,
+        responsibleUsers:[UUID],
+        status:String
+    )
     {
         self.id = id
         self.posterId = posterId
