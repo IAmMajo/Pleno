@@ -201,26 +201,6 @@ struct PosterController: RouteCollection, Sendable {
             responseContentType: .application(.json)
         )
         
-        posterPositions.patch(":positionId", use: updatePosterPosition).openAPI(
-            summary: "Aktualisiert eine bestehende Poster-Position",
-            description: """
-                Aktualisiert eine vorhandene Poster-Position anhand ihrer ID. Der Request muss als `multipart/form-data` gesendet werden.
-                Nur die Felder, die im `UpdatePosterPositionDTO` gesetzt sind, werden aktualisiert. Neue Verantwortliche können hinzugefügt,
-                bestehende entfernt und ein neues Bild hochgeladen werden (das alte wird dann gelöscht).
-                
-                **Ablauf:**
-                - Pfadparameter `:positionId` für die ID der zu aktualisierenden Position angeben.
-                - `UpdatePosterPositionDTO` im Body senden, nur die Felder setzen, die geändert werden sollen.
-                - Bei Erfolg erhalten Sie ein aktualisiertes `PosterPositionResponseDTO`.
-                """,
-            query:[],
-            path: .type(PosterPosition.IDValue.self),
-            body: .type(UpdatePosterPositionDTO.self),
-            contentType: .multipart(.formData),
-            response: .type(PosterPositionResponseDTO.self),
-            responseContentType: .application(.json)
-        )
-        
         posterPositions.put("/hang", use: hangPosterPosition).openAPI(
             summary: "Hängt eine Poster-Position auf",
             description: """
@@ -259,6 +239,26 @@ struct PosterController: RouteCollection, Sendable {
         
         
         let adminRoutesPosterPositions = posterPositions.grouped(adminMiddleware)
+        adminRoutesPosterPositions.patch(":positionId", use: updatePosterPosition).openAPI(
+            summary: "Aktualisiert eine bestehende Poster-Position",
+            description: """
+                Aktualisiert eine vorhandene Poster-Position anhand ihrer ID. Der Request muss als `multipart/form-data` gesendet werden.
+                Nur die Felder, die im `UpdatePosterPositionDTO` gesetzt sind, werden aktualisiert. Neue Verantwortliche können hinzugefügt,
+                bestehende entfernt und ein neues Bild hochgeladen werden (das alte wird dann gelöscht).
+                
+                **Ablauf:**
+                - Pfadparameter `:positionId` für die ID der zu aktualisierenden Position angeben.
+                - `UpdatePosterPositionDTO` im Body senden, nur die Felder setzen, die geändert werden sollen.
+                - Bei Erfolg erhalten Sie ein aktualisiertes `PosterPositionResponseDTO`.
+                """,
+            query:[],
+            path: .type(PosterPosition.IDValue.self),
+            body: .type(UpdatePosterPositionDTO.self),
+            contentType: .multipart(.formData),
+            response: .type(PosterPositionResponseDTO.self),
+            responseContentType: .application(.json)
+        )
+        
         adminRoutesPosterPositions.delete(":id", use: deletePosterPosition).openAPI(
             summary: "Löscht ein Poster",
             description: """
@@ -299,13 +299,24 @@ struct PosterController: RouteCollection, Sendable {
     
     /// Erstellt eine HTTP-Response mit JSON-Inhalt aus einem codierbaren DTO.
     @Sendable
-    private func createResponse<T: Codable>(with dto: T, on req: Request) async throws -> Response {
+    private func createResponse<T: Codable>(
+        with dto: T,
+        on req: Request,
+        additionalHeaders: HTTPHeaders? = nil
+    ) async throws -> Response {
         let responseData = try JSONEncoder().encode(dto)
         var headers = HTTPHeaders()
         headers.contentType = .json
+
+        if let extraHeaders = additionalHeaders {
+            for (name, value) in extraHeaders {
+                headers.add(name: name, value: value)
+            }
+        }
+
         return Response(status: .ok, headers: headers, body: .init(data: responseData))
     }
-    
+
     // Hilfsfunktion zum Mappen von PosterPosition in PosterPositionResponseDTO
     @Sendable
     private func mapToDTO(_ positions: [PosterPosition], status: String) -> [PosterPositionResponseDTO] {
@@ -427,16 +438,16 @@ struct PosterController: RouteCollection, Sendable {
             
             var headers = HTTPHeaders()
                     headers.contentType = .json
-                    headers.add(name: "X-Current-Page", value: "\(currentPage)")
-                    headers.add(name: "X-Per-Page", value: "\(perPage)")
-                    headers.add(name: "X-Total-Items", value: "\(totalItems)")
-                    headers.add(name: "X-Total-Pages", value: "\(totalPages)")
+                    headers.add(name: "Pagnation-Current-Page", value: "\(currentPage)")
+                    headers.add(name: "Pagnation-Per-Page", value: "\(perPage)")
+                    headers.add(name: "Pagnation-Total-Items", value: "\(totalItems)")
+                    headers.add(name: "Pagnation-Total-Pages", value: "\(totalPages)")
             
-            return try await createResponse(with: response, on: req)
+            return try await createResponse(with: response, on: req, additionalHeaders: headers)
             
         } else {
             let posters = try await Poster.query(on: req.db).all()
-            let responseDTOs = posters.map { poster in
+            let response = posters.map { poster in
                 PosterResponseDTO(
                     id: poster.id!,
                     name: poster.name,
@@ -444,13 +455,7 @@ struct PosterController: RouteCollection, Sendable {
                     imageUrl: poster.image_url
                 )
             }
-            
-            // Ohne Pagination kein Metadata
-            let response = PagedResponseDTO<PosterResponseDTO>(
-                items: responseDTOs,
-                metadata: nil
-            )
-            
+                        
             return try await createResponse(with: response, on: req)
         }
     }
@@ -575,181 +580,6 @@ struct PosterController: RouteCollection, Sendable {
     }
     
     // MARK: - PosterPosition-Routen
-    
-    /// Gibt alle angezeigten oder nicht angezeigten PosterPositionen zurück.
-    /// Parameter `displayed` in der Query bestimmt, ob nur angezeigte oder nicht angezeigte zurückgegeben werden.
-    @Sendable
-    func getPostersPositions(req: Request) async throws -> Response {
-        let statusQuery = try? req.query.get(String.self, at: "status")
-        let page = try? req.query.get(Int.self, at: "page")
-        let per = try? req.query.get(Int.self, at: "per")
-        
-        let currentDate = Date()
-        
-        // Abhängig von statusQuery unterschiedlichen Code ausführen
-        switch statusQuery {
-        case "hangs":
-            // hangs: posted_by != nil und removed_by == nil und nach expires_at sortieren
-            let query = PosterPosition.query(on: req.db)
-                .filter(\.$posted_by.$id != nil)
-                .filter(\.$removed_by.$id == nil)
-                .sort(\.$expires_at, .ascending)
-            
-            if let page = page, let per = per {
-                // Paginieren über die Datenbank
-                let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
-                let responseDTOs = mapToDTO(paginatedData.items, status: "hangs")
-                
-                let currentPage = paginatedData.metadata.page
-                let perPage = paginatedData.metadata.per
-                let totalItems = paginatedData.metadata.total
-                let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
-                
-                let customMeta = CustomPageMetadata(
-                    currentPage: currentPage,
-                    perPage: perPage,
-                    totalItems: totalItems,
-                    totalPages: totalPages
-                )
-                
-                let response = PagedResponseDTO(
-                    items: responseDTOs,
-                    metadata: customMeta
-                )
-                return try await createResponse(with: response, on: req)
-                
-            } else {
-                // Ohne Paginierung
-                let positions = try await query.all()
-                let responseDTOs = mapToDTO(positions, status: "hangs")
-                return try await createResponse(with: responseDTOs, on: req)
-            }
-            
-        case "toHang":
-            // toHang: posted_by == nil && expires_at > currentDate
-            let query = PosterPosition.query(on: req.db)
-                .filter(\.$posted_by.$id == nil)
-                .filter(\.$expires_at > currentDate)
-            
-            if let page = page, let per = per {
-                let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
-                let responseDTOs = mapToDTO(paginatedData.items, status: "toHang")
-                
-                let currentPage = paginatedData.metadata.page
-                let perPage = paginatedData.metadata.per
-                let totalItems = paginatedData.metadata.total
-                let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
-                
-                let customMeta = CustomPageMetadata(
-                    currentPage: currentPage,
-                    perPage: perPage,
-                    totalItems: totalItems,
-                    totalPages: totalPages
-                )
-                
-                let response = PagedResponseDTO(
-                    items: responseDTOs,
-                    metadata: customMeta
-                )
-                
-                return try await createResponse(with: response, on: req)
-                
-            } else {
-                // Ohne Paginierung
-                let positions = try await query.all()
-                let responseDTOs = mapToDTO(positions, status: "toHang")
-                return try await createResponse(with: responseDTOs, on: req)
-            }
-            
-        case "overdue":
-            // overdue: posted_by != nil, removed_by == nil, expires_at <= currentDate
-            let query = PosterPosition.query(on: req.db)
-                .filter(\.$posted_by.$id != nil)
-                .filter(\.$removed_by.$id == nil)
-                .filter(\.$expires_at <= currentDate)
-            
-            if let page = page, let per = per {
-                let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
-                let responseDTOs = mapToDTO(paginatedData.items, status: "overdue")
-                
-                let currentPage = paginatedData.metadata.page
-                let perPage = paginatedData.metadata.per
-                let totalItems = paginatedData.metadata.total
-                let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
-                
-                let customMeta = CustomPageMetadata(
-                    currentPage: currentPage,
-                    perPage: perPage,
-                    totalItems: totalItems,
-                    totalPages: totalPages
-                )
-                
-                let response = PagedResponseDTO(
-                    items: responseDTOs,
-                    metadata: customMeta
-                )
-                return try await createResponse(with: response, on: req)
-                
-            } else {
-                // Ohne Paginierung
-                let positions = try await query.all()
-                let responseDTOs = mapToDTO(positions, status: "overdue")
-                return try await createResponse(with: responseDTOs, on: req)
-            }
-            
-        case nil:
-            // Kein Status übergeben: Alle drei Sets holen und zusammenführen
-            let hangsQuery = PosterPosition.query(on: req.db)
-                .filter(\.$posted_by.$id != nil)
-                .filter(\.$removed_by.$id == nil)
-                .sort(\.$expires_at, .ascending)
-            let toHangQuery = PosterPosition.query(on: req.db)
-                .filter(\.$posted_by.$id == nil)
-                .filter(\.$expires_at > currentDate)
-            let overdueQuery = PosterPosition.query(on: req.db)
-                .filter(\.$posted_by.$id != nil)
-                .filter(\.$removed_by.$id == nil)
-                .filter(\.$expires_at <= currentDate)
-            
-            let (hangsPositions, toHangPositions, overduePositions) = try await (
-                hangsQuery.all(),
-                toHangQuery.all(),
-                overdueQuery.all()
-            )
-            
-            let hangsDTOs = mapToDTO(hangsPositions, status: "hangs")
-            let toHangDTOs = mapToDTO(toHangPositions, status: "toHang")
-            let overdueDTOs = mapToDTO(overduePositions, status: "overdue")
-            
-            var combined = hangsDTOs + toHangDTOs + overdueDTOs
-            
-            // Wenn page und per gesetzt sind, manuelle Pagination im Speicher
-            if let page = page, let per = per {
-                let (pagedItems, totalItems) = paginate(combined, page: page, per: per)
-                let totalPages = Int((Double(totalItems) / Double(per)).rounded(.up))
-                
-                let customMeta = CustomPageMetadata(
-                    currentPage: page,
-                    perPage: per,
-                    totalItems: totalItems,
-                    totalPages: totalPages
-                )
-                
-                let response = PagedResponseDTO(items: pagedItems, metadata: customMeta)
-                return try await createResponse(with: response, on: req)
-            } else {
-                // Ohne Paginierung
-                return try await createResponse(with: combined, on: req)
-            }
-            
-        default:
-            // Ungültiger Status-Wert
-            throw Abort(.badRequest, reason: "Invalid status parameter. Must be one of hangs, toHang, overdue or omitted.")
-        }
-    }
-    
-    
-    
     /// Erstellt eine neue PosterPosition mit Bild und speichert sie in der Datenbank.
     @Sendable
     func createPosterPosition(req: Request) async throws -> Response {
@@ -811,6 +641,171 @@ struct PosterController: RouteCollection, Sendable {
         return try await createResponse(with: responseDTO, on: req)
     }
     
+    
+    /// Gibt alle angezeigten oder nicht angezeigten PosterPositionen zurück.
+    /// Parameter `displayed` in der Query bestimmt, ob nur angezeigte oder nicht angezeigte zurückgegeben werden.
+    @Sendable
+    func getPostersPositions(req: Request) async throws -> Response {
+        let statusQuery = try? req.query.get(String.self, at: "status")
+        let page = try? req.query.get(Int.self, at: "page")
+        let per = try? req.query.get(Int.self, at: "per")
+        
+        let currentDate = Date()
+        
+        // Abhängig von statusQuery unterschiedlichen Code ausführen
+        switch statusQuery {
+        case "hangs":
+            // hangs: posted_by != nil und removed_by == nil und nach expires_at sortieren
+            let query = PosterPosition.query(on: req.db)
+                .filter(\.$posted_by.$id != nil)
+                .filter(\.$removed_by.$id == nil)
+                .sort(\.$expires_at, .ascending)
+            
+            if let page = page, let per = per {
+                // Paginieren über die Datenbank
+                let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
+                let response = mapToDTO(paginatedData.items, status: "hangs")
+                
+                let currentPage = paginatedData.metadata.page
+                let perPage = paginatedData.metadata.per
+                let totalItems = paginatedData.metadata.total
+                let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
+                
+                var headers = HTTPHeaders()
+                        headers.contentType = .json
+                        headers.add(name: "Pagnation-Current-Page", value: "\(currentPage)")
+                        headers.add(name: "Pagnation-Per-Page", value: "\(perPage)")
+                        headers.add(name: "Pagnation-Total-Items", value: "\(totalItems)")
+                        headers.add(name: "Pagnation-Total-Pages", value: "\(totalPages)")
+                
+                return try await createResponse(with: response, on: req, additionalHeaders: headers)
+                
+            } else {
+                // Ohne Paginierung
+                let positions = try await query.all()
+                let response = mapToDTO(positions, status: "hangs")
+                return try await createResponse(with: response, on: req)
+            }
+            
+        case "toHang":
+            // toHang: posted_by == nil && expires_at > currentDate
+            let query = PosterPosition.query(on: req.db)
+                .filter(\.$posted_by.$id == nil)
+                .filter(\.$expires_at > currentDate)
+            
+            if let page = page, let per = per {
+                let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
+                let response = mapToDTO(paginatedData.items, status: "toHang")
+                
+                let currentPage = paginatedData.metadata.page
+                let perPage = paginatedData.metadata.per
+                let totalItems = paginatedData.metadata.total
+                let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
+                
+                var headers = HTTPHeaders()
+                        headers.contentType = .json
+                        headers.add(name: "Pagnation-Current-Page", value: "\(currentPage)")
+                        headers.add(name: "Pagnation-Per-Page", value: "\(perPage)")
+                        headers.add(name: "Pagnation-Total-Items", value: "\(totalItems)")
+                        headers.add(name: "Pagnation-Total-Pages", value: "\(totalPages)")
+                
+                return try await createResponse(with: response, on: req, additionalHeaders: headers)
+                
+            } else {
+                // Ohne Paginierung
+                let positions = try await query.all()
+                let response = mapToDTO(positions, status: "toHang")
+                return try await createResponse(with: response, on: req)
+            }
+            
+        case "overdue":
+            // overdue: posted_by != nil, removed_by == nil, expires_at <= currentDate
+            let query = PosterPosition.query(on: req.db)
+                .filter(\.$posted_by.$id != nil)
+                .filter(\.$removed_by.$id == nil)
+                .filter(\.$expires_at <= currentDate)
+            
+            if let page = page, let per = per {
+                let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
+                let response = mapToDTO(paginatedData.items, status: "overdue")
+                
+                let currentPage = paginatedData.metadata.page
+                let perPage = paginatedData.metadata.per
+                let totalItems = paginatedData.metadata.total
+                let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
+                
+                var headers = HTTPHeaders()
+                        headers.contentType = .json
+                        headers.add(name: "Pagnation-Current-Page", value: "\(currentPage)")
+                        headers.add(name: "Pagnation-Per-Page", value: "\(perPage)")
+                        headers.add(name: "Pagnation-Total-Items", value: "\(totalItems)")
+                        headers.add(name: "Pagnation-Total-Pages", value: "\(totalPages)")
+                
+                return try await createResponse(with: response, on: req, additionalHeaders: headers)
+                
+            } else {
+                // Ohne Paginierung
+                let positions = try await query.all()
+                let response = mapToDTO(positions, status: "overdue")
+                return try await createResponse(with: response, on: req)
+            }
+            
+        case nil:
+            // Kein Status übergeben: Alle drei Sets holen und zusammenführen
+            let hangsQuery = PosterPosition.query(on: req.db)
+                .filter(\.$posted_by.$id != nil)
+                .filter(\.$removed_by.$id == nil)
+                .sort(\.$expires_at, .ascending)
+            let toHangQuery = PosterPosition.query(on: req.db)
+                .filter(\.$posted_by.$id == nil)
+                .filter(\.$expires_at > currentDate)
+            let overdueQuery = PosterPosition.query(on: req.db)
+                .filter(\.$posted_by.$id != nil)
+                .filter(\.$removed_by.$id == nil)
+                .filter(\.$expires_at <= currentDate)
+            
+            let (hangsPositions, toHangPositions, overduePositions) = try await (
+                hangsQuery.all(),
+                toHangQuery.all(),
+                overdueQuery.all()
+            )
+            
+            let hangsDTOs = mapToDTO(hangsPositions, status: "hangs")
+            let toHangDTOs = mapToDTO(toHangPositions, status: "toHang")
+            let overdueDTOs = mapToDTO(overduePositions, status: "overdue")
+            
+            var combined = hangsDTOs + toHangDTOs + overdueDTOs
+            
+            // Wenn page und per gesetzt sind, manuelle Pagination im Speicher
+            if let page = page, let per = per {
+                let (pagedItems, totalItems) = paginate(combined, page: page, per: per)
+                let totalPages = Int((Double(totalItems) / Double(per)).rounded(.up))
+                
+                let customMeta = CustomPageMetadata(
+                    currentPage: page,
+                    perPage: per,
+                    totalItems: totalItems,
+                    totalPages: totalPages
+                )
+                
+                var headers = HTTPHeaders()
+                        headers.contentType = .json
+                        headers.add(name: "Pagnation-Current-Page", value: "\(page)")
+                        headers.add(name: "Pagnation-Per-Page", value: "\(per)")
+                        headers.add(name: "Pagnation-Total-Items", value: "\(totalItems)")
+                        headers.add(name: "Pagnation-Total-Pages", value: "\(totalPages)")
+                
+                return try await createResponse(with: combined, on: req, additionalHeaders: headers)
+            } else {
+                // Ohne Paginierung
+                return try await createResponse(with: combined, on: req)
+            }
+            
+        default:
+            // Ungültiger Status-Wert
+            throw Abort(.badRequest, reason: "Invalid status parameter. Must be one of hangs, toHang, overdue or omitted.")
+        }
+    }
     
     
     /// Aktualisiert eine vorhandene PosterPosition (Location, Anzeigezustand, Ablaufdatum, Verantwortlicher, Poster-ID, Bild).
@@ -936,12 +931,17 @@ struct PosterController: RouteCollection, Sendable {
             throw Abort(.notFound, reason: "PosterPosition nicht gefunden.")
         }
         
+        guard let userId = req.jwtPayload?.userID else {
+                   throw Abort(.unauthorized)
+               }
+        let identity = try await Identity.byUserId(userId, req.db)
+        
         let imageData = dto.image
         let imageUrl = try await saveImage(imageData, in: "Storage/Images/PosterPositions", on: req)
         
         position.image_url = imageUrl
         position.posted_at = Date()
-        position.$posted_by.id = dto.user
+        position.$posted_by.id = identity.id
         
         try await position.update(on: req.db)
         
@@ -969,6 +969,11 @@ struct PosterController: RouteCollection, Sendable {
             throw Abort(.notFound, reason: "PosterPosition nicht gefunden.")
         }
         
+        guard let userId = req.jwtPayload?.userID else {
+                   throw Abort(.unauthorized)
+               }
+        let identity = try await Identity.byUserId(userId, req.db)
+        
         let imageData = dto.image
         if let oldImageUrl = position.image_url {
             let oldFilePath = req.application.directory.workingDirectory + oldImageUrl
@@ -982,7 +987,7 @@ struct PosterController: RouteCollection, Sendable {
         
         position.image_url = imageUrl
         position.removed_at = Date()
-        position.$removed_by.id = dto.user
+        position.$removed_by.id = identity.id
         
         try await position.update(on: req.db)
         
