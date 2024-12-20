@@ -9,7 +9,7 @@ public struct HangPosterPositionResponseDTO: Codable {
     public init(posterPosition: UUID, postedAt: Date, postedBy: UUID, imageUrl: String) {
         self.posterPosition = posterPosition
         self.postedAt = postedAt
-        self.posted_By = postedBy
+        self.postedBy = postedBy
         self.imageUrl = imageUrl
     }
 }
