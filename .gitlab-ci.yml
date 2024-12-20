@@ -17,7 +17,7 @@ ticketflow:
     PUT_ISSUE_URL_UNFORMATTED: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/issues/%s"
     GET_MERGE_REQ_INTO_MAIN_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests?state=opened&source_branch=$CI_COMMIT_BRANCH&target_branch=$CI_DEFAULT_BRANCH"
     PUT_MERGE_REQ_URL_UNFORMATTED: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/%s"
-    TICKET_ID_REGEX: '(?<=Close|Closes|Closed|Closing|close|closes|closed|closing|Fix|Fixes|Fixed|Fixing|fix|fixes|fixed|fixing|Resolve|Resolves|Resolved|Resolving|resolve|resolves|resolved|resolving|Implement|Implements|Implemented|Implementing|implement|implements|implemented|implementing)(?:,?\s*#\d+)+'
+    TICKET_ID_REGEX: '(?<=Close|Closes|Closed|Closing|close|closes|closed|closing|Fix|Fixes|Fixed|Fixing|fix|fixes|fixed|fixing|Resolve|Resolves|Resolved|Resolving|resolve|resolves|resolved|resolving|Implement|Implements|Implemented|Implementing|implement|implements|implemented|implementing)(?:,?\s*#\d+)+(?:\s*and\s*#\d+)*'
   script:
     - 'MERGE_REQ="$(curl -s --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN" $COMMIT_MERGE_REQ_URL)"'
     - if [[ "$(echo "$MERGE_REQ" | jq -r ". | length")" == "0" || "$(echo "$MERGE_REQ" | jq -r ".[0].target_branch")" != "$CI_COMMIT_BRANCH" || "$(echo "$MERGE_REQ" | jq -r ".[0].source_branch")" == "$CI_DEFAULT_BRANCH" ]]; then exit 0; fi
