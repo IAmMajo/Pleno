@@ -86,7 +86,17 @@ fun VotePage(navController: NavController, votingID: String) {
             containerColor = Secondary, 
             contentColor = Text_tertiary
           ),
-          onClick = {},
+          onClick = {
+            //todo: ask if user is sure
+            scope.launch { 
+              val voted = putVote(navController.context,votingID,0)
+              if (!voted){
+                Toast.makeText(navController.context, "Fehler beim Abstimmen", Toast.LENGTH_SHORT).show()
+              }else{
+                navController.navigate("abgestimmt/${votingID}")
+              }
+            }
+          },
         ){
           Text(text = "Enthalten", fontSize = 20.sp)
         }
@@ -97,6 +107,7 @@ fun VotePage(navController: NavController, votingID: String) {
             contentColor = Background_secondary
           ),
           onClick = {
+            //todo: ask if user is sure
             if(votedIndex!=-1){
               scope.launch {
                 val voted = putVote(navController.context,votingID,votedIndex)
