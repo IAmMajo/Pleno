@@ -1,11 +1,11 @@
 package net.ipv64.kivop.dtos.PosterServiceDTOs
 
-import java.util.UUID
 import java.time.LocalDateTime
+import java.util.UUID
 
-data class HangPosterPositionResponseDTO (
-    var poster_position : UUID,
-    var posted_at : LocalDateTime,
-    var posted_by : UUID,
-    var image_url : String,
+data class HangPosterPositionResponseDTO(
+    var posterPosition: UUID,
+    var postedAt: LocalDateTime,
+    var postedBy: UUID,
+    var imageUrl: String,
 )
