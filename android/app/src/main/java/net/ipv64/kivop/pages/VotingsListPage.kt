@@ -66,7 +66,12 @@ fun VotingsListPage(navController: NavController) {
         ListenItem(
             votingData,
             onClick = {
-              val route = "abstimmungen/${voting.id}"
+              var route = ""
+              if (voting.isOpen == true) {
+                route = "abstimmen/${voting.id}"
+              } else {
+                route = "abstimmung/${voting.id}"
+              }
               navController.navigate(route)
             })
         Spacer(modifier = Modifier.size(8.dp))

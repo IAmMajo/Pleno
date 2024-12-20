@@ -38,12 +38,12 @@ fun VotingResultPage(navController: NavController, votingID: String) {
       Log.d("voting", votingData?.options.toString())
       votings = GetVotingResultByID(navController.context, UUID.fromString(votingID))
       votingsCombined =
-          votingData?.options!!.map { option ->
-            val label = option.text
-            val votes = votings?.results?.find { it.index == option.index }?.total?.toInt() ?: 0
-            val percentage = votings?.results?.find { it.index == option.index }?.percentage ?: 0.0
-            VotingResults(label, votes, percentage)
-          }
+        votingData?.options!!.map { option ->
+          val label = option.text
+          val votes = votings?.results?.find { it.index == option.index }?.total?.toInt() ?: 0
+          val percentage = votings?.results?.find { it.index == option.index }?.percentage ?: 0.0
+          VotingResults(label, votes, percentage)
+        }
     }
   }
 
@@ -59,7 +59,7 @@ fun VotingResultPage(navController: NavController, votingID: String) {
     Spacer(modifier = Modifier.size(16.dp))
     //
     if (votingsCombined.isNotEmpty()) {
-      PieChart(votingsCombined, 15f)
+      PieChart(modifier = Modifier.size(40.dp),list = votingsCombined, explodeDistance = 15f)
       Spacer(modifier = Modifier.size(16.dp))
       ErgebnisCard(votingsCombined)
     }

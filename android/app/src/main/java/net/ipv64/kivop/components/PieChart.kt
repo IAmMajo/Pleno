@@ -16,39 +16,38 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.math.*
 import net.ipv64.kivop.models.VotingResults
 import net.ipv64.kivop.ui.theme.Background_secondary
 
 @Composable
-fun PieChart(list: List<VotingResults>, explodeDistance: Float = 30f) {
-  Column(
-      modifier =
-          Modifier.fillMaxWidth()
-              .background(Background_secondary, shape = RoundedCornerShape(8.dp))
-              .padding(15.dp),
-      horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier =
-                Modifier.fillMaxWidth().aspectRatio(1f).drawBehind {
-                  if (list.sumOf { it.votes } != 0) {
-                    drawPieChart(list, explodeDistance = explodeDistance)
-                  } else {
-                    val noVotings =
-                        listOf(
-                            VotingResults("Keine Stimmen", 1, 100.0),
-                        )
-                    drawPieChart(noVotings, 1.0f)
-                  }
-                }) {}
+fun PieChart(
+  modifier: Modifier = Modifier,
+  list: List<VotingResults>, 
+  explodeDistance: Float = 30f,
+  showLabel: Boolean = false,
+) {
+  Box(
+    modifier = modifier.aspectRatio(1f).drawBehind {
+      if (list.sumOf { it.votes } != 0) {
+        drawPieChart(list, explodeDistance = explodeDistance,showLabel)
+      } else {
+        val noVotings =
+          listOf(
+              VotingResults("Keine Stimmen", 1, 100.0),
+          )
+        drawPieChart(noVotings, 1.0f, showLabel)
       }
+    }) {}
+
 }
 
 val CakeColorStart = Color(0xFF2C7D91)
 val CakeColorEnd = Color(0xFFF7DEC8)
 
-fun DrawScope.drawPieChart(list: List<VotingResults>, explodeDistance: Float) {
+fun DrawScope.drawPieChart(list: List<VotingResults>, explodeDistance: Float,showLabel: Boolean) {
   val totalVotes = list.sumOf { it.votes }
   val colors: List<Color> = interpolateColor(CakeColorStart, CakeColorEnd, list.size)
   // startingAngle -90° to start at the top
@@ -80,29 +79,30 @@ fun DrawScope.drawPieChart(list: List<VotingResults>, explodeDistance: Float) {
         true,
         topLeft = offset.copy(x = offset.x + explodeOffset.x, y = offset.y + explodeOffset.y),
         size = adjustedSize)
-
-    // radius of the circle adjustedSize = diameter
-    val radius = size.width / 2
-    // find Text offset 1/3
-    val textOffset = calcPointOnCircle(startingAngle, sweepAngle, adjustedSize.width / 3)
-    // calc text position by taking the center and add the offset from textOffset
-    val textPos = Offset(radius, radius) + textOffset
-    // estimate the width of the arc
-    val sliceWidth = (sweepAngle / 360) * (2 * Math.PI * radius).toFloat() * 0.5f
-    // set text name
-    val textName = list[i].label
-    // calc set percentage
-    val textPercentage = list[i].percentage.toString() + "%"
-    // get the text name width
-    val textWidth = textPaint.measureText(textName)
-    // check if the text fits in the slice
-    if (textWidth < sliceWidth) {
-      // draw name
-      drawContext.canvas.nativeCanvas.drawText(textName, textPos.x, textPos.y, textPaint)
-      // draw percentage under name
-      val textPercentageOffsetY = textPaint.textSize * 1.1f
-      drawContext.canvas.nativeCanvas.drawText(
+    if (showLabel){
+      // radius of the circle adjustedSize = diameter
+      val radius = size.width / 2
+      // find Text offset 1/3
+      val textOffset = calcPointOnCircle(startingAngle, sweepAngle, adjustedSize.width / 3)
+      // calc text position by taking the center and add the offset from textOffset
+      val textPos = Offset(radius, radius) + textOffset
+      // estimate the width of the arc
+      val sliceWidth = (sweepAngle / 360) * (2 * Math.PI * radius).toFloat() * 0.5f
+      // set text name
+      val textName = list[i].label
+      // calc set percentage
+      val textPercentage = list[i].percentage.toString() + "%"
+      // get the text name width
+      val textWidth = textPaint.measureText(textName)
+      // check if the text fits in the slice
+      if (textWidth < sliceWidth) {
+        // draw name
+        drawContext.canvas.nativeCanvas.drawText(textName, textPos.x, textPos.y, textPaint)
+        // draw percentage under name
+        val textPercentageOffsetY = textPaint.textSize * 1.1f
+        drawContext.canvas.nativeCanvas.drawText(
           textPercentage, textPos.x, textPos.y + textPercentageOffsetY, textPaint)
+      }
     }
 
     startingAngle += sweepAngle
@@ -149,4 +149,15 @@ fun interpolateColor(startColor: Color, endColor: Color, steps: Int): List<Color
   }
 
   return colors
+}
+
+@Preview
+@Composable
+fun PieChartPreview() {
+  val votingResults = listOf(
+    VotingResults("Keine Stimmen", 50, 50.0),
+    VotingResults("Keine Stimmen", 40, 40.0),
+    VotingResults("Keine Stimmen", 10, 10.0),
+  )
+  PieChart(list = votingResults)
 }
