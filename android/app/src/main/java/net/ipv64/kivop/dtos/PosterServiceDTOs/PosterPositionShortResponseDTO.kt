@@ -6,6 +6,6 @@ import java.time.LocalDateTime
 data class PosterPositionShortResponseDTO (
     var id : UUID,
     var posterId : UUID?,
-    var expires_at : LocalDateTime,
+    var expiresAt : LocalDateTime,
     var status : String,
 )
