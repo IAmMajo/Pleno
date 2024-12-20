@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,74 +31,58 @@ import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Secondary
 
 @Composable
-fun VoteOptions(
-  options: List<GetVotingOptionDTO>,
-  onCheckedChange: (Int) -> Unit
-){
+fun VoteOptions(options: List<GetVotingOptionDTO>, onCheckedChange: (Int) -> Unit) {
   var selectedIndex by remember { mutableIntStateOf(-1) } // -1 means no selection
-  
-  Column(
-    modifier = Modifier
-      .customShadow()
-      .background(Background_secondary,shape = RoundedCornerShape(8.dp))
-      .padding(10.dp)
-      
-  ) {
-    Row(
-      verticalAlignment = Alignment.CenterVertically
-    ) { 
-      Icon(
-        painter = painterResource(id = R.drawable.ic_voting_24),
-        "Vote",
-        tint = Primary,
-        modifier = Modifier
-          .background(Secondary,shape = RoundedCornerShape(8.dp))
-          .padding(8.dp))
-      Spacer(modifier = Modifier.size(8.dp))
-      Text(text = "Abstimmung")
-    }
-    Spacer(modifier = Modifier.size(16.dp))
-    options.forEach { option ->
-      Row(
-        modifier = Modifier
-          .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Text(text = option.text)
-        Spacer(modifier = Modifier.weight(1f))
-        CustomCheckbox(
-          size = 30.dp,
-          checked = if (selectedIndex == option.index.toInt()) true else false,
-          onCheckedChange = { isChecked ->
-            if (isChecked) {
-              onCheckedChange(option.index.toInt())
-              selectedIndex = option.index.toInt()
-            } else {
-              onCheckedChange(-1)
-              selectedIndex = -1
-            }
-          }
-        )
-      }
-      Spacer(modifier = Modifier.size(16.dp))
-    }
-  }
-}
 
+  Column(
+      modifier =
+          Modifier.customShadow()
+              .background(Background_secondary, shape = RoundedCornerShape(8.dp))
+              .padding(10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Icon(
+              painter = painterResource(id = R.drawable.ic_voting_24),
+              "Vote",
+              tint = Primary,
+              modifier =
+                  Modifier.background(Secondary, shape = RoundedCornerShape(8.dp)).padding(8.dp))
+          Spacer(modifier = Modifier.size(8.dp))
+          Text(text = "Abstimmung")
+        }
+        Spacer(modifier = Modifier.size(16.dp))
+        options.forEach { option ->
+          Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(text = option.text)
+            Spacer(modifier = Modifier.weight(1f))
+            CustomCheckbox(
+                size = 30.dp,
+                checked = if (selectedIndex == option.index.toInt()) true else false,
+                onCheckedChange = { isChecked ->
+                  if (isChecked) {
+                    onCheckedChange(option.index.toInt())
+                    selectedIndex = option.index.toInt()
+                  } else {
+                    onCheckedChange(-1)
+                    selectedIndex = -1
+                  }
+                })
+          }
+          Spacer(modifier = Modifier.size(16.dp))
+        }
+      }
+}
 
 @Preview
 @Composable
-fun previewVote(){
-  var options = listOf<GetVotingOptionDTO>(
-    GetVotingOptionDTO(1u, "Option 1"),
-    GetVotingOptionDTO(2u, "Option 2"),
-    GetVotingOptionDTO(3u, "Option 3")
-  )
+fun previewVote() {
+  var options =
+      listOf<GetVotingOptionDTO>(
+          GetVotingOptionDTO(1u, "Option 1"),
+          GetVotingOptionDTO(2u, "Option 2"),
+          GetVotingOptionDTO(3u, "Option 3"))
   var selectedIndex by remember { mutableIntStateOf(-1) }
   Log.i("Vote", "Checked: $selectedIndex")
   Column(modifier = Modifier.background(Background_prime).padding(8.dp).fillMaxHeight()) {
-    VoteOptions(options, onCheckedChange = { index ->
-      selectedIndex = index
-    })
+    VoteOptions(options, onCheckedChange = { index -> selectedIndex = index })
   }
 }

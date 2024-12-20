@@ -2,7 +2,6 @@ package net.ipv64.kivop.components
 
 import android.graphics.Paint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -28,39 +26,37 @@ import net.ipv64.kivop.ui.theme.Background_secondary
 
 @Composable
 fun PieChart(
-  list: List<VotingResults>, 
-  explodeDistance: Float = 10f,
-  showLabel: Boolean = false,
+    list: List<VotingResults>,
+    explodeDistance: Float = 10f,
+    showLabel: Boolean = false,
 ) {
-  Column(modifier = Modifier
-    .fillMaxWidth()
-    .customShadow()
-    .background(Background_secondary,shape = RoundedCornerShape(8.dp))
-    .padding(10.dp),
-    horizontalAlignment = Alignment.CenterHorizontally
-    )
-  {
-    Box(
-      modifier = Modifier.size(250.dp).aspectRatio(1f).drawBehind {
-        if (list.sumOf { it.votes } != 0) {
-          drawPieChart(list, explodeDistance = explodeDistance,showLabel)
-        } else {
-          val noVotings =
-            listOf(
-              VotingResults("Keine Stimmen", 1, 100.0),
-            )
-          drawPieChart(noVotings, 1.0f, showLabel)
-        }
-      }) {
-
-    }
-  }
+  Column(
+      modifier =
+          Modifier.fillMaxWidth()
+              .customShadow()
+              .background(Background_secondary, shape = RoundedCornerShape(8.dp))
+              .padding(10.dp),
+      horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier =
+                Modifier.size(250.dp).aspectRatio(1f).drawBehind {
+                  if (list.sumOf { it.votes } != 0) {
+                    drawPieChart(list, explodeDistance = explodeDistance, showLabel)
+                  } else {
+                    val noVotings =
+                        listOf(
+                            VotingResults("Keine Stimmen", 1, 100.0),
+                        )
+                    drawPieChart(noVotings, 1.0f, showLabel)
+                  }
+                }) {}
+      }
 }
 
 val CakeColorStart = Color(0xFF2C7D91)
 val CakeColorEnd = Color(0xFFF7DEC8)
 
-fun DrawScope.drawPieChart(list: List<VotingResults>, explodeDistance: Float,showLabel: Boolean) {
+fun DrawScope.drawPieChart(list: List<VotingResults>, explodeDistance: Float, showLabel: Boolean) {
   val totalVotes = list.sumOf { it.votes }
   val colors: List<Color> = interpolateColor(CakeColorStart, CakeColorEnd, list.size)
   // startingAngle -90° to start at the top
@@ -92,7 +88,7 @@ fun DrawScope.drawPieChart(list: List<VotingResults>, explodeDistance: Float,sho
         true,
         topLeft = offset.copy(x = offset.x + explodeOffset.x, y = offset.y + explodeOffset.y),
         size = adjustedSize)
-    if (showLabel){
+    if (showLabel) {
       // radius of the circle adjustedSize = diameter
       val radius = size.width / 2
       // find Text offset 1/3
@@ -114,7 +110,7 @@ fun DrawScope.drawPieChart(list: List<VotingResults>, explodeDistance: Float,sho
         // draw percentage under name
         val textPercentageOffsetY = textPaint.textSize * 1.1f
         drawContext.canvas.nativeCanvas.drawText(
-          textPercentage, textPos.x, textPos.y + textPercentageOffsetY, textPaint)
+            textPercentage, textPos.x, textPos.y + textPercentageOffsetY, textPaint)
       }
     }
 
@@ -167,10 +163,11 @@ fun interpolateColor(startColor: Color, endColor: Color, steps: Int): List<Color
 @Preview
 @Composable
 fun PieChartPreview() {
-  val votingResults = listOf(
-    VotingResults("Keine Stimmen", 50, 50.0),
-    VotingResults("Keine Stimmen", 40, 40.0),
-    VotingResults("Keine Stimmen", 10, 10.0),
-  )
+  val votingResults =
+      listOf(
+          VotingResults("Keine Stimmen", 50, 50.0),
+          VotingResults("Keine Stimmen", 40, 40.0),
+          VotingResults("Keine Stimmen", 10, 10.0),
+      )
   PieChart(list = votingResults)
 }

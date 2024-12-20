@@ -24,8 +24,8 @@ import androidx.navigation.NavController
 import java.util.UUID
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.components.AbstimmungCard
-import net.ipv64.kivop.components.ResultCard
 import net.ipv64.kivop.components.PieChart
+import net.ipv64.kivop.components.ResultCard
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
 import net.ipv64.kivop.models.GetVotingByID
@@ -46,41 +46,35 @@ fun VotingResultPage(navController: NavController, votingID: String) {
       Log.d("voting", votingData?.options.toString())
       votings = GetVotingResultByID(navController.context, UUID.fromString(votingID))
       votingsCombined =
-        votingData?.options!!.map { option ->
-          val label = option.text
-          val votes = votings?.results?.find { it.index == option.index }?.total?.toInt() ?: 0
-          val percentage = votings?.results?.find { it.index == option.index }?.percentage ?: 0.0
-          VotingResults(label, votes, percentage)
-        }
+          votingData?.options!!.map { option ->
+            val label = option.text
+            val votes = votings?.results?.find { it.index == option.index }?.total?.toInt() ?: 0
+            val percentage = votings?.results?.find { it.index == option.index }?.percentage ?: 0.0
+            VotingResults(label, votes, percentage)
+          }
     }
   }
 
   Column {
     if (votingData != null) {
-      votingData!!.let {
-        AbstimmungCard(
-            title = it.description,
-            date = it.startedAt!!
-        )
-      }
+      votingData!!.let { AbstimmungCard(title = it.description, date = it.startedAt!!) }
     }
     Spacer(modifier = Modifier.size(16.dp))
     //
     LazyColumn(
-      modifier = Modifier
-        .fillMaxWidth()
-        .fillMaxHeight()
-        .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
-        .background(Background_prime)
-        .padding(18.dp)
-    ) {
-      item{
-        if (votingsCombined.isNotEmpty()) {
-          PieChart(list = votingsCombined, explodeDistance = 15f)
-          Spacer(modifier = Modifier.size(16.dp))
-          ResultCard(votingsCombined)
+        modifier =
+            Modifier.fillMaxWidth()
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
+                .background(Background_prime)
+                .padding(18.dp)) {
+          item {
+            if (votingsCombined.isNotEmpty()) {
+              PieChart(list = votingsCombined, explodeDistance = 15f)
+              Spacer(modifier = Modifier.size(16.dp))
+              ResultCard(votingsCombined)
+            }
+          }
         }
-      }
-    }
   }
 }

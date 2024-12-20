@@ -1,6 +1,6 @@
 package net.ipv64.kivop.models
 
 data class GetMyVoteDTO(
-  var index: Int,
-  var text: String,
+    var index: Int,
+    var text: String,
 )

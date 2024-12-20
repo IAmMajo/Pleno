@@ -1,7 +1,5 @@
 package net.ipv64.kivop.dtos.PosterServiceDTOs
 
-
-
 import java.time.LocalDateTime
 import java.util.UUID
 

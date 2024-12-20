@@ -30,35 +30,33 @@ fun ResultCard(votingResults: List<VotingResults>) {
   val totalVotes = votingResults.sumOf { it.votes }
   val colors: List<Color> = interpolateColor(CakeColorStart, CakeColorEnd, votingResults.size)
   Box(
-    modifier =
-      Modifier.fillMaxWidth()
-        .customShadow()
-        .background(color = Background_secondary, shape = RoundedCornerShape(6.dp))
-        .padding(6.dp)
-  ) 
-  {
-    Column {
-      votingResults.forEach { result ->
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 3.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Box(
-            modifier =
-              Modifier.background(
-                  colors[votingResults.indexOf(result)], shape = CircleShape)
-                .size(16.dp),
-          ) {}
-          // Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = "wahl", tint =
-          // colors[votingResults.indexOf(result)])
-          Spacer(modifier = Modifier.size(3.dp))
-          Text(result.label, color = Text_prime)
-          Spacer(modifier = Modifier.weight(1f))
-          Text(text = result.percentage.toString() + "%", color = Text_prime)
+      modifier =
+          Modifier.fillMaxWidth()
+              .customShadow()
+              .background(color = Background_secondary, shape = RoundedCornerShape(6.dp))
+              .padding(6.dp)) {
+        Column {
+          votingResults.forEach { result ->
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 3.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Box(
+                  modifier =
+                      Modifier.background(
+                              colors[votingResults.indexOf(result)], shape = CircleShape)
+                          .size(16.dp),
+              ) {}
+              // Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = "wahl", tint =
+              // colors[votingResults.indexOf(result)])
+              Spacer(modifier = Modifier.size(3.dp))
+              Text(result.label, color = Text_prime)
+              Spacer(modifier = Modifier.weight(1f))
+              Text(text = result.percentage.toString() + "%", color = Text_prime)
+            }
+          }
         }
       }
-    }
-  }
 }
 
 @Preview

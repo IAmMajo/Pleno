@@ -253,48 +253,45 @@ suspend fun putVote(context: Context, votingId: String, optionIndex: Int): Boole
     }
 
 suspend fun getMyVote(context: Context, ID: UUID): GetMyVoteDTO? =
-  withContext(Dispatchers.IO) {
-    var auth = AuthController(context)
-    val path = "meetings/votings/$ID/my-vote"
+    withContext(Dispatchers.IO) {
+      var auth = AuthController(context)
+      val path = "meetings/votings/$ID/my-vote"
 
-    val token = auth.getSessionToken()
+      val token = auth.getSessionToken()
 
-    if (token.isNullOrEmpty()) {
-      println("Fehler: Kein Token verfügbar")
-      return@withContext null
-    }
+      if (token.isNullOrEmpty()) {
+        println("Fehler: Kein Token verfügbar")
+        return@withContext null
+      }
 
-    val request =
-      Request.Builder()
-        .url(BASE_URL + path)
-        .addHeader("Authorization", "Bearer $token")
-        .get()
-        .build()
+      val request =
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .get()
+              .build()
 
-    return@withContext try {
-      val response = okHttpClient.newCall(request).execute()
-      if (response.isSuccessful) {
-        val responseBody = response.body?.string()
-        if (responseBody != null) {
-          val vote = Gson().fromJson(responseBody, JsonObject::class.java)
-          val voteJson = vote.asJsonObject
-          val index = voteJson.get("index").asInt
-          val text = voteJson.get("text").asString
+      return@withContext try {
+        val response = okHttpClient.newCall(request).execute()
+        if (response.isSuccessful) {
+          val responseBody = response.body?.string()
+          if (responseBody != null) {
+            val vote = Gson().fromJson(responseBody, JsonObject::class.java)
+            val voteJson = vote.asJsonObject
+            val index = voteJson.get("index").asInt
+            val text = voteJson.get("text").asString
 
-          GetMyVoteDTO(
-            index,
-            text
-          )
+            GetMyVoteDTO(index, text)
+          } else {
+            println("Fehler: Leere Antwort erhalten.")
+            null
+          }
         } else {
-          println("Fehler: Leere Antwort erhalten.")
+          println("Fehler bei der Anfrage: ${response.message}")
           null
         }
-      } else {
-        println("Fehler bei der Anfrage: ${response.message}")
+      } catch (e: Exception) {
+        Log.e("get", "Fehler: ${e.message}")
         null
       }
-    } catch (e: Exception) {
-      Log.e("get", "Fehler: ${e.message}")
-      null
     }
-  }

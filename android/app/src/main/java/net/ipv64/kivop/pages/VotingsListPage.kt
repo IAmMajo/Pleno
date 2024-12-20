@@ -18,13 +18,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import java.util.UUID
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.components.ListenItem
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
 import net.ipv64.kivop.models.GetVotings
 import net.ipv64.kivop.models.ItemListData
 import net.ipv64.kivop.models.getMyVote
-import java.util.UUID
 
 @Composable
 fun VotingsListPage(navController: NavController) {
@@ -32,8 +32,8 @@ fun VotingsListPage(navController: NavController) {
   val scope = rememberCoroutineScope()
 
   LaunchedEffect(Unit) {
-      val result = GetVotings(navController.context)
-      votings = result
+    val result = GetVotings(navController.context)
+    votings = result
   }
 
   Column(modifier = Modifier.fillMaxSize()) {
@@ -66,13 +66,12 @@ fun VotingsListPage(navController: NavController) {
         ListenItem(
             votingData,
             onClick = {
-              
               var route = ""
               scope.launch {
                 if (voting.isOpen == true) {
                   if (voted(navController, voting.id)) {
                     route = "abgestimmt/${voting.id}"
-                  } else{
+                  } else {
                     route = "abstimmen/${voting.id}"
                   }
                 } else {
@@ -87,7 +86,7 @@ fun VotingsListPage(navController: NavController) {
   }
 }
 
-suspend fun voted(navController: NavController,id: UUID):Boolean{
+suspend fun voted(navController: NavController, id: UUID): Boolean {
   val myVote = getMyVote(navController.context, id)
   return myVote != null
 }
