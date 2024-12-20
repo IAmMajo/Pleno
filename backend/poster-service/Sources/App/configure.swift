@@ -51,8 +51,6 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreatePosters())
     app.migrations.add(CreatePosterPositions())
 
-    app.jwt.signers.use(.hs256(key: "Ganzgeheimespasswort"))
-
     // Erinnerungen für aufgehangene Poster versenden
     app.lifecycle.use(DailyCheckTask())
 

@@ -115,7 +115,7 @@ struct DailyCheckTask: LifecycleHandler {
                     )
                     
                     do {
-                        let jsonData = try JSONEncoder().encode(email)
+                        let jsonData = try JSONEncoder().encode(dto)
                         // Setzen der Content-Type-Header und Body manuell
                         var headers = HTTPHeaders()
                         headers.add(name: .contentType, value: "application/json")
