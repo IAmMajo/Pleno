@@ -7,6 +7,9 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -60,6 +63,7 @@ import androidx.navigation.navArgument
 import com.example.kivopandriod.pages.VotingResultPage
 import com.example.kivopandriod.pages.VotingsListPage
 import kotlinx.coroutines.launch
+import net.ipv64.kivop.pages.AlreadyVoted
 import net.ipv64.kivop.pages.AttendancesCoordinationPage
 import net.ipv64.kivop.pages.AttendancesListPage
 import net.ipv64.kivop.pages.HomePage
@@ -81,10 +85,12 @@ class MainActivity : ComponentActivity() {
       KIVoPAndriodTheme {
         val navController: NavHostController = rememberNavController()
         val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
+        Log.i("MainActivity", "Current Destination: $currentDestination")
         
         //change Surface color 
         val surfaceColor = when (currentDestination) {
           Screen.Abstimmen.rout -> Primary
+          Screen.Abstimmung.rout -> Primary
           else -> Background_prime
         }
         // A surface container using the 'background' color from the theme
@@ -110,12 +116,16 @@ fun handleLogout(context: Context) {
 // TODO - Navigation anpassen name anpassen
 @Composable
 fun navigation(navController: NavHostController) {
-  // val navController = rememberNavController()
+
   NavHost(
-      navController = navController,
-      startDestination = Screen.Home.rout,
-      modifier =
-          Modifier.fillMaxWidth().padding(top = 60.dp)
+    navController = navController,
+    startDestination = Screen.Home.rout,
+    modifier =
+        Modifier.fillMaxWidth().padding(top = 60.dp),
+    enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+    exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },
+    popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
+    popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
   ) {
 
     // StartScreen
@@ -159,6 +169,15 @@ fun navigation(navController: NavHostController) {
       )) { backStackEntry ->
       val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
       VotePage(navController = navController, votingID = votingID)
+    }
+    composable(
+      route = Screen.Abgestimmt.rout,
+      arguments =
+      listOf(
+        navArgument("votingID") { type = NavType.StringType },
+      )) { backStackEntry ->
+      val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
+      AlreadyVoted(navController = navController, votingID = votingID)
     }
   }
 }

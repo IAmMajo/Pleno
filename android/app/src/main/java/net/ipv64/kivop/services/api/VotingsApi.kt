@@ -220,7 +220,7 @@ suspend fun GetVotingByID(context: Context, ID: UUID): GetVotingDTO? =
 suspend fun putVote(context: Context, votingId: String, optionIndex: Int): Boolean =
     withContext(Dispatchers.IO) {
       var auth = AuthController(context)
-      val path = "/meetings/votings/$votingId/vote/$optionIndex"
+      val path = "meetings/votings/$votingId/vote/$optionIndex"
 
       val token = auth.getSessionToken()
 
@@ -251,3 +251,50 @@ suspend fun putVote(context: Context, votingId: String, optionIndex: Int): Boole
         false
       }
     }
+
+suspend fun getMyVote(context: Context, ID: UUID): GetMyVoteDTO? =
+  withContext(Dispatchers.IO) {
+    var auth = AuthController(context)
+    val path = "meetings/votings/$ID/my-vote"
+
+    val token = auth.getSessionToken()
+
+    if (token.isNullOrEmpty()) {
+      println("Fehler: Kein Token verfügbar")
+      return@withContext null
+    }
+
+    val request =
+      Request.Builder()
+        .url(BASE_URL + path)
+        .addHeader("Authorization", "Bearer $token")
+        .get()
+        .build()
+
+    return@withContext try {
+      val response = okHttpClient.newCall(request).execute()
+      if (response.isSuccessful) {
+        val responseBody = response.body?.string()
+        if (responseBody != null) {
+          val vote = Gson().fromJson(responseBody, JsonObject::class.java)
+          val voteJson = vote.asJsonObject
+          val index = voteJson.get("index").asInt
+          val text = voteJson.get("text").asString
+
+          GetMyVoteDTO(
+            index,
+            text
+          )
+        } else {
+          println("Fehler: Leere Antwort erhalten.")
+          null
+        }
+      } else {
+        println("Fehler bei der Anfrage: ${response.message}")
+        null
+      }
+    } catch (e: Exception) {
+      Log.e("get", "Fehler: ${e.message}")
+      null
+    }
+  }
