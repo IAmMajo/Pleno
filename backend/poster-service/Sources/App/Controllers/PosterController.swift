@@ -78,7 +78,18 @@ struct PosterController: RouteCollection, Sendable {
         // Poster-Routen
         let posters = authProtected.grouped("posters")
         
-        posters.get(":posterId",use: getPoster)
+        posters.get(":posterId",use: getPoster).openAPI(
+            summary: "Poster abfragen",
+            description: """
+                Diese Route gibt ein Poster anhand der ID zurück. 
+                **Beispiel:**
+                - `GET /posters/121434-132131` gibt das Poster mit der dazugehörigen UUID zurück.
+                """,
+            path: .type(Poster.IDValue.self),
+            body: nil,
+            response: .type(PosterResponseDTO.self),
+            responseContentType: .application(.json)
+        )
         
         posters.get(use: getPosters).openAPI(
             summary: "Alle verfügbaren Poster abfragen",
