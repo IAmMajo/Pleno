@@ -189,7 +189,8 @@ struct PosterController: RouteCollection, Sendable {
               - **hangs**: Gibt alle Poster-Positionen zurück, bei denen ein Poster bereits aufgehängt wurde, aber noch nicht abgenommen ist.
               - **toHang**: Gibt alle Positionen zurück, an denen noch kein Poster hängt und deren Verfallsdatum (expires_at) in der Zukunft liegt.
               - **overdue**: Zeigt alle Positionen, bei denen ein Poster hängt, deren Verfallsdatum jedoch bereits überschritten ist.
-              
+              - **takenDown**: Zeigt alle vergangenen Positionen.
+
               Wird kein `status`-Parameter übergeben, werden alle Kategorien zusammen zurückgegeben.
             
             Das Ergebnis wird standardmäßig als JSON zurückgeliefert. Bei aktivierter Paginierung wird ein `PagedResponseDTO` mit Metadaten zu Seitenanzahl, aktueller Seite und Gesamtmenge an Items zurückgegeben. Ohne Paginierung erhält man ein einfaches Array von PosterPositionResponseDTO-Objekten.
@@ -718,6 +719,7 @@ struct PosterController: RouteCollection, Sendable {
         let page = try? req.query.get(Int.self, at: "page")
         let per = try? req.query.get(Int.self, at: "per")
         
+        
         let currentDate = Date()
         
         // Abhängig von statusQuery unterschiedlichen Code ausführen
@@ -760,6 +762,7 @@ struct PosterController: RouteCollection, Sendable {
             let query = PosterPosition.query(on: req.db)
                 .filter(\.$posted_by.$id == nil)
                 .filter(\.$expires_at > currentDate)
+                .sort(\.$expires_at, .ascending)
             
             if let page = page, let per = per {
                 let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
@@ -792,6 +795,7 @@ struct PosterController: RouteCollection, Sendable {
                 .filter(\.$posted_by.$id != nil)
                 .filter(\.$removed_by.$id == nil)
                 .filter(\.$expires_at <= currentDate)
+                .sort(\.$expires_at, .ascending)
             
             if let page = page, let per = per {
                 let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
@@ -818,8 +822,35 @@ struct PosterController: RouteCollection, Sendable {
                 return try await createResponse(with: response, on: req)
             }
             
-        case nil:
-            // Kein Status übergeben: Alle drei Sets holen und zusammenführen
+        case "takenDown":
+            let query = PosterPosition.query(on: req.db)
+                .filter(\.$removed_by.$id != nil)
+                .sort(\.$expires_at, .ascending)
+            
+            if let page = page, let per = per {
+                let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
+                let response = posterPositionMapToDTO(paginatedData.items, status: "takenDown")
+                
+                let currentPage = paginatedData.metadata.page
+                let perPage = paginatedData.metadata.per
+                let totalItems = paginatedData.metadata.total
+                let totalPages = Int((Double(totalItems) / Double(perPage)).rounded(.up))
+                
+                var headers = HTTPHeaders()
+                        headers.contentType = .json
+                        headers.add(name: "Pagnation-Current-Page", value: "\(currentPage)")
+                        headers.add(name: "Pagnation-Per-Page", value: "\(perPage)")
+                        headers.add(name: "Pagnation-Total-Items", value: "\(totalItems)")
+                        headers.add(name: "Pagnation-Total-Pages", value: "\(totalPages)")
+                
+                return try await createResponse(with: response, on: req, additionalHeaders: headers)
+            } else {
+                // Ohne Paginierung
+                let positions = try await query.all()
+                let response = posterPositionMapToDTO(positions, status: "takenDown")
+                return try await createResponse(with: response, on: req)
+            }
+        default:
             let hangsQuery = PosterPosition.query(on: req.db)
                 .filter(\.$posted_by.$id != nil)
                 .filter(\.$removed_by.$id == nil)
@@ -827,11 +858,13 @@ struct PosterController: RouteCollection, Sendable {
             let toHangQuery = PosterPosition.query(on: req.db)
                 .filter(\.$posted_by.$id == nil)
                 .filter(\.$expires_at > currentDate)
+                .sort(\.$expires_at, .ascending)
             let overdueQuery = PosterPosition.query(on: req.db)
                 .filter(\.$posted_by.$id != nil)
                 .filter(\.$removed_by.$id == nil)
                 .filter(\.$expires_at <= currentDate)
-            
+                .sort(\.$expires_at, .ascending)
+
             let (hangsPositions, toHangPositions, overduePositions) = try await (
                 hangsQuery.all(),
                 toHangQuery.all(),
@@ -862,10 +895,6 @@ struct PosterController: RouteCollection, Sendable {
                 // Ohne Paginierung
                 return try await createResponse(with: combined, on: req)
             }
-            
-        default:
-            // Ungültiger Status-Wert
-            throw Abort(.badRequest, reason: "Invalid status parameter. Must be one of hangs, toHang, overdue or omitted.")
         }
     }
     
