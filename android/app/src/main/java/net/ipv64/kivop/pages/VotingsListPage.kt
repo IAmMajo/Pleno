@@ -23,6 +23,8 @@ import net.ipv64.kivop.components.ListenItem
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
 import net.ipv64.kivop.models.GetVotings
 import net.ipv64.kivop.models.ItemListData
+import net.ipv64.kivop.models.getMyVote
+import java.util.UUID
 
 @Composable
 fun VotingsListPage(navController: NavController) {
@@ -30,10 +32,8 @@ fun VotingsListPage(navController: NavController) {
   val scope = rememberCoroutineScope()
 
   LaunchedEffect(Unit) {
-    scope.launch {
       val result = GetVotings(navController.context)
       votings = result
-    }
   }
 
   Column(modifier = Modifier.fillMaxSize()) {
@@ -66,11 +66,28 @@ fun VotingsListPage(navController: NavController) {
         ListenItem(
             votingData,
             onClick = {
-              val route = "abstimmungen/${voting.id}"
-              navController.navigate(route)
+              
+              var route = ""
+              scope.launch {
+                if (voting.isOpen == true) {
+                  if (voted(navController, voting.id)) {
+                    route = "abgestimmt/${voting.id}"
+                  } else{
+                    route = "abstimmen/${voting.id}"
+                  }
+                } else {
+                  route = "abstimmung/${voting.id}"
+                }
+                navController.navigate(route)
+              }
             })
         Spacer(modifier = Modifier.size(8.dp))
       }
     }
   }
+}
+
+suspend fun voted(navController: NavController,id: UUID):Boolean{
+  val myVote = getMyVote(navController.context, id)
+  return myVote != null
 }
