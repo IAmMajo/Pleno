@@ -2,7 +2,7 @@ import Fluent
 import Vapor
 import Foundation
 import Models
-@preconcurrency import JWTKit
+@preconcurrency import JWT
 import VaporToOpenAPI
 
 // MARK: - Fehlerdefinitionen für Poster-Erstellung und -Verwaltung
