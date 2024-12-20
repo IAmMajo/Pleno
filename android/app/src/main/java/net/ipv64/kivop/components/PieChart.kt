@@ -2,16 +2,19 @@ package net.ipv64.kivop.components
 
 import android.graphics.Paint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -20,28 +23,38 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.math.*
 import net.ipv64.kivop.models.VotingResults
+import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
 
 @Composable
 fun PieChart(
-  modifier: Modifier = Modifier,
   list: List<VotingResults>, 
-  explodeDistance: Float = 30f,
+  explodeDistance: Float = 10f,
   showLabel: Boolean = false,
 ) {
-  Box(
-    modifier = modifier.aspectRatio(1f).drawBehind {
-      if (list.sumOf { it.votes } != 0) {
-        drawPieChart(list, explodeDistance = explodeDistance,showLabel)
-      } else {
-        val noVotings =
-          listOf(
+  Column(modifier = Modifier
+    .fillMaxWidth()
+    .customShadow()
+    .background(Background_secondary,shape = RoundedCornerShape(8.dp))
+    .padding(10.dp),
+    horizontalAlignment = Alignment.CenterHorizontally
+    )
+  {
+    Box(
+      modifier = Modifier.size(250.dp).aspectRatio(1f).drawBehind {
+        if (list.sumOf { it.votes } != 0) {
+          drawPieChart(list, explodeDistance = explodeDistance,showLabel)
+        } else {
+          val noVotings =
+            listOf(
               VotingResults("Keine Stimmen", 1, 100.0),
-          )
-        drawPieChart(noVotings, 1.0f, showLabel)
-      }
-    }) {}
+            )
+          drawPieChart(noVotings, 1.0f, showLabel)
+        }
+      }) {
 
+    }
+  }
 }
 
 val CakeColorStart = Color(0xFF2C7D91)

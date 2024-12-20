@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.ipv64.kivop.R
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingOptionDTO
+import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
@@ -39,10 +40,7 @@ fun VoteOptions(
   
   Column(
     modifier = Modifier
-      .shadow(
-        elevation = 4.dp,
-        shape = RoundedCornerShape(8.dp),
-      )
+      .customShadow()
       .background(Background_secondary,shape = RoundedCornerShape(8.dp))
       .padding(10.dp)
       
