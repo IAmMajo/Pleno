@@ -42,7 +42,10 @@ fun ListenItem(
                   painterResource(id = R.drawable.ic_event_open), Text_prime, Background_secondary)
           1 -> Triple(painterResource(id = R.drawable.ic_event_check), Primary, Primary_20)
           else ->
-              Triple(painterResource(id = R.drawable.ic_event_cancel), Signal_red, Signal_red.copy(0.2f))
+              Triple(
+                  painterResource(id = R.drawable.ic_event_cancel),
+                  Signal_red,
+                  Signal_red.copy(0.2f))
         }
 
     iconPainter = iconData.first
