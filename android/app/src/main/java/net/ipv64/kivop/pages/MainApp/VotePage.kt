@@ -1,4 +1,4 @@
-package net.ipv64.kivop.pages
+package net.ipv64.kivop.pages.MainApp
 
 import android.widget.Toast
 import androidx.compose.foundation.background

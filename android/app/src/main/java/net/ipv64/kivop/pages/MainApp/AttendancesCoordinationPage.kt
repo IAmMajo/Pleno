@@ -1,8 +1,6 @@
-package net.ipv64.kivop.pages
+package net.ipv64.kivop.pages.MainApp
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 
 @Composable

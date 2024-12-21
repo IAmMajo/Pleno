@@ -1,4 +1,4 @@
-package net.ipv64.kivop.pages
+package net.ipv64.kivop.pages.onboarding
 
 import android.content.Context
 import android.content.Intent
@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -52,13 +53,14 @@ class LoginActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     val context: Context = this
     setContent {
+      val navController = rememberNavController()
       KIVoPAndriodTheme {
         // A surface container using the 'background' color from the theme
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = Color(0xfffafaee), // TODO - Android Background Light)
+            color = Color(0xfffafaee),
         ) {
-          LoginScreen(context)
+          OnboardingNav(navController = navController)
         }
       }
     }

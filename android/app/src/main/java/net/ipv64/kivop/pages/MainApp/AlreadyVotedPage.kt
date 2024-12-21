@@ -1,4 +1,4 @@
-package net.ipv64.kivop.pages
+package net.ipv64.kivop.pages.MainApp
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
