@@ -14,7 +14,7 @@ class AuthController(private val context: Context) {
     private const val PREF_USER_EMAIL = "user_email"
     private const val PREF_USER_PASSWORD = "user_password"
   }
-
+  private val appContext = context.applicationContext;
   suspend fun login(email: String, password: String): Boolean {
     val token = getToken(email, password)
     if (token != "") {
@@ -26,7 +26,7 @@ class AuthController(private val context: Context) {
   }
 
   fun logout() {
-    val sharedPreferences = getEncryptedSharedPreferences(context)
+    val sharedPreferences = getEncryptedSharedPreferences()
 
     sharedPreferences.edit().remove(PREF_SESSION_TOKEN).apply()
     sharedPreferences.edit().remove(PREF_USER_EMAIL).apply()
@@ -43,7 +43,7 @@ class AuthController(private val context: Context) {
   }
 
   suspend fun getSessionToken(): String {
-    val sharedPreferences = getEncryptedSharedPreferences(context)
+    val sharedPreferences = getEncryptedSharedPreferences()
 
     var sessionToken = sharedPreferences.getString(PREF_SESSION_TOKEN, "")
     if (!sessionToken.isNullOrEmpty()) {
@@ -62,20 +62,20 @@ class AuthController(private val context: Context) {
   }
 
   private fun saveSessionToken(token: String) {
-    val sharedPreferences = getEncryptedSharedPreferences(context)
+    val sharedPreferences = getEncryptedSharedPreferences()
 
     sharedPreferences.edit().putString(PREF_SESSION_TOKEN, token).apply()
   }
 
   private fun saveCredentials(email: String, password: String) {
-    val sharedPreferences = getEncryptedSharedPreferences(context)
+    val sharedPreferences = getEncryptedSharedPreferences()
 
     sharedPreferences.edit().putString(PREF_USER_EMAIL, email).apply()
     sharedPreferences.edit().putString(PREF_USER_PASSWORD, password).apply()
   }
 
   private fun getCredentials(): UserLoginDTO {
-    val sharedPreferences = getEncryptedSharedPreferences(context)
+    val sharedPreferences = getEncryptedSharedPreferences()
 
     val email = sharedPreferences.getString(PREF_USER_EMAIL, "")
     val password = sharedPreferences.getString(PREF_USER_PASSWORD, "")
@@ -85,10 +85,10 @@ class AuthController(private val context: Context) {
     return UserLoginDTO("", "")
   }
 
-  private fun getEncryptedSharedPreferences(context: Context): SharedPreferences {
+  private fun getEncryptedSharedPreferences(): SharedPreferences {
     // Create or retrieve a master key
     val masterKey =
-        MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+        MasterKey.Builder(appContext, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
 
