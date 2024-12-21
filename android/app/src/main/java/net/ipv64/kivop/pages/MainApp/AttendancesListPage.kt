@@ -1,4 +1,4 @@
-package net.ipv64.kivop.pages.MainApp
+package net.ipv64.kivop.pages.mainApp
 
 import AppointmentTabContent
 import androidx.compose.runtime.Composable

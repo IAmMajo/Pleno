@@ -1,4 +1,4 @@
-package net.ipv64.kivop.pages.MainApp
+package net.ipv64.kivop.pages.mainApp
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
