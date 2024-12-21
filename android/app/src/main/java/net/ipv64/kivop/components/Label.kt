@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.ipv64.kivop.ui.theme.Background_prime
+import net.ipv64.kivop.ui.theme.Primary
 
 
 @Composable
@@ -38,33 +39,34 @@ fun Label(
 
 @Composable
 fun LabelMax(
-  backgroundColor: Color = Color(color = 0xff686D74),
+  modifier: Modifier = Modifier,
+  outerBackgroundColor: Color = Color.Transparent, // Hintergrund um die Box
+  backgroundColor: Color = Color(0xFF686D74), // Hintergrund der Box selbst
   onClick: (() -> Unit)? = null, // Optionaler onClick-Parameter
   content: @Composable BoxScope.() -> Unit
 ) {
   Box(
-    modifier = Modifier
+    modifier = modifier
       .fillMaxWidth()
-      .clip(RoundedCornerShape(50))
-      .background(backgroundColor)
-      .padding(horizontal = 18.dp, vertical = 6.dp)
-      .let { baseModifier -> // Modifier nur hinzufügen, wenn onClick vorhanden ist
-        if (onClick != null) {
-          baseModifier.clickable { onClick() }
-        } else {
-          baseModifier
-        }
-      },
-    content = content
-  )
+      .background(outerBackgroundColor) 
+  ) {
+    Box(
+      modifier = Modifier
+        .fillMaxWidth()
+        .clip(RoundedCornerShape(50))
+        .background(backgroundColor) // Hintergrund der Box
+        .padding(horizontal = 18.dp, vertical = 6.dp)
+        .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier), // Optionaler Klick
+      content = content
+    )
+  }
 }
 
 
 @Preview(showBackground = true)
 @Composable
 fun LabelMaxPreview() {
-  LabelMax(
-  ) {
+  LabelMax(outerBackgroundColor = Primary) {
     Text(
       text = "Nach rechts ausgerichtet",
       color = Background_prime,
