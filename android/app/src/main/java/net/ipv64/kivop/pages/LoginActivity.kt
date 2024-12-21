@@ -98,8 +98,6 @@ fun LoginScreen(context: Context) {
             CustomInputField(
                 label = "Username",
                 placeholder = "Enter your username",
-                horizontalPadding = 0.dp,
-                verticalPadding = 0.dp,
                 value = username,
                 onValueChange = { username = it })
             Spacer(Modifier.size(12.dp))
@@ -108,8 +106,6 @@ fun LoginScreen(context: Context) {
                 label = "Passwort",
                 placeholder = "Enter your passwort",
                 isPasswort = true,
-                horizontalPadding = 0.dp,
-                verticalPadding = 0.dp,
                 value = password,
                 onValueChange = { password = it })
             Spacer(Modifier.size(12.dp))
