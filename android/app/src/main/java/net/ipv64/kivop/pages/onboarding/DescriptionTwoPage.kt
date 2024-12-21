@@ -27,55 +27,41 @@ import net.ipv64.kivop.ui.theme.Text_prime_light
 
 @Composable
 fun DescriptionTwoPage(navController: NavController) {
-  Column(
-    modifier = Modifier
-      .fillMaxWidth()
-      .background(Color.Green)
-  ) {
+  Column(modifier = Modifier.fillMaxWidth().background(Color.Green)) {
     Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(1.5f)
-        .background(Background_prime)
-        .zIndex(2f)
-        .customRoundedBottom(Background_prime, heightPercent = 40, widthPercent = 30),
-      verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally,
-    )  {
+        modifier =
+            Modifier.fillMaxWidth()
+                .weight(1.5f)
+                .background(Background_prime)
+                .zIndex(2f)
+                .customRoundedBottom(Background_prime, heightPercent = 40, widthPercent = 30),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
       Spacer(modifier = Modifier.weight(1f))
-      Box(
-        modifier = Modifier
-          .height(250.dp)
-          .aspectRatio(1f)
-          .background(Color.Red)
-      ){
-        //Box for image
+      Box(modifier = Modifier.height(250.dp).aspectRatio(1f).background(Color.Red)) {
+        // Box for image
       }
       Spacer(modifier = Modifier.height(16.dp))
-      Box(modifier = Modifier.weight(1f)){
-        //Box for Text
+      Box(modifier = Modifier.weight(1f)) {
+        // Box for Text
       }
       Spacer(modifier = Modifier.weight(1f))
     }
     Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(1f)
-        .background(Primary)
-        .padding(18.dp),
-      verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth().weight(1f).background(Primary).padding(18.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       Text(
-        text = "Verwalte Ratssitzungen, \nerstelle Umfragen, oder \nplane die perfekte \nVereinsreise...",
-        color = Text_prime_light ,
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.headlineLarge,
+          text =
+              "Verwalte Ratssitzungen, \nerstelle Umfragen, oder \nplane die perfekte \nVereinsreise...",
+          color = Text_prime_light,
+          textAlign = TextAlign.Center,
+          style = MaterialTheme.typography.headlineLarge,
       )
-      //Todo: Temp Button! Wie geht es weiter?
-      Button(onClick = {
-        navController.navigate(OnboardingScreen.Register.rout)
-      }) {
+      // Todo: Temp Button! Wie geht es weiter?
+      Button(onClick = { navController.navigate(OnboardingScreen.Register.rout) }) {
         Text(text = "Weiter")
       }
     }

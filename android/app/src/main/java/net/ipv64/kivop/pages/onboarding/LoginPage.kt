@@ -28,9 +28,7 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.MainActivity
 import net.ipv64.kivop.components.CustomInputField
-import net.ipv64.kivop.components.ImgPicker
 import net.ipv64.kivop.services.AuthController
-import net.ipv64.kivop.services.uriToByteArray
 import net.ipv64.kivop.ui.customRoundedTop
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Primary
@@ -41,84 +39,73 @@ import net.ipv64.kivop.ui.theme.Text_prime_light
 fun LoginPage(navController: NavController) {
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-  
+
   var scope = rememberCoroutineScope()
 
-  Column(
-    modifier = Modifier
-      .fillMaxWidth()
-      .background(Color.Green)
-  ) {
+  Column(modifier = Modifier.fillMaxWidth().background(Color.Green)) {
     Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(2f)
-        .background(Primary)
-        .padding(18.dp),
-      //verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally,
-    )  {
+        modifier = Modifier.fillMaxWidth().weight(2f).background(Primary).padding(18.dp),
+        // verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
       Spacer(modifier = Modifier.height(32.dp))
       Text(
-        text = "Melde dich an",
-        color = Text_prime_light ,
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.headlineLarge,
+          text = "Melde dich an",
+          color = Text_prime_light,
+          textAlign = TextAlign.Center,
+          style = MaterialTheme.typography.headlineLarge,
       )
       Spacer(modifier = Modifier.height(16.dp))
-      //Todo: Fix CustomInputField.kt
+      // Todo: Fix CustomInputField.kt
       CustomInputField(
-        label = "Email",
-        placeholder = "Max Mustermann",
-        value = email,
-        onValueChange = { email = it},
+          label = "Email",
+          placeholder = "Max Mustermann",
+          value = email,
+          onValueChange = { email = it },
       )
       CustomInputField(
-        label = "Passwort",
-        placeholder = "Max Mustermann",
-        value = password,
-        onValueChange = { password = it},
-        isPasswort = true,
+          label = "Passwort",
+          placeholder = "Max Mustermann",
+          value = password,
+          onValueChange = { password = it },
+          isPasswort = true,
       )
     }
     Column(
-
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(0.4f)
-        .customRoundedTop(Background_prime, heightPercent = 40, widthPercent = 30)
-        .background(Background_prime)
-        .padding(18.dp)
-
-    )
-    {
-      Spacer(modifier = Modifier.weight(1f))
-      Button(
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-          containerColor = Color.Transparent, contentColor = Signal_blue
-        ),
-        onClick = { navController.navigate(OnboardingScreen.Description1.rout) }
-      ) {
-        Text(text = "Regestrieren", style = MaterialTheme.typography.labelMedium, textDecoration = TextDecoration.Underline)
-      }
-      Button(
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-          containerColor = Signal_blue, contentColor = Text_prime_light
-        ),
-        onClick = {
-          scope.launch { 
-            val success = handleLogin(navController.context,email,password)
-            if (success) {
-              navigateToMainActivity(navController.context)
-            }
-          }
+        modifier =
+            Modifier.fillMaxWidth()
+                .weight(0.4f)
+                .customRoundedTop(Background_prime, heightPercent = 40, widthPercent = 30)
+                .background(Background_prime)
+                .padding(18.dp)) {
+          Spacer(modifier = Modifier.weight(1f))
+          Button(
+              modifier = Modifier.fillMaxWidth(),
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = Color.Transparent, contentColor = Signal_blue),
+              onClick = { navController.navigate(OnboardingScreen.Description1.rout) }) {
+                Text(
+                    text = "Regestrieren",
+                    style = MaterialTheme.typography.labelMedium,
+                    textDecoration = TextDecoration.Underline)
+              }
+          Button(
+              modifier = Modifier.fillMaxWidth(),
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = Signal_blue, contentColor = Text_prime_light),
+              onClick = {
+                scope.launch {
+                  val success = handleLogin(navController.context, email, password)
+                  if (success) {
+                    navigateToMainActivity(navController.context)
+                  }
+                }
+              }) {
+                Text(text = "Bestätigen", style = MaterialTheme.typography.labelMedium)
+              }
         }
-      ) {
-        Text(text = "Bestätigen", style = MaterialTheme.typography.labelMedium)
-      }
-    }
   }
 }
 

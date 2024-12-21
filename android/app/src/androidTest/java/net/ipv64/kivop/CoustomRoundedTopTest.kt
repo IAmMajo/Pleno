@@ -21,7 +21,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.ipv64.kivop.ui.customRoundedTop
 
-
 @Composable
 fun DebugSliderTest() {
   // State for the height and width percentages
@@ -30,46 +29,46 @@ fun DebugSliderTest() {
 
   // UI Layout
   Column(
-    modifier = Modifier
-      .fillMaxSize()
-      .padding(0.dp),
-    horizontalAlignment = Alignment.CenterHorizontally
-  ) {
-    // Slider for height percentage
-    Text("Height Percent: ${heightPercent.toInt()}%")
-    Slider(
-      value = heightPercent,
-      onValueChange = { heightPercent = it },
-      valueRange = 0f..100f,
-      steps = 100,
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-    )
+      modifier = Modifier.fillMaxSize().padding(0.dp),
+      horizontalAlignment = Alignment.CenterHorizontally) {
+        // Slider for height percentage
+        Text("Height Percent: ${heightPercent.toInt()}%")
+        Slider(
+            value = heightPercent,
+            onValueChange = { heightPercent = it },
+            valueRange = 0f..100f,
+            steps = 100,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
 
-    Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-    // Slider for width percentage
-    Text("Width Percent: ${widthPercent.toInt()}%")
-    Slider(
-      value = widthPercent,
-      onValueChange = { widthPercent = it },
-      valueRange = 0f..50f,
-      steps = 100,
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-    )
+        // Slider for width percentage
+        Text("Width Percent: ${widthPercent.toInt()}%")
+        Slider(
+            value = widthPercent,
+            onValueChange = { widthPercent = it },
+            valueRange = 0f..50f,
+            steps = 100,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
 
-    Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(1f))
 
-    // Box with custom rounded top applied
-    Box(
-      modifier = Modifier
-        .fillMaxWidth()
-        .height(100.dp)
-        .customRoundedTop(color = Color.Blue, heightPercent = heightPercent.toInt(), widthPercent = widthPercent.toInt())
-    ) {
-      // Optionally, you can add some content inside the box if you want
-      Text("Testing customRoundedTop", modifier = Modifier.align(Alignment.Center), color = Color.White)
-    }
-  }
+        // Box with custom rounded top applied
+        Box(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .height(100.dp)
+                    .customRoundedTop(
+                        color = Color.Blue,
+                        heightPercent = heightPercent.toInt(),
+                        widthPercent = widthPercent.toInt())) {
+              // Optionally, you can add some content inside the box if you want
+              Text(
+                  "Testing customRoundedTop",
+                  modifier = Modifier.align(Alignment.Center),
+                  color = Color.White)
+            }
+      }
 }
 
 @Preview(showBackground = true)

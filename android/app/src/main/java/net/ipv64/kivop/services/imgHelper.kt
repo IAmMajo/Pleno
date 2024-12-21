@@ -7,7 +7,6 @@ import android.net.Uri
 import android.util.Base64
 import java.io.InputStream
 
-
 fun uriToByteArray(context: Context, uri: Uri): ByteArray? {
   try {
     // Open input stream from the URI

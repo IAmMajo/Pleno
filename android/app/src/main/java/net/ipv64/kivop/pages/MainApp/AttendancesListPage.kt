@@ -19,7 +19,7 @@ fun AttendancesListPage(navController: NavController) {
   val tabs = listOf("anstehende Sitzungen", "vergangenen Sitzungen")
   val scope = rememberCoroutineScope()
   var meetings by remember { mutableStateOf<List<GetMeetingDTO>>(emptyList()) }
-  
+
   //    val colorH: Color = when (STATUS) {
   //        0 -> Background_secondary_light
   //        1 -> Primary_dark_20

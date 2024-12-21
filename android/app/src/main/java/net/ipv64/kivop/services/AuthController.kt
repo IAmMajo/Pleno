@@ -14,7 +14,9 @@ class AuthController(private val context: Context) {
     private const val PREF_USER_EMAIL = "user_email"
     private const val PREF_USER_PASSWORD = "user_password"
   }
-  private val appContext = context.applicationContext;
+
+  private val appContext = context.applicationContext
+
   suspend fun login(email: String, password: String): Boolean {
     val token = getToken(email, password)
     if (token != "") {
