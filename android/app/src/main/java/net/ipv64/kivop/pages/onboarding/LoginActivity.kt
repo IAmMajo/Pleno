@@ -46,12 +46,9 @@ import net.ipv64.kivop.ui.theme.KIVoPAndriodTheme
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Text_prime
 
-var coroutineScope = CoroutineScope(Dispatchers.IO)
-
 class LoginActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    val context: Context = this
     setContent {
       val navController = rememberNavController()
       KIVoPAndriodTheme {
@@ -65,91 +62,4 @@ class LoginActivity : ComponentActivity() {
       }
     }
   }
-}
-
-@Composable
-fun LoginScreen(context: Context) {
-  var isLoggedIn by remember { mutableStateOf<Boolean?>(null) }
-  val auth = AuthController(context)
-  LaunchedEffect(Unit) {
-    isLoggedIn = auth.isLoggedIn()
-    if (isLoggedIn == true) {
-      navigateToMainActivity(context)
-    }
-  }
-  if (isLoggedIn == false) {
-    Column(
-        modifier = Modifier.background(color = Background_prime).padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally) {
-          // TODO: CHANGE LOGIN PAGE!!!
-          val annotatedString = buildAnnotatedString {
-            append("Log dich in deinen ")
-            withStyle(style = SpanStyle(color = Primary)) { append("Account") }
-            append(" ein!")
-          }
-          Text(
-              text = annotatedString,
-              fontSize = 24.sp,
-              color = Text_prime,
-              fontWeight = FontWeight.Bold)
-          Column(
-              modifier = Modifier.fillMaxHeight(),
-              verticalArrangement = Arrangement.Center,
-          ) {
-            var username by remember { mutableStateOf("") }
-            CustomInputField(
-                label = "Username",
-                placeholder = "Enter your username",
-                horizontalPadding = 0.dp,
-                verticalPadding = 0.dp,
-                value = username,
-                onValueChange = { username = it })
-            Spacer(Modifier.size(12.dp))
-            var password by remember { mutableStateOf("") }
-            CustomInputField(
-                label = "Passwort",
-                placeholder = "Enter your passwort",
-                isPasswort = true,
-                horizontalPadding = 0.dp,
-                verticalPadding = 0.dp,
-                value = password,
-                onValueChange = { password = it })
-            Spacer(Modifier.size(12.dp))
-            CustomButton(
-                text = "Login",
-                onClick = {
-                  coroutineScope.launch {
-                    // Todo: use email and password val
-                    if (handleLogin(context, username, password)) {
-                      navigateToMainActivity(context)
-                    } else {
-                      try {
-                        withContext(Dispatchers.Main) {
-                          Toast.makeText(
-                                  context,
-                                  "Login failed. Please check your credentials.",
-                                  Toast.LENGTH_SHORT)
-                              .show()
-                        }
-                      } catch (e: Exception) {
-                        Log.e("Login", "Error showing toast: $e")
-                      }
-                    }
-                  }
-                },
-                color = Primary,
-                fontColor = Text_prime)
-          }
-        }
-  }
-}
-
-private suspend fun handleLogin(context: Context, email: String, password: String): Boolean {
-  val auth = AuthController(context)
-  return auth.login(email, password)
-}
-
-private fun navigateToMainActivity(context: Context) {
-  val intent = Intent(context, MainActivity::class.java)
-  context.startActivity(intent)
 }
