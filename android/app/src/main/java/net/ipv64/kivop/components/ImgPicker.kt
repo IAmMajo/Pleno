@@ -22,8 +22,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -38,7 +40,7 @@ import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun ImgPicker(img: ByteArray? = null): Uri?{
+fun ImgPicker(img: ByteArray? = null,size: Dp = 150.dp): Uri?{
   var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
   val launcher = rememberLauncherForActivityResult(
@@ -50,7 +52,7 @@ fun ImgPicker(img: ByteArray? = null): Uri?{
 
   Box(
     modifier = Modifier
-      .size(150.dp)
+      .size(size)
       .background(Secondary, shape = CircleShape),
   ){
     if (img != null){
@@ -80,7 +82,7 @@ fun ImgPicker(img: ByteArray? = null): Uri?{
       modifier = Modifier
         .clip(shape = CircleShape)
         .background(Background_secondary)
-        .size(50.dp)
+        .size(size*0.3f)
         .align(Alignment.BottomEnd)
         .clickable(onClick = {launcher.launch("image/*")}),
       contentAlignment = Alignment.Center
@@ -89,7 +91,7 @@ fun ImgPicker(img: ByteArray? = null): Uri?{
         painter = painterResource(id = R.drawable.ic_edit),
         contentDescription = "Upload Image",
         tint = Text_tertiary,
-        modifier = Modifier.fillMaxSize().padding(12.dp))
+        modifier = Modifier.fillMaxSize().padding(8.dp))
     }
   }
   return selectedImageUri
