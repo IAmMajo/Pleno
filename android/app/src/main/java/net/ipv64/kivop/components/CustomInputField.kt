@@ -25,43 +25,42 @@ import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
 fun CustomInputField(
-  label: String,
-  labelColor: Color = Background_prime,
-  placeholder: String,
-  modifier: Modifier = Modifier,
-  isPasswort: Boolean = false,
-  value: String,
-  backgroundColor: Color = Background_prime,
-  onValueChange: (String) -> Unit,
+    label: String,
+    labelColor: Color = Background_prime,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    isPasswort: Boolean = false,
+    value: String,
+    backgroundColor: Color = Background_prime,
+    onValueChange: (String) -> Unit,
 ) {
   val textState = remember { mutableStateOf(TextFieldValue()) }
 
-  Column(
-      modifier =
-          modifier
-              .fillMaxWidth()) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.titleMedium,
-            color = labelColor,
-            modifier = Modifier.fillMaxWidth())
-        val visualTransformation =
-            if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None
-        OutlinedTextField(
-            visualTransformation = visualTransformation,
-            value = value,
-          colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = backgroundColor,
-            unfocusedContainerColor =  backgroundColor,
-            disabledContainerColor = backgroundColor,
-            unfocusedBorderColor = backgroundColor, 
-            focusedBorderColor = backgroundColor, 
-          ),
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(text = placeholder, color = Text_tertiary, fontWeight = FontWeight.SemiBold)}
-        )
-      }
+  Column(modifier = modifier.fillMaxWidth()) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.titleMedium,
+        color = labelColor,
+        modifier = Modifier.fillMaxWidth())
+    val visualTransformation =
+        if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None
+    OutlinedTextField(
+        visualTransformation = visualTransformation,
+        value = value,
+        colors =
+            OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = backgroundColor,
+                unfocusedContainerColor = backgroundColor,
+                disabledContainerColor = backgroundColor,
+                unfocusedBorderColor = backgroundColor,
+                focusedBorderColor = backgroundColor,
+            ),
+        onValueChange = onValueChange,
+        modifier = Modifier.fillMaxWidth(),
+        placeholder = {
+          Text(text = placeholder, color = Text_tertiary, fontWeight = FontWeight.SemiBold)
+        })
+  }
 }
 
 @Preview(showBackground = true)
@@ -77,10 +76,9 @@ fun CustomInputFieldPreview() {
         onValueChange = { username = it })
 
     CustomInputField(
-      label = "Vorname",
-      placeholder = "Gib deinen Vornamen ein",
-      value = username,
-      onValueChange = { username = it })
-              
+        label = "Vorname",
+        placeholder = "Gib deinen Vornamen ein",
+        value = username,
+        onValueChange = { username = it })
   }
 }
