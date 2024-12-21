@@ -39,11 +39,11 @@ fun AttendancesCoordinationPage(navController: NavController? = null, meetingId:
   // API-Anfrage ausführen Response
   LaunchedEffect(meetingId) {
     val responseData =
-      getAttendances(navController!!.context, meetingId) // Dynamische Daten abrufen
+        getAttendances(navController!!.context, meetingId) // Dynamische Daten abrufen
     responses =
-      responseData.map { response ->
-        ResponseItem(name = response.identity.name, status = response.status)
-      }
+        responseData.map { response ->
+          ResponseItem(name = response.identity.name, status = response.status)
+        }
   }
 
   // API-Anfrage ausführen SitzungsCard
@@ -55,7 +55,7 @@ fun AttendancesCoordinationPage(navController: NavController? = null, meetingId:
   Column {
     responseSitzungsCard?.let { sitzungsCardData -> SitzungsCard(sitzungsCardData) }
     Spacer(Modifier.size(12.dp))
-    
+
     val pendingList = responses.filter { it.status == null }
     val presentList = responses.filter { it.status == AttendanceStatus.present }
     val absentList = responses.filter { it.status == AttendanceStatus.absent }
@@ -65,64 +65,48 @@ fun AttendancesCoordinationPage(navController: NavController? = null, meetingId:
     var isPresentVisible by remember { mutableStateOf(true) }
     var isAbsentVisible by remember { mutableStateOf(true) }
     var isAcceptedVisible by remember { mutableStateOf(true) }
-   
+
     LazyColumn(
-      modifier = Modifier
-        .fillMaxWidth()
-        .fillMaxHeight(),
-      verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-      
-      AttendanceCoordinationList(
-        title = "Present",
-        responses = presentList,
-        isVisible = isPresentVisible,
-        maxMembernumber = maxMembernumber,
-        background = Text_secondary,
-        onVisibilityToggle = { isPresentVisible = it }
-      )
-      if (responseSitzungsCard?.status == MeetingStatus.scheduled || responseSitzungsCard?.status == MeetingStatus.inSession)
-      {
-        AttendanceCoordinationList(
-          title = "Zugesagt",
-          responses = acceptedList,
-          isVisible = isAcceptedVisible,
-          maxMembernumber = maxMembernumber,
-          background = Color(color = 0xff1061DA) ,
-          onVisibilityToggle = { isAcceptedVisible = it }
-        )
-        AttendanceCoordinationList(
-          title = "Ausstehend",
-          responses = pendingList,
-          isVisible = isPendingVisible,
-          maxMembernumber = maxMembernumber,
-          onVisibilityToggle = { isPendingVisible = it }
-        )
-        AttendanceCoordinationList(
-          title = "Abgesagt",
-          responses = absentList,
-          isVisible = isAbsentVisible,
-          maxMembernumber = maxMembernumber,
-          background = Color(color = 0xffDA1043),
-          onVisibilityToggle = { isAbsentVisible = it }
-        )
-      }
-      else{
-        AttendanceCoordinationList(
-          title = "Abwesend",
-          responses = absentList,
-          isVisible = isAbsentVisible,
-          maxMembernumber = maxMembernumber,
-          background = Color(color = 0xffDA1043),
-          onVisibilityToggle = { isAbsentVisible = it }
-        )
-      }
-      
-      
-    }
+        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          AttendanceCoordinationList(
+              title = "Present",
+              responses = presentList,
+              isVisible = isPresentVisible,
+              maxMembernumber = maxMembernumber,
+              background = Text_secondary,
+              onVisibilityToggle = { isPresentVisible = it })
+          if (responseSitzungsCard?.status == MeetingStatus.scheduled ||
+              responseSitzungsCard?.status == MeetingStatus.inSession) {
+            AttendanceCoordinationList(
+                title = "Zugesagt",
+                responses = acceptedList,
+                isVisible = isAcceptedVisible,
+                maxMembernumber = maxMembernumber,
+                background = Color(color = 0xff1061DA),
+                onVisibilityToggle = { isAcceptedVisible = it })
+            AttendanceCoordinationList(
+                title = "Ausstehend",
+                responses = pendingList,
+                isVisible = isPendingVisible,
+                maxMembernumber = maxMembernumber,
+                onVisibilityToggle = { isPendingVisible = it })
+            AttendanceCoordinationList(
+                title = "Abgesagt",
+                responses = absentList,
+                isVisible = isAbsentVisible,
+                maxMembernumber = maxMembernumber,
+                background = Color(color = 0xffDA1043),
+                onVisibilityToggle = { isAbsentVisible = it })
+          } else {
+            AttendanceCoordinationList(
+                title = "Abwesend",
+                responses = absentList,
+                isVisible = isAbsentVisible,
+                maxMembernumber = maxMembernumber,
+                background = Color(color = 0xffDA1043),
+                onVisibilityToggle = { isAbsentVisible = it })
+          }
+        }
   }
 }
-
-  
-
-
