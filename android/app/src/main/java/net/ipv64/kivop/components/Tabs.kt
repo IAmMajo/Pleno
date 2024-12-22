@@ -1,4 +1,6 @@
+
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,16 +11,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.kivopandriod.components.Subtitles
 import net.ipv64.kivop.components.ListenItem
-import net.ipv64.kivop.models.ItemListData
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
 
 @Composable
 fun GenerateTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
@@ -53,7 +62,7 @@ fun GenerateTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int)
 fun AppointmentTabContent(
     navigation: NavController,
     tabs: List<String>,
-    appointments: List<ItemListData>
+    appointments: List<GetMeetingDTO>
 ) {
   var selectedTabIndex by remember { mutableStateOf(0) }
 
@@ -63,19 +72,19 @@ fun AppointmentTabContent(
         tabs = tabs, selectedTabIndex = selectedTabIndex, onTabSelected = { selectedTabIndex = it })
 
     // Inhalt unterhalb der Tabs
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(modifier = Modifier.fillMaxSize().padding(18.dp),verticalArrangement = Arrangement.spacedBy(12.dp)) {
       var previousYear: Int? = null // Zustand für das vorherige Jahr
 
       when (selectedTabIndex) {
         0 -> {
           // Anstehende Sitzungen
           val upcomingAppointments =
-              appointments.filter { appointment ->
-                appointment.meetingStatus == "scheduled" || appointment.meetingStatus == "inSession"
+              appointments.filter { appointment: GetMeetingDTO ->
+                appointment.status == MeetingStatus.scheduled || appointment.status == MeetingStatus.inSession
               }
           if (upcomingAppointments.isNotEmpty()) {
             items(upcomingAppointments.size) { index ->
-              val currentYear = upcomingAppointments[index].date?.year
+              val currentYear = upcomingAppointments[index].start?.year
               val shouldRenderSubtitle = currentYear != previousYear
               if (shouldRenderSubtitle) {
                 previousYear = currentYear
@@ -96,10 +105,11 @@ fun AppointmentTabContent(
         1 -> {
           // Vergangene Sitzungen
           val pastAppointments =
-              appointments.filter { appointment -> appointment.meetingStatus == "completed" }
+              appointments.filter { appointment: GetMeetingDTO -> 
+                appointment.status == MeetingStatus.completed }
           if (pastAppointments.isNotEmpty()) {
             items(pastAppointments.size) { index ->
-              val currentYear = pastAppointments[index].date?.year
+              val currentYear = pastAppointments[index].start?.year
               val shouldRenderSubtitle = currentYear != previousYear
               if (shouldRenderSubtitle) {
                 previousYear = currentYear
