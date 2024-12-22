@@ -1,4 +1,4 @@
-package com.example.kivopandriod.pages
+package net.ipv64.kivop.pages.mainApp
 
 import android.util.Log
 import androidx.compose.foundation.layout.Column

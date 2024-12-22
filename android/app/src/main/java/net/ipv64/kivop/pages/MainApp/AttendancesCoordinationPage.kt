@@ -1,4 +1,4 @@
-package net.ipv64.kivop.pages
+package net.ipv64.kivop.pages.mainApp
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
