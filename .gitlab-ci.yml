@@ -260,8 +260,9 @@ build-android:
     - cd android
     - chmod +x gradlew
     - ANDROID_HOME=~/Android/Sdk ./gradlew assembleDebug
-  artifacts:
-    paths:
-      - android/app/build/outputs/apk/debug/app-debug.apk
-    name: APK
-    expose_as: APK
+  # APK seems to be to be too large for the university's GitLab instance
+  # artifacts:
+  #   paths:
+  #     - android/app/build/outputs/apk/debug/app-debug.apk
+  #   name: APK
+  #   expose_as: APK
