@@ -1,7 +1,7 @@
 import Fluent
 import Vapor
 
-public struct UserProfileUpdateDTO: Content {
+public struct UserProfileUpdateDTO: Content, Sendable {
     public var name: String?
     public var profileImage: Data?
 }
