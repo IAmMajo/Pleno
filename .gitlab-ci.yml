@@ -234,7 +234,7 @@ format-android:
   stage: format
   script:
     - wget https://repo1.maven.org/maven2/com/facebook/ktfmt/0.53/ktfmt-0.53-jar-with-dependencies.jar
-    - find -path ./android/dtos -prune -o \( -name '*.kt' -o -name '*.kts' \) -exec java -jar ktfmt-0.53-jar-with-dependencies.jar {} +
+    - find -path ./android/app/src/main/java/net/ipv64/kivop/dtos -prune -o \( -name '*.kt' -o -name '*.kts' \) -exec java -jar ktfmt-0.53-jar-with-dependencies.jar {} +
     - rm ktfmt-0.53-jar-with-dependencies.jar
     - |
       if [[ $(git status --porcelain) ]]; then
