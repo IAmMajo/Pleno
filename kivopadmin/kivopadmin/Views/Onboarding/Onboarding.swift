@@ -20,7 +20,7 @@ struct Onboarding: View {
                 if currentIndex == 0 {
                     // Erster Onboarding-Bildschirm
                     VStack {
-                        Image("Onboarding1")
+                        Image("onboarding4")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 300)
@@ -49,7 +49,7 @@ struct Onboarding: View {
                 } else if currentIndex == 1 {
                     // Zweiter Onboarding-Bildschirm
                     VStack {
-                        Image("Onboarding2")
+                        Image("onboarding5")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 300)
@@ -60,21 +60,21 @@ struct Onboarding: View {
                                 .fontWeight(.regular)
                             + Text("Ratssitzungen, ")
                                 .font(.title3)
-                                .fontWeight(.regular)
+                                .fontWeight(.bold)
                                 .foregroundColor(.blue)
                             + Text("erstelle ")
                                 .font(.title3)
                                 .fontWeight(.regular)
                             + Text("Umfragen, ")
                                 .font(.title3)
-                                .fontWeight(.regular)
+                                .fontWeight(.bold)
                                 .foregroundColor(.blue)
                             + Text("oder plane deine nächste ")
                                 .font(.title3)
                                 .fontWeight(.regular)
                             + Text("Vereinsreise...")
                                 .font(.title3)
-                                .fontWeight(.regular)
+                                .fontWeight(.bold)
                                 .foregroundColor(.blue)
                         }
                         .multilineTextAlignment(.center)
