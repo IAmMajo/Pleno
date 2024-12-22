@@ -36,6 +36,7 @@ let package = Package(
                 .product(name: "JWT", package: "jwt"),
                 .product(name: "Models", package: "models"),
                 .product(name: "AuthServiceDTOs", package: "dtos"),
+                .product(name: "NotificationsServiceDTOs", package: "dtos"),
                 .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
             ],
             swiftSettings: swiftSettings

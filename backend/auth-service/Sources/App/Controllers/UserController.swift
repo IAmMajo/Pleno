@@ -2,6 +2,8 @@ import Fluent
 import Vapor
 import Models
 import JWT
+import NotificationsServiceDTOs
+
 
 struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -443,6 +445,7 @@ struct UserController: RouteCollection {
         }
         guard let user = try await User.query(on: req.db)
             .filter(\.$email == body.email!)
+            .with(\.$identity)
             .first() else {
             return Response(status: .ok, body: .init(string: "If the email exists, a reset code has been sent."))
         }
@@ -456,7 +459,23 @@ struct UserController: RouteCollection {
         try await tokenEntry.create(on: req.db)
         
         // Hier muss der Code per Mail gesendet werden
-        print("Sending reset code \(resetCode) to email \(user.email)")
+        let deeplink = "kivop//"
+        
+        let notificationServiceUrl = "http://localhost:80/notification-service/email"
+        
+        let emailInformation = SendEmailDTO(
+            receiver: user.email,
+            subject: "Setzen sie jetzt ihr Passwort zurück",
+            template: "welcome",
+            templateData: {
+                "userName": user.identity.name,
+                "verificationLink": deeplink
+            }
+        )
+        
+        
+            
+        
         
         return Response(status: .ok, body: .init(string: "If the email exists, a reset code has been sent."))
     }
@@ -466,17 +485,20 @@ struct UserController: RouteCollection {
         guard let body = try? req.content.decode(ResetPasswordDTO.self) else {
             throw Abort(.badRequest, reason: "Body does not match ResetPasswordDTO")
         }
+        guard let email = body.email, let resetCode = body.resetCode, let newPassword = body.newPassword else {
+            throw Abort(.badRequest, reason: "Missing email, reset code, or new password")
+        }
         guard let user = try await User.query(on: req.db)
-            .filter(\.$email == body.email!)
+            .filter(\.$email == email)
             .first() else {
-            throw Abort(.notFound, reason: "Invalid email or reset code")
+            throw Abort(.notFound, reason: "User with email \(email) not found")
         }
         guard let tokenEntry = try await PasswordResetToken.query(on: req.db)
             .filter(\.$user.$id == user.id!)
-            .filter(\.$token == body.resetCode!)
+            .filter(\.$token == resetCode)
             .filter(\.$expiresAt > Date())
             .first() else {
-            throw Abort(.badRequest, reason: "Invalid or missing reset code")
+            throw Abort(.badRequest, reason: "Invalid or expired reset code")
         }
         do {
             user.passwordHash = try Bcrypt.hash(body.newPassword!)
