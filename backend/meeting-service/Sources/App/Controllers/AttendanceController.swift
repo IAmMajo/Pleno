@@ -46,6 +46,7 @@ struct AttendanceController: RouteCollection {
         
         if meeting.status == .scheduled {
             getAttendanceDTOs.append(contentsOf: try await Identity.query(on: req.db)
+                .join(child: \.$user)
                 .filter(\.$id !~ getAttendanceDTOs.map({ getAttendanceDTO in
                     getAttendanceDTO.identity.id
                 }))

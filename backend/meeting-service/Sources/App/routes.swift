@@ -14,6 +14,7 @@ func routes(_ app: Application) throws {
     try meetings.register(collection: AttendanceController())
     try meetings.register(collection: VotingController(eventLoop: app.eventLoopGroup.next()))
     try meetings.register(collection: RecordController())
+    try app.grouped("internal").register(collection: InternalController())
     
     app.get("brew", "coffee") { req -> HTTPStatus in // 418
         .imATeapot

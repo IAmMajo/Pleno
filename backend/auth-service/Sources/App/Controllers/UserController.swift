@@ -43,7 +43,7 @@ struct UserController: RouteCollection {
             response: .type(UserProfileDTO.self),
             responseContentType: .application(.json),
             auth: .bearer()
-
+            
         )
         // GET /users/:id -> ein User
         protectedRoutes.get(":id", use: self.getUser).openAPI(
@@ -53,7 +53,7 @@ struct UserController: RouteCollection {
             response: .type(UserProfileDTO.self),
             responseContentType: .application(.json),
             auth: .bearer()
-
+            
             
         )
         // GET /users/identities/:id
@@ -63,7 +63,7 @@ struct UserController: RouteCollection {
             response: .type(Identity.self),
             responseContentType: .application(.json),
             auth: .bearer()
-
+            
         )
         // PATCH /users/:id
         protectedRoutes.patch(":id", use: self.updateUserStatus).openAPI(
@@ -73,7 +73,7 @@ struct UserController: RouteCollection {
             contentType: .application(.json),
             response: .type(HTTPResponseStatus.self),
             auth: .bearer()
-
+            
         )
         // DELETE /users/:id
         protectedRoutes.delete(":id", use: self.deleteUser).openAPI(
@@ -81,7 +81,7 @@ struct UserController: RouteCollection {
             description: "Admin can delete user account with user id",
             response: .type(HTTPResponseStatus.self),
             auth: .bearer()
-
+            
         )
         // GET /users/profile-image/identity/:identity_id
         protectedRoutes.get("profile-image", "identity", ":id", use: self.getImageIdentity).openAPI(
@@ -89,7 +89,7 @@ struct UserController: RouteCollection {
             description: "Get profile image with identity id",
             responseContentType: .application(.json),
             auth: .bearer()
-
+            
         )
         // GET /users/profile-image/user/:user_id
         protectedRoutes.get("profile-image", "user", ":id", use: self.getImageUser).openAPI(
@@ -97,7 +97,7 @@ struct UserController: RouteCollection {
             description: "Get profile image with user id",
             responseContentType: .application(.json),
             auth: .bearer()
-
+            
             
         )
         // GET /users/identities
@@ -107,7 +107,7 @@ struct UserController: RouteCollection {
             response: .type(Identity.self),
             responseContentType: .application(.json),
             auth: .bearer()
-
+            
         )
         // DELETE /users/delete
         protectedRoutes.delete("delete", use: self.userDeleteEntry).openAPI(
@@ -127,44 +127,78 @@ struct UserController: RouteCollection {
         // decode updates
         let update = try req.content.decode(UserProfileUpdateDTO.self)
         
-        // query user
-        guard let user = try await User.query(on: req.db)
-            .filter(\.$id == token.userID!)
-            .with(\.$identity)
-            .first() else {
-            throw Abort(.notFound)
+        /// **Verbesserungsvorschlag**:
+        guard let userID = token.userID, let user = try await User.find(userID, on: req.db) else {
+            throw Abort(.unauthorized)
         }
+        let oldIdentity = try await user.$identity.get(on: req.db)
+        let updatedIdentity = oldIdentity.clone()
         
-        // clone identity
-        let updatedIdentity = user.identity.clone()
+        /// **Alte Version**
+        //        // query user
+        //        guard let user = try await User.query(on: req.db)
+        //            .filter(\.$id == token.userID!)
+        //            .with(\.$identity)
+        //            .first() else {
+        //            throw Abort(.notFound)
+        //        }
+        //
+        //        // clone identity
+        //        let updatedIdentity = user.identity.clone()
         
         if let newName = update.name {
             updatedIdentity.name = newName
         }
-        if updatedIdentity.hasChanges {
-            try await updatedIdentity.save(on: req.db)
+        let newAttendancesContainer: ContainerActor<[Attendance]> = .init(value: [])
+        try await req.db.transaction { db in
+            if let newProfileImage = update.profileImage {
+                user.profileImage = newProfileImage
+            }
+            
+            if updatedIdentity.hasChanges {
+                try await updatedIdentity.create(on: db)
+                let identityID = try updatedIdentity.requireID()
+                
+                // update current identity
+                user.$identity.id = identityID
+                // create history object
+                try await IdentityHistory(userID: user.requireID(), identityID: identityID).create(on: db)
+                
+                // save update
+                try await user.update(on: db)
+                
+                // Update corresponding attendance entries or bubble up failure
+                let response = try await req.client.put("http://meeting-service/internal/adjust-identities/prepare/\(oldIdentity.requireID().uuidString)/\(identityID.uuidString)")
+                    .throwOnVaporError()
+                guard response.status == .ok else {
+                    throw Abort(response.status) // Should never be necessary (except for wrong response status definitions)
+                }
+                guard let newAttendances = try? response.content.decode([Attendance].self) else {
+                    throw Abort(.internalServerError, reason: "Could not decode response.")
+                }
+                await newAttendancesContainer.setValue(newAttendances)
+            } else if (user.hasChanges) {
+                // save update
+                try await user.update(on: db)
+            } else {
+                throw Abort(.conflict, reason: "No changes were made.")
+            }
         }
         
-        let identityID = try updatedIdentity.requireID()
-        
-        // update current identity
-        user.$identity.id = identityID
-        
-        if let newProfileImage = update.profileImage {
-            user.profileImage = newProfileImage
+        let newAttendances = await newAttendancesContainer.value
+        if !newAttendances.isEmpty {
+            do {
+                let response = try await req.client.put("http://meeting-service/internal/adjust-identities") { request in
+                    try request.content.encode(newAttendances)
+                }
+                    .throwOnVaporError()
+                guard response.status == .noContent else {
+                    throw Abort(response.status) // Should never be necessary (except for wrong response status definitions)
+                }
+            } catch { 
+                return .multiStatus
+            }
         }
-        
-        // save update
-        try await user.update(on: req.db)
-        
-        // extract identity id
-        let userID = try user.requireID()
-        
-        // create history object
-        let history = IdentityHistory(userID: userID, identityID: identityID)
-        
-        // save history entry
-        try await history.save(on: req.db)
         
         return .ok
     }
@@ -491,5 +525,25 @@ struct UserController: RouteCollection {
         } catch {
             throw Abort(.internalServerError, reason: "Error deleting user: \(error.localizedDescription)")
         }
+    }
+}
+
+extension Attendance: @retroactive Content { }
+
+actor ContainerActor<T> {
+    var value: T
+    
+    init(value: T) {
+        self.value = value
+    }
+    
+    func setValue(_ value: T) {
+        self.value = value
+    }
+}
+
+extension ContainerActor where T: RangeReplaceableCollection {
+    func append(_ value: T.Element) {
+        self.value.append(value)
     }
 }
