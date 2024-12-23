@@ -42,9 +42,9 @@ fun VotingResultPage(navController: NavController, votingID: String) {
 
   LaunchedEffect(Unit) {
     coroutineScope.launch {
-      votingData = GetVotingByID(navController.context, UUID.fromString(votingID))
+      votingData = GetVotingByID(UUID.fromString(votingID))
       Log.d("voting", votingData?.options.toString())
-      votings = GetVotingResultByID(navController.context, UUID.fromString(votingID))
+      votings = GetVotingResultByID(UUID.fromString(votingID))
       votingsCombined =
           votingData?.options!!.map { option ->
             val label = option.text

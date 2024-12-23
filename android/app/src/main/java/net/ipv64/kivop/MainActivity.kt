@@ -51,6 +51,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -73,7 +74,6 @@ import net.ipv64.kivop.pages.onboarding.LoginActivity
 import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.KIVoPAndriodTheme
-import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Primary_20
 import net.ipv64.kivop.ui.theme.Text_prime
 
@@ -86,18 +86,11 @@ class MainActivity : ComponentActivity() {
         val currentDestination =
             navController.currentBackStackEntryAsState().value?.destination?.route
         Log.i("MainActivity", "Current Destination: $currentDestination")
-
-        // change Surface color
-        val surfaceColor =
-            when (currentDestination) {
-              Screen.Abstimmen.rout -> Primary
-              Screen.Abstimmung.rout -> Primary
-              else -> Background_prime
-            }
+        
         // A surface container using the 'background' color from the theme
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = surfaceColor,
+            color = Background_prime,
         ) {
           Nav(navController)
         }
@@ -105,7 +98,6 @@ class MainActivity : ComponentActivity() {
     }
   }
 }
-
 fun handleLogout(context: Context) {
   val auth = AuthController(context)
   auth.logout()
@@ -113,7 +105,6 @@ fun handleLogout(context: Context) {
   val intent = Intent(context, LoginActivity::class.java)
   context.startActivity(intent)
 }
-
 // TODO - Navigation anpassen name anpassen
 @Composable
 fun navigation(navController: NavHostController) {
@@ -121,7 +112,7 @@ fun navigation(navController: NavHostController) {
   NavHost(
       navController = navController,
       startDestination = Screen.Home.rout,
-      modifier = Modifier.fillMaxWidth().padding(top = 60.dp),
+      modifier = Modifier.fillMaxWidth().zIndex(-1f),
       enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
       exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },
       popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) },

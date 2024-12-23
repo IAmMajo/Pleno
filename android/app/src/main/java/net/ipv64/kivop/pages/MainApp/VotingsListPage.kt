@@ -69,7 +69,7 @@ fun VotingsListPage(navController: NavController) {
               var route = ""
               scope.launch {
                 if (voting.isOpen == true) {
-                  if (voted(navController, voting.id)) {
+                  if (voted(voting.id)) {
                     route = "abgestimmt/${voting.id}"
                   } else {
                     route = "abstimmen/${voting.id}"
@@ -86,7 +86,7 @@ fun VotingsListPage(navController: NavController) {
   }
 }
 
-suspend fun voted(navController: NavController, id: UUID): Boolean {
-  val myVote = getMyVote(navController.context, id)
+suspend fun voted(id: UUID): Boolean {
+  val myVote = getMyVote(id)
   return myVote != null
 }
