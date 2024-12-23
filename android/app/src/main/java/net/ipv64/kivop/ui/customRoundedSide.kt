@@ -47,7 +47,7 @@ fun Modifier.customRoundedTopWithShadow(
     -height,
     width,
     0f,
-    heightOffset,
+    -heightOffset,
     shadowColor,
     alpha,
     offsetY,
