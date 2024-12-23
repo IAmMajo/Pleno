@@ -10,7 +10,9 @@ struct Onboarding_Login: View {
     @State private var loginSuccessful: Bool = false
     @State private var faceIDTriggered = false
     @State private var isKeychainAvailable = false
-    @State private var isActive = true // Verfolgt, ob die View aktiv ist
+    @State private var isActive = true
+
+    @Environment(\.dismiss) private var dismiss // Für das Zurückgehen
 
     var body: some View {
         NavigationStack {
@@ -86,7 +88,9 @@ struct Onboarding_Login: View {
                 .padding(.horizontal, 24)
 
                 // Back Button
-                NavigationLink(destination: Onboarding()) {
+                Button(action: {
+                    dismiss() // Zur vorherigen Ansicht zurückkehren
+                }) {
                     Text("Zurück")
                         .foregroundColor(.gray)
                         .font(.footnote)
@@ -104,11 +108,11 @@ struct Onboarding_Login: View {
                 MainPage()
             }
             .onAppear {
-                isActive = true // View ist aktiv
+                isActive = true
                 checkKeychainAvailability()
             }
             .onDisappear {
-                isActive = false // View ist nicht mehr aktiv
+                isActive = false
             }
         }
     }
@@ -162,7 +166,6 @@ struct Onboarding_Login: View {
     private func checkKeychainAvailability() {
         isKeychainAvailable = KeychainHelper.load(key: "email") != nil && KeychainHelper.load(key: "password") != nil
         if isKeychainAvailable {
-            // Verzögerung für FaceID
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 triggerFaceID()
             }
@@ -193,7 +196,6 @@ struct Onboarding_Login: View {
         .padding(.bottom, 10)
     }
 }
-
 
 struct Onboarding_Login_Previews: PreviewProvider {
     static var previews: some View {
