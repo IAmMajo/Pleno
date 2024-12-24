@@ -34,7 +34,7 @@ fun AttendancesListPage(navController: NavController) {
       meetings = result
     }
   }
-  
+
   // Log.i("AttendancesListPage", "Appointments: ${appointments}")
   // Ergebnisse anzeigen
   AppointmentTabContent(navController, tabs = tabs, appointments = meetings)

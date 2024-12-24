@@ -61,7 +61,7 @@ fun VotingsListPage(navController: NavController) {
           Log.d("test", e.message.toString())
           Log.d("test", voting.question)
         }
-        //Todo: Brauchen die Page nicht mehr
+        // Todo: Brauchen die Page nicht mehr
         Spacer(modifier = Modifier.size(8.dp))
       }
     }

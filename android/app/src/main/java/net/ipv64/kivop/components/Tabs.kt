@@ -1,4 +1,3 @@
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -72,59 +71,65 @@ fun AppointmentTabContent(
         tabs = tabs, selectedTabIndex = selectedTabIndex, onTabSelected = { selectedTabIndex = it })
 
     // Inhalt unterhalb der Tabs
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(18.dp),verticalArrangement = Arrangement.spacedBy(12.dp)) {
-      var previousYear: Int? = null // Zustand für das vorherige Jahr
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(18.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          var previousYear: Int? = null // Zustand für das vorherige Jahr
 
-      when (selectedTabIndex) {
-        0 -> {
-          // Anstehende Sitzungen
-          val upcomingAppointments =
-              appointments.filter { appointment: GetMeetingDTO ->
-                appointment.status == MeetingStatus.scheduled || appointment.status == MeetingStatus.inSession
+          when (selectedTabIndex) {
+            0 -> {
+              // Anstehende Sitzungen
+              val upcomingAppointments =
+                  appointments.filter { appointment: GetMeetingDTO ->
+                    appointment.status == MeetingStatus.scheduled ||
+                        appointment.status == MeetingStatus.inSession
+                  }
+              if (upcomingAppointments.isNotEmpty()) {
+                items(upcomingAppointments.size) { index ->
+                  val currentYear = upcomingAppointments[index].start?.year
+                  val shouldRenderSubtitle = currentYear != previousYear
+                  if (shouldRenderSubtitle) {
+                    previousYear = currentYear
+                    Subtitles(subText = currentYear?.toString() ?: "")
+                  }
+                  ListenItem(
+                      itemListData = upcomingAppointments[index],
+                      onClick = {
+                        navigation.navigate("anwesenheit/${upcomingAppointments[index].id}")
+                      })
+                  Spacer(modifier = Modifier.size(8.dp))
+                }
+              } else {
+                item { Text("Keine anstehenden Sitzungen", color = Color.Gray) }
               }
-          if (upcomingAppointments.isNotEmpty()) {
-            items(upcomingAppointments.size) { index ->
-              val currentYear = upcomingAppointments[index].start?.year
-              val shouldRenderSubtitle = currentYear != previousYear
-              if (shouldRenderSubtitle) {
-                previousYear = currentYear
-                Subtitles(subText = currentYear?.toString() ?: "")
-              }
-              ListenItem(
-                  itemListData = upcomingAppointments[index],
-                  onClick = {
-                    navigation.navigate("anwesenheit/${upcomingAppointments[index].id}")
-                  })
-              Spacer(modifier = Modifier.size(8.dp))
             }
-          } else {
-            item { Text("Keine anstehenden Sitzungen", color = Color.Gray) }
+
+            1 -> {
+              // Vergangene Sitzungen
+              val pastAppointments =
+                  appointments.filter { appointment: GetMeetingDTO ->
+                    appointment.status == MeetingStatus.completed
+                  }
+              if (pastAppointments.isNotEmpty()) {
+                items(pastAppointments.size) { index ->
+                  val currentYear = pastAppointments[index].start?.year
+                  val shouldRenderSubtitle = currentYear != previousYear
+                  if (shouldRenderSubtitle) {
+                    previousYear = currentYear
+                    Subtitles(subText = currentYear?.toString() ?: "")
+                  }
+                  ListenItem(
+                      itemListData = pastAppointments[index],
+                      onClick = {
+                        navigation.navigate("anwesenheit/${pastAppointments[index].id}")
+                      })
+                  Spacer(modifier = Modifier.size(8.dp))
+                }
+              } else {
+                item { Text("Keine vergangenen Sitzungen", color = Color.Gray) }
+              }
+            }
           }
         }
-
-        1 -> {
-          // Vergangene Sitzungen
-          val pastAppointments =
-              appointments.filter { appointment: GetMeetingDTO -> 
-                appointment.status == MeetingStatus.completed }
-          if (pastAppointments.isNotEmpty()) {
-            items(pastAppointments.size) { index ->
-              val currentYear = pastAppointments[index].start?.year
-              val shouldRenderSubtitle = currentYear != previousYear
-              if (shouldRenderSubtitle) {
-                previousYear = currentYear
-                Subtitles(subText = currentYear?.toString() ?: "")
-              }
-              ListenItem(
-                  itemListData = pastAppointments[index],
-                  onClick = { navigation.navigate("anwesenheit/${pastAppointments[index].id}") })
-              Spacer(modifier = Modifier.size(8.dp))
-            }
-          } else {
-            item { Text("Keine vergangenen Sitzungen", color = Color.Gray) }
-          }
-        }
-      }
-    }
   }
 }

@@ -8,23 +8,20 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.services.api.getMeetingsApi
-import net.ipv64.kivop.services.api.getUserProfile
 
-class MeetingsViewModel: ViewModel() {
+class MeetingsViewModel : ViewModel() {
   private var meetings by mutableStateOf<List<GetMeetingDTO?>>(emptyList())
-  
+
   fun loadMeetings(): List<GetMeetingDTO?> {
     return meetings
   }
-  
+
   fun fetchMeetings() {
     viewModelScope.launch {
       val response = getMeetingsApi() // Call the API service to get user profile
       response.let { meetings = it } // Set the user profile in ViewModel state
     }
   }
-  
-  init {
 
-  }
+  init {}
 }

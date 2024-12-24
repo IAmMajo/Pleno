@@ -7,6 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SpacerTopBar(){
+fun SpacerTopBar() {
   Spacer(modifier = Modifier.height(48.dp))
 }

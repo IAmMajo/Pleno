@@ -12,7 +12,6 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetAttendanceDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
 import net.ipv64.kivop.models.PlanAttendance
-import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
@@ -76,7 +75,6 @@ suspend fun putPlanAttendance(
     status: PlanAttendance
 ): Boolean =
     withContext(Dispatchers.IO) {
-      
       val path = "/meetings/$meetingId/plan-attendance/${status.name}"
 
       val token = auth.getSessionToken()
@@ -111,7 +109,6 @@ suspend fun putPlanAttendance(
 
 suspend fun putAttend(meetingId: String, code: String): Boolean =
     withContext(Dispatchers.IO) {
-      
       val path = "/meetings/$meetingId/attend/$code"
 
       val token = auth.getSessionToken()

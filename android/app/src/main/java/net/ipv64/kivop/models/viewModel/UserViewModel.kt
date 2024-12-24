@@ -9,11 +9,9 @@ import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileDTO
 import net.ipv64.kivop.services.api.getUserProfile
 
-class UserViewModel: ViewModel() {
+class UserViewModel : ViewModel() {
   private var user by mutableStateOf<UserProfileDTO?>(null)
     private set
-  
-  
 
   fun fetchUser() {
     viewModelScope.launch {
@@ -21,17 +19,12 @@ class UserViewModel: ViewModel() {
       response?.let { user = it } // Set the user profile in ViewModel state
     }
   }
-  
+
   fun getProfile(): UserProfileDTO? {
     return this.user
   }
-  
-  
-  fun updateUser(){
-    
-  }
-  
-  init {
 
-  }
+  fun updateUser() {}
+
+  init {}
 }

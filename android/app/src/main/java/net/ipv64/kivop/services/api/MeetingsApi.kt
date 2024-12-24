@@ -15,7 +15,6 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
-
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.Request
 

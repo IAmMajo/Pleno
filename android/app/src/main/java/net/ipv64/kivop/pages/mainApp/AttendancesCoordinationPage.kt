@@ -38,8 +38,7 @@ fun AttendancesCoordinationPage(navController: NavController? = null, meetingId:
 
   // API-Anfrage ausführen Response
   LaunchedEffect(meetingId) {
-    val responseData =
-        getAttendances(meetingId) // Dynamische Daten abrufen
+    val responseData = getAttendances(meetingId) // Dynamische Daten abrufen
     responses =
         responseData.map { response ->
           ResponseItem(name = response.identity.name, status = response.status)

@@ -9,13 +9,11 @@ import com.google.gson.JsonObject
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.ipv64.kivop.MyApplication
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingOptionDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
-import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
@@ -152,7 +150,6 @@ suspend fun GetVotingResultByID(id: UUID): GetVotingResultsDTO? =
 
 suspend fun GetVotingByID(ID: UUID): GetVotingDTO? =
     withContext(Dispatchers.IO) {
-      
       val path = "meetings/votings/$ID"
 
       val token = auth.getSessionToken()
@@ -219,7 +216,6 @@ suspend fun GetVotingByID(ID: UUID): GetVotingDTO? =
 
 suspend fun putVote(votingId: String, optionIndex: Int): Boolean =
     withContext(Dispatchers.IO) {
-      
       val path = "meetings/votings/$votingId/vote/$optionIndex"
 
       val token = auth.getSessionToken()
@@ -254,7 +250,6 @@ suspend fun putVote(votingId: String, optionIndex: Int): Boolean =
 
 suspend fun getMyVote(ID: UUID): GetMyVoteDTO? =
     withContext(Dispatchers.IO) {
-      
       val path = "meetings/votings/$ID/my-vote"
 
       val token = auth.getSessionToken()

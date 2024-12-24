@@ -23,45 +23,44 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter.ofPattern
+import java.util.UUID
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
 import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Text_prime
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter.ofPattern
-import java.util.UUID
 
 @Composable
 fun BulletList(title: String, list: List<GetMeetingDTO?>, gap: Dp = 16.dp) {
 
   Column(
-    modifier = Modifier
-      .customShadow()
-      .background(color = Background_secondary, shape = RoundedCornerShape(8.dp))
-      .padding(15.dp)
-      .height(IntrinsicSize.Min)
-  ) {
-    Text(text = title, style = MaterialTheme.typography.headlineMedium)
-    Spacer(modifier = Modifier.size(8.dp))
-    Row {
-      // val height = maxHeight
-      // val width = maxWidth
-      Column(
-        modifier = Modifier
-          .width(8.dp)
-          .fillMaxHeight()
-          .drawBehind { line(list.size, gap.toPx()) }) {}
-      Column(modifier = Modifier.fillMaxHeight()) {
-        Spacer(modifier = Modifier.size(gap))
-        list.forEach { meeting ->
-          if (meeting != null) {
-            Eintrag(meeting = meeting, gap)
+      modifier =
+          Modifier.customShadow()
+              .background(color = Background_secondary, shape = RoundedCornerShape(8.dp))
+              .padding(15.dp)
+              .height(IntrinsicSize.Min)) {
+        Text(text = title, style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.size(8.dp))
+        Row {
+          // val height = maxHeight
+          // val width = maxWidth
+          Column(
+              modifier =
+                  Modifier.width(8.dp).fillMaxHeight().drawBehind {
+                    line(list.size, gap.toPx())
+                  }) {}
+          Column(modifier = Modifier.fillMaxHeight()) {
+            Spacer(modifier = Modifier.size(gap))
+            list.forEach { meeting ->
+              if (meeting != null) {
+                Eintrag(meeting = meeting, gap)
+              }
+            }
           }
         }
       }
-    }
-  }
 }
 
 fun DrawScope.line(items: Int, gap: Float) {
@@ -82,24 +81,14 @@ fun DrawScope.line(items: Int, gap: Float) {
 
 @Composable
 fun Eintrag(meeting: GetMeetingDTO, gap: Dp) {
-  Row(
-    modifier =
-      Modifier
-        .fillMaxWidth()
-        .padding(4.dp)
-  ) {
+  Row(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
     Spacer(modifier = Modifier.size(4.dp))
     Text(
-      text = "[ " + meeting.start.format(ofPattern("dd.MM.yyyy")) + " ]",
-      color = Text_prime,
-      style = MaterialTheme.typography.bodyLarge
-    )
+        text = "[ " + meeting.start.format(ofPattern("dd.MM.yyyy")) + " ]",
+        color = Text_prime,
+        style = MaterialTheme.typography.bodyLarge)
     Spacer(modifier = Modifier.size(4.dp))
-    Text(
-      text = meeting.name, 
-      color = Text_prime,
-      style = MaterialTheme.typography.bodyLarge
-    )
+    Text(text = meeting.name, color = Text_prime, style = MaterialTheme.typography.bodyLarge)
   }
   Spacer(modifier = Modifier.size(gap))
 }
@@ -107,41 +96,43 @@ fun Eintrag(meeting: GetMeetingDTO, gap: Dp) {
 @Preview
 @Composable
 fun previewBulletList() {
-  val list = listOf(GetMeetingDTO(
-    id = UUID.randomUUID(),
-    name = "test",
-    description = "test",
-    status = MeetingStatus.inSession,
-    start = LocalDateTime.now(),
-    duration = null,
-    location = null,
-    chair = null,
-    code = null,
-    myAttendanceStatus = null,
-  ),GetMeetingDTO(
-    id = UUID.randomUUID(),
-    name = "test",
-    description = "test",
-    status = MeetingStatus.inSession,
-    start = LocalDateTime.now(),
-    duration = null,
-    location = null,
-    chair = null,
-    code = null,
-    myAttendanceStatus = null,
-  ),GetMeetingDTO(
-    id = UUID.randomUUID(),
-    name = "test",
-    description = "test",
-    status = MeetingStatus.inSession,
-    start = LocalDateTime.now(),
-    duration = null,
-    location = null,
-    chair = null,
-    code = null,
-    myAttendanceStatus = null,
-  ))
-  Column(modifier = Modifier.padding(18.dp)) {
-    BulletList("Bevorstehende Sitzungen",list)
-  }
+  val list =
+      listOf(
+          GetMeetingDTO(
+              id = UUID.randomUUID(),
+              name = "test",
+              description = "test",
+              status = MeetingStatus.inSession,
+              start = LocalDateTime.now(),
+              duration = null,
+              location = null,
+              chair = null,
+              code = null,
+              myAttendanceStatus = null,
+          ),
+          GetMeetingDTO(
+              id = UUID.randomUUID(),
+              name = "test",
+              description = "test",
+              status = MeetingStatus.inSession,
+              start = LocalDateTime.now(),
+              duration = null,
+              location = null,
+              chair = null,
+              code = null,
+              myAttendanceStatus = null,
+          ),
+          GetMeetingDTO(
+              id = UUID.randomUUID(),
+              name = "test",
+              description = "test",
+              status = MeetingStatus.inSession,
+              start = LocalDateTime.now(),
+              duration = null,
+              location = null,
+              chair = null,
+              code = null,
+              myAttendanceStatus = null,
+          ))
+  Column(modifier = Modifier.padding(18.dp)) { BulletList("Bevorstehende Sitzungen", list) }
 }

@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
         val currentDestination =
             navController.currentBackStackEntryAsState().value?.destination?.route
         Log.i("MainActivity", "Current Destination: $currentDestination")
-        
+
         // A surface container using the 'background' color from the theme
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -102,6 +102,7 @@ class MainActivity : ComponentActivity() {
     }
   }
 }
+
 fun handleLogout(context: Context) {
   val auth = AuthController(context)
   auth.logout()
@@ -109,6 +110,7 @@ fun handleLogout(context: Context) {
   val intent = Intent(context, LoginActivity::class.java)
   context.startActivity(intent)
 }
+
 // TODO - Navigation anpassen name anpassen
 @Composable
 fun navigation(navController: NavHostController) {
@@ -129,7 +131,9 @@ fun navigation(navController: NavHostController) {
 
         // StartScreen
 
-        composable(Screen.Home.rout) { HomePage(navController = navController,userViewModel,meetingsViewModel) }
+        composable(Screen.Home.rout) {
+          HomePage(navController = navController, userViewModel, meetingsViewModel)
+        }
         // Sitzungen
         composable(Screen.Sitzungen.rout) { MeetingsListPage(navController = navController) }
         // Anwesenheit liste
