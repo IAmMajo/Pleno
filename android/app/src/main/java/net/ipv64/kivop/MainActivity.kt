@@ -42,6 +42,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -61,6 +63,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
+import net.ipv64.kivop.models.viewModel.MeetingsViewModel
+import net.ipv64.kivop.models.viewModel.UserViewModel
 import net.ipv64.kivop.pages.mainApp.AlreadyVoted
 import net.ipv64.kivop.pages.mainApp.AttendancesCoordinationPage
 import net.ipv64.kivop.pages.mainApp.AttendancesListPage
@@ -108,7 +112,12 @@ fun handleLogout(context: Context) {
 // TODO - Navigation anpassen name anpassen
 @Composable
 fun navigation(navController: NavHostController) {
-
+  val userViewModel = viewModel<UserViewModel>()
+  val meetingsViewModel = viewModel<MeetingsViewModel>()
+  LaunchedEffect(Unit) {
+    userViewModel.fetchUser()
+    meetingsViewModel.fetchMeetings()
+  }
   NavHost(
       navController = navController,
       startDestination = Screen.Home.rout,
@@ -120,7 +129,7 @@ fun navigation(navController: NavHostController) {
 
         // StartScreen
 
-        composable(Screen.Home.rout) { HomePage(navController = navController) }
+        composable(Screen.Home.rout) { HomePage(navController = navController,userViewModel,meetingsViewModel) }
         // Sitzungen
         composable(Screen.Sitzungen.rout) { MeetingsListPage(navController = navController) }
         // Anwesenheit liste

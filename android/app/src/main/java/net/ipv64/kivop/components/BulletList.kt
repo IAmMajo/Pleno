@@ -1,6 +1,5 @@
 package net.ipv64.kivop.components
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -19,28 +18,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.core.app.NotificationCompat.Style
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
-import net.ipv64.kivop.models.EventItem
 import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
-import net.ipv64.kivop.ui.theme.Primary
-import net.ipv64.kivop.ui.theme.Secondary
 import net.ipv64.kivop.ui.theme.Text_prime
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ofPattern
 import java.util.UUID
 
 @Composable
-fun BulletList(title: String, list: List<GetMeetingDTO>, gap: Dp = 16.dp) {
+fun BulletList(title: String, list: List<GetMeetingDTO?>, gap: Dp = 16.dp) {
 
   Column(
     modifier = Modifier
@@ -61,7 +54,11 @@ fun BulletList(title: String, list: List<GetMeetingDTO>, gap: Dp = 16.dp) {
           .drawBehind { line(list.size, gap.toPx()) }) {}
       Column(modifier = Modifier.fillMaxHeight()) {
         Spacer(modifier = Modifier.size(gap))
-        list.forEach { meeting -> Eintrag(meeting = meeting, gap) }
+        list.forEach { meeting ->
+          if (meeting != null) {
+            Eintrag(meeting = meeting, gap)
+          }
+        }
       }
     }
   }

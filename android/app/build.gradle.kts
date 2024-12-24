@@ -60,4 +60,6 @@ dependencies {
   implementation("androidx.security:security-crypto:1.1.0-alpha06")
   // Glide for smooth sliding
   implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+  // ViewModel Compose
+  implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 }

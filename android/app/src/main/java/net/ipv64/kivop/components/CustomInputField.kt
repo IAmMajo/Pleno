@@ -55,6 +55,7 @@ fun CustomInputField(
                 unfocusedBorderColor = backgroundColor,
                 focusedBorderColor = backgroundColor,
             ),
+      singleLine = true,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
         placeholder = {

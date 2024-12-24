@@ -13,16 +13,14 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetLocationDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
-import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.Request
 
-suspend fun getMeetings(context: Context): List<GetMeetingDTO> =
+suspend fun getMeetingsApi(): List<GetMeetingDTO> =
     withContext(Dispatchers.IO) {
-      val auth = AuthController(context)
       val path = "meetings"
 
       val token = auth.getSessionToken()

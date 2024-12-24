@@ -6,10 +6,9 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.ipv64.kivop.MyApplication
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileDTO
-import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
+import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.FormBody
 import okhttp3.Request
@@ -72,8 +71,7 @@ suspend fun getValidateToken(token: String): Boolean = withContext(Dispatchers.I
 }
 
 suspend fun getUserProfile(): UserProfileDTO? = withContext(Dispatchers.IO) {
-  val auth = AuthController(MyApplication.instance)
-  val path = "auth/token-verify"
+  val path = "users/profile"
 
   val token = auth.getSessionToken()
 
