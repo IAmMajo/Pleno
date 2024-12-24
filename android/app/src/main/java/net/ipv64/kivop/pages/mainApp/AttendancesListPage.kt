@@ -11,7 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
-import net.ipv64.kivop.services.api.getMeetings
+import net.ipv64.kivop.services.api.getMeetingsApi
 
 @Composable
 fun AttendancesListPage(navController: NavController) {
@@ -30,7 +30,7 @@ fun AttendancesListPage(navController: NavController) {
       // Login zuerst ausführen
 
       // Meetings abrufen
-      val result = getMeetings(navController.context)
+      val result = getMeetingsApi()
       meetings = result
     }
   }

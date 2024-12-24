@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import net.ipv64.kivop.MainActivity
 import net.ipv64.kivop.pages.onboarding.LoginActivity
-import net.ipv64.kivop.services.AuthController
+import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
@@ -35,7 +35,6 @@ class SplashActivity : ComponentActivity() {
           modifier = Modifier.background(Background_prime).fillMaxSize(),
       ) {
         val context = this
-        val auth = AuthController(context)
         var isLoggedIn by remember { mutableStateOf<Boolean?>(null) }
         LaunchedEffect(Unit) {
           isLoggedIn = auth.isLoggedIn()

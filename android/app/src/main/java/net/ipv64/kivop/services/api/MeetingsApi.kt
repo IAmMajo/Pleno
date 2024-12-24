@@ -13,14 +13,14 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetLocationDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
-import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
+import net.ipv64.kivop.services.api.ApiConfig.auth
+
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.Request
 
-suspend fun getMeetings(context: Context): List<GetMeetingDTO> =
+suspend fun getMeetingsApi(): List<GetMeetingDTO> =
     withContext(Dispatchers.IO) {
-      val auth = AuthController(context)
       val path = "meetings"
 
       val token = auth.getSessionToken()
@@ -99,9 +99,8 @@ suspend fun getMeetings(context: Context): List<GetMeetingDTO> =
       }
     }
 
-suspend fun getMeetingByID(context: Context, id: String): GetMeetingDTO? =
+suspend fun getMeetingByID(id: String): GetMeetingDTO? =
     withContext(Dispatchers.IO) {
-      val auth = AuthController(context)
       val path = "meetings/$id"
 
       val token = auth.getSessionToken()
@@ -179,7 +178,6 @@ suspend fun getMeetingByID(context: Context, id: String): GetMeetingDTO? =
 
 suspend fun getLocations(context: Context): List<GetLocationDTO> =
     withContext(Dispatchers.IO) {
-      val auth = AuthController(context)
       val path = "meetings/locations"
 
       val token = auth.getSessionToken()
@@ -228,9 +226,8 @@ suspend fun getLocations(context: Context): List<GetLocationDTO> =
       }
     }
 
-suspend fun getLocationById(context: Context, id: String): GetLocationDTO? =
+suspend fun getLocationById(id: String): GetLocationDTO? =
     withContext(Dispatchers.IO) {
-      val auth = AuthController(context)
       val path = "meetings/locations/$id"
 
       val token = auth.getSessionToken()
