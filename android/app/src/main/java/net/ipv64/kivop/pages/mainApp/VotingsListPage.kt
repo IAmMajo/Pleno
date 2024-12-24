@@ -19,8 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import java.util.UUID
-import kotlinx.coroutines.launch
-import net.ipv64.kivop.components.ListenItem
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
 import net.ipv64.kivop.models.GetVotings
 import net.ipv64.kivop.models.ItemListData
@@ -63,23 +61,7 @@ fun VotingsListPage(navController: NavController) {
           Log.d("test", e.message.toString())
           Log.d("test", voting.question)
         }
-        ListenItem(
-            votingData,
-            onClick = {
-              var route = ""
-              scope.launch {
-                if (voting.isOpen == true) {
-                  if (voted(voting.id)) {
-                    route = "abgestimmt/${voting.id}"
-                  } else {
-                    route = "abstimmen/${voting.id}"
-                  }
-                } else {
-                  route = "abstimmung/${voting.id}"
-                }
-                navController.navigate(route)
-              }
-            })
+        //Todo: Brauchen die Page nicht mehr
         Spacer(modifier = Modifier.size(8.dp))
       }
     }
