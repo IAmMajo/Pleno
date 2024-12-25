@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -37,10 +38,12 @@ fun BulletList(title: String, list: List<GetMeetingDTO?>, gap: Dp = 16.dp) {
 
   Column(
       modifier =
-          Modifier.customShadow()
-              .background(color = Background_secondary, shape = RoundedCornerShape(8.dp))
-              .padding(15.dp)
-              .height(IntrinsicSize.Min)) {
+          Modifier
+            .fillMaxWidth()
+            .customShadow()
+            .background(color = Background_secondary, shape = RoundedCornerShape(8.dp))
+            .padding(15.dp)
+            .height(IntrinsicSize.Min)) {
         Text(text = title, style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.size(8.dp))
         Row {
@@ -88,7 +91,12 @@ fun Eintrag(meeting: GetMeetingDTO, gap: Dp) {
         color = Text_prime,
         style = MaterialTheme.typography.bodyLarge)
     Spacer(modifier = Modifier.size(4.dp))
-    Text(text = meeting.name, color = Text_prime, style = MaterialTheme.typography.bodyLarge)
+    Text(
+      text = meeting.name, 
+      color = Text_prime, 
+      style = MaterialTheme.typography.bodyLarge,
+      maxLines = 1, 
+      overflow = TextOverflow.Ellipsis )
   }
   Spacer(modifier = Modifier.size(gap))
 }

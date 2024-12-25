@@ -4,6 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 
 @Composable
-fun TravelPage(navController: NavController) {
-  
+fun PosterPage(navController: NavController) {
+  // Your composable code here
 }
