@@ -1,6 +1,5 @@
 package net.ipv64.kivop.pages.mainApp
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,10 +29,7 @@ import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
-data class TopAppBarConfig(
-  val title: String,
-  val actions: @Composable RowScope.() -> Unit = {}
-)
+data class TopAppBarConfig(val title: String, val actions: @Composable RowScope.() -> Unit = {})
 
 @Composable
 fun HomePage(
@@ -85,18 +80,17 @@ fun HomePage(
           BulletList("Bevorstehende Sitzungen", list)
         }
   }
-  val appBarConfig = TopAppBarConfig(
-    title = "Home",
-    actions = {
-      IconBox(
-        Icons.Default.Home,
-        height = 50.dp,
-        Background_secondary.copy(alpha = 0.15f),
-        Background_secondary,
-        onClick = {  }
-      )
-    }
-  )
-  
+  val appBarConfig =
+      TopAppBarConfig(
+          title = "Home",
+          actions = {
+            IconBox(
+                Icons.Default.Home,
+                height = 50.dp,
+                Background_secondary.copy(alpha = 0.15f),
+                Background_secondary,
+                onClick = {})
+          })
+
   return appBarConfig
 }
