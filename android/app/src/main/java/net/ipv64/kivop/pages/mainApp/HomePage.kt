@@ -3,8 +3,12 @@ package net.ipv64.kivop.pages.mainApp
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import net.ipv64.kivop.components.BulletList
+import net.ipv64.kivop.components.IconBox
 import net.ipv64.kivop.components.SitzungsCard
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
@@ -22,15 +27,21 @@ import net.ipv64.kivop.models.viewModel.MeetingsViewModel
 import net.ipv64.kivop.models.viewModel.UserViewModel
 import net.ipv64.kivop.ui.customRoundedTopWithShadow
 import net.ipv64.kivop.ui.theme.Background_prime
+import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Text_prime_light
+
+data class TopAppBarConfig(
+  val title: String,
+  val actions: @Composable RowScope.() -> Unit = {}
+)
 
 @Composable
 fun HomePage(
     navController: NavController,
     userViewModel: UserViewModel,
     meetingsViewModel: MeetingsViewModel
-) {
+): TopAppBarConfig {
   val meetings = meetingsViewModel.loadMeetings()
   var currentMeeting: GetMeetingDTO? = null
   var nextMeetings: List<GetMeetingDTO?> = emptyList()
@@ -38,7 +49,6 @@ fun HomePage(
   if (meetings.isNotEmpty()) {
     currentMeeting = meetings.first()!!
     nextMeetings = meetings.drop(1).take(3)
-    Log.i("HomePage", "Current Meeting: $nextMeetings")
   }
 
   Column(modifier = Modifier.background(Primary)) {
@@ -75,4 +85,18 @@ fun HomePage(
           BulletList("Bevorstehende Sitzungen", list)
         }
   }
+  val appBarConfig = TopAppBarConfig(
+    title = "Home",
+    actions = {
+      IconBox(
+        Icons.Default.Home,
+        height = 50.dp,
+        Background_secondary.copy(alpha = 0.15f),
+        Background_secondary,
+        onClick = {  }
+      )
+    }
+  )
+  
+  return appBarConfig
 }

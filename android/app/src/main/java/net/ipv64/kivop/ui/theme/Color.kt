@@ -10,7 +10,7 @@ val Tertiary = Color(0xFFCDEAF7)
 
 // Text colors dark
 val Text_prime = Color(0xFF1F1F1F)
-val Text_secondary = Color(0xFF12516B)
+val Text_secondary = Color(0xFF43578A)
 val Text_tertiary = Color(0xFF404445)
 // Text colors light
 val Text_prime_light = Color(0xFFF7FBFC)

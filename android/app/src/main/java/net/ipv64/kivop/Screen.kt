@@ -2,20 +2,27 @@ package net.ipv64.kivop
 
 sealed class Screen(val rout: String) {
   object Home : Screen("home")
+  
+  object Meetings : Screen("sitzungen")
 
-  object Sitzungen : Screen("sitzungen")
+  object Attendance : Screen("anwesenheit")
 
-  object Anwesenheit : Screen("anwesenheit")
+  object Protocol : Screen("protokolle")
 
-  object Protokolle : Screen("protokolle")
+  object Travel : Screen("travel")
+  
+  object Events : Screen("events")
 
-  object Abstimmungen : Screen("abstimmungen")
+  object Poster : Screen("poster")
 
-  object Abstimmung : Screen("abstimmung/{votingID}")
+  object Votings : Screen("abstimmungen") //todo remove
 
-  object Abstimmen : Screen("abstimmen/{votingID}")
+  object Voting : Screen("abstimmung/{votingID}")
 
-  object Abgestimmt : Screen("abgestimmt/{votingID}")
+  object Vote : Screen("abstimmen/{votingID}")
+
+  object Voted : Screen("abgestimmt/{votingID}")
+  
 }
 
 // routing später anpassen: navController.
