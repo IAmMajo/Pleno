@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">KIVoP Andriod</string>
+    <string name="app_name">Pleno</string>
+    <!-- Navigation drawer items-->
+    <string name="meetings">Sitzungen</string>
+    <string name="protocol">Protokolle</string>
+    <string name="travel_planning">Reiseplanung</string>
+    <string name="events">Events</string>
+    <string name="poster">Plakate</string>
 </resources>
