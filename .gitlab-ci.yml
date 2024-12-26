@@ -129,13 +129,13 @@ build-backend-docker-image-config-service:
     - cd "$PROD_DIR_LOCATION"
     - docker compose build config-service
   rules:
-    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
-      changes:
-        - backend/config-service/**/*
     - changes:
         - backend/models/**/*
         - DTOs/**/*
       when: never
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/config-service/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -148,13 +148,13 @@ build-backend-docker-image-auth-service:
     - cd "$PROD_DIR_LOCATION"
     - docker compose build auth-service
   rules:
-    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
-      changes:
-        - backend/auth-service/**/*
     - changes:
         - backend/models/**/*
         - DTOs/**/*
       when: never
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/auth-service/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -167,13 +167,13 @@ build-backend-docker-image-meeting-service:
     - cd "$PROD_DIR_LOCATION"
     - docker compose build meeting-service
   rules:
-    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
-      changes:
-        - backend/meeting-service/**/*
     - changes:
         - backend/models/**/*
         - DTOs/**/*
       when: never
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/meeting-service/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -186,13 +186,13 @@ build-backend-docker-image-notifications-service:
     - cd "$PROD_DIR_LOCATION"
     - docker compose build notifications-service
   rules:
-    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
-      changes:
-        - backend/notifications-service/**/*
     - changes:
         - backend/models/**/*
         - DTOs/**/*
       when: never
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/notifications-service/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -218,24 +218,24 @@ build-backend-docker-image-notifications-service:
 #     action: prepare
 #     deployment_tier: production
 
-# build-backend-docker-image-carpool-service:
-#   stage: build
-#   script:
-#     - cd "$PROD_DIR_LOCATION"
-#     - docker compose build carpool-service
-#   rules:
-#     - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
-#       changes:
-#         - backend/carpool-service/**/*
-#     - changes:
-#         - backend/models/**/*
-#         - DTOs/**/*
-#       when: never
-#   environment:
-#     name: Production
-#     url: https://kivop.ipv64.net
-#     action: prepare
-#     deployment_tier: production
+build-backend-docker-image-ride-service:
+  stage: build
+  script:
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose build ride-service
+  rules:
+    - changes:
+        - backend/models/**/*
+        - DTOs/**/*
+      when: never
+    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/ride-service/**/*
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: prepare
+    deployment_tier: production
 
 build-backend-docker-image-all-services:
   stage: build
