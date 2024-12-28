@@ -1,6 +1,7 @@
 package net.ipv64.kivop.pages.mainApp
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.BulletList
 import net.ipv64.kivop.components.IconBox
 import net.ipv64.kivop.components.SitzungsCard
@@ -42,6 +43,10 @@ fun HomePage(
     userViewModel: UserViewModel,
     meetingsViewModel: MeetingsViewModel
 ): TopAppBarConfig {
+  BackHandler {
+    isBackPressed = navController.popBackStack()
+    Log.i("BackHandler", "BackHandler: $isBackPressed")
+  }
   val meetings = meetingsViewModel.loadMeetings()
   var currentMeeting: GetMeetingDTO? = null
   var nextMeetings: List<GetMeetingDTO?> = emptyList()

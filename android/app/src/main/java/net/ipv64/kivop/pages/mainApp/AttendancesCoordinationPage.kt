@@ -1,5 +1,7 @@
 package net.ipv64.kivop.pages.mainApp
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.AttendanceCoordinationList
 import net.ipv64.kivop.components.ResponseItem
 import net.ipv64.kivop.components.SitzungsCard
@@ -30,8 +33,11 @@ import net.ipv64.kivop.ui.theme.Text_secondary
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AttendancesCoordinationPage(navController: NavController? = null, meetingId: String) {
-
+fun AttendancesCoordinationPage(navController: NavController, meetingId: String) {
+  BackHandler {
+    isBackPressed = navController.popBackStack()
+    Log.i("BackHandler", "BackHandler: $isBackPressed")
+  }
   // Zustand für die Antworten (Liste von ResponseItem)
   var responses by remember { mutableStateOf<List<ResponseItem>>(emptyList()) }
   var responseSitzungsCard by remember { mutableStateOf<GetMeetingDTO?>(null) }

@@ -1,6 +1,8 @@
 package net.ipv64.kivop.pages.mainApp
 
 import AppointmentTabContent
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -10,11 +12,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.services.api.getMeetingsApi
 
 @Composable
 fun AttendancesListPage(navController: NavController) {
+  BackHandler {
+    isBackPressed = navController.popBackStack()
+    Log.i("BackHandler", "BackHandler: $isBackPressed")
+  }
   val tabs = listOf("anstehende Sitzungen", "vergangenen Sitzungen")
   val scope = rememberCoroutineScope()
   var meetings by remember { mutableStateOf<List<GetMeetingDTO>>(emptyList()) }

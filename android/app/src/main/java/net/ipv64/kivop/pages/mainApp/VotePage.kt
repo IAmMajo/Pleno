@@ -1,6 +1,8 @@
 package net.ipv64.kivop.pages.mainApp
 
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,8 +26,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import java.util.UUID
 import kotlinx.coroutines.launch
+import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.AbstimmungCard
 import net.ipv64.kivop.components.VoteOptions
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
@@ -38,9 +40,14 @@ import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Secondary
 import net.ipv64.kivop.ui.theme.Text_tertiary
+import java.util.UUID
 
 @Composable
 fun VotePage(navController: NavController, votingID: String) {
+  BackHandler {
+    isBackPressed = navController.popBackStack()
+    Log.i("BackHandler", "BackHandler: $isBackPressed")
+  }
   var votingData by remember { mutableStateOf<GetVotingDTO?>(null) }
   var meetingData by remember { mutableStateOf<GetMeetingDTO?>(null) }
   var votedIndex by remember { mutableIntStateOf(-1) }
