@@ -38,12 +38,11 @@ fun BulletList(title: String, list: List<GetMeetingDTO?>, gap: Dp = 16.dp) {
 
   Column(
       modifier =
-          Modifier
-            .fillMaxWidth()
-            .customShadow()
-            .background(color = Background_secondary, shape = RoundedCornerShape(8.dp))
-            .padding(15.dp)
-            .height(IntrinsicSize.Min)) {
+          Modifier.fillMaxWidth()
+              .customShadow()
+              .background(color = Background_secondary, shape = RoundedCornerShape(8.dp))
+              .padding(15.dp)
+              .height(IntrinsicSize.Min)) {
         Text(text = title, style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.size(8.dp))
         Row {
@@ -92,11 +91,11 @@ fun Eintrag(meeting: GetMeetingDTO, gap: Dp) {
         style = MaterialTheme.typography.bodyLarge)
     Spacer(modifier = Modifier.size(4.dp))
     Text(
-      text = meeting.name, 
-      color = Text_prime, 
-      style = MaterialTheme.typography.bodyLarge,
-      maxLines = 1, 
-      overflow = TextOverflow.Ellipsis )
+        text = meeting.name,
+        color = Text_prime,
+        style = MaterialTheme.typography.bodyLarge,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis)
   }
   Spacer(modifier = Modifier.size(gap))
 }

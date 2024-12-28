@@ -6,7 +6,7 @@ import java.lang.ref.WeakReference
 object StringProvider {
 
   private var contextRef: WeakReference<Context>? = null
-  
+
   fun initialize(context: Context) {
     contextRef = WeakReference(context.applicationContext)
   }
@@ -19,4 +19,3 @@ object StringProvider {
     return context.getString(resId)
   }
 }
-
