@@ -6,7 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
 
-@Composable fun MeetingsListPage(navController: NavController) {
+@Composable
+fun MeetingsListPage(navController: NavController) {
   BackHandler {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")

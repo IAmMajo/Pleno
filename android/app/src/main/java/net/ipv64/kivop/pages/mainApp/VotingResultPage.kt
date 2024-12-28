@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import java.util.UUID
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.AbstimmungCard
@@ -33,7 +34,6 @@ import net.ipv64.kivop.models.GetVotingByID
 import net.ipv64.kivop.models.GetVotingResultByID
 import net.ipv64.kivop.models.VotingResults
 import net.ipv64.kivop.ui.theme.Background_prime
-import java.util.UUID
 
 @Composable
 fun VotingResultPage(navController: NavController, votingID: String) {

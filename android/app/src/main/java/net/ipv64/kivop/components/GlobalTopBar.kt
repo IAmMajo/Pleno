@@ -30,7 +30,6 @@ import net.ipv64.kivop.Screen
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Text_prime
 
-
 @SuppressLint("RestrictedApi")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,80 +38,74 @@ fun GlobalTopBar(navController: NavController, onOpenDrawer: () -> Unit) {
   val currentRoute = currentBackStackEntry?.destination?.route
   var back by remember { mutableStateOf(false) }
 
-  LaunchedEffect(currentRoute) {
-    isBackPressed = false
-  }
-  
+  LaunchedEffect(currentRoute) { isBackPressed = false }
+
   val modifier = Modifier.padding(vertical = 12.dp, horizontal = 14.dp).height(48.dp)
   AnimatedContent(
-    modifier = Modifier,
-    targetState = currentRoute,
-    transitionSpec = {
-      if (isBackPressed) {
-        slideInHorizontally(initialOffsetX = { -it }) togetherWith slideOutHorizontally(targetOffsetX = { it })
-      } else {
-        slideInHorizontally(initialOffsetX = { it }) togetherWith slideOutHorizontally(targetOffsetX = { -it })
+      modifier = Modifier,
+      targetState = currentRoute,
+      transitionSpec = {
+        if (isBackPressed) {
+          slideInHorizontally(initialOffsetX = { -it }) togetherWith
+              slideOutHorizontally(targetOffsetX = { it })
+        } else {
+          slideInHorizontally(initialOffsetX = { it }) togetherWith
+              slideOutHorizontally(targetOffsetX = { -it })
+        }
+      },
+  ) { route ->
+    when (route) {
+      Screen.Home.rout -> {
+        TopAppBar(
+            modifier = modifier,
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent), // transparente NavBar
+            title = {},
+            actions = {
+              IconBox(
+                  Icons.Default.Menu,
+                  height = 50.dp,
+                  Background_secondary.copy(alpha = 0.15f),
+                  Background_secondary,
+                  onClick = { onOpenDrawer() })
+            },
+            navigationIcon = {
+              IconBox(
+                  Icons.Default.Notifications,
+                  height = 50.dp,
+                  Background_secondary.copy(alpha = 0.15f),
+                  Background_secondary,
+                  onClick = { onOpenDrawer() })
+            })
       }
-    },
-  ){ route ->
-  when (route) {
-    Screen.Home.rout -> {
-      TopAppBar(
-        modifier = modifier,
-        colors =
-        TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent), // transparente NavBar
-        title = {
-        },
-        actions = {
-          IconBox(
-            Icons.Default.Menu,
-            height = 50.dp,
-            Background_secondary.copy(alpha = 0.15f),
-            Background_secondary,
-            onClick = { onOpenDrawer() }
-          )
-        },
-        navigationIcon = {
-          IconBox(
-            Icons.Default.Notifications,
-            height = 50.dp,
-            Background_secondary.copy(alpha = 0.15f),
-            Background_secondary,
-            onClick = { onOpenDrawer() }
-          )
-        }
-      )
-    }
-    else -> {
-      TopAppBar(
-        modifier = modifier,
-        colors =
-        TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent), // transparente NavBar
-        title = {
-        },
-        actions = {
-          IconBox(
-            Icons.Default.Menu,
-            height = 50.dp,
-            Color.Transparent,
-            Text_prime,
-            onClick = { onOpenDrawer() }
-          )
-        },
-        navigationIcon = {
-          IconBox(
-            Icons.Default.KeyboardArrowLeft,
-            height = 50.dp,
-            Color.Transparent,
-            Text_prime,
-            onClick = { 
-              isBackPressed = true
-              navController.popBackStack() 
-            }
-          )
-        }
-      )
+      else -> {
+        TopAppBar(
+            modifier = modifier,
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent), // transparente NavBar
+            title = {},
+            actions = {
+              IconBox(
+                  Icons.Default.Menu,
+                  height = 50.dp,
+                  Color.Transparent,
+                  Text_prime,
+                  onClick = { onOpenDrawer() })
+            },
+            navigationIcon = {
+              IconBox(
+                  Icons.Default.KeyboardArrowLeft,
+                  height = 50.dp,
+                  Color.Transparent,
+                  Text_prime,
+                  onClick = {
+                    isBackPressed = true
+                    navController.popBackStack()
+                  })
+            })
+      }
     }
   }
-}}
-
+}

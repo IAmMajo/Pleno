@@ -8,11 +8,10 @@ import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable fun ProtocolListPage(navController: NavController) {
+@Composable
+fun ProtocolListPage(navController: NavController) {
   BackHandler {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
-  
 }
-

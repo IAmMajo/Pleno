@@ -18,12 +18,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import java.util.UUID
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
 import net.ipv64.kivop.models.GetVotings
 import net.ipv64.kivop.models.ItemListData
 import net.ipv64.kivop.models.getMyVote
-import java.util.UUID
 
 @Composable
 fun VotingsListPage(navController: NavController) {

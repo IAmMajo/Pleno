@@ -32,10 +32,7 @@ import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
-data class TopAppBarConfig(
-  val title: String,
-  val actions: @Composable RowScope.() -> Unit = {}
-)
+data class TopAppBarConfig(val title: String, val actions: @Composable RowScope.() -> Unit = {})
 
 @Composable
 fun HomePage(
@@ -90,18 +87,17 @@ fun HomePage(
           BulletList("Bevorstehende Sitzungen", list)
         }
   }
-  val appBarConfig = TopAppBarConfig(
-    title = "Home",
-    actions = {
-      IconBox(
-        Icons.Default.Home,
-        height = 50.dp,
-        Background_secondary.copy(alpha = 0.15f),
-        Background_secondary,
-        onClick = {  }
-      )
-    }
-  )
-  
+  val appBarConfig =
+      TopAppBarConfig(
+          title = "Home",
+          actions = {
+            IconBox(
+                Icons.Default.Home,
+                height = 50.dp,
+                Background_secondary.copy(alpha = 0.15f),
+                Background_secondary,
+                onClick = {})
+          })
+
   return appBarConfig
 }
