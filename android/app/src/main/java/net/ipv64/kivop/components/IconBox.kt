@@ -23,26 +23,20 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun IconBox(
-    icon: ImageVector,
-    height: Dp = 40.dp,
-    backgroundColor: Color,
-    tint: Color,
-    onClick: () -> Unit,
+  icon: ImageVector,
+  height: Dp = 40.dp,
+  backgroundColor: Color,
+  tint: Color,
+  onClick: () -> Unit,
 ) {
   Box(
-      modifier =
-          Modifier.height(height)
-              .aspectRatio(1f)
-              .clip(RoundedCornerShape(8.dp))
-              .background(backgroundColor)
-              .clickable { onClick() }
-              .padding(10.dp),
-  ) {
+    modifier = Modifier.height(height).aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(backgroundColor).clickable(onClick=onClick ).padding(10.dp),
+  ){
     Icon(
-        modifier = Modifier.align(Alignment.Center).fillMaxSize(),
-        imageVector = icon,
-        contentDescription = null,
-        tint = tint,
+      modifier = Modifier.align(Alignment.Center).fillMaxSize(),
+      imageVector = icon,
+      contentDescription = null,
+      tint = tint,
     )
   }
 }
@@ -51,5 +45,8 @@ fun IconBox(
 @Composable
 fun IconBoxPreview() {
   IconBox(
-      icon = Icons.Rounded.Home, backgroundColor = Color.White, tint = Color.Black, onClick = {})
+    icon = Icons.Rounded.Home,
+    backgroundColor = Color.White,
+    tint = Color.Black,
+    onClick = {})
 }

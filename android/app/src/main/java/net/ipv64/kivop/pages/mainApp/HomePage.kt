@@ -1,5 +1,7 @@
 package net.ipv64.kivop.pages.mainApp
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -15,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.BulletList
 import net.ipv64.kivop.components.IconBox
 import net.ipv64.kivop.components.SitzungsCard
@@ -29,7 +32,10 @@ import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
-data class TopAppBarConfig(val title: String, val actions: @Composable RowScope.() -> Unit = {})
+data class TopAppBarConfig(
+  val title: String,
+  val actions: @Composable RowScope.() -> Unit = {}
+)
 
 @Composable
 fun HomePage(
@@ -37,6 +43,10 @@ fun HomePage(
     userViewModel: UserViewModel,
     meetingsViewModel: MeetingsViewModel
 ): TopAppBarConfig {
+  BackHandler {
+    isBackPressed = navController.popBackStack()
+    Log.i("BackHandler", "BackHandler: $isBackPressed")
+  }
   val meetings = meetingsViewModel.loadMeetings()
   var currentMeeting: GetMeetingDTO? = null
   var nextMeetings: List<GetMeetingDTO?> = emptyList()
@@ -80,17 +90,18 @@ fun HomePage(
           BulletList("Bevorstehende Sitzungen", list)
         }
   }
-  val appBarConfig =
-      TopAppBarConfig(
-          title = "Home",
-          actions = {
-            IconBox(
-                Icons.Default.Home,
-                height = 50.dp,
-                Background_secondary.copy(alpha = 0.15f),
-                Background_secondary,
-                onClick = {})
-          })
-
+  val appBarConfig = TopAppBarConfig(
+    title = "Home",
+    actions = {
+      IconBox(
+        Icons.Default.Home,
+        height = 50.dp,
+        Background_secondary.copy(alpha = 0.15f),
+        Background_secondary,
+        onClick = {  }
+      )
+    }
+  )
+  
   return appBarConfig
 }
