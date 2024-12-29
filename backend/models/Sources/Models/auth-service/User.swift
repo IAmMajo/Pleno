@@ -34,10 +34,13 @@ public final class User: Model, Content, @unchecked Sendable {
     @Field(key: "profile_image")
     public var profileImage: Data?
     
+    @OptionalChild(for: \.$user)
+    public var emailVerification: EmailVerification?
+    
     public init() { }
     
     // TODO temporarily every user is active by default until email verification works. Attention for the first user!
-    public init (id: UUID? = nil, identityID: Identity.IDValue, email: String, passwordHash: String, isAdmin: Bool = false, isActive: Bool = true, profileImage: Data? = nil) {
+    public init (id: UUID? = nil, identityID: Identity.IDValue, email: String, passwordHash: String, isAdmin: Bool = false, isActive: Bool = false, profileImage: Data? = nil) {
         self.id = id
         self.$identity.id = identityID
         self.email = email
