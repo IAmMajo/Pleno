@@ -24,6 +24,7 @@ import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.AttendanceCoordinationList
 import net.ipv64.kivop.components.ResponseItem
 import net.ipv64.kivop.components.SitzungsCard
+import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
@@ -58,6 +59,8 @@ fun AttendancesCoordinationPage(navController: NavController, meetingId: String)
 
   // UI anzeigen
   Column {
+    SpacerTopBar()
+    Log.d("Sit","$responseSitzungsCard")
     responseSitzungsCard?.let { sitzungsCardData -> SitzungsCard(sitzungsCardData) }
     Spacer(Modifier.size(12.dp))
 
