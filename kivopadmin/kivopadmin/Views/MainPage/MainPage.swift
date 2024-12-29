@@ -2,7 +2,7 @@ import SwiftUI
 import AuthServiceDTOs
 
 enum Pages: Hashable {
-    case vereinseinstellungen, nutzerverwaltung, abstimmungen, sitzungen
+    case vereinseinstellungen, nutzerverwaltung, abstimmungen, sitzungen, protokolle
 }
 
 struct MainPage: View {
@@ -34,6 +34,9 @@ struct MainPage: View {
                 }
                 Tab("Sitzungen", systemImage: "calendar.badge.clock", value: .sitzungen) {
                     MeetingAdminView()
+                }
+                Tab("Protokolle", systemImage: "doc.text", value: .protokolle) {
+                    RecordsMainView()
                 }
 
 

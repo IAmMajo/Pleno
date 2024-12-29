@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3A926B1A2D203BDF00988BF4 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3A926B192D203BDF00988BF4 /* MarkdownUI */; };
 		AF3458E42CECCC75008C18D2 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF3458E32CECCC75008C18D2 /* AuthServiceDTOs */; };
 		AF3458E62CECCC75008C18D2 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF3458E52CECCC75008C18D2 /* MeetingServiceDTOs */; };
 		AF3458E82CECCC75008C18D2 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF3458E72CECCC75008C18D2 /* NotificationsServiceDTOs */; };
@@ -65,6 +66,7 @@
 				AFAEE2EF2CEFAF020017CDB7 /* AuthServiceDTOs in Frameworks */,
 				AFAEE2F12CEFAF020017CDB7 /* ConfigServiceDTOs in Frameworks */,
 				AF3458E82CECCC75008C18D2 /* NotificationsServiceDTOs in Frameworks */,
+				3A926B1A2D203BDF00988BF4 /* MarkdownUI in Frameworks */,
 				AFAEE2F52CEFAF020017CDB7 /* NotificationsServiceDTOs in Frameworks */,
 				AF3458E62CECCC75008C18D2 /* MeetingServiceDTOs in Frameworks */,
 				AFAEE2F32CEFAF020017CDB7 /* MeetingServiceDTOs in Frameworks */,
@@ -136,6 +138,7 @@
 				AFAEE2F02CEFAF020017CDB7 /* ConfigServiceDTOs */,
 				AFAEE2F22CEFAF020017CDB7 /* MeetingServiceDTOs */,
 				AFAEE2F42CEFAF020017CDB7 /* NotificationsServiceDTOs */,
+				3A926B192D203BDF00988BF4 /* MarkdownUI */,
 			);
 			productName = kivopadmin;
 			productReference = A8390B822CE5F9E4006D2D80 /* kivopadmin.app */;
@@ -221,6 +224,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				AFAEE2ED2CEFAF020017CDB7 /* XCLocalSwiftPackageReference "../DTOs" */,
+				3A926AA62D20397F00988BF4 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A8390B832CE5F9E4006D2D80 /* Products */;
@@ -591,7 +595,23 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		3A926AA62D20397F00988BF4 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		3A926B192D203BDF00988BF4 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3A926AA62D20397F00988BF4 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
+		};
 		AF3458E32CECCC75008C18D2 /* AuthServiceDTOs */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AuthServiceDTOs;

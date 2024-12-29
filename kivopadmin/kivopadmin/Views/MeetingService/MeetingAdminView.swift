@@ -3,6 +3,7 @@ import SwiftUI
 
 struct MeetingAdminView: View {
     @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
+    
     @State private var selectedStatus: FilterType = .scheduled
     @State private var searchText: String = ""
     @State private var showCreateMeeting = false
