@@ -31,8 +31,6 @@ fun AttendancesListPage(navController: NavController) {
   val scope = rememberCoroutineScope()
   var meetings by remember { mutableStateOf<List<GetMeetingDTO>>(emptyList()) }
 
-
-
   LaunchedEffect(Unit) {
     scope.launch {
       // Login zuerst ausführen
@@ -43,59 +41,50 @@ fun AttendancesListPage(navController: NavController) {
     }
   }
 
-
-  val scheduledMeetings = meetings.filter { it.status  == MeetingStatus.scheduled}
-  val completedMeetings = meetings.filter { it.status  == MeetingStatus.completed}
-  val inSessionMeetings = meetings.filter { it.status  == MeetingStatus.inSession}
+  val scheduledMeetings = meetings.filter { it.status == MeetingStatus.scheduled }
+  val completedMeetings = meetings.filter { it.status == MeetingStatus.completed }
+  val inSessionMeetings = meetings.filter { it.status == MeetingStatus.inSession }
 
   // Tab-Inhalte definieren
-  val tabContents = listOf<@Composable () -> Unit>(
-    {
-      LazyColumn(
-        modifier = Modifier.fillMaxHeight(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-      ) {
-        items(scheduledMeetings) { meeting ->
-          ListenItem(itemListData = meeting, onClick = {
-            navController.navigate("anwesenheit/${meeting.id}")
+  val tabContents =
+      listOf<@Composable () -> Unit>(
+          {
+            LazyColumn(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                  items(scheduledMeetings) { meeting ->
+                    ListenItem(
+                        itemListData = meeting,
+                        onClick = { navController.navigate("anwesenheit/${meeting.id}") })
+                  }
+                }
+          },
+          {
+            LazyColumn(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                  items(completedMeetings) { meeting ->
+                    ListenItem(
+                        itemListData = meeting,
+                        onClick = { navController.navigate("anwesenheit/${meeting.id}") })
+                  }
+                }
           })
-        }
-      }
-    },
-    {
-      LazyColumn(
-        modifier = Modifier.fillMaxHeight(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-      ) {
-        items(completedMeetings) { meeting ->
-          ListenItem(itemListData = meeting, onClick = {
-            navController.navigate("anwesenheit/${meeting.id}")
-          })
-        }
-      }
-    }
-  )
 
- 
   // Layout mit Tabs und aktuellen Meetings
   Column {
     // Aktuelle Meetings anzeigen
     LazyColumn(
-      modifier = Modifier.heightIn(max = 210.dp),
-      verticalArrangement = Arrangement.spacedBy(12.dp)
-      
-    ) {
-      items(inSessionMeetings) { meeting ->
-        ListenItem(itemListData = meeting, onClick = {
-          navController.navigate("anwesenheit/${meeting.id}")
-        })
-      }
-    }
+        modifier = Modifier.heightIn(max = 210.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          items(inSessionMeetings) { meeting ->
+            ListenItem(
+                itemListData = meeting,
+                onClick = { navController.navigate("anwesenheit/${meeting.id}") })
+          }
+        }
     Spacer(Modifier.size(18.dp))
     // Tabs anzeigen
-    GenerateTabs(
-      tabs = tabs,
-      tabContents = tabContents
-    )
+    GenerateTabs(tabs = tabs, tabContents = tabContents)
   }
 }

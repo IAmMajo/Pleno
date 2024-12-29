@@ -1,4 +1,3 @@
-
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
@@ -34,59 +33,51 @@ import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Signal_blue
 import net.ipv64.kivop.ui.theme.Text_tertiary
 
-
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun GenerateTabs(
-  tabs: List<String>,
-  tabContents: List<@Composable (() -> Unit)?>
-) {
+fun GenerateTabs(tabs: List<String>, tabContents: List<@Composable (() -> Unit)?>) {
   val pagerState = rememberPagerState()
   val coroutineScope = rememberCoroutineScope()
 
   Column {
     ScrollableTabRow(
-      selectedTabIndex = pagerState.currentPage,
-      edgePadding = 16.dp,
-      contentColor = Color.Transparent,
-      containerColor = Color.Transparent,
-      divider = {},
-      indicator = { tabPositions ->
-        CustomIndicator(tabPositions, pagerState)
-      }
-    ) {
-      tabs.forEachIndexed { index, title ->
-        Tab(
-          modifier = Modifier
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .heightIn(34.dp)
-            .background(
-              if (pagerState.currentPage == index) Color.Transparent else Background_secondary,
-              shape = RoundedCornerShape(50.dp),
+        selectedTabIndex = pagerState.currentPage,
+        edgePadding = 16.dp,
+        contentColor = Color.Transparent,
+        containerColor = Color.Transparent,
+        divider = {},
+        indicator = { tabPositions -> CustomIndicator(tabPositions, pagerState) }) {
+          tabs.forEachIndexed { index, title ->
+            Tab(
+                modifier =
+                    Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        .heightIn(34.dp)
+                        .background(
+                            if (pagerState.currentPage == index) Color.Transparent
+                            else Background_secondary,
+                            shape = RoundedCornerShape(50.dp),
+                        ),
+                text = {
+                  Text(
+                      text = title,
+                      color = Text_tertiary,
+                      style = MaterialTheme.typography.labelMedium)
+                },
+                selected = pagerState.currentPage == index,
+                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
             )
-            ,
-          text = { Text(text = title, color =  Text_tertiary, style = MaterialTheme.typography.labelMedium) },
-          selected = pagerState.currentPage == index,
-          onClick = {
-            coroutineScope.launch {
-              pagerState.animateScrollToPage(index)
-            }
-          },
-        )
-      }
-    }
+          }
+        }
 
     HorizontalPager(
-      count = tabs.size,
-      state = pagerState,
-      modifier = Modifier.fillMaxSize().padding(18.dp)
-    ) { page ->
-      if (page < 0 || page >= tabContents.size) {
-        Text(text = "Kein Inhalt in diesem Tab")
-      } else {
-        tabContents[page]?.invoke()
-      }
-    }
+        count = tabs.size, state = pagerState, modifier = Modifier.fillMaxSize().padding(18.dp)) {
+            page ->
+          if (page < 0 || page >= tabContents.size) {
+            Text(text = "Kein Inhalt in diesem Tab")
+          } else {
+            tabContents[page]?.invoke()
+          }
+        }
   }
 }
 
@@ -94,38 +85,38 @@ fun GenerateTabs(
 @Composable
 private fun CustomIndicator(tabPositions: List<TabPosition>, pagerState: PagerState) {
   val transition = updateTransition(pagerState.currentPage)
-  val indicatorStart by transition.animateDp(
-    transitionSpec = {
-      if (initialState < targetState) {
-        spring(dampingRatio = 1f, stiffness = 200f)
-      } else {
-        spring(dampingRatio = 1f, stiffness = 500f)
-      }
-    }, label = ""
-  ) {
-    tabPositions[it].left
-  }
+  val indicatorStart by
+      transition.animateDp(
+          transitionSpec = {
+            if (initialState < targetState) {
+              spring(dampingRatio = 1f, stiffness = 200f)
+            } else {
+              spring(dampingRatio = 1f, stiffness = 500f)
+            }
+          },
+          label = "") {
+            tabPositions[it].left
+          }
 
-  val indicatorEnd by transition.animateDp(
-    transitionSpec = {
-      if (initialState < targetState) {
-        spring(dampingRatio = 1f, stiffness = 500f)
-      } else {
-        spring(dampingRatio = 1f, stiffness = 200f)
-      }
-    }, label = ""
-  ) {
-    tabPositions[it].right
-  }
+  val indicatorEnd by
+      transition.animateDp(
+          transitionSpec = {
+            if (initialState < targetState) {
+              spring(dampingRatio = 1f, stiffness = 500f)
+            } else {
+              spring(dampingRatio = 1f, stiffness = 200f)
+            }
+          },
+          label = "") {
+            tabPositions[it].right
+          }
 
   Box(
-    Modifier
-      .offset(x = indicatorStart,y = -4.dp)
-      .wrapContentSize(align = Alignment.BottomStart)
-      .width(indicatorEnd - indicatorStart)
-      //.padding(2.dp)
-      .heightIn(48.dp)
-      .background(Signal_blue.copy(0.19f), RoundedCornerShape(50))
-      .zIndex(-1f)
-  )
+      Modifier.offset(x = indicatorStart, y = -4.dp)
+          .wrapContentSize(align = Alignment.BottomStart)
+          .width(indicatorEnd - indicatorStart)
+          // .padding(2.dp)
+          .heightIn(48.dp)
+          .background(Signal_blue.copy(0.19f), RoundedCornerShape(50))
+          .zIndex(-1f))
 }
