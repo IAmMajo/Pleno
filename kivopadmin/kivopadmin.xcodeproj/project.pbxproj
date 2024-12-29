@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		3A926B1A2D203BDF00988BF4 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3A926B192D203BDF00988BF4 /* MarkdownUI */; };
+		3A926D352D21743E00988BF4 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = 3A926D342D21743E00988BF4 /* AuthServiceDTOs */; };
+		3A926D372D21743E00988BF4 /* ConfigServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = 3A926D362D21743E00988BF4 /* ConfigServiceDTOs */; };
+		3A926D392D21743E00988BF4 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = 3A926D382D21743E00988BF4 /* MeetingServiceDTOs */; };
+		3A926D3B2D21743E00988BF4 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = 3A926D3A2D21743E00988BF4 /* NotificationsServiceDTOs */; };
+		3A926D3D2D21743E00988BF4 /* PosterServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = 3A926D3C2D21743E00988BF4 /* PosterServiceDTOs */; };
 		AF3458E42CECCC75008C18D2 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF3458E32CECCC75008C18D2 /* AuthServiceDTOs */; };
 		AF3458E62CECCC75008C18D2 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF3458E52CECCC75008C18D2 /* MeetingServiceDTOs */; };
 		AF3458E82CECCC75008C18D2 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF3458E72CECCC75008C18D2 /* NotificationsServiceDTOs */; };
@@ -67,10 +72,15 @@
 				AFAEE2F12CEFAF020017CDB7 /* ConfigServiceDTOs in Frameworks */,
 				AF3458E82CECCC75008C18D2 /* NotificationsServiceDTOs in Frameworks */,
 				3A926B1A2D203BDF00988BF4 /* MarkdownUI in Frameworks */,
+				3A926D392D21743E00988BF4 /* MeetingServiceDTOs in Frameworks */,
+				3A926D3D2D21743E00988BF4 /* PosterServiceDTOs in Frameworks */,
 				AFAEE2F52CEFAF020017CDB7 /* NotificationsServiceDTOs in Frameworks */,
 				AF3458E62CECCC75008C18D2 /* MeetingServiceDTOs in Frameworks */,
+				3A926D372D21743E00988BF4 /* ConfigServiceDTOs in Frameworks */,
 				AFAEE2F32CEFAF020017CDB7 /* MeetingServiceDTOs in Frameworks */,
+				3A926D3B2D21743E00988BF4 /* NotificationsServiceDTOs in Frameworks */,
 				AF3458E42CECCC75008C18D2 /* AuthServiceDTOs in Frameworks */,
+				3A926D352D21743E00988BF4 /* AuthServiceDTOs in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,6 +149,11 @@
 				AFAEE2F22CEFAF020017CDB7 /* MeetingServiceDTOs */,
 				AFAEE2F42CEFAF020017CDB7 /* NotificationsServiceDTOs */,
 				3A926B192D203BDF00988BF4 /* MarkdownUI */,
+				3A926D342D21743E00988BF4 /* AuthServiceDTOs */,
+				3A926D362D21743E00988BF4 /* ConfigServiceDTOs */,
+				3A926D382D21743E00988BF4 /* MeetingServiceDTOs */,
+				3A926D3A2D21743E00988BF4 /* NotificationsServiceDTOs */,
+				3A926D3C2D21743E00988BF4 /* PosterServiceDTOs */,
 			);
 			productName = kivopadmin;
 			productReference = A8390B822CE5F9E4006D2D80 /* kivopadmin.app */;
@@ -611,6 +626,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3A926AA62D20397F00988BF4 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		3A926D342D21743E00988BF4 /* AuthServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AuthServiceDTOs;
+		};
+		3A926D362D21743E00988BF4 /* ConfigServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ConfigServiceDTOs;
+		};
+		3A926D382D21743E00988BF4 /* MeetingServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MeetingServiceDTOs;
+		};
+		3A926D3A2D21743E00988BF4 /* NotificationsServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NotificationsServiceDTOs;
+		};
+		3A926D3C2D21743E00988BF4 /* PosterServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PosterServiceDTOs;
 		};
 		AF3458E32CECCC75008C18D2 /* AuthServiceDTOs */ = {
 			isa = XCSwiftPackageProductDependency;

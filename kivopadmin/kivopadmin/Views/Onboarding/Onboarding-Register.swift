@@ -9,6 +9,9 @@ struct Onboarding_Register: View {
     @State private var errorMessage: String? = nil
     @State private var isLoading: Bool = false
     @State private var navigateToMainPage: Bool = false
+    
+    
+    @Binding var isLoggedIn: Bool
 
     var body: some View {
         NavigationStack {
@@ -113,7 +116,7 @@ struct Onboarding_Register: View {
                 .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty)
                 
                 // Zurück zu Login Button
-                NavigationLink(destination: Onboarding_Login()) {
+                NavigationLink(destination: Onboarding_Login(isLoggedIn: $isLoggedIn)) {
                     Text("Zurück zum Login")
                         .foregroundColor(.blue)
                         .frame(maxWidth: .infinity, maxHeight: 44)
@@ -129,9 +132,9 @@ struct Onboarding_Register: View {
             .background(Color(UIColor.systemGray6))
             .edgesIgnoringSafeArea(.all)
             .navigationBarBackButtonHidden(true)
-            .navigationDestination(isPresented: $navigateToMainPage) {
-                MainPage()
-            }
+//            .navigationDestination(isPresented: $navigateToMainPage) {
+//                MainPage()
+//            }
         }
     }
     
@@ -159,11 +162,13 @@ struct Onboarding_Register: View {
                 case .success:
                     saveCredentialsToKeychain(email: email, password: password)
                     navigateToMainPage = true
+                    isLoggedIn = true
                 case .failure(let error):
                     if error.localizedDescription.contains("200") {
                         // Bei Fehlercode 200 als Erfolg behandeln
                         saveCredentialsToKeychain(email: email, password: password)
                         navigateToMainPage = true
+                        isLoggedIn = true
                     } else {
                         errorMessage = error.localizedDescription
                     }
@@ -200,11 +205,11 @@ struct Onboarding_Register: View {
     }
 }
 
-struct Onboarding_Register_Previews: PreviewProvider {
-    static var previews: some View {
-        Onboarding_Register()
-            .environment(\.colorScheme, .light)
-        Onboarding_Register()
-            .environment(\.colorScheme, .dark)
-    }
-}
+//struct Onboarding_Register_Previews: PreviewProvider {
+//    static var previews: some View {
+//        Onboarding_Register()
+//            .environment(\.colorScheme, .light)
+//        Onboarding_Register()
+//            .environment(\.colorScheme, .dark)
+//    }
+//}

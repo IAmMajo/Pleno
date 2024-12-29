@@ -17,6 +17,9 @@ struct MainPage_ProfilView: View {
     @State private var navigateToLogin = false
     @State private var isLoading = true
     @State private var errorMessage: String? = nil
+    
+    
+    @Binding var isLoggedIn: Bool
 
     var body: some View {
         NavigationStack {
@@ -155,7 +158,7 @@ struct MainPage_ProfilView: View {
             .toolbarBackground(Color(UIColor.systemBackground), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .navigationDestination(isPresented: $navigateToLogin) {
-                Onboarding_Login()
+                Onboarding_Login(isLoggedIn: $isLoggedIn)
             }
             .onAppear {
                 MainPageAPI.fetchUserProfile { result in
@@ -175,8 +178,8 @@ struct MainPage_ProfilView: View {
     }
 }
 
-struct MainPage_ProfilView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainPage_ProfilView()
-    }
-}
+//struct MainPage_ProfilView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        MainPage_ProfilView()
+//    }
+//}

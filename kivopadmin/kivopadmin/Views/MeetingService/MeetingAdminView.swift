@@ -28,7 +28,7 @@ struct MeetingAdminView: View {
 
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 if meetingManager.isLoading {
                     ProgressView("Loading meetings...") // Ladeanzeige
@@ -96,7 +96,7 @@ struct MeetingAdminView: View {
             .sheet(isPresented: $showCreateMeeting) {
                 CreateMeetingView()
             }
-        }.navigationViewStyle(StackNavigationViewStyle())
+        }
     }
 
 

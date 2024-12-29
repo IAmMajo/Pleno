@@ -54,6 +54,7 @@ class UserManager: ObservableObject {
 
                 let users = try decoder.decode([UserProfileDTO].self, from: data)
                 completion(.success(users))
+                print(users)
             } catch {
                 completion(.failure(error))
             }

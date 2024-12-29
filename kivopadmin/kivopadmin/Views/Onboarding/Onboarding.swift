@@ -4,6 +4,8 @@ struct Onboarding: View {
     @State private var currentIndex = 0
     @State private var ClubLogo: String = "VL"
     @State private var navigateToLogin = false
+    
+    @Binding var isLoggedIn: Bool
 
     var body: some View {
         NavigationStack {
@@ -172,7 +174,7 @@ struct Onboarding: View {
                     }
             )
             .navigationDestination(isPresented: $navigateToLogin) {
-                Onboarding_Login()
+                Onboarding_Login(isLoggedIn: $isLoggedIn)
             }
         }
         .onAppear {
@@ -185,8 +187,8 @@ struct Onboarding: View {
     }
 }
 
-struct Onboarding_Previews: PreviewProvider {
-    static var previews: some View {
-        Onboarding()
-    }
-}
+//struct Onboarding_Previews: PreviewProvider {
+//    static var previews: some View {
+//        Onboarding($isLoggedIn: false)
+//    }
+//}
