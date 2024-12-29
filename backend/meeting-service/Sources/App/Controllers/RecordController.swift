@@ -205,7 +205,7 @@ struct RecordController: RouteCollection {
         guard let record = try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard (try await Record.find(.init(meeting: meeting, lang: lang2), on: req.db)) != nil else {
+        guard (try await Record.find(.init(meeting: meeting, lang: lang2), on: req.db)) == nil else {
             throw Abort(.conflict, reason: "Cannot create a new, translated record, since there is already one for the language '\(lang2)'.")
         }
         
