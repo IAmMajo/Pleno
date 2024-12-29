@@ -4,6 +4,11 @@ import Models
 import JWT
 import NotificationsServiceDTOs
 
+extension SendEmailDTO: @retroactive AsyncResponseEncodable {}
+extension SendEmailDTO: @retroactive AsyncRequestDecodable {}
+extension SendEmailDTO: @retroactive ResponseEncodable {}
+extension SendEmailDTO: @retroactive RequestDecodable {}
+extension SendEmailDTO: @retroactive Content, @unchecked @retroactive Sendable {}
 
 struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -12,8 +17,16 @@ struct UserController: RouteCollection {
         userRoutes.on(.POST, "register", body: .collect(maxSize: "500kb"), use: self.register)
         userRoutes.get("profile", use: self.getProfile)
         userRoutes.put("profile", use: self.updateProfile)
-        userRoutes.post("password", "reset-request", use: self.requestPasswordReset)
-        userRoutes.post("password", "reset", use: self.userResetPasswort)
+        userRoutes.post("password", "reset-request", use: self.requestPasswordReset).openAPI(
+            summary: "Request Reset Code",
+            description: "Request Reset Code with Email",
+            body: .type(RequestPasswordResetDTO.self)
+        )
+        userRoutes.post("password", "reset", use: self.userResetPasswort).openAPI(
+            summary: "Reset Password with code",
+            description: "Reset Password with email, code and new password",
+            body: .type(ResetPasswordDTO.self)
+        )
         
         let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
         let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
@@ -38,7 +51,12 @@ struct UserController: RouteCollection {
         // DELETE /users/delete
         protectedRoutes.delete("delete", use: self.userDeleteEntry)
         // PATCH /users/change-password
-        protectedRoutes.patch("change-password", use: self.userChangePassword)
+        protectedRoutes.patch("change-password", use: self.userChangePassword).openAPI(
+            summary: "Change password",
+            description: "Change password with old password",
+            body: .type(ChangePasswordDTO.self),
+            contentType: .application(.json)
+        )
     }
     
     @Sendable
@@ -459,24 +477,20 @@ struct UserController: RouteCollection {
         try await tokenEntry.create(on: req.db)
         
         // Hier muss der Code per Mail gesendet werden
-        let deeplink = "kivop//"
         
-        let notificationServiceUrl = "http://localhost:80/notification-service/email"
-        
-        let emailInformation = SendEmailDTO(
+        let emailData = SendEmailDTO(
             receiver: user.email,
-            subject: "Setzen sie jetzt ihr Passwort zurück",
-            template: "welcome",
-            templateData: {
-                "userName": user.identity.name,
-                "verificationLink": deeplink
-            }
+            subject: "Passwort zurücksetzen",
+            message: "Einmal-Code: \(tokenEntry.token)"
         )
+
+        let response = try await req.client.post("https://kivop.ipv64.net/email") { request in
+            try request.content.encode(emailData)
+        }
         
-        
-            
-        
-        
+        guard response.status == .ok else {
+            throw Abort(.internalServerError, reason: "Failed to send email: \(response.status)")
+        }
         return Response(status: .ok, body: .init(string: "If the email exists, a reset code has been sent."))
     }
     
@@ -501,7 +515,7 @@ struct UserController: RouteCollection {
             throw Abort(.badRequest, reason: "Invalid or expired reset code")
         }
         do {
-            user.passwordHash = try Bcrypt.hash(body.newPassword!)
+            user.passwordHash = try Bcrypt.hash(newPassword)
             try await user.save(on: req.db)
             try await tokenEntry.delete(on: req.db)
         } catch {
