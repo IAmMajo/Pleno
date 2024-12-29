@@ -9,6 +9,7 @@ struct MeetingDetailAdminView: View {
     @State private var actionType: ActionType = .start // Typ der Aktion (Starten oder Beenden)
     
     @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
+    @StateObject private var recordManager = RecordManager() // RecordManager als StateObject
     
     enum ActionType {
         case start
@@ -80,15 +81,26 @@ struct MeetingDetailAdminView: View {
                         }
                     }
                     
-                    // Sitzung
-                    Section(header: Text("Sitzung")) {
-                        NavigationLink(destination: PlaceholderView()) {
-                            Text("Protokoll")
-                        }
-                        NavigationLink(destination: PlaceholderView()) {
-                            Text("Anwesenheit")
+                    // Protokolle
+                    Section(header: Text("Protokolle")) {
+                        if recordManager.isLoading {
+                            ProgressView("Lade Protokolle...")
+                                .progressViewStyle(CircularProgressViewStyle())
+                        } else if let errorMessage = recordManager.errorMessage {
+                            Text("Error: \(errorMessage)")
+                                .foregroundColor(.red)
+                        } else if recordManager.records.isEmpty {
+                            Text("No records available.")
+                                .foregroundColor(.secondary)
+                        } else {
+                            ForEach(recordManager.records, id: \.meetingId) { record in
+                                NavigationLink(destination: MarkdownEditorView(meetingId: record.meetingId, lang: record.lang)) {
+                                    Text("Protokoll: \(record.lang)")
+                                }
+                            }
                         }
                     }
+
                     
                     // Abstimmungen
                     Section(header: Text("Abstimmungen")) {
@@ -176,6 +188,9 @@ struct MeetingDetailAdminView: View {
                     },
                     secondaryButton: .cancel(Text("Abbrechen"))
                 )
+            }
+            .onAppear(){
+                recordManager.getRecordsMeeting(meetingId: meeting.id)
             }
         }
     }
