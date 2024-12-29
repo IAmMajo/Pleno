@@ -22,7 +22,9 @@ let package = Package(
         // 🎁 KIVoP DTOs
         .package(path: "../../DTOs"),
         // 📄 Generate OpenAPI documentation from Vapor routes
-        .package(url: "https://github.com/dankinsoid/VaporToOpenAPI.git", from: "4.7.1")
+        .package(url: "https://github.com/dankinsoid/VaporToOpenAPI.git", from: "4.7.1"),
+        // Leaf
+        .package(url: "https://github.com/vapor/leaf.git", from: "4.3.0")
     ],
     targets: [
         .executableTarget(
@@ -37,7 +39,8 @@ let package = Package(
                 .product(name: "Models", package: "models"),
                 .product(name: "AuthServiceDTOs", package: "dtos"),
                 .product(name: "NotificationsServiceDTOs", package: "dtos"),
-                .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
+                .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI"),
+                .product(name: "Leaf", package: "leaf")
             ],
             swiftSettings: swiftSettings
         ),

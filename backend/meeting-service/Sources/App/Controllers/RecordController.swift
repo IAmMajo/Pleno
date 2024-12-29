@@ -2,21 +2,36 @@ import Fluent
 import Vapor
 import Models
 import MeetingServiceDTOs
+import SwiftOpenAPI
 
 struct RecordController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
+        let openAPITag = TagObject(name: "Protokolle")
         let adminMiddleware = AdminMiddleware()
         
         routes.group(":id", "records") { recordRoutes in
             recordRoutes.get(use: getAllRecords)
+                .openAPI(tags: openAPITag, summary: "Alle Protokolle einer Sitzung abfragen", response: .type([GetRecordDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+            
             recordRoutes.group(":lang") { singleRecordRoutes in
                 let adminRoutes = singleRecordRoutes.grouped(adminMiddleware)
                 singleRecordRoutes.get(use: getSingleRecord)
+                    .openAPI(tags: openAPITag, summary: "Ein Protokoll einer Sprache einer Sitzung abfragen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+                
                 singleRecordRoutes.patch(use: updateRecord)
+                    .openAPI(tags: openAPITag, summary: "Ein Protokoll einer Sprache einer Sitzung updaten", description: "Nur gestattet, wenn Status noch underway ist und der Bearbeiter der im Protokoll eingetragene oder ein Admin ist. Wenn PatchRecordDTO.identity gesetzt ist, wird der Status automatisch auf underway gesetzt.", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), body: .type(PatchRecordDTO.self), contentType: .application(.json), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+                
                 adminRoutes.delete(use: deleteRecord)
+                    .openAPI(tags: openAPITag, summary: "Ein Protokoll einer Sprache einer Sitzung löschen", description: "Nur gestattet, wenn Status noch underway ist und der Bearbeiter der im Protokoll eingetragene oder ein Admin ist. Das Protokoll der Standardsprache des Vereins kann nicht gelöscht werden.", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), statusCode: .noContent, auth: AdminMiddleware.schemeObject)
+                
                 singleRecordRoutes.put("submit", use: submitRecord)
+                    .openAPI(tags: openAPITag, summary: "Ein Protokoll einer Sprache einer Sitzung einreichen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+                
                 adminRoutes.put("approve", use: approveRecord)
+                    .openAPI(tags: openAPITag, summary: "Ein Protokoll einer Sprache einer Sitzung genehmigen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self)), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
+                
                 adminRoutes.put("translate", ":lang2", use: translateRecord)
+                    .openAPI(tags: openAPITag, summary: "Ein Protokoll einer Sprache einer Sitzung in eine neue Sprache übersetzen", path: .all(of: .type(Meeting.IDValue.self), .type(String.self), .type(String.self)), response: .type(GetRecordDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
             }
         }
     }
@@ -28,6 +43,7 @@ struct RecordController: RouteCollection {
         }
         
         return try await meeting.$records.query(on: req.db)
+            .with(\.$identity)
             .all()
             .map { record in
             try record.toGetRecordDTO()
@@ -45,6 +61,7 @@ struct RecordController: RouteCollection {
         guard let record =  try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
             throw Abort(.notFound)
         }
+        try await record.$identity.load(on: req.db)
         return try record.toGetRecordDTO()
     }
     
@@ -91,6 +108,7 @@ struct RecordController: RouteCollection {
         }
         
         try await record.update(on: req.db)
+        try await record.$identity.load(on: req.db)
         return try record.toGetRecordDTO()
     }
     
@@ -137,6 +155,7 @@ struct RecordController: RouteCollection {
         record.status = .submitted
         
         try await record.update(on: req.db)
+        try await record.$identity.load(on: req.db)
         return try record.toGetRecordDTO()
     }
     
@@ -164,6 +183,7 @@ struct RecordController: RouteCollection {
         record.status = .approved
         
         try await record.update(on: req.db)
+        try await record.$identity.load(on: req.db)
         return try record.toGetRecordDTO()
     }
     
@@ -192,6 +212,7 @@ struct RecordController: RouteCollection {
         let translatedRecord = Record(id: try .init(meeting: meeting, lang: lang2), identityId: identityId, status: .underway, content: record.content)
         
         try await translatedRecord.create(on: req.db)
+        try await record.$identity.load(on: req.db)
         return try translatedRecord.toGetRecordDTO()
     }
 }

@@ -1,4 +1,5 @@
 import Vapor
+@preconcurrency import VaporToOpenAPI
 @preconcurrency import JWT
 
 struct AdminMiddleware: AsyncMiddleware {
@@ -15,4 +16,8 @@ struct AdminMiddleware: AsyncMiddleware {
         
         return try await next.respond(to: request)
     }
+}
+
+extension AdminMiddleware {
+    static let schemeObject = AuthSchemeObject.bearer(description: "Admin Token")
 }

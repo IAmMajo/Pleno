@@ -1,7 +1,7 @@
 import Fluent
 import Models
 import Vapor
-@preconcurrency import JWTKit
+@preconcurrency import JWT
 
 /// Controller zum Verwalten von Konfigurationseinstellungen.
 /// Beinhaltet Routen zum Anzeigen, Aktualisieren und Abrufen von Einstellungen,
@@ -32,14 +32,57 @@ struct ConfigController: RouteCollection{
             
             // Routen für Konfigurationseinstellungen
             let settings = adminProtected.grouped("config")
-            settings.get(use: index)
-            settings.get(":id", use: show)
-            settings.patch(":id", use: update)
-            settings.patch(use: bulkUpdate)
+            settings.get(use: index).openAPI(
+                summary: "Alle aktiven Einstellungen abrufen",
+                description: "Gibt eine Liste aller Einstellungen zurück, die mit aktiven Services verknüpft sind.",
+                query: [],
+                body: nil,
+                response: .type([SettingResponseDTO].self),
+                responseContentType: .application(.json)
+            )
+            settings.get(":id", use: show).openAPI(
+                summary: "Eine bestimmte Einstellung abrufen",
+                description: "Gibt eine Einstellung anhand ihrer ID zurück.",
+                path: ["id":.string],
+                body: nil,
+                response: .type(SettingResponseDTO.self),
+                responseContentType: .application(.json)
+            )
+            settings.patch(":id", use: update).openAPI(
+                summary: "Eine Einstellung aktualisieren",
+                description: "Aktualisiert den Wert einer einzelnen Einstellung anhand ihrer ID.",
+                path: ["id":.string],
+                body: .type(SettingUpdateDTO.self),
+                contentType: .application(.json),
+                response: .type(SettingResponseDTO.self),
+                responseContentType: .application(.json)
+            )
+            settings.patch(use: bulkUpdate).openAPI(
+                summary: "Mehrere Einstellungen gleichzeitig aktualisieren",
+                description: """
+                    Aktualisiert mehrere Einstellungen in einem Batch.
+                    Gibt 207 (Multi-Status) zurück, um anzuzeigen, welche Updates erfolgreich und welche fehlgeschlagen sind.
+                """,
+                query: [],
+                body: .type(SettingBulkUpdateDTO.self),
+                contentType: .application(.json),
+                response: .type(BulkUpdateResponseDTO.self),
+                responseContentType: .application(.json)
+            )
             
             // Servicebezogene Routen
             let services = routes.grouped("service")
-            services.get(":serviceID", use: settingsForService)
+            services.get(":serviceID", use: settingsForService).openAPI(
+                summary: "Einstellungen für einen bestimmten Service abrufen",
+                description: "Gibt alle Einstellungen zurück, die einem bestimmten Service zugeordnet sind.",
+                path: [
+                    "serviceID": .string
+                ],
+                body: nil,
+                response: .type([SettingResponseDTO].self),
+                responseContentType: .application(.json)
+            )
+        }
         }
         
         // MARK: - Routen
@@ -254,7 +297,7 @@ struct ConfigController: RouteCollection{
             }
         }
 
-    }
+    
 
     // Struktur für eine konsistente Fehlerantwort
     struct ErrorResponse: Codable {

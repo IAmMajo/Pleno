@@ -3,23 +3,43 @@ import Vapor
 import Models
 import MeetingServiceDTOs
 import AsyncAlgorithms
+import SwiftOpenAPI
+import VaporToOpenAPI
 
 struct MeetingController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
+        let openAPITag = TagObject(name: "Sitzungen")
+        
         let adminMiddleware = AdminMiddleware()
         let adminRoutes = routes.grouped(adminMiddleware)
         routes.get(use: getAllMeetings)
+            .openAPI(tags: openAPITag, summary: "Alle Sitzungen abfragen", response: .type([GetMeetingDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+        
         routes.get(":id", use: getSingleMeeting)
+            .openAPI(tags: openAPITag, summary: "Eine Sitzung abfragen", path: .type(Meeting.IDValue.self), response: .type(GetMeetingDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+        
         adminRoutes.post(use: createMeeting)
+            .openAPI(tags: openAPITag, summary: "Sitzung erstellen", description: "Bietet sowohl das Feld locationId als auch alle Einzelfelder der Location. Beim Place eroiert das Backend automatisch, ob bereits ein Eintrag mit der Kombination plz/ort existiert. Wenn locationId gesetzt ist, werden die übrigen locationFelder ignoriert.", body: .type(CreateMeetingDTO.self), contentType: .application(.json), response: .type(GetMeetingDTO.self), responseContentType: .application(.json), statusCode: .created, auth: AdminMiddleware.schemeObject)
+        
         adminRoutes.group(":id") { meetingRoutes in
             meetingRoutes.patch(use: updateMeeting)
+                .openAPI(tags: openAPITag, summary: "Eine Sitzung updaten", path: .type(Meeting.IDValue.self), body: .type(PatchMeetingDTO.self), contentType: .application(.json), response: .type(GetMeetingDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
+            
             meetingRoutes.delete(use: deleteMeeting)
+                .openAPI(tags: openAPITag, summary: "Eine Sitzung löschen", description: "Nur Sitzungen, die noch nicht begonnen haben, können gelöscht werden. Löscht ebenfalls alle vorgemerkten Anwesenheiten sowie alle zugehörigen Abstimmungen inklusive Abstimmungsoptionen.", path: .type(Meeting.IDValue.self), statusCode: .noContent, auth: AdminMiddleware.schemeObject)
+            
             meetingRoutes.put("begin", use: beginMeeting)
+                .openAPI(tags: openAPITag, summary: "Eine Sitzung beginnen", description: "Befüllt einige Felder automatisch. Nach dem Beginn ist PATCH /meetings/{id} nicht mehr zulässig.", path: .type(Meeting.IDValue.self), response: .type(GetMeetingDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
+            
             meetingRoutes.put("end", use: endMeeting)
+                .openAPI(tags: openAPITag, summary: "Eine Sitzung beenden", path: .type(Meeting.IDValue.self), response: .type(GetMeetingDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
         }
         routes.group("locations") { locationRoutes in
             locationRoutes.get(use: getAllLocations)
+                .openAPI(tags: openAPITag, summary: "Alle Locations abfragen", response: .type([GetLocationDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+            
             locationRoutes.get(":id", use: getSingleLocation)
+                .openAPI(tags: openAPITag, summary: "Eine Location abfragen", path: .type(Location.IDValue.self), response: .type(GetLocationDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
         }
     }
     

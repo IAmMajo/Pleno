@@ -14,9 +14,6 @@ struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let userRoutes = routes.grouped("users")
         
-        userRoutes.on(.POST, "register", body: .collect(maxSize: "500kb"), use: self.register)
-        userRoutes.get("profile", use: self.getProfile)
-        userRoutes.put("profile", use: self.updateProfile)
         userRoutes.post("password", "reset-request", use: self.requestPasswordReset).openAPI(
             summary: "Request Reset Code",
             description: "Request Reset Code with Email",
@@ -32,24 +29,118 @@ struct UserController: RouteCollection {
         let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
         let protectedRoutes = userRoutes.grouped(authMiddleware)
         
+        userRoutes.on(.POST, "register", body: .collect(maxSize: "7000kb"), use: self.register).openAPI(
+            summary: "Register an account",
+            description: "Register an account to new Members",
+            body: .type(UserRegistrationDTO.self),
+            contentType: .application(.json),
+            response: .type(UserRegistrationDTO.self)
+        )
+        userRoutes.post("email", "resend", ":email", use: self.resendVerificationEmail).openAPI(
+            summary: "Resend verification email",
+            description: "Resend pending verification link",
+            contentType: .application(.json)
+        )
+        
+        userRoutes.get("profile", use: self.getProfile).openAPI(
+            summary: "Get profile",
+            description: "Get current profile of user",
+            body: .none,
+            response: .type(UserProfileDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+        )
+        protectedRoutes.on(.PATCH, "profile", body: .collect(maxSize: "7000kb"), use: self.updateProfile).openAPI(
+            summary: "Update profile",
+            description: "Update identity and/or profileImage",
+            body: .type(UserProfileUpdateDTO.self),
+            response: .type(HTTPResponseStatus.self),
+            auth: .bearer()
+        )
+        
+        
         // GET /users -> alle User
-        protectedRoutes.get(use: self.getAllUsers)
+        protectedRoutes.get(use: self.getAllUsers).openAPI(
+            summary: "Admin get all users",
+            description: "List all user profiles",
+            body: .none,
+            response: .type(UserProfileDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+            
+        )
         // GET /users/:id -> ein User
-        protectedRoutes.get(":id", use: self.getUser)
+        protectedRoutes.get(":id", use: self.getUser).openAPI(
+            summary: "Admin get a user profile",
+            description: "Get User with user id",
+            body: .none,
+            response: .type(UserProfileDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+            
+            
+        )
         // GET /users/identities/:id
-        protectedRoutes.get("identities", ":id", use: self.getIdentities)
+        protectedRoutes.get("identities", ":id", use: self.getIdentities).openAPI(
+            summary: "Admin get all user identites",
+            description: "Get all identites with user id",
+            response: .type(Identity.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+            
+        )
         // PATCH /users/:id
-        protectedRoutes.patch(":id", use: self.updateUserStatus)
+        protectedRoutes.patch(":id", use: self.updateUserStatus).openAPI(
+            summary: "Patch isActive or isAdmin",
+            description: "Admin Patch user profile status",
+            body: .type(UserUpdateAccountDTO.self),
+            contentType: .application(.json),
+            response: .type(HTTPResponseStatus.self),
+            auth: .bearer()
+            
+        )
         // DELETE /users/:id
-        protectedRoutes.delete(":id", use: self.deleteUser)
+        protectedRoutes.delete(":id", use: self.deleteUser).openAPI(
+            summary: "Admin delete user account",
+            description: "Admin can delete user account with user id",
+            response: .type(HTTPResponseStatus.self),
+            auth: .bearer()
+            
+        )
         // GET /users/profile-image/identity/:identity_id
-        protectedRoutes.get("profile-image", "identity", ":id", use: self.getImageIdentity)
+        protectedRoutes.get("profile-image", "identity", ":id", use: self.getImageIdentity).openAPI(
+            summary: "Get profile image",
+            description: "Get profile image with identity id",
+            responseContentType: .application(.json),
+            auth: .bearer()
+            
+        )
         // GET /users/profile-image/user/:user_id
-        protectedRoutes.get("profile-image", "user", ":id", use: self.getImageUser)
-        // GET /users/identites
-        protectedRoutes.get("identities", use: self.userGetIdentities)
+        protectedRoutes.get("profile-image", "user", ":id", use: self.getImageUser).openAPI(
+            summary: "Get profile image",
+            description: "Get profile image with user id",
+            responseContentType: .application(.json),
+            auth: .bearer()
+            
+            
+        )
+        // GET /users/identities
+        protectedRoutes.get("identities", use: self.userGetIdentities).openAPI(
+            summary: "Get identities",
+            description: "Get own identities with JWT-Token",
+            response: .type(Identity.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+            
+        )
         // DELETE /users/delete
-        protectedRoutes.delete("delete", use: self.userDeleteEntry)
+        protectedRoutes.delete("delete", use: self.userDeleteEntry).openAPI(
+            summary: "Delete user account",
+            description: "Delete own user account with JWT-Token",
+            response: .type(HTTPResponseStatus.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+        )
         // PATCH /users/change-password
         protectedRoutes.patch("change-password", use: self.userChangePassword).openAPI(
             summary: "Change password",
@@ -67,40 +158,78 @@ struct UserController: RouteCollection {
         // decode updates
         let update = try req.content.decode(UserProfileUpdateDTO.self)
         
-        // query user
-        guard let user = try await User.query(on: req.db)
-            .filter(\.$id == token.userID!)
-            .with(\.$identity)
-            .first() else {
-            throw Abort(.notFound)
+        /// **Verbesserungsvorschlag**:
+        guard let userID = token.userID, let user = try await User.find(userID, on: req.db) else {
+            throw Abort(.unauthorized)
+        }
+        let oldIdentity = try await user.$identity.get(on: req.db)
+        let updatedIdentity = oldIdentity.clone()
+        
+        /// **Alte Version**
+        //        // query user
+        //        guard let user = try await User.query(on: req.db)
+        //            .filter(\.$id == token.userID!)
+        //            .with(\.$identity)
+        //            .first() else {
+        //            throw Abort(.notFound)
+        //        }
+        //
+        //        // clone identity
+        //        let updatedIdentity = user.identity.clone()
+        
+        if let newName = update.name {
+            updatedIdentity.name = newName
+        }
+        let newAttendancesContainer: ContainerActor<[Attendance]> = .init(value: [])
+        try await req.db.transaction { db in
+            if let newProfileImage = update.profileImage {
+                user.profileImage = newProfileImage
+            }
+            
+            if updatedIdentity.hasChanges {
+                try await updatedIdentity.create(on: db)
+                let identityID = try updatedIdentity.requireID()
+                
+                // update current identity
+                user.$identity.id = identityID
+                // create history object
+                try await IdentityHistory(userID: user.requireID(), identityID: identityID).create(on: db)
+                
+                // save update
+                try await user.update(on: db)
+                
+                // Update corresponding attendance entries or bubble up failure
+                let response = try await req.client.put("http://meeting-service/internal/adjust-identities/prepare/\(oldIdentity.requireID().uuidString)/\(identityID.uuidString)")
+                    .throwOnVaporError()
+                guard response.status == .ok else {
+                    throw Abort(response.status) // Should never be necessary (except for wrong response status definitions)
+                }
+                guard let newAttendances = try? response.content.decode([Attendance].self) else {
+                    throw Abort(.internalServerError, reason: "Could not decode response.")
+                }
+                await newAttendancesContainer.setValue(newAttendances)
+            } else if (user.hasChanges) {
+                // save update
+                try await user.update(on: db)
+            } else {
+                throw Abort(.conflict, reason: "No changes were made.")
+            }
         }
         
-        // clone identity
-        let updatedIdentity = user.identity.clone()
-        
-        // update identity
-        updatedIdentity.name = update.name!
-        
-        // save updated identity
-        try await updatedIdentity.save(on: req.db)
-        
-        // extract identity id
-        let identityID = try updatedIdentity.requireID()
-        
-        // update current identity
-        user.$identity.id = identityID
-        
-        // save update
-        try await user.update(on: req.db)
-        
-        // extract identity id
-        let userID = try user.requireID()
-        
-        // create history object
-        let history = IdentityHistory(userID: userID, identityID: identityID)
-        
-        // save history entry
-        try await history.save(on: req.db)
+        let newAttendances = await newAttendancesContainer.value
+        if !newAttendances.isEmpty {
+            do {
+                let response = try await req.client.put("http://meeting-service/internal/adjust-identities") { request in
+                    try request.content.encode(newAttendances)
+                }
+                    .throwOnVaporError()
+                guard response.status == .noContent else {
+                    throw Abort(response.status) // Should never be necessary (except for wrong response status definitions)
+                }
+            } catch { 
+                return .multiStatus
+            }
+        }
         
         return .ok
     }
@@ -167,10 +296,11 @@ struct UserController: RouteCollection {
         // create new user
         let user = User(identityID: identityID, email: registrationData.email!, passwordHash: passwordHash, profileImage: profileImageData)
         
-        // the first user becomes admin
+        // the first user becomes admin and instant access
         let countAll = try await User.query(on: req.db).count()
         if countAll == 0 {
             user.isAdmin = true
+            user.isActive = true
         }
         
         // save user in database
@@ -195,7 +325,111 @@ struct UserController: RouteCollection {
             createdAt: user.createdAt
         )
         
+        let verificationCode = String(format: "%06d", Int.random(in: 0...999999))
+        
+        let emailVerification = EmailVerification(
+            user: user.id!,
+            email: user.email,
+            code: verificationCode,
+            status: .pending,
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+            
+        try await emailVerification.save(on: req.db)
+        
+        let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(verificationCode)"
+        
+        print("Verifizierung: \(verifyLink)")
+        
+        let emailData = SendEmailDTO(
+            receiver: user.email,
+            subject: "Email-Verifizierung",
+            message: "Verifizierungslink: \(verifyLink)"
+        )
+        
+        let response = try await req.client.post("https://kivop.ipv64.net/email") { request in
+            try request.content.encode(emailData)
+        }
+        
+        guard response.status == .ok else {
+            throw Abort(.internalServerError, reason: "Failed to send email: \(response.status)")
+        }
+        
         return try await registeredUser.encodeResponse(status: .created, for: req)
+    }
+    
+    @Sendable
+    func resendVerificationEmail(req: Request) async throws -> Response {
+        guard let email = req.parameters.get("email", as: String.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing email")
+        }
+        
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$email == email)
+            .first() else {
+            throw Abort(.notFound, reason: "No user found with the given email")
+        }
+        
+        guard let emailVerification =  try await user.$emailVerification.get(on: req.db),
+              emailVerification.status != .verified else {
+            throw Abort(.badRequest, reason: "User's email has not been verified")
+        }
+        
+        if emailVerification.expiresAt! < Date() {
+            print("Verifizierung ist abgelaufen. Generiere neuen Code...")
+            let newVerificationCode = String(format: "%06d", Int.random(in: 0...999999))
+            
+            let newExpirationDate = Date().addingTimeInterval(3600)
+            let newEmailVerification = EmailVerification(
+                user: emailVerification.$user.id,
+                email: emailVerification.email,
+                code: newVerificationCode,
+                status: .pending,
+                expiresAt: newExpirationDate
+            )
+            
+            try await newEmailVerification.save(on: req.db)
+            
+            let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(newVerificationCode)"
+            
+            print("Verifizierung: \(verifyLink)")
+            
+            let emailData = SendEmailDTO(
+                receiver: user.email,
+                subject: "Email-Verifizierung",
+                message: "Verifizierungslink: \(verifyLink)"
+            )
+            
+            let response = try await req.client.post("https://kivop.ipv64.net/email") { request in
+                try request.content.encode(emailData)
+            }
+            
+            guard response.status == .ok else {
+                throw Abort(.internalServerError, reason: "Failed to send email: \(response.status)")
+            }
+            return Response(status: .ok, body: .init(string: "A new verification email has been sent"))
+        } else {
+            print("Verifizierung noch gültig")
+            
+            let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailVerification.code)"
+            
+            print("Verifizierung: \(verifyLink)")
+            
+            let emailData = SendEmailDTO(
+                receiver: user.email,
+                subject: "Email-Verifizierung",
+                message: "Verifizierungslink: \(verifyLink)"
+            )
+            
+            let response = try await req.client.post("https://kivop.ipv64.net/email") { request in
+                try request.content.encode(emailData)
+            }
+            
+            guard response.status == .ok else {
+                throw Abort(.internalServerError, reason: "Failed to send email: \(response.status)")
+            }
+            return Response(status: .ok, body: .init(string: "A new verification email has been sent"))
+        }
     }
     
     @Sendable
@@ -306,7 +540,7 @@ struct UserController: RouteCollection {
         guard let userID = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid or missing user ID")
         }
-        let update = try req.content.decode(UserProfileUpdateDTO.self)
+        let update = try req.content.decode(UserUpdateAccountDTO.self)
         
         guard let user = try await User.query(on: req.db)
             .filter(\.$id == userID)
@@ -428,7 +662,7 @@ struct UserController: RouteCollection {
             throw Abort(.internalServerError, reason: "Error deleting user: \(error.localizedDescription)")
         }
     }
-    
+     
     @Sendable
     func userChangePassword(req: Request) async throws -> Response {
         guard let payload = req.jwtPayload else {
@@ -524,3 +758,25 @@ struct UserController: RouteCollection {
         return Response(status: .ok, body: .init(string: "Password has been reset successfully"))
     }
 }
+
+extension Attendance: @retroactive Content { }
+
+actor ContainerActor<T> {
+    var value: T
+    
+    init(value: T) {
+        self.value = value
+    }
+    
+    func setValue(_ value: T) {
+        self.value = value
+    }
+}
+
+extension ContainerActor where T: RangeReplaceableCollection {
+    func append(_ value: T.Element) {
+        self.value.append(value)
+    }
+}
+
+

@@ -14,50 +14,50 @@ public final class PosterPosition: Model,@unchecked Sendable {
     @ID(key: .id)
     public var id: UUID?
     
-    @Parent(key: "poster_id")
-    public var poster: Poster
+    @OptionalParent(key: "poster_id")
+    public var poster: Poster?
     
-    @Parent(key: "responsible_user_id")
-    public var responsibleUser: User
-
     @Field(key: "latitude")
     public var latitude: Double
 
-       @Field(key: "longitude")
+    @Field(key: "longitude")
     public var longitude: Double
-
-    @Field(key: "is_Displayed")
-    public var is_Displayed: Bool
 
     @Timestamp(key: "posted_at", on: .create)
     public var posted_at: Date?
     
+    @OptionalParent(key: "posted_by")
+    public var posted_by: Identity?
+    
     @Timestamp(key: "expires_at", on: .update)
     public var expires_at: Date?
     
+    @Timestamp(key: "removed_at", on: .create)
+    public var removed_at: Date?
+    
+    @OptionalParent(key: "removed_by")
+    public var removed_by: Identity?
+    
     @Field(key:"image_url")
     public var image_url: String?
-
+    
+    @Children(for: \.$poster_position)
+    public var responsibilities: [PosterPositionResponsibilities]
+    
     public init() { }
 
 public init(
     id: UUID? = nil,
-    posterId: UUID,
-    responsibleUserID: UUID,
+    posterId: UUID? = nil,
     latitude: Double,
     longitude: Double,
-    imageUrl: String?,
     expiresAt: Date
 ) {
     self.id = id
     self.latitude = round(latitude * 1_000_000) / 1_000_000
     self.longitude = round(longitude * 1_000_000) / 1_000_000
     self.$poster.id = posterId
-    self.$responsibleUser.id = responsibleUserID
-    self.posted_at = Date()
-    self.is_Displayed = true
     self.expires_at = expiresAt
-    self.image_url = imageUrl
 }
 
 }

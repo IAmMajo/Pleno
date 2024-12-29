@@ -31,12 +31,6 @@ public func configure(_ app: Application) async throws {
     
     app.logger.logLevel = .debug
     
-    app.http.client.configuration.timeout = .init(
-        connect: .seconds(10),
-        read: .seconds(30)
-    )
-
-
     // register routes
     try routes(app)
 }
