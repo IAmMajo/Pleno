@@ -105,7 +105,7 @@ fun ListenItem(
   Box(
     modifier = Modifier
       .fillMaxWidth()
-      .customShadow(cornersRadius = 0.dp, shadowBlurRadius = 10.dp)
+      .customShadow(cornersRadius = 8.dp, shadowBlurRadius = 2.dp)
       .clip(RoundedCornerShape(8.dp))
       .background(Background_secondary)
       .padding(8.dp)
