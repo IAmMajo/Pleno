@@ -2,6 +2,13 @@ import Fluent
 import Vapor
 import Models
 import JWT
+import NotificationsServiceDTOs
+
+extension SendEmailDTO: @retroactive AsyncResponseEncodable {}
+extension SendEmailDTO: @retroactive AsyncRequestDecodable {}
+extension SendEmailDTO: @retroactive ResponseEncodable {}
+extension SendEmailDTO: @retroactive RequestDecodable {}
+extension SendEmailDTO: @retroactive Content, @unchecked @retroactive Sendable {}
 
 struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -18,6 +25,12 @@ struct UserController: RouteCollection {
             contentType: .application(.json),
             response: .type(UserRegistrationDTO.self)
         )
+        userRoutes.post("email", "resend", ":email", use: self.resendVerificationEmail).openAPI(
+            summary: "Resend verification email",
+            description: "Resend pending verification link",
+            contentType: .application(.json)
+        )
+        
         userRoutes.get("profile", use: self.getProfile).openAPI(
             summary: "Get profile",
             description: "Get current profile of user",
@@ -265,10 +278,11 @@ struct UserController: RouteCollection {
         // create new user
         let user = User(identityID: identityID, email: registrationData.email!, passwordHash: passwordHash, profileImage: profileImageData)
         
-        // the first user becomes admin
+        // the first user becomes admin and instant access
         let countAll = try await User.query(on: req.db).count()
         if countAll == 0 {
             user.isAdmin = true
+            user.isActive = true
         }
         
         // save user in database
@@ -293,7 +307,111 @@ struct UserController: RouteCollection {
             createdAt: user.createdAt
         )
         
+        let verificationCode = String(format: "%06d", Int.random(in: 0...999999))
+        
+        let emailVerification = EmailVerification(
+            user: user.id!,
+            email: user.email,
+            code: verificationCode,
+            status: .pending,
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+            
+        try await emailVerification.save(on: req.db)
+        
+        let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(verificationCode)"
+        
+        print("Verifizierung: \(verifyLink)")
+        
+        let emailData = SendEmailDTO(
+            receiver: user.email,
+            subject: "Email-Verifizierung",
+            message: "Verifizierungslink: \(verifyLink)"
+        )
+        
+        let response = try await req.client.post("https://kivop.ipv64.net/email") { request in
+            try request.content.encode(emailData)
+        }
+        
+        guard response.status == .ok else {
+            throw Abort(.internalServerError, reason: "Failed to send email: \(response.status)")
+        }
+        
         return try await registeredUser.encodeResponse(status: .created, for: req)
+    }
+    
+    @Sendable
+    func resendVerificationEmail(req: Request) async throws -> Response {
+        guard let email = req.parameters.get("email", as: String.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing email")
+        }
+        
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$email == email)
+            .first() else {
+            throw Abort(.notFound, reason: "No user found with the given email")
+        }
+        
+        guard let emailVerification =  try await user.$emailVerification.get(on: req.db),
+              emailVerification.status != .verified else {
+            throw Abort(.badRequest, reason: "User's email has not been verified")
+        }
+        
+        if emailVerification.expiresAt! < Date() {
+            print("Verifizierung ist abgelaufen. Generiere neuen Code...")
+            let newVerificationCode = String(format: "%06d", Int.random(in: 0...999999))
+            
+            let newExpirationDate = Date().addingTimeInterval(3600)
+            let newEmailVerification = EmailVerification(
+                user: emailVerification.$user.id,
+                email: emailVerification.email,
+                code: newVerificationCode,
+                status: .pending,
+                expiresAt: newExpirationDate
+            )
+            
+            try await newEmailVerification.save(on: req.db)
+            
+            let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(newVerificationCode)"
+            
+            print("Verifizierung: \(verifyLink)")
+            
+            let emailData = SendEmailDTO(
+                receiver: user.email,
+                subject: "Email-Verifizierung",
+                message: "Verifizierungslink: \(verifyLink)"
+            )
+            
+            let response = try await req.client.post("https://kivop.ipv64.net/email") { request in
+                try request.content.encode(emailData)
+            }
+            
+            guard response.status == .ok else {
+                throw Abort(.internalServerError, reason: "Failed to send email: \(response.status)")
+            }
+            return Response(status: .ok, body: .init(string: "A new verification email has been sent"))
+        } else {
+            print("Verifizierung noch gültig")
+            
+            let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailVerification.code)"
+            
+            print("Verifizierung: \(verifyLink)")
+            
+            let emailData = SendEmailDTO(
+                receiver: user.email,
+                subject: "Email-Verifizierung",
+                message: "Verifizierungslink: \(verifyLink)"
+            )
+            
+            let response = try await req.client.post("https://kivop.ipv64.net/email") { request in
+                try request.content.encode(emailData)
+            }
+            
+            guard response.status == .ok else {
+                throw Abort(.internalServerError, reason: "Failed to send email: \(response.status)")
+            }
+            return Response(status: .ok, body: .init(string: "A new verification email has been sent"))
+        }
     }
     
     @Sendable

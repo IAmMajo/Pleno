@@ -16,7 +16,7 @@ public final class EmailVerification: Model, Content, @unchecked Sendable {
     @Field(key: "code")
     public var code: String
     
-    @Field(key: "status")
+    @Enum(key: "status")
     public var status: VerificationStatus
     
     @Timestamp(key: "expires_at", on: .none)
@@ -30,14 +30,13 @@ public final class EmailVerification: Model, Content, @unchecked Sendable {
     
     public init() { }
 
-    public init(id: UUID? = nil, user: User, email: String, code: String, status: VerificationStatus, expiresAt: Date, verifiedAt: Date) {
+    public init(id: UUID? = nil, user: User.IDValue, email: String, code: String, status: VerificationStatus, expiresAt: Date) {
         self.id = id
-        self.user = user
+        self.$user.id = user
         self.email = email
         self.code = code
         self.status = status
         self.expiresAt = expiresAt
-        self.verifiedAt = verifiedAt
     }
 }
 

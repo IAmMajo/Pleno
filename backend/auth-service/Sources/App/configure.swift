@@ -30,7 +30,6 @@ public func configure(_ app: Application) async throws {
     
     app.logger.logLevel = .debug
     
-
     // register routes
     try routes(app)
 }
