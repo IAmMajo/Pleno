@@ -15,6 +15,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,8 +32,13 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetLocationDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
+import net.ipv64.kivop.services.api.getAttendances
 import net.ipv64.kivop.ui.theme.Background_secondary
+import net.ipv64.kivop.ui.theme.Primary
+import net.ipv64.kivop.ui.theme.Secondary
+import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_prime_light
+import net.ipv64.kivop.ui.theme.Text_secondary
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -97,7 +105,8 @@ fun SitzungsCard(GetMeetingDTO: GetMeetingDTO, backgroundColor: Color = Color.Tr
             text =
             "${GetMeetingDTO.location?.name}${if (!GetMeetingDTO.location?.street.isNullOrBlank()) ", " else ""}",
             color = Text_prime_light,
-            style = MaterialTheme.typography.bodyMedium)
+            style = MaterialTheme.typography.bodyMedium,fontWeight = FontWeight.SemiBold
+          )
           // Adresse der Location
           if (!GetMeetingDTO.location?.street.isNullOrBlank())
             Text(
@@ -126,12 +135,103 @@ fun SitzungsCard(GetMeetingDTO: GetMeetingDTO, backgroundColor: Color = Color.Tr
               },
               color = Text_prime_light,
               style = MaterialTheme.typography.bodyMedium,
+              fontWeight = FontWeight.SemiBold
             )
         
       }
 
       Spacer(modifier = Modifier.height(16.dp))
       ProfileCardSmall(name = GetMeetingDTO.chair?.name ?: "", role = "Sitzungsleiter", profilePicture = null,backgroundColor = Background_secondary.copy(0.15f),texColor = Text_prime_light)
+    }
+  }
+}
+
+
+@Composable
+fun InToSitzungCard(GetMeetingDTO: GetMeetingDTO, backgroundColor: Color = Secondary,onClick: () -> Unit) {
+  val dateFormatter = java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy")
+  val timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+  val meetingId = GetMeetingDTO.id.toString()
+  val responses = remember { mutableStateOf<List<AttendanceStatus?>>(emptyList()) }
+  
+  
+  
+  LaunchedEffect(meetingId) {
+    val responseData = getAttendances(meetingId) // Dynamische Daten abrufen
+    responses.value = responseData.map { response -> response.status }
+  }
+
+  val count = responses.value.count { it == AttendanceStatus.present }
+  
+  Log.e("Test-id", "${GetMeetingDTO.id}")
+  // Beobachtbarer Zustand wird aktualisiert
+  Log.e("Test-resp", "${responses}")
+
+  Box(
+    modifier = Modifier
+      .fillMaxWidth()
+      .clip(RoundedCornerShape(16.dp))
+      .background(backgroundColor)
+      .padding(16.dp)
+  ) {
+    Column {
+      Text(
+        text = GetMeetingDTO.name,
+        color = Text_prime,
+        style = MaterialTheme.typography.headlineMedium,
+      )
+      Spacer(modifier = Modifier.height(12.dp))
+      Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Icon(
+          painter = painterResource(id = R.drawable.ic_calendar),
+          contentDescription = "Datum",
+          tint = Text_prime
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+          text = "${GetMeetingDTO.start.format(dateFormatter)}",
+          color = Text_prime,
+          style = MaterialTheme.typography.bodyLarge,
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+       
+      }
+      Spacer(modifier = Modifier.height(4.dp))
+      Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,) {
+        Icon(
+          painter = painterResource(id = R.drawable.ic_clock),
+          contentDescription = "Dauer",
+          tint = Text_secondary
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+          text = "${GetMeetingDTO.start.format(timeFormatter)} Uhr",
+          color = Text_secondary,
+          style = MaterialTheme.typography.bodyMedium,
+          fontWeight = FontWeight.SemiBold
+
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Icon(
+          painter = painterResource(id = R.drawable.ic_groups),
+          contentDescription = "Dauer",
+          tint = Text_secondary,
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+          text = "${count}",
+          color = Text_secondary,
+          style = MaterialTheme.typography.bodyMedium,
+          fontWeight = FontWeight.SemiBold
+        )
+      }
+
+      Spacer(modifier = Modifier.height(12.dp))
+      
+      CustomButton(text = "Zur aktuellen Sitzung", color = Primary, fontColor = Text_prime_light,
+        modifier = Modifier.clip(shape = RoundedCornerShape(50.dp))
+        ,onClick = onClick
+        )
     }
   }
 }
@@ -167,5 +267,5 @@ fun SitzungsCardPreview() {
     code = "23",
     myAttendanceStatus = AttendanceStatus.present
   )
-  SitzungsCard(GetMeetingDTO = test)
+  InToSitzungCard(GetMeetingDTO = test,onClick = {})
 }
