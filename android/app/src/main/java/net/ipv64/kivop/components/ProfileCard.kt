@@ -34,7 +34,13 @@ import net.ipv64.kivop.ui.theme.Text_prime
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun ProfileCardSmall(name: String, profilePicture: ByteArray?,role: String,backgroundColor: Color = Background_secondary,texColor: Color = Text_prime ) {
+fun ProfileCardSmall(
+    name: String,
+    profilePicture: ByteArray?,
+    role: String,
+    backgroundColor: Color = Background_secondary,
+    texColor: Color = Text_prime
+) {
   Box(
       modifier =
           Modifier.fillMaxWidth()

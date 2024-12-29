@@ -66,7 +66,9 @@ fun HomePage(
               style = MaterialTheme.typography.headlineLarge)
           SpacerBetweenElements()
           if (currentMeeting != null) {
-            InToSitzungCard(currentMeeting, onClick = { navController.navigate("anwesenheit/${currentMeeting.id}")})
+            InToSitzungCard(
+                currentMeeting,
+                onClick = { navController.navigate("anwesenheit/${currentMeeting.id}") })
           }
         }
     Column(
