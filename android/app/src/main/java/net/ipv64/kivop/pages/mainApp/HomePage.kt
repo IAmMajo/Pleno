@@ -20,7 +20,7 @@ import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.BulletList
 import net.ipv64.kivop.components.IconBox
-import net.ipv64.kivop.components.SitzungsCard
+import net.ipv64.kivop.components.InToSitzungCard
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
@@ -66,7 +66,7 @@ fun HomePage(
               style = MaterialTheme.typography.headlineLarge)
           SpacerBetweenElements()
           if (currentMeeting != null) {
-            SitzungsCard(currentMeeting)
+            InToSitzungCard(currentMeeting, onClick = { navController.navigate("anwesenheit/${currentMeeting.id}")})
           }
         }
     Column(

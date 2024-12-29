@@ -239,7 +239,7 @@ fun DrawerContent(
       modifier = Modifier.padding(top = 60.dp, start = 20.dp, end = 8.dp, bottom = 10.dp),
   ) {
     if (user != null) {
-      ProfileCardSmall(user.name!!, user.profileImage)
+      ProfileCardSmall(user.name!!, user.profileImage,role = "verein")
     }
 
     Spacer(modifier = Modifier.height(4.dp))

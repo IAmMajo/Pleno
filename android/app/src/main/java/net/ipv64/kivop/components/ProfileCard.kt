@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -33,13 +34,13 @@ import net.ipv64.kivop.ui.theme.Text_prime
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun ProfileCardSmall(name: String, profilePicture: ByteArray?) {
+fun ProfileCardSmall(name: String, profilePicture: ByteArray?,role: String,backgroundColor: Color = Background_secondary,texColor: Color = Text_prime ) {
   Box(
       modifier =
           Modifier.fillMaxWidth()
               .height(68.dp)
               .customShadow()
-              .background(Background_secondary, shape = RoundedCornerShape(8.dp))
+              .background(backgroundColor, shape = RoundedCornerShape(8.dp))
               .padding(8.dp)) {
         Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
           if (profilePicture != null) {
@@ -64,11 +65,11 @@ fun ProfileCardSmall(name: String, profilePicture: ByteArray?) {
           }
           Spacer(modifier = Modifier.size(16.dp))
           Column() {
-            Text(text = name, style = MaterialTheme.typography.labelLarge, color = Text_prime)
+            Text(text = name, style = MaterialTheme.typography.labelLarge, color = texColor)
             Text(
-                text = "verein",
+                text = role,
                 style = MaterialTheme.typography.labelLarge,
-                color = Text_prime.copy(alpha = 0.40f))
+                color = texColor.copy(alpha = 0.40f))
           }
         }
       }
