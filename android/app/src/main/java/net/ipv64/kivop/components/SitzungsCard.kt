@@ -26,8 +26,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import java.time.LocalDateTime
-import java.util.UUID
 import net.ipv64.kivop.R
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
@@ -41,6 +39,8 @@ import net.ipv64.kivop.ui.theme.Secondary
 import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_prime_light
 import net.ipv64.kivop.ui.theme.Text_secondary
+import java.time.LocalDateTime
+import java.util.UUID
 
 @Composable
 fun SitzungsCard(GetMeetingDTO: GetMeetingDTO, backgroundColor: Color = Color.Transparent) {
@@ -132,12 +132,15 @@ fun SitzungsCard(GetMeetingDTO: GetMeetingDTO, backgroundColor: Color = Color.Tr
           }
 
           Spacer(modifier = Modifier.height(16.dp))
-          ProfileCardSmall(
-              name = GetMeetingDTO.chair?.name ?: "",
+          if (GetMeetingDTO.chair != null) {
+            ProfileCardSmall(
+              name = GetMeetingDTO.chair?.name ?: "C",
               role = "Sitzungsleiter",
               profilePicture = null,
               backgroundColor = Background_secondary.copy(0.15f),
-              texColor = Text_prime_light)
+              texColor = Text_prime_light
+            )
+          }
         }
       }
 }
@@ -162,7 +165,6 @@ fun InToSitzungCard(
 
   Log.e("Test-id", "${GetMeetingDTO.id}")
   // Beobachtbarer Zustand wird aktualisiert
-  Log.e("Test-resp", "${responses}")
 
   Box(
       modifier =
