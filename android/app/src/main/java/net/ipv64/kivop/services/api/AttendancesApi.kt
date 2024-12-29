@@ -12,15 +12,14 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetAttendanceDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
 import net.ipv64.kivop.models.PlanAttendance
-import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
+import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
-suspend fun getAttendances(context: Context, id: String): List<GetAttendanceDTO> =
+suspend fun getAttendances(id: String): List<GetAttendanceDTO> =
     withContext(Dispatchers.IO) {
-      val auth = AuthController(context)
       val path = "meetings/$id/attendances"
 
       val token = auth.getSessionToken()
@@ -76,7 +75,6 @@ suspend fun putPlanAttendance(
     status: PlanAttendance
 ): Boolean =
     withContext(Dispatchers.IO) {
-      var auth = AuthController(context)
       val path = "/meetings/$meetingId/plan-attendance/${status.name}"
 
       val token = auth.getSessionToken()
@@ -109,9 +107,8 @@ suspend fun putPlanAttendance(
       }
     }
 
-suspend fun putAttend(context: Context, meetingId: String, code: String): Boolean =
+suspend fun putAttend(meetingId: String, code: String): Boolean =
     withContext(Dispatchers.IO) {
-      var auth = AuthController(context)
       val path = "/meetings/$meetingId/attend/$code"
 
       val token = auth.getSessionToken()

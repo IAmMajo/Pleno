@@ -1,11 +1,15 @@
 package net.ipv64.kivop.services.api
 
 import android.util.Log
+import com.example.kivopandriod.services.stringToLocalDateTime
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileDTO
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
+import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.FormBody
 import okhttp3.Request
@@ -66,4 +70,51 @@ suspend fun getValidateToken(token: String): Boolean =
         Log.e("token", "Fehler beim Token-Validieren", e)
       }
       return@withContext false
+    }
+
+suspend fun getUserProfile(): UserProfileDTO? =
+    withContext(Dispatchers.IO) {
+      val path = "users/profile"
+
+      val token = auth.getSessionToken()
+
+      if (token.isNullOrEmpty()) {
+        println("Fehler: Kein Token verfügbar")
+        return@withContext null
+      }
+
+      val request =
+          Request.Builder()
+              .url(BASE_URL + path)
+              .get()
+              .addHeader("Authorization", "Bearer $token")
+              .build()
+
+      return@withContext try {
+        val response = okHttpClient.newCall(request).execute()
+        if (response.isSuccessful) {
+          val responseBody = response.body?.string()
+          if (responseBody != null) {
+            val profileObject = Gson().fromJson(responseBody, JsonObject::class.java)
+            val uid = profileObject.get("uid")?.asString.let { UUID.fromString(it) }
+            val email = profileObject.get("email")?.asString
+            val name = profileObject.get("name")?.asString
+            val profileImage = profileObject.get("profileImage")?.asString?.toByteArray()
+            val isAdmin = profileObject.get("isAdmin")?.asBoolean
+            val isActive = profileObject.get("isActive")?.asBoolean
+            val createdAt =
+                profileObject.get("createdAt")?.asString.let { stringToLocalDateTime(it) }
+            UserProfileDTO(uid, email, name, profileImage, isAdmin, isActive, createdAt)
+          } else {
+            println("Fehler: Leere Antwort erhalten.")
+            null
+          }
+        } else {
+          println("Fehler bei der Anfrage: ${response.message}")
+          null
+        }
+      } catch (e: Exception) {
+        println("Fehler: ${e.message}")
+        null
+      }
     }

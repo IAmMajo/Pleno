@@ -1,6 +1,7 @@
 package net.ipv64.kivop.pages.mainApp
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import java.util.UUID
 import kotlinx.coroutines.launch
+import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.AbstimmungCard
 import net.ipv64.kivop.components.PieChart
 import net.ipv64.kivop.components.ResultCard
@@ -35,6 +37,10 @@ import net.ipv64.kivop.ui.theme.Background_prime
 
 @Composable
 fun VotingResultPage(navController: NavController, votingID: String) {
+  BackHandler {
+    isBackPressed = navController.popBackStack()
+    Log.i("BackHandler", "BackHandler: $isBackPressed")
+  }
   val coroutineScope = rememberCoroutineScope()
   var votingData by remember { mutableStateOf<GetVotingDTO?>(null) }
   var votings by remember { mutableStateOf<GetVotingResultsDTO?>(null) }
@@ -42,9 +48,9 @@ fun VotingResultPage(navController: NavController, votingID: String) {
 
   LaunchedEffect(Unit) {
     coroutineScope.launch {
-      votingData = GetVotingByID(navController.context, UUID.fromString(votingID))
+      votingData = GetVotingByID(UUID.fromString(votingID))
       Log.d("voting", votingData?.options.toString())
-      votings = GetVotingResultByID(navController.context, UUID.fromString(votingID))
+      votings = GetVotingResultByID(UUID.fromString(votingID))
       votingsCombined =
           votingData?.options!!.map { option ->
             val label = option.text

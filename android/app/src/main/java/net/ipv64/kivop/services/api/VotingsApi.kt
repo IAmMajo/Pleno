@@ -14,15 +14,14 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingOptionDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
-import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
+import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
 suspend fun GetVotings(context: Context): List<GetVotingDTO> =
     withContext(Dispatchers.IO) {
-      var auth = AuthController(context)
       val path = "meetings/votings"
 
       val token = auth.getSessionToken()
@@ -89,9 +88,8 @@ suspend fun GetVotings(context: Context): List<GetVotingDTO> =
       }
     }
 
-suspend fun GetVotingResultByID(context: Context, id: UUID): GetVotingResultsDTO? =
+suspend fun GetVotingResultByID(id: UUID): GetVotingResultsDTO? =
     withContext(Dispatchers.IO) {
-      var auth = AuthController(context)
       val path = "meetings/votings/$id/results"
 
       val token = auth.getSessionToken()
@@ -150,9 +148,8 @@ suspend fun GetVotingResultByID(context: Context, id: UUID): GetVotingResultsDTO
       }
     }
 
-suspend fun GetVotingByID(context: Context, ID: UUID): GetVotingDTO? =
+suspend fun GetVotingByID(ID: UUID): GetVotingDTO? =
     withContext(Dispatchers.IO) {
-      var auth = AuthController(context)
       val path = "meetings/votings/$ID"
 
       val token = auth.getSessionToken()
@@ -217,9 +214,8 @@ suspend fun GetVotingByID(context: Context, ID: UUID): GetVotingDTO? =
       }
     }
 
-suspend fun putVote(context: Context, votingId: String, optionIndex: Int): Boolean =
+suspend fun putVote(votingId: String, optionIndex: Int): Boolean =
     withContext(Dispatchers.IO) {
-      var auth = AuthController(context)
       val path = "meetings/votings/$votingId/vote/$optionIndex"
 
       val token = auth.getSessionToken()
@@ -252,9 +248,8 @@ suspend fun putVote(context: Context, votingId: String, optionIndex: Int): Boole
       }
     }
 
-suspend fun getMyVote(context: Context, ID: UUID): GetMyVoteDTO? =
+suspend fun getMyVote(ID: UUID): GetMyVoteDTO? =
     withContext(Dispatchers.IO) {
-      var auth = AuthController(context)
       val path = "meetings/votings/$ID/my-vote"
 
       val token = auth.getSessionToken()

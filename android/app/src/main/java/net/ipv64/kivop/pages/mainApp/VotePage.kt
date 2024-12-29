@@ -1,6 +1,8 @@
 package net.ipv64.kivop.pages.mainApp
 
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import java.util.UUID
 import kotlinx.coroutines.launch
+import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.AbstimmungCard
 import net.ipv64.kivop.components.VoteOptions
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
@@ -41,15 +44,18 @@ import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
 fun VotePage(navController: NavController, votingID: String) {
+  BackHandler {
+    isBackPressed = navController.popBackStack()
+    Log.i("BackHandler", "BackHandler: $isBackPressed")
+  }
   var votingData by remember { mutableStateOf<GetVotingDTO?>(null) }
   var meetingData by remember { mutableStateOf<GetMeetingDTO?>(null) }
   var votedIndex by remember { mutableIntStateOf(-1) }
   var scope = rememberCoroutineScope()
   LaunchedEffect(Unit) {
-    votingData = GetVotingByID(navController.context, UUID.fromString(votingID))
-    meetingData = getMeetingByID(navController.context, votingData!!.meetingId.toString())
+    votingData = GetVotingByID(UUID.fromString(votingID))
+    meetingData = getMeetingByID(votingData!!.meetingId.toString())
   }
-
   Column(modifier = Modifier.background(Primary)) {
     if (votingData != null) {
       AbstimmungCard(
@@ -75,7 +81,7 @@ fun VotePage(navController: NavController, votingID: String) {
                 onClick = {
                   // todo: ask if user is sure
                   scope.launch {
-                    val voted = putVote(navController.context, votingID, 0)
+                    val voted = putVote(votingID, 0)
                     if (!voted) {
                       Toast.makeText(
                               navController.context, "Fehler beim Abstimmen", Toast.LENGTH_SHORT)
@@ -97,7 +103,7 @@ fun VotePage(navController: NavController, votingID: String) {
                   // todo: ask if user is sure
                   if (votedIndex != -1) {
                     scope.launch {
-                      val voted = putVote(navController.context, votingID, votedIndex)
+                      val voted = putVote(votingID, votedIndex)
                       if (!voted) {
                         Toast.makeText(
                                 navController.context, "Fehler beim Abstimmen", Toast.LENGTH_SHORT)

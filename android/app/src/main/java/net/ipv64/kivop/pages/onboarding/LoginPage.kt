@@ -28,7 +28,7 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.MainActivity
 import net.ipv64.kivop.components.CustomInputField
-import net.ipv64.kivop.services.AuthController
+import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.ui.customRoundedTop
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Primary
@@ -97,7 +97,7 @@ fun LoginPage(navController: NavController) {
                       containerColor = Signal_blue, contentColor = Text_prime_light),
               onClick = {
                 scope.launch {
-                  val success = handleLogin(navController.context, email, password)
+                  val success = handleLogin(email, password)
                   if (success) {
                     navigateToMainActivity(navController.context)
                   }
@@ -109,9 +109,7 @@ fun LoginPage(navController: NavController) {
   }
 }
 
-private suspend fun handleLogin(context: Context, email: String, password: String): Boolean {
-  var appContext = context.applicationContext
-  val auth = AuthController(appContext)
+private suspend fun handleLogin(email: String, password: String): Boolean {
   return auth.login(email, password)
 }
 

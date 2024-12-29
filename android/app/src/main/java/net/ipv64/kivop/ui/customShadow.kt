@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 fun Modifier.customShadow(
-    color: Color = Color(272626),
+    color: Color = Color(0xFF000000),
     alpha: Float = 0.08f,
     cornersRadius: Dp = 8.dp,
     shadowBlurRadius: Dp = 16.dp,
