@@ -60,7 +60,7 @@ fun AttendancesCoordinationPage(navController: NavController, meetingId: String)
   // UI anzeigen
   Column {
     SpacerTopBar()
-    Log.d("Sit","$responseSitzungsCard")
+    Log.d("Sit", "$responseSitzungsCard")
     responseSitzungsCard?.let { sitzungsCardData -> SitzungsCard(sitzungsCardData) }
     Spacer(Modifier.size(12.dp))
 
