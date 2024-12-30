@@ -2,12 +2,15 @@ import SwiftUI
 import AuthServiceDTOs
 
 struct Onboarding_Wait: View {
+    @Binding var email: String // Email wird übergeben
     @State private var clubName: String = "Name des Vereins der manchmal auch sehr lange werden kann e.V."
     @State private var isEmailVerified: Bool = false
     @State private var isUserAccepted: Bool = false
     @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
     @State private var navigateToMainPage: Bool = false
+    @State private var resendTimer: Int = 30 // Countdown-Timer
+    @State private var canResendEmail: Bool = false // Steuerung des Buttons
 
     var body: some View {
         NavigationStack {
@@ -69,18 +72,31 @@ struct Onboarding_Wait: View {
                 if isLoading {
                     ProgressView("Überprüfung...")
                         .padding()
-                } else if isEmailVerified && isUserAccepted {
-                    // Navigation zu MainPage bei Erfolg
-                    EmptyView()
-                        .onAppear {
-                            navigateToMainPage = true
-                        }
                 }
+
+                // Button für E-Mail erneut senden
+                if !canResendEmail {
+                    Text("E-Mail erneut senden (\(resendTimer)s)")
+                        .foregroundColor(.gray)
+                        .font(.footnote)
+                        .padding(.top, 10)
+                } else {
+                    Button(action: resendVerificationEmail) {
+                        Text("E-Mail erneut senden")
+                            .foregroundColor(.blue)
+                            .font(.footnote)
+                            .underline()
+                    }
+                }
+
+                Spacer()
             }
             .background(Color(UIColor.systemGray6))
             .edgesIgnoringSafeArea(.all)
             .onAppear {
                 checkVerificationStatus()
+                startResendTimer()
+                startAutoLoginAttempt()
             }
             // Navigation zu MainPage
             .navigationDestination(isPresented: $navigateToMainPage) {
@@ -129,7 +145,6 @@ struct Onboarding_Wait: View {
 
     private func checkVerificationStatus() {
         isLoading = true
-        errorMessage = nil
 
         OnboardingAPI.checkEmailVerification { result in
             DispatchQueue.main.async {
@@ -143,30 +158,61 @@ struct Onboarding_Wait: View {
                                 switch userResult {
                                 case .success(let userAccepted):
                                     self.isUserAccepted = userAccepted
-                                    if !userAccepted {
-                                        self.errorMessage = "Warte auf die Bestätigung durch den Organisator."
+                                    if userAccepted {
+                                        navigateToMainPage = true
                                     }
-                                case .failure(let error):
-                                    self.errorMessage = error.localizedDescription
+                                case .failure:
+                                    break // Kein Fehler anzeigen
                                 }
                             }
                         }
                     } else {
                         self.isLoading = false
-                        self.errorMessage = "Bitte überprüfe deine Email und klicke auf den Bestätigungslink."
                     }
-                case .failure(let error):
-                    self.isLoading = false
-                    self.errorMessage = error.localizedDescription
+                case .failure:
+                    self.isLoading = false // Kein Fehler anzeigen
                 }
             }
         }
     }
+
+    private func resendVerificationEmail() {
+        isLoading = true
+
+        OnboardingAPI.resendVerificationEmail(email: email) { result in
+            DispatchQueue.main.async {
+                isLoading = false
+                if case .success = result {
+                    startResendTimer() // Timer zurücksetzen
+                }
+            }
+        }
+    }
+
+    private func startResendTimer() {
+        resendTimer = 30
+        canResendEmail = false
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            if resendTimer > 0 {
+                resendTimer -= 1
+            } else {
+                timer.invalidate()
+                canResendEmail = true
+            }
+        }
+    }
+
+    private func startAutoLoginAttempt() {
+        Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { _ in
+            checkVerificationStatus()
+        }
+    }
 }
 
-
 struct Onboarding_Wait_Previews: PreviewProvider {
+    @State static var testEmail: String = "test@example.com"
+
     static var previews: some View {
-        Onboarding_Wait()
+        Onboarding_Wait(email: $testEmail)
     }
 }

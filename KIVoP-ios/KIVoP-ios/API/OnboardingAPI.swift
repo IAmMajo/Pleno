@@ -49,28 +49,16 @@ class OnboardingAPI {
             }
 
             if httpResponse.statusCode == 201 {
-                // Registrierung erfolgreich, automatischer Login
-                print("Registrierung erfolgreich. Starte automatischen Login...")
-
-                let loginDTO = UserLoginDTO(email: registrationDTO.email, password: registrationDTO.password)
-
-                loginUser(with: loginDTO) { loginResult in
-                    switch loginResult {
-                    case .success(let token):
-                        // Token speichern
-                        UserDefaults.standard.setValue(token, forKey: "jwtToken")
-                        print("JWT-Token erfolgreich gespeichert: \(token)")
-                        completion(.success(token))
-                    case .failure(let loginError):
-                        completion(.failure(loginError))
-                    }
-                }
+                // Registrierung erfolgreich
+                print("Registrierung erfolgreich.")
+                completion(.success("Registrierung erfolgreich."))
             } else {
                 let errorMessage = "Registrierung fehlgeschlagen. Status: \(httpResponse.statusCode)"
                 completion(.failure(NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])))
             }
         }.resume()
     }
+
 
 
     
@@ -252,7 +240,32 @@ class OnboardingAPI {
                 }
             }
         }.resume()
-    }    
+    }
+    
+    static func resendVerificationEmail(email: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users/email/resend/\(email)") else {
+            completion(.failure(NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                completion(.failure(NSError(domain: "", code: 500, userInfo: [NSLocalizedDescriptionKey: "Fehler beim erneuten Senden der Verifizierungs-E-Mail"])))
+                return
+            }
+
+            completion(.success(()))
+        }.resume()
+    }
+
 }
 
 
