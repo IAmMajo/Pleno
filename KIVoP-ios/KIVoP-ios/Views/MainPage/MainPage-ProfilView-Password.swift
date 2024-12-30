@@ -8,9 +8,11 @@ struct MainPage_ProfilView_Password: View {
     @State private var newPassword: String = ""
     @State private var confirmPassword: String = ""
     @State private var isLoading: Bool = false
-    @State private var errorMessage: String? = nil
+    @State private var currentPasswordError: String? = nil
+    @State private var newPasswordError: String? = nil
+    @State private var confirmPasswordError: String? = nil
     @State private var successMessage: String? = nil
-
+    
     var body: some View {
         VStack(spacing: 20) {
             if isLoading {
@@ -26,6 +28,11 @@ struct MainPage_ProfilView_Password: View {
                         .padding(10)
                         .background(Color(UIColor.systemBackground).opacity(0.8))
                         .cornerRadius(10)
+                    if let error = currentPasswordError {
+                        Text(error)
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
                 }
                 
                 // Neues Passwort Abschnitt mit grauer Linie dazwischen
@@ -34,29 +41,41 @@ struct MainPage_ProfilView_Password: View {
                         .font(.caption)
                         .foregroundColor(Color.secondary)
                     
-                    VStack(spacing: 0) {
-                        SecureField("Neues Passwort", text: $newPassword)
-                            .padding(10)
-                            .background(Color(UIColor.systemBackground).opacity(0.8))
-                        Divider()
-                            .frame(height: 0.5)
-                            .background(Color.gray.opacity(0.6))
-                            .padding(.horizontal, 10)
-                        
-                        SecureField("Passwort wiederholen", text: $confirmPassword)
-                            .padding(10)
-                            .background(Color(UIColor.systemBackground).opacity(0.8))
+                    SecureField("Neues Passwort", text: $newPassword)
+                        .onChange(of: newPassword) { newValue in
+                            print("[DEBUG] Neues Passwort eingegeben: \(newValue)")
+                            newPasswordError = validatePasswordStrength(newValue) ? nil : "Passwort ist zu schwach."
+                        }
+                        .padding(10)
+                        .background(Color(UIColor.systemBackground).opacity(0.8))
+                        .cornerRadius(10)
+                    if let error = newPasswordError {
+                        Text(error)
+                            .foregroundColor(.red)
+                            .font(.caption)
                     }
-                    .cornerRadius(10)
+                    
+                    Divider()
+                        .frame(height: 0.5)
+                        .background(Color.gray.opacity(0.6))
+                        .padding(.horizontal, 10)
+                    
+                    SecureField("Passwort wiederholen", text: $confirmPassword)
+                        .onChange(of: confirmPassword) { newValue in
+                            confirmPasswordError = newValue == newPassword ? nil : "Passwörter stimmen nicht überein."
+                        }
+                        .padding(10)
+                        .background(Color(UIColor.systemBackground).opacity(0.8))
+                        .cornerRadius(10)
+                    if let error = confirmPasswordError {
+                        Text(error)
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
                 }
                 
-                // Fehlermeldung oder Erfolgsmeldung
-                if let errorMessage = errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .multilineTextAlignment(.center)
-                        .padding()
-                } else if let successMessage = successMessage {
+                // Erfolgsmeldung
+                if let successMessage = successMessage {
                     Text(successMessage)
                         .foregroundColor(.green)
                         .multilineTextAlignment(.center)
@@ -70,11 +89,12 @@ struct MainPage_ProfilView_Password: View {
                     Text("Speichern")
                         .frame(maxWidth: .infinity)
                         .padding(15)
-                        .background(Color.accentColor) // Dynamische Farben für Dark/Light mode
-                        .foregroundColor(Color(UIColor.systemBackground)) // Text contrast mit dem Hintergrund
+                        .background(isLoading ? Color.gray : Color.accentColor)
+                        .foregroundColor(Color(UIColor.systemBackground))
                         .cornerRadius(10)
                 }
                 .padding(.top, 20)
+                .disabled(isLoading)
             }
             
             Spacer()
@@ -99,47 +119,65 @@ struct MainPage_ProfilView_Password: View {
         .toolbarBackground(Color(UIColor.systemBackground), for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
     }
-
+    
     // MARK: - Passwortvalidierung
     private func validateAndSavePassword() {
-        errorMessage = nil
+        currentPasswordError = nil
+        newPasswordError = nil
+        confirmPasswordError = nil
         successMessage = nil
-
-        // Einfache Validation
-        guard !currentPassword.isEmpty else {
-            errorMessage = "Bitte aktuelles Passwort eingeben."
+        
+        print("[DEBUG] Passwortvalidierung gestartet.")
+        
+        var hasError = false
+        
+        if currentPassword.isEmpty {
+            currentPasswordError = "Bitte aktuelles Passwort eingeben."
+            print("[DEBUG] Aktuelles Passwort fehlt.")
+            hasError = true
+        }
+        
+        if newPassword.isEmpty {
+            newPasswordError = "Bitte neues Passwort eingeben."
+            print("[DEBUG] Neues Passwort fehlt.")
+            hasError = true
+        } else if !validatePasswordStrength(newPassword) {
+            newPasswordError = "Passwort muss mindestens 8 Zeichen lang sein, eine Zahl, ein Sonderzeichen und einen Großbuchstaben enthalten."
+            print("[DEBUG] Passwort erfüllt nicht die Sicherheitsanforderungen.")
+            hasError = true
+        }
+        
+        if confirmPassword != newPassword {
+            confirmPasswordError = "Passwörter stimmen nicht überein."
+            print("[DEBUG] Passwörter stimmen nicht überein.")
+            hasError = true
+        }
+        
+        if hasError {
             return
         }
-
-        guard !newPassword.isEmpty else {
-            errorMessage = "Bitte neues Passwort eingeben."
-            return
-        }
-
-        guard newPassword == confirmPassword else {
-            errorMessage = "Passwörter stimmen nicht überein."
-            return
-        }
-
-        guard validatePasswordStrength(newPassword) else {
-            errorMessage = "Passwort muss mindestens 8 Zeichen lang sein, eine Zahl, ein Sonderzeichen und einen Großbuchstaben enthalten."
-            return
-        }
-
+        
         // API um aktuelles Passwort zu validieren und neues zu speichern
         saveNewPassword()
     }
-
+    
     private func validatePasswordStrength(_ password: String) -> Bool {
         let passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}$"
-        return NSPredicate(format: "SELF MATCHES %@", passwordRegex).evaluate(with: password)
+        let isValid = NSPredicate(format: "SELF MATCHES %@", passwordRegex).evaluate(with: password)
+        print("[DEBUG] Passwortstärke überprüft: \(isValid)")
+        return isValid
     }
-
+    
+    // MARK: - Passwort speichern
     // MARK: - Passwort speichern
     private func saveNewPassword() {
         isLoading = true
-        errorMessage = nil
+        currentPasswordError = nil
+        newPasswordError = nil
+        confirmPasswordError = nil
         successMessage = nil
+
+        print("[DEBUG] API-Aufruf zur Passwortänderung gestartet.")
 
         MainPageAPI.updatePassword(currentPassword: currentPassword, newPassword: newPassword) { result in
             DispatchQueue.main.async {
@@ -147,18 +185,63 @@ struct MainPage_ProfilView_Password: View {
                 switch result {
                 case .success:
                     successMessage = "Passwort wurde erfolgreich geändert."
+                    print("[DEBUG] Passwort erfolgreich geändert.")
+
+                    // Neues Passwort in Keychain speichern
+                    KeychainHelper.save(key: "password", value: newPassword)
+
+                    // Überprüfen, ob das Passwort korrekt gespeichert wurde
+                    if let savedPassword = KeychainHelper.load(key: "password") {
+                        if savedPassword == newPassword {
+                            print("[DEBUG] Neues Passwort erfolgreich in der Keychain aktualisiert: \(savedPassword)")
+                        } else {
+                            print("[DEBUG] Fehler: Gespeichertes Passwort stimmt nicht mit dem neuen überein.")
+                        }
+                    } else {
+                        print("[DEBUG] Fehler: Passwort konnte nicht aus der Keychain geladen werden.")
+                    }
+
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 case .failure(let error):
-                    errorMessage = error.localizedDescription
+                    if let apiError = error as? APIError {
+                        switch apiError {
+                        case .unauthorized:
+                            currentPasswordError = "Falsches aktuelles Passwort."
+                            print("[DEBUG] API-Fehler: Falsches Passwort.")
+                        case .badRequest:
+                            newPasswordError = "Ungültige Eingabe. Bitte überprüfe die Daten."
+                            print("[DEBUG] API-Fehler: Ungültige Eingabe.")
+                        default:
+                            currentPasswordError = "Ein unbekannter Fehler ist aufgetreten."
+                            print("[DEBUG] API-Fehler: Unbekannt.")
+                        }
+                    } else {
+                        currentPasswordError = error.localizedDescription
+                        print("[DEBUG] Fehler: \(error.localizedDescription)")
+                    }
                 }
+            }
+        }
+    }
+
+
+    struct MainPage_ProfilView_Password_Previews: PreviewProvider {
+        static var previews: some View {
+            NavigationView {
+                MainPage_ProfilView_Password()
             }
         }
     }
 }
 
-struct MainPage_ProfilView_Password_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            MainPage_ProfilView_Password()
-        }
-    }
+enum APIError: Error {
+    case invalidURL
+    case invalidRequest
+    case invalidResponse
+    case unauthorized
+    case badRequest
+    case unknown
 }
+
