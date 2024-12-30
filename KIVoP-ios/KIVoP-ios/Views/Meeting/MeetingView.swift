@@ -22,7 +22,8 @@ struct MeetingView: View {
                     if !currentMeetings.isEmpty {
                         Section(header: Text("Aktuelle Sitzungen")) {
                             ForEach(currentMeetings, id: \.id) { meeting in
-                                NavigationLink(destination: CurrentMeetingView(meeting: meeting)) {
+                                //NavigationLink(destination: CurrentMeetingView(meeting: meeting)) {
+                                NavigationLink(destination: MeetingDetailView(meeting: meeting)) {
                                     HStack {
                                         Image(systemName: "play.circle")
                                             .foregroundColor(.red)
