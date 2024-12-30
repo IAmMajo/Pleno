@@ -72,12 +72,6 @@
     "2/3" : {
 
     },
-    "03.12.2023" : {
-
-    },
-    "07.01.2024" : {
-
-    },
     "8/12" : {
 
     },
@@ -102,12 +96,6 @@
           }
         }
       }
-    },
-    "12.12.2023" : {
-
-    },
-    "14.01.2024" : {
-
     },
     "18:06" : {
       "localizations" : {
@@ -152,9 +140,6 @@
           }
         }
       }
-    },
-    "22.12.2023" : {
-
     },
     "Abbrechen" : {
       "localizations" : {
@@ -325,6 +310,7 @@
 
     },
     "Aktuelle Sitzung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -575,9 +561,6 @@
         }
       }
     },
-    "Dezember - 2023" : {
-
-    },
     "Die Abstimmung läuft noch" : {
 
     },
@@ -824,12 +807,6 @@
           }
         }
       }
-    },
-    "Jahresversammlung" : {
-
-    },
-    "Januar - 2024" : {
-
     },
     "Kamera" : {
       "localizations" : {
@@ -1083,6 +1060,9 @@
       }
     },
     "Möchtest du wirklich abstimmen" : {
+
+    },
+    "Nach Meeting suchen" : {
 
     },
     "Name" : {
@@ -1530,9 +1510,6 @@
         }
       }
     },
-    "Sitzungs-Titel" : {
-
-    },
     "Sitzungsleiter" : {
 
     },
@@ -1581,6 +1558,9 @@
       }
     },
     "Standorte (3)" : {
+
+    },
+    "Start: %@" : {
 
     },
     "Suchen" : {
