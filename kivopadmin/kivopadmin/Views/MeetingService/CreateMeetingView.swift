@@ -2,6 +2,7 @@ import SwiftUI
 import MeetingServiceDTOs
 
 struct CreateMeetingView: View {
+    @State private var selectedLocationID: UUID?
     @State private var name: String = ""
     @State private var description: String = ""
     @State private var startDate: Date = Date()
@@ -15,6 +16,7 @@ struct CreateMeetingView: View {
 
     @Environment(\.dismiss) private var dismiss
     @StateObject private var meetingManager = MeetingManager() // MeetingManager verwenden
+    @StateObject private var locationManager = LocationManager() // MeetingManager verwenden
 
     var body: some View {
         NavigationStack {
@@ -31,8 +33,27 @@ struct CreateMeetingView: View {
                 }
 
                 Section(header: Text("Location Details")) {
-                    TextField("Location Name", text: $locationName)
-                    
+                    if locationManager.isLoading {
+                        // Ladeanzeige während Daten geladen werden
+                        ProgressView("Loading locations...")
+                    } else if let errorMessage = locationManager.errorMessage {
+                        // Fehleranzeige, wenn ein Fehler aufgetreten ist
+                        Text("Error: \(errorMessage)")
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                    } else if locationManager.locations.isEmpty {
+                        // Nachricht, wenn keine Standorte gefunden wurden
+                        Text("No locations available.")
+                            .foregroundColor(.gray)
+                    } else {
+                        // Die Locations in einer Liste anzeigen
+                        Picker("Location Name", selection: $selectedLocationID) {
+                            ForEach(locationManager.locations, id: \.id) { location in
+                                Text(location.name).tag(location.id as UUID?)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle()) // Optional: Für Dropdown-Stil                    }
+                    }
                     TextField("Street (optional)", text: $locationStreet)
                     
                     HStack {
@@ -73,12 +94,21 @@ struct CreateMeetingView: View {
                 }
             }
         }
+        .onAppear(){
+            locationManager.fetchLocations()
+        }
     }
 
     private func saveMeeting() {
         guard let durationUInt16 = UInt16(duration) else {
             meetingManager.errorMessage = "Invalid duration. Must be a number."
             return
+        }
+        
+        if let selectedLocation = locationManager.locations.first(where: { $0.id == selectedLocationID }) {
+            locationName = selectedLocation.name
+        } else {
+            locationName = "" // Standardwert, wenn keine Location ausgewählt wurde
         }
 
         let location = CreateLocationDTO(
