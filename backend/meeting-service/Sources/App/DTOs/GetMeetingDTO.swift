@@ -26,6 +26,7 @@ extension GetMeetingDTO: @retroactive Content, @unchecked @retroactive Sendable 
 }
 
 extension [GetMeetingDTO] {
+    /// **Concurrent!** Might change the array's order
     public func withMyAttendanceStatus(req: Request) async throws -> [GetMeetingDTO] {
         guard let userId = req.jwtPayload?.userID else {
             throw Abort(.unauthorized)
