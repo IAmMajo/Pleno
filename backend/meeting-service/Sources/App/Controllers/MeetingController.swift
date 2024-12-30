@@ -50,11 +50,18 @@ struct MeetingController: RouteCollection {
             .with(\.$chair)
             .with(\.$location) {location in
                 location.with(\.$place)
-            }.all()
+            }
+            .all()
             .map { meeting in
                 try meeting.toGetMeetingDTO(showCode: isAdmin)
             }
-            .withMyAttendanceStatus(req: req)
+            .withMyAttendanceStatus(req: req) // is concurrent and might therefore change the array's order. Hence all sorting is conducted afterwards.
+            .sorted(by: { left, right in
+                left.start > right.start
+            })
+            .sorted(by: { left, right in
+                left.status == .inSession && right.status != .inSession
+            })
     }
     
     /// **GET** `/meetings/{id}`
