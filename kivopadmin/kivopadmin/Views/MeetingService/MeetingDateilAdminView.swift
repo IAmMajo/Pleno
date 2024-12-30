@@ -11,6 +11,7 @@ struct MeetingDetailAdminView: View {
     @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
     @StateObject private var recordManager = RecordManager() // RecordManager als StateObject
     @StateObject private var votingManager = VotingManager() // RecordManager als StateObject
+    @StateObject private var attendanceManager = AttendanceManager() // RecordManager als StateObject
     
     enum ActionType {
         case start
@@ -38,9 +39,16 @@ struct MeetingDetailAdminView: View {
                             .foregroundColor(.gray)
                     }
                     Spacer()
-                    HStack(spacing: 4) {
-                        Image(systemName: "person.3.fill")
-                        Text("8/12")
+                    HStack(spacing: 4) { // kleiner Abstand zwischen dem Symbol und der Personenanzahl
+                        Image(systemName: "person.3.fill") // Symbol für eine Gruppe von Personen
+                        if attendanceManager.isLoading {
+                            Text("Loading...")
+                        } else if let errorMessage = attendanceManager.errorMessage {
+                            Text("Error: \(errorMessage)")
+                        } else {
+                            Text(attendanceManager.attendanceSummary())
+                                .font(.headline)
+                        }
                     }
                 }.padding(.horizontal)
                 
@@ -194,7 +202,7 @@ struct MeetingDetailAdminView: View {
                             Text("Bearbeiten")
                                 .foregroundColor(.blue)
                         }
-                        Text("21.01.2024")
+                        Text(DateTimeFormatter.formatDate(meeting.start))
                     }
                 }
             }
@@ -216,6 +224,7 @@ struct MeetingDetailAdminView: View {
             .onAppear(){
                 recordManager.getRecordsMeeting(meetingId: meeting.id)
                 votingManager.getRecordsMeeting(meetingId: meeting.id)
+                attendanceManager.fetchAttendances(meetingId: meeting.id)
             }
         }
     }
