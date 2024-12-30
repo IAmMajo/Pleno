@@ -5,6 +5,8 @@ struct CurrentMeetingBottomView: View {
     @StateObject private var meetingManager = MeetingManager()
     @State private var activeMeetingID: UUID? // UUID statt GetMeetingDTO, um Hashable zu sein
     
+    @StateObject private var attendanceManager = AttendanceManager() // RecordManager als StateObject
+    
     var body: some View {
         Group {
             if let currentMeeting = meetingManager.currentMeeting {
@@ -42,6 +44,7 @@ struct CurrentMeetingBottomView: View {
             meetingView(for: meeting)
         }
         .containerRelativeFrame(.horizontal, count: 1, spacing: 0)
+
     }
 
     private func meetingView(for meeting: GetMeetingDTO) -> some View {
@@ -58,11 +61,16 @@ struct CurrentMeetingBottomView: View {
                 
                 Spacer()
                 
-                HStack(spacing: 4) {
-                    Text("4") // Beispiel: Teilnehmeranzahl
-                        .foregroundColor(.white)
-                    Image(systemName: "person.3")
-                        .foregroundColor(.white)
+                HStack(spacing: 4) { // kleiner Abstand zwischen dem Symbol und der Personenanzahl
+                    if attendanceManager.isLoading {
+                        Text("Loading...")
+                    } else if let errorMessage = attendanceManager.errorMessage {
+                        Text("Error: \(errorMessage)")
+                    } else {
+                        Text("\(attendanceManager.numberOfParticipants())")
+                            .foregroundStyle(.white)
+                    }
+                    Image(systemName: "person.3.fill").foregroundStyle(.white) // Symbol für eine Gruppe von Personen
                 }
             }
             
@@ -92,6 +100,9 @@ struct CurrentMeetingBottomView: View {
         .cornerRadius(15)
         .padding(.horizontal, 12)
         .padding(.bottom, 20)
+        .onAppear(){
+            attendanceManager.fetchAttendances(meetingId: meeting.id)
+        }
     }
 
     private var pagingControl: some View {

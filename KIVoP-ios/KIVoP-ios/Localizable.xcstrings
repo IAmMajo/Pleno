@@ -75,9 +75,6 @@
     "03.12.2023" : {
 
     },
-    "4" : {
-
-    },
     "07.01.2024" : {
 
     },
@@ -213,6 +210,7 @@
 
     },
     "Abstimmung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -633,9 +631,6 @@
     "E-Mail senden" : {
 
     },
-    "Editor" : {
-
-    },
     "Einführung überspringen" : {
       "localizations" : {
         "de" : {
@@ -874,6 +869,9 @@
         }
       }
     },
+    "Keine Abstimmungen gefunden." : {
+
+    },
     "Keine aktuelle Sitzung verfügbar" : {
 
     },
@@ -908,7 +906,13 @@
         }
       }
     },
+    "Lade Abstimmungen..." : {
+
+    },
     "Lade Profilbild..." : {
+
+    },
+    "Lade Protokolle..." : {
 
     },
     "Lade..." : {
@@ -1175,6 +1179,9 @@
     "No meetings available." : {
 
     },
+    "No records available." : {
+
+    },
     "oder" : {
       "localizations" : {
         "de" : {
@@ -1413,6 +1420,9 @@
     "Protokoll:" : {
 
     },
+    "Protokoll: %@" : {
+
+    },
     "Protokollant" : {
 
     },
@@ -1637,6 +1647,9 @@
         }
       }
     },
+    "Test" : {
+
+    },
     "Überprüfung..." : {
 
     },
@@ -1666,6 +1679,7 @@
 
     },
     "Vereinsfarbe" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
