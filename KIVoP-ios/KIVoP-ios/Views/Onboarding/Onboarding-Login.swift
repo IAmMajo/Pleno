@@ -42,6 +42,14 @@ struct Onboarding_Login: View {
 
                 // Password TextField
                 inputField(title: "Passwort", text: $password, isSecure: true)
+                
+                // "Passwort vergessen?" Link
+                NavigationLink(destination: ForgotPasswordView()) {
+                    Text("Passwort vergessen?")
+                        .foregroundColor(.blue)
+                        .font(.footnote)
+                        .padding(.top, 5)
+                    }
 
                 Spacer()
 

@@ -552,6 +552,9 @@
     "Count" : {
 
     },
+    "Das Passwort ist zu schwach. Bitte verwenden Sie mindestens 8 Zeichen, eine Zahl und ein Sonderzeichen." : {
+
+    },
     "Dein Name: " : {
       "localizations" : {
         "de" : {
@@ -578,6 +581,9 @@
 
     },
     "Die Abstimmung läuft noch" : {
+
+    },
+    "Die Passwörter stimmen nicht überein." : {
 
     },
     "Dies ist nur eine vorläufige Umfrage, um festzustellen, wie viele Mitglieder kommen." : {
@@ -623,6 +629,9 @@
           }
         }
       }
+    },
+    "E-Mail senden" : {
+
     },
     "Editor" : {
 
@@ -1298,6 +1307,9 @@
         }
       }
     },
+    "Passwort vergessen?" : {
+
+    },
     "Passwort wiederholen" : {
       "localizations" : {
         "de" : {
@@ -1319,6 +1331,9 @@
           }
         }
       }
+    },
+    "Passwort zurücksetzen" : {
+
     },
     "Plakat %@" : {
 
