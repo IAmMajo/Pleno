@@ -2,7 +2,7 @@ import SwiftUI
 import AuthServiceDTOs
 
 enum Pages: Hashable {
-    case vereinseinstellungen, nutzerverwaltung, abstimmungen, sitzungen, protokolle
+    case vereinseinstellungen, nutzerverwaltung, abstimmungen, sitzungen, protokolle, plakatpositionen
 }
 
 struct MainPage: View {
@@ -19,7 +19,6 @@ struct MainPage: View {
     }
     
     var body: some View {
-        //NavigationStack {
             // Optionen in der Seitenleiste
 
             TabView(selection: $page){
@@ -37,6 +36,9 @@ struct MainPage: View {
                 }
                 Tab("Protokolle", systemImage: "doc.text", value: .protokolle) {
                     RecordsMainView()
+                }
+                Tab("Plakatpositionen", systemImage: "mappin.and.ellipse", value: .plakatpositionen) {
+                    PostersMainView()
                 }
 
 
@@ -69,8 +71,6 @@ struct MainPage: View {
                 meetingManager.fetchAllMeetings()
             }
             .navigationBarHidden(true)
-        //}
-        //.navigationBarBackButtonHidden(true)
         .onAppear {
             loadUserProfile()
         }

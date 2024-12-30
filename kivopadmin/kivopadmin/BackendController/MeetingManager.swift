@@ -120,7 +120,7 @@ class MeetingManager: ObservableObject {
                     }
                     
                     // Debug JSON
-                    print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
+                    //print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
                     
                     let decoder = JSONDecoder()
                     

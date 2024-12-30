@@ -12,6 +12,8 @@ struct Onboarding_Login: View {
     @State private var isKeychainAvailable = false
     @State private var isActive = true
 
+    
+    @Binding var isLoggedIn: Bool
     @Environment(\.dismiss) private var dismiss // Für das Zurückgehen
 
     var body: some View {
@@ -77,7 +79,7 @@ struct Onboarding_Login: View {
                 }
 
                 // Register Button
-                NavigationLink(destination: Onboarding_Register()) {
+                NavigationLink(destination: Onboarding_Register(isLoggedIn: $isLoggedIn)) {
                     Text("Registrieren")
                         .foregroundColor(.blue)
                         .frame(maxWidth: .infinity, maxHeight: 44)
@@ -104,9 +106,9 @@ struct Onboarding_Login: View {
             .background(Color(UIColor.systemGray6))
             .edgesIgnoringSafeArea(.all)
             .navigationBarBackButtonHidden(true)
-            .navigationDestination(isPresented: $loginSuccessful) {
-                MainPage()
-            }
+//            .navigationDestination(isPresented: $loginSuccessful) {
+//                MainPage()
+//            }
             .onAppear {
                 isActive = true
                 checkKeychainAvailability()
@@ -130,6 +132,7 @@ struct Onboarding_Login: View {
                     UserDefaults.standard.set(token, forKey: "jwtToken")
                     saveCredentialsToKeychain()
                     loginSuccessful = true
+                    isLoggedIn = true
                 case .failure(let error):
                     errorMessage = error.localizedDescription
                 }
@@ -197,11 +200,11 @@ struct Onboarding_Login: View {
     }
 }
 
-struct Onboarding_Login_Previews: PreviewProvider {
-    static var previews: some View {
-        Onboarding_Login()
-            .environment(\.colorScheme, .light)
-        Onboarding_Login()
-            .environment(\.colorScheme, .dark)
-    }
-}
+//struct Onboarding_Login_Previews: PreviewProvider {
+//    static var previews: some View {
+//        Onboarding_Login()
+//            .environment(\.colorScheme, .light)
+//        Onboarding_Login()
+//            .environment(\.colorScheme, .dark)
+//    }
+//}
