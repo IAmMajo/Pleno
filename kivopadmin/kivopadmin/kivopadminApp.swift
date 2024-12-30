@@ -10,7 +10,7 @@ struct KIVoP_iosApp: App {
             if isLoggedIn {
                 MainPage() // Zeigt die Hauptansicht, wenn der Benutzer eingeloggt ist
             } else {
-                Onboarding_Login(isLoggedIn: $isLoggedIn) // Zeigt die Login-Ansicht, wenn der Benutzer nicht eingeloggt ist
+                Onboarding(isLoggedIn: $isLoggedIn) // Zeigt die Login-Ansicht, wenn der Benutzer nicht eingeloggt ist
             }
         }
     }

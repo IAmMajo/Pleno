@@ -75,16 +75,16 @@ struct CurrentMeetingBottomView: View {
                 Spacer()
             }
             
-            NavigationLink(destination: MeetingDetailAdminView(meeting: meeting)) {
-                Text("Zur aktuellen Sitzung")
-                    .font(.footnote)
-                    .fontWeight(.bold)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color(UIColor.systemBackground))
-                    .foregroundColor(.accentColor)
-                    .cornerRadius(10)
-            }
+//            NavigationLink(destination: MeetingDetailAdminView(meeting: meeting)) {
+//                Text("Zur aktuellen Sitzung")
+//                    .font(.footnote)
+//                    .fontWeight(.bold)
+//                    .padding()
+//                    .frame(maxWidth: .infinity)
+//                    .background(Color(UIColor.systemBackground))
+//                    .foregroundColor(.accentColor)
+//                    .cornerRadius(10)
+//            }
 
         }
         .padding()
