@@ -1,271 +1,113 @@
-//
-//  ProtokollView.swift
-//  iOS Protokolle
-//
-//  Created by Christian Heller on 18.11.24.
-//
-
 import SwiftUI
+import MeetingServiceDTOs
 
-struct ProtokolleView: View {
+struct RecordsMainView: View {
+    @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
+    
+    @State private var searchText: String = ""
+    @State private var showCreateMeeting = false
+    @StateObject private var recordManager = RecordManager()
+
+    // Berechnete Eigenschaft für die gefilterten Meetings basierend auf dem Suchtext
+    var filteredMeetingsWithRecords: [MeetingWithRecords] {
+        guard !searchText.isEmpty else {
+            return sortedMeetings
+        }
+        return sortedMeetings.filter { meetingWithRecords in
+            meetingWithRecords.meeting.name.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+
+    var sortedMeetings: [MeetingWithRecords] {
+        recordManager.meetingsWithRecords.sorted { meeting1, meeting2 in
+            meeting2.meeting.start < meeting1.meeting.start // Absteigende Reihenfolge
+        }
+    }
+    
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-                // Kopfbereich mit Zurück-Button, Überschrift und Suchfeld
-                VStack(alignment: .leading, spacing: 8) {
-//                    HStack {
-//                        Button(action: {
-//                            // Aktion für den Zurück-Knopf
-//                        }) {
-//                            HStack {
-//                                Image(systemName: "chevron.left")
-//                                    .foregroundColor(.blue)
-//                                Text("Zurück")
-//                                    .foregroundColor(.blue)
-//                            }
-//                        }
-//                        .padding(.leading)
-//                        
-//                        Spacer()
-//                    }
-                    
-                    Text("Protokolle")
-                        .font(.largeTitle)
-                        .bold()
-                        .padding(.leading)
-                    
+            VStack {
+                if recordManager.isLoading {
+                    ProgressView("Loading meetings...") // Ladeanzeige
+                        .progressViewStyle(CircularProgressViewStyle())
+                } else if let errorMessage = recordManager.errorMessage {
+                    Text("Error: \(errorMessage)")
+                        .foregroundColor(.red)
+                } else if recordManager.meetingsWithRecords.isEmpty {
+                    Text("No meetings available.")
+                        .foregroundColor(.secondary)
+                } else {
+                    // Searchbar
                     HStack {
-                        HStack {
+                        HStack(spacing: 8) {
                             Image(systemName: "magnifyingglass")
                                 .foregroundColor(.gray)
-                            Text("Suchen")
-                                .foregroundColor(.gray)
-                            Spacer()
-                            Button(action: {
-                                // Mikrofon-Aktion
-                            }) {
-                                Image(systemName: "mic.fill")
-                                    .foregroundColor(.gray)
-                            }
+                            TextField("Nach Meeting suchen", text: $searchText)
+                                .textFieldStyle(PlainTextFieldStyle())
                         }
                         .padding(8)
                         .background(Color(.systemGray6))
                         .cornerRadius(8)
-                        .padding(.horizontal)
-                        .shadow(radius: 2)
                     }
-                }
-                .background(Color.white) // Kopfbereich bleibt weiß
-                
-                // Scrollbare Liste mit hellgrauem Hintergrund
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                    // Aktuelle Sitzung
-                    Text("Aktuelle Sitzung")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                        .padding(.leading)
-                    
-                    Button(action: {
-                        // Aktion für aktuellen Button
-                    }) {
-                        NavigationLink(destination: MeetingDetailsView()) {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Jahresversammlung")
-                                        .font(.headline)
-                                        .foregroundColor(.white)
-                                    Text("21.01.2024")
-                                        .font(.subheadline)
-                                        .foregroundColor(.white.opacity(0.7))
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.white)
-                            }
-                            .padding()
-                        }
-                    }
-                    .background(Color.blue)
-                    .cornerRadius(12)
                     .padding(.horizontal)
-                        
-                        
-                        // Gruppe: Januar - 2024
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Januar - 2024")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                                .padding(.leading)
-                            
-                            VStack(spacing: 0) {
-                                // Erste Zeile
-                                Button(action: {
-                                    // Aktion für Sitzung 1
-                                }) {
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text("Sitzungs-Titel")
-                                                .font(.body)
-                                                .foregroundColor(.black)
-                                            Text("14.01.2024")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
+                    
+                    // Liste der Meetings mit den Sprachen der zugehörigen Records
+                    List {
+                        ForEach(filteredMeetingsWithRecords, id: \.meeting.id) { meetingWithRecords in
+                            VStack(alignment: .leading, spacing: 5) {
+                                HStack {
+                                    // Name des Meetings
+                                    Text(meetingWithRecords.meeting.name)
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+                                    
+                                    Spacer()
+                                    
+                                    // Sprachen der zugehörigen Records
+                                    HStack(spacing: 8) {
+                                        ForEach(meetingWithRecords.records, id: \.lang) { record in
+                                            //NavigationLink(destination: MarkdownEditorView(meetingId: meetingWithRecords.meeting.id, lang: record.lang)) {
+                                                Text(record.lang)
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.secondary)
+                                                    .padding(4)
+                                                    .background(Color.blue.opacity(0.2))
+                                                    .cornerRadius(4)
+                                                    .overlay {
+                                                        NavigationLink(destination: MarkdownEditorView(meetingId: meetingWithRecords.meeting.id, lang: record.lang)) {}
+                                                            .opacity(0)
+                                                    }
+                                            //}
                                         }
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.gray)
                                     }
-                                    .padding()
-                                    .background(Color.white)
+
                                 }
-                                .cornerRadius(12, corners: [.topLeft, .topRight])
                                 
-                                Divider() // Trennlinie
-                                    .padding(.horizontal)
+                                // Optional: Zeige das Startdatum des Meetings
+                                Text("Start: \(meetingWithRecords.meeting.start.formatted(date: .abbreviated, time: .shortened))")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
                                 
-                                // Letzte Zeile
-                                Button(action: {
-                                    // Aktion für Sitzung 2
-                                }) {
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text("Sitzungs-Titel")
-                                                .font(.body)
-                                                .foregroundColor(.black)
-                                            Text("07.01.2024")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                        }
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.gray)
-                                    }
-                                    .padding()
-                                    .background(Color.white)
-                                }
-                                .cornerRadius(12, corners: [.bottomLeft, .bottomRight])
                             }
-                            .background(Color.white)
-                            .cornerRadius(12)
-                            .shadow(radius: 1)
+                            .padding(.vertical, 8)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(8)
                         }
-                        .padding(.horizontal) // Abstand zum Bildschirmrand
-                        
-                        // Gruppe: Dezember - 2023
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Dezember - 2023")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                                .padding(.leading)
-                            
-                            VStack(spacing: 0) {
-                                // Erste Zeile
-                                Button(action: {
-                                    // Aktion für Sitzung 1
-                                }) {
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text("Sitzungs-Titel")
-                                                .font(.body)
-                                                .foregroundColor(.black)
-                                            Text("22.12.2023")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                        }
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.gray)
-                                    }
-                                    .padding()
-                                    .background(Color.white)
-                                }
-                                .cornerRadius(12, corners: [.topLeft, .topRight])
-                                
-                                Divider() // Trennlinie
-                                    .padding(.horizontal)
-                                
-                                // Zweite Zeile
-                                Button(action: {
-                                    // Aktion für Sitzung 2
-                                }) {
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text("Sitzungs-Titel")
-                                                .font(.body)
-                                                .foregroundColor(.black)
-                                            Text("12.12.2023")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                        }
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.gray)
-                                    }
-                                    .padding()
-                                    .background(Color.white)
-                                }
-                                
-                                Divider() // Trennlinie
-                                    .padding(.horizontal)
-                                
-                                // Letzte Zeile
-                                Button(action: {
-                                    // Aktion für Sitzung 3
-                                }) {
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text("Sitzungs-Titel")
-                                                .font(.body)
-                                                .foregroundColor(.black)
-                                            Text("03.12.2023")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                        }
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.gray)
-                                    }
-                                    .padding()
-                                    .background(Color.white)
-                                }
-                                .cornerRadius(12, corners: [.bottomLeft, .bottomRight])
-                            }
-                            .background(Color.white)
-                            .cornerRadius(12)
-                            .shadow(radius: 1)
-                        }
-                        .padding(.horizontal) // Abstand zum Bildschirmrand
                     }
+                    .listStyle(PlainListStyle()) // Optionale Listensytle
                 }
-                .background(Color(.systemGray6)) // Hellgrauer Hintergrund
             }
-            //.navigationTitle("Protokolle")
-            //.toolbarBackground(Color.white, for: .navigationBar)
-            //.toolbarBackground(.visible, for: .navigationBar)
+            .navigationTitle("Protokolle")
+            .onAppear {
+                meetingManager.fetchAllMeetings() // Meetings laden, wenn die View erscheint
+                recordManager.getAllMeetingsWithRecords()
+            }
         }
     }
+
+
 }
 
-// Erweiterung für Corner Radius
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
-
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-    
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
-        return Path(path.cgPath)
-    }
-}
-
-struct ProtokolleView_Previews: PreviewProvider {
-    static var previews: some View {
-        ProtokolleView()
-    }
+#Preview {
+    RecordsMainView()
 }

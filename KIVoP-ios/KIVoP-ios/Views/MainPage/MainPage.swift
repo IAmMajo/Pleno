@@ -111,7 +111,7 @@ struct MainPage: View {
                             }
                         }
 
-                        NavigationLink(destination: ProtokolleView()) {
+                        NavigationLink(destination: RecordsMainView()) {
                             HStack {
                                 Image(systemName: "doc.text")
                                     .foregroundColor(.accentColor)
