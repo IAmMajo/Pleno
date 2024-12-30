@@ -59,7 +59,7 @@ struct CustomMapView: UIViewRepresentable {
 
 struct Posters_AddPositionView: View {
     @State private var mapRegion = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 52.52, longitude: 13.405),
+        center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
     @ObservedObject var userManager = UserManager()

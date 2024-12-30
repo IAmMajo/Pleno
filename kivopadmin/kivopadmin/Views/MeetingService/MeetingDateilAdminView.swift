@@ -10,6 +10,7 @@ struct MeetingDetailAdminView: View {
     
     @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
     @StateObject private var recordManager = RecordManager() // RecordManager als StateObject
+    @StateObject private var votingManager = VotingManager() // RecordManager als StateObject
     
     enum ActionType {
         case start
@@ -93,32 +94,55 @@ struct MeetingDetailAdminView: View {
                             Text("No records available.")
                                 .foregroundColor(.secondary)
                         } else {
-                            ForEach(recordManager.records, id: \.meetingId) { record in
+                            ForEach(recordManager.records, id: \.lang) { record in
                                 NavigationLink(destination: MarkdownEditorView(meetingId: record.meetingId, lang: record.lang)) {
                                     Text("Protokoll: \(record.lang)")
                                 }
                             }
                         }
                     }
-
-                    
-                    // Abstimmungen
+                    // Abstimmugnen
                     Section(header: Text("Abstimmungen")) {
-                        NavigationLink(destination: PlaceholderView()) {
-                            HStack {
-                                Text("Vereinsfarbe")
-                                Spacer()
-                                Image(systemName: "checkmark").foregroundColor(.blue)
-                            }
-                        }
-                        NavigationLink(destination: PlaceholderView()) {
-                            HStack {
-                                Text("Abstimmung")
-                                Spacer()
-                                Image(systemName: "exclamationmark.arrow.circlepath").foregroundColor(.orange)
+                        if votingManager.isLoading {
+                            ProgressView("Lade Abstimmungen...")
+                                .progressViewStyle(CircularProgressViewStyle())
+                        } else if let errorMessage = votingManager.errorMessage {
+                            Text("Error: \(errorMessage)")
+                                .foregroundColor(.red)
+                        } else if votingManager.votings.isEmpty {
+                            Text("Keine Abstimmungen gefunden.")
+                                .foregroundColor(.secondary)
+                        } else {
+                            ForEach(votingManager.votings, id: \.id) { voting in
+                                NavigationLink(destination: AktivView(voting: voting, votingResults: nil, onBack: {
+                                    // Hier können Sie Aktionen definieren, die ausgeführt werden, wenn der Nutzer zurückgeht.
+                                    print("Zurück zur vorherigen Ansicht.")
+                                })) {
+                                    Text("\(voting.question)")
+                                }
                             }
                         }
                     }
+                    
+//                    // Abstimmungen
+//                    Section(header: Text("Abstimmungen")) {
+//                        NavigationLink(destination: PlaceholderView()) {
+//                            HStack {
+//                                Text("Vereinsfarbe")
+//                                Spacer()
+//                                Image(systemName: "checkmark").foregroundColor(.blue)
+//                            }
+//                        }
+//                        NavigationLink(destination: PlaceholderView()) {
+//                            HStack {
+//                                Text("Abstimmung")
+//                                Spacer()
+//                                Image(systemName: "exclamationmark.arrow.circlepath").foregroundColor(.orange)
+//                            }
+//                        }
+//                    }
+                    
+
                     
                     if let meetingCode = meeting.code {
                         // QR-Code
@@ -191,6 +215,7 @@ struct MeetingDetailAdminView: View {
             }
             .onAppear(){
                 recordManager.getRecordsMeeting(meetingId: meeting.id)
+                votingManager.getRecordsMeeting(meetingId: meeting.id)
             }
         }
     }

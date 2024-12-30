@@ -101,6 +101,7 @@ class RecordManager: ObservableObject {
     }
 
     // getRecordsMeeting muss den Completion-Handler verwenden
+    // Diese Funktion wird für die Fuktion getAllMeetingsWithRecords() benötigt
     func getRecordsMeeting2(meetingId: UUID, completion: @escaping ([GetRecordDTO]) -> Void) {
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records") else {
             print("Invalid URL")
@@ -150,52 +151,77 @@ class RecordManager: ObservableObject {
 
     func getRecordsMeeting(meetingId: UUID) {
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records") else {
+            DispatchQueue.main.async {
+                self.errorMessage = "Invalid URL"
+            }
             print("Invalid URL")
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         } else {
+            DispatchQueue.main.async {
+                self.errorMessage = "Unauthorized: No token found"
+            }
             print("Unauthorized: No token found")
             return
         }
-
+        
+        // Setze isLoading auf true, um den Start des Ladevorgangs anzuzeigen
+        DispatchQueue.main.async {
+            self.isLoading = true
+            self.errorMessage = nil // Zurücksetzen der Fehlermeldung
+        }
+        
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false // Ladevorgang abgeschlossen
+            }
+            
             if let error = error {
+                DispatchQueue.main.async {
+                    self?.errorMessage = "Network error: \(error.localizedDescription)"
+                }
                 print("Network error: \(error.localizedDescription)")
                 return
             }
             
             guard let data = data else {
+                DispatchQueue.main.async {
+                    self?.errorMessage = "No data received from server"
+                }
                 print("No data received from server")
                 return
             }
-
+            
             // Debugging: JSON-String anzeigen
             if let jsonString = String(data: data, encoding: .utf8) {
                 print("Server Response: \(jsonString)")
             }
-
+            
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             decoder.keyDecodingStrategy = .convertFromSnakeCase
-
+            
             do {
                 // Dekodieren der JSON-Daten in ein Array von `GetRecordDTO`
                 let decodedRecords = try decoder.decode([GetRecordDTO].self, from: data)
                 DispatchQueue.main.async {
                     self?.records = decodedRecords // Aktualisiere das @Published-Array
+                    self?.errorMessage = nil // Erfolgreiches Dekodieren
                 }
             } catch {
+                DispatchQueue.main.async {
+                    self?.errorMessage = "JSON Decode Error: \(error.localizedDescription)"
+                }
                 print("JSON Decode Error: \(error.localizedDescription)")
             }
         }.resume()
     }
-    
     
     @Published var record: GetRecordDTO? // Speichern eines einzelnen Records
 
