@@ -6,16 +6,14 @@ import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instanc
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.request.crossfade
-import com.bumptech.glide.Glide.init
 import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.StringProvider
 
-class MyApplication : Application(),SingletonImageLoader.Factory {
+class MyApplication : Application(), SingletonImageLoader.Factory {
   override fun newImageLoader(context: Context): ImageLoader {
-    return ImageLoader.Builder(context)
-      .crossfade(true)
-      .build()
+    return ImageLoader.Builder(context).crossfade(true).build()
   }
+
   lateinit var authController: AuthController
 
   override fun onCreate() {

@@ -14,5 +14,4 @@ fun ProtocolListPage(navController: NavController) {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
-  
 }

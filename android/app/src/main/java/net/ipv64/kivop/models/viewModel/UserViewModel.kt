@@ -5,8 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.bumptech.glide.Glide.init
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileDTO
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileUpdateDTO
@@ -30,21 +28,20 @@ class UserViewModel : ViewModel() {
   }
 
   fun updateUser(email: String? = null, name: String? = null, profileImage: ByteArray? = null) {
-    user?.let { 
-      val updatedUser = it.copy(
-        email = email ?: it.email,
-        name = if (name?.isNotEmpty() == true) name else it.name,
-        profileImage = profileImage ?: it.profileImage
-      )
-      if (updatedUser != it){
-        
+    user?.let {
+      val updatedUser =
+          it.copy(
+              email = email ?: it.email,
+              name = if (name?.isNotEmpty() == true) name else it.name,
+              profileImage = profileImage ?: it.profileImage)
+      if (updatedUser != it) {
+
         viewModelScope.launch {
-          val response = patchUserProfile(
-            UserProfileUpdateDTO(
-              name = if (name.isNullOrEmpty()) null else name,
-              profileImage?.let { it1 -> encodeImageToBase64(it1) }
-            )
-          )
+          val response =
+              patchUserProfile(
+                  UserProfileUpdateDTO(
+                      name = if (name.isNullOrEmpty()) null else name,
+                      profileImage?.let { it1 -> encodeImageToBase64(it1) }))
           if (response?.isSuccessful == true) {
             user = updatedUser
           }

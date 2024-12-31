@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,7 +17,6 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.BulletList
-import net.ipv64.kivop.components.IconBox
 import net.ipv64.kivop.components.InToSitzungCard
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
@@ -28,7 +25,6 @@ import net.ipv64.kivop.models.viewModel.MeetingsViewModel
 import net.ipv64.kivop.models.viewModel.UserViewModel
 import net.ipv64.kivop.ui.customRoundedTopWithShadow
 import net.ipv64.kivop.ui.theme.Background_prime
-import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
@@ -72,21 +68,21 @@ fun HomePage(
           }
         }
     Column(
-      modifier =
-        Modifier.fillMaxWidth()
-          .weight(1f)
-          .customRoundedTopWithShadow(
-            color = Background_prime,
-            heightOffset = 40.dp,
-            // shadow
-            shadowColor = Color.Black,
-            offsetX = 0.dp,
-            offsetY = 4.dp)
-          .background(Background_prime)
-          .padding(top = 18.dp)
-          .padding(horizontal = 18.dp)) {
-        val list = nextMeetings
-        BulletList("Bevorstehende Sitzungen", list)
-      }
+        modifier =
+            Modifier.fillMaxWidth()
+                .weight(1f)
+                .customRoundedTopWithShadow(
+                    color = Background_prime,
+                    heightOffset = 40.dp,
+                    // shadow
+                    shadowColor = Color.Black,
+                    offsetX = 0.dp,
+                    offsetY = 4.dp)
+                .background(Background_prime)
+                .padding(top = 18.dp)
+                .padding(horizontal = 18.dp)) {
+          val list = nextMeetings
+          BulletList("Bevorstehende Sitzungen", list)
+        }
   }
 }

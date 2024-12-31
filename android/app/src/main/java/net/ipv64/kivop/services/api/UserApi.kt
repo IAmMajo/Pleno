@@ -1,25 +1,19 @@
 package net.ipv64.kivop.services.api
 
-import com.example.kivopandriod.services.stringToLocalDateTime
 import com.google.gson.Gson
-import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileDTO
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileUpdateDTO
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
-import net.ipv64.kivop.services.encodeImageToBase64
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import java.util.UUID
 
 suspend fun patchUserProfile(updatedFields: UserProfileUpdateDTO): Response? {
-  val path = "users/profile"  // Path for the update request
+  val path = "users/profile" // Path for the update request
 
   val token = auth.getSessionToken()
 
@@ -29,14 +23,15 @@ suspend fun patchUserProfile(updatedFields: UserProfileUpdateDTO): Response? {
   }
 
   // Create the request body with the changed fields only
-  val jsonBody = Gson().toJson(updatedFields)  // Serialize only the updated fields
+  val jsonBody = Gson().toJson(updatedFields) // Serialize only the updated fields
 
   // Create the PATCH request
-  val request = Request.Builder()
-    .url(BASE_URL + path)
-    .patch(jsonBody.toRequestBody("application/json".toMediaTypeOrNull()))
-    .addHeader("Authorization", "Bearer $token")
-    .build()
+  val request =
+      Request.Builder()
+          .url(BASE_URL + path)
+          .patch(jsonBody.toRequestBody("application/json".toMediaTypeOrNull()))
+          .addHeader("Authorization", "Bearer $token")
+          .build()
 
   return withContext(Dispatchers.IO) {
     try {

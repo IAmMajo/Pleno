@@ -1,6 +1,5 @@
 package net.ipv64.kivop.components
 
-import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -24,18 +23,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
 import net.ipv64.kivop.R
 import net.ipv64.kivop.services.byteArrayToBitmap
-import net.ipv64.kivop.services.uriToBitmap
 import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Secondary
@@ -43,18 +38,27 @@ import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
-fun ImgPicker(img: ByteArray? = null, size: Dp = 150.dp, userName:String = "Max",edit: Boolean = true): Uri? {
+fun ImgPicker(
+    img: ByteArray? = null,
+    size: Dp = 150.dp,
+    userName: String = "Max",
+    edit: Boolean = true
+): Uri? {
   var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-  val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-    if (uri != null) {
-      selectedImageUri = uri
-    } else {
-      Log.d("PhotoPicker", "No media selected")
-    }
-  }
+  val pickMedia =
+      rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+          selectedImageUri = uri
+        } else {
+          Log.d("PhotoPicker", "No media selected")
+        }
+      }
 
   Box(
-      modifier = Modifier.size(size).customShadow(cornersRadius = 1000.dp).background(Secondary, shape = CircleShape),
+      modifier =
+          Modifier.size(size)
+              .customShadow(cornersRadius = 1000.dp)
+              .background(Secondary, shape = CircleShape),
   ) {
     if (selectedImageUri != null) {
       AsyncImage(
@@ -78,22 +82,26 @@ fun ImgPicker(img: ByteArray? = null, size: Dp = 150.dp, userName:String = "Max"
           fontSize = 64.sp,
           modifier = Modifier.align(Alignment.Center))
     }
-    if (edit){
+    if (edit) {
       Box(
-        modifier =
-        Modifier.clip(shape = CircleShape)
-          .background(Background_secondary)
-          .size(size * 0.3f)
-          .align(Alignment.BottomEnd)
-          .clickable(onClick = { pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-          }),
-        contentAlignment = Alignment.Center) {
-        Icon(
-          painter = painterResource(id = R.drawable.ic_edit),
-          contentDescription = "Upload Image",
-          tint = Text_tertiary,
-          modifier = Modifier.fillMaxSize().padding(8.dp))
-      }
+          modifier =
+              Modifier.clip(shape = CircleShape)
+                  .background(Background_secondary)
+                  .size(size * 0.3f)
+                  .align(Alignment.BottomEnd)
+                  .clickable(
+                      onClick = {
+                        pickMedia.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly))
+                      }),
+          contentAlignment = Alignment.Center) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_edit),
+                contentDescription = "Upload Image",
+                tint = Text_tertiary,
+                modifier = Modifier.fillMaxSize().padding(8.dp))
+          }
     }
   }
   return selectedImageUri

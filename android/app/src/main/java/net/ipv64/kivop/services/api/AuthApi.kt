@@ -100,7 +100,8 @@ suspend fun getUserProfile(): UserProfileDTO? =
             val uid = profileObject.get("uid")?.asString.let { UUID.fromString(it) }
             val email = profileObject.get("email")?.asString
             val name = profileObject.get("name")?.asString
-            val profileImage = profileObject.get("profileImage")?.asString?.let { decodeFromBase64(it) }
+            val profileImage =
+                profileObject.get("profileImage")?.asString?.let { decodeFromBase64(it) }
             val isAdmin = profileObject.get("isAdmin")?.asBoolean
             val isActive = profileObject.get("isActive")?.asBoolean
             val createdAt =
