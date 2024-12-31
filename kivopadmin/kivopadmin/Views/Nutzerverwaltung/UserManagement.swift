@@ -42,8 +42,12 @@ struct NutzerverwaltungView: View {
                 .onTapGesture {
                     isPendingRequestPopupPresented = true
                 }
-                .sheet(isPresented: $isPendingRequestPopupPresented) {
-                    PendingRequestsNavigationView(isPresented: $isPendingRequestPopupPresented)
+                .sheet(isPresented: $isPendingRequestPopupPresented, onDismiss: {
+                    fetchPendingRequestsCount() // Anzahl der ausstehenden Anfragen aktualisieren
+                }) {
+                    PendingRequestsNavigationView(isPresented: $isPendingRequestPopupPresented, onListUpdate: {
+                        fetchPendingRequestsCount() // Anzahl der ausstehenden Anfragen live aktualisieren
+                    })
                 }
             }
             
@@ -90,13 +94,18 @@ struct NutzerverwaltungView: View {
             Spacer()
         }
         .onAppear {
-            // Benutzer laden, wenn die View erscheint
-            userManager.fetchUsers()
-            fetchPendingRequestsCount() // Anzahl der ausstehenden Anfragen abrufen
+            fetchAllData() // Daten beim ersten Anzeigen laden
         }
         .background(Color(UIColor.systemBackground)) // Adapt to Dark/Light Mode
     }
 
+    // Funktion: Alle Daten abrufen
+    private func fetchAllData() {
+        userManager.fetchUsers() // Nutzerliste laden
+        fetchPendingRequestsCount() // Anzahl ausstehender Anfragen abrufen
+    }
+
+    // Funktion: Anzahl ausstehender Anfragen abrufen
     private func fetchPendingRequestsCount() {
         MainPageAPI.fetchPendingUsers { result in
             DispatchQueue.main.async {
@@ -111,6 +120,7 @@ struct NutzerverwaltungView: View {
         }
     }
 }
+
 
 #Preview {
     NutzerverwaltungView()

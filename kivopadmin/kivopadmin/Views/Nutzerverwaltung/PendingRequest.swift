@@ -3,6 +3,8 @@ import AuthServiceDTOs
 
 struct PendingRequestsNavigationView: View {
     @Binding var isPresented: Bool
+    var onListUpdate: (() -> Void)? = nil // Optionaler Callback für Updates
+
     @State private var requests: [UserEmailVerificationDTO] = [] // Liste der Nutzeranfragen
     @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
@@ -25,7 +27,11 @@ struct PendingRequestsNavigationView: View {
                                 destination: PendingRequestPopup(
                                     user: request.name ?? "Unbekannt",
                                     createdAt: request.createdAt,
-                                    userId: request.uid?.uuidString ?? ""
+                                    userId: request.uid?.uuidString ?? "",
+                                    onListUpdate: {
+                                        fetchPendingRequests() // Liste aktualisieren
+                                        onListUpdate?() // Callback zur Haupt-View
+                                    }
                                 )
                             ) {
                                 VStack(alignment: .leading) {
@@ -60,17 +66,14 @@ struct PendingRequestsNavigationView: View {
     private func fetchPendingRequests() {
         isLoading = true
         errorMessage = nil
-        print("Starte Anfrage für ausstehende Nutzer...")
 
         MainPageAPI.fetchPendingUsers { result in
             DispatchQueue.main.async {
                 isLoading = false
                 switch result {
                 case .success(let users):
-                    print("API Response: \(users)")
                     self.requests = users.filter { $0.isActive == false }
                 case .failure(let error):
-                    print("Fehler beim Abrufen der Anfragen: \(error.localizedDescription)")
                     self.errorMessage = error.localizedDescription
                 }
             }
@@ -81,14 +84,15 @@ struct PendingRequestsNavigationView: View {
 struct PendingRequestPopup: View {
     var user: String
     var createdAt: Date?
-    var userId: String // Benutzer-ID für Aktionen
+    var userId: String
+    var onListUpdate: (() -> Void)? = nil // Optionaler Callback für Updates
 
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text("Name")
@@ -114,7 +118,6 @@ struct PendingRequestPopup: View {
 
             Spacer()
 
-            // Buttons am unteren Rand
             VStack(spacing: 10) {
                 Button(action: {
                     handleUserAction(activate: true)
@@ -137,7 +140,8 @@ struct PendingRequestPopup: View {
                 }
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+
+            Spacer()
         }
         .padding()
         .navigationTitle("Beitrittsanfrage: \(user)")
@@ -148,40 +152,26 @@ struct PendingRequestPopup: View {
         isLoading = true
         errorMessage = nil
 
-        if activate {
-            print("Benutzer wird aktiviert: \(userId)")
-            MainPageAPI.activateUser(userId: userId) { result in
-                DispatchQueue.main.async {
-                    isLoading = false
-                    switch result {
-                    case .success():
-                        print("Benutzer erfolgreich aktiviert: \(userId)")
-                        // 1 Sekunde warten, dann zurück zur Liste
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            presentationMode.wrappedValue.dismiss()
-                        }
-                    case .failure(let error):
-                        print("Fehler beim Aktivieren des Benutzers: \(error.localizedDescription)")
-                        errorMessage = error.localizedDescription
+        let action = activate ? "aktiviert" : "abgelehnt"
+        print("Benutzer wird \(action): \(userId)")
+
+        let apiCall: (_ userId: String, @escaping (Result<Void, Error>) -> Void) -> Void = activate
+            ? MainPageAPI.activateUser
+            : MainPageAPI.deleteUser
+
+        apiCall(userId) { result in
+            DispatchQueue.main.async {
+                isLoading = false
+                switch result {
+                case .success:
+                    print("Benutzer erfolgreich \(action): \(userId)")
+                    onListUpdate?()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        self.presentationMode.wrappedValue.dismiss()
                     }
-                }
-            }
-        } else {
-            print("Benutzer wird abgelehnt: \(userId)")
-            MainPageAPI.deleteUser(userId: userId) { result in
-                DispatchQueue.main.async {
-                    isLoading = false
-                    switch result {
-                    case .success():
-                        print("Benutzer erfolgreich gelöscht: \(userId)")
-                        // 1 Sekunde warten, dann zurück zur Liste
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            presentationMode.wrappedValue.dismiss()
-                        }
-                    case .failure(let error):
-                        print("Fehler beim Ablehnen des Benutzers: \(error.localizedDescription)")
-                        errorMessage = error.localizedDescription
-                    }
+                case .failure(let error):
+                    print("Fehler beim \(action) des Benutzers: \(error.localizedDescription)")
+                    errorMessage = error.localizedDescription
                 }
             }
         }
@@ -192,7 +182,9 @@ struct DateFormatterHelper {
     static func formattedDate(from date: Date?) -> String {
         guard let date = date else { return "Unbekanntes Datum" }
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "de_DE") // Deutsche Formatierung
         formatter.dateStyle = .medium
+        formatter.timeStyle = .none
         return formatter.string(from: date)
     }
 }
