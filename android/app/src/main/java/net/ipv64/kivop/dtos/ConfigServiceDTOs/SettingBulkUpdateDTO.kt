@@ -1,8 +1,5 @@
 package net.ipv64.kivop.dtos.ConfigServiceDTOs
 
-import java.util.UUID
-import java.time.LocalDateTime
-
-data class SettingBulkUpdateDTO (
-    var updates : List<SettingUpdateItemDTO>,
+data class SettingBulkUpdateDTO(
+    var updates: List<SettingUpdateItemDTO>,
 )

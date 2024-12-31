@@ -1,11 +1,13 @@
+import Foundation
+
 public struct UpdatePosterDTO: Codable {
     public var name: String?
     public var description: String?
-    public var imageBase64: String? // Optionaler Base64-String für das Bild
-
-    public init(name: String?, description: String?, imageBase64: String?) {
+    public var image: Data?
+    
+    public init(name: String? = nil, description: String? = nil, image: Data? = nil) {
         self.name = name
         self.description = description
-        self.imageBase64 = imageBase64
+        self.image = image
     }
 }

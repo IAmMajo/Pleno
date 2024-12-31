@@ -18,45 +18,70 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import java.time.LocalDate
+import androidx.compose.ui.unit.sp
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import net.ipv64.kivop.R
+import net.ipv64.kivop.ui.theme.Background_prime
+import net.ipv64.kivop.ui.theme.Primary
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AbstimmungCard(title: String, eventType: String, date: LocalDate) {
+fun AbstimmungCard(
+    title: String,
+    backgroundColor: Color = Primary,
+    fontColor: Color = Background_prime,
+    date: LocalDateTime? = null,
+    eventType: String? = null
+) {
 
-  val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+  val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy | HH:mm")
 
   // Kartenlayout
   Box(
       modifier =
           Modifier.fillMaxWidth()
               .clip(RoundedCornerShape(8.dp))
-              .background(Color(0xFFBFEFB1))
+              .background(backgroundColor)
               .padding(8.dp)) {
         Column {
           Text(
               text = title,
               style = MaterialTheme.typography.titleLarge,
+              color = fontColor,
               fontWeight = FontWeight.Bold)
           Spacer(modifier = Modifier.height(8.dp))
           Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(painter = painterResource(id = R.drawable.ic_calendar), contentDescription = null)
+            Icon(
+                modifier = Modifier.size(16.dp),
+                painter = painterResource(id = R.drawable.ic_calendar),
+                contentDescription = null,
+                tint = fontColor)
             Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = date.format(formatter),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold)
-          }
-          Spacer(modifier = Modifier.height(8.dp))
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(painter = painterResource(id = R.drawable.ic_groups), contentDescription = null)
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = eventType,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold)
+            if (date != null) {
+              Text(
+                  text = date.format(formatter),
+                  fontSize = 14.sp,
+                  style = MaterialTheme.typography.bodyLarge,
+                  color = fontColor,
+              )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            if (eventType != null) {
+              Icon(
+                  modifier = Modifier.size(16.dp),
+                  painter = painterResource(id = R.drawable.ic_groups),
+                  contentDescription = null,
+                  tint = fontColor,
+              )
+              Spacer(modifier = Modifier.width(8.dp))
+              Text(
+                  text = eventType,
+                  fontSize = 14.sp,
+                  style = MaterialTheme.typography.bodyLarge,
+                  color = fontColor,
+              )
+            }
           }
         }
       }
@@ -70,10 +95,10 @@ fun AbstimmungCardPreview() {
     Surface {
       Column {
         // Beispiel für ein Datum
-        val eventDate = LocalDate.of(2024, 10, 24) // 24.10.2024
+        val eventDateTime = LocalDateTime.of(2024, 10, 24, 23, 59, 33) // 24.10.2024
 
         AbstimmungCard(
-            title = "Vorstandswahl", eventType = "Jahreshauptversammlung", date = eventDate)
+            title = "Vorstandswahl", eventType = "Jahreshauptversammlung", date = eventDateTime)
       }
     }
   }

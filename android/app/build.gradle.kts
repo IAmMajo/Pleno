@@ -56,4 +56,15 @@ dependencies {
   implementation("androidx.navigation:navigation-compose:2.8.4")
   implementation("com.squareup.okhttp3:okhttp:4.12.0")
   implementation("com.google.code.gson:gson:2.10.1")
+  // EncryptedSharedPreferences
+  implementation("androidx.security:security-crypto:1.1.0-alpha06")
+  // Glide for smooth sliding Todo:Remove glide if not needed
+  implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+  // ViewModel Compose
+  implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+  // Coil AsyncImage
+  implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+  // Tav Compose
+  implementation(libs.accompanist.pager)
+  implementation(libs.accompanist.pager.indicators)
 }

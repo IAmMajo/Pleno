@@ -1,23 +1,30 @@
-package net.ipv64.kivop.moduls
+package net.ipv64.kivop.models
 
 import android.content.Context
 import android.util.Log
+import com.example.kivopandriod.services.stringToLocalDateTime
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.ipv64.kivop.services.api.AuthApi
-import okhttp3.OkHttpClient
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingOptionDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
+import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
+import net.ipv64.kivop.services.api.ApiConfig.auth
+import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 
 suspend fun GetVotings(context: Context): List<GetVotingDTO> =
     withContext(Dispatchers.IO) {
-      var auth = AuthApi(context)
-      val url = "https://kivop.ipv64.net/meetings/votings"
-      val client = OkHttpClient()
-      val token = auth.getToken()
+      val path = "meetings/votings"
+
+      val token = auth.getSessionToken()
 
       if (token.isNullOrEmpty()) {
         println("Fehler: Kein Token verfügbar")
@@ -25,10 +32,14 @@ suspend fun GetVotings(context: Context): List<GetVotingDTO> =
       }
 
       val request =
-          Request.Builder().url(url).addHeader("Authorization", "Bearer $token").get().build()
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .get()
+              .build()
 
       return@withContext try {
-        val response = client.newCall(request).execute()
+        val response = okHttpClient.newCall(request).execute()
         if (response.isSuccessful) {
           val responseBody = response.body?.string()
           if (responseBody != null) {
@@ -40,8 +51,8 @@ suspend fun GetVotings(context: Context): List<GetVotingDTO> =
               val question = voting.get("question").asString
               val description = voting.get("description").asString
               val isOpen = voting.get("isOpen").asBoolean
-              val startedAt = voting.get("startedAt")?.asString ?: null
-              val closedAt = voting.get("closedAt")?.asString ?: null
+              val startedAt = voting.get("startedAt")?.asString?.let { stringToLocalDateTime(it) }
+              val closedAt = voting.get("closedAt")?.asString?.let { stringToLocalDateTime(it) }
               val anonymous = voting.get("anonymous").asBoolean
               val optionsArray = voting.get("options").asJsonArray
               val options =
@@ -77,12 +88,11 @@ suspend fun GetVotings(context: Context): List<GetVotingDTO> =
       }
     }
 
-suspend fun GetVotingResultByID(context: Context, id: UUID): GetVotingResultsDTO? =
+suspend fun GetVotingResultByID(id: UUID): GetVotingResultsDTO? =
     withContext(Dispatchers.IO) {
-      var auth = AuthApi(context)
-      val url = "https://kivop.ipv64.net/meetings/votings/$id/results"
-      val client = OkHttpClient()
-      val token = auth.getToken()
+      val path = "meetings/votings/$id/results"
+
+      val token = auth.getSessionToken()
 
       if (token.isNullOrEmpty()) {
         println("Fehler: Kein Token verfügbar")
@@ -90,10 +100,14 @@ suspend fun GetVotingResultByID(context: Context, id: UUID): GetVotingResultsDTO
       }
 
       val request =
-          Request.Builder().url(url).addHeader("Authorization", "Bearer $token").get().build()
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .get()
+              .build()
 
       return@withContext try {
-        val response = client.newCall(request).execute()
+        val response = okHttpClient.newCall(request).execute()
         if (response.isSuccessful) {
           val responseBody = response.body?.string()
           if (responseBody != null) {
@@ -134,12 +148,11 @@ suspend fun GetVotingResultByID(context: Context, id: UUID): GetVotingResultsDTO
       }
     }
 
-suspend fun GetVotingByID(context: Context, ID: UUID): GetVotingDTO? =
+suspend fun GetVotingByID(ID: UUID): GetVotingDTO? =
     withContext(Dispatchers.IO) {
-      var auth = AuthApi(context)
-      val url = "https://kivop.ipv64.net/meetings/votings/$ID"
-      val client = OkHttpClient()
-      val token = auth.getToken()
+      val path = "meetings/votings/$ID"
+
+      val token = auth.getSessionToken()
 
       if (token.isNullOrEmpty()) {
         println("Fehler: Kein Token verfügbar")
@@ -147,10 +160,14 @@ suspend fun GetVotingByID(context: Context, ID: UUID): GetVotingDTO? =
       }
 
       val request =
-          Request.Builder().url(url).addHeader("Authorization", "Bearer $token").get().build()
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .get()
+              .build()
 
       return@withContext try {
-        val response = client.newCall(request).execute()
+        val response = okHttpClient.newCall(request).execute()
         if (response.isSuccessful) {
           val responseBody = response.body?.string()
           if (responseBody != null) {
@@ -161,8 +178,8 @@ suspend fun GetVotingByID(context: Context, ID: UUID): GetVotingDTO? =
             val question = votingJson.get("question").asString
             val description = votingJson.get("description").asString
             val isOpen = votingJson.get("isOpen").asBoolean
-            val startedAt = votingJson.get("startedAt")?.asString ?: null
-            val closedAt = votingJson.get("closedAt")?.asString ?: null
+            val startedAt = votingJson.get("startedAt")?.asString?.let { stringToLocalDateTime(it) }
+            val closedAt = votingJson.get("closedAt")?.asString?.let { stringToLocalDateTime(it) }
             val anonymous = votingJson.get("anonymous").asBoolean
             val optionsArray = votingJson.get("options").asJsonArray
             val options =
@@ -183,6 +200,83 @@ suspend fun GetVotingByID(context: Context, ID: UUID): GetVotingDTO? =
                 closedAt,
                 anonymous,
                 options)
+          } else {
+            println("Fehler: Leere Antwort erhalten.")
+            null
+          }
+        } else {
+          println("Fehler bei der Anfrage: ${response.message}")
+          null
+        }
+      } catch (e: Exception) {
+        Log.e("get", "Fehler: ${e.message}")
+        null
+      }
+    }
+
+suspend fun putVote(votingId: String, optionIndex: Int): Boolean =
+    withContext(Dispatchers.IO) {
+      val path = "meetings/votings/$votingId/vote/$optionIndex"
+
+      val token = auth.getSessionToken()
+
+      if (token.isNullOrEmpty()) {
+        println("Fehler: Kein Token verfügbar")
+        return@withContext false
+      }
+
+      val emptyBody = ByteArray(0).toRequestBody(null)
+
+      val request =
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .put(emptyBody)
+              .build()
+
+      return@withContext try {
+        val response = okHttpClient.newCall(request).execute()
+        if (response.isSuccessful) {
+          true
+        } else {
+          println("Fehler bei der Anfrage: ${response.message}")
+          false
+        }
+      } catch (e: Exception) {
+        Log.e("put", "Fehler: ${e.message}")
+        false
+      }
+    }
+
+suspend fun getMyVote(ID: UUID): GetMyVoteDTO? =
+    withContext(Dispatchers.IO) {
+      val path = "meetings/votings/$ID/my-vote"
+
+      val token = auth.getSessionToken()
+
+      if (token.isNullOrEmpty()) {
+        println("Fehler: Kein Token verfügbar")
+        return@withContext null
+      }
+
+      val request =
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .get()
+              .build()
+
+      return@withContext try {
+        val response = okHttpClient.newCall(request).execute()
+        if (response.isSuccessful) {
+          val responseBody = response.body?.string()
+          if (responseBody != null) {
+            val vote = Gson().fromJson(responseBody, JsonObject::class.java)
+            val voteJson = vote.asJsonObject
+            val index = voteJson.get("index").asInt
+            val text = voteJson.get("text").asString
+
+            GetMyVoteDTO(index, text)
           } else {
             println("Fehler: Leere Antwort erhalten.")
             null
