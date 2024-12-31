@@ -1,7 +1,6 @@
 package net.ipv64.kivop.ui.theme
 
 import androidx.compose.ui.graphics.Color
-import org.w3c.dom.Text
 
 // Primary colors
 val Primary = Color(0xFF2351C4)
@@ -28,5 +27,3 @@ val Checkbox_background = Color(0xFFD4D7DB)
 val Signal_blue = Color(0xFF1061DA) // das ist Tertiary - TO DO: austauschen
 val Signal_red = Color(0xFFDA1043)
 val Signal_neutral = Color(0xFF686D74)
-
-
