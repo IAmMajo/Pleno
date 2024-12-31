@@ -5,8 +5,8 @@ struct NutzerverwaltungView: View {
     @State private var isUserPopupPresented = false
     @State private var isPendingRequestPopupPresented = false
     @State private var selectedUser: UserProfileDTO? = nil
+    @State private var pendingRequestsCount: Int = 0
 
-    @ObservedObject var controller = BackendController()
     @ObservedObject var userManager = UserManager()
 
     var body: some View {
@@ -32,7 +32,7 @@ struct NutzerverwaltungView: View {
                     
                     Spacer()
                     
-                    Text("\(controller.pendingRequestsCount)")
+                    Text("\(pendingRequestsCount)") // Dynamische Anzeige
                         .foregroundColor(.orange)
                     
                     Image(systemName: "chevron.right")
@@ -92,8 +92,23 @@ struct NutzerverwaltungView: View {
         .onAppear {
             // Benutzer laden, wenn die View erscheint
             userManager.fetchUsers()
+            fetchPendingRequestsCount() // Anzahl der ausstehenden Anfragen abrufen
         }
         .background(Color(UIColor.systemBackground)) // Adapt to Dark/Light Mode
+    }
+
+    private func fetchPendingRequestsCount() {
+        MainPageAPI.fetchPendingUsers { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let users):
+                    pendingRequestsCount = users.filter { $0.isActive == false }.count
+                case .failure(let error):
+                    print("Fehler beim Abrufen der Anzahl ausstehender Anfragen: \(error.localizedDescription)")
+                    pendingRequestsCount = 0
+                }
+            }
+        }
     }
 }
 

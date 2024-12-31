@@ -9,6 +9,9 @@ import AuthServiceDTOs
 import MeetingServiceDTOs
 import UIKit
 
+let baseURL = "https://kivop.ipv64.net"
+
+
 struct MainPageAPI {
     
     // MARK: - Benutzerprofil abrufen
@@ -317,6 +320,134 @@ struct MainPageAPI {
                 completion(.success(()))
             }.resume()
         }
+    
+    static func fetchPendingUsers(completion: @escaping (Result<[UserEmailVerificationDTO], Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/auth/users") else {
+            print("❌ Fehler: Ungültige URL für fetchPendingUsers.")
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
+
+        print("➡️ Sende GET-Anfrage an URL: \(url)")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ Netzwerkfehler in fetchPendingUsers: \(error.localizedDescription)")
+                completion(.failure(error))
+                return
+            }
+
+            if let httpResponse = response as? HTTPURLResponse {
+                print("ℹ️ Antwortstatus von fetchPendingUsers: \(httpResponse.statusCode)")
+            }
+
+            guard let data = data else {
+                print("❌ Keine Daten von fetchPendingUsers erhalten.")
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Keine Daten erhalten."])))
+                return
+            }
+
+            do {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let users = try decoder.decode([UserEmailVerificationDTO].self, from: data)
+                print("✅ Erfolgreich \(users.count) Nutzeranfragen abgerufen.")
+                completion(.success(users))
+            } catch {
+                print("❌ Fehler beim Dekodieren von fetchPendingUsers: \(error.localizedDescription)")
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+
+
+
+    static func activateUser(userId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users/\(userId)") else {
+            print("❌ Fehler: Ungültige URL für activateUser.")
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
+
+        let body = ["isActive": true]
+        do {
+            request.httpBody = try JSONEncoder().encode(body)
+            if let jsonString = String(data: request.httpBody ?? Data(), encoding: .utf8) {
+                print("➡️ Sende PATCH-Anfrage an URL: \(url) mit Body: \(jsonString)")
+            }
+        } catch {
+            print("❌ Fehler beim Erstellen des JSON-Bodys für activateUser: \(error.localizedDescription)")
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                print("❌ Netzwerkfehler in activateUser: \(error.localizedDescription)")
+                completion(.failure(error))
+                return
+            }
+
+            if let httpResponse = response as? HTTPURLResponse {
+                print("ℹ️ Antwortstatus von activateUser: \(httpResponse.statusCode)")
+                if httpResponse.statusCode == 200 {
+                    print("✅ Nutzer erfolgreich aktiviert.")
+                    completion(.success(()))
+                } else {
+                    print("❌ Fehler beim Aktivieren des Nutzers: Status \(httpResponse.statusCode)")
+                    completion(.failure(NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Fehler beim Aktivieren des Nutzers."])))
+                }
+            }
+        }.resume()
+    }
+
+
+    static func deleteUser(userId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users/\(userId)") else {
+            print("❌ Fehler: Ungültige URL für deleteUser.")
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
+
+        print("➡️ Sende DELETE-Anfrage an URL: \(url)")
+
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                print("❌ Netzwerkfehler in deleteUser: \(error.localizedDescription)")
+                completion(.failure(error))
+                return
+            }
+
+            if let httpResponse = response as? HTTPURLResponse {
+                print("ℹ️ Antwortstatus von deleteUser: \(httpResponse.statusCode)")
+                if httpResponse.statusCode == 200 {
+                    print("✅ Nutzer erfolgreich gelöscht.")
+                    completion(.success(()))
+                } else {
+                    print("❌ Fehler beim Löschen des Nutzers: Status \(httpResponse.statusCode)")
+                    completion(.failure(NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Fehler beim Löschen des Nutzers."])))
+                }
+            }
+        }.resume()
+    }
+
+
+    }
+
 
     // MARK: - Fehlerarten
     enum APIError: Error {
@@ -326,7 +457,7 @@ struct MainPageAPI {
         case invalidData
         case unknown
     }
-}
+
 
 
 public struct UserPasswordUpdateDTO: Codable {
