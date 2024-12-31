@@ -251,6 +251,7 @@ fun DrawerContent(
       ProfileCardSmall(
         user.name!!, 
         user.profileImage,
+        role = "@Verein",
         onClick = {
           coroutineScope.launch {
             drawerState.close()

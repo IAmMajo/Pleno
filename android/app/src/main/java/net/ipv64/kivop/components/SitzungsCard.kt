@@ -134,11 +134,13 @@ fun SitzungsCard(GetMeetingDTO: GetMeetingDTO, backgroundColor: Color = Color.Tr
           Spacer(modifier = Modifier.height(16.dp))
           if (GetMeetingDTO.chair != null) {
             ProfileCardSmall(
-                name = GetMeetingDTO.chair?.name ?: "C",
-                role = "Sitzungsleiter",
-                profilePicture = null,
-                backgroundColor = Background_secondary.copy(0.15f),
-                texColor = Text_prime_light)
+              name = GetMeetingDTO.chair?.name ?: "C",
+              role = "Sitzungsleiter",
+              profilePicture = null,
+              backgroundColor = Background_secondary.copy(0.15f),
+              texColor = Text_prime_light,
+              onClick = {}
+            )
           }
         }
       }

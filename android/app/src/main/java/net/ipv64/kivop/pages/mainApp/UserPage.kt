@@ -97,7 +97,7 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
         height = 50.dp,
         Background_secondary.copy(alpha = 0.15f),
         Background_secondary,
-        onClick = {  })
+        onClick = { navController.popBackStack(); isBackPressed = true })
     })
 
   Column(modifier = Modifier.background(Primary)) {
