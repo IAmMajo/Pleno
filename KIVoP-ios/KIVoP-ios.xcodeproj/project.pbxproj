@@ -448,7 +448,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "KIVoP-ios/Info.plist";
-				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Kamera wird für das Scannen von QR-Codes und für Fotografieren des Plakat-Standortes benötigt";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to attach to photos or extract metadata.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photo library to extract image metadata.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -479,7 +481,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "KIVoP-ios/Info.plist";
-				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Kamera wird für das Scannen von QR-Codes und für Fotografieren des Plakat-Standortes benötigt";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to attach to photos or extract metadata.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photo library to extract image metadata.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

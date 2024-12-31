@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
+import CoreLocation
 
-struct PosterDetailView: View {
+struct Posters_PosterDetailView: View {
    
    let poster: Poster
    var posterPositions: [PosterPosition] {
@@ -16,10 +17,17 @@ struct PosterDetailView: View {
    
    @StateObject private var postersViewModel = PostersViewModel()
    
+   @State private var address: String?
+   @State private var isLoadingAddress = true
+   
+   @State private var showImage: Bool =  false
+   
    @State private var isLoading = false
    @State private var error: String?
    
    @State var optionTextMap: [UInt8: String] = [:]
+   
+   @Environment(\.colorScheme) var colorScheme
    
    let addresses = [
            "Am Grabstein 6, Transilvanien",
@@ -39,11 +47,11 @@ struct PosterDetailView: View {
    func getDateColor(status: Status) -> Color {
       switch status {
       case .hung:
-         return Color(UIColor.darkText)
+         return Color(UIColor.secondaryLabel)
       case .takenDown:
-         return Color(UIColor.darkText)
+         return Color(UIColor.secondaryLabel)
       case .notDisplayed:
-         return Color(UIColor.darkText)
+         return Color(UIColor.secondaryLabel)
       case .expiresInOneDay:
          return .orange
       case .expired:
@@ -63,6 +71,37 @@ struct PosterDetailView: View {
          return "morgen überfällig"
       case .expired:
          return "überfällig"
+      }
+   }
+   
+   func getAddressFromCoordinates(latitude: Double, longitude: Double, completion: @escaping (String?) -> Void) {
+      let geocoder = CLGeocoder()
+      let location = CLLocation(latitude: latitude, longitude: longitude)
+      
+      geocoder.reverseGeocodeLocation(location) { placemarks, error in
+         if let error = error {
+            print("Geocoding error: \(error.localizedDescription)")
+            completion(nil)
+         } else if let placemark = placemarks?.first {
+            let address = [
+               placemark.name,
+               placemark.locality,
+               placemark.administrativeArea,
+               placemark.country
+            ].compactMap { $0 }.joined(separator: ", ")
+            completion(address)
+         } else {
+            completion(nil)
+         }
+      }
+   }
+   
+   private func fetchAddress(latitude: Double, longitude: Double) {
+      getAddressFromCoordinates(latitude: latitude, longitude: longitude) { fetchedAddress in
+         DispatchQueue.main.async {
+            self.address = fetchedAddress
+            self.isLoadingAddress = false
+         }
       }
    }
    
@@ -96,6 +135,12 @@ struct PosterDetailView: View {
                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                    .foregroundStyle(.gray.opacity(0.5))
                    .padding(.top, 10) .padding(.bottom, 10)
+                   .onTapGesture {
+                      showImage = true
+                   }
+                   .navigationDestination(isPresented: $showImage) {
+                      FullImageView(image: "TestPosterImage")
+                   }
                 
                 HStack{
                    VStack{
@@ -107,7 +152,7 @@ struct PosterDetailView: View {
                          .fontWeight(.semibold)
                       Text("Aufgehangen")
                          .font(.subheadline)
-                         .foregroundStyle(.black.opacity(0.6))
+                         .foregroundStyle(Color(UIColor.label).opacity(0.6))
                    }
                    .padding(.leading, 50)
                    
@@ -122,7 +167,7 @@ struct PosterDetailView: View {
                          .fontWeight(.semibold)
                       Text("Abgehangen")
                          .font(.subheadline)
-                         .foregroundStyle(.black.opacity(0.6))
+                         .foregroundStyle(Color(UIColor.label).opacity(0.6))
                    }
                    .padding(.trailing, 50)
                 }
@@ -173,7 +218,7 @@ struct PosterDetailView: View {
        .refreshable {
        }
        .navigationBarTitleDisplayMode(.inline)
-       .background(Color(UIColor.secondarySystemBackground))
+       .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
        .onAppear {
           Task {
 
@@ -185,5 +230,5 @@ struct PosterDetailView: View {
 #Preview {
 //   @StateObject private var postersViewModel = PostersViewModel()
 
-   PosterDetailView(poster: mockPosters[0])
+   Posters_PosterDetailView(poster: mockPosters[0])
 }
