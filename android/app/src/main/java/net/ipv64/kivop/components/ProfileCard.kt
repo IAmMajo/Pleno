@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -38,7 +39,14 @@ import net.ipv64.kivop.ui.theme.Text_prime
 @Composable fun ProfileCard() {}
 
 @Composable
-fun ProfileCardSmall(name: String, profilePicture: ByteArray?, onClick: () -> Unit) {
+fun ProfileCardSmall(
+    name: String,
+    profilePicture: ByteArray?,
+    role: String,
+    backgroundColor: Color = Background_secondary,
+    texColor: Color = Text_prime,
+    onClick: () -> Unit
+) {
   Box(
       modifier =
           Modifier.fillMaxWidth()
@@ -46,7 +54,7 @@ fun ProfileCardSmall(name: String, profilePicture: ByteArray?, onClick: () -> Un
             .clip(shape = RoundedCornerShape(8.dp))
             .clickable { onClick() }
             .customShadow()
-            .background(Background_secondary)
+            .background(backgroundColor)
             .padding(8.dp)) {
         Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
           if (profilePicture != null) {
@@ -77,11 +85,11 @@ fun ProfileCardSmall(name: String, profilePicture: ByteArray?, onClick: () -> Un
           }
           Spacer(modifier = Modifier.size(16.dp))
           Column() {
-            Text(text = name, style = MaterialTheme.typography.labelLarge, color = Text_prime)
+            Text(text = name, style = MaterialTheme.typography.labelLarge, color = texColor)
             Text(
-                text = "verein",
+                text = role,
                 style = MaterialTheme.typography.labelLarge,
-                color = Text_prime.copy(alpha = 0.40f))
+                color = texColor.copy(alpha = 0.40f))
           }
         }
       }

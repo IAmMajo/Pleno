@@ -133,7 +133,9 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
       UserPage(navController = navController, userViewModel)
     }
     // Sitzungen
-    composable(Screen.Meetings.rout) { MeetingsListPage(navController = navController) }
+    composable(Screen.Meetings.rout) {
+          MeetingsListPage(navController = navController, meetingsViewModel)
+        }
     // Anwesenheit
     composable(route = Screen.Attendance.rout) {
       AttendancesListPage(navController = navController)
