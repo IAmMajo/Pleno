@@ -4,13 +4,5 @@
 <dict>
 	<key>Scene Configuration</key>
 	<string></string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library to extract metadata from images.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We need access to your location to attach GPS data to photos you capture.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We need your location to provide better services.</string>	
-	<key>NSCameraUsageDescription</key>
-	<string>We need access to your camera to take photos.</string>
 </dict>
 </plist>
