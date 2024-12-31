@@ -2,5 +2,5 @@ package net.ipv64.kivop.dtos.AuthServiceDTOs
 
 data class UserProfileUpdateDTO(
     var name: String?,
-    var profileImage: ByteArray?,
+    var profileImage: String?,
 )

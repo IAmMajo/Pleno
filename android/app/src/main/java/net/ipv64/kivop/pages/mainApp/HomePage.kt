@@ -39,7 +39,7 @@ fun HomePage(
     navController: NavController,
     userViewModel: UserViewModel,
     meetingsViewModel: MeetingsViewModel
-): TopAppBarConfig {
+) {
   BackHandler {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
@@ -72,34 +72,21 @@ fun HomePage(
           }
         }
     Column(
-        modifier =
-            Modifier.fillMaxWidth()
-                .weight(1f)
-                .customRoundedTopWithShadow(
-                    color = Background_prime,
-                    heightOffset = 40.dp,
-                    // shadow
-                    shadowColor = Color.Black,
-                    offsetX = 0.dp,
-                    offsetY = 4.dp)
-                .background(Background_prime)
-                .padding(top = 18.dp)
-                .padding(horizontal = 18.dp)) {
-          val list = nextMeetings
-          BulletList("Bevorstehende Sitzungen", list)
-        }
+      modifier =
+        Modifier.fillMaxWidth()
+          .weight(1f)
+          .customRoundedTopWithShadow(
+            color = Background_prime,
+            heightOffset = 40.dp,
+            // shadow
+            shadowColor = Color.Black,
+            offsetX = 0.dp,
+            offsetY = 4.dp)
+          .background(Background_prime)
+          .padding(top = 18.dp)
+          .padding(horizontal = 18.dp)) {
+        val list = nextMeetings
+        BulletList("Bevorstehende Sitzungen", list)
+      }
   }
-  val appBarConfig =
-      TopAppBarConfig(
-          title = "Home",
-          actions = {
-            IconBox(
-                Icons.Default.Home,
-                height = 50.dp,
-                Background_secondary.copy(alpha = 0.15f),
-                Background_secondary,
-                onClick = {})
-          })
-
-  return appBarConfig
 }

@@ -28,7 +28,7 @@ fun MeetingsListPage(navController: NavController, meetingsViewModel: MeetingsVi
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
   val tabs = listOf("Anstehende Sitzungen", "Vergangene Sitzungen")
-  val meetings = meetingsViewModel.meetings
+  val meetings = meetingsViewModel.loadMeetings()
 
   val scheduledMeetings = meetings.filter { it?.status == MeetingStatus.scheduled }
   val completedMeetings = meetings.filter { it?.status == MeetingStatus.completed }

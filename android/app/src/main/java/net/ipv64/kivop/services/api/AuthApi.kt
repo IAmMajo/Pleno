@@ -11,6 +11,7 @@ import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileDTO
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
+import net.ipv64.kivop.services.decodeFromBase64
 import okhttp3.FormBody
 import okhttp3.Request
 
@@ -99,7 +100,7 @@ suspend fun getUserProfile(): UserProfileDTO? =
             val uid = profileObject.get("uid")?.asString.let { UUID.fromString(it) }
             val email = profileObject.get("email")?.asString
             val name = profileObject.get("name")?.asString
-            val profileImage = profileObject.get("profileImage")?.asString?.toByteArray()
+            val profileImage = profileObject.get("profileImage")?.asString?.let { decodeFromBase64(it) }
             val isAdmin = profileObject.get("isAdmin")?.asBoolean
             val isActive = profileObject.get("isActive")?.asBoolean
             val createdAt =

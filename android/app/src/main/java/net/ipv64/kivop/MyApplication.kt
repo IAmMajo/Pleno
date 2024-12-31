@@ -1,10 +1,21 @@
 package net.ipv64.kivop
 
 import android.app.Application
+import android.content.Context
+import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.request.crossfade
+import com.bumptech.glide.Glide.init
 import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.StringProvider
 
-class MyApplication : Application() {
+class MyApplication : Application(),SingletonImageLoader.Factory {
+  override fun newImageLoader(context: Context): ImageLoader {
+    return ImageLoader.Builder(context)
+      .crossfade(true)
+      .build()
+  }
   lateinit var authController: AuthController
 
   override fun onCreate() {

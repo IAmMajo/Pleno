@@ -3,6 +3,8 @@ package net.ipv64.kivop
 sealed class Screen(val rout: String) {
   object Home : Screen("home")
 
+  object User : Screen("user")
+
   object Meetings : Screen("sitzungen")
 
   object Attendance : Screen("anwesenheit")
