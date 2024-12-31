@@ -82,12 +82,6 @@
     "2/3" : {
 
     },
-    "03.12.2023" : {
-
-    },
-    "07.01.2024" : {
-
-    },
     "8/12" : {
 
     },
@@ -112,12 +106,6 @@
           }
         }
       }
-    },
-    "12.12.2023" : {
-
-    },
-    "14.01.2024" : {
-
     },
     "18:06" : {
       "localizations" : {
@@ -162,9 +150,6 @@
           }
         }
       }
-    },
-    "22.12.2023" : {
-
     },
     "Abbrechen" : {
       "localizations" : {
@@ -229,6 +214,7 @@
 
     },
     "Abstimmung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -346,6 +332,7 @@
 
     },
     "Aktuelle Sitzung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -580,6 +567,9 @@
     "Count" : {
 
     },
+    "Das Passwort ist zu schwach. Bitte verwenden Sie mindestens 8 Zeichen, eine Zahl und ein Sonderzeichen." : {
+
+    },
     "Dein Name: " : {
       "localizations" : {
         "de" : {
@@ -602,10 +592,10 @@
         }
       }
     },
-    "Dezember - 2023" : {
+    "Die Abstimmung läuft noch" : {
 
     },
-    "Die Abstimmung läuft noch" : {
+    "Die Passwörter stimmen nicht überein." : {
 
     },
     "Dies ist nur eine vorläufige Umfrage, um festzustellen, wie viele Mitglieder kommen." : {
@@ -652,7 +642,7 @@
         }
       }
     },
-    "Editor" : {
+    "E-Mail senden" : {
 
     },
     "Einführung überspringen" : {
@@ -849,12 +839,6 @@
         }
       }
     },
-    "Jahresversammlung" : {
-
-    },
-    "Januar - 2024" : {
-
-    },
     "Kamera" : {
       "localizations" : {
         "de" : {
@@ -893,10 +877,16 @@
         }
       }
     },
+    "Keine Abstimmungen gefunden." : {
+
+    },
     "Keine aktuelle Sitzung verfügbar" : {
 
     },
     "Keine anstehenden Sitzungen." : {
+
+    },
+    "Keine Sitzung verfügbar" : {
 
     },
     "Keine vergangenen Sitzungen." : {
@@ -924,13 +914,22 @@
         }
       }
     },
+    "Lade Abstimmungen..." : {
+
+    },
     "Lade Profilbild..." : {
+
+    },
+    "Lade Protokolle..." : {
 
     },
     "Lade..." : {
 
     },
     "Laden..." : {
+
+    },
+    "Lädt..." : {
 
     },
     "Link" : {
@@ -1094,6 +1093,9 @@
     "Möchtest du wirklich abstimmen" : {
 
     },
+    "Nach Meeting suchen" : {
+
+    },
     "Name" : {
       "localizations" : {
         "de" : {
@@ -1186,6 +1188,9 @@
 
     },
     "No meetings available." : {
+
+    },
+    "No records available." : {
 
     },
     "oder" : {
@@ -1326,6 +1331,9 @@
         }
       }
     },
+    "Passwort vergessen?" : {
+
+    },
     "Passwort wiederholen" : {
       "localizations" : {
         "de" : {
@@ -1347,6 +1355,9 @@
           }
         }
       }
+    },
+    "Passwort zurücksetzen" : {
+
     },
     "Plakat %@" : {
 
@@ -1427,6 +1438,9 @@
 
     },
     "Protokoll:" : {
+
+    },
+    "Protokoll: %@" : {
 
     },
     "Protokollant" : {
@@ -1539,9 +1553,6 @@
         }
       }
     },
-    "Sitzungs-Titel" : {
-
-    },
     "Sitzungsleiter" : {
 
     },
@@ -1590,6 +1601,9 @@
       }
     },
     "Standorte (3)" : {
+
+    },
+    "Start: %@" : {
 
     },
     "Suchen" : {
@@ -1659,6 +1673,9 @@
         }
       }
     },
+    "Test" : {
+
+    },
     "Überprüfung..." : {
 
     },
@@ -1691,6 +1708,7 @@
 
     },
     "Vereinsfarbe" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

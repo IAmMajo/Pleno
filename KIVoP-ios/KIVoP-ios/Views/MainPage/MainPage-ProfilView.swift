@@ -135,8 +135,15 @@ struct MainPage_ProfilView: View {
                         Button("Abbrechen", role: .cancel) {}
                         Button("Löschen", role: .destructive) {
                             MainPageAPI.deleteUserAccount { result in
-                                if case .success = result {
-                                    navigateToLogin = true
+                                DispatchQueue.main.async {
+                                    if case .success = result {
+                                        KeychainHelper.delete(key: "username")
+                                        KeychainHelper.delete(key: "password")
+                                        MainPageAPI.logoutUser()
+                                        navigateToLogin = true
+                                    } else if case .failure(let error) = result {
+                                        errorMessage = "Fehler: \(error.localizedDescription)"
+                                    }
                                 }
                             }
                         }
@@ -158,17 +165,27 @@ struct MainPage_ProfilView: View {
                 Onboarding_Login()
             }
             .onAppear {
-                MainPageAPI.fetchUserProfile { result in
-                    DispatchQueue.main.async {
-                        isLoading = false
-                        switch result {
-                        case .success(let profile):
-                            name = profile.name ?? ""
-                            shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
-                        case .failure(let error):
-                            errorMessage = "Fehler: \(error.localizedDescription)"
-                        }
+                loadUserProfile()
+            }
+        }
+    }
+
+    // MARK: - Daten laden
+    func loadUserProfile() {
+        MainPageAPI.fetchUserProfile { result in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                switch result {
+                case .success(let profile):
+                    self.name = profile.name ?? ""
+                    self.shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
+                    if let imageData = profile.profileImage {
+                        self.profileImage = UIImage(data: imageData)
+                    } else {
+                        self.profileImage = nil
                     }
+                case .failure(let error):
+                    self.errorMessage = "Fehler: \(error.localizedDescription)"
                 }
             }
         }

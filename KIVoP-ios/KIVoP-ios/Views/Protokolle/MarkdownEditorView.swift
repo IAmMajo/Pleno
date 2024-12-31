@@ -7,47 +7,22 @@
 
 import SwiftUI
 import MarkdownUI
+import MeetingServiceDTOs
 
 struct MarkdownEditorView: View {
-    @State private var isEditing: Bool = false // Zustand des Bearbeitungsmodus
-    @State private var markdownText: String = "Hier stehen Notizen für das **Protokoll** und weitere Dinge..." // Initialer Text
+    @Environment(\.dismiss) private var dismiss
+    @State private var isEditing: Bool = false
+    @State private var markdownText: String = ""
+
+    
+    var meetingId: UUID
+    var lang: String
+    
+    @StateObject private var recordManager = RecordManager()
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Kopfbereich
-//                VStack(alignment: .leading, spacing: 8) {
-//                    HStack {
-//                        Button(action: {
-//                            // Navigation zu MeetingDetailsView
-//                        }) {
-//                            NavigationLink(destination: MeetingDetailsView()) {
-//                                HStack {
-//                                    Image(systemName: "chevron.left")
-//                                        .foregroundColor(.blue)
-//                                    Text("Zurück")
-//                                        .foregroundColor(.blue)
-//                                }
-//                            }
-//                        }
-//                        Spacer()
-//                        Text("21.01.2024")
-//                            .font(.headline)
-//                            .bold()
-//                        Spacer()
-//                        Button(action: {
-//                            isEditing.toggle() // Umschalten zwischen Bearbeiten und Speichern
-//                        }) {
-//                            Text(isEditing ? "Speichern" : "Bearbeiten")
-//                                .foregroundColor(.blue)
-//                        }
-//                    }
-//                }
-//                .padding()
-//                .background(Color.white)
-//                .shadow(radius: 2)
-
-                // Körperbereich
                 ZStack(alignment: .bottom) {
                     VStack {
                         if isEditing {
@@ -58,16 +33,10 @@ struct MarkdownEditorView: View {
                                 .cornerRadius(12)
                                 .padding()
                                 .shadow(radius: 2)
-                                .onAppear {
-                                    // Tastatur aktivieren, falls erforderlich
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                        UIApplication.shared.sendAction(#selector(UIResponder.becomeFirstResponder), to: nil, from: nil, for: nil)
-                                    }
-                                }
                         } else {
                             // Markdown gerendert anzeigen
                             ScrollView {
-                                Markdown(markdownText) // MarkdownUI für gerenderte Anzeige
+                                Markdown(markdownText)
                                     .padding()
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
@@ -77,46 +46,67 @@ struct MarkdownEditorView: View {
                         }
                     }
 
-                    if !isEditing {
-                        // "Veröffentlichen"-Button anzeigen, wenn nicht bearbeitet wird
-                        Button(action: {
-                            // Aktion für den Zurück-Knopf
-                        }) {
-//                            NavigationLink(destination: MeetingDetailsView()) {
-                                Text("Veröffentlichen")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.blue)
-                                    .cornerRadius(12)
-                                    .padding(.horizontal)
-//                            }
+                    Button(action: {
+                        recordManager.submitRecordMeetingLang(meetingId: meetingId, lang: lang) { result in
+                            DispatchQueue.main.async {
+                                switch result {
+                                case .success:
+                                    print("Record erfolgreich veröffentlicht")
+                                    // Hier kannst du das UI aktualisieren
+                                case .failure(let error):
+                                    print("Fehler beim Veröffentlichen: \(error.localizedDescription)")
+                                    // Fehler behandeln
+                                }
+                            }
                         }
-                        .padding(.bottom, 16)
+
+                        dismiss()
+                    }) {
+                        Text("Veröffentlichen")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .cornerRadius(12)
+                            .padding(.horizontal)
                     }
+                    .padding(.bottom, 16)
                 }
                 .background(Color(.systemGray6)) // Hellgrauer Hintergrund
                 .animation(.easeInOut, value: isEditing) // Animation bei Statuswechsel
             }
-            //.navigationBarTitle("21.01.2024", displayMode: .inline)
-            .toolbarBackground(Color.white, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
-                            ToolbarItem(placement: .navigationBarTrailing) {
-                                Button(action: {
-                                    isEditing.toggle() // Umschalten zwischen Bearbeiten und Speichern
-                                }) {
-                                    Text(isEditing ? "Speichern" : "Bearbeiten")
-                                }
-                            }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        if isEditing{
+                            saveRecord()
                         }
+                        isEditing.toggle() // Umschalten zwischen Bearbeiten und Speichern
+                    }) {
+                        Text(isEditing ? "Speichern" : "Bearbeiten")
+                    }
+                }
+            }
         }
-    }
-}
+        .onAppear {
+            Task {
+                await recordManager.getRecordMeetingLang(meetingId: meetingId, lang: lang)
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                if let record = recordManager.record {
+                    markdownText = record.content
+                    print("Das ist der Text: \(markdownText)")
+                }
+            }
+        }
 
-struct MarkdownEditorView_Previews: PreviewProvider {
-    static var previews: some View {
-        MarkdownEditorView()
+    }
+
+    // Speichern der Änderungen
+    private func saveRecord() {
+        Task {
+            let patchDTO = PatchRecordDTO(content: markdownText)
+            await recordManager.patchRecordMeetingLang(patchRecordDTO: patchDTO, meetingId: meetingId, lang: lang)
+        }
     }
 }

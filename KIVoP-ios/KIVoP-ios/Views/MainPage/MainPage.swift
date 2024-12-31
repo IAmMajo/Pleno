@@ -13,9 +13,9 @@ struct MainPage: View {
     @State private var attendeesCount: Int? = nil
     @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
-    
+
     @StateObject private var meetingManager = MeetingManager()
-    
+
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
@@ -34,7 +34,7 @@ struct MainPage: View {
                         .foregroundColor(Color.primary)
                         .padding([.top, .leading], 20)
                 }
-                
+
                 // Profil-Informationen
                 NavigationLink(destination: MainPage_ProfilView()) {
                     HStack {
@@ -50,9 +50,13 @@ struct MainPage: View {
                             Circle()
                                 .fill(Color.gray)
                                 .frame(width: 50, height: 50)
-                                .overlay(Text(shortName).foregroundColor(.white))
+                                .overlay(
+                                    Text(shortName)
+                                        .foregroundColor(.white)
+                                        .font(.headline)
+                                )
                         }
-                        
+
                         VStack(alignment: .leading) {
                             Text(name.isEmpty ? "Name laden..." : name)
                                 .font(.headline)
@@ -61,9 +65,9 @@ struct MainPage: View {
                                 .font(.subheadline)
                                 .foregroundColor(Color.secondary)
                         }
-                        
+
                         Spacer()
-                        
+
                         Image(systemName: "chevron.right")
                             .foregroundColor(Color.secondary)
                     }
@@ -73,12 +77,12 @@ struct MainPage: View {
                     .padding(.horizontal, 10)
                     .padding(10)
                 }
-                
+
                 // Options List
                 List {
                     Section {
                         if meetingManager.isLoading {
-                            ProgressView("Loading meetings...") // Ladeanzeige
+                            ProgressView("Loading meetings...")
                                 .progressViewStyle(CircularProgressViewStyle())
                         } else if !meetingManager.meetings.isEmpty {
                             NavigationLink(destination: MeetingView(meetings: meetingManager.meetings)) {
@@ -96,7 +100,7 @@ struct MainPage: View {
                             Text("No meetings available.")
                         }
                     }
-                    
+
                     Section {
                         NavigationLink(destination: VotingsView()) {
                             HStack {
@@ -106,8 +110,8 @@ struct MainPage: View {
                                     .foregroundColor(Color.primary)
                             }
                         }
-                        
-                        NavigationLink(destination: ProtokolleView()) {
+
+                        NavigationLink(destination: RecordsMainView()) {
                             HStack {
                                 Image(systemName: "doc.text")
                                     .foregroundColor(.accentColor)
@@ -115,7 +119,7 @@ struct MainPage: View {
                                     .foregroundColor(Color.primary)
                             }
                         }
-                        
+
                         NavigationLink(destination: AttendanceView()) {
                             HStack {
                                 Image(systemName: "person.crop.circle.fill.badge.checkmark")
@@ -138,53 +142,57 @@ struct MainPage: View {
                 .listStyle(InsetGroupedListStyle())
                 .background(Color.clear)
                 .padding(.top, -10)
-                
+                .refreshable{
+                    meetingManager.fetchAllMeetings()
+                }
+
                 Spacer()
 
-                MainPageCurrentMeetingView()
-
-
+                CurrentMeetingBottomView()
             }
             .background(Color(UIColor.systemGroupedBackground))
         }
-        .navigationBarHidden(true) // Verstecken von navigation bar und back button
+        .navigationBarHidden(true)
         .onAppear {
-            meetingManager.fetchAllMeetings() // Meetings laden, wenn die View erscheint
+            meetingManager.fetchAllMeetings()
             loadUserProfile()
             loadCurrentMeeting()
         }
     }
-        
+
     // MARK: - Daten laden
-    func loadUserProfile() {
+    func loadUserProfile(retryCount: Int = 4) {
+        guard retryCount > 0 else {
+            self.errorMessage = "Fehler: Profil konnte nicht geladen werden."
+            return
+        }
+
         MainPageAPI.fetchUserProfile { result in
             DispatchQueue.main.async {
-                self.isLoading = false
                 switch result {
                 case .success(let profile):
+                    self.isLoading = false
+                    self.errorMessage = nil
                     self.name = profile.name ?? ""
                     self.shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
-                    self.loadProfilePicture() // Profilbild laden
+                    if let imageData = profile.profileImage, let image = UIImage(data: imageData) {
+                        self.profileImage = image
+                    } else {
+                        self.profileImage = nil
+                    }
                 case .failure(let error):
                     self.errorMessage = "Fehler beim Laden des Profils: \(error.localizedDescription)"
+                    print("Retry \(5 - retryCount): \(error.localizedDescription)")
+
+                    // Retry nach 2 Sekunden
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        self.loadUserProfile(retryCount: retryCount - 1)
+                    }
                 }
             }
         }
     }
-        
-    func loadProfilePicture() {
-        MainPageAPI.fetchProfilePicture { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let image):
-                    self.profileImage = image
-                case .failure:
-                    self.profileImage = nil // Kein Bild verfügbar
-                }
-            }
-        }
-    }
-        
+
     func loadCurrentMeeting() {
         MainPageAPI.fetchCurrentMeeting { result in
             DispatchQueue.main.async {
@@ -202,25 +210,24 @@ struct MainPage: View {
             }
         }
     }
-        
+
     // MARK: - Helferfunktionen
     func extractFirstName(from fullName: String) -> String {
         return fullName.split(separator: " ").first.map(String.init) ?? "Nutzer"
     }
-    
+
     func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
     }
-    
+
     func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
 }
-
 
 struct MainPage_Previews: PreviewProvider {
     static var previews: some View {

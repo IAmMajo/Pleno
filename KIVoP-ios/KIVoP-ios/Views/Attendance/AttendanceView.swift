@@ -6,154 +6,135 @@
 //
 
 import SwiftUI
-import MeetingServiceDTOs
 
 struct AttendanceView: View {
-    @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var auth: AuthController
     @StateObject private var viewModel = AttendanceViewModel()
-
+    
     var body: some View {
-        NavigationView {
-            VStack(alignment: .leading, spacing: 16) {
-                
-                // Navbar
-                Button(action: {
-                    dismiss()
-                }) {
-                    HStack {
-                        Image(systemName: "chevron.backward")
-                        Text("Zurück")
-                    }
-                    .foregroundColor(.blue)
-                }
-                .padding(.horizontal)
-
-                // Titel
-                Text("Anwesenheit")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .padding(.leading)
-                
-                // Suchfeld
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.gray.opacity(0.2))
-                    HStack {
-                        TextField("Suchen", text: $viewModel.searchText)
-                            .padding(8)
-                    }
-                    .padding(.horizontal, 8)
-                }
-                .frame(height: 40)
-                .padding(.horizontal)
-                
-                // Inhalt
-                ZStack {
-                    Color.gray.opacity(0.1)
-                        .edgesIgnoringSafeArea(.all)
-                    
-                    VStack(alignment: .leading, spacing: 16) {
-                        
-                        // Aktuelle Sitzung
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("AKTUELLE SITZUNG")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.gray)
-                                .padding(.leading, 10)
-
-                            if !viewModel.currentMeetings.isEmpty {
+        NavigationStack {
+            // Inhalt
+            VStack {
+                //Aktuelle Meetings
+                List {
+                    if !viewModel.currentMeetings.isEmpty {
+                        Section(header:
+                                    Text("AKTUELLE SITZUNG")
+                            .padding(.leading, -5)){
                                 ForEach(viewModel.currentMeetings, id: \.id) { currentMeeting in
-                                    NavigationLink(destination: destinationView(for: currentMeeting)) {
+                                    NavigationLink(destination: viewModel.destinationView(for: currentMeeting)) {
                                         HStack {
+                                            // Icon für Meeting im Gange
+                                            Image(systemName: "play.circle")
+                                                // Farbe je nach Teilnahme Status
+                                                .foregroundColor(
+                                                    currentMeeting.myAttendanceStatus == .present ? .blue :
+                                                            .orange
+                                                )
                                             VStack(alignment: .leading) {
+                                                // Meeting Name
                                                 Text(currentMeeting.name)
-                                                    .foregroundColor(.white)
+                                                    .font(.headline)
+                                                // Meeting Datum
                                                 Text(DateTimeFormatter.formatDate(currentMeeting.start))
                                                     .font(.subheadline)
-                                                    .foregroundColor(.white)
-                                            }
-                                            .padding(.vertical, 4)
-                                            Spacer()
-                                            // Image comes here: pending or checked?
-                                            Image(systemName: "chevron.right")
-                                                .foregroundColor(.white)
-                                        }
-                                        .padding(.horizontal)
-                                        .padding(.vertical, 2)
-                                        .background(Color.blue)
-                                        .cornerRadius(10)
-                                    }
-                                }
-                            } else {
-                                Text("Aktuell sind keine Sitzungen im Gange.")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray.opacity(0.7))
-                                    .padding(.leading)
-                            }
-                        }
-                        .padding(.horizontal)
-                        
-                        // TabView für vergangene und anstehende Termine
-                        Picker("Termine", selection: $viewModel.selectedTab) {
-                            Text("Vergangene Termine").tag(0)
-                            Text("Anstehende Termine").tag(1)
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
-                        .padding(.horizontal)
-                        
-                        // Gruppierte Liste
-                        List {
-                            ForEach(viewModel.groupedMeetings, id: \.key) { group in
-                                Section(header: Text(group.key)
-                                    .padding(.leading, -5)
-                                ) {
-                                    ForEach(group.value, id: \.id) { meeting in
-                                        NavigationLink(destination: destinationView(for: meeting)) {
-                                            VStack(alignment: .leading) {
-                                                Text(meeting.name)
-                                                    .font(.headline)
-                                                Text(DateTimeFormatter.formatDate(meeting.start))
-                                                    .font(.subheadline)
                                                     .foregroundColor(.gray)
-                                                // Image for took part or not check or X
-                                                // On scheduled also pending
                                             }
+                                            Spacer()
+                                            Image(systemName:
+                                                    currentMeeting.myAttendanceStatus == .present ? "checkmark.circle" :
+                                                    "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90"
+                                            )
+                                            .foregroundColor(
+                                                currentMeeting.myAttendanceStatus == .present ? .blue :
+                                                        .orange
+                                            )
+                                            .font(.system(size: 18))
                                         }
                                     }
                                 }
                             }
-                        }
-                        .listStyle(InsetGroupedListStyle())
+                    } else {
+                        Text("Aktuell sind keine Sitzungen im Gange.")
+                            .foregroundColor(.gray)
+                            .font(.body)
+                            .multilineTextAlignment(.center)
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
                     }
-                    .padding(.top)
+                    
+                    // TabView für vergangene und anstehende Termine
+                    Picker("Termine", selection: $viewModel.selectedTab) {
+                        Text("Vergangene Termine").tag(0)
+                        Text("Anstehende Termine").tag(1)
+                    }
+                    .pickerStyle(.segmented)
+                    .listRowBackground(Color.clear)
+                    .padding(-20)
+                    
+                    // Liste für vergangene und anstehende Termine
+                    ForEach(viewModel.groupedMeetings, id: \.key) { group in
+                        Section(header: Text(group.key)
+                            .padding(.leading, -5)
+                        ) {
+                            ForEach(group.value, id: \.id) { meeting in
+                                NavigationLink(destination: viewModel.destinationView(for: meeting)) {
+                                    HStack{
+                                        VStack(alignment: .leading) {
+                                            Text(meeting.name)
+                                                .font(.headline)
+                                            Text(DateTimeFormatter.formatDate(meeting.start))
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                        }
+                                        Spacer()
+                                        
+                                        // Logik für die Symbolauswahl. Bei vergangenen Terminen gibt es kein Kalender Symbol. Wenn dort der Status noch nicht gesetzt ist, hat man am Meeting nicht teilgenommen.
+                                        Image(systemName: {
+                                            switch meeting.myAttendanceStatus {
+                                            case .accepted, .present:
+                                                return "checkmark.circle"
+                                            case .absent:
+                                                return "xmark.circle"
+                                            default:
+                                                return viewModel.selectedTab == 0 ? "xmark.circle" : "calendar"
+                                            }
+                                        }())
+                                        .foregroundColor({
+                                            switch meeting.myAttendanceStatus {
+                                            case .accepted, .present:
+                                                return .blue
+                                            case .absent:
+                                                return .red
+                                            default:
+                                                return viewModel.selectedTab == 0 ? .red : .orange
+                                            }
+                                        }())
+                                        .font(.system(size: 18))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .listStyle(.insetGrouped)
+                .overlay {
+                    if viewModel.isLoading {
+                      ProgressView("Lädt...")
+                   }
+                }
+                .onAppear {
+                   Task {
+                       viewModel.fetchMeetings()
+                   }
+                }
+                .refreshable {
+                    Task {
+                        viewModel.fetchMeetings()
+                    }
                 }
             }
+            .navigationTitle("Anwesenheit")
+            .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
         }
-        .navigationBarHidden(true)
-    }
-
-    private func destinationView(for meeting: GetMeetingDTO) -> some View {
-        switch meeting.status {
-        case .inSession:
-            let viewModel = AttendanceCurrentViewModel(meeting: meeting)
-            return AnyView(AttendanceCurrentView(viewModel: viewModel))
-        case .completed:
-            let viewModel = AttendanceDetailViewModel(meeting: meeting)
-            return AnyView(AttendanceDetailView(viewModel: viewModel))
-            
-        case .scheduled:
-            let viewModel = AttendancePlanningViewModel(meeting: meeting)
-            return AnyView(AttendancePlanningView(viewModel: viewModel))
-        }
-    }
-}
-
-// Vorschau
-struct AttendanceView_Previews: PreviewProvider {
-    static var previews: some View {
-        AttendanceView()
-            .environmentObject(AuthController.shared)
     }
 }

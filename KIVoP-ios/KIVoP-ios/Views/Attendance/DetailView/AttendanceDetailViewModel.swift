@@ -11,64 +11,53 @@ import MeetingServiceDTOs
 @MainActor
 class AttendanceDetailViewModel: ObservableObject {
     @Published var searchText: String = ""
+    @Published var errorMessage: String? = nil
     @Published var attendances: [GetAttendanceDTO] = []
+    @Published var isLoading: Bool = true
     
     private let baseURL = "https://kivop.ipv64.net"
     var meeting: GetMeetingDTO
     
     init(meeting: GetMeetingDTO) {
         self.meeting = meeting
-        fetchAttendances()
     }
     
     public func fetchAttendances() {
+        isLoading = true
         Task {
             do {
-                // Authentifizierung und Token holen
-                let token = try await AuthController.shared.getAuthToken()
-                
                 // URL und Request erstellen
                 guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/attendances") else {
                     print("Ungültige URL.")
+                    isLoading = false
                     return
                 }
                 
                 var request = URLRequest(url: url)
                 request.httpMethod = "GET"
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                } else {
+                    errorMessage = "Unauthorized: Token not found."
+                    isLoading = false
+                    return
+                }
                 
                 // API-Aufruf und Antwort verarbeiten
                 let (data, response) = try await URLSession.shared.data(for: request)
                 guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                     print("Fehlerhafte Antwort vom Server.")
+                    isLoading = false
                     return
                 }
                 
                 // JSON dekodieren
-                let fetchedAttendances = try JSONDecoder().decode([GetAttendanceDTO].self, from: data)
-                
-                // Attendances sortieren
-                self.attendances = fetchedAttendances.sorted {
-                    let orderA = self.sortOrder(for: $0.status)
-                    let orderB = self.sortOrder(for: $1.status)
-                    
-                    // Zuerst nach Status, dann alphabetisch nach Name sortieren
-                    return orderA == orderB
-                        ? $0.identity.name.localizedCaseInsensitiveCompare($1.identity.name) == .orderedAscending
-                        : orderA < orderB
-                }
+                self.attendances = try JSONDecoder().decode([GetAttendanceDTO].self, from: data)
                 
             } catch {
                 print("Fehler: \(error.localizedDescription)")
             }
-        }
-    }
-    
-    var filteredAttendances: [GetAttendanceDTO] {
-        if searchText.isEmpty {
-            return attendances
-        } else {
-            return attendances.filter { $0.identity.id.uuidString.contains(searchText) }
+            isLoading = false
         }
     }
     
@@ -78,15 +67,5 @@ class AttendanceDetailViewModel: ObservableObject {
     
     var absentCount: Int {
         attendances.filter { $0.status != .present }.count
-    }
-    
-    // Sortierungspriorität definieren
-    private func sortOrder(for status: AttendanceStatus?) -> Int {
-        switch status {
-        case .present:
-            return 0
-        default:
-            return 1
-        }
     }
 }

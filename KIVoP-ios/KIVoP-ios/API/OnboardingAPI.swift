@@ -18,17 +18,17 @@ class OnboardingAPI {
     ///   - completion: Callback mit einem optionalen Fehler und einer Erfolgsmeldung.
     static func registerUser(
         with registrationDTO: UserRegistrationDTO,
-        completion: @escaping (Result<Void, Error>) -> Void
+        completion: @escaping (Result<String, Error>) -> Void
     ) {
         guard let url = URL(string: "\(baseURL)/users/register") else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL"])))
             return
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+
         do {
             let jsonData = try JSONEncoder().encode(registrationDTO)
             request.httpBody = jsonData
@@ -36,26 +36,43 @@ class OnboardingAPI {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Fehler beim Verarbeiten der Daten."])))
             return
         }
-        
+
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return
             }
-            
+
             guard let httpResponse = response as? HTTPURLResponse else {
                 completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Ungültige Antwort vom Server."])))
                 return
             }
-            
+
             if httpResponse.statusCode == 201 {
-                completion(.success(()))
+                // Registrierung erfolgreich, automatischer Login
+                print("Registrierung erfolgreich. Starte automatischen Login...")
+
+                let loginDTO = UserLoginDTO(email: registrationDTO.email, password: registrationDTO.password)
+
+                loginUser(with: loginDTO) { loginResult in
+                    switch loginResult {
+                    case .success(let token):
+                        // Token speichern
+                        UserDefaults.standard.setValue(token, forKey: "jwtToken")
+                        print("JWT-Token erfolgreich gespeichert: \(token)")
+                        completion(.success(token))
+                    case .failure(let loginError):
+                        completion(.failure(loginError))
+                    }
+                }
             } else {
                 let errorMessage = "Registrierung fehlgeschlagen. Status: \(httpResponse.statusCode)"
                 completion(.failure(NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])))
             }
         }.resume()
     }
+
+
     
     /// Loggt einen Benutzer ein.
     /// - Parameters:
@@ -167,6 +184,75 @@ class OnboardingAPI {
             completion(.success(profile.isAdmin ?? false))
         }.resume()
     }
+    
+    static func sendResetCode(email: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "https://kivop.ipv64.net/users/password/reset-request"),
+              let jsonData = try? JSONSerialization.data(withJSONObject: ["email": email]) else {
+            completion(.failure(NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "Ungültige Anfrage"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                completion(.failure(NSError(domain: "", code: 500, userInfo: [NSLocalizedDescriptionKey: "Fehler beim Senden des Reset-Codes"])))
+                return
+            }
+
+            completion(.success(()))
+        }.resume()
+    }
+    
+    
+    static func resetPassword(email: String, resetCode: String, newPassword: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users/password/reset"),
+              let jsonData = try? JSONSerialization.data(withJSONObject: [
+                  "email": email,
+                  "resetCode": resetCode,
+                  "newPassword": newPassword
+              ]) else {
+            completion(.failure(NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "Ungültige Anfrage"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                completion(.failure(NSError(domain: "", code: 500, userInfo: [NSLocalizedDescriptionKey: "Fehler beim Zurücksetzen des Passworts"])))
+                return
+            }
+
+            // Automatischer Login nach erfolgreichem Passwort-Reset
+            let loginDTO = UserLoginDTO(email: email, password: newPassword)
+            loginUser(with: loginDTO) { loginResult in
+                switch loginResult {
+                case .success(let token):
+                    UserDefaults.standard.setValue(token, forKey: "jwtToken")
+                    completion(.success(()))
+                case .failure(let loginError):
+                    completion(.failure(loginError))
+                }
+            }
+        }.resume()
+    }    
 }
 
 
