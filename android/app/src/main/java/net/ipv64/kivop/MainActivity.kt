@@ -3,7 +3,9 @@ package net.ipv64.kivop
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -60,6 +62,7 @@ import net.ipv64.kivop.pages.mainApp.MeetingsListPage
 import net.ipv64.kivop.pages.mainApp.PosterPage
 import net.ipv64.kivop.pages.mainApp.ProtocolListPage
 import net.ipv64.kivop.pages.mainApp.TravelPage
+import net.ipv64.kivop.pages.mainApp.UserPage
 import net.ipv64.kivop.pages.mainApp.VotePage
 import net.ipv64.kivop.pages.mainApp.VotingResultPage
 import net.ipv64.kivop.pages.mainApp.VotingsListPage
@@ -112,73 +115,77 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
   LaunchedEffect(Unit) { meetingsViewModel.fetchMeetings() }
 
   NavHost(
-      navController = navController,
-      startDestination = Screen.Home.rout,
-      modifier = Modifier.fillMaxWidth().zIndex(-1f),
-      enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
-      exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },
-      popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
-      popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) }) {
+    navController = navController,
+    startDestination = Screen.Home.rout,
+    modifier = Modifier.fillMaxWidth().zIndex(-1f),
+    enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+    exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },
+    popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
+    popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) }) {
 
-        // StartScreen
+    // StartScreen
 
-        composable(Screen.Home.rout) {
-          HomePage(navController = navController, userViewModel, meetingsViewModel)
-        }
-        // Sitzungen
-        composable(Screen.Meetings.rout) { MeetingsListPage(navController = navController) }
-        // Anwesenheit
-        composable(route = Screen.Attendance.rout) {
-          AttendancesListPage(navController = navController)
-        }
-        // Anwesenheit liste
-        composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
-          AttendancesCoordinationPage(
-              navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
-        }
-        // Protokolle
-        composable(route = Screen.Protocol.rout) { ProtocolListPage(navController = navController) }
-        // Travel
-        composable(route = Screen.Travel.rout) { TravelPage(navController = navController) }
-        // Events
-        composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
-        // Poster
-        composable(route = Screen.Poster.rout) { PosterPage(navController = navController) }
-        // Abstimmungen Listen Page
-        composable(route = Screen.Votings.rout) { VotingsListPage(navController = navController) }
-        // Abstimmung Resultat Page
-        composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
-          AttendancesCoordinationPage(
-              navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
-        }
-        composable(
-            route = Screen.Voting.rout,
-            arguments =
-                listOf(
-                    navArgument("votingID") { type = NavType.StringType },
-                )) { backStackEntry ->
-              val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
-              VotingResultPage(navController = navController, votingID = votingID)
-            }
-        composable(
-            route = Screen.Vote.rout,
-            arguments =
-                listOf(
-                    navArgument("votingID") { type = NavType.StringType },
-                )) { backStackEntry ->
-              val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
-              VotePage(navController = navController, votingID = votingID)
-            }
-        composable(
-            route = Screen.Voted.rout,
-            arguments =
-                listOf(
-                    navArgument("votingID") { type = NavType.StringType },
-                )) { backStackEntry ->
-              val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
-              AlreadyVoted(navController = navController, votingID = votingID)
-            }
+    composable(Screen.Home.rout) {
+      HomePage(navController = navController, userViewModel, meetingsViewModel)
+    }
+    //UserPage
+    composable(Screen.User.rout) { 
+      UserPage(navController = navController, userViewModel)
+    }
+    // Sitzungen
+    composable(Screen.Meetings.rout) { MeetingsListPage(navController = navController) }
+    // Anwesenheit
+    composable(route = Screen.Attendance.rout) {
+      AttendancesListPage(navController = navController)
+    }
+    // Anwesenheit liste
+    composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
+      AttendancesCoordinationPage(
+          navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
+    }
+    // Protokolle
+    composable(route = Screen.Protocol.rout) { ProtocolListPage(navController = navController) }
+    // Travel
+    composable(route = Screen.Travel.rout) { TravelPage(navController = navController) }
+    // Events
+    composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
+    // Poster
+    composable(route = Screen.Poster.rout) { PosterPage(navController = navController) }
+    // Abstimmungen Listen Page
+    composable(route = Screen.Votings.rout) { VotingsListPage(navController = navController) }
+    // Abstimmung Resultat Page
+    composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
+      AttendancesCoordinationPage(
+          navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
+    }
+    composable(
+      route = Screen.Voting.rout,
+      arguments =
+        listOf(
+          navArgument("votingID") { type = NavType.StringType },
+        )) { backStackEntry ->
+        val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
+        VotingResultPage(navController = navController, votingID = votingID)
       }
+    composable(
+      route = Screen.Vote.rout,
+      arguments =
+        listOf(
+          navArgument("votingID") { type = NavType.StringType },
+        )) { backStackEntry ->
+      val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
+      VotePage(navController = navController, votingID = votingID)
+      }
+    composable(
+      route = Screen.Voted.rout,
+      arguments =
+        listOf(
+          navArgument("votingID") { type = NavType.StringType },
+        )) { backStackEntry ->
+        val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
+        AlreadyVoted(navController = navController, votingID = votingID)
+      }
+    }
 }
 
 @Composable
@@ -239,7 +246,18 @@ fun DrawerContent(
       modifier = Modifier.padding(top = 60.dp, start = 20.dp, end = 8.dp, bottom = 10.dp),
   ) {
     if (user != null) {
-      ProfileCardSmall(user.name!!, user.profileImage)
+      ProfileCardSmall(
+        user.name!!, 
+        user.profileImage,
+        onClick = {
+          coroutineScope.launch {
+            drawerState.close()
+          }
+          if (currentRoute != Screen.User.rout) {
+            navController.navigate(Screen.User.rout)
+          }
+        }
+      )
     }
 
     Spacer(modifier = Modifier.height(4.dp))

@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 val Primary = Color(0xFF2351C4)
 val Primary_20 = Color(0x332351C4)
 val Secondary = Color(0xFF9AB1EB)
-val Tertiary = Color(0xFFCDEAF7)
+val Tertiary = Color(0xFF1061DA)
 
 // Text colors dark
 val Text_prime = Color(0xFF1F1F1F)

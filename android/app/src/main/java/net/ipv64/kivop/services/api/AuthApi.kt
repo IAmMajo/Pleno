@@ -11,6 +11,7 @@ import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileDTO
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
+import net.ipv64.kivop.services.decodeFromBase64
 import okhttp3.FormBody
 import okhttp3.Request
 

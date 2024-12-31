@@ -6,4 +6,13 @@
     <string name="travel_planning">Reiseplanung</string>
     <string name="events">Events</string>
     <string name="poster">Plakate</string>
+
+    <!-- Profile Page -->
+    <string name="user_info">Nutzerinformationen</string>
+    <string name="btn_del_user">Account löschen</string>
+    <string name="btn_back_user">Zurück</string>
+    <string name="btn_save_change_user">Änderungen speichern</string>
+    <string name="btn_change_password">Passwort ändern</string>"
+    <string name="btn_logout">Abmelden</string>
+    <string name="btn_cancel_change_user">Abbrechen</string>
 </resources>

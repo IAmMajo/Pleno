@@ -36,7 +36,6 @@ import net.ipv64.kivop.ui.theme.Text_prime
 fun GlobalTopBar(navController: NavController, onOpenDrawer: () -> Unit) {
   val currentBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = currentBackStackEntry?.destination?.route
-  var back by remember { mutableStateOf(false) }
 
   LaunchedEffect(currentRoute) { isBackPressed = false }
 
@@ -78,6 +77,9 @@ fun GlobalTopBar(navController: NavController, onOpenDrawer: () -> Unit) {
                   Background_secondary,
                   onClick = { onOpenDrawer() })
             })
+      }
+      Screen.User.rout -> {
+        
       }
       else -> {
         TopAppBar(
