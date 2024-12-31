@@ -15,6 +15,7 @@ import net.ipv64.kivop.ui.theme.BG_Pri
 import net.ipv64.kivop.ui.theme.Secondary
 import net.ipv64.kivop.ui.theme.Tertiary
 import net.ipv64.kivop.ui.theme.Text_Ter
+import net.ipv64.kivop.ui.theme.Text_tertiary
 
 
 @Composable
@@ -26,7 +27,7 @@ fun CallToConfirmation(
   buttonOneText: String,
   buttonTwoText: String?,
   buttonTextDismiss: String,
-  alert: Boolean,
+//  alert: Boolean,
 
 ){
   AlertDialog(
@@ -71,19 +72,12 @@ fun CallToConfirmation(
 //    
         Text(
           text = buttonTextDismiss,
-          color = Text_Ter,
+          color = Text_tertiary,
           modifier = Modifier
             .padding(horizontal = 12.dp)
         )
       }
     },
-//        icon = {
-//            // if-statement ergänzen? / doch rausnehmen?
-//            Icon(
-//                painterResource(id = iconIdTop),
-//                contentDescription = ""
-//            )
-//        },
     title = {
       Text( text = dialogTitle)
     },
@@ -108,15 +102,11 @@ fun Screen(){
     onDismissRequest = close,
     onConfirmation = openCam,
     dialogTitle = "TestTitel",
-    dialogText = "Sind Sie sicher, dass SIe Ihr Ergebnis abschickenmöchten?",
+    dialogText = "Sind Sie sicher, dass Sie Ihr Ergebnis abschicken möchten?",
     buttonOneText = "Bestätigen",
-   // buttonTextColorConfirm = Background_light,
     buttonTwoText = "Two Button",
-  //  buttonOneColor = Primary_dark,
-   // buttonTwoColor = Primary_dark,
-    // buttonColorDismiss = Primary_dark_20,
-    buttonTextDismiss = "Abbrechen",
-    alert = false
+    buttonTextDismiss = "Abbrechen"
+  //  alert = false
   )
 }
 
