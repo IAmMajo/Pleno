@@ -13,7 +13,7 @@ xmlns:tools="http://schemas.android.com/tools">
     android:theme="@style/Theme.KIVoPAndriod"
     tools:targetApi="31">
     <activity
-        android:name=".MainActivity"
+        android:name=".pages.LoginActivity"
         android:exported="true"
         android:label="@string/app_name"
         android:theme="@style/Theme.KIVoPAndriod">
@@ -23,6 +23,7 @@ xmlns:tools="http://schemas.android.com/tools">
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
     </activity>
+    <activity android:name=".MainActivity" />
 </application>
 
 </manifest>
