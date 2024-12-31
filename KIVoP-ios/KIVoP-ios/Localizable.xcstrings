@@ -63,6 +63,16 @@
     "%@" : {
 
     },
+    "%@\n%lf, %lf" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@\n%2$lf, %3$lf"
+          }
+        }
+      }
+    },
     "%lld" : {
 
     },
@@ -169,6 +179,15 @@
     "Abhängedatum:" : {
 
     },
+    "Abhängen bestätigen" : {
+
+    },
+    "Abhängen zurückziehen" : {
+
+    },
+    "Abhängen zurückziehen?" : {
+
+    },
     "Abmelden" : {
       "localizations" : {
         "de" : {
@@ -257,6 +276,9 @@
           }
         }
       }
+    },
+    "Achte beim Aufnehmen des Bildes darauf, dass das Plakat sowie der Hintergrund und die Umgebung gut zu erkennen sind." : {
+
     },
     "Adresse" : {
 
@@ -389,7 +411,7 @@
         }
       }
     },
-    "Am Grabstein 6,\n12345 Transilvanien \nDeutschland \n51.500603516488205, 6.545327532716446" : {
+    "Alles im Blick?" : {
 
     },
     "Anschließend kann der " : {
@@ -495,6 +517,12 @@
     "Beschreibung" : {
 
     },
+    "Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt." : {
+
+    },
+    "Bist du sicher, dass du das Plakat abhängen möchtest?" : {
+
+    },
     "Bitte klicke nun auf den " : {
       "localizations" : {
         "de" : {
@@ -532,6 +560,9 @@
           }
         }
       }
+    },
+    "Copy" : {
+
     },
     "Count" : {
 
@@ -1200,6 +1231,12 @@
         }
       }
     },
+    "Öffnen mit Apple Maps" : {
+
+    },
+    "Öffnen mit Google Maps" : {
+
+    },
     "Option" : {
 
     },
@@ -1323,6 +1360,9 @@
 
     },
     "Plakat %@" : {
+
+    },
+    "Plakat abhängen?" : {
 
     },
     "Plakate" : {
@@ -1472,6 +1512,9 @@
         }
       }
     },
+    "Schließen" : {
+
+    },
     "Sitzung" : {
       "localizations" : {
         "de" : {
@@ -1579,6 +1622,9 @@
         }
       }
     },
+    "Teilen..." : {
+
+    },
     "Teilnahme bestätigen" : {
       "localizations" : {
         "de" : {
@@ -1654,6 +1700,9 @@
           }
         }
       }
+    },
+    "Unknown Action" : {
+
     },
     "Verantwortliche (2)" : {
 
@@ -1764,6 +1813,9 @@
       }
     },
     "Veröffentlichen" : {
+
+    },
+    "Verstanden" : {
 
     },
     "Verwalte " : {
