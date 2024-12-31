@@ -5,8 +5,8 @@ struct NutzerverwaltungView: View {
     @State private var isUserPopupPresented = false
     @State private var isPendingRequestPopupPresented = false
     @State private var selectedUser: UserProfileDTO? = nil
+    @State private var pendingRequestsCount: Int = 0
 
-    @ObservedObject var controller = BackendController()
     @ObservedObject var userManager = UserManager()
 
     var body: some View {
@@ -32,7 +32,7 @@ struct NutzerverwaltungView: View {
                     
                     Spacer()
                     
-                    Text("\(controller.pendingRequestsCount)")
+                    Text("\(pendingRequestsCount)") // Dynamische Anzeige
                         .foregroundColor(.orange)
                     
                     Image(systemName: "chevron.right")
@@ -42,8 +42,12 @@ struct NutzerverwaltungView: View {
                 .onTapGesture {
                     isPendingRequestPopupPresented = true
                 }
-                .sheet(isPresented: $isPendingRequestPopupPresented) {
-                    PendingRequestsNavigationView(isPresented: $isPendingRequestPopupPresented)
+                .sheet(isPresented: $isPendingRequestPopupPresented, onDismiss: {
+                    fetchPendingRequestsCount() // Anzahl der ausstehenden Anfragen aktualisieren
+                }) {
+                    PendingRequestsNavigationView(isPresented: $isPendingRequestPopupPresented, onListUpdate: {
+                        fetchPendingRequestsCount() // Anzahl der ausstehenden Anfragen live aktualisieren
+                    })
                 }
             }
             
@@ -90,12 +94,33 @@ struct NutzerverwaltungView: View {
             Spacer()
         }
         .onAppear {
-            // Benutzer laden, wenn die View erscheint
-            userManager.fetchUsers()
+            fetchAllData() // Daten beim ersten Anzeigen laden
         }
         .background(Color(UIColor.systemBackground)) // Adapt to Dark/Light Mode
     }
+
+    // Funktion: Alle Daten abrufen
+    private func fetchAllData() {
+        userManager.fetchUsers() // Nutzerliste laden
+        fetchPendingRequestsCount() // Anzahl ausstehender Anfragen abrufen
+    }
+
+    // Funktion: Anzahl ausstehender Anfragen abrufen
+    private func fetchPendingRequestsCount() {
+        MainPageAPI.fetchPendingUsers { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let users):
+                    pendingRequestsCount = users.filter { $0.isActive == false }.count
+                case .failure(let error):
+                    print("Fehler beim Abrufen der Anzahl ausstehender Anfragen: \(error.localizedDescription)")
+                    pendingRequestsCount = 0
+                }
+            }
+        }
+    }
 }
+
 
 #Preview {
     NutzerverwaltungView()
