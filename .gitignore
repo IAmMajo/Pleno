@@ -1,5 +1,13 @@
 node_modules/
 build/
+*.xcuserstate
 .swiftpm
 .DS_Store
 .env
+KIVoP-ios/KIVoP-ios.xcodeproj/project.xcworkspace/xcuserdata/
+KIVoP-ios/KIVoP-ios.xcodeproj/xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+*.xcworkspace/xcuserdata/
+*.xcscheme
+xcschemes/
