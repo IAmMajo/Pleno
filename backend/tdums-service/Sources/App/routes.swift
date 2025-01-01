@@ -7,6 +7,10 @@ func routes(_ app: Application) throws {
     
     // Presentation routes
     
+    app.get { req in
+        req.redirect(to: "/homepage/de")
+    }
+    
     app.get("**") { req in
         req.redirect(to: "/homepage/de")
     }
@@ -22,82 +26,55 @@ func routes(_ app: Application) throws {
     
     // Victim routes
     
-    app.group("aufklaerung") { route in
-        route.get("briefkasten") { req async -> Response in
-            req.fileio.streamFile(at: "Resources/aufklaerung-briefkasten.html")
-        }
-        route.get("mensa") { req async -> Response in
-            req.fileio.streamFile(at: "Resources/aufklaerung-mensa.html")
-        }
-        route.get("weihnachtsmarkt") { req async -> Response in
-            req.fileio.streamFile(at: "Resources/aufklaerung-weihnachtsmarkt.html")
-        }
-    }
-    
-    app.group("info", ":id") { route in
-        route.get { req -> HTTPStatus in
-            try await increaseVictimCount(req)
-            return .ok
-        }
+    app.group("info") { route in
         route.get("briefkasten") { req async throws -> Response in
-            try await increaseVictimCount(req)
+            guard let uuidString = req.headers.first(name: "id"), let uuid = UUID(uuidString: uuidString),
+                  let victim = try await Victim.find(uuid, on: req.db) else {
+                throw Abort(.unauthorized)
+            }
+            let fool = try Fool(victim: victim)
+            try await fool.create(on: req.db)
             return req.fileio.streamFile(at: "Resources/aufklaerung-briefkasten.html")
         }
-        route.get("mensa") { req async throws -> Response in
-            try await increaseVictimCount(req)
-            return req.fileio.streamFile(at: "Resources/aufklaerung-mensa.html")
-        }
-        route.get("weihnachtsmarkt") { req async throws -> Response in
-            try await increaseVictimCount(req)
-            return req.fileio.streamFile(at: "Resources/aufklaerung-weihnachtsmarkt.html")
+        route.get("labyrinth") { req async throws -> Response in
+            guard let uuidString = req.headers.first(name: "id"), let uuid = UUID(uuidString: uuidString) else {
+                throw Abort(.unauthorized)
+            }
+            var victim: Victim
+            if let existingVictim = try await Victim.find(uuid, on: req.db) {
+                victim = existingVictim
+            } else {
+                victim = Victim(id: uuid, experiment: .labyrinth)
+                try await victim.create(on: req.db)
+            }
+            let fool = try Fool(victim: victim)
+            try await fool.create(on: req.db)
+            return req.fileio.streamFile(at: "Resources/aufklaerung-labyrinth.html")
         }
     }
     
     // Protected routes
     
-    protected.group("create", "victim") { route in
+    protected.group("victims") { route in
+        route.get { req -> [GetVictimDTO] in
+            try await Victim.query(on: req.db)
+                .with(\.$fools)
+                .all()
+                .toGetVictimDTO()
+        }
+        
+        route.get(":id") { req -> GetVictimDTO in
+            guard let victim = try await Victim.find(req.parameters.get("id"), on: req.db) else {
+                throw Abort(.notFound)
+            }
+            try await victim.$fools.load(on: req.db)
+            return try victim.toGetVictimDTO()
+        }
+        
         route.post("briefkasten") { req in
             let victim = Victim(experiment: .briefkasten)
             try await victim.create(on: req.db)
             return try await victim.requireID().uuidString.encodeResponse(status: .created, for: req)
         }
-        route.post("mensa") { req in
-            let victim = Victim(experiment: .mensa)
-            try await victim.create(on: req.db)
-            return try await victim.requireID().uuidString.encodeResponse(status: .created, for: req)
-        }
-        route.post("weihnachtsmarkt") { req in
-            let victim = Victim(experiment: .weihnachtsmarkt)
-            try await victim.create(on: req.db)
-            return try await victim.requireID().uuidString.encodeResponse(status: .created, for: req)
-        }
-        route.post("test") { req in
-            UUID().uuidString.encodeResponse(status: .ok, for: req)
-        }
-    }
-    
-    protected.put("mark-unused", ":id") { req -> HTTPStatus in
-        guard let uuidString = req.parameters.get("id"), let id = UUID(uuidString: uuidString), let victim = try await Victim.find(id, on: req.db) else {
-            throw Abort(.notFound, reason: "Invalid UUID.")
-        }
-        guard victim.count == 0 else {
-            throw Abort(.badRequest, reason: "Victim ('\(uuidString)') cannot be marked unused: Count is not 0 (it's \(victim.count).")
-        }
-        guard !victim.unused else {
-            throw Abort(.badRequest, reason: "Victim ('\(uuidString)') cannot be marked unused: It's already marked unused.")
-        }
-        
-        victim.unused = true
-        try await victim.update(on: req.db)
-        return .ok
-    }
-    
-    @Sendable func increaseVictimCount(_ req: Request) async throws {
-        guard let uuidString = req.parameters.get("id"), let id = UUID(uuidString: uuidString), let victim = try await Victim.find(id, on: req.db) else {
-            throw Abort(.notFound, reason: "Invalid UUID.")
-        }
-        
-        victim.count += 1
-        try await victim.update(on: req.db)
     }
 }

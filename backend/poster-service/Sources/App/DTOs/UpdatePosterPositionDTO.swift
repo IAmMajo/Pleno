@@ -6,24 +6,35 @@
 //
 import Foundation
 import Vapor
+
 public struct UpdatePosterPositionDTO: Codable {
+    
+    public var posterId: UUID?
     public var latitude: Double?
     public var longitude: Double?
-    public var isDisplayed: Bool?
-    public var image: File? 
-    public var expiresAt:Date?
-    public var responsibleUserId: UUID?
-    public var posterId: UUID?
+    public var expires_at:Date?
+    public var responsible_users: [UUID]?
+    public var image: File?
+    
 
-
-    public init(posterId:UUID?,responsibleUserId:UUID?,latitude: Double?, longitude: Double?, isDisplayed: Bool?, image: File?,expiresAt:Date?) {
+    public init(
+                posterId: UUID? = nil,
+                latitude: Double? = nil,
+                longitude: Double? = nil,
+                imageUrl: String? = nil,
+                expiresAt: Date? = nil,
+                responsibleUsers:[UUID]? = nil,
+                image: File? = nil
+                )
+    {
+        self.latitude = round((latitude ?? 0) * 1_000_000) / 1_000_000
+        self.longitude = round(longitude ?? 0 * 1_000_000) / 1_000_000
         self.posterId = posterId
-        self.responsibleUserId = responsibleUserId
-        self.latitude = latitude
-        self.longitude = longitude
-        self.isDisplayed = isDisplayed
+        self.expires_at = expiresAt
+        self.responsible_users = responsibleUsers
         self.image = image
-        self.expiresAt = expiresAt
-
     }
 }
+
+
+

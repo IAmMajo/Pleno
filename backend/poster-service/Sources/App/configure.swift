@@ -5,6 +5,7 @@ import Fluent
 import FluentPostgresDriver
 import Vapor
 
+
 // Konfiguriert deine Anwendung
 public func configure(_ app: Application) async throws {
     app.middleware.use(FileMiddleware(
@@ -52,7 +53,7 @@ public func configure(_ app: Application) async throws {
 
     // Erinnerungen für aufgehangene Poster versenden
     app.lifecycle.use(DailyCheckTask())
-    
+
     // Routen registrieren
     try routes(app)
 }

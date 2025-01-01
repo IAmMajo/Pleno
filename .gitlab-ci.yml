@@ -1,4 +1,5 @@
 stages:
+  - document
   - pull
   - build
   - distribute
@@ -8,6 +9,46 @@ variables:
   SERVER_BRANCH: staging-backend
 # SERVER_BRANCH: $BACKEND_STAGING_BRANCH s. https://gitlab.com/gitlab-org/gitlab/-/issues/327780
 
+# s. Ticket #179: https://gitlab.hsrw.eu/30182/kivop/-/issues/179
+ticketflow:
+  stage: document
+  variables:
+    COMMIT_MERGE_REQ_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/commits/$CI_COMMIT_SHA/merge_requests"
+    PUT_ISSUE_URL_UNFORMATTED: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/issues/%s"
+    GET_MERGE_REQ_INTO_MAIN_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests?state=opened&source_branch=$CI_COMMIT_BRANCH&target_branch=$CI_DEFAULT_BRANCH"
+    PUT_MERGE_REQ_URL_UNFORMATTED: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/%s"
+    TICKET_ID_REGEX: '(?<=Close|Closes|Closed|Closing|close|closes|closed|closing|Fix|Fixes|Fixed|Fixing|fix|fixes|fixed|fixing|Resolve|Resolves|Resolved|Resolving|resolve|resolves|resolved|resolving|Implement|Implements|Implemented|Implementing|implement|implements|implemented|implementing)(?:,?\s*#\d+)+(?:\s*and\s*#\d+)*'
+  script:
+    - 'MERGE_REQ="$(curl -s --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN" $COMMIT_MERGE_REQ_URL)"'
+    - if [[ "$(echo "$MERGE_REQ" | jq -r ". | length")" == "0" || "$(echo "$MERGE_REQ" | jq -r ".[0].target_branch")" != "$CI_COMMIT_BRANCH" || "$(echo "$MERGE_REQ" | jq -r ".[0].source_branch")" == "$CI_DEFAULT_BRANCH" ]]; then exit 0; fi
+    - TICKET_IIDS="$(echo "$MERGE_REQ" | jq -r '.[0].description' | grep -oP "${TICKET_ID_REGEX}" | grep -oP '\d+')"
+    - echo "$TICKET_IIDS"
+    - >
+      echo "$TICKET_IIDS" | while IFS= read -r iid ; do
+      curl
+      --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN"
+      --header "Content-Type: application/json"
+      --request PUT
+      --data "$(printf '{"add_labels":"%s"}' "$TICKET_DONE_LABEL")"
+      "$(printf "$PUT_ISSUE_URL_UNFORMATTED" "${iid}")" | jq -r '.labels[]';
+      done
+    - 'MERGE_REQ_INTO_MAIN="$(curl -s --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN" $GET_MERGE_REQ_INTO_MAIN_URL)"'
+    - MERGE_REQ_INTO_MAIN_COUNT="$(echo "$MERGE_REQ_INTO_MAIN" | jq -r ". | length")"
+    - >
+      if [[ "$MERGE_REQ_INTO_MAIN_COUNT" != '1' ]]; then
+      echo "ERROR: There is not exactly ONE merge request pointing from ${CI_COMMIT_BRANCH} to ${CI_DEFAULT_BRANCH} (there are ${MERGE_REQ_INTO_MAIN_COUNT}: $(echo "$MERGE_REQ_INTO_MAIN" | jq -r '.[].iid'))";
+      exit 1;
+      fi
+    - UPDATED_DESCRIPTION="$(echo "$MERGE_REQ_INTO_MAIN" | jq '.[0].description' | sed -e 's/^\"//g' -e 's/\"$//g')\n\n$(echo "$MERGE_REQ" | jq '.[0].description' | sed -e 's/^\"//g' -e 's/\"$//g')"
+    - >
+      curl
+      --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN"
+      --header "Content-Type: application/json"
+      --request PUT
+      --data "$(printf '{"description":"%s"}' "$UPDATED_DESCRIPTION")"
+      "$(printf "$PUT_MERGE_REQ_URL_UNFORMATTED" "$(echo "$MERGE_REQ_INTO_MAIN" | jq -r '.[0].iid')")" | jq -r '.description'
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^staging-/ && $CI_PIPELINE_SOURCE == "push"
 
 dto-swiftkotlin:
     stage: build
@@ -29,33 +70,37 @@ dto-main-staging-mrs:
   variables:
     COMMIT_MERGE_REQ_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/commits/$CI_COMMIT_SHA/merge_requests"
   script:
-    - 'MERGE_REQ=$(curl -s --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN" $COMMIT_MERGE_REQ_URL)'
-    - MR_BRANCH_NAME=$(echo $MERGE_REQ | jq -r '.[0].source_branch')
+    - 'MERGE_REQ="$(curl -s --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN" $COMMIT_MERGE_REQ_URL)"'
+    - MR_BRANCH_NAME="$(echo $MERGE_REQ | jq -r '.[0].source_branch')"
     - if [[ "$MR_BRANCH_NAME" != "$DTOS_STAGING_BRANCH" ]]; then exit 0; fi
     # staging-backend
     - >
-      curl --header "Content-Type: application/json"
+      curl
+      --header "Content-Type: application/json"
       --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN"
       --request POST
       --data "$(printf '{"source_branch":"%s","target_branch":"%s","title":"%s","assignee_id":%s,"labels":"%s","reviewer_ids":[%s]}' "$CI_DEFAULT_BRANCH" "$BACKEND_STAGING_BRANCH" "$(printf "$DTO_MAIN_STAGING_MRS_TITLE" "$BACKEND_STAGING_BRANCH")" "$(echo $MERGE_REQ | jq -r '.[0].assignee.id')" "$BACKEND_LABEL" "$(echo $MERGE_REQ | jq -r '.[0].reviewers[0].id')")"
       "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests"
     # staging-android
     - >
-      curl --header "Content-Type: application/json"
+      curl
+      --header "Content-Type: application/json"
       --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN"
       --request POST
       --data "$(printf '{"source_branch":"%s","target_branch":"%s","title":"%s","assignee_id":%s,"labels":"%s","reviewer_ids":[%s]}' "$CI_DEFAULT_BRANCH" "$ANDROID_STAGING_BRANCH" "$(printf "$DTO_MAIN_STAGING_MRS_TITLE" "$ANDROID_STAGING_BRANCH")" "$(echo $MERGE_REQ | jq -r '.[0].assignee.id')" "$ANDROID_LABEL" "$(echo $MERGE_REQ | jq -r '.[0].reviewers[0].id')")"
       "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests"
     # staging-ios
     - >
-      curl --header "Content-Type: application/json"
+      curl
+      --header "Content-Type: application/json"
       --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN"
       --request POST
       --data "$(printf '{"source_branch":"%s","target_branch":"%s","title":"%s","assignee_id":%s,"labels":"%s","reviewer_ids":[%s]}' "$CI_DEFAULT_BRANCH" "$IOS_STAGING_BRANCH" "$(printf "$DTO_MAIN_STAGING_MRS_TITLE" "$IOS_STAGING_BRANCH")" "$(echo $MERGE_REQ | jq -r '.[0].assignee.id')" "$IOS_LABEL" "$(echo $MERGE_REQ | jq -r '.[0].reviewers[0].id')")"
       "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests"
     # staging-ipados
     - >
-      curl --header "Content-Type: application/json"
+      curl
+      --header "Content-Type: application/json"
       --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN"
       --request POST
       --data "$(printf '{"source_branch":"%s","target_branch":"%s","title":"%s","assignee_id":%s,"labels":"%s","reviewer_ids":[%s]}' "$CI_DEFAULT_BRANCH" "$IPADOS_STAGING_BRANCH" "$(printf "$DTO_MAIN_STAGING_MRS_TITLE" "$IPADOS_STAGING_BRANCH")" "$(echo $MERGE_REQ | jq -r '.[0].assignee.id')" "$IPADOS_LABEL" "$(echo $MERGE_REQ | jq -r '.[0].reviewers[0].id')")"
@@ -84,13 +129,15 @@ build-backend-docker-image-config-service:
     - cd "$PROD_DIR_LOCATION"
     - docker compose build config-service
   rules:
+    # - changes:
+    #     - backend/models/**/*
+    #     - DTOs/**/*
+    #   when: never
     - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
       changes:
         - backend/config-service/**/*
-    - changes:
         - backend/models/**/*
         - DTOs/**/*
-      when: never
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -103,13 +150,15 @@ build-backend-docker-image-auth-service:
     - cd "$PROD_DIR_LOCATION"
     - docker compose build auth-service
   rules:
+    # - changes:
+    #     - backend/models/**/*
+    #     - DTOs/**/*
+    #   when: never
     - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
       changes:
         - backend/auth-service/**/*
-    - changes:
         - backend/models/**/*
         - DTOs/**/*
-      when: never
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -122,13 +171,15 @@ build-backend-docker-image-meeting-service:
     - cd "$PROD_DIR_LOCATION"
     - docker compose build meeting-service
   rules:
+    # - changes:
+    #     - backend/models/**/*
+    #     - DTOs/**/*
+    #   when: never
     - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
       changes:
         - backend/meeting-service/**/*
-    - changes:
         - backend/models/**/*
         - DTOs/**/*
-      when: never
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -141,13 +192,15 @@ build-backend-docker-image-notifications-service:
     - cd "$PROD_DIR_LOCATION"
     - docker compose build notifications-service
   rules:
+    # - changes:
+    #     - backend/models/**/*
+    #     - DTOs/**/*
+    #   when: never
     - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
       changes:
         - backend/notifications-service/**/*
-    - changes:
         - backend/models/**/*
         - DTOs/**/*
-      when: never
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -160,46 +213,34 @@ build-backend-docker-image-notifications-service:
 #     - cd "$PROD_DIR_LOCATION"
 #     - docker compose build poster-service
 #   rules:
+#     # - changes:
+#     #     - backend/models/**/*
+#     #     - DTOs/**/*
+#     #   when: never
 #     - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
 #       changes:
 #         - backend/poster-service/**/*
-#     - changes:
 #         - backend/models/**/*
 #         - DTOs/**/*
-#       when: never
 #   environment:
 #     name: Production
 #     url: https://kivop.ipv64.net
 #     action: prepare
 #     deployment_tier: production
 
-# build-backend-docker-image-carpool-service:
-#   stage: build
-#   script:
-#     - cd "$PROD_DIR_LOCATION"
-#     - docker compose build carpool-service
-#   rules:
-#     - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
-#       changes:
-#         - backend/carpool-service/**/*
-#     - changes:
-#         - backend/models/**/*
-#         - DTOs/**/*
-#       when: never
-#   environment:
-#     name: Production
-#     url: https://kivop.ipv64.net
-#     action: prepare
-#     deployment_tier: production
-
-build-backend-docker-image-all-services:
+build-backend-docker-image-ride-service:
   stage: build
   script:
     - cd "$PROD_DIR_LOCATION"
-    - docker compose build
+    - docker compose build ride-service
   rules:
-    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+    # - changes:
+    #     - backend/models/**/*
+    #     - DTOs/**/*
+    #   when: never
+    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
       changes:
+        - backend/ride-service/**/*
         - backend/models/**/*
         - DTOs/**/*
   environment:
@@ -207,6 +248,24 @@ build-backend-docker-image-all-services:
     url: https://kivop.ipv64.net
     action: prepare
     deployment_tier: production
+
+### Vorübergehend deaktiviert (s. Ticket #285: https://gitlab.hsrw.eu/30182/kivop/-/issues/285) ###
+# build-backend-docker-image-all-services:
+#   stage: build
+#   script:
+#     - cd "$PROD_DIR_LOCATION"
+#     - docker compose build
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+#       changes:
+#         - backend/models/**/*
+#         - DTOs/**/*
+#   timeout: 2 hours
+#   environment:
+#     name: Production
+#     url: https://kivop.ipv64.net
+#     action: prepare
+#     deployment_tier: production
 
 deploy-containers-on-prod-server:
   stage: deploy

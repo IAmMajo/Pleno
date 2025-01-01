@@ -16,6 +16,9 @@ public final class Identity: Model, Content, @unchecked Sendable {
     @Timestamp(key: "updated_at", on: .update)
     public var updatedAt: Date?
     
+    @OptionalChild(for: \.$identity)
+    public var user: User?
+    
     public init() {}
     
     public init (id: UUID? = nil, name: String) {

@@ -169,6 +169,39 @@ services:
       traefik.http.routers.notifications-service.tls.certresolver: myresolver
 
 #
+# Vapor: ride-service
+#
+  ride-service:
+    extends:
+      file: ./backend/docker-compose.yml
+      service: ride-service
+    container_name: kivop-ride-service
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.ride-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/ride-service`) || PathPrefix(`/rides`))
+      traefik.http.routers.ride-service.middlewares: ride-service-replace-path-regex
+      traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.regex: ^/ride-service(:/(.*))?
+      traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.ride-service.entrypoints: https
+      traefik.http.routers.ride-service.tls: true
+      traefik.http.routers.ride-service.tls.certresolver: myresolver
+
+  ride-service-migration:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: ride-service-migration
+
+  ride-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: ride-service-migration
+
+#
 # Vapor: tdums-service // NICHT IP-RELEVANT (abgesprochen)
 #
   tdums-service:
@@ -179,10 +212,10 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.meeting-service.rule: Host(`weihnachts-wuensche-ev.de`)
-      traefik.http.routers.meeting-service.entrypoints: https
-      traefik.http.routers.meeting-service.tls: true
-      traefik.http.routers.meeting-service.tls.certresolver: myresolver
+      traefik.http.routers.tdums-service.rule: Host(`weihnachts-wuensche-ev.de`)
+      traefik.http.routers.tdums-service.entrypoints: https
+      traefik.http.routers.tdums-service.tls: true
+      traefik.http.routers.tdums-service.tls.certresolver: myresolver
 
   tdums-postgres:
     image: postgres:17.0-bookworm
