@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import net.ipv64.kivop.ui.theme.BG_Pri
+import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Secondary
 import net.ipv64.kivop.ui.theme.Tertiary
 import net.ipv64.kivop.ui.theme.Text_tertiary
@@ -48,7 +48,7 @@ fun CallToConfirmation(
             // content: @Composable() (RowScope.() -> Unit)
         ) {
           Text(
-              text = buttonOneText, color = BG_Pri, modifier = Modifier.padding(horizontal = 12.dp))
+              text = buttonOneText, color = Background_prime, modifier = Modifier.padding(horizontal = 12.dp))
         }
       },
       // Dismiss-Button, TODO - fix placing
