@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Pleno</string>
+    <!-- Navigation drawer items-->
+    <string name="meetings">Meetings</string>
+    <string name="protocol">Protocols</string>
+    <string name="travel_planning">Travel planning</string>
+    <string name="events">Events</string>
+    <string name="poster">Poster</string>
+
+    <!-- Profile Page -->
+    <string name="user_info">User information</string>
+    <string name="btn_del_user">Delete account</string>
+    <string name="btn_back_user">Back</string>
+    <string name="btn_save_change_user">Save</string>
+    <string name="btn_change_password">Change password</string>"
+    <string name="btn_logout">Logout</string>
+    <string name="btn_cancel_change_user">Cancel</string>
+</resources>

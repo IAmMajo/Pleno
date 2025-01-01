@@ -1,6 +1,7 @@
 stages:
   - document
   - pull
+  - format
   - build
   - distribute
   - deploy
@@ -286,3 +287,41 @@ deploy-containers-on-prod-server:
     action: start
     deployment_tier: production
 
+format-android:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $ANDROID_STAGING_BRANCH
+  stage: format
+  script:
+    - wget https://repo1.maven.org/maven2/com/facebook/ktfmt/0.53/ktfmt-0.53-jar-with-dependencies.jar
+    - find -path ./android/app/src/main/java/net/ipv64/kivop/dtos -prune -o \( -name '*.kt' -o -name '*.kts' \) -exec java -jar ktfmt-0.53-jar-with-dependencies.jar {} +
+    - rm ktfmt-0.53-jar-with-dependencies.jar
+    - |
+      if [[ $(git status --porcelain) ]]; then
+        git commit -am Format
+        git push "https://gitlab-ci-token:$PROJECT_ACCESS_MAINTAINER_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git" HEAD:$CI_COMMIT_BRANCH
+        exit 1
+      fi
+
+build-android:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $ANDROID_STAGING_BRANCH
+  stage: build
+  script:
+    - |
+      if ! [[ -d ~/Android/Sdk ]]; then
+        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+        unzip commandlinetools-linux-11076708_latest.zip
+        rm commandlinetools-linux-11076708_latest.zip
+        mkdir -p ~/Android/Sdk/cmdline-tools
+        mv cmdline-tools ~/Android/Sdk/cmdline-tools/latest
+        yes | ~/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+      fi
+    - cd android
+    - chmod +x gradlew
+    - ANDROID_HOME=~/Android/Sdk ./gradlew assembleDebug
+  # APK seems to be to be too large for the university's GitLab instance
+  # artifacts:
+  #   paths:
+  #     - android/app/build/outputs/apk/debug/app-debug.apk
+  #   name: APK
+  #   expose_as: APK
