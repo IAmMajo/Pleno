@@ -48,7 +48,9 @@ fun CallToConfirmation(
             // content: @Composable() (RowScope.() -> Unit)
         ) {
           Text(
-              text = buttonOneText, color = Background_prime, modifier = Modifier.padding(horizontal = 12.dp))
+              text = buttonOneText,
+              color = Background_prime,
+              modifier = Modifier.padding(horizontal = 12.dp))
         }
       },
       // Dismiss-Button, TODO - fix placing
