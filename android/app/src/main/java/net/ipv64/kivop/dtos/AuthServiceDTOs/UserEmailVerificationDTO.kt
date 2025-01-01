@@ -10,7 +10,7 @@ data class UserEmailVerificationDTO (
     var emailStatus : VerificationStatus?,
     var createdAt : LocalDateTime?,
 )
-enum VerificationStatus: Codable {
+enum class VerificationStatus {
     failed,
     pending,
     verified,

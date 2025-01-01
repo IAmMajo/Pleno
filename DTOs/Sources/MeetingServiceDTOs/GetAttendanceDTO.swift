@@ -19,4 +19,3 @@ public enum AttendanceStatus: String, Codable {
     case absent
     case accepted
 }
-
