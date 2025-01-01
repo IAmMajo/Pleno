@@ -16,7 +16,7 @@ public struct UserEmailVerificationDTO: Codable {
     }
 }
 
-public enum VerificationStatus: Codable {
+public enum VerificationStatus: String, Codable {
     case failed
     case pending
     case verified
