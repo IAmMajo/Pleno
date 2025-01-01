@@ -13,3 +13,5 @@ public struct PatchVotingDTO: Codable {
         self.options = options
     }
 }
+
+
