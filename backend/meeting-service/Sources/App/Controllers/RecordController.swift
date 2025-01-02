@@ -55,7 +55,7 @@ struct RecordController: RouteCollection {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard let lang = req.parameters.get("lang"), !lang.isEmpty else {
+        guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty else {
             throw Abort(.badRequest)
         }
         guard let record =  try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
@@ -74,7 +74,7 @@ struct RecordController: RouteCollection {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard let lang = req.parameters.get("lang"), !lang.isEmpty else {
+        guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty else {
             throw Abort(.badRequest)
         }
         guard let patchRecordDTO = try? req.content.decode(PatchRecordDTO.self) else {
@@ -117,10 +117,10 @@ struct RecordController: RouteCollection {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard let lang = req.parameters.get("lang"), !lang.isEmpty else {
+        guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty else {
             throw Abort(.badRequest)
         }
-        guard lang != "DE" else {
+        guard lang != "de" else {
             throw Abort(.badRequest, reason: "The record for the club's default language cannot be deleted.")
         }
         guard let record =  try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
@@ -139,7 +139,7 @@ struct RecordController: RouteCollection {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard let lang = req.parameters.get("lang"), !lang.isEmpty else {
+        guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty else {
             throw Abort(.badRequest)
         }
         guard let record = try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
@@ -170,7 +170,7 @@ struct RecordController: RouteCollection {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard let lang = req.parameters.get("lang"), !lang.isEmpty else {
+        guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty else {
             throw Abort(.badRequest)
         }
         guard let record = try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
@@ -199,8 +199,11 @@ struct RecordController: RouteCollection {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard let lang = req.parameters.get("lang"), !lang.isEmpty, let lang2 = req.parameters.get("lang2"), !lang2.isEmpty, lang != lang2 else {
+        guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty, let lang2 = req.parameters.get("lang2")?.lowercased(), !lang2.isEmpty, lang != lang2 else {
             throw Abort(.badRequest)
+        }
+        guard Locale.LanguageCode(stringLiteral: lang2).isISOLanguage else {
+            throw Abort(.badRequest, reason: "Invalid language '\(lang2)' (expected a two-letter ISO 639-1 or three-letter ISO 639-2 code, e.g. 'en').")
         }
         guard let record = try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
             throw Abort(.notFound)

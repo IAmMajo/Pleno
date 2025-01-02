@@ -193,7 +193,7 @@ struct MeetingController: RouteCollection {
         try await req.db.transaction { db in
             try await meeting.update(on: db)
             
-            let record = Record(id: try .init(meeting: meeting, lang: "DE"), identityId: identityId, status: .underway)
+            let record = Record(id: try .init(meeting: meeting, lang: "de"), identityId: identityId, status: .underway)
             try await record.create(on: db)
             
             if let attendance = try await Attendance.find(.init(meeting: meeting, identityId: identityId), on: db) {
