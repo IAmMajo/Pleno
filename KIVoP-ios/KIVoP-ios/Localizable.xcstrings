@@ -48,7 +48,7 @@
         }
       }
     },
-    " Mitteilung." : {
+    " Vereinsreise..." : {
 
     },
     "(ca. %u min.)" : {
@@ -406,6 +406,9 @@
       }
     },
     "Am Grabstein 6,\n12345 Transilvanien \nDeutschland \n51.500603516488205, 6.545327532716446" : {
+
+    },
+    "Anmeldung wird überprüft..." : {
 
     },
     "Anschließend kann der " : {
@@ -893,6 +896,7 @@
 
     },
     "KIVoP " : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1347,6 +1351,9 @@
     "Plakate" : {
 
     },
+    "Pleno " : {
+
+    },
     "Profil" : {
       "localizations" : {
         "de" : {
@@ -1533,6 +1540,7 @@
 
     },
     "Sobald dies geschehen ist, erhältst du eine " : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1643,9 +1651,6 @@
         }
       }
     },
-    "Überprüfung..." : {
-
-    },
     "Umfragen, " : {
       "localizations" : {
         "de" : {
@@ -1732,6 +1737,7 @@
       }
     },
     "Vereinsreise..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

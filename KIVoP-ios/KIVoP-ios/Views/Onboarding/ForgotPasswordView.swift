@@ -43,23 +43,22 @@ struct ForgotPasswordView: View {
                 } else {
                     // Reset Code TextField
                     inputField(title: "Reset-Code", text: $resetCode)
-                        .keyboardType(.numberPad)
-                        .onChange(of: resetCode) { _ in
-                            successMessage = nil // Entferne die grüne Nachricht, sobald ein Code eingegeben wird
-                        }
+                                    .keyboardType(.numberPad)
+                                    .onChange(of: resetCode) {
+                                        successMessage = nil // Entferne die grüne Nachricht, sobald ein Code eingegeben wird
+                                    }
 
-                    // New Password TextField
-                    inputField(title: "Neues Passwort", text: $newPassword, isSecure: true)
-                        .onChange(of: newPassword) { _ in
-                            errorMessage = nil // Entferne Fehlernachrichten bei Passwortänderung
-                        }
+                                // Neues Passwort TextField
+                                inputField(title: "Neues Passwort", text: $newPassword, isSecure: true)
+                                    .onChange(of: newPassword) {
+                                        errorMessage = nil // Entferne Fehlernachrichten bei Passwortänderung
+                                    }
 
-                    // Confirm Password TextField
-                    inputField(title: "Passwort bestätigen", text: $confirmPassword, isSecure: true)
-                        .onChange(of: confirmPassword) { _ in
-                            errorMessage = nil // Entferne Fehlernachrichten bei Bestätigung
-                        }
-
+                                // Passwort bestätigen TextField
+                                inputField(title: "Passwort bestätigen", text: $confirmPassword, isSecure: true)
+                                    .onChange(of: confirmPassword) {
+                                        errorMessage = nil // Entferne Fehlernachrichten bei Bestätigung
+                                    }
                     // Password Strength Check
                     if !newPassword.isEmpty && confirmPassword.isEmpty {
                         if !isPasswordStrong(newPassword) {
