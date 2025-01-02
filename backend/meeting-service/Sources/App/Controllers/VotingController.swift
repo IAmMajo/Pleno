@@ -374,6 +374,10 @@ struct VotingController: RouteCollection {
             }
             
             self.votingClientWebSocketContainer.getClientWebSocketContainer(votingId: try voting.requireID()).add(userId, ws)
+            
+            try await ws.send(
+                "\(voting.$votes.query(on: req.db).count())/\(voting.$meeting.get(on: req.db).$attendances.query(on: req.db).count())"
+            )
         } catch {
             req.logger.notice("An error occured while handling the votingLiveStatusWebSocket request: \(error)")
             ws.send("ERROR: \(error.localizedDescription)", promise: nil)
