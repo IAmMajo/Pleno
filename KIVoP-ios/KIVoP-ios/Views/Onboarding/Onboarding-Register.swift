@@ -142,8 +142,9 @@ struct Onboarding_Register: View {
             .edgesIgnoringSafeArea(.all)
             .navigationBarBackButtonHidden(true)
             .navigationDestination(isPresented: $registrationSuccessful) {
-                MainPage()
+                Onboarding_Wait(email: $email)
             }
+
         }
     }
     

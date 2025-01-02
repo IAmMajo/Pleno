@@ -48,7 +48,7 @@
         }
       }
     },
-    " Mitteilung." : {
+    " Vereinsreise..." : {
 
     },
     "(ca. %u min.)" : {
@@ -414,6 +414,9 @@
     "Alles im Blick?" : {
 
     },
+    "Anmeldung wird überprüft..." : {
+
+    },
     "Anschließend kann der " : {
       "localizations" : {
         "de" : {
@@ -641,6 +644,12 @@
           }
         }
       }
+    },
+    "E-Mail erneut senden" : {
+
+    },
+    "E-Mail erneut senden (%llds)" : {
+
     },
     "E-Mail senden" : {
 
@@ -893,6 +902,7 @@
 
     },
     "KIVoP " : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1368,6 +1378,9 @@
     "Plakate" : {
 
     },
+    "Pleno " : {
+
+    },
     "Profil" : {
       "localizations" : {
         "de" : {
@@ -1557,6 +1570,7 @@
 
     },
     "Sobald dies geschehen ist, erhältst du eine " : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1769,6 +1783,7 @@
       }
     },
     "Vereinsreise..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
