@@ -4,6 +4,11 @@ import MeetingServiceDTOs
 struct MeetingDetailView: View {
     var meeting: GetMeetingDTO
     
+    @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
+    @StateObject private var recordManager = RecordManager() // RecordManager als StateObject
+    @StateObject private var votingManager = VotingManager() // RecordManager als StateObject
+    @StateObject private var attendanceManager = AttendanceManager() // RecordManager als StateObject
+    
     var body: some View {
         NavigationStack {
             VStack (alignment: .leading){
@@ -24,7 +29,14 @@ struct MeetingDetailView: View {
                     Spacer()
                     HStack(spacing: 4) { // kleiner Abstand zwischen dem Symbol und der Personenanzahl
                         Image(systemName: "person.3.fill") // Symbol für eine Gruppe von Personen
-                        Text("8/12")
+                        if attendanceManager.isLoading {
+                            Text("Loading...")
+                        } else if let errorMessage = attendanceManager.errorMessage {
+                            Text("Error: \(errorMessage)")
+                        } else {
+                            Text(attendanceManager.attendanceSummary())
+                                .font(.headline)
+                        }
                     }
                 }.padding(.horizontal)
                 List {
@@ -57,20 +69,6 @@ struct MeetingDetailView: View {
                             }
                         }
                     }
-                    // ??????
-
-//                        HStack{
-//                            Image(systemName: "person.circle")
-//                                .resizable()
-//                                .frame(width: 30, height: 30)
-//                                .foregroundColor(.gray)
-//                            VStack(alignment: .leading) {
-//                                Text("Franz")
-//                                Text("Protokollant")
-//                                    .font(.caption) // Kleiner Schriftgrad
-//                                    .foregroundColor(.gray) // Graue Farbe
-//                            }
-//                        }
                     
                     // Beschreibung
                     Section(header: Text("Beschreibung")) {
@@ -79,41 +77,61 @@ struct MeetingDetailView: View {
                         }
                     }
                     
-                    // Sitzung
-                    Section(header: Text("Sitzung")) {
-                        NavigationLink(destination: PlaceholderView()) {
-                            Text("Protokoll")
-                        }
-                        NavigationLink(destination: PlaceholderView()) {
-                            Text("Anwesenheit")
+                    // Protokolle
+                    Section(header: Text("Protokolle")) {
+                        if recordManager.isLoading {
+                            ProgressView("Lade Protokolle...")
+                                .progressViewStyle(CircularProgressViewStyle())
+                        } else if let errorMessage = recordManager.errorMessage {
+                            Text("Error: \(errorMessage)")
+                                .foregroundColor(.red)
+                        } else if recordManager.records.isEmpty {
+                            Text("No records available.")
+                                .foregroundColor(.secondary)
+                        } else {
+                            ForEach(recordManager.records, id: \.lang) { record in
+                                NavigationLink(destination: MarkdownEditorView(meetingId: record.meetingId, lang: record.lang)) {
+                                    Text("Protokoll: \(record.lang)")
+                                }
+                            }
                         }
                     }
-                    
-                    // Abstimmungen
+                    // Abstimmugnen
                     Section(header: Text("Abstimmungen")) {
-                        NavigationLink(destination: PlaceholderView()) {
-                            HStack {
-                                Text("Vereinsfarbe")
-                                Spacer()
-                                Image(systemName: "checkmark").foregroundColor(.blue)
-                            }
-                        }
-                        NavigationLink(destination: PlaceholderView()) {
-                            HStack {
-                                Text("Abstimmung")
-                                Spacer()
-                                Image(systemName: "exclamationmark.arrow.circlepath").foregroundColor(.orange)
-                            }
+                        if votingManager.isLoading {
+                            ProgressView("Lade Abstimmungen...")
+                                .progressViewStyle(CircularProgressViewStyle())
+                        } else if let errorMessage = votingManager.errorMessage {
+                            Text("Error: \(errorMessage)")
+                                .foregroundColor(.red)
+                        } else if votingManager.votings.isEmpty {
+                            Text("Keine Abstimmungen gefunden.")
+                                .foregroundColor(.secondary)
+                        } else {
+//                            ForEach(votingManager.votings, id: \.id) { voting in
+//                                NavigationLink(destination: AktivView(voting: voting, votingResults: nil, onBack: {
+//                                    // Hier können Sie Aktionen definieren, die ausgeführt werden, wenn der Nutzer zurückgeht.
+//                                    print("Zurück zur vorherigen Ansicht.")
+//                                })) {
+//                                    Text("\(voting.question)")
+//                                }
+//                            }
+                            Text("Test")
                         }
                     }
                 }
             }.toolbar { // Toolbar hinzufügen
                 ToolbarItem(placement: .navigationBarTrailing) { // Position auf der rechten Seite
-                    Text("21.01.2024")
+                    Text(DateTimeFormatter.formatDate(meeting.start))
                 }
             }
                 
             
+        }
+        .onAppear(){
+            recordManager.getRecordsMeeting(meetingId: meeting.id)
+            votingManager.getVotingsMeeting(meetingId: meeting.id)
+            attendanceManager.fetchAttendances(meetingId: meeting.id)
         }
 
     }

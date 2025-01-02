@@ -63,6 +63,16 @@
     "%@" : {
 
     },
+    "%@\n%lf, %lf" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@\n%2$lf, %3$lf"
+          }
+        }
+      }
+    },
     "%lld" : {
 
     },
@@ -70,15 +80,6 @@
 
     },
     "2/3" : {
-
-    },
-    "03.12.2023" : {
-
-    },
-    "4" : {
-
-    },
-    "07.01.2024" : {
 
     },
     "8/12" : {
@@ -105,12 +106,6 @@
           }
         }
       }
-    },
-    "12.12.2023" : {
-
-    },
-    "14.01.2024" : {
-
     },
     "18:06" : {
       "localizations" : {
@@ -156,9 +151,6 @@
         }
       }
     },
-    "22.12.2023" : {
-
-    },
     "Abbrechen" : {
       "localizations" : {
         "de" : {
@@ -187,6 +179,15 @@
     "Abhängedatum:" : {
 
     },
+    "Abhängen bestätigen" : {
+
+    },
+    "Abhängen zurückziehen" : {
+
+    },
+    "Abhängen zurückziehen?" : {
+
+    },
     "Abmelden" : {
       "localizations" : {
         "de" : {
@@ -213,6 +214,7 @@
 
     },
     "Abstimmung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -275,6 +277,9 @@
         }
       }
     },
+    "Achte beim Aufnehmen des Bildes darauf, dass das Plakat sowie der Hintergrund und die Umgebung gut zu erkennen sind." : {
+
+    },
     "Adresse" : {
 
     },
@@ -327,6 +332,7 @@
 
     },
     "Aktuelle Sitzung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -405,7 +411,7 @@
         }
       }
     },
-    "Am Grabstein 6,\n12345 Transilvanien \nDeutschland \n51.500603516488205, 6.545327532716446" : {
+    "Alles im Blick?" : {
 
     },
     "Anmeldung wird überprüft..." : {
@@ -514,6 +520,12 @@
     "Beschreibung" : {
 
     },
+    "Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt." : {
+
+    },
+    "Bist du sicher, dass du das Plakat abhängen möchtest?" : {
+
+    },
     "Bitte klicke nun auf den " : {
       "localizations" : {
         "de" : {
@@ -552,6 +564,9 @@
         }
       }
     },
+    "Copy" : {
+
+    },
     "Count" : {
 
     },
@@ -579,9 +594,6 @@
           }
         }
       }
-    },
-    "Dezember - 2023" : {
-
     },
     "Die Abstimmung läuft noch" : {
 
@@ -640,9 +652,6 @@
 
     },
     "E-Mail senden" : {
-
-    },
-    "Editor" : {
 
     },
     "Einführung überspringen" : {
@@ -839,12 +848,6 @@
         }
       }
     },
-    "Jahresversammlung" : {
-
-    },
-    "Januar - 2024" : {
-
-    },
     "Kamera" : {
       "localizations" : {
         "de" : {
@@ -883,6 +886,9 @@
         }
       }
     },
+    "Keine Abstimmungen gefunden." : {
+
+    },
     "Keine aktuelle Sitzung verfügbar" : {
 
     },
@@ -918,7 +924,13 @@
         }
       }
     },
+    "Lade Abstimmungen..." : {
+
+    },
     "Lade Profilbild..." : {
+
+    },
+    "Lade Protokolle..." : {
 
     },
     "Lade..." : {
@@ -1091,6 +1103,9 @@
     "Möchtest du wirklich abstimmen" : {
 
     },
+    "Nach Meeting suchen" : {
+
+    },
     "Name" : {
       "localizations" : {
         "de" : {
@@ -1185,6 +1200,9 @@
     "No meetings available." : {
 
     },
+    "No records available." : {
+
+    },
     "oder" : {
       "localizations" : {
         "de" : {
@@ -1222,6 +1240,12 @@
           }
         }
       }
+    },
+    "Öffnen mit Apple Maps" : {
+
+    },
+    "Öffnen mit Google Maps" : {
+
     },
     "Option" : {
 
@@ -1348,6 +1372,9 @@
     "Plakat %@" : {
 
     },
+    "Plakat abhängen?" : {
+
+    },
     "Plakate" : {
 
     },
@@ -1426,6 +1453,9 @@
     "Protokoll:" : {
 
     },
+    "Protokoll: %@" : {
+
+    },
     "Protokollant" : {
 
     },
@@ -1495,6 +1525,9 @@
         }
       }
     },
+    "Schließen" : {
+
+    },
     "Sitzung" : {
       "localizations" : {
         "de" : {
@@ -1532,9 +1565,6 @@
           }
         }
       }
-    },
-    "Sitzungs-Titel" : {
-
     },
     "Sitzungsleiter" : {
 
@@ -1587,6 +1617,9 @@
     "Standorte (3)" : {
 
     },
+    "Start: %@" : {
+
+    },
     "Suchen" : {
       "localizations" : {
         "de" : {
@@ -1602,6 +1635,9 @@
           }
         }
       }
+    },
+    "Teilen..." : {
+
     },
     "Teilnahme bestätigen" : {
       "localizations" : {
@@ -1651,6 +1687,12 @@
         }
       }
     },
+    "Test" : {
+
+    },
+    "Überprüfung..." : {
+
+    },
     "Umfragen, " : {
       "localizations" : {
         "de" : {
@@ -1673,10 +1715,14 @@
         }
       }
     },
+    "Unknown Action" : {
+
+    },
     "Verantwortliche (2)" : {
 
     },
     "Vereinsfarbe" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1782,6 +1828,9 @@
       }
     },
     "Veröffentlichen" : {
+
+    },
+    "Verstanden" : {
 
     },
     "Verwalte " : {

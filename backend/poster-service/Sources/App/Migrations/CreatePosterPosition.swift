@@ -13,14 +13,14 @@ struct CreatePosterPositions: AsyncMigration {
     func prepare(on database: Database) async throws {
         try await database.schema(PosterPosition.schema)
             .id() // Automatisches UUID-Primärschlüsselfeld
-            .field("poster_id", .uuid, .required, .references(Poster.schema , .id)) // Foreign Key zu Posters
-            .field("responsible_user_id", .uuid, .required, .references(User.schema, .id)) // Foreign Key zu Users
+            .field("poster_id", .uuid, .references(Poster.schema , .id)) // Foreign Key zu Posters
             .field("latitude", .double, .required) // Latitude als Pflichtfeld
             .field("longitude", .double, .required) // Longitude als Pflichtfeld
-            .field("is_Displayed", .bool, .required) // Anzeige-Status als Pflichtfeld
-            .field("posted_at", .datetime)
-            .field("expires_at", .datetime)
-            .field("image_url", .string , .required)
+            .field("posted_by", .uuid,  .references(Identity.schema , .id)) // Foreign Key zu Identity
+            .field("expires_at", .datetime , .required )
+            .field("removed_at", .datetime)
+            .field("removed_by", .uuid,  .references(Identity.schema , .id)) // Foreign Key zu Identity
+            .field("image_url", .string )
             .create()
     }
 

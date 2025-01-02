@@ -136,14 +136,14 @@ struct MeetingDetailsView: View {
             .toolbarBackground(Color.white, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
-                            ToolbarItem(placement: .navigationBarTrailing) {
-                                Button(action: {}) {
-                                    NavigationLink(destination: MarkdownEditorView()) {
-                                        Text("Editor")
-                                    }
-                                }
-                            }
-                        }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+//                        NavigationLink(destination: MarkdownEditorView()) {
+//                            Text("Editor")
+//                        }
+                    }
+                }
+            }
         }
     }
 }

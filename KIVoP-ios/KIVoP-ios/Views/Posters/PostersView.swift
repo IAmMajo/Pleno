@@ -27,11 +27,11 @@ struct PostersView: View {
    func getDateColor(status: Status) -> Color {
       switch status {
       case .hung:
-         return Color(UIColor.darkText)
+         return Color(UIColor.secondaryLabel)
       case .takenDown:
-         return Color(UIColor.darkText)
+         return Color(UIColor.secondaryLabel)
       case .notDisplayed:
-         return Color(UIColor.darkText)
+         return Color(UIColor.secondaryLabel)
       case .expiresInOneDay:
          return .orange
       case .expired:
@@ -47,7 +47,7 @@ struct PostersView: View {
                 List {
                    ForEach(postersViewModel.filteredPosters.indices, id: \.self) { index in
                       let poster = postersViewModel.filteredPosters[index]
-                      NavigationLink(destination: PosterDetailView(poster: poster).navigationTitle(poster.name)) {
+                      NavigationLink(destination: Posters_PosterDetailView(poster: poster).navigationTitle(poster.name)) {
                          HStack {
                             VStack {
                                Text(poster.name)
@@ -97,7 +97,7 @@ struct PostersView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal) .padding(.bottom, 10)
-                .background(.white)
+                .background(Color(UIColor.systemBackground))
                 
              } else {
                 ContentUnavailableView {

@@ -79,7 +79,7 @@ struct VotingsView: View {
    
    var body: some View {
       ZStack {
-         NavigationView {
+         ZStack {
             if !votingsOfMeetings.isEmpty {
                List {
                   ForEach(votingsOfMeetings, id: \.self) { votingGroup in

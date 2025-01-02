@@ -10,9 +10,6 @@ public final class Participant: Model, @unchecked Sendable {
     @Parent(key: "ride_id")
     public var ride: Ride
     
-    @Parent(key: "location_id")
-    public var location: ParticipantLocation
-    
     @Parent(key: "user_id")
     public var user: User
     
@@ -22,6 +19,12 @@ public final class Participant: Model, @unchecked Sendable {
     @Field(key: "passengers_count")
     public var passengers_count: Int?
     
+    @Field(key: "latitude")
+    public var latitude: Float
+    
+    @Field(key: "longitude")
+    public var longitude: Float
+    
     @Timestamp(key: "created_at", on: .create)
     public var createdAt: Date?
     
@@ -30,13 +33,14 @@ public final class Participant: Model, @unchecked Sendable {
     
     public init(){}
     
-    public init(id: UUID? = nil, rideId: Ride.IDValue, locationId: ParticipantLocation.IDValue, userId: User.IDValue, driver: Bool, passengers_count: Int?) {
+    public init(id: UUID? = nil, rideId: Ride.IDValue, userId: User.IDValue, driver: Bool, passengers_count: Int?, latitude: Float, longitude: Float) {
         self.id = id
         self.$ride.id = rideId
-        self.$location.id = locationId
         self.$user.id = userId
         self.driver = driver
         self.passengers_count = passengers_count
+        self.latitude = latitude
+        self.longitude = longitude
     }
 }
 
