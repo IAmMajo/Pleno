@@ -1,5 +1,8 @@
 package net.ipv64.kivop.dtos.AuthServiceDTOs
 
-data class TokenResponseDTO(
-    var token: String?,
+import java.util.UUID
+import java.time.LocalDateTime
+
+data class TokenResponseDTO (
+    var token : String?,
 )
