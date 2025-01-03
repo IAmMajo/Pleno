@@ -1,3 +1,4 @@
+import ConfigServiceDTOs
 import Vapor
 
 final class SettingsManager {
