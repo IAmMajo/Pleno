@@ -202,6 +202,25 @@ services:
       service: ride-service-migration
 
 #
+# Vapor: ai-service
+#
+  ai-service:
+    extends:
+      file: ./backend/docker-compose.yml
+      service: ai-service
+    container_name: kivop-ai-service
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.ai-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/ai-service`) || PathPrefix(`/ai`))
+      traefik.http.routers.ai-service.middlewares: ai-service-replace-path-regex
+      traefik.http.middlewares.ai-service-replace-path-regex.replacepathregex.regex: ^/ai-service(:/(.*))?
+      traefik.http.middlewares.ai-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.ai-service.entrypoints: https
+      traefik.http.routers.ai-service.tls: true
+      traefik.http.routers.ai-service.tls.certresolver: myresolver
+
+#
 # Vapor: tdums-service // NICHT IP-RELEVANT (abgesprochen)
 #
   tdums-service:

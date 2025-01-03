@@ -301,6 +301,26 @@ services:
     command: ["migrate", "--revert", "--yes"]
 
 #
+# Vapor: ai-service
+#
+  ai-service:
+    image: kivop-ai-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/ai-service/Dockerfile
+    container_name: kivop-ai-service
+    depends_on:
+     - config-service
+    environment:
+      <<: *shared_environment
+    labels:
+      traefik.enable: true
+      traefik.http.routers.ai-service.rule: PathPrefix(`/ai-service`) || PathPrefix(`/ai`)
+      traefik.http.routers.ai-service.middlewares: ai-service-replace-path-regex
+      traefik.http.middlewares.ai-service-replace-path-regex.replacepathregex.regex: ^/ai-service(:/(.*))?
+      traefik.http.middlewares.ai-service-replace-path-regex.replacepathregex.replacement: /$$1
+
+#
 # Vapor: tdums-service
 #
   tdums-service:
@@ -367,26 +387,6 @@ services:
       - tdums-data:/var/lib/postgresql/data
     ports:
       - 5432:5432
-
-#
-# Vapor: ai-service
-#
-  ai-service:
-    image: kivop-ai-service:latest
-    build:
-      context: ./..
-      dockerfile: backend/ai-service/Dockerfile
-    container_name: kivop-ai-service
-    depends_on:
-     - config-service
-    environment:
-      <<: *shared_environment
-    labels:
-      traefik.enable: true
-      traefik.http.routers.ai-service.rule: PathPrefix(`/ai-service`) || PathPrefix(`/ai`)
-      traefik.http.routers.ai-service.middlewares: ai-service-replace-path-regex
-      traefik.http.middlewares.ai-service-replace-path-regex.replacepathregex.regex: ^/ai-service(:/(.*))?
-      traefik.http.middlewares.ai-service-replace-path-regex.replacepathregex.replacement: /$$1
 
 #
 # Volumes
