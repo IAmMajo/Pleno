@@ -9,9 +9,7 @@ struct AppTests {
         let app = try await Application.make(.testing)
         do {
             try await configure(app)
-            try await app.autoMigrate()   
             try await test(app)
-            try await app.autoRevert()   
         }
         catch {
             try await app.asyncShutdown()
