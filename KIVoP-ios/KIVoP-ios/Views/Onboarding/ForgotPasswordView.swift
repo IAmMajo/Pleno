@@ -43,13 +43,14 @@ struct ForgotPasswordView: View {
                 } else {
                     // Reset Code TextField
                     inputField(title: "Reset-Code", text: $resetCode)
-                                    .keyboardType(.numberPad)
-                                    .onChange(of: resetCode) {
+                                        .textContentType(.oneTimeCode)
+                                        .keyboardType(.numberPad)                                  .onChange(of: resetCode) {
                                         successMessage = nil // Entferne die grüne Nachricht, sobald ein Code eingegeben wird
                                     }
 
                                 // Neues Passwort TextField
                                 inputField(title: "Neues Passwort", text: $newPassword, isSecure: true)
+                                    .textContentType(.newPassword)
                                     .onChange(of: newPassword) {
                                         errorMessage = nil // Entferne Fehlernachrichten bei Passwortänderung
                                     }
