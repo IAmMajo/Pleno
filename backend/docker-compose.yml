@@ -369,6 +369,54 @@ services:
       - 5432:5432
 
 #
+# Vapor: ai-service
+#
+  ai-service:
+    image: kivop-ai-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/ai-service/Dockerfile
+    container_name: kivop-ai-service
+    depends_on:
+     - config-service
+    environment:
+      <<: *shared_environment
+    labels:
+      traefik.enable: true
+      traefik.http.routers.ai-service.rule: PathPrefix(`/ai-service`) || PathPrefix(`/ai`)
+      traefik.http.routers.ai-service.middlewares: ai-service-replace-path-regex
+      traefik.http.middlewares.ai-service-replace-path-regex.replacepathregex.regex: ^/ai-service(:/(.*))?
+      traefik.http.middlewares.ai-service-replace-path-regex.replacepathregex.replacement: /$$1
+
+  ai-service-migration:
+    profiles:
+      - not-default
+    image: kivop-ai-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/ai-service/Dockerfile
+    container_name: kivop-ai-service-migration
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - postgres
+    command: ["migrate", "--yes"]
+
+  ai-service-revert:
+    profiles:
+      - not-default
+    image: kivop-ai-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/ai-service/Dockerfile
+    container_name: kivop-ai-service-revert
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - postgres
+    command: ["migrate", "--revert", "--yes"]
+
+#
 # Volumes
 #
 volumes:
