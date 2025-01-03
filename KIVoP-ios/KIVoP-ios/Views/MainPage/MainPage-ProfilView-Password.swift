@@ -49,6 +49,7 @@ struct MainPage_ProfilView_Password: View {
                                                        .onChange(of: newPassword) {
                                                            newPasswordError = validatePasswordStrength(newPassword) ? nil : "Passwort muss mindestens 8 Zeichen, eine Zahl und ein Sonderzeichen enthalten."
                                                        }
+                                                       .textContentType(.newPassword)
 
                                 .padding(10)
                                 .background(Color(UIColor.systemBackground).opacity(0.8))

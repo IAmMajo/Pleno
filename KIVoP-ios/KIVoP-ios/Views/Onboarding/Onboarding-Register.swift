@@ -74,6 +74,7 @@ struct Onboarding_Register: View {
                     
                     VStack(spacing: 0) {
                         SecureField("Neues Passwort", text: $password)
+                            .textContentType(.newPassword)
                             .padding()
                             .background(Color(UIColor.systemBackground))
                         
