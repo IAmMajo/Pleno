@@ -9,6 +9,8 @@ data class GetRecordDTO (
     var identity : GetIdentityDTO,
     var status : RecordStatus,
     var content : String,
+    var attendancesAppendix : String,
+    var votingResultsAppendix : String?,
 )
 enum class RecordStatus {
     underway,
