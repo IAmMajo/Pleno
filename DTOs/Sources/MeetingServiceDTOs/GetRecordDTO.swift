@@ -16,7 +16,7 @@ public struct GetRecordDTO: Codable {
     }
 }
 
-public enum RecordStatus: String, Codable {
+public enum RecordStatus: String, Codable, CaseIterable {
     case underway
     case submitted
     case approved
