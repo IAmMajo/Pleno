@@ -1,4 +1,3 @@
-// WebhookController.swift
 import ConfigServiceDTOs
 import Vapor
 

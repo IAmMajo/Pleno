@@ -1,11 +1,4 @@
-//
-//  SettingsManager.swift
-//  poster-service
-//
-//  Created by Dennis Sept on 26.11.24.
-//
-
-
+import ConfigServiceDTOs
 import Vapor
 
 actor SettingsManager {

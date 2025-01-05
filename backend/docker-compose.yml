@@ -265,6 +265,8 @@ services:
       context: ./..
       dockerfile: backend/ride-service/Dockerfile
     container_name: kivop-ride-service
+    depends_on:
+      - config-service
     environment:
       <<: *shared_environment
     labels:
