@@ -15,6 +15,7 @@
 		AF0EDF172CEFA8F100582C70 /* ConfigServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF162CEFA8F100582C70 /* ConfigServiceDTOs */; };
 		AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF182CEFA8F100582C70 /* MeetingServiceDTOs */; };
 		AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */; };
+		B57A28C82D29F23F004D5AC2 /* PosterServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = B57A28C72D29F23F004D5AC2 /* PosterServiceDTOs */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +80,7 @@
 				AF0EDF152CEFA8F100582C70 /* AuthServiceDTOs in Frameworks */,
 				AF0EDF172CEFA8F100582C70 /* ConfigServiceDTOs in Frameworks */,
 				AF04581F2CECCA540071EDF8 /* NotificationsServiceDTOs in Frameworks */,
+				B57A28C82D29F23F004D5AC2 /* PosterServiceDTOs in Frameworks */,
 				23DADFFB2CF7A5DC004B15C1 /* MarkdownUI in Frameworks */,
 				AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */,
 				AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */,
@@ -110,6 +112,7 @@
 				A81ABA942CD130F00026F492 /* KIVoP-ios */,
 				A81ABAA52CD130F20026F492 /* KIVoP-iosTests */,
 				A81ABAAF2CD130F20026F492 /* KIVoP-iosUITests */,
+				B57A28C62D29F23F004D5AC2 /* Frameworks */,
 				A81ABA932CD130F00026F492 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -122,6 +125,13 @@
 				A81ABAAC2CD130F20026F492 /* KIVoP-iosUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B57A28C62D29F23F004D5AC2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -152,6 +162,7 @@
 				AF0EDF182CEFA8F100582C70 /* MeetingServiceDTOs */,
 				AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */,
 				23DADFFA2CF7A5DC004B15C1 /* MarkdownUI */,
+				B57A28C72D29F23F004D5AC2 /* PosterServiceDTOs */,
 			);
 			productName = "KIVoP-ios";
 			productReference = A81ABA922CD130F00026F492 /* KIVoP-ios.app */;
@@ -664,6 +675,11 @@
 		AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = NotificationsServiceDTOs;
+		};
+		B57A28C72D29F23F004D5AC2 /* PosterServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
+			productName = PosterServiceDTOs;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

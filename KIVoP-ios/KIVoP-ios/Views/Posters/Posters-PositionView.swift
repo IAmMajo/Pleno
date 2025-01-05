@@ -9,6 +9,7 @@ import SwiftUI
 import MeetingServiceDTOs
 import MapKit
 import UIKit
+//import CoreHaptics
 
 struct Posters_PositionView: View {
    let position: PosterPosition
@@ -24,6 +25,10 @@ struct Posters_PositionView: View {
    @State private var shareLocation = false
    @State private var showTakeDownAlert = false
    @State private var showUndoTakeDownAlert = false
+   @State private var copiedToClipboard: Bool = false
+   @State private var tappedCopyButton: Bool = false
+   @FocusState private var isFocused: Bool
+   @State private var text = "Sample text"
    @Environment(\.dismiss) private var dismiss
    @Environment(\.colorScheme) var colorScheme
    
@@ -152,36 +157,67 @@ struct Posters_PositionView: View {
                 Form {
                    Section {
                       HStack(spacing: 0) {
-                         SelectableTextView(text: address ?? "")
-                            .frame(maxWidth: .infinity, alignment: .topLeading)
-                            .fixedSize(horizontal: false, vertical: true)
+                         Text(address ?? "")
+                            .textSelection(.enabled)
+                         
                          Spacer()
                          
                          VStack {
-                            HStack {
-                               Spacer()
-                               
-                               Button(action: { showMapOptions = true }) {
-                                  Image(systemName: "square.and.arrow.up")
-                               }
-                               .buttonStyle(PlainButtonStyle())
-                               .foregroundStyle(.blue)
-                               .frame(width: 25, height: 25)
-                               .padding(.top, 8)
+                            Button(action: { showMapOptions = true }) {
+                               Image(systemName: "square.and.arrow.up")
                             }
+                            .buttonStyle(PlainButtonStyle())
+                            .foregroundStyle(.blue)
+                            .frame(width: 25, height: 25)
+                            .padding(.top, 8)
                             
                             Spacer()
                          }
-                         .frame(maxWidth: .infinity)
                       }
-                      SelectableTextView(text: "\(String(format: "%.6f", currentCoordinates!.latitude))° N, \(String(format: "%.6f", currentCoordinates!.longitude))° E")
-                         .padding(.top, 8)
+                      HStack {
+                         Text("\(String(format: "%.6f", currentCoordinates!.latitude))° N, \(String(format: "%.6f", currentCoordinates!.longitude))° E")
+                            .textSelection(.enabled)
+                         
+                         Spacer()
+                         
+                         Button(action: {
+                            tappedCopyButton.toggle()
+                            UIPasteboard.general.string = "\(String(format: "%.6f", currentCoordinates!.latitude))° N, \(String(format: "%.6f", currentCoordinates!.longitude))° E"
+                            withAnimation(.snappy) {
+                               copiedToClipboard = true
+                            }
+                            DispatchQueue.main.asyncAfter (deadline: .now() + 1.8) {
+                               withAnimation(.snappy) {
+                                  copiedToClipboard = false
+                               }
+                            }
+                         }) {
+                            Image(systemName: "document.on.document")
+                         }
+                         .buttonStyle(PlainButtonStyle())
+                         .foregroundStyle(.blue)
+                         .frame(width: 25, height: 25)
+                         .sensoryFeedback(.success, trigger: tappedCopyButton)
+                      }
                    } header: {
                       Text("Adresse in der Nähe")
                    }
                 }
                 .scrollDisabled(true)
                 .frame(height: 185)
+                .overlay {
+                   if copiedToClipboard {
+                      Text ("In Zwischenablage kopiert") // Copied to Clipboard
+                         .font(.system(.body, design: .rounded, weight: .semibold))
+                         .foregroundStyle(.white)
+                         .padding ()
+                         .background(Color.blue.cornerRadius(12))
+                         .padding(.bottom)
+                         .shadow(radius: 5)
+                         .transition(.move (edge: .bottom))
+                         .frame(maxHeight: .infinity, alignment: .bottom)
+                   }
+                }
              }
              .confirmationDialog("\(address ?? "Adresse")\n\(currentCoordinates!.latitude), \(currentCoordinates!.longitude)", isPresented: $showMapOptions, titleVisibility: .visible) {
                 Button("Öffnen mit Apple Maps") {
@@ -189,6 +225,9 @@ struct Posters_PositionView: View {
                 }
                 Button("Öffnen mit Google Maps") {
                    openInGoogleMaps()
+                }
+                Button("Öffnen mit Waze") {
+                   openInWaze()
                 }
                 Button("Teilen...") {
                    shareLocation = true
@@ -283,6 +322,18 @@ struct Posters_PositionView: View {
       } else {
          // Fallback to Google Maps in browser if the app is not installed
          if let webUrl = URL(string: "https://www.google.com/maps?q=\(currentCoordinates!.latitude),\(currentCoordinates!.longitude)") {
+            UIApplication.shared.open(webUrl)
+         }
+      }
+   }
+   
+   private func openInWaze() {
+      let urlString = "waze://?ll=\(currentCoordinates!.latitude),\(currentCoordinates!.longitude)&navigate=yes"
+      if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
+         UIApplication.shared.open(url)
+      } else {
+         // Fallback to Waze in browser if the app is not installed
+         if let webUrl = URL(string: "https://www.waze.com/ul?ll=\(currentCoordinates!.latitude),\(currentCoordinates!.longitude)&navigate=yes") {
             UIApplication.shared.open(webUrl)
          }
       }

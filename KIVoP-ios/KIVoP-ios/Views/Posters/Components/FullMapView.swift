@@ -51,6 +51,9 @@ struct FullMapView: View {
             Button("Öffnen mit Google Maps") {
                openInGoogleMaps()
             }
+            Button("Öffnen mit Waze") {
+               openInWaze()
+            }
             Button("Teilen...") {
                shareLocation = true
             }
@@ -76,6 +79,18 @@ struct FullMapView: View {
       } else {
          // Fallback to Google Maps in browser if the app is not installed
          if let webUrl = URL(string: "https://www.google.com/maps?q=\(coordinate.latitude),\(coordinate.longitude)") {
+            UIApplication.shared.open(webUrl)
+         }
+      }
+   }
+   
+   private func openInWaze() {
+      let urlString = "waze://?ll=\(coordinate.latitude),\(coordinate.longitude)&navigate=yes"
+      if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
+         UIApplication.shared.open(url)
+      } else {
+         // Fallback to Waze in browser if the app is not installed
+         if let webUrl = URL(string: "https://www.waze.com/ul?ll=\(coordinate.latitude),\(coordinate.longitude)&navigate=yes") {
             UIApplication.shared.open(webUrl)
          }
       }

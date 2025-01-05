@@ -73,6 +73,16 @@
         }
       }
     },
+    "%@° N, %@° E" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@° N, %2$@° E"
+          }
+        }
+      }
+    },
     "%lld" : {
 
     },
@@ -561,9 +571,6 @@
         }
       }
     },
-    "Copy" : {
-
-    },
     "Count" : {
 
     },
@@ -798,6 +805,9 @@
 
     },
     "In der alten Turnhalle hinter dem Friedhof\nAltes Grab 5 b, 42069 Hölle" : {
+
+    },
+    "In Zwischenablage kopiert" : {
 
     },
     "Ja" : {
@@ -1235,6 +1245,9 @@
 
     },
     "Öffnen mit Google Maps" : {
+
+    },
+    "Öffnen mit Waze" : {
 
     },
     "Option" : {
