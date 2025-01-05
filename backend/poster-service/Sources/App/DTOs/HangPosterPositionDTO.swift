@@ -9,14 +9,15 @@ import Foundation
 import Vapor
 
 public struct HangPosterPositionDTO: Codable {
-    public var poster_position: UUID
+    public var posterPosition: UUID
     public var image:File
+    
     public init(
         posterPosition:UUID,
         image:File
                 )
     {
-        self.poster_position = posterPosition
+        self.posterPosition = posterPosition
         self.image = image
     }
 }

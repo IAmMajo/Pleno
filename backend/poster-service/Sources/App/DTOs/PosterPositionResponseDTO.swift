@@ -11,13 +11,13 @@ public struct PosterPositionResponseDTO: Codable {
     public var posterId: UUID?
     public var latitude: Double
     public var longitude: Double
-    public var posted_by:UUID?
+    public var postedBy:UUID?
     public var postedAt:Date?
-    public var expires_at:Date
-    public var removed_by: UUID?
-    public var removed_at: Date?
+    public var expiresAt:Date
+    public var removedBy: UUID?
+    public var removedAt: Date?
     public var imageUrl: String?
-    public var responsible_users: [UUID]
+    public var responsibleUsers: [UUID]
     public var status: String
     public init(
         id: UUID,
@@ -38,13 +38,13 @@ public struct PosterPositionResponseDTO: Codable {
         self.posterId = posterId
         self.latitude = round(latitude * 1_000_000) / 1_000_000
         self.longitude = round(longitude * 1_000_000) / 1_000_000
-        self.posted_by = postedBy
+        self.postedBy = postedBy
         self.postedAt = postedAt
-        self.expires_at = expiresAt
-        self.removed_by = removedBy
-        self.removed_at = removedAt
+        self.expiresAt = expiresAt
+        self.removedBy = removedBy
+        self.removedAt = removedAt
         self.imageUrl = imageUrl
-        self.responsible_users = responsibleUsers
+        self.responsibleUsers = responsibleUsers
         self.status = status
     }
 }

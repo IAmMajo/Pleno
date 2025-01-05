@@ -41,7 +41,6 @@ struct DailyCheckTask: LifecycleHandler {
                     break
                 }
                 
-                // Führen Sie die tägliche Prüfung durch
                 await performDailyCheck(app)
             }
         }
@@ -52,8 +51,8 @@ struct DailyCheckTask: LifecycleHandler {
         // Abrufen des poster_reminder_interval-Werts (in Tagen)
         let posterReminder: Int? = await SettingsManager.shared.getSetting(forKey: "poster_reminder_interval")
         
-        // Verwenden Sie einen Standardwert von 3 Tagen, falls poster_reminder nicht gesetzt ist
-        let reminderDays = posterReminder ?? 3
+        // Verwenden von einen Standardwert von 3 Tagen, falls poster_reminder nicht gesetzt ist
+        let reminderDays = posterReminder ?? 1
         
         let now = Date()
         let calendar = Calendar.current
@@ -64,20 +63,13 @@ struct DailyCheckTask: LifecycleHandler {
             return
         }
         
-        // Definieren des Start- und Endzeitpunkts des targetDate-Tages
-        let startOfDay = calendar.startOfDay(for: targetDate)
-        guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
-            app.logger.error("Fehler beim Berechnen des endOfDay für DailyCheckTask.")
-            return
-        }
-        
+        app.logger.info("Gefundene PosterPositionen für Erinnerungen: \(targetDate)")
         do {
             // Abfrage der PosterPositions, deren expires_at genau dem targetDate entspricht
             let positions = try await PosterPosition.query(on: app.db)
                 .filter(\.$posted_by.$id != nil)
                 .filter(\.$removed_by.$id == nil)
-                .filter(\.$expires_at >= startOfDay)
-                .filter(\.$expires_at < endOfDay)
+                .filter(\.$expires_at >= targetDate)
                 .with(\.$posted_by)
                 .with(\.$responsibilities)
                 .all()
@@ -120,7 +112,7 @@ struct DailyCheckTask: LifecycleHandler {
                         var headers = HTTPHeaders()
                         headers.add(name: .contentType, value: "application/json")
                         
-                        let response = try await app.client.post("http://kivop-notification-service/email") { request in
+                        let response = try await app.client.post("https://kivop.ipv64.net/email") { request in
                             request.headers = headers
                             request.body = .init(data: jsonData)
                         }

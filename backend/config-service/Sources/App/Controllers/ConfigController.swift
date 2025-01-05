@@ -1,7 +1,7 @@
 import Fluent
 import Models
 import Vapor
-@preconcurrency import JWT
+@preconcurrency import JWTKit
 
 /// Controller zum Verwalten von Konfigurationseinstellungen.
 /// Beinhaltet Routen zum Anzeigen, Aktualisieren und Abrufen von Einstellungen,

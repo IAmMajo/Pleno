@@ -9,10 +9,10 @@ import Foundation
 
 
 public struct HangPosterPositionResponseDTO: Codable {
-    public var poster_position: UUID
-    public var posted_at: Date
-    public var posted_by: UUID
-    public var image_url:String
+    public var posterPosition: UUID
+    public var postedAt: Date
+    public var postedBy: UUID
+    public var imageUrl:String
     public init(
         posterPosition:UUID,
         postedAt: Date,
@@ -20,9 +20,9 @@ public struct HangPosterPositionResponseDTO: Codable {
         imageUrl:String
     )
     {
-        self.poster_position = posterPosition
-        self.posted_at = postedAt
-        self.posted_by = postedBy
-        self.image_url = imageUrl
+        self.posterPosition = posterPosition
+        self.postedAt = postedAt
+        self.postedBy = postedBy
+        self.imageUrl = imageUrl
     }
 }
