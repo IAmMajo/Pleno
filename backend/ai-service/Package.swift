@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "SRVNAME_PLACEHOLDER-service",
+    name: "ai-service",
     platforms: [
        .macOS(.v13)
     ],
@@ -33,7 +33,7 @@ let package = Package(
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "Models", package: "models"),
                 .product(name: "ConfigServiceDTOs", package: "dtos"),
-                .product(name: "FIRST_LETTER_CAPITAL_SRVNAME_PLACEHOLDERServiceDTOs", package: "dtos"),
+                // .product(name: "AIServiceDTOs", package: "dtos"),
                 .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
             ],
             swiftSettings: swiftSettings
