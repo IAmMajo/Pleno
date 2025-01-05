@@ -13,8 +13,8 @@ public struct CreatePosterPositionDTO: Codable {
     public var posterId: UUID?
     public var latitude: Double
     public var longitude: Double
-    public var responsible_users: [UUID]
-    public var expires_at: Date
+    public var responsibleUsers: [UUID]
+    public var expiresAt: Date
     
     public init(
                 posterId: UUID? = nil,
@@ -27,8 +27,8 @@ public struct CreatePosterPositionDTO: Codable {
         self.posterId = posterId
         self.latitude = round(latitude * 1_000_000) / 1_000_000
         self.longitude = round(longitude * 1_000_000) / 1_000_000
-        self.responsible_users = responsibleUsers
-        self.expires_at = expiresAt
+        self.responsibleUsers = responsibleUsers
+        self.expiresAt = expiresAt
     }
 }
 

@@ -48,12 +48,19 @@ RUN find -L "$(swift build --package-path /build/backend/poster-service -c relea
 # Ensure that only the necessary permissions are set
 RUN [ -d /build/backend/poster-service/Public ] && { \
         mv /build/backend/poster-service/Public ./Public && \
-        chmod -R u+rwX,go+rX,go-w ./Public; \
+        chmod -R a-w ./Public; \
     } || true
 RUN [ -d /build/backend/poster-service/Resources ] && { \
         mv /build/backend/poster-service/Resources ./Resources && \
         chmod -R a-w ./Resources; \
     } || true
+# Copy and set permissions for the Storage directory
+RUN [ -d /build/backend/poster-service/Storage ] && { \
+        mv /build/backend/poster-service/Storage ./Storage && \
+        chmod 766 ./Storage; \
+    } || true
+
+
 
 # ================================
 # Run image

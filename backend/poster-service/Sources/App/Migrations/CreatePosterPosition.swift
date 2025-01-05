@@ -16,6 +16,7 @@ struct CreatePosterPositions: AsyncMigration {
             .field("poster_id", .uuid, .references(Poster.schema , .id)) // Foreign Key zu Posters
             .field("latitude", .double, .required) // Latitude als Pflichtfeld
             .field("longitude", .double, .required) // Longitude als Pflichtfeld
+            .field("posted_at", .datetime)
             .field("posted_by", .uuid,  .references(Identity.schema , .id)) // Foreign Key zu Identity
             .field("expires_at", .datetime , .required )
             .field("removed_at", .datetime)

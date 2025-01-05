@@ -50,7 +50,7 @@ public func configure(_ app: Application) async throws {
     // Migrations registrieren
     app.migrations.add(CreatePosters())
     app.migrations.add(CreatePosterPositions())
-
+    app.migrations.add(CreatePosterPositionResponsibilities())
     // Erinnerungen für aufgehangene Poster versenden
     app.lifecycle.use(DailyCheckTask())
 

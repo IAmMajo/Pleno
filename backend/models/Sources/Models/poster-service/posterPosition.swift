@@ -23,16 +23,16 @@ public final class PosterPosition: Model,@unchecked Sendable {
     @Field(key: "longitude")
     public var longitude: Double
 
-    @Timestamp(key: "posted_at", on: .create)
+    @Field(key: "posted_at")
     public var posted_at: Date?
     
     @OptionalParent(key: "posted_by")
     public var posted_by: Identity?
     
-    @Timestamp(key: "expires_at", on: .update)
+    @Field(key: "expires_at")
     public var expires_at: Date?
     
-    @Timestamp(key: "removed_at", on: .create)
+    @Field(key: "removed_at")
     public var removed_at: Date?
     
     @OptionalParent(key: "removed_by")
@@ -58,6 +58,11 @@ public init(
     self.longitude = round(longitude * 1_000_000) / 1_000_000
     self.$poster.id = posterId
     self.expires_at = expiresAt
+    self.image_url = nil
+    self.posted_at = nil
+    self.$posted_by.id = nil
+    self.removed_at = nil
+    self.$removed_by.id = nil
 }
 
 }

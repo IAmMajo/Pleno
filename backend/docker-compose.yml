@@ -225,6 +225,8 @@ services:
       traefik.http.routers.poster-service.middlewares: poster-service-replace-path-regex
       traefik.http.middlewares.poster-service-replace-path-regex.replacepathregex.regex: ^/poster-service(:/(.*))?
       traefik.http.middlewares.poster-service-replace-path-regex.replacepathregex.replacement: /$$1
+    volumes:
+      - images-data:/app/Storage/Images
 
   poster-service-migration:
     profiles:
@@ -376,6 +378,8 @@ volumes:
     name: "kivop-postgres-data"
   tdums-data:
     name: "tdums-postgres-data"
+  images-data:
+    name: "kivop-images-data"
 
 #
 # Networks
