@@ -3,20 +3,14 @@ import Vapor
 import VaporToOpenAPI
 
 func routes(_ app: Application) throws {
-    app.get { req async in
-        "It works!"
-    }
-
-    app.get("hello") { req async -> String in
-        "Hello, world!"
-    }
+    try app.register(collection: AIController())
 
     try app.register(collection: WebhookController())
 
     app.get("openapi.json") { req in
       app.routes.openAPI(
         info: .init(
-          title: "KIVoP Ai Service API",
+          title: "KIVoP AI Service API",
           license: .init(
             name: "MIT-0",
             url: URL(string: "https://github.com/aws/mit-0")
