@@ -52,7 +52,7 @@ struct DailyCheckTask: LifecycleHandler {
         let posterReminder: Int? = await SettingsManager.shared.getSetting(forKey: "poster_reminder_interval")
         
         // Verwenden von einen Standardwert von 3 Tagen, falls poster_reminder nicht gesetzt ist
-        let reminderDays = posterReminder ?? 1
+        let reminderDays = posterReminder ?? 0
         
         let now = Date()
         let calendar = Calendar.current
@@ -69,7 +69,7 @@ struct DailyCheckTask: LifecycleHandler {
             let positions = try await PosterPosition.query(on: app.db)
                 .filter(\.$posted_by.$id != nil)
                 .filter(\.$removed_by.$id == nil)
-                .filter(\.$expires_at >= targetDate)
+                .filter(\.$expires_at <= targetDate)
                 .with(\.$posted_by)
                 .with(\.$responsibilities)
                 .all()

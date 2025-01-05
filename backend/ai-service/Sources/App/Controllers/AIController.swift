@@ -35,7 +35,7 @@ struct AIController: RouteCollection {
             responseDescription: "Social Media Post"
         )
     }
-    
+    @Sendable
     func extendRecord(req: Request) async throws -> Response {
         let dto = try req.content.decode(AISendMessageDTO.self)
         return try await req.ai.getAIResponse(
@@ -44,7 +44,7 @@ struct AIController: RouteCollection {
             maxCompletionTokens: 10000
         )
     }
-
+    @Sendable
     func generateSocialMediaPost(req: Request) async throws -> Response {
         let dto = try req.content.decode(AISendMessageDTO.self)
         return try await req.ai.getAIResponse(

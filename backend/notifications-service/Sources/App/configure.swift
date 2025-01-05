@@ -23,6 +23,21 @@ public func configure(_ app: Application) async throws {
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
 
+     // Settings beim Start laden
+    Task {
+        do {
+            let configServiceURL = Environment.get("CONFIG_SERVICE_URL") ?? "http://kivop-config-service"
+            let serviceIDString = Environment.get("SERVICE_ID") ?? "a4c1f7b9-9aaf-4b8e-9c56-4e2a8c0c3f7d"
+            guard let serviceID = UUID(uuidString: serviceIDString) else {
+                app.logger.error("Ungültige Service-ID.")
+                return
+            }
+            try await SettingsManager.shared.loadSettings(from: configServiceURL, serviceID: serviceID, client: app.client, logger: app.logger)
+        } catch {
+            app.logger.error("Fehler beim Laden der Einstellungen: \(error.localizedDescription)")
+        }
+    }
+
     var smtpSignInMethod = SignInMethod.anonymous
     let smtpUsername = Environment.get("SMTP_USERNAME") ?? ""
     if !smtpUsername.isEmpty {

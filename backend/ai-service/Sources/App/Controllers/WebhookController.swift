@@ -1,5 +1,4 @@
 import ConfigServiceDTOs
-import Fluent
 import Vapor
 
 struct WebhookController: RouteCollection {
@@ -8,6 +7,7 @@ struct WebhookController: RouteCollection {
         webhook.post(use: receiveWebhook)
     }
     
+    @Sendable
     func receiveWebhook(req: Request) async throws -> HTTPStatus {
         let payload = try req.content.decode(WebhookPayloadDTO.self)
         
@@ -16,10 +16,14 @@ struct WebhookController: RouteCollection {
             throw Abort(.badRequest, reason: "Ungültiger Payload")
         }
         
-        // Cache aktualisieren
-        SettingsManager.shared.updateSetting(key: newValue.key, value: newValue.value)
-        req.logger.info("Einstellung '\(newValue.key)' wurde aktualisiert.")
+        // Werte extrahieren
+        let key = newValue.key
+        let value = newValue.value
         
+        // Direkter Aufruf der Methode mit await
+        await SettingsManager.shared.updateSetting(key: key, value: value)
+        
+        req.logger.info("Einstellung '\(key)' wurde aktualisiert.")
         return .ok
     }
 }

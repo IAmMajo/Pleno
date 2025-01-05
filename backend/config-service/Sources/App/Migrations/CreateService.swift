@@ -42,7 +42,22 @@ struct CreateService: AsyncMigration {
                 webhook_url: "http://kivop-poster-service/webhook",
                 description: "Manages Poster positions",
                 active: true
+            ),
+            Service(
+                id: UUID(uuidString: "d355c12b-19c6-4f67-b5b5-837030ed09e6")!,
+                name: "Ride-Service",
+                webhook_url: "http://kivop-ride-service/webhook",
+                description: "Organisiert die Planung von Gemeinschaftsfahrten",
+                active: true
+            ),
+            Service(
+                id: UUID(uuidString: "47900b1a-63c2-45fb-a708-adf5e1ed8e11")!,
+                name: "Ai-Service",
+                webhook_url: "http://kivop-ai-service/webhook",
+                description: "Mit dem Ai-Service lassen sich Protokolle ausformulieren und Social Media Posts erstellen",
+                active: true
             )
+            
         ]
 
         for service in services {

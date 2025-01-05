@@ -21,6 +21,21 @@ public func configure(_ app: Application) async throws {
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
     
+    // Settings beim Start laden
+    Task {
+        do {
+            let configServiceURL = Environment.get("CONFIG_SERVICE_URL") ?? "http://kivop-config-service"
+            let serviceIDString = Environment.get("SERVICE_ID") ?? "e1e5f3b8-3c1d-4f58-a9e0-2e65d5d0a7d9"
+            guard let serviceID = UUID(uuidString: serviceIDString) else {
+                app.logger.error("Ungültige Service-ID.")
+                return
+            }
+            try await SettingsManager.shared.loadSettings(from: configServiceURL, serviceID: serviceID, client: app.client, logger: app.logger)
+        } catch {
+            app.logger.error("Fehler beim Laden der Einstellungen: \(error.localizedDescription)")
+        }
+    }
+
     app.migrations.add(CreateIdentity())
     app.migrations.add(CreateUser())
     app.migrations.add(CreateIdentityHistory())

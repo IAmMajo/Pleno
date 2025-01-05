@@ -1,4 +1,3 @@
-// WebhookController.swift
 import ConfigServiceDTOs
 import Vapor
 
@@ -28,3 +27,4 @@ struct WebhookController: RouteCollection {
         return .ok
     }
 }
+
