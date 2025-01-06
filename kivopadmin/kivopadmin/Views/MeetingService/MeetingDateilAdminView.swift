@@ -1,5 +1,6 @@
 import SwiftUI
 import MeetingServiceDTOs
+import AuthServiceDTOs
 
 struct MeetingDetailAdminView: View {
     var meeting: GetMeetingDTO
@@ -7,11 +8,15 @@ struct MeetingDetailAdminView: View {
     @State private var isMeetingActive = false // Status für Meeting
     @State private var showConfirmationAlert = false // Alert anzeigen
     @State private var actionType: ActionType = .start // Typ der Aktion (Starten oder Beenden)
+    @State private var selectedUser: UUID?
+    @State private var selectedUserName: String?
+    @State private var showRecorderSelectionSheet = false
     
     @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
     @StateObject private var recordManager = RecordManager() // RecordManager als StateObject
     @StateObject private var votingManager = VotingManager() // RecordManager als StateObject
     @StateObject private var attendanceManager = AttendanceManager() // RecordManager als StateObject
+    @ObservedObject var userManager = UserManager()
     
     enum ActionType {
         case start
@@ -108,7 +113,15 @@ struct MeetingDetailAdminView: View {
                                 }
                             }
                         }
+                        Button(action: {
+                            showRecorderSelectionSheet.toggle()
+                        }) {
+                            Text(selectedUserName ?? "Protokollanten auswählen")
+                                .cornerRadius(8)
+                        }
                     }
+                    
+                    
                     // Abstimmugnen
                     Section(header: Text("Abstimmungen")) {
                         if votingManager.isLoading {
@@ -221,10 +234,14 @@ struct MeetingDetailAdminView: View {
                     secondaryButton: .cancel(Text("Abbrechen"))
                 )
             }
+            .sheet(isPresented: $showRecorderSelectionSheet) {
+                RecorderSelectionSheet(users: userManager.users, selectedUser: $selectedUser, selectedUserName: $selectedUserName)
+            }
             .onAppear(){
                 recordManager.getRecordsMeeting(meetingId: meeting.id)
                 votingManager.getRecordsMeeting(meetingId: meeting.id)
                 attendanceManager.fetchAttendances(meetingId: meeting.id)
+                userManager.fetchUsers()
             }
         }
     }
@@ -259,12 +276,85 @@ struct MeetingDetailAdminView: View {
         }
     }
 }
+struct RecorderSelectionSheet: View {
+    var users: [UserProfileDTO]
+    @Binding var selectedUser: UUID? // Speichert die Benutzer-ID
+    @Binding var selectedUserName: String? // Speichert den Benutzernamen
+    @State private var searchText: String = ""
+    
+    @ObservedObject var userManager = UserManager()
 
-struct PlaceholderView: View {
     var body: some View {
-        Text("Hallo")
+        NavigationStack { // NavigationStack hier außen
+            VStack {
+                List {
+                    ForEach(filteredUsers, id: \.email) { user in
+                        HStack {
+                            Text(user.name ?? "Unbekannter Name") // Fallback, falls name nil ist
+                            Spacer()
+                            if let uid = user.uid, uid == selectedUser { // Prüfen, ob dieser Benutzer ausgewählt ist
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectUser(user)
+                        }
+                    }
+                }
+                .navigationTitle("Benutzer auswählen")
+                .searchable(text: $searchText)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Fertig") {
+                            print("Ausgewählter Benutzer: \(selectedUserName ?? "Keiner")")
+                            dismiss()
+                        }
+                    }
+                }
+            }
+        }
+        .onAppear {
+            userManager.fetchUsers()
+        }
+    }
+
+    private var filteredUsers: [UserProfileDTO] {
+        if searchText.isEmpty {
+            return users
+        } else {
+            return users.filter { user in
+                if let name = user.name {
+                    return name.localizedCaseInsensitiveContains(searchText)
+                }
+                return false
+            }
+        }
+    }
+
+    private func selectUser(_ user: UserProfileDTO) {
+        if let uid = user.uid {
+            // Wenn derselbe Benutzer ausgewählt ist, entfernen; ansonsten neu setzen
+            if selectedUser == uid {
+                selectedUser = nil
+                selectedUserName = nil
+            } else {
+                selectedUser = uid
+                selectedUserName = user.name
+            }
+        }
+    }
+
+    private func dismiss() {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            rootVC.dismiss(animated: true, completion: nil)
+        }
     }
 }
+
+
 
 #Preview {
     let exampleLocation = GetLocationDTO(
