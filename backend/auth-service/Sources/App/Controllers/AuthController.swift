@@ -76,9 +76,11 @@ struct AuthController: RouteCollection {
         guard try Bcrypt.verify(loginRequest.password!, created: user.passwordHash) else {
             throw Abort(.notFound, reason: "Invalid credentials")
         }
-        // Status der Email-Verifizierung
-        guard user.emailVerification?.status == .verified else {
-            throw Abort(.unauthorized, reason: "Email not verified")
+        
+        if user.isAdmin == false {
+            guard user.emailVerification?.status == .verified else {
+                throw Abort(.unauthorized, reason: "Email not verified")
+            }
         }
         // Hat der Nutzer einen aktiven Account
         guard user.isActive == true else {
