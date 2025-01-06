@@ -39,6 +39,9 @@ let package = Package(
                 .product(name: "ConfigServiceDTOs", package: "dtos"),
                 .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
             ],
+            resources: [
+                .process("Resources/Localizable.xcstrings.json")
+            ],
             swiftSettings: swiftSettings
         ),
         .testTarget(

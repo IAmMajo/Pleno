@@ -1,12 +1,53 @@
 import Models
+import Foundation
 import MeetingServiceDTOs
+import Fluent
 
 extension Record {
-    public func toGetRecordDTO() throws -> GetRecordDTO {
-        try .init(meetingId: self.requireID().$meeting.id,
-                  lang: self.requireID().lang,
-                  identity: self.identity.toGetIdentityDTO(),
-                  status: self.status.convert(),
-                  content: self.content)
+    public func toGetRecordDTO(db: Database) async throws -> GetRecordDTO {
+        let lang = try self.requireID().lang
+        let attendances = try await self.$id.$meeting.get(on: db).$attendances.query(on: db)
+            .filter(\.$status == .present)
+            .all().map({ attendance in
+                "- \(try attendance.toGetAttendanceDTO().identity.name)"
+            })
+            .joined(separator: "\n")
+        let votings = try await self.$id.$meeting.get(on: db).$votings.query(on: db)
+            .filter(\.$isOpen == false)
+            .filter(\.$closedAt != nil)
+            .with(\.$votingOptions)
+            .with(\.$votes)
+            .all()
+        
+        return try await .init(meetingId: self.requireID().$meeting.id,
+                               lang: self.requireID().lang,
+                               identity: self.identity.toGetIdentityDTO(),
+                               status: self.status.convert(),
+                               content: self.content,
+                               attendancesAppendix: "# \(LocalizableManager.shared.translate(key: "Attendees", into: lang))\n\(attendances)",
+                               votingResultsAppendix: """
+# \(LocalizableManager.shared.translate(key: "Votings", into: lang))
+\(votings.asyncMap({ voting in
+let getVotingDTO = try voting.toGetVotingDTO()
+let getVotingResultsDTO = try await voting.toGetVotingResultsDTO(db: db)
+return await """
+## \(unsafeRaw: voting.question)
+_\(unsafeRaw: voting.description)_
+**\(unsafeRaw: LocalizableManager.shared.translate(key: "Opened at", into: lang))**: \(unsafeRaw: voting.startedAt?.description(with: Locale(identifier: lang)) ?? "X")
+**\(unsafeRaw: LocalizableManager.shared.translate(key: "Closed at", into: lang))**: \(unsafeRaw: voting.closedAt?.description(with: Locale(identifier: lang)) ?? "X")
+** \(unsafeRaw: LocalizableManager.shared.translate(key: "Options",  into: lang))**: \(unsafeRaw: getVotingDTO.options.map(\.text).joined(separator: ", "))
+### \(unsafeRaw: LocalizableManager.shared.translate(key: "Distribution of votes",  into: lang))
+\(unsafeRaw: getVotingResultsDTO.results.asyncMap({ getVotingResultDTO in
+let votingOptionText: String
+if let text = getVotingDTO.options.first(where: {$0.index == getVotingResultDTO.index})?.text {
+    votingOptionText = text
+} else { // Null-coalescing operator (??) does not allow for the right side to be asyncronous if the left side is not
+    votingOptionText = await LocalizableManager.shared.translate(key: "Abstention",  into: lang)
+}
+    return "- \(votingOptionText): \(getVotingResultDTO.count)/\(getVotingResultsDTO.totalCount) (\(getVotingResultDTO.percentage)%)"
+}).joined(separator: "\n"))
+"""
+}).joined(separator: "\n\n"))
+""")
     }
 }

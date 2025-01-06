@@ -112,75 +112,6 @@ struct VotingController: RouteCollection {
         return try voting.toGetVotingDTO()
     }
     
-    func calculateVotingResults(voting: Voting, userId: UUID, db: Database) async throws -> GetVotingResultsDTO {
-        let identityIds = try await IdentityHistory.byUserId(userId, db).map { identityHistory in
-            try identityHistory.identity.requireID()
-        }
-        guard !voting.isOpen && voting.startedAt != nil && voting.closedAt != nil else {
-            throw Abort(.conflict, reason: "The voting has not closed yet.")
-        }
-        
-        let votingOptions = try await voting.$votingOptions.get(on: db)
-        var getVotingResultsDTO = try GetVotingResultsDTO(votingId: voting.requireID(), myVote: nil, results: [])
-        
-        if let myVote = try await voting.$votes.query(on: db)
-            .with(\.$id.$identity)
-            .filter(\.$id.$identity.$id ~~ identityIds)
-            .first() {
-            getVotingResultsDTO.myVote = myVote.index
-        }
-        
-        var totalVotes: [[Vote]] = []
-        
-        for i in 0...votingOptions.count {
-            try await totalVotes.append(voting.$votes.query(on: db)
-                .filter(\.$index == UInt8(i))
-                .with(\.$id.$identity)
-                .all())
-        }
-        let totalVoteAmounts: [Int] = totalVotes.map { votes in
-            votes.count
-        }
-        let totalVotesCount = totalVoteAmounts.reduce(0) { partialResult, votes in
-            partialResult + votes
-        }
-        guard totalVotesCount > 0 else {
-            return getVotingResultsDTO
-        }
-        var percentageCutoffs: [percentageCutoff] = totalVoteAmounts.enumerated().map { index, votes in
-            let percentage = (Double(votes) / Double(totalVotesCount))
-            let roundedDownPercentage = (percentage * 10000.0).rounded(.down) / 100.0
-            return .init(index: UInt8(index), percentage: roundedDownPercentage, cutoff: percentage - roundedDownPercentage)
-        }
-        
-        percentageCutoffs.sort { percentageCutoff1, percentageCutoff2 in
-            percentageCutoff1.cutoff > percentageCutoff2.cutoff
-        }
-        let totalPercentage = percentageCutoffs.reduce(0.0) { partialResult, percentageCutoff in
-            partialResult + percentageCutoff.percentage
-        }
-        
-        for i in 0..<(Int((100.0 - totalPercentage)*100.0)) {
-            percentageCutoffs[i].percentage += 0.01
-        }
-        percentageCutoffs.sort { percentageCutoff1, percentageCutoff2 in
-            percentageCutoff1.index < percentageCutoff2.index
-        }
-        
-        for index in 0...votingOptions.count {
-            let percentageCutoff = percentageCutoffs[index]
-            try getVotingResultsDTO.results.append(
-                GetVotingResultDTO(index: UInt8(index),
-                                   total: UInt8(totalVoteAmounts[index]),
-                                   percentage: percentageCutoff.percentage,
-                                   identities: voting.anonymous ? nil : totalVotes[index].map({ vote in
-                                       try vote.requireID().identity.toGetIdentityDTO()
-                                   })))
-        }
-        
-        return getVotingResultsDTO
-    }
-    
     /// **GET** `/meetings/votings/{id}/results`
     @Sendable func getVotingResults(req: Request) async throws -> GetVotingResultsDTO {
         guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
@@ -189,7 +120,7 @@ struct VotingController: RouteCollection {
         guard let userId = req.jwtPayload?.userID else {
             throw Abort(.unauthorized)
         }
-        return try await self.calculateVotingResults(voting: voting, userId: userId, db: req.db)
+        return try await voting.toGetVotingResultsDTO(db: req.db, userId: userId)
     }
     
     /// **PATCH** `/meetings/votings/{id}`
@@ -288,7 +219,7 @@ struct VotingController: RouteCollection {
         
         let clientWebSocketContainer = try self.votingClientWebSocketContainer.getClientWebSocketContainer(votingId: voting.requireID())
         try await clientWebSocketContainer.sendBinary(
-            JSONEncoder().encode(self.calculateVotingResults(voting: voting, userId: userId, db: req.db))
+            JSONEncoder().encode(voting.toGetVotingResultsDTO(db: req.db, userId: userId))
         )
         try await clientWebSocketContainer.closeAllConnections()
         
@@ -350,7 +281,7 @@ struct VotingController: RouteCollection {
             return try await voting.$votingOptions.get(on: req.db).first { votingOption in
                 try votingOption.requireID().index == myVote.index
             }!
-            .toGetVotingOptionDTO().encodeResponse(status: .ok, for: req)
+                .toGetVotingOptionDTO().encodeResponse(status: .ok, for: req)
         } else {
             return .init(status: .ok)
         }
