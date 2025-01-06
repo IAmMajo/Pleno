@@ -14,12 +14,12 @@ struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let userRoutes = routes.grouped("users")
         
-        userRoutes.post("password", "reset-request", use: self.requestPasswordReset).openAPI(
+        userRoutes.put("password", "reset-request", use: self.requestPasswordReset).openAPI(
             summary: "Request Reset Code",
             description: "Request Reset Code with Email",
             body: .type(RequestPasswordResetDTO.self)
         )
-        userRoutes.post("password", "reset", use: self.userResetPasswort).openAPI(
+        userRoutes.put("password", "reset", use: self.userResetPasswort).openAPI(
             summary: "Reset Password with code",
             description: "Reset Password with email, code and new password",
             body: .type(ResetPasswordDTO.self)
@@ -36,7 +36,7 @@ struct UserController: RouteCollection {
             contentType: .application(.json),
             response: .type(UserRegistrationDTO.self)
         )
-        userRoutes.post("email", "resend", ":email", use: self.resendVerificationEmail).openAPI(
+        userRoutes.put("email", "resend", ":email", use: self.resendVerificationEmail).openAPI(
             summary: "Resend verification email",
             description: "Resend pending verification link",
             contentType: .application(.json)
@@ -445,25 +445,25 @@ struct UserController: RouteCollection {
         
         let users = try await User.query(on: req.db)
             .with(\.$identity)
+            .join(EmailVerification.self, on: \User.$id == \EmailVerification.$user.$id)
             .all()
-        return users.map { user in
-            //let profileImageBase64: String?
-            // if let profileImage = user.profileImage {
-            //   profileImageBase64 = profileImage.base64EncodedString()
-            // } else {
-            //     profileImageBase64 = nil
-            //}
-            
-            return UserProfileDTO(
+        var userProfiles: [UserProfileDTO] = []
+        
+        for user in users {
+            let emailVerification = try user.joined(EmailVerification.self)
+            let profileDTO = UserProfileDTO(
                 uid: user.id,
                 email: user.email,
                 name: user.identity.name,
                 profileImage: user.profileImage,
                 isAdmin: user.isAdmin,
                 isActive: user.isActive,
+                emailVerification: VerificationStatus(rawValue: emailVerification.status.rawValue),
                 createdAt: user.createdAt
             )
+            userProfiles.append(profileDTO)
         }
+        return userProfiles
     }
     
     @Sendable
@@ -484,17 +484,12 @@ struct UserController: RouteCollection {
         guard let user = try await User.query(on: req.db)
             .filter(\.$id == userID)
             .with(\.$identity)
+            .join(EmailVerification.self, on: \User.$id == \EmailVerification.$user.$id)
             .first() else {
             throw Abort(.notFound, reason: "User not found")
         }
-        
-        //let profileImageBase64: String?
-        //if let profileImage = user.profileImage {
-        //    profileImageBase64 = profileImage.base64EncodedString()
-        //} else {
-        //   profileImageBase64 = nil
-        //}
-        
+        let emailVerification = try user.joined(EmailVerification.self)
+    
         // Gibt ProfilDTO zurück
         return UserProfileDTO(
             uid: user.id,
@@ -503,6 +498,7 @@ struct UserController: RouteCollection {
             profileImage: user.profileImage,
             isAdmin: user.isAdmin,
             isActive: user.isActive,
+            emailVerification: VerificationStatus(rawValue: emailVerification.status.rawValue),
             createdAt: user.createdAt
         )
     }
