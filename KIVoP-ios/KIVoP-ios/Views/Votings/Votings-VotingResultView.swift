@@ -10,6 +10,8 @@ import LocalAuthentication
 import MeetingServiceDTOs
 
 struct Votings_VotingResultView: View {
+   @StateObject private var meetingViewModel = MeetingViewModel()
+
    let votingsView: VotingsView
    
    let voting: GetVotingDTO
@@ -92,28 +94,26 @@ struct Votings_VotingResultView: View {
     }
 
    private func loadVotingResults(voting: GetVotingDTO) async {
-      isLoading = true
-      error = nil
-      do {
-         votingResults = try await APIService.shared.fetchVotingResults(by: voting.id)
-         resultsLoaded = true
-      } catch {
-         resultsLoaded = false
-         print("error: ", error)
+      VotingService.shared.fetchVotingResults(votingId: voting.id) { result in
+         DispatchQueue.main.async {
+            switch result {
+            case .success(let results):
+               self.votingResults = results
+               resultsLoaded = true
+            case .failure(let error):
+               print("Fehler beim Abrufen der Ergebnisse: \(error.localizedDescription)")
+            }
+         }
       }
-      isLoading = false
    }
    
    private func loadMeetingName(voting: GetVotingDTO) async {
-      isLoading = true
-      error = nil
       do {
-         let meeting = try await APIService.shared.fetchMeeting(by: voting.meetingId)
+         let meeting = try await meetingViewModel.fetchMeeting(byId: voting.meetingId)
          meetingName = meeting.name
       } catch {
-         print("error: ", error)
+         print("Error fetching meeting: \(error.localizedDescription)")
       }
-      isLoading = false
    }
    
    func getColor (index: UInt8) -> Color {
