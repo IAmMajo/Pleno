@@ -52,7 +52,7 @@ find "$DEST" -type f -name '*.swift' | while read -r file; do
     perl -pi -e 's/^(from \w+ )?import \w+(\r?\n)//g' $file
     perl -pi -e 's/^\s*\r?\n//g' $file
     # enum -> enum class
-    perl -pi -e 's/^public enum ([A-Za-z0-9_]+): String, Codable \{$/public enum class \1 {/g' $file
+    perl -pi -e 's/^public enum ([A-Za-z0-9_]+): String, Codable, CaseIterable \{$/public enum class \1 {/g' $file
     # Remove case in enums / enum classes
     perl -pi -e 's/^(\s*)case (\w+),?/\1\2,/g' $file
     # Remove public keyword from vars and enums

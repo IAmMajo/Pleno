@@ -14,7 +14,7 @@ public struct GetAttendanceDTO: Codable {
     }
 }
 
-public enum AttendanceStatus: String, Codable {
+public enum AttendanceStatus: String, Codable, CaseIterable {
     case present
     case absent
     case accepted
