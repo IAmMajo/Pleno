@@ -98,7 +98,7 @@ struct Votings_VoteView: View {
    }
    
    private func castVote(voting: GetVotingDTO, selection: GetVotingOptionDTO?) async {
-      VotingService.shared.castVote(votingID: voting.id, index: selection!.index) { result in
+      VotingService.shared.castVote(votingID: voting.id, index: selection != nil ? selection!.index : 0) { result in
           DispatchQueue.main.async {
               switch result {
               case .success:

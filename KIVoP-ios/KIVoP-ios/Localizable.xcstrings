@@ -574,6 +574,9 @@
         }
       }
     },
+    "Connecting..." : {
+
+    },
     "Count" : {
 
     },
@@ -976,6 +979,9 @@
           }
         }
       }
+    },
+    "Live Status: %@" : {
+
     },
     "Loading meetings..." : {
 
@@ -1890,6 +1896,9 @@
           }
         }
       }
+    },
+    "Voting Results:" : {
+
     },
     "Weiter" : {
       "localizations" : {

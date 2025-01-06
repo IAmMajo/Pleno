@@ -72,6 +72,7 @@ struct Votings_VotingResultView: View {
                 .environment(\.defaultMinListHeaderHeight, 10)
              }
           } else {
+//             VotingLiveStatusView(votingId: UUID(uuidString: "4CF57888-E6AC-4B56-92D5-2D081480A10C")!)
              ContentUnavailableView(
                "Die Abstimmung läuft noch",
                systemImage: "chart.pie.fill",
