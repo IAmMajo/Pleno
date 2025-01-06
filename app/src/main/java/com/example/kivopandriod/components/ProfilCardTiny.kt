@@ -27,7 +27,8 @@ fun ProfileCardSmall(
     profileImageUrl: String? = null,
     backgroundColor: Color,
     backgroundColorProfile: Color
-    ) {
+) {
+    // Extrahiere den ersten Buchstaben des Nachnamens als Initial
     val initial = remember(name) { name.split(" ").lastOrNull()?.firstOrNull()?.toString().orEmpty() }
 
     Card(
@@ -41,6 +42,7 @@ fun ProfileCardSmall(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 4.dp)
         ) {
+            // Box für das Profilbild oder Initial
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -49,6 +51,7 @@ fun ProfileCardSmall(
                     .background(if (profileImageUrl == null) backgroundColorProfile else Color.Transparent)
             ) {
                 if (profileImageUrl == null) {
+                    // Zeigt das Initial an, wenn kein Profilbild vorhanden ist
                     androidx.compose.material3.Text(
                         text = initial,
                         color = Text_light,
@@ -56,10 +59,11 @@ fun ProfileCardSmall(
                         fontWeight = FontWeight.Bold
                     )
                 } else {
-                    // TODO: Bild einfügen, wenn profileImageUrl nicht null ist
+                    // TODO: Hier sollte das Bild eingefügt werden, wenn profileImageUrl nicht null ist
                 }
             }
             Spacer(modifier = Modifier.width(8.dp))
+            // Spalte für Name und Rolle
             Column {
                 androidx.compose.material3.Text(
                     text = name,
@@ -67,6 +71,7 @@ fun ProfileCardSmall(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
+                // Zeigt die Rolle an, wenn vorhanden
                 role?.let {
                     androidx.compose.material3.Text(
                         text = it,
@@ -79,17 +84,18 @@ fun ProfileCardSmall(
     }
 }
 
+// Vorschau-Funktion für die ProfileCardSmall
 @Preview
 @Composable
 fun PreviewProfileCard() {
     Box(modifier = Modifier.width(300.dp)) {
-    ProfileCardSmall(
-        name = "Thorsten Trauer",
-        role = null,
-        profileImageUrl = null, // Beispiel ohne Bild
-        backgroundColor = Tertiary_light,
-        backgroundColorProfile = Color.Cyan
+        ProfileCardSmall(
+            name = "Thorsten Trauer",
+            role = null,
+            profileImageUrl = null, // Beispiel ohne Bild
+            backgroundColor = Tertiary_light,
+            backgroundColorProfile = Color.Cyan
 
-    )
+        )
     }
 }
