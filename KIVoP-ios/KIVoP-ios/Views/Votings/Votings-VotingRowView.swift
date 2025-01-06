@@ -17,8 +17,10 @@ struct Votings_VotingRowView: View {
                Text(viewModel.voting.question)
                    .frame(maxWidth: .infinity, alignment: .leading)
                Spacer()
-               Image(systemName: viewModel.status)
-                   .foregroundStyle(viewModel.symbolColor)
+              if viewModel.status != "" {
+                 Image(systemName: viewModel.status)
+                    .foregroundStyle(viewModel.symbolColor)
+              }
                Spacer()
            }
            .contentShape(Rectangle())
