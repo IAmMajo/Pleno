@@ -21,7 +21,7 @@ struct AuthController: RouteCollection {
         //Email Verifizieren
         authRoutes.get("email", "verify", ":code", use: self.verifyEmail).openAPI(
             summary: "Verify email",
-            description: "Verify email with code. HTML = without Query, API = Route/code/?statusCodeResponse=true",
+            description: "Verify email with code. HTML = without Query for Browser, API = Route/code/?statusCodeResponse=true",
             response: .type(HTTPResponseStatus.self)
         )
 
