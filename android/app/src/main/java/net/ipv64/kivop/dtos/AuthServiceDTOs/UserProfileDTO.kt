@@ -10,5 +10,11 @@ data class UserProfileDTO (
     var profileImage : ByteArray?,
     var isAdmin : Boolean?,
     var isActive : Boolean?,
+    var emailVerification : VerificationStatus?,
     var createdAt : LocalDateTime?,
 )
+enum class VerificationStatus {
+    failed,
+    pending,
+    verified,
+}
