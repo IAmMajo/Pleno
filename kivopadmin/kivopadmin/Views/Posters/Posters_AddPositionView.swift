@@ -67,13 +67,7 @@ struct Posters_AddPositionView: View {
     @State private var expiresAt: Date = Date()
     @State private var showUserSelectionSheet = false
     @State private var selectedUsers: [UUID] = []
-//    @State private var users: [User] = [
-//        User(name: "Alice"),
-//        User(name: "Bob"),
-//        User(name: "Charlie"),
-//        User(name: "David"),
-//        User(name: "Eve")
-//    ]
+
     
     // Array to hold CreatePosterPositionDTO objects
     @State private var posterPositions: [CreatePosterPositionDTO] = []
@@ -89,7 +83,7 @@ struct Posters_AddPositionView: View {
                         .font(.body)
                 }
             }
-            .frame(width: 250)
+            .frame(width: 300)
             .background(Color.gray.opacity(0.1))
 
             VStack {
@@ -97,6 +91,7 @@ struct Posters_AddPositionView: View {
                     CustomMapView(region: $mapRegion, posterPositions: posterPositions, onRegionChange: { newRegion in
                         mapRegion = newRegion
                     })
+                    .ignoresSafeArea()
                         .frame(maxHeight: .infinity)
 
                     VStack {

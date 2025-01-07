@@ -94,32 +94,47 @@ struct MeetingDetailAdminView: View {
                             Text(meeting.description)
                         }
                     }
-                    
-                    // Protokolle
-                    Section(header: Text("Protokolle")) {
-                        if recordManager.isLoading {
-                            ProgressView("Lade Protokolle...")
-                                .progressViewStyle(CircularProgressViewStyle())
-                        } else if let errorMessage = recordManager.errorMessage {
-                            Text("Error: \(errorMessage)")
-                                .foregroundColor(.red)
-                        } else if recordManager.records.isEmpty {
-                            Text("No records available.")
-                                .foregroundColor(.secondary)
-                        } else {
-                            ForEach(recordManager.records, id: \.lang) { record in
-                                NavigationLink(destination: MarkdownEditorView(meetingId: record.meetingId, lang: record.lang)) {
-                                    Text("Protokoll: \(record.lang)")
+                    if meeting.status != .scheduled {
+                        // Protokolle
+                        Section(header: Text("Protokolle")) {
+                            if recordManager.isLoading {
+                                ProgressView("Lade Protokolle...")
+                                    .progressViewStyle(CircularProgressViewStyle())
+                            } else if let errorMessage = recordManager.errorMessage {
+                                Text("Error: \(errorMessage)")
+                                    .foregroundColor(.red)
+                            } else if recordManager.records.isEmpty {
+                                Text("No records available.")
+                                    .foregroundColor(.secondary)
+                            } else {
+                                ForEach(recordManager.records, id: \.lang) { record in
+                                    NavigationLink(destination: MarkdownEditorView(meetingId: record.meetingId, lang: record.lang)) {
+                                        Text("Protokoll: \(record.lang)")
+                                    }
+                                }
+                                Button(action: {
+                                    showRecorderSelectionSheet.toggle()
+                                }) {
+                                    if userManager.user == nil {
+                                        HStack {
+                                            Image(systemName: "person.circle")
+                                            Text(selectedUserName ?? "Protokollanten auswählen")
+                                                .cornerRadius(8)
+                                        }
+                                    } else {
+                                        HStack {
+                                            Image(systemName: "person.circle")
+                                            Text(userManager.user?.name ?? "Protokollanten auswählen")
+                                                .cornerRadius(8)
+                                        }
+                                    }
+
                                 }
                             }
-                        }
-                        Button(action: {
-                            showRecorderSelectionSheet.toggle()
-                        }) {
-                            Text(selectedUserName ?? "Protokollanten auswählen")
-                                .cornerRadius(8)
+
                         }
                     }
+
                     
                     
                     // Abstimmugnen
@@ -144,24 +159,7 @@ struct MeetingDetailAdminView: View {
                             }
                         }
                     }
-                    
-//                    // Abstimmungen
-//                    Section(header: Text("Abstimmungen")) {
-//                        NavigationLink(destination: PlaceholderView()) {
-//                            HStack {
-//                                Text("Vereinsfarbe")
-//                                Spacer()
-//                                Image(systemName: "checkmark").foregroundColor(.blue)
-//                            }
-//                        }
-//                        NavigationLink(destination: PlaceholderView()) {
-//                            HStack {
-//                                Text("Abstimmung")
-//                                Spacer()
-//                                Image(systemName: "exclamationmark.arrow.circlepath").foregroundColor(.orange)
-//                            }
-//                        }
-//                    }
+
                     
 
                     
@@ -235,13 +233,18 @@ struct MeetingDetailAdminView: View {
                 )
             }
             .sheet(isPresented: $showRecorderSelectionSheet) {
-                RecorderSelectionSheet(users: userManager.users, selectedUser: $selectedUser, selectedUserName: $selectedUserName)
+                RecorderSelectionSheet(users: userManager.users, recordLang: recordManager.records.first?.lang, meetingId: meeting.id, selectedUser: $selectedUser, selectedUserName: $selectedUserName)
             }
             .onAppear(){
                 recordManager.getRecordsMeeting(meetingId: meeting.id)
                 votingManager.getRecordsMeeting(meetingId: meeting.id)
                 attendanceManager.fetchAttendances(meetingId: meeting.id)
                 userManager.fetchUsers()
+                if let userId = recordManager.records.first?.identity.id {
+                    userManager.getUser(userId: userId)
+                }
+
+                
             }
         }
     }
@@ -278,11 +281,14 @@ struct MeetingDetailAdminView: View {
 }
 struct RecorderSelectionSheet: View {
     var users: [UserProfileDTO]
+    var recordLang: String?
+    var meetingId: UUID
     @Binding var selectedUser: UUID? // Speichert die Benutzer-ID
     @Binding var selectedUserName: String? // Speichert den Benutzernamen
     @State private var searchText: String = ""
     
     @ObservedObject var userManager = UserManager()
+    @StateObject private var recordManager = RecordManager()
 
     var body: some View {
         NavigationStack { // NavigationStack hier außen
@@ -309,6 +315,7 @@ struct RecorderSelectionSheet: View {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Fertig") {
                             print("Ausgewählter Benutzer: \(selectedUserName ?? "Keiner")")
+                            saveRecord()
                             dismiss()
                         }
                     }
@@ -319,6 +326,13 @@ struct RecorderSelectionSheet: View {
             userManager.fetchUsers()
         }
     }
+    private func saveRecord() {
+        Task {
+            let patchDTO = PatchRecordDTO(identityId: selectedUser)
+            await recordManager.patchRecordMeetingLang(patchRecordDTO: patchDTO, meetingId: meetingId, lang: recordLang ?? "DE")
+        }
+    }
+    
 
     private var filteredUsers: [UserProfileDTO] {
         if searchText.isEmpty {
