@@ -11,7 +11,7 @@ struct CreateEmailVerification: AsyncMigration {
 
         try await database.schema(EmailVerification.schema)
             .id()
-            .field("user_id", .uuid, .required, .references(User.schema, "id"))
+            .field("user_id", .uuid, .required, .references(User.schema, "id", onDelete: .cascade))
             .field("email", .string, .required)
             .field("code", .string, .required)
             .field("status", verificationStatus)
