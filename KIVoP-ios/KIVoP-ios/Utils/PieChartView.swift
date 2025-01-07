@@ -62,7 +62,7 @@ struct PieChartView: View {
    var body: some View {
       Chart(votingResults.results, id: \.index) { result in
          SectorMark(
-            angle: .value("Count", result.total),
+            angle: .value("Count", result.count),
 //            innerRadius: .ratio(0.5),
             angularInset: 4
          )

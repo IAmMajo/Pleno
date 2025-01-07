@@ -181,7 +181,7 @@ class OnboardingAPI {
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = "PUT"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = jsonData
 
@@ -213,7 +213,7 @@ class OnboardingAPI {
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = "PUT"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = jsonData
 
@@ -249,7 +249,7 @@ class OnboardingAPI {
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = "PUT"
 
         URLSession.shared.dataTask(with: request) { _, response, error in
             if let error = error {
