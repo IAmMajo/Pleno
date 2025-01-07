@@ -10,11 +10,23 @@ import MeetingServiceDTOs
 
 
 struct VotingsView: View {
+   @StateObject private var webSocketService = WebSocketService()
    @StateObject private var votingService = VotingService.shared
    @StateObject private var meetingViewModel = MeetingViewModel()
    
    @State private var meetings: [GetMeetingDTO] = []
    var votings: [GetVotingDTO] {
+//      let votings = votingService.votings
+//      var openVotings: [GetVotingDTO] = []
+//      for voting in votings {
+//         if (voting.isOpen) {
+//            openVotings.append(voting)
+//         }
+//      }
+//      return openVotings
+      
+//      votingsOfMeetings = allVotings.filter { $0.isOpen }
+      
       return votingService.votings
    }
    @State private var votingResults: GetVotingResultsDTO?
@@ -81,8 +93,34 @@ struct VotingsView: View {
            }
            return meeting1Start > meeting2Start
        }
-       
+//         print("setVotingsOfMeetings sorted")
          self.votingsOfMeetings = votingsOfMeetingsSorted
+   }
+   
+   private func hasVotedForOpenVoting(votingId: UUID) async -> Bool {
+      await withCheckedContinuation { continuation in
+         webSocketService.connect(to: votingId)
+         
+         // Wait for the WebSocket to receive messages
+         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//            print("liveStatus: \(webSocketService.liveStatus ?? "")")
+//            print("votingResults: \(String(describing: webSocketService.votingResults))")
+//            print("errorMessage: \(webSocketService.errorMessage ?? "")")
+            if let liveStatus = webSocketService.liveStatus, !liveStatus.isEmpty {
+               webSocketService.disconnect()
+               continuation.resume(returning: true)
+            } else if webSocketService.votingResults != nil {
+               webSocketService.disconnect()
+               continuation.resume(returning: false)
+            } else if webSocketService.errorMessage != nil {
+               webSocketService.disconnect()
+               continuation.resume(returning: false)
+            } else {
+               webSocketService.disconnect()
+               continuation.resume(returning: false)
+            }
+         }
+      }
    }
    
    var body: some View {
@@ -97,15 +135,19 @@ struct VotingsView: View {
                     } else {
                List {
                   ForEach(votingsOfMeetings, id: \.self) { votingGroup in
-                     Votings_VotingsSectionView(votingsView: self, votingGroup: votingGroup, mockVotingResults: mockVotingResults, onVotingSelected: { voting in
+                     Votings_VotingsSectionView(
+                        votingsView: self,
+                        votingGroup: votingGroup,
+                        mockVotingResults: mockVotingResults,
+                        onVotingSelected: { voting in
                         selectedVoting = voting
                         Task {
-                           var hasVoted = false
-                           if (selectedVoting != nil) {
-                              hasVoted = VotingStateTracker.hasVoted(for: voting.id)
-                              await loadVotingResults(voting: voting)
-                           }
-                           if(votingResults?.myVote == nil && voting.isOpen && !hasVoted) {
+                           let hasVoted = await hasVotedForOpenVoting(votingId: voting.id)
+                           
+                           print(voting.isOpen)
+                           print(!hasVoted)
+                           
+                           if(voting.isOpen && !hasVoted) {
                               isShowingVoteSheet = true
                            } else {
                               navigateToResultView = true
@@ -191,6 +233,11 @@ struct VotingsView: View {
          let votings = try await votingService.fetchVotings()
          // Update the votings in the state
          votingService.votings = votings
+//         for voting in votings {
+//            if (voting.isOpen) {
+//               votingsFiltered.append(voting)
+//            }
+//         }
          votingsFiltered = votings
          print("Loaded \(votings.count) votings")
       } catch {

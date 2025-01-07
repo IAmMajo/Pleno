@@ -31,7 +31,12 @@ struct Votings_VoteView: View {
                Text(voting.question)
                   .font(.title)
                   .fontWeight(.semibold)
-                  .padding(.top).padding(.leading).padding(.trailing)
+                  .padding(.top).padding(.bottom, 2)
+                  .padding(.leading).padding(.trailing)
+               Divider()
+               Text(voting.description)
+                  .frame(maxWidth: .infinity, alignment: .center)
+                  .padding(.leading).padding(.top, 2).padding(.trailing)
                
                List(voting.options, id: \.self, selection: $selection) { option in
                   if option.index != 0 {

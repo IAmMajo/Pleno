@@ -574,9 +574,6 @@
         }
       }
     },
-    "Connecting..." : {
-
-    },
     "Count" : {
 
     },
@@ -1896,9 +1893,6 @@
           }
         }
       }
-    },
-    "Voting Results:" : {
-
     },
     "Weiter" : {
       "localizations" : {

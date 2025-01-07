@@ -9,35 +9,67 @@ import SwiftUI
 import MeetingServiceDTOs
 
 struct VotingLiveStatusView: View {
-    @ObservedObject var webSocketManager = WebSocketManager()
-    let votingId: UUID
-    
-    var body: some View {
-        VStack {
-            if let liveStatus = webSocketManager.liveStatus {
-                Text("Live Status: \(liveStatus)")
-                    .font(.headline)
-            } else if let votingResults = webSocketManager.votingResults {
-                Text("Voting Results:")
-                    .font(.headline)
-                Text("\(votingResults)") // Customize the display as needed
-            } else if let errorMessage = webSocketManager.errorMessage {
-                Text("Error: \(errorMessage)")
-                    .foregroundColor(.red)
-            } else {
-                Text("Connecting...")
-                    .font(.subheadline)
-            }
-        }
-        .onAppear {
-            webSocketManager.connect(toVotingId: votingId)
-        }
-        .onDisappear {
-            webSocketManager.disconnect()
-        }
-    }
+   @StateObject private var webSocketService: WebSocketService
+   let votingId: UUID
+   @State var votingResults: GetVotingResultsDTO
+   
+   init(votingId: UUID) {
+      self.votingId = votingId
+      _webSocketService = StateObject(wrappedValue: WebSocketService())
+      self.votingResults = VotingsView().mockVotingResults
+   }
+   
+   var body: some View {
+      VStack {
+         if let liveStatus = webSocketService.liveStatus {
+            Text("Live Status: \(liveStatus)")
+               .font(.title)
+               .padding()
+         }
+         
+         if let votingResults = webSocketService.votingResults {
+//            Text("Voting Results: \(self.votingResults)")
+//               .font(.headline)
+//               .padding()
+//            List{
+//               Section {
+//                  ForEach (self.votingResults.results, id: \.self) { result in
+//                     HStack {
+//                        Image(systemName: self.votingResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill")
+//                       
+//                        Spacer()
+//                        Text("\(result.percentage, specifier: "%.2f")%")
+//                           .opacity(0.6)
+//                     }
+//                  }
+//               } header: {
+//                  Spacer(minLength: 0).listRowInsets(EdgeInsets())
+//               }
+//            }
+//            .onAppear() {
+//               self.votingResults = votingResults
+//            }
+         }
+         
+         if let errorMessage = webSocketService.errorMessage {
+            Text("Error: \(errorMessage)")
+               .foregroundColor(.red)
+         }
+      }
+      .onAppear {
+         webSocketService.connect(to: votingId)
+//         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//            print("liveStatus: \(webSocketService.liveStatus ?? "")")
+//            print("votingResults: \(String(describing: webSocketService.votingResults))")
+//            print("errorMessage: \(webSocketService.errorMessage ?? "")")
+//         }
+      }
+      .onDisappear {
+         webSocketService.disconnect()
+      }
+   }
 }
 
 #Preview {
-   VotingLiveStatusView(votingId: UUID(uuidString: "4CF57888-E6AC-4B56-92D5-2D081480A10C")!)
+   VotingLiveStatusView(votingId: UUID(uuidString: "")!)
 }

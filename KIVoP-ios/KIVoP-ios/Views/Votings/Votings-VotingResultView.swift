@@ -59,7 +59,7 @@ struct Votings_VotingResultView: View {
                                .foregroundStyle(getColor(index: result.index))
                             Text(optionTextMap[result.index] ?? "")
                             Spacer()
-                            Text("\(result.percentage, specifier: "%.2f")%") //mit 1-2 Nachkommastellen?
+                            Text("\(result.percentage, specifier: "%.2f")%")
                                .opacity(0.6)
                          }
                       }
@@ -72,7 +72,7 @@ struct Votings_VotingResultView: View {
                 .environment(\.defaultMinListHeaderHeight, 10)
              }
           } else {
-//             VotingLiveStatusView(votingId: UUID(uuidString: "4CF57888-E6AC-4B56-92D5-2D081480A10C")!)
+//             VotingLiveStatusView(votingId: voting.id)
              ContentUnavailableView(
                "Die Abstimmung läuft noch",
                systemImage: "chart.pie.fill",

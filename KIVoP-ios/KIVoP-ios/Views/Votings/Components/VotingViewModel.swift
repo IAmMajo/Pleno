@@ -10,13 +10,15 @@ import MeetingServiceDTOs
 
 @MainActor
 class VotingViewModel: ObservableObject, Identifiable {
-   let voting: GetVotingDTO
+   let id: UUID
+   @Published var voting: GetVotingDTO
    @Published var symbolColor: Color = .black
    @Published var status: String = ""
    @Published var isLoading: Bool = false
    let hasVoted: Bool
    
    init(voting: GetVotingDTO) {
+      self.id = voting.id 
       self.voting = voting
       self.hasVoted = VotingStateTracker.hasVoted(for: voting.id)
    }
