@@ -44,8 +44,25 @@ struct Onboarding_Login: View {
 
                 // Password TextField
                 inputField(title: "Passwort", text: $password, isSecure: true)
+                
+                // "Passwort vergessen?" Link
+                NavigationLink(destination: ForgotPasswordView()) {
+                    Text("Passwort vergessen?")
+                        .foregroundColor(.blue)
+                        .font(.footnote)
+                        .padding(.top, 5)
+                    }
+
 
                 Spacer()
+                
+                // Error Message
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                        .padding(.horizontal, 24)
+                }
 
                 // Login Button
                 Button(action: {
@@ -70,13 +87,6 @@ struct Onboarding_Login: View {
                 .padding(.bottom, 10)
                 .disabled(isLoading || email.isEmpty || password.isEmpty)
 
-                // Error Message
-                if let errorMessage = errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.footnote)
-                        .padding(.horizontal, 24)
-                }
 
                 // Register Button
                 NavigationLink(destination: Onboarding_Register(isLoggedIn: $isLoggedIn)) {
