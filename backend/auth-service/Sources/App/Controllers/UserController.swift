@@ -339,8 +339,6 @@ struct UserController: RouteCollection {
         
         let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(verificationCode)"
         
-        print("Verifizierung: \(verifyLink)")
-        
         let emailData = SendEmailDTO(
             receiver: user.email,
             subject: "Email-Verifizierung",
@@ -370,29 +368,20 @@ struct UserController: RouteCollection {
             throw Abort(.notFound, reason: "No user found with the given email")
         }
         
-        guard let emailVerification =  try await user.$emailVerification.get(on: req.db),
-              emailVerification.status != .verified else {
-            throw Abort(.badRequest, reason: "User's email has not been verified")
+        guard let emailVerification = try await user.$emailVerification.get(on: req.db),
+              emailVerification.status == .pending else {
+            throw Abort(.badRequest, reason: "User's email has already been verified")
         }
         
         if emailVerification.expiresAt! < Date() {
-            print("Verifizierung ist abgelaufen. Generiere neuen Code...")
             let newVerificationCode = String(format: "%06d", Int.random(in: 0...999999))
             
-            let newExpirationDate = Date().addingTimeInterval(3600)
-            let newEmailVerification = EmailVerification(
-                user: emailVerification.$user.id,
-                email: emailVerification.email,
-                code: newVerificationCode,
-                status: .pending,
-                expiresAt: newExpirationDate
-            )
+            emailVerification.code = newVerificationCode
+            emailVerification.expiresAt = Date().addingTimeInterval(3600)
             
-            try await newEmailVerification.save(on: req.db)
+            try await emailVerification.save(on: req.db)
             
             let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(newVerificationCode)"
-            
-            print("Verifizierung: \(verifyLink)")
             
             let emailData = SendEmailDTO(
                 receiver: user.email,
@@ -409,11 +398,8 @@ struct UserController: RouteCollection {
             }
             return Response(status: .ok, body: .init(string: "A new verification email has been sent"))
         } else {
-            print("Verifizierung noch gültig")
-            
+
             let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailVerification.code)"
-            
-            print("Verifizierung: \(verifyLink)")
             
             let emailData = SendEmailDTO(
                 receiver: user.email,
@@ -445,12 +431,11 @@ struct UserController: RouteCollection {
         
         let users = try await User.query(on: req.db)
             .with(\.$identity)
-            .join(EmailVerification.self, on: \User.$id == \EmailVerification.$user.$id)
+            .with(\.$emailVerification)
             .all()
         var userProfiles: [UserProfileDTO] = []
         
         for user in users {
-            let emailVerification = try user.joined(EmailVerification.self)
             let profileDTO = UserProfileDTO(
                 uid: user.id,
                 email: user.email,
@@ -458,7 +443,7 @@ struct UserController: RouteCollection {
                 profileImage: user.profileImage,
                 isAdmin: user.isAdmin,
                 isActive: user.isActive,
-                emailVerification: VerificationStatus(rawValue: emailVerification.status.rawValue),
+                emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue),
                 createdAt: user.createdAt
             )
             userProfiles.append(profileDTO)
@@ -484,11 +469,10 @@ struct UserController: RouteCollection {
         guard let user = try await User.query(on: req.db)
             .filter(\.$id == userID)
             .with(\.$identity)
-            .join(EmailVerification.self, on: \User.$id == \EmailVerification.$user.$id)
+            .with(\.$emailVerification)
             .first() else {
             throw Abort(.notFound, reason: "User not found")
         }
-        let emailVerification = try user.joined(EmailVerification.self)
     
         // Gibt ProfilDTO zurück
         return UserProfileDTO(
@@ -498,7 +482,7 @@ struct UserController: RouteCollection {
             profileImage: user.profileImage,
             isAdmin: user.isAdmin,
             isActive: user.isActive,
-            emailVerification: VerificationStatus(rawValue: emailVerification.status.rawValue),
+            emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue),
             createdAt: user.createdAt
         )
     }
@@ -514,13 +498,20 @@ struct UserController: RouteCollection {
         guard let userID = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid or missing user ID")
         }
-        let identities = try await Identity.query(on: req.db)
-            .join(IdentityHistory.self, on: \Identity.$id == \IdentityHistory.$identity.$id)
-            .filter(IdentityHistory.self, \.$user.$id == userID)
+        let identityHistories = try await IdentityHistory.query(on: req.db)
+            .with(\.$identity)
+            .filter(\.$user.$id == userID)
             .all()
         
-        guard !identities.isEmpty else {
+        guard !identityHistories.isEmpty else {
             throw Abort(.notFound, reason: "No identities found for user")
+        }
+        
+        let identities = identityHistories.map { history in
+            Identity(
+                id: history.id,
+                name: history.identity.name
+            )
         }
         return identities
     }
@@ -591,12 +582,10 @@ struct UserController: RouteCollection {
             throw Abort(.badRequest, reason: "Invalid or missing identity ID")
         }
         guard let identity = try await Identity.query(on: req.db)
-            .join(IdentityHistory.self, on: \Identity.$id == \IdentityHistory.$identity.$id)
-            .filter(IdentityHistory.self, \.$identity.$id == identityId)
+            .filter(\.$id == identityId)
             .first() else {
             throw Abort(.notFound, reason: "Identity not found")
         }
-        
         guard let user = try await User.query(on: req.db)
             .filter(\.$identity.$id == identity.id!)
             .first() else {
@@ -623,12 +612,20 @@ struct UserController: RouteCollection {
         guard let payload = req.jwtPayload else {
             throw Abort(.unauthorized)
         }
-        let identities = try await Identity.query(on: req.db)
-            .join(IdentityHistory.self, on: \Identity.$id == \IdentityHistory.$identity.$id)
-            .filter(IdentityHistory.self, \.$user.$id == payload.userID)
+        let identityHistories = try await IdentityHistory.query(on: req.db)
+            .with(\.$identity)
+            .filter(\.$user.$id == payload.userID)
             .all()
-        guard !identities.isEmpty else {
+        
+        guard !identityHistories.isEmpty else {
             throw Abort(.notFound, reason: "No identities found for user")
+        }
+        
+        let identities = identityHistories.map { history in
+            Identity(
+                id: history.id,
+                name: history.identity.name
+            )
         }
         return identities
     }
