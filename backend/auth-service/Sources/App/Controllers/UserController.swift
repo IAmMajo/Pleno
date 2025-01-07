@@ -509,7 +509,7 @@ struct UserController: RouteCollection {
         
         let identities = identityHistories.map { history in
             Identity(
-                id: history.id,
+                id: history.identity.id,
                 name: history.identity.name
             )
         }
@@ -623,7 +623,7 @@ struct UserController: RouteCollection {
         
         let identities = identityHistories.map { history in
             Identity(
-                id: history.id,
+                id: history.identity.id,
                 name: history.identity.name
             )
         }
