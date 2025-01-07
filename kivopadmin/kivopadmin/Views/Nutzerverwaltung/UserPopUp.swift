@@ -1,71 +1,64 @@
 import SwiftUI
-import MeetingServiceDTOs
 import AuthServiceDTOs
 
 struct UserPopupView: View {
-    @Binding var user: UserProfileDTO // Benutzer als Binding
-    
+    @Binding var user: UserProfileDTO
     @Binding var isPresented: Bool
-    @State var selectedRole = "Protokollant"
-    @State var wip = "WIP"
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
                 VStack {
-                    Circle()
-                        .fill(Color.gray)
-                        .frame(width: 110, height: 110)
-                        .overlay(
-                            Text(user.name?.prefix(2) ?? "NN")
-                                .font(.system(size: 50)) // Schriftgröße festlegen
-                                .foregroundColor(.white)
-                        )
+                    if let imageData = user.profileImage, let uiImage = UIImage(data: imageData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 110, height: 110)
+                            .clipShape(Circle())
+                    } else {
+                        Circle()
+                            .fill(Color.gray)
+                            .frame(width: 110, height: 110)
+                            .overlay(
+                                Text(MainPageAPI.calculateInitials(from: user.name))
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.white)
+                            )
+                    }
                 }
+
                 HStack {
-                    Text("Name")
+                    Text("Name:")
                     Spacer()
-                    Text("\(user.name ?? "Unbekannt")").foregroundColor(.gray)
+                    Text(user.name ?? "Unbekannt").foregroundColor(.gray)
                 }
                 Divider()
                 HStack {
-                    Text("Rolle")
+                    Text("E-Mail:")
                     Spacer()
-                    Text(selectedRole).foregroundColor(.gray)
+                    Text(user.email ?? "Keine E-Mail").foregroundColor(.gray)
                 }
                 Divider()
                 HStack {
-                    Text("WIP")
+                    Text("Admin:")
                     Spacer()
-                    Text(wip).foregroundColor(.gray)
+                    Text(user.isAdmin == true ? "Ja" : "Nein").foregroundColor(.gray)
                 }
+                Divider()
+                HStack {
+                    Text("Aktiv:")
+                    Spacer()
+                    Text(user.isActive == true ? "Ja" : "Nein").foregroundColor(.gray)
+                }
+
                 Spacer()
-                
-                Button("Account löschen") {
-                    // Account löschen
+
+                Button("Schließen") {
+                    isPresented = false
                 }
-                .padding()
-                .frame(width: 400)
-                .background(Color.red)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                
-                Divider()
-                
-                // Nutzer bearbeiten
-                NavigationLink(destination: UserEditView(user: $user, selectedRole: $selectedRole, wip: $wip)) {
-                    Text("Nutzer bearbeiten")
-                        .foregroundColor(.blue)
-                }
-                .buttonStyle(PlainButtonStyle())
+                .foregroundColor(.blue)
             }
             .padding()
-            .navigationBarItems(leading: Button(action: {
-                isPresented = false
-            }) {
-                Text("Schließen") // Button-Text für den Schließen-Button
-                    .foregroundColor(.blue)
-            })
         }
     }
 }
