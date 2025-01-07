@@ -94,7 +94,7 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.auth-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/auth-service`) || PathPrefix(`/auth`) || PathPrefix(`/users`))
+      traefik.http.routers.auth-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/auth-service`) || PathPrefix(`/auth`) || PathPrefix(`/users`) || PathPrefix(`/.well-known`))
       traefik.http.routers.auth-service.middlewares: auth-service-replace-path-regex
       traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.regex: ^/auth-service(:/(.*))?
       traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.replacement: /$$1
