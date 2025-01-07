@@ -213,7 +213,7 @@ services:
       traefik.enable: true
       traefik.http.routers.poster-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/poster-service`) || PathPrefix(`/poster`))
       traefik.http.routers.poster-service.middlewares: poster-service-replace-path-regex
-      traefik.http.middlewares.poster-service-replace-path-regex.replacepathregex.regex: ^/rposter-service(:/(.*))?
+      traefik.http.middlewares.poster-service-replace-path-regex.replacepathregex.regex: ^/poster-service(:/(.*))?
       traefik.http.middlewares.poster-service-replace-path-regex.replacepathregex.replacement: /$$1
       traefik.http.routers.poster-service.entrypoints: https
       traefik.http.routers.poster-service.tls: true
