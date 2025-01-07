@@ -86,7 +86,8 @@ struct PosterController: RouteCollection, Sendable {
             path: .type(Poster.IDValue.self),
             body: nil,
             response: .type(PosterResponseDTO.self),
-            responseContentType: .application(.json)
+            responseContentType: .application(.json),
+            auth: .bearer()
         )
         
         authProtected.get(use: getPosters).openAPI(
@@ -101,7 +102,8 @@ struct PosterController: RouteCollection, Sendable {
             query:["page":.integer,"per":.integer],
             body: nil,
             response: .type(PosterResponseDTO.self),
-            responseContentType: .application(.json)
+            responseContentType: .application(.json),
+            auth: .bearer()
         )
         authProtected.post(use: createPoster).openAPI(
             summary: "Erstellt ein neues Poster",
@@ -119,7 +121,8 @@ struct PosterController: RouteCollection, Sendable {
             body: .type(CreatePosterDTO.self),
             contentType: .multipart(.formData),
             response: .type(PosterResponseDTO.self),
-            responseContentType: .application(.json)
+            responseContentType: .application(.json),
+            auth: .bearer()
         )
         authProtected.patch(":posterId", use: updatePoster).openAPI(
             summary: "Updatet ein Poster",
@@ -138,7 +141,8 @@ struct PosterController: RouteCollection, Sendable {
             body: .type(UpdatePosterDTO.self),
             contentType: .multipart(.formData),
             response: .type(PosterResponseDTO.self),
-            responseContentType: .application(.json)
+            responseContentType: .application(.json),
+            auth: .bearer()
         )
         
         let adminRoutesPoster = authProtected.grouped(adminMiddleware)
@@ -147,26 +151,33 @@ struct PosterController: RouteCollection, Sendable {
             description: """
                 Löscht ein vorhandenes Poster anhand seiner ID. Das zugehörige Bild wird ebenfalls entfernt.
                 Des Weiteren werden auch die zugehörigen Poster Positionen gelöscht samt zugehöriger Bilder.
+                Die Request kann nur von einem Admin erstellt werden.
+                
                 **Ablauf:**
                 - Gib die ID des zu löschenden Posters als Pfadparameter `:id` an.
                 - Bei Erfolg wird ein HTTP-Status `204 No Content` zurückgegeben.
                 """,
             query:[],
-            path: .type(Poster.IDValue.self)
+            path: .type(Poster.IDValue.self),
+            statusCode: .noContent,
+            auth: .bearer()
         )
         adminRoutesPoster.delete("batch", use: deletePosters).openAPI(
             summary: "Löscht mehrere Poster",
             description: """
                 Löscht mehrere Poster anhand einer Liste von IDs. Die zugehörigen Bilder werden ebenfalls entfernt.
                 Des Weiteren werden auch die zugehörigen Poster Positionen gelöscht samt zugehöriger Bilder.
+                Die Request kann nur von einem Admin erstellt werden.
+                
                 **Ablauf:**
                 - Senden Sie ein `DeleteDTO` mit einem Array von Poster-IDs.
                 - Falls eine oder mehrere IDs nicht gefunden werden, wird ein Fehler zurückgegeben.
                 - Bei Erfolg wird ein HTTP-Status `204 No Content` zurückgegeben.
                 """,            query:[],
             body: .type(DeleteDTO.self),
-            contentType: .application(.json)
-            
+            contentType: .application(.json),
+            statusCode: .noContent,
+            auth: .bearer()
         )
         
         // PosterPosition-Routen
@@ -196,24 +207,8 @@ struct PosterController: RouteCollection, Sendable {
             query:["page":.integer,"per":.integer,"status":.string],
             body: nil,
             response: .type(PosterPositionResponseDTO.self),
-            responseContentType: .application(.json)
-        )
-        
-        posterPositions.post(use: createPosterPosition).openAPI(
-            summary: "Erstellt eine neue Poster-Position",
-            description: """
-                Erstellt eine neue Poster-Position mit optionalem Poster-Bezug, Koordinaten, Verantwortlichen und Ablaufdatum.
-                Der Request muss als `multipart/form-data` gesendet werden und kann ein Bild enthalten.
-                
-                **Ablauf:**
-                - Sende ein `CreatePosterPositionDTO` mit den erforderlichen Daten.
-                - Bei Erfolg gibt die Route ein `PosterPositionResponseDTO` mit allen Details zurück.
-                """,
-            query:[],
-            body: .type(CreatePosterPositionDTO.self),
-            contentType: .application(.json),
-            response: .type(PosterPositionResponseDTO.self),
-            responseContentType: .application(.json)
+            responseContentType: .application(.json),
+            auth: .bearer()
         )
         
         posterPositions.put("hang", use: hangPosterPosition).openAPI(
@@ -230,7 +225,8 @@ struct PosterController: RouteCollection, Sendable {
             body: .type(HangPosterPositionDTO.self),
             contentType: .multipart(.formData),
             response: .type(HangPosterPositionResponseDTO.self),
-            responseContentType: .application(.json)
+            responseContentType: .application(.json),
+            auth: .bearer()
         )
         
         posterPositions.put("take-down", use: takeDownPosterPosition).openAPI(
@@ -247,17 +243,38 @@ struct PosterController: RouteCollection, Sendable {
             body: .type(TakeDownPosterPositionDTO.self),
             contentType: .application(.json),
             response: .type(TakeDownPosterPositionResponseDTO.self),
-            responseContentType: .application(.json)
+            responseContentType: .application(.json),
+            auth: .bearer()
         )
         
         
         let adminRoutesPosterPositions = posterPositions.grouped(adminMiddleware)
+        
+        adminRoutesPosterPositions.post(use: createPosterPosition).openAPI(
+            summary: "Erstellt eine neue Poster-Position",
+            description: """
+                Erstellt eine neue Poster-Position mit Poster-Bezug, Koordinaten, Verantwortlichen und Ablaufdatum.
+                Die Request kann nur von einem Admin erstellt werden.
+                
+                **Ablauf:**
+                - Sende ein `CreatePosterPositionDTO` mit den erforderlichen Daten.
+                - Bei Erfolg gibt die Route ein `PosterPositionResponseDTO` mit allen Details zurück.
+                """,
+            query:[],
+            body: .type(CreatePosterPositionDTO.self),
+            contentType: .application(.json),
+            response: .type(PosterPositionResponseDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+        )
+        
         adminRoutesPosterPositions.patch(":positionId", use: updatePosterPosition).openAPI(
             summary: "Aktualisiert eine bestehende Poster-Position",
             description: """
                 Aktualisiert eine vorhandene Poster-Position anhand ihrer ID. Der Request muss als `multipart/form-data` gesendet werden.
                 Nur die Felder, die im `UpdatePosterPositionDTO` gesetzt sind, werden aktualisiert. Neue Verantwortliche können hinzugefügt,
                 bestehende entfernt und ein neues Bild hochgeladen werden (das alte wird dann gelöscht).
+                Die Request kann nur von einem Admin erstellt werden.
                 
                 **Ablauf:**
                 - Pfadparameter `:positionId` für die ID der zu aktualisierenden Position angeben.
@@ -269,25 +286,30 @@ struct PosterController: RouteCollection, Sendable {
             body: .type(UpdatePosterPositionDTO.self),
             contentType: .multipart(.formData),
             response: .type(PosterPositionResponseDTO.self),
-            responseContentType: .application(.json)
+            responseContentType: .application(.json),
+            auth: .bearer()
         )
+        
         
         adminRoutesPosterPositions.delete(":id", use: deletePosterPosition).openAPI(
             summary: "Löscht ein Poster",
             description: """
                 Löscht eine vorhandene Poster-Position anhand ihrer ID. Das zugehörige Bild wird ebenfalls entfernt.
+                Die Request kann nur von einem Admin erstellt werden.
                 
                 **Ablauf:**
                 - Geben Sie die ID der zu löschenden Poster-Position als Pfadparameter `:id` an.
                 - Bei Erfolg wird ein HTTP-Status `204 No Content` zurückgegeben.
                 """,            query:[],
-            path: .type(PosterPosition.IDValue.self)
+            path: .type(PosterPosition.IDValue.self),
+            statusCode: .noContent,
+            auth: .bearer()
         )
         adminRoutesPosterPositions.delete("batch", use: deletePosterPositions).openAPI(
             summary: "Löscht mehrere Poster Positonen",
             description: """
                 Löscht mehrere Poster-Positionen anhand einer übergebenen Liste von IDs. Die zugehörigen Bilder werden ebenfalls entfernt.
-                
+                Die Request kann nur von einem Admin erstellt werden.                
                 **Ablauf:**
                 - Senden Sie ein `DeleteDTO` mit einem Array von PosterPositions-IDs.
                 - Falls eine oder mehrere IDs nicht gefunden werden, wird ein Fehler zurückgegeben.
@@ -295,7 +317,9 @@ struct PosterController: RouteCollection, Sendable {
                 """,
             query:[],
             body: .type(DeleteDTO.self),
-            contentType: .application(.json)
+            contentType: .application(.json),
+            statusCode: .noContent,
+            auth: .bearer()
         )
         let images = authProtected.grouped("images")
         // Bild-Routen
@@ -310,7 +334,8 @@ struct PosterController: RouteCollection, Sendable {
             """,
             path: ["folder": .string,"imageURL": .string],
             body: nil,
-            responseContentType: .init("image/jpeg")
+            responseContentType: .init("image/jpeg"),
+            auth: .bearer()
         )
     }
     
