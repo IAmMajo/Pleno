@@ -9,32 +9,28 @@ import SwiftUI
 
 struct NewRideView: View {
     @ObservedObject var viewModel: NewRideViewModel
+    @State var showingSaveAlert = false
+    @State var showingBackAlert = false
+    @State var showingSelectionAlert = false
     @Environment(\.dismiss) private var dismiss
-    @State private var showingSaveAlert = false
-    @State private var showingBackAlert = false
 
     var body: some View {
         NavigationStack {
             VStack {
-                List {
-                    Section(header: Text("Details der Fahrt")){
-                        
-                    }
-                    Section(header: Text("Startort")){
-                        
-                    }
-                    Section(header: Text("Zielort")){
-                        
-                    }
-                    Section(header: Text("Auto und Sitzplätze")){
-                        
+                if let selectedOption = viewModel.selectedOption {
+                    if selectedOption == "EventFahrt" {
+                        CreateEventRideView(viewModel: viewModel, selectedOption: $viewModel.selectedOption)
+                    } else if selectedOption == "SonderFahrt" {
+                        CreateSpecialRideView(viewModel: viewModel, selectedOption: $viewModel.selectedOption)
                     }
                 }
-                .listStyle(.insetGrouped)
             }
             .navigationTitle("Neue Fahrt")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
+            .onAppear {
+                showingSelectionAlert = true
+            }
             .toolbar {
                 // Speichern Button
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -71,16 +67,27 @@ struct NewRideView: View {
                     .alert(isPresented: $showingBackAlert) {
                         Alert(
                             title: Text("Möchtest du wirklich zurück?"),
-                             message: Text("Deine gesamten Änderungen gehen verloren!"),
-                             primaryButton:.default(Text("Nein")),
-                            secondaryButton:.destructive(Text("Ja").foregroundColor(.red), action: {
-                                 dismiss()
-                             })
+                            message: Text("Deine gesamten Änderungen gehen verloren!"),
+                            primaryButton: .default(Text("Nein")),
+                            secondaryButton: .destructive(Text("Ja").foregroundColor(.red), action: {
+                                dismiss()
+                            })
                         )
                     }
                 }
             }
+            .alert(isPresented: $showingSelectionAlert) {
+                Alert(
+                    title: Text("Wähle die Art der Fahrt"),
+                    message: Text("Bitte wähle, ob du eine Event Fahrt oder eine Sonderfahrt anlegen möchtest."),
+                    primaryButton: .default(Text("Event Fahrt"), action: {
+                        viewModel.selectedOption = "EventFahrt"
+                    }),
+                    secondaryButton: .default(Text("Sonderfahrt"), action: {
+                        viewModel.selectedOption = "SonderFahrt"
+                    })
+                )
+            }
         }
     }
 }
-

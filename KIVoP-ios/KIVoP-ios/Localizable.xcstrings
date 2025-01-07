@@ -523,6 +523,12 @@
     "Beschreibung" : {
 
     },
+    "Beschreibung Auto" : {
+
+    },
+    "Beschreibung der Fahrt" : {
+
+    },
     "Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt." : {
 
     },
@@ -550,6 +556,9 @@
           }
         }
       }
+    },
+    "Bitte wähle, ob du eine Event Fahrt oder eine Sonderfahrt anlegen möchtest." : {
+
     },
     "Code scannen" : {
       "localizations" : {
@@ -716,10 +725,19 @@
         }
       }
     },
+    "Event Fahrt" : {
+
+    },
+    "Event-spezifische Details" : {
+
+    },
     "Events" : {
 
     },
     "Fahrgemeinschaften" : {
+
+    },
+    "Fahrzeug und Sitzplatzdetails" : {
 
     },
     "Fast fertig" : {
@@ -749,6 +767,9 @@
 
     },
     "Franz" : {
+
+    },
+    "Freie Plätze" : {
 
     },
     "Galerie" : {
@@ -1154,6 +1175,9 @@
           }
         }
       }
+    },
+    "Name der Fahrt" : {
+
     },
     "Name eingeben" : {
 
@@ -1628,6 +1652,9 @@
         }
       }
     },
+    "Sonderfahrt" : {
+
+    },
     "Sonstige Fahrten" : {
 
     },
@@ -1660,6 +1687,12 @@
 
     },
     "Startort" : {
+
+    },
+    "Startort für die Event Fahrt" : {
+
+    },
+    "Startzeit" : {
 
     },
     "Suchen" : {
@@ -1917,6 +1950,9 @@
         }
       }
     },
+    "Wähle die Art der Fahrt" : {
+
+    },
     "Weiter" : {
       "localizations" : {
         "de" : {
@@ -1962,6 +1998,12 @@
       }
     },
     "Zielort" : {
+
+    },
+    "Zielort eingeben" : {
+
+    },
+    "Zielort für die Event Fahrt" : {
 
     },
     "zu einer verbesserten " : {
