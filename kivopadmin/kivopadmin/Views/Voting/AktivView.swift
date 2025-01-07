@@ -3,31 +3,27 @@ import MeetingServiceDTOs
 
 struct AktivView: View {
     let voting: GetVotingDTO
-    let votingResults: GetVotingResultsDTO?
     let onBack: () -> Void
 
+    @StateObject private var webSocketManager: WebSocketManager
     @State private var isClosing = false
     @State private var errorMessage: String?
 
-    var totalVotes: Int {
-        guard let results = votingResults?.results else { return 0 }
-        return results.reduce(0) { $0 + Int($1.total) }
-    }
-
-    var optionTextMap: [UInt8: String] {
-        Dictionary(uniqueKeysWithValues: voting.options.map { ($0.index, $0.text) })
+    init(voting: GetVotingDTO, onBack: @escaping () -> Void) {
+        self.voting = voting
+        self.onBack = onBack
+        _webSocketManager = StateObject(wrappedValue: WebSocketManager(url: URL(string: "wss://kivop.ipv64.net/meetings/votings/\(voting.id)/live-status")!))
     }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                // Frage anzeigen
+                // Frage und Beschreibung anzeigen
                 Text(voting.question)
                     .font(.title)
                     .bold()
                     .padding()
 
-                // Beschreibung anzeigen (falls vorhanden)
                 if !voting.description.isEmpty {
                     Text(voting.description)
                         .font(.body)
@@ -35,9 +31,10 @@ struct AktivView: View {
                         .padding([.leading, .trailing])
                 }
 
-                if let results = votingResults, !results.results.isEmpty {
-                    // Grafische Ergebnisse (Pie Chart)
-                    Text("Ergebnisse")
+
+                // Echtzeit-Ergebnisse anzeigen
+                if let results = webSocketManager.liveResults {
+                    Text("Echtzeit-Ergebnisse")
                         .font(.headline)
                         .padding(.top)
 
@@ -45,28 +42,15 @@ struct AktivView: View {
                         .frame(height: 200)
                         .padding()
 
-                    // Tabellarische Ergebnisse
-                    VStack(alignment: .leading, spacing: 8) {
-                        TableView2(results: results.results, optionTextMap: optionTextMap, totalVotes: totalVotes)
-                    }
-                    .padding([.leading, .trailing])
+                    TableView2(results: results.results, optionTextMap: optionTextMap, totalVotes: totalVotes(results: results.results))
+                        .padding([.leading, .trailing])
                 } else {
-                    // Optionen in moderner Tabelle anzeigen
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Auswahlmöglichkeiten")
-                            .font(.headline)
-                            .padding(.bottom, 8)
-
-                        TableView(options: voting.options)
-                    }
-                    .padding([.leading, .trailing])
-
-                    Text("Keine Ergebnisse verfügbar.")
+                    Text("Warte auf Echtzeit-Daten...")
                         .foregroundColor(.gray)
                         .padding()
                 }
 
-                // Fehlermeldung anzeigen
+                // Fehler anzeigen
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
@@ -78,7 +62,18 @@ struct AktivView: View {
                 actionButton(title: "Umfrage abschließen", icon: "checkmark", color: .orange, action: closeVoting)
             }
         }
-        .background(Color.white)
+        .onDisappear {
+            webSocketManager.disconnect()
+        }
+    }
+
+    private var optionTextMap: [UInt8: String] {
+        Dictionary(uniqueKeysWithValues: voting.options.map { ($0.index, $0.text) })
+    }
+
+    private func totalVotes(results: [GetVotingResultDTO]?) -> Int {
+        guard let results = results else { return 0 }
+        return results.reduce(0) { $0 + Int($1.count) }
     }
 
     private func actionButton(title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
@@ -128,7 +123,6 @@ struct AktivView: View {
     }
 }
 
-// MARK: - TableView2 Component
 struct TableView2: View {
     let results: [GetVotingResultDTO]?
     let optionTextMap: [UInt8: String]?
@@ -143,7 +137,7 @@ struct TableView2: View {
                             .font(.body)
                             .bold()
                         Spacer()
-                        Text("\(result.total) Stimmen (\(percentage(for: result, totalVotes: totalVotes))%)")
+                        Text("\(result.count) Stimmen (\(percentage(for: result, totalVotes: totalVotes))%)")
                             .font(.body)
                     }
                     Divider()
@@ -154,8 +148,7 @@ struct TableView2: View {
 
     private func percentage(for result: GetVotingResultDTO, totalVotes: Int) -> String {
         guard totalVotes > 0 else { return "0" }
-        let percent = Double(result.total) / Double(totalVotes) * 100
+        let percent = Double(result.count) / Double(totalVotes) * 100
         return String(format: "%.1f", percent)
     }
 }
-

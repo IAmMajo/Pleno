@@ -5,7 +5,7 @@ struct PendingRequestsNavigationView: View {
     @Binding var isPresented: Bool
     var onListUpdate: (() -> Void)? = nil // Optionaler Callback für Updates
 
-    @State private var requests: [UserEmailVerificationDTO] = [] // Liste der Nutzeranfragen
+    @State private var requests: [UserProfileDTO] = [] // Liste der Nutzeranfragen
     @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
 
