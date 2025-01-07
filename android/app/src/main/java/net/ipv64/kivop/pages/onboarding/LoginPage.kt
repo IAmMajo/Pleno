@@ -2,6 +2,7 @@ package net.ipv64.kivop.pages.onboarding
 
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -84,7 +85,7 @@ fun LoginPage(navController: NavController) {
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = Color.Transparent, contentColor = Signal_blue),
-              onClick = { navController.navigate(OnboardingScreen.Description1.rout) }) {
+              onClick = { navController.navigate(OnboardingScreen.Register.rout) }) {
                 Text(
                     text = "Regestrieren",
                     style = MaterialTheme.typography.labelMedium,
@@ -97,9 +98,13 @@ fun LoginPage(navController: NavController) {
                       containerColor = Signal_blue, contentColor = Text_prime_light),
               onClick = {
                 scope.launch {
-                  val success = handleLogin(email, password)
-                  if (success) {
+                  val response = handleLogin(email, password)
+                  if (response === "Successful Login!") {
                     navigateToMainActivity(navController.context)
+                  } else if (response === "This account is inactiv") {
+                    navController.navigate(OnboardingScreen.AlmostDone.rout)
+                  } else{
+                    Toast.makeText(navController.context, "Login failed", Toast.LENGTH_SHORT).show()
                   }
                 }
               }) {
@@ -109,7 +114,7 @@ fun LoginPage(navController: NavController) {
   }
 }
 
-private suspend fun handleLogin(email: String, password: String): Boolean {
+private suspend fun handleLogin(email: String, password: String): String? {
   return auth.login(email, password)
 }
 

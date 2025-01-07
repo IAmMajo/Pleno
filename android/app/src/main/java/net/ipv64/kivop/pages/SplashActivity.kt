@@ -30,16 +30,22 @@ import net.ipv64.kivop.ui.theme.Primary
 class SplashActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    
+    
     setContent {
       Surface(
           modifier = Modifier.background(Background_prime).fillMaxSize(),
       ) {
         val context = this
-        var isLoggedIn by remember { mutableStateOf<Boolean?>(null) }
+        var hasCredentials by remember { mutableStateOf<Boolean?>(null) }
         LaunchedEffect(Unit) {
-          isLoggedIn = auth.isLoggedIn()
-          if (isLoggedIn as Boolean) {
-            navigateToMainActivity(context)
+          hasCredentials = auth.hasCredentials()
+          if (hasCredentials as Boolean) {
+            if (auth.isActivated()){
+              navigateToMainActivity(context)
+            }else{
+              navigateToLoginActivity(context,true)
+            }
           } else {
             navigateToLoginActivity(context)
           }
@@ -65,7 +71,8 @@ private fun navigateToMainActivity(context: Context) {
   context.startActivity(intent)
 }
 
-private fun navigateToLoginActivity(context: Context) {
+private fun navigateToLoginActivity(context: Context,needsActivation:Boolean = false) {
   val intent = Intent(context, LoginActivity::class.java)
+  intent.putExtra("NEEDS_ACTIVATION", needsActivation)
   context.startActivity(intent)
 }

@@ -8,6 +8,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileDTO
+import net.ipv64.kivop.dtos.AuthServiceDTOs.UserRegistrationDTO
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
@@ -16,36 +17,49 @@ import okhttp3.FormBody
 import okhttp3.Request
 
 // Api for getting a session token
-suspend fun getToken(email: String, password: String): String =
-    withContext(Dispatchers.IO) {
-      val path = "auth/login"
+suspend fun getToken(email: String, password: String): Pair<String, String> =
+  withContext(Dispatchers.IO) {
+    val path = "auth/login"
+    val formBody = FormBody.Builder()
+      .add("email", email)
+      .add("password", password)
+      .build()
 
-      val formBody = FormBody.Builder().add("email", email).add("password", password).build()
+    val request = Request.Builder()
+      .url(BASE_URL + path)
+      .post(formBody)
+      .build()
 
-      val request = Request.Builder().url(BASE_URL + path).post(formBody).build()
+    try {
+      okHttpClient.newCall(request).execute().use { response ->
+        val responseBody = response.body?.string() ?: return@withContext "" to "Empty response body"
 
-      try {
-        okHttpClient.newCall(request).execute().use { response ->
-          if (!response.isSuccessful) {
-            println("Unexpected code: $response")
-            return@withContext ""
+        return@withContext if (response.isSuccessful) {
+          // Successful response
+          val jsonResponse = Gson().fromJson(responseBody, JsonObject::class.java)
+          val token = jsonResponse.get("token")?.asString
+          if (token != null) {
+            token to "loggedin" // Status for successful login
           } else {
-            val responseBody = response.body?.string()
-            val jsonResponse = Gson().fromJson(responseBody, JsonObject::class.java)
-            val token = jsonResponse.get("token")?.asString
-            if (token != null) {
-              return@withContext token
-            } else {
-              println("Token not found in response")
-              return@withContext ""
-            }
+            "" to "Token not found in response"
+          }
+        } else {
+          // Handle error cases
+          val jsonResponse = Gson().fromJson(responseBody, JsonObject::class.java)
+          val reason = jsonResponse.get("reason")?.asString
+          return@withContext when (reason) {
+            "This account is inactiv" -> "" to "This account is inactiv"
+            "Email not verified" -> "" to "Email not verified"
+            else -> "" to "Invalid credentials"
           }
         }
-      } catch (e: Exception) {
-        Log.e("token", "Fehler beim Abrufen des Tokens", e)
       }
-      return@withContext ""
+    } catch (e: Exception) {
+      Log.e("token", "Error while retrieving the token", e)
+      return@withContext "" to "Error occurred: ${e.localizedMessage}"
     }
+  }
+
 
 // api call for validating the session token
 suspend fun getValidateToken(token: String): Boolean =

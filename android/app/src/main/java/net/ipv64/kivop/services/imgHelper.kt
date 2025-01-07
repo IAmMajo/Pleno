@@ -48,7 +48,10 @@ fun byteArrayToBitmap(byteArray: ByteArray): Bitmap? {
   }
 }
 
-fun encodeImageToBase64(imageByteArray: ByteArray): String {
+fun encodeImageToBase64(imageByteArray: ByteArray?): String? {
+  if (imageByteArray == null) {
+    return null
+  }
   return Base64.encodeToString(imageByteArray, Base64.NO_WRAP)
 }
 

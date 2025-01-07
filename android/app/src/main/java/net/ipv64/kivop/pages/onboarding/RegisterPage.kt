@@ -1,12 +1,13 @@
 package net.ipv64.kivop.pages.onboarding
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,8 +25,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
+import net.ipv64.kivop.MainActivity
 import net.ipv64.kivop.components.CustomInputField
 import net.ipv64.kivop.components.ImgPicker
+import net.ipv64.kivop.dtos.AuthServiceDTOs.UserRegistrationDTO
+import net.ipv64.kivop.services.api.ApiConfig.auth
+import net.ipv64.kivop.services.encodeImageToBase64
 import net.ipv64.kivop.services.uriToByteArray
 import net.ipv64.kivop.ui.customRoundedTop
 import net.ipv64.kivop.ui.theme.Background_prime
@@ -39,6 +46,8 @@ fun RegisterPage(navController: NavController) {
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
   var confirmPassword by remember { mutableStateOf("") }
+  
+  val scope = rememberCoroutineScope()
 
   Column(modifier = Modifier.fillMaxWidth().background(Color.Green)) {
     Column(
@@ -64,20 +73,20 @@ fun RegisterPage(navController: NavController) {
       )
       CustomInputField(
           label = "Email",
-          placeholder = "Max Mustermann",
+          placeholder = "Max@pleno.net",
           value = email,
           onValueChange = { email = it },
       )
       CustomInputField(
           label = "Passwort",
-          placeholder = "Max Mustermann",
+          placeholder = "*******",
           value = password,
           onValueChange = { password = it },
           isPasswort = true,
       )
       CustomInputField(
           label = "Passwort wiederholen",
-          placeholder = "Max Mustermann",
+          placeholder = "*******",
           value = confirmPassword,
           onValueChange = { confirmPassword = it },
           isPasswort = true,
@@ -103,13 +112,32 @@ fun RegisterPage(navController: NavController) {
                     textDecoration = TextDecoration.Underline)
               }
           Button(
-              modifier = Modifier.fillMaxWidth(),
-              colors =
-                  ButtonDefaults.buttonColors(
-                      containerColor = Signal_blue, contentColor = Text_prime_light),
-              onClick = { navController.navigate(OnboardingScreen.Description1.rout) }) {
-                Text(text = "Weiter", style = MaterialTheme.typography.labelMedium)
-              }
+            modifier = Modifier.fillMaxWidth(),
+            colors =
+              ButtonDefaults.buttonColors(
+                containerColor = Signal_blue, contentColor = Text_prime_light),
+            onClick = {
+              val user = UserRegistrationDTO(name, email, password, encodeImageToBase64(imgByteArray))
+                scope.launch {
+                  if(user.name != null && user.email != null && user.password != null){
+                    if (handleRegister(user)) {
+                      navController.navigate(OnboardingScreen.AlmostDone.rout)
+                    }
+                  }
+                }
+            }) {
+              Text(text = "Weiter", style = MaterialTheme.typography.labelMedium)
+            }
         }
   }
+}
+
+private suspend fun handleRegister(user: UserRegistrationDTO): Boolean {
+  return auth.register(user)
+}
+
+private fun navigateToMainActivity(context: Context) {
+  var appContext = context.applicationContext
+  val intent = Intent(appContext, MainActivity::class.java)
+  context.startActivity(intent)
 }

@@ -1,6 +1,7 @@
 package net.ipv64.kivop.pages.onboarding
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -57,13 +58,16 @@ fun WelcomePage(navController: NavController) {
       Spacer(modifier = Modifier.weight(1f))
     }
     Column(
-        modifier =
-            Modifier.fillMaxWidth()
-                .weight(1f)
-                .customRoundedTop(Background_prime, heightPercent = 40, widthPercent = 30)
-                .background(Background_prime)
-                .padding(18.dp)) {
-          Spacer(modifier = Modifier.weight(1f))
+      modifier =
+        Modifier.fillMaxWidth()
+          .weight(1f)
+          .customRoundedTop(Background_prime, heightPercent = 40, widthPercent = 30)
+          .background(Background_prime)
+          .padding(18.dp),
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+            
           Button(
               modifier = Modifier.fillMaxWidth(),
               colors =
@@ -77,7 +81,7 @@ fun WelcomePage(navController: NavController) {
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = Signal_blue, contentColor = Text_prime_light),
-              onClick = { navController.navigate(OnboardingScreen.Description1.rout) }) {
+              onClick = { navController.navigate(OnboardingScreen.Register.rout) }) {
                 Text(text = "Registrieren", style = MaterialTheme.typography.labelMedium)
               }
         }

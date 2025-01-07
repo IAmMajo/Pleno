@@ -26,8 +26,8 @@ import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
 @Composable
-fun DescriptionOnePage(navController: NavController) {
-  Column(modifier = Modifier.fillMaxWidth().background(Color.Green)) {
+fun DescriptionOnePage() {
+  Column(modifier = Modifier.background(Color.Green)) {
     Column(
         modifier =
             Modifier.fillMaxWidth()
@@ -59,10 +59,6 @@ fun DescriptionOnePage(navController: NavController) {
           textAlign = TextAlign.Center,
           style = MaterialTheme.typography.headlineLarge,
       )
-      // Todo: Temp Button! Wie geht es weiter?
-      Button(onClick = { navController.navigate(OnboardingScreen.Description2.rout) }) {
-        Text(text = "Weiter")
-      }
     }
   }
 }
