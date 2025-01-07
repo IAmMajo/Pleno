@@ -322,7 +322,7 @@ struct MainPageAPI {
         }
     
     static func fetchPendingUsers(completion: @escaping (Result<[UserEmailVerificationDTO], Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/auth/users") else {
+        guard let url = URL(string: "\(baseURL)/users") else {
             print("❌ Fehler: Ungültige URL für fetchPendingUsers.")
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL"])))
             return
@@ -456,6 +456,8 @@ struct MainPageAPI {
         case invalidRequest
         case invalidData
         case unknown
+        case decodingError
+        case unauthorized
     }
 
 

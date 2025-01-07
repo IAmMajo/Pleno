@@ -22,7 +22,7 @@ struct Onboarding: View {
                 if currentIndex == 0 {
                     // Erster Onboarding-Bildschirm
                     VStack {
-                        Image("onboarding4")
+                        Image("onboarding2")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 300)
@@ -31,7 +31,7 @@ struct Onboarding: View {
                             Text("Mit ")
                                 .font(.title3)
                                 .fontWeight(.regular) +
-                            Text("KIVoP ")
+                            Text("Pleno ")
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(.blue) +
@@ -51,7 +51,7 @@ struct Onboarding: View {
                 } else if currentIndex == 1 {
                     // Zweiter Onboarding-Bildschirm
                     VStack {
-                        Image("onboarding5")
+                        Image("onboarding1")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 300)

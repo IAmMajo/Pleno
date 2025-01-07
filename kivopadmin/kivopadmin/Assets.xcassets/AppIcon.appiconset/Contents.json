@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "PlenoLogoLight.jpg",
+      "filename" : "PlenoLogoLight.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "PlenoDark.png",
+      "filename" : "PlenoLogoDark (1).png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

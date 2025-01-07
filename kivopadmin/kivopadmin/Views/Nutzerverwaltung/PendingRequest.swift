@@ -22,7 +22,7 @@ struct PendingRequestsNavigationView: View {
                         .padding()
                 } else {
                     List {
-                        ForEach(requests, id: \.uid?.uuidString) { request in
+                        ForEach(requests, id: \ .uid?.uuidString) { request in
                             NavigationLink(
                                 destination: PendingRequestPopup(
                                     user: request.name ?? "Unbekannt",
@@ -89,10 +89,10 @@ struct PendingRequestPopup: View {
 
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\ .presentationMode) var presentationMode
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text("Name")
@@ -128,6 +128,7 @@ struct PendingRequestPopup: View {
                         .foregroundColor(.white)
                         .cornerRadius(8)
                 }
+                .padding(.horizontal, 20)
 
                 Button(action: {
                     handleUserAction(activate: false)
@@ -138,10 +139,9 @@ struct PendingRequestPopup: View {
                         .foregroundColor(.white)
                         .cornerRadius(8)
                 }
+                .padding(.horizontal, 20)
             }
-            .padding(.horizontal, 20)
-
-            Spacer()
+            .padding(.bottom, 20)
         }
         .padding()
         .navigationTitle("Beitrittsanfrage: \(user)")

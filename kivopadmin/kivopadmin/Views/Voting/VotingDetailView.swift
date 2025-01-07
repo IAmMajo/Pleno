@@ -29,17 +29,15 @@ struct VotingDetailView: View {
                             print("onDelete ausgelöst, kehre zur Liste zurück.") // Debugging
                             onBack() // Benutzer zur ListView zurückleiten
                         },
-                        onOpen:{
+                        onOpen: {
                             print("onOpen ausgelöst, kehre zur Liste zurück.") // Debugging
                             onBack() // Benutzer zur ListView zurückleiten
                         },
                         onReload: loadVoting
                     )
-
                 } else if voting.isOpen {
                     AktivView(
                         voting: voting,
-                        votingResults: votingResults, // Übergebe die geladenen Ergebnisse (kann nil sein)
                         onBack: {
                             print("Zurück zur Voting-Liste.") // Debugging
                             onBack() // Navigation zur Voting-Liste
@@ -90,7 +88,6 @@ struct VotingDetailView: View {
             }
         }
     }
-
 
     private func fetchVotingResults() {
         VotingService.shared.fetchVotingResults(votingId: votingId) { result in
