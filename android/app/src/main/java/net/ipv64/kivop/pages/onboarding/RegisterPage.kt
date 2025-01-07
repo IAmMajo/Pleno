@@ -119,7 +119,7 @@ fun RegisterPage(navController: NavController) {
               ButtonDefaults.buttonColors(
                 containerColor = Signal_blue, contentColor = Text_prime_light),
             onClick = {
-              val user = UserRegistrationDTO(name, email, password, imgByteArray)
+              val user = UserRegistrationDTO(name, email.lowercase(), password, imgByteArray)
                 scope.launch {
                   if(user.name != null && user.email != null && user.password != null){
                     if (handleRegister(user)) {

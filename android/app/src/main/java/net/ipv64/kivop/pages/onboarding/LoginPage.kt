@@ -99,7 +99,7 @@ fun LoginPage(navController: NavController) {
                       containerColor = Signal_blue, contentColor = Text_prime_light),
               onClick = {
                 scope.launch {
-                  val response = handleLogin(email, password)
+                  val response = handleLogin(email.lowercase(), password)
                   if (response === "Successful Login!") {
                     navigateToMainActivity(navController.context)
                   } else if (response === "This account is inactiv") {
