@@ -495,6 +495,9 @@
     "Auswahl" : {
 
     },
+    "Auto und Sitzplätze" : {
+
+    },
     "Bearbeiten" : {
       "localizations" : {
         "de" : {
@@ -594,6 +597,15 @@
           }
         }
       }
+    },
+    "Deine Fahrt wird dann veröffentlicht und andere können dieser beitreten." : {
+
+    },
+    "Deine gesamten Änderungen gehen verloren!" : {
+
+    },
+    "Details der Fahrt" : {
+
     },
     "Die Abstimmung läuft noch" : {
 
@@ -703,6 +715,12 @@
           }
         }
       }
+    },
+    "Events" : {
+
+    },
+    "Fahrgemeinschaften" : {
+
     },
     "Fast fertig" : {
       "extractionState" : "manual",
@@ -1017,6 +1035,9 @@
     "Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position" : {
 
     },
+    "Meine Fahrten" : {
+
+    },
     "Mit " : {
       "localizations" : {
         "de" : {
@@ -1103,6 +1124,12 @@
     "Möchtest du wirklich abstimmen" : {
 
     },
+    "Möchtest du wirklich speichern?" : {
+
+    },
+    "Möchtest du wirklich zurück?" : {
+
+    },
     "Nach Meeting suchen" : {
 
     },
@@ -1148,6 +1175,12 @@
       }
     },
     "Neu laden" : {
+
+    },
+    "Neue Fahrt" : {
+
+    },
+    "Neue Fahrt anbieten" : {
 
     },
     "Neues Passwort" : {
@@ -1378,6 +1411,9 @@
     "Plakate" : {
 
     },
+    "Planned Ride for %@" : {
+
+    },
     "Pleno " : {
 
     },
@@ -1592,6 +1628,9 @@
         }
       }
     },
+    "Sonstige Fahrten" : {
+
+    },
     "Speichern" : {
       "localizations" : {
         "de" : {
@@ -1618,6 +1657,9 @@
 
     },
     "Start: %@" : {
+
+    },
+    "Startort" : {
 
     },
     "Suchen" : {
@@ -1688,9 +1730,6 @@
       }
     },
     "Test" : {
-
-    },
-    "Überprüfung..." : {
 
     },
     "Umfragen, " : {
@@ -1921,6 +1960,9 @@
           }
         }
       }
+    },
+    "Zielort" : {
+
     },
     "zu einer verbesserten " : {
       "localizations" : {

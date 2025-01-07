@@ -137,6 +137,14 @@ struct MainPage: View {
                                    .foregroundColor(Color.primary)
                            }
                        }
+                        NavigationLink(destination: RideView()) {
+                            HStack {
+                               Image(systemName: "car.fill")
+                                    .foregroundColor(.accentColor)
+                                Text("Fahrgemeinschaften")
+                                    .foregroundColor(Color.primary)
+                            }
+                        }
                     }
                 }
                 .listStyle(InsetGroupedListStyle())
