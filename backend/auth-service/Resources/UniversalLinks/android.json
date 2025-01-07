@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "net.ipv64.kivop",
+            "sha256_cert_fingerprints": [
+                "7A:37:0D:6E:34:04:67:5D:D5:7E:88:C4:B9:E6:95:45:4A:6F:89:15:E5:25:61:6B:47:F1:3B:87:3E:CB:5F:49"
+            ]
+        }
+    }
+]
