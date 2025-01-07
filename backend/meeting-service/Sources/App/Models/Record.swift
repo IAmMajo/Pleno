@@ -8,8 +8,9 @@ extension Record {
         let lang = try self.requireID().lang
         let attendances = try await self.$id.$meeting.get(on: db).$attendances.query(on: db)
             .filter(\.$status == .present)
+            .with(\.$id.$identity)
             .all().map({ attendance in
-                "- \(try attendance.toGetAttendanceDTO().identity.name)"
+                "- \(try attendance.requireID().identity.name)"
             })
             .joined(separator: "\n")
         let votings = try await self.$id.$meeting.get(on: db).$votings.query(on: db)
