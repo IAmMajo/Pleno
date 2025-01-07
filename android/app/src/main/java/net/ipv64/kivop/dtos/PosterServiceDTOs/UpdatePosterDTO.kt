@@ -6,5 +6,5 @@ import java.time.LocalDateTime
 data class UpdatePosterDTO (
     var name : String?,
     var description : String?,
-    var image : ByteArray?,
+    var image : String?,
 )
