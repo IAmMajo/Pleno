@@ -5,5 +5,5 @@ import java.time.LocalDateTime
 
 data class UserProfileUpdateDTO (
     var name : String?,
-    var profileImage : ByteArray?,
+    var profileImage : String?,
 )
