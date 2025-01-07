@@ -4,5 +4,5 @@ data class UserRegistrationDTO(
     var name: String?,
     var email: String?,
     var password: String?,
-    var profileImage: String?,
+    var profileImage: ByteArray?,
 )
