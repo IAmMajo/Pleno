@@ -4,8 +4,8 @@ import java.util.UUID
 import java.time.LocalDateTime
 
 data class UserRegistrationDTO (
-    var name : String?,
-    var email : String?,
-    var password : String?,
-    var profileImage : String?,
+  var name : String?,
+  var email : String?,
+  var password : String?,
+  var profileImage : String?,
 )

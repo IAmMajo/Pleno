@@ -1,6 +1,8 @@
 package net.ipv64.kivop.pages.onboarding
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,9 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import net.ipv64.kivop.R
 import net.ipv64.kivop.ui.customRoundedTop
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Primary
@@ -41,8 +45,12 @@ fun WelcomePage(navController: NavController) {
               Modifier.height(250.dp)
                   .aspectRatio(1f)
                   .clip(RoundedCornerShape(50, 50, 50, 50))
-                  .background(Color.Red)) {
-            // Box for image
+      ) {
+        Image(
+          painter = painterResource(id = R.drawable.onboardingscreen3),
+          contentDescription = "Onboarding Screen 1",
+          modifier = Modifier.fillMaxWidth().aspectRatio(1f)
+        )
           }
       Spacer(modifier = Modifier.height(16.dp))
       Box(modifier = Modifier.weight(1f)) {
@@ -57,13 +65,16 @@ fun WelcomePage(navController: NavController) {
       Spacer(modifier = Modifier.weight(1f))
     }
     Column(
-        modifier =
-            Modifier.fillMaxWidth()
-                .weight(1f)
-                .customRoundedTop(Background_prime, heightPercent = 40, widthPercent = 30)
-                .background(Background_prime)
-                .padding(18.dp)) {
-          Spacer(modifier = Modifier.weight(1f))
+      modifier =
+        Modifier.fillMaxWidth()
+          .weight(1f)
+          .customRoundedTop(Background_prime, heightPercent = 40, widthPercent = 30)
+          .background(Background_prime)
+          .padding(18.dp),
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+            
           Button(
               modifier = Modifier.fillMaxWidth(),
               colors =
@@ -77,7 +88,7 @@ fun WelcomePage(navController: NavController) {
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = Signal_blue, contentColor = Text_prime_light),
-              onClick = { navController.navigate(OnboardingScreen.Description1.rout) }) {
+              onClick = { navController.navigate(OnboardingScreen.Register.rout) }) {
                 Text(text = "Registrieren", style = MaterialTheme.typography.labelMedium)
               }
         }

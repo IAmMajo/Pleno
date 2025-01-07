@@ -10,6 +10,7 @@ xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.CAMERA"></uses-permission>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
 <application
+    android:enableOnBackInvokedCallback="true"
     android:name=".MyApplication"
     android:allowBackup="true"
     android:dataExtractionRules="@xml/data_extraction_rules"
@@ -19,7 +20,7 @@ xmlns:tools="http://schemas.android.com/tools">
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
     android:theme="@style/Theme.KIVoPAndriod"
-    tools:targetApi="31">
+    tools:targetApi="33">
     <activity
         android:name=".pages.SplashActivity"
         android:exported="true"
@@ -27,9 +28,17 @@ xmlns:tools="http://schemas.android.com/tools">
         android:theme="@style/Theme.KIVoPAndriod">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
-
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+        <intent-filter>
+            <data
+                android:host="kivop.ipv64.net"
+                android:scheme="https" />
+            <category android:name="android.intent.category.DEFAULT"/>
+            <category android:name="android.intent.category.BROWSABLE"/>
+            <action android:name="android.intent.action.VIEW"/>
+        </intent-filter>
+
     </activity>
     <activity android:name=".MainActivity" />
     <activity android:name=".pages.onboarding.LoginActivity" />

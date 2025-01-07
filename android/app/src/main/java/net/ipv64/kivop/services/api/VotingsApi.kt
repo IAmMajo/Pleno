@@ -20,73 +20,72 @@ import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
-suspend fun GetVotings(context: Context): List<GetVotingDTO> =
-    withContext(Dispatchers.IO) {
-      val path = "meetings/votings"
+suspend fun GetVotings(context: Context): List<GetVotingDTO> = withContext(Dispatchers.IO) {
+  val path = "meetings/votings"
 
-      val token = auth.getSessionToken()
+  val token = auth.getSessionToken()
 
-      if (token.isNullOrEmpty()) {
-        println("Fehler: Kein Token verfügbar")
-        return@withContext emptyList<GetVotingDTO>()
-      }
+  if (token.isNullOrEmpty()) {
+    println("Fehler: Kein Token verfügbar")
+    return@withContext emptyList<GetVotingDTO>()
+  }
 
-      val request =
-          Request.Builder()
-              .url(BASE_URL + path)
-              .addHeader("Authorization", "Bearer $token")
-              .get()
-              .build()
+  val request =
+      Request.Builder()
+          .url(BASE_URL + path)
+          .addHeader("Authorization", "Bearer $token")
+          .get()
+          .build()
 
-      return@withContext try {
-        val response = okHttpClient.newCall(request).execute()
-        if (response.isSuccessful) {
-          val responseBody = response.body?.string()
-          if (responseBody != null) {
-            val votingsArray = Gson().fromJson(responseBody, JsonArray::class.java)
-            votingsArray.map { element ->
-              val voting = element.asJsonObject
-              val id = voting.get("id").asString.let { UUID.fromString(it) }
-              val meetingId = voting.get("meetingId").asString.let { UUID.fromString(it) }
-              val question = voting.get("question").asString
-              val description = voting.get("description").asString
-              val isOpen = voting.get("isOpen").asBoolean
-              val startedAt = voting.get("startedAt")?.asString?.let { stringToLocalDateTime(it) }
-              val closedAt = voting.get("closedAt")?.asString?.let { stringToLocalDateTime(it) }
-              val anonymous = voting.get("anonymous").asBoolean
-              val optionsArray = voting.get("options").asJsonArray
-              val options =
-                  optionsArray.map { option ->
-                    val optionObject = option.asJsonObject
-                    GetVotingOptionDTO(
-                        index = optionObject.get("index").asInt.toUByte(),
-                        text = optionObject.get("text").asString)
-                  }
+  return@withContext try {
+    val response = okHttpClient.newCall(request).execute()
+    if (response.isSuccessful) {
+      val responseBody = response.body?.string()
+      if (responseBody != null) {
+        val votingsArray = Gson().fromJson(responseBody, JsonArray::class.java)
+        votingsArray.map { element ->
+          val voting = element.asJsonObject
+          val id = voting.get("id").asString.let { UUID.fromString(it) }
+          val meetingId = voting.get("meetingId").asString.let { UUID.fromString(it) }
+          val question = voting.get("question").asString
+          val description = voting.get("description").asString
+          val isOpen = voting.get("isOpen").asBoolean
+          val startedAt = voting.get("startedAt")?.asString?.let { stringToLocalDateTime(it) }
+          val closedAt = voting.get("closedAt")?.asString?.let { stringToLocalDateTime(it) }
+          val anonymous = voting.get("anonymous").asBoolean
+          val optionsArray = voting.get("options").asJsonArray
+          val options =
+              optionsArray.map { option ->
+                val optionObject = option.asJsonObject
+                GetVotingOptionDTO(
+                    index = optionObject.get("index").asInt.toUByte(),
+                    text = optionObject.get("text").asString)
+              }
 
-              GetVotingDTO(
-                  id,
-                  meetingId,
-                  question,
-                  description,
-                  isOpen,
-                  startedAt,
-                  closedAt,
-                  anonymous,
-                  options)
-            }
-          } else {
-            println("Fehler: Leere Antwort erhalten.")
-            emptyList()
-          }
-        } else {
-          println("Fehler bei der Anfrage: ${response.message}")
-          emptyList()
+          GetVotingDTO(
+              id,
+              meetingId,
+              question,
+              description,
+              isOpen,
+              startedAt,
+              closedAt,
+              anonymous,
+              options)
         }
-      } catch (e: Exception) {
-        Log.e("get", "Fehler: ${e.message}")
+      } else {
+        println("Fehler: Leere Antwort erhalten.")
         emptyList()
       }
+    } else {
+      println("Fehler bei der Anfrage: ${response.message}")
+      emptyList()
     }
+  } catch (e: Exception) {
+    Log.e("get", "Fehler: ${e.message}")
+    emptyList()
+  }
+}
 
 suspend fun GetVotingResultByID(id: UUID): GetVotingResultsDTO? =
     withContext(Dispatchers.IO) {
@@ -114,6 +113,7 @@ suspend fun GetVotingResultByID(id: UUID): GetVotingResultsDTO? =
             val votingResult = Gson().fromJson(responseBody, JsonObject::class.java)
             val votingId = votingResult.get("votingId").asString.let { UUID.fromString(it) }
             val myVote = votingResult.get("myVote")?.asInt?.toUByte() // Handle nullable "myVote"
+            val totalCount = votingResult.get("totalCount").asInt.toUInt()
             val resultsArray = votingResult.getAsJsonArray("results")
 
             val results =
@@ -129,11 +129,11 @@ suspend fun GetVotingResultByID(id: UUID): GetVotingResultsDTO? =
 
                   GetVotingResultDTO(
                       index = resultObject.get("index").asInt.toUByte(),
-                      total = resultObject.get("total").asInt.toUByte(),
+                      count = resultObject.get("count").asInt.toUInt(),
                       percentage = resultObject.get("percentage").asDouble,
                       identities = identitiesArray)
                 }
-            GetVotingResultsDTO(votingId = votingId, myVote = myVote, results = results)
+            GetVotingResultsDTO(votingId = votingId, myVote = myVote, totalCount = totalCount ,results = results)
           } else {
             println("Fehler: Leere Antwort erhalten.")
             null

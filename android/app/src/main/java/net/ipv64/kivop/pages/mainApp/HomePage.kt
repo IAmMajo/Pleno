@@ -1,5 +1,6 @@
 package net.ipv64.kivop.pages.mainApp
 
+import android.app.Activity
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -12,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
@@ -36,9 +38,9 @@ fun HomePage(
     userViewModel: UserViewModel,
     meetingsViewModel: MeetingsViewModel
 ) {
+  val context = LocalContext.current
   BackHandler {
-    isBackPressed = navController.popBackStack()
-    Log.i("BackHandler", "BackHandler: $isBackPressed")
+    (context as? Activity)?.moveTaskToBack(true)
   }
   val meetings = meetingsViewModel.loadMeetings()
   var currentMeeting: GetMeetingDTO? = null

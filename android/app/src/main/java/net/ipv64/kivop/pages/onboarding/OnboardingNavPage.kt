@@ -1,21 +1,35 @@
 package net.ipv64.kivop.pages.onboarding
 
+import android.content.Intent
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 
 @Composable
-fun OnboardingNav(navController: NavHostController) {
+fun OnboardingNav(navController: NavHostController, needsActivation: Boolean = false, activationState: Int = 1) {
   NavHost(
       navController = navController,
-      startDestination = OnboardingScreen.Welcome.rout,
+      startDestination = if (needsActivation) OnboardingScreen.AlmostDone.rout else OnboardingScreen.Start.rout
   ) {
-    composable(OnboardingScreen.Welcome.rout) { WelcomePage(navController) }
+    composable(OnboardingScreen.Start.rout) { StartPage(navController) }
     composable(OnboardingScreen.Login.rout) { LoginPage(navController) }
     composable(OnboardingScreen.Register.rout) { RegisterPage(navController) }
-    composable(OnboardingScreen.Description1.rout) { DescriptionOnePage(navController) }
-    composable(OnboardingScreen.Description2.rout) { DescriptionTwoPage(navController) }
-    composable(OnboardingScreen.AlmostDone.rout) { AlmostDonePage(navController) }
+    composable(
+      route = OnboardingScreen.AlmostDone.rout,
+      deepLinks = listOf(
+        navDeepLink { 
+          uriPattern = "https://kivop.ipv64.net/auth/email/verify"
+          action = Intent.ACTION_VIEW
+        }
+      )
+    ) { backStackEntry ->
+      val isFromDeepLink = backStackEntry.arguments?.getString("argName") != null
+      
+      AlmostDonePage(navController,activationState) 
+    }
   }
 }

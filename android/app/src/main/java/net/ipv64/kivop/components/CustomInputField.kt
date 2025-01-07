@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Signal_blue
+import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
@@ -45,22 +46,23 @@ fun CustomInputField(
     val visualTransformation =
         if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None
     OutlinedTextField(
-        visualTransformation = visualTransformation,
-        value = value,
-        colors =
-            OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = backgroundColor,
-                unfocusedContainerColor = backgroundColor,
-                disabledContainerColor = backgroundColor,
-                unfocusedBorderColor = backgroundColor,
-                focusedBorderColor = backgroundColor,
-            ),
-        singleLine = true,
-        onValueChange = onValueChange,
-        modifier = Modifier.fillMaxWidth(),
-        placeholder = {
-          Text(text = placeholder, color = Text_tertiary, fontWeight = FontWeight.SemiBold)
-        })
+      visualTransformation = visualTransformation,
+      value = value,
+      colors =
+        OutlinedTextFieldDefaults.colors(
+          focusedContainerColor = backgroundColor,
+          unfocusedContainerColor = backgroundColor,
+          disabledContainerColor = backgroundColor,
+          unfocusedBorderColor = backgroundColor,
+          focusedBorderColor = backgroundColor,
+        ),
+      singleLine = true,
+      onValueChange = onValueChange,
+      modifier = Modifier.fillMaxWidth(),
+      textStyle = MaterialTheme.typography.titleMedium.copy(color = Text_prime),
+      placeholder = {
+        Text(text = placeholder, color = Text_tertiary.copy(0.4f), style = MaterialTheme.typography.titleMedium)
+      })
   }
 }
 
