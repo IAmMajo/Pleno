@@ -9,5 +9,5 @@ data class UpdatePosterPositionDTO (
     var longitude : Double?,
     var expiresAt : LocalDateTime?,
     var responsibleUsers : List<UUID>?,
-    var image : ByteArray?,
+    var image : String?,
 )

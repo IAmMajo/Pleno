@@ -29,7 +29,7 @@ cd "$SOURCE"
 find . -type f -name '*.swift' | cpio -pd "$DEST"
 
 # Basic data type translation declaration
-declare -A basicdatatypes=( [Bool]=Boolean [Int8]=Byte [Int16]=Short [Int32]=Int [Int64]=Long [UInt8]=UByte [UInt16]=UShort [UInt32]=UInt [UInt64]=ULong [UUID]=UUID [Date]=LocalDateTime [Data]=ByteArray )
+declare -A basicdatatypes=( [Bool]=Boolean [Int8]=Byte [Int16]=Short [Int32]=Int [Int64]=Long [UInt8]=UByte [UInt16]=UShort [UInt32]=UInt [UInt64]=ULong [UUID]=UUID [Date]=LocalDateTime [Data]=String )
 ### Translations
 find "$DEST" -type f -name '*.swift' | while read -r file; do
     # Remove inits
