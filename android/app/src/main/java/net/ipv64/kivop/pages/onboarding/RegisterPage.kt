@@ -2,6 +2,7 @@ package net.ipv64.kivop.pages.onboarding
 
 import android.content.Context
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,7 +33,8 @@ import net.ipv64.kivop.components.ImgPicker
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserRegistrationDTO
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.encodeImageToBase64
-import net.ipv64.kivop.services.uriToByteArray
+import net.ipv64.kivop.services.uriToBase64String
+import net.ipv64.kivop.services.uriToBitmap
 import net.ipv64.kivop.ui.customRoundedTop
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Primary
@@ -41,7 +43,7 @@ import net.ipv64.kivop.ui.theme.Text_prime_light
 
 @Composable
 fun RegisterPage(navController: NavController) {
-  var imgByteArray: ByteArray? = null
+  var imgByteArray: String? = null
   var name by remember { mutableStateOf("") }
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
@@ -63,7 +65,7 @@ fun RegisterPage(navController: NavController) {
           style = MaterialTheme.typography.headlineLarge,
       )
       Spacer(modifier = Modifier.height(16.dp))
-      imgByteArray = ImgPicker(size = 120.dp)?.let { uriToByteArray(navController.context, it) }
+      imgByteArray = ImgPicker(size = 120.dp)?.let { uriToBase64String(navController.context, it) }
       // Todo: Fix CustomInputField.kt
       CustomInputField(
           label = "Name",
@@ -117,7 +119,7 @@ fun RegisterPage(navController: NavController) {
               ButtonDefaults.buttonColors(
                 containerColor = Signal_blue, contentColor = Text_prime_light),
             onClick = {
-              val user = UserRegistrationDTO(name, email, password, encodeImageToBase64(imgByteArray))
+              val user = UserRegistrationDTO(name, email, password, imgByteArray)
                 scope.launch {
                   if(user.name != null && user.email != null && user.password != null){
                     if (handleRegister(user)) {
@@ -134,10 +136,4 @@ fun RegisterPage(navController: NavController) {
 
 private suspend fun handleRegister(user: UserRegistrationDTO): Boolean {
   return auth.register(user)
-}
-
-private fun navigateToMainActivity(context: Context) {
-  var appContext = context.applicationContext
-  val intent = Intent(appContext, MainActivity::class.java)
-  context.startActivity(intent)
 }

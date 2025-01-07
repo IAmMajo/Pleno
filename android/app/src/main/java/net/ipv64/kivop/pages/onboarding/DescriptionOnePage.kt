@@ -1,5 +1,6 @@
 package net.ipv64.kivop.pages.onboarding
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,10 +17,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import coil3.compose.AsyncImage
+import net.ipv64.kivop.R
+import net.ipv64.kivop.services.StringProvider.getString
 import net.ipv64.kivop.ui.customRoundedBottom
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Primary
@@ -39,8 +44,12 @@ fun DescriptionOnePage() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       Spacer(modifier = Modifier.weight(1f))
-      Box(modifier = Modifier.height(250.dp).aspectRatio(1f).background(Color.Red)) {
-        // Box for image
+      Box(modifier = Modifier.height(250.dp).aspectRatio(1f)) {
+        Image(
+          painter = painterResource(id = R.drawable.onboardingscreen1),
+          contentDescription = "Onboarding Screen 1",
+          modifier = Modifier.fillMaxWidth().aspectRatio(1f)
+        )
       }
       Spacer(modifier = Modifier.height(16.dp))
       Box(modifier = Modifier.weight(1f)) {
@@ -54,7 +63,7 @@ fun DescriptionOnePage() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       Text(
-          text = "Mit Pleno \n zu einer verbesserten \nVereinsplannung",
+          text = getString(R.string.description_one),
           color = Text_prime_light,
           textAlign = TextAlign.Center,
           style = MaterialTheme.typography.headlineLarge,

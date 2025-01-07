@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileDTO
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserRegistrationDTO
+import net.ipv64.kivop.dtos.AuthServiceDTOs.VerificationStatus
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
@@ -115,12 +116,13 @@ suspend fun getUserProfile(): UserProfileDTO? =
             val email = profileObject.get("email")?.asString
             val name = profileObject.get("name")?.asString
             val profileImage =
-                profileObject.get("profileImage")?.asString?.let { decodeFromBase64(it) }
+                profileObject.get("profileImage")?.asString
             val isAdmin = profileObject.get("isAdmin")?.asBoolean
             val isActive = profileObject.get("isActive")?.asBoolean
+            val emailVerification = profileObject.get("emailVerification")?.asString?.let {  VerificationStatus.valueOf(it) }
             val createdAt =
                 profileObject.get("createdAt")?.asString.let { stringToLocalDateTime(it) }
-            UserProfileDTO(uid, email, name, profileImage, isAdmin, isActive, createdAt)
+            UserProfileDTO(uid, email, name, profileImage, isAdmin, isActive, emailVerification, createdAt)
           } else {
             println("Fehler: Leere Antwort erhalten.")
             null

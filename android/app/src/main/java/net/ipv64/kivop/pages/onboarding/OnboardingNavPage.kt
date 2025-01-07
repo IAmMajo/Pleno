@@ -1,6 +1,8 @@
 package net.ipv64.kivop.pages.onboarding
 
 import android.content.Intent
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -8,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 
 @Composable
-fun OnboardingNav(navController: NavHostController, needsActivation: Boolean) {
+fun OnboardingNav(navController: NavHostController, needsActivation: Boolean = false, activationState: Int = 1) {
   NavHost(
       navController = navController,
       startDestination = if (needsActivation) OnboardingScreen.AlmostDone.rout else OnboardingScreen.Start.rout
@@ -24,8 +26,10 @@ fun OnboardingNav(navController: NavHostController, needsActivation: Boolean) {
           action = Intent.ACTION_VIEW
         }
       )
-    ) { 
-      AlmostDonePage(navController) 
+    ) { backStackEntry ->
+      val isFromDeepLink = backStackEntry.arguments?.getString("argName") != null
+      
+      AlmostDonePage(navController,activationState) 
     }
   }
 }

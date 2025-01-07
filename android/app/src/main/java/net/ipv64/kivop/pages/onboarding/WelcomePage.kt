@@ -1,5 +1,6 @@
 package net.ipv64.kivop.pages.onboarding
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,9 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import net.ipv64.kivop.R
 import net.ipv64.kivop.ui.customRoundedTop
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Primary
@@ -42,8 +45,12 @@ fun WelcomePage(navController: NavController) {
               Modifier.height(250.dp)
                   .aspectRatio(1f)
                   .clip(RoundedCornerShape(50, 50, 50, 50))
-                  .background(Color.Red)) {
-            // Box for image
+      ) {
+        Image(
+          painter = painterResource(id = R.drawable.onboardingscreen3),
+          contentDescription = "Onboarding Screen 1",
+          modifier = Modifier.fillMaxWidth().aspectRatio(1f)
+        )
           }
       Spacer(modifier = Modifier.height(16.dp))
       Box(modifier = Modifier.weight(1f)) {

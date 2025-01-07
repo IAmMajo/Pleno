@@ -1,9 +1,12 @@
 package net.ipv64.kivop
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -33,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,6 +48,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
+import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.DrawerItem
 import net.ipv64.kivop.components.GlobalTopBar
 import net.ipv64.kivop.components.ProfileCardSmall
@@ -51,6 +56,7 @@ import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.drawerItem
 import net.ipv64.kivop.models.viewModel.MeetingsViewModel
 import net.ipv64.kivop.models.viewModel.UserViewModel
+import net.ipv64.kivop.pages.SplashActivity
 import net.ipv64.kivop.pages.mainApp.AlreadyVoted
 import net.ipv64.kivop.pages.mainApp.AttendancesCoordinationPage
 import net.ipv64.kivop.pages.mainApp.AttendancesListPage
@@ -77,13 +83,15 @@ object BackPressed {
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
+    
     setContent {
       KIVoPAndriodTheme {
+        
         val navController: NavHostController = rememberNavController()
         val userViewModel = viewModel<UserViewModel>()
-
-        LaunchedEffect(Unit) { userViewModel.fetchUser() }
+        LaunchedEffect(Unit) { userViewModel.fetchUser()
+        Log.i("nav", navController.graph.toString())
+        }
 
         // A surface container using the 'background' color from the theme
         Surface(
@@ -101,8 +109,9 @@ fun handleLogout(context: Context) {
   val auth = AuthController(context)
   auth.logout()
 
-  val intent = Intent(context, LoginActivity::class.java)
+  val intent = Intent(context, SplashActivity::class.java)
   context.startActivity(intent)
+  (context as? ComponentActivity)?.finish()
 }
 
 // TODO - Navigation anpassen name anpassen
@@ -111,7 +120,6 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
 
   val meetingsViewModel = viewModel<MeetingsViewModel>()
   LaunchedEffect(Unit) { meetingsViewModel.fetchMeetings() }
-
   NavHost(
       navController = navController,
       startDestination = Screen.Home.rout,
@@ -297,3 +305,4 @@ fun DrawerContent(
     }
   }
 }
+

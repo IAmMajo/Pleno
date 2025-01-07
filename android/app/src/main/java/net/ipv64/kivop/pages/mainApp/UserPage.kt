@@ -43,7 +43,7 @@ import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.handleLogout
 import net.ipv64.kivop.models.viewModel.UserViewModel
 import net.ipv64.kivop.services.StringProvider.getString
-import net.ipv64.kivop.services.uriToByteArray
+import net.ipv64.kivop.services.uriToBase64String
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
@@ -60,7 +60,7 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
   }
   var editMode by remember { mutableStateOf(false) }
   val user = userViewModel.getProfile()
-  var newImgByteArray: ByteArray? = null
+  var newImgByteArray: String? = null
   val topBarModifier =
       Modifier.zIndex(1f).padding(vertical = 12.dp, horizontal = 14.dp).height(48.dp)
 
@@ -103,7 +103,7 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
           newImgByteArray =
               user.name
                   ?.let { name -> ImgPicker(user.profileImage, userName = name) }
-                  ?.let { uriToByteArray(navController.context, it) }
+                  ?.let { uriToBase64String(navController.context, it) }
         } else {
           if (user.profileImage != null) {
             ImgPicker(user.profileImage, edit = false)

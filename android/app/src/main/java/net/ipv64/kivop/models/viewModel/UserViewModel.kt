@@ -27,7 +27,7 @@ class UserViewModel : ViewModel() {
     return this.user
   }
 
-  fun updateUser(email: String? = null, name: String? = null, profileImage: ByteArray? = null) {
+  fun updateUser(email: String? = null, name: String? = null, profileImage: String? = null) {
     user?.let {
       val updatedUser =
           it.copy(
@@ -40,8 +40,9 @@ class UserViewModel : ViewModel() {
           val response =
               patchUserProfile(
                   UserProfileUpdateDTO(
-                      name = if (name.isNullOrEmpty()) null else name,
-                      profileImage?.let { it1 -> encodeImageToBase64(it1) }))
+                    name = if (name.isNullOrEmpty()) null else name,
+                    profileImage
+                  ))
           if (response?.isSuccessful == true) {
             user = updatedUser
           }

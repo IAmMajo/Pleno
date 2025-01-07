@@ -3,6 +3,7 @@ package net.ipv64.kivop.pages.onboarding
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -122,4 +123,5 @@ private fun navigateToMainActivity(context: Context) {
   var appContext = context.applicationContext
   val intent = Intent(appContext, MainActivity::class.java)
   context.startActivity(intent)
+  (context as? ComponentActivity)?.finish()
 }

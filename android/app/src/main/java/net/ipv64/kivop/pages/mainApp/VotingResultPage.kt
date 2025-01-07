@@ -54,9 +54,9 @@ fun VotingResultPage(navController: NavController, votingID: String) {
       votingsCombined =
           votingData?.options!!.map { option ->
             val label = option.text
-            val votes = votings?.results?.find { it.index == option.index }?.total?.toInt() ?: 0
+            val votes = votings?.totalCount
             val percentage = votings?.results?.find { it.index == option.index }?.percentage ?: 0.0
-            VotingResults(label, votes, percentage)
+            VotingResults(label, votes!!.toInt(), percentage)
           }
     }
   }

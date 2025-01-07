@@ -23,18 +23,19 @@ import net.ipv64.kivop.ui.theme.KIVoPAndriodTheme
 class LoginActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    val needsActivation = intent.getBooleanExtra("NEEDS_ACTIVATION", true) // Default value is true
+    //Defines where the navigation should start
+    val needsActivation = intent.getBooleanExtra("NEEDS_ACTIVATION", true)
+    val activationState = intent.getIntExtra("ACTIVATION_STATE", 1)
     setContent {
       val navController = rememberNavController()
       
 
       KIVoPAndriodTheme {
-        // A surface container using the 'background' color from the theme
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = Background_prime,
         ) {
-          OnboardingNav(navController = navController, needsActivation)
+          OnboardingNav(navController = navController, needsActivation, activationState)
         }
       }
     }

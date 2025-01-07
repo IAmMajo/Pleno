@@ -146,10 +146,10 @@ class AuthController(private val context: Context) {
     return false
   }
   
-  suspend fun isActivated(): Boolean {
+  suspend fun isActivated(): String? {
     val userLoginDTO = getCredentials()
     val response = login(userLoginDTO.email!!, userLoginDTO.password!!)
-    return response == "Successful Login!"
+    return response
   }
   
   suspend fun isLoggedIn(): Boolean {

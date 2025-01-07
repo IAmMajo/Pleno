@@ -9,19 +9,19 @@ import android.util.Base64
 import android.util.Log
 import java.io.InputStream
 
-fun uriToByteArray(context: Context, uri: Uri): ByteArray? {
-  try {
+fun uriToBase64String(context: Context, uri: Uri): String? {
+  return try {
     // Open input stream from the URI
     val inputStream: InputStream = context.contentResolver.openInputStream(uri)!!
 
     // Convert InputStream to ByteArray
     val byteArray = inputStream.readBytes()
 
-    // Encode the ByteArray in Base64
-    return Base64.encodeToString(byteArray, Base64.NO_WRAP).toByteArray()
+    // Encode the ByteArray in Base64 and return it as a String
+    Base64.encodeToString(byteArray, Base64.NO_WRAP)
   } catch (e: Exception) {
     e.printStackTrace()
-    return null
+    null
   }
 }
 
@@ -35,13 +35,13 @@ fun uriToBitmap(contentResolver: ContentResolver, uri: Uri): Bitmap? {
   }
 }
 
-fun byteArrayToBitmap(byteArray: ByteArray): Bitmap? {
-  Log.i("byteArrayToBitmap", "byteArrayToBitmap")
+fun base64ToBitmap(base64String: String): Bitmap? {
+  Log.i("base64ToBitmap", "Converting Base64 string to Bitmap")
   return try {
     // Decode Base64 string into a byte array
-    val decodedString = Base64.decode(byteArray.decodeToString(), Base64.NO_WRAP)
+    val decodedBytes = Base64.decode(base64String, Base64.NO_WRAP)
     // Convert byte array into Bitmap
-    BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
   } catch (e: Exception) {
     e.printStackTrace()
     null
