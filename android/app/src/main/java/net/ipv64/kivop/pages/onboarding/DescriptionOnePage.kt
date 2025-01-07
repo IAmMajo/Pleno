@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,8 +20,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.navigation.NavController
-import coil3.compose.AsyncImage
 import net.ipv64.kivop.R
 import net.ipv64.kivop.services.StringProvider.getString
 import net.ipv64.kivop.ui.customRoundedBottom
@@ -46,10 +43,9 @@ fun DescriptionOnePage() {
       Spacer(modifier = Modifier.weight(1f))
       Box(modifier = Modifier.height(250.dp).aspectRatio(1f)) {
         Image(
-          painter = painterResource(id = R.drawable.onboardingscreen1),
-          contentDescription = "Onboarding Screen 1",
-          modifier = Modifier.fillMaxWidth().aspectRatio(1f)
-        )
+            painter = painterResource(id = R.drawable.onboardingscreen1),
+            contentDescription = "Onboarding Screen 1",
+            modifier = Modifier.fillMaxWidth().aspectRatio(1f))
       }
       Spacer(modifier = Modifier.height(16.dp))
       Box(modifier = Modifier.weight(1f)) {

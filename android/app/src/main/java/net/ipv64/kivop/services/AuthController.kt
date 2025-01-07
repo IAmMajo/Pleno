@@ -43,20 +43,20 @@ class AuthController(private val context: Context) {
       else -> "Unexpected error: $status"
     }
   }
-  
+
   suspend fun register(user: UserRegistrationDTO): Boolean {
-    if(postRegister(user)){
+    if (postRegister(user)) {
       saveCredentials(user.email!!, user.password!!)
       return true
     }
     return false
   }
-  
+
   suspend fun resendEmail() {
     val credentials = getCredentials()
     postResendEmail(credentials.email!!)
   }
-  
+
   fun logout() {
     val sharedPreferences = getEncryptedSharedPreferences()
 
@@ -69,7 +69,7 @@ class AuthController(private val context: Context) {
     return getValidateToken(token)
   }
 
-  suspend fun refreshSession():Boolean {
+  suspend fun refreshSession(): Boolean {
     val credentials = getCredentials()
     val response = login(credentials.email!!, credentials.password!!)
     if (response == "Successful Login!") {
@@ -137,7 +137,7 @@ class AuthController(private val context: Context) {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM // Value encryption scheme
         )
   }
-    
+
   fun hasCredentials(): Boolean {
     val userLoginDTO = getCredentials()
     if (userLoginDTO.email?.isNotEmpty() == true && userLoginDTO.password?.isNotEmpty() == true) {
@@ -145,13 +145,13 @@ class AuthController(private val context: Context) {
     }
     return false
   }
-  
+
   suspend fun isActivated(): String? {
     val userLoginDTO = getCredentials()
     val response = login(userLoginDTO.email!!, userLoginDTO.password!!)
     return response
   }
-  
+
   suspend fun isLoggedIn(): Boolean {
     val userLoginDTO = getCredentials()
     val token = getSessionToken()

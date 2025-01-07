@@ -1,8 +1,5 @@
 package net.ipv64.kivop.pages.onboarding
 
-import android.content.Context
-import android.content.Intent
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -27,14 +24,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-import net.ipv64.kivop.MainActivity
 import net.ipv64.kivop.components.CustomInputField
 import net.ipv64.kivop.components.ImgPicker
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserRegistrationDTO
 import net.ipv64.kivop.services.api.ApiConfig.auth
-import net.ipv64.kivop.services.encodeImageToBase64
 import net.ipv64.kivop.services.uriToBase64String
-import net.ipv64.kivop.services.uriToBitmap
 import net.ipv64.kivop.ui.customRoundedTop
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Primary
@@ -48,7 +42,7 @@ fun RegisterPage(navController: NavController) {
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
   var confirmPassword by remember { mutableStateOf("") }
-  
+
   val scope = rememberCoroutineScope()
 
   Column(modifier = Modifier.fillMaxWidth().background(Color.Green)) {
@@ -114,22 +108,22 @@ fun RegisterPage(navController: NavController) {
                     textDecoration = TextDecoration.Underline)
               }
           Button(
-            modifier = Modifier.fillMaxWidth(),
-            colors =
-              ButtonDefaults.buttonColors(
-                containerColor = Signal_blue, contentColor = Text_prime_light),
-            onClick = {
-              val user = UserRegistrationDTO(name, email.lowercase(), password, imgByteArray)
+              modifier = Modifier.fillMaxWidth(),
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = Signal_blue, contentColor = Text_prime_light),
+              onClick = {
+                val user = UserRegistrationDTO(name, email.lowercase(), password, imgByteArray)
                 scope.launch {
-                  if(user.name != null && user.email != null && user.password != null){
+                  if (user.name != null && user.email != null && user.password != null) {
                     if (handleRegister(user)) {
                       navController.navigate(OnboardingScreen.AlmostDone.rout)
                     }
                   }
                 }
-            }) {
-              Text(text = "Weiter", style = MaterialTheme.typography.labelMedium)
-            }
+              }) {
+                Text(text = "Weiter", style = MaterialTheme.typography.labelMedium)
+              }
         }
   }
 }

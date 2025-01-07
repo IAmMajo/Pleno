@@ -1,12 +1,10 @@
 package net.ipv64.kivop
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -36,7 +34,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -48,7 +45,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
-import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.DrawerItem
 import net.ipv64.kivop.components.GlobalTopBar
 import net.ipv64.kivop.components.ProfileCardSmall
@@ -70,7 +66,6 @@ import net.ipv64.kivop.pages.mainApp.UserPage
 import net.ipv64.kivop.pages.mainApp.VotePage
 import net.ipv64.kivop.pages.mainApp.VotingResultPage
 import net.ipv64.kivop.pages.mainApp.VotingsListPage
-import net.ipv64.kivop.pages.onboarding.LoginActivity
 import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.StringProvider.getString
 import net.ipv64.kivop.ui.theme.Background_prime
@@ -83,14 +78,14 @@ object BackPressed {
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    
+
     setContent {
       KIVoPAndriodTheme {
-        
         val navController: NavHostController = rememberNavController()
         val userViewModel = viewModel<UserViewModel>()
-        LaunchedEffect(Unit) { userViewModel.fetchUser()
-        Log.i("nav", navController.graph.toString())
+        LaunchedEffect(Unit) {
+          userViewModel.fetchUser()
+          Log.i("nav", navController.graph.toString())
         }
 
         // A surface container using the 'background' color from the theme
@@ -305,4 +300,3 @@ fun DrawerContent(
     }
   }
 }
-

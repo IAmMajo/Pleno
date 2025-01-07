@@ -104,7 +104,7 @@ fun LoginPage(navController: NavController) {
                     navigateToMainActivity(navController.context)
                   } else if (response === "This account is inactiv") {
                     navController.navigate(OnboardingScreen.AlmostDone.rout)
-                  } else{
+                  } else {
                     Toast.makeText(navController.context, "Login failed", Toast.LENGTH_SHORT).show()
                   }
                 }

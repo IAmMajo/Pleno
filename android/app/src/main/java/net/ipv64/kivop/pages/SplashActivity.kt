@@ -30,8 +30,7 @@ import net.ipv64.kivop.ui.theme.Primary
 class SplashActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    
-    
+
     setContent {
       Surface(
           modifier = Modifier.background(Background_prime).fillMaxSize(),
@@ -42,12 +41,12 @@ class SplashActivity : ComponentActivity() {
           hasCredentials = auth.hasCredentials()
           if (hasCredentials as Boolean) {
             val response = auth.isActivated()
-            if (response == "Successful Login!"){
+            if (response == "Successful Login!") {
               navigateToMainActivity(context)
-            }else if (response == "Email not verified"){
-              navigateToLoginActivity(context,true, 1)
-            } else if (response == "This account is inactiv"){
-              navigateToLoginActivity(context,true, 2)
+            } else if (response == "Email not verified") {
+              navigateToLoginActivity(context, true, 1)
+            } else if (response == "This account is inactiv") {
+              navigateToLoginActivity(context, true, 2)
             }
           } else {
             navigateToLoginActivity(context)
@@ -75,7 +74,11 @@ private fun navigateToMainActivity(context: Context) {
   (context as? ComponentActivity)?.finish()
 }
 
-private fun navigateToLoginActivity(context: Context,needsActivation:Boolean = false,activationState:Int = 1) {
+private fun navigateToLoginActivity(
+    context: Context,
+    needsActivation: Boolean = false,
+    activationState: Int = 1
+) {
   val intent = Intent(context, LoginActivity::class.java)
   intent.putExtra("NEEDS_ACTIVATION", needsActivation)
   intent.putExtra("ACTIVATION_STATE", activationState)

@@ -42,15 +42,11 @@ fun WelcomePage(navController: NavController) {
       Spacer(modifier = Modifier.weight(1f))
       Box(
           modifier =
-              Modifier.height(250.dp)
-                  .aspectRatio(1f)
-                  .clip(RoundedCornerShape(50, 50, 50, 50))
-      ) {
-        Image(
-          painter = painterResource(id = R.drawable.onboardingscreen3),
-          contentDescription = "Onboarding Screen 1",
-          modifier = Modifier.fillMaxWidth().aspectRatio(1f)
-        )
+              Modifier.height(250.dp).aspectRatio(1f).clip(RoundedCornerShape(50, 50, 50, 50))) {
+            Image(
+                painter = painterResource(id = R.drawable.onboardingscreen3),
+                contentDescription = "Onboarding Screen 1",
+                modifier = Modifier.fillMaxWidth().aspectRatio(1f))
           }
       Spacer(modifier = Modifier.height(16.dp))
       Box(modifier = Modifier.weight(1f)) {
@@ -65,32 +61,31 @@ fun WelcomePage(navController: NavController) {
       Spacer(modifier = Modifier.weight(1f))
     }
     Column(
-      modifier =
-        Modifier.fillMaxWidth()
-          .weight(1f)
-          .customRoundedTop(Background_prime, heightPercent = 40, widthPercent = 30)
-          .background(Background_prime)
-          .padding(18.dp),
-      verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally,
+        modifier =
+            Modifier.fillMaxWidth()
+                .weight(1f)
+                .customRoundedTop(Background_prime, heightPercent = 40, widthPercent = 30)
+                .background(Background_prime)
+                .padding(18.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-            
-          Button(
-              modifier = Modifier.fillMaxWidth(),
-              colors =
-                  ButtonDefaults.buttonColors(
-                      containerColor = Signal_blue, contentColor = Text_prime_light),
-              onClick = { navController.navigate(OnboardingScreen.Login.rout) }) {
-                Text(text = "Anmelden", style = MaterialTheme.typography.labelMedium)
-              }
-          Button(
-              modifier = Modifier.fillMaxWidth(),
-              colors =
-                  ButtonDefaults.buttonColors(
-                      containerColor = Signal_blue, contentColor = Text_prime_light),
-              onClick = { navController.navigate(OnboardingScreen.Register.rout) }) {
-                Text(text = "Registrieren", style = MaterialTheme.typography.labelMedium)
-              }
-        }
+      Button(
+          modifier = Modifier.fillMaxWidth(),
+          colors =
+              ButtonDefaults.buttonColors(
+                  containerColor = Signal_blue, contentColor = Text_prime_light),
+          onClick = { navController.navigate(OnboardingScreen.Login.rout) }) {
+            Text(text = "Anmelden", style = MaterialTheme.typography.labelMedium)
+          }
+      Button(
+          modifier = Modifier.fillMaxWidth(),
+          colors =
+              ButtonDefaults.buttonColors(
+                  containerColor = Signal_blue, contentColor = Text_prime_light),
+          onClick = { navController.navigate(OnboardingScreen.Register.rout) }) {
+            Text(text = "Registrieren", style = MaterialTheme.typography.labelMedium)
+          }
+    }
   }
 }
