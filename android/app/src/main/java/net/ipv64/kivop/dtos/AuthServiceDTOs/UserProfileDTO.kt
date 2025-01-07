@@ -7,7 +7,7 @@ data class UserProfileDTO (
     var uid : UUID?,
     var email : String?,
     var name : String?,
-    var profileImage : ByteArray?,
+    var profileImage : String?,
     var isAdmin : Boolean?,
     var isActive : Boolean?,
     var emailVerification : VerificationStatus?,
