@@ -321,7 +321,7 @@ struct MainPageAPI {
             }.resume()
         }
     
-    static func fetchPendingUsers(completion: @escaping (Result<[UserEmailVerificationDTO], Error>) -> Void) {
+    static func fetchPendingUsers(completion: @escaping (Result<[UserProfileDTO], Error>) -> Void) {
         guard let url = URL(string: "\(baseURL)/users") else {
             print("❌ Fehler: Ungültige URL für fetchPendingUsers.")
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL"])))
@@ -354,8 +354,8 @@ struct MainPageAPI {
             do {
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601
-                let users = try decoder.decode([UserEmailVerificationDTO].self, from: data)
-                print("✅ Erfolgreich \(users.count) Nutzeranfragen abgerufen.")
+                let users = try decoder.decode([UserProfileDTO].self, from: data)
+                print("✅ Erfolgreich \(users.count) Nutzerprofile abgerufen.")
                 completion(.success(users))
             } catch {
                 print("❌ Fehler beim Dekodieren von fetchPendingUsers: \(error.localizedDescription)")
@@ -409,8 +409,7 @@ struct MainPageAPI {
             }
         }.resume()
     }
-
-
+    
     static func deleteUser(userId: String, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let url = URL(string: "\(baseURL)/users/\(userId)") else {
             print("❌ Fehler: Ungültige URL für deleteUser.")
@@ -444,6 +443,147 @@ struct MainPageAPI {
             }
         }.resume()
     }
+
+    
+    // MARK: - Alle Benutzer laden
+    static func fetchAllUsers(completion: @escaping (Result<[UserProfileDTO], Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users") else {
+            print("❌ Fehler: Ungültige URL für Benutzerliste.")
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
+
+        print("➡️ Sende GET-Anfrage an URL: \(url)")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ Netzwerkfehler in fetchAllUsers: \(error.localizedDescription)")
+                completion(.failure(error))
+                return
+            }
+
+            if let httpResponse = response as? HTTPURLResponse {
+                print("ℹ️ Antwortstatus von fetchAllUsers: \(httpResponse.statusCode)")
+            }
+
+            guard let data = data else {
+                print("❌ Keine Daten von fetchAllUsers erhalten.")
+                completion(.failure(APIError.invalidData))
+                return
+            }
+
+            do {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let users = try decoder.decode([UserProfileDTO].self, from: data)
+                print("✅ Erfolgreich \(users.count) Benutzer geladen:")
+                users.forEach { print("👤 Benutzer: \(String(describing: $0.name)) - \(String(describing: $0.email))") }
+                completion(.success(users))
+            } catch {
+                print("❌ Fehler beim Dekodieren von fetchAllUsers: \(error.localizedDescription)")
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+    
+    // MARK: - Einzelnen Benutzer abrufen
+    static func fetchUserByID(userID: UUID, completion: @escaping (Result<UserProfileDTO, Error>) -> Void) {
+           let urlString = "\(baseURL)/users/\(userID)"
+           guard let url = URL(string: urlString) else {
+               print("❌ Ungültige URL: \(urlString)")
+               completion(.failure(APIError.invalidURL))
+               return
+           }
+
+           var request = URLRequest(url: url)
+           request.httpMethod = "GET"
+           request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
+
+           print("➡️ Sende GET-Anfrage für Benutzer mit ID \(userID) an URL: \(url)")
+
+           URLSession.shared.dataTask(with: request) { data, response, error in
+               if let error = error {
+                   print("❌ Netzwerkfehler: \(error.localizedDescription)")
+                   completion(.failure(error))
+                   return
+               }
+
+               guard let data = data else {
+                   print("❌ Keine Daten empfangen.")
+                   completion(.failure(APIError.invalidResponse))
+                   return
+               }
+
+               // Debug: Response-Daten prüfen
+               if let responseString = String(data: data, encoding: .utf8) {
+                   print("📝 Serverantwort JSON: \(responseString)")
+               }
+
+               do {
+                   let decoder = JSONDecoder()
+                   let formatter = DateFormatter()
+                   formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+                   decoder.dateDecodingStrategy = .formatted(formatter)
+
+                   let user = try decoder.decode(UserProfileDTO.self, from: data)
+                   print("✅ Benutzer erfolgreich dekodiert: \(user.name ?? "Unbekannt")")
+                   completion(.success(user))
+               } catch {
+                   print("❌ Fehler beim Dekodieren des Benutzers: \(error.localizedDescription)")
+                   completion(.failure(error))
+               }
+           }.resume()
+       }
+    
+    // MARK: - Admin-Status aktualisieren
+    static func updateAdminStatus(userId: String, isAdmin: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users/\(userId)") else {
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
+
+        let body = ["isAdmin": isAdmin]
+        request.httpBody = try? JSONEncoder().encode(body)
+
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                completion(.failure(APIError.invalidResponse))
+                return
+            }
+
+            completion(.success(()))
+        }.resume()
+    }
+
+
+
+    static func calculateInitials(from fullName: String?) -> String {
+        guard let name = fullName, !name.isEmpty else { return "??" }
+        let nameParts = name.split(separator: " ")
+
+        if nameParts.count >= 2 {
+            let firstInitial = nameParts.first?.prefix(1) ?? ""
+            let lastInitial = nameParts.last?.prefix(1) ?? ""
+            return "\(firstInitial)\(lastInitial)".uppercased()
+        } else {
+            return String(name.prefix(2)).uppercased()
+        }
+    }
+
 
 
     }

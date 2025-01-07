@@ -21,18 +21,19 @@ struct AbgeschlossenView: View {
                     .padding()
 
                 if let results = votingResults {
-                    PieChartView(optionTextMap: Dictionary(uniqueKeysWithValues: voting.options.map { ($0.index, $0.text) }),
-                                 votingResults: results)
+                    let optionTextMap = Dictionary(uniqueKeysWithValues: voting.options.map { ($0.index, $0.text) })
+
+                    PieChartView(optionTextMap: optionTextMap, votingResults: results)
                         .frame(height: 200)
                         .padding()
 
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(results.results, id: \.index) { result in
                             HStack {
-                                Text(voting.options.first { $0.index == result.index }?.text ?? "Enthaltung")
+                                Text(optionTextMap[result.index] ?? "Enthaltung")
                                     .font(.headline)
                                 Spacer()
-                                Text("\(result.total) Stimmen")
+                                Text("\(result.count) Stimmen") // 'total' durch 'count' ersetzt
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
                             }
