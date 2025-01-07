@@ -11,7 +11,12 @@ class UserManager: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let fetchedUsers):
-                    self?.users = fetchedUsers
+                    self?.users = fetchedUsers.filter { user in
+                        if let isActive = user.isActive {
+                            return isActive
+                        }
+                        return false // Wenn isActive nil ist, wird der Benutzer ausgeschlossen
+                    }
                 case .failure(let error):
                     print("Fehler beim Abrufen der Benutzer: \(error.localizedDescription)")
                 }
@@ -57,6 +62,57 @@ class UserManager: ObservableObject {
                 print(users)
             } catch {
                 completion(.failure(error))
+            }
+        }.resume()
+    }
+    
+    var user: UserProfileDTO?
+    func getUser(userId: UUID){
+        // Erstelle die URL für die Anfrage
+        guard let url = URL(string: "https://kivop.ipv64.net/users/\(userId)") else {
+            print("Invalid URL")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        // Füge das Token hinzu, falls vorhanden
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            print("Unauthorized: No token found")
+            return
+        }
+
+        // Sende die Anfrage und verarbeite die Antwort
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            if let error = error {
+                print("Network error: \(error.localizedDescription)")
+                return
+            }
+
+            guard let data = data else {
+                print("No data received from server")
+                return
+            }
+
+            // Debugging: Serverantwort in Klartext ausgeben
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("Das ist es: -------------------- Server Response: \(jsonString)")
+            }
+
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+            do {
+                // Dekodiere das einzelne Record-Objekt
+                let decodedUser = try decoder.decode(UserProfileDTO.self, from: data)
+                DispatchQueue.main.async {
+                    self?.user = decodedUser // Den User speichern
+                }
+            } catch {
+                print("JSON Decode Error: \(error.localizedDescription)")
             }
         }.resume()
     }
