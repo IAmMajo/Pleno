@@ -8,7 +8,7 @@ func routes(_ app: Application) throws {
     let authProtected = app.grouped(AuthMiddleware())
     
     try authProtected.register(collection: RideController())
-
+    try app.register(collection: WebhookController())
     app.get("openapi.json") { req in
       app.routes.openAPI(
         info: .init(

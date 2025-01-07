@@ -32,6 +32,7 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "Models", package: "models"),
+                .product(name: "ConfigServiceDTOs", package: "dtos"),
                 .product(name: "FIRST_LETTER_CAPITAL_SRVNAME_PLACEHOLDERServiceDTOs", package: "dtos"),
                 .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
             ],

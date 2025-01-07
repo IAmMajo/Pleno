@@ -45,8 +45,8 @@ struct RecordController: RouteCollection {
         return try await meeting.$records.query(on: req.db)
             .with(\.$identity)
             .all()
-            .map { record in
-            try record.toGetRecordDTO()
+            .asyncMap { record in
+                try await record.toGetRecordDTO(db: req.db)
         }
     }
     
@@ -62,7 +62,7 @@ struct RecordController: RouteCollection {
             throw Abort(.notFound)
         }
         try await record.$identity.load(on: req.db)
-        return try record.toGetRecordDTO()
+        return try await record.toGetRecordDTO(db: req.db)
     }
     
     /// **PATCH** `/meetings/{id}/records/{lang}`
@@ -109,7 +109,7 @@ struct RecordController: RouteCollection {
         
         try await record.update(on: req.db)
         try await record.$identity.load(on: req.db)
-        return try record.toGetRecordDTO()
+        return try await record.toGetRecordDTO(db: req.db)
     }
     
     /// **DELETE** `/meetings/{id}/records/{lang}`
@@ -156,7 +156,7 @@ struct RecordController: RouteCollection {
         
         try await record.update(on: req.db)
         try await record.$identity.load(on: req.db)
-        return try record.toGetRecordDTO()
+        return try await record.toGetRecordDTO(db: req.db)
     }
     
     /// **PUT** `/meetings/{id}/records/{lang}/approve`
@@ -184,7 +184,7 @@ struct RecordController: RouteCollection {
         
         try await record.update(on: req.db)
         try await record.$identity.load(on: req.db)
-        return try record.toGetRecordDTO()
+        return try await record.toGetRecordDTO(db: req.db)
     }
     
     /// **PUT** `/meetings/{id}/records/{lang}/translate/{lang2}`
@@ -216,6 +216,6 @@ struct RecordController: RouteCollection {
         
         try await translatedRecord.create(on: req.db)
         try await record.$identity.load(on: req.db)
-        return try translatedRecord.toGetRecordDTO()
+        return try await record.toGetRecordDTO(db: req.db)
     }
 }

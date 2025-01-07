@@ -3,7 +3,7 @@ import VaporToOpenAPI
 
 func routes(_ app: Application) throws {
     try app.register(collection: EmailController())
-
+    try app.register(collection: WebhookController())
     app.get("openapi.json") { req in
       app.routes.openAPI(
         info: .init(

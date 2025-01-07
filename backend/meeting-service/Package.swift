@@ -36,7 +36,11 @@ let package = Package(
                 .product(name: "JWT", package: "jwt"),
                 .product(name: "Models", package: "models"),
                 .product(name: "MeetingServiceDTOs", package: "dtos"),
+                .product(name: "ConfigServiceDTOs", package: "dtos"),
                 .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
+            ],
+            resources: [
+                .process("Resources/Localizable.xcstrings.json")
             ],
             swiftSettings: swiftSettings
         ),

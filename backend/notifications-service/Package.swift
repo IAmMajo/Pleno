@@ -38,6 +38,7 @@ let package = Package(
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "Models", package: "models"),
                 .product(name: "NotificationsServiceDTOs", package: "dtos"),
+                .product(name: "ConfigServiceDTOs", package: "dtos"),
                 .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI"),
                 .product(name: "Smtp", package: "Smtp"),
             ],
