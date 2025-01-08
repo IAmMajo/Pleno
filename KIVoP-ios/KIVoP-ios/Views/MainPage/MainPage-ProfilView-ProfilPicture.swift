@@ -3,7 +3,7 @@ import UIKit
 
 struct MainPage_ProfilView_ProfilPicture: View {
     @State private var showImagePicker = false
-    @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary // Standard auf Galerie
+    @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
     @State private var selectedImage: UIImage? = nil
     @State private var shortName: String = "NN"
     @State private var errorMessage: String? = nil
@@ -51,7 +51,7 @@ struct MainPage_ProfilView_ProfilPicture: View {
                         }
                         .font(.headline)
                         .foregroundColor(.red)
-                        .disabled(selectedImage == nil || isUpdating)
+                        .disabled(isUpdating)
 
                         // Kamera- und Galerie-Aktionen
                         HStack(spacing: 50) {
@@ -133,11 +133,6 @@ struct MainPage_ProfilView_ProfilPicture: View {
 
     // MARK: - Profilbild aktualisieren
     func updateProfileImage(with updatedImage: UIImage?) {
-        guard let updatedImage = updatedImage else {
-            self.errorMessage = "Kein Bild ausgewählt."
-            return
-        }
-
         isUpdating = true
         errorMessage = nil
 
@@ -157,9 +152,29 @@ struct MainPage_ProfilView_ProfilPicture: View {
 
     // MARK: - Profilbild löschen
     func deleteProfileImage() {
+        // Profilbild lokal entfernen
         selectedImage = nil
-        updateProfileImage(with: nil)
+        shortName = MainPageAPI.calculateShortName(from: "Anonym") // Fallback für die Anzeige
+
+        // Indikator setzen
+        isUpdating = true
+        errorMessage = nil
+
+        // Leeres Bild-Datenobjekt senden
+        MainPageAPI.updateUserProfileImage(profileImage: UIImage()) { result in
+            DispatchQueue.main.async {
+                self.isUpdating = false
+                switch result {
+                case .success:
+                    print("Profilbild erfolgreich gelöscht.")
+                case .failure(let error):
+                    self.errorMessage = "Fehler beim Löschen des Profilbilds: \(error.localizedDescription)"
+                    print("[DEBUG] Fehler: \(error.localizedDescription)")
+                }
+            }
+        }
     }
+
 
     // MARK: - ImagePicker
     struct ImagePicker: UIViewControllerRepresentable {
@@ -176,7 +191,6 @@ struct MainPage_ProfilView_ProfilPicture: View {
         }
 
         func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {
-            // Sicherstellen, dass der sourceType bei jedem Update korrekt gesetzt ist
             uiViewController.sourceType = sourceType
         }
 

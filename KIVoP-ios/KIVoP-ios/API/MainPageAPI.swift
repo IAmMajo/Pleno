@@ -193,46 +193,86 @@ struct MainPageAPI {
     }
     
     // MARK: - Profilbild aktualisieren
+    // MARK: - Profilbild aktualisieren
     static func updateUserProfileImage(profileImage: UIImage?, completion: @escaping (Result<Void, Error>) -> Void) {
+        print("[DEBUG] Profilbild-Update gestartet.")
+        
+        // URL erstellen
         guard let url = URL(string: "https://kivop.ipv64.net/users/profile") else {
+            print("[DEBUG] Fehler: Ungültige URL.")
             completion(.failure(APIError.invalidURL))
             return
         }
-
+        print("[DEBUG] URL für Profilbild-Update: \(url)")
+        
+        // JWT-Token abrufen
         guard let jwtToken = UserDefaults.standard.string(forKey: "jwtToken") else {
-            completion(.failure(APIError.invalidRequest))
+            print("[DEBUG] Fehler: Kein JWT-Token gefunden.")
+            completion(.failure(APIError.missingToken))
             return
         }
-
+        print("[DEBUG] JWT-Token abgerufen: \(jwtToken.prefix(10))...") // Token maskiert
+        
+        // HTTP-Request erstellen
         var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
-
-        let compressedImageData = profileImage?.jpegData(compressionQuality: 0.6)
-        let updateDTO = UserProfileUpdateDTO(name: nil, profileImage: compressedImageData)
-
+        print("[DEBUG] HTTP-Header gesetzt.")
+        
+        // Bilddaten oder explizites Null-Objekt vorbereiten
+        let updateDTO: [String: Any]
+        if let image = profileImage, let imageData = image.jpegData(compressionQuality: 0.6) {
+            updateDTO = ["profileImage": imageData.base64EncodedString()] // Base64 für JSON
+            print("[DEBUG] Profilbild wird aktualisiert.")
+        } else {
+            updateDTO = ["profileImage": ""] // Explizit `null` senden
+            print("[DEBUG] Profilbild wird gelöscht.")
+        }
+        
         do {
-            request.httpBody = try JSONEncoder().encode(updateDTO)
+            let jsonData = try JSONSerialization.data(withJSONObject: updateDTO, options: [])
+            request.httpBody = jsonData
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("[DEBUG] Encodiertes JSON: \(jsonString)")
+            }
         } catch {
+            print("[DEBUG] Fehler beim Encodieren des JSON: \(error.localizedDescription)")
             completion(.failure(error))
             return
         }
-
-        URLSession.shared.dataTask(with: request) { _, response, error in
+        
+        // API-Request ausführen
+        URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
+                print("[DEBUG] Netzwerkfehler: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
-
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("[DEBUG] Fehler: Keine gültige HTTP-Antwort erhalten.")
                 completion(.failure(APIError.invalidResponse))
                 return
             }
-
-            completion(.success(()))
+            
+            print("[DEBUG] HTTP-Statuscode: \(httpResponse.statusCode)")
+            
+            if let data = data, let responseBody = String(data: data, encoding: .utf8) {
+                print("[DEBUG] Antwort-Body: \(responseBody)")
+            }
+            
+            if httpResponse.statusCode == 200 {
+                print("[DEBUG] Profilbild-Update erfolgreich.")
+                completion(.success(()))
+            } else {
+                print("[DEBUG] Fehler: Unerwarteter Statuscode \(httpResponse.statusCode).")
+                completion(.failure(APIError.invalidResponse))
+            }
         }.resume()
     }
+
+
 
 
     // MARK: - Passwort aktualisieren/ändern
