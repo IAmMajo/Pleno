@@ -38,7 +38,7 @@ public final class SpecialRide: Model, @unchecked Sendable {
     public var destinationLongitude: Float
     
     @Field(key: "emptySeats")
-    public var emptySeats: Int
+    public var emptySeats: UInt8
     
     @Timestamp(key: "created_at", on: .create)
     public var createdAt: Date?
@@ -48,7 +48,7 @@ public final class SpecialRide: Model, @unchecked Sendable {
     
     public init(){}
     
-    public init(id: UUID? = nil, userID: User.IDValue, name: String, description: String? = nil, vehicleDescription: String? = nil, starts: Date, ends: Date, startLatitude: Float, startLongitude: Float, destinationLatitude: Float, destinationLongitude: Float, emptySeats: Int, createdAt: Date? = nil, updatedAt: Date? = nil) {
+    public init(id: UUID? = nil, userID: User.IDValue, name: String, description: String? = nil, vehicleDescription: String? = nil, starts: Date, ends: Date, startLatitude: Float, startLongitude: Float, destinationLatitude: Float, destinationLongitude: Float, emptySeats: UInt8, createdAt: Date? = nil, updatedAt: Date? = nil) {
         self.id = id
         self.$user.id = userID
         self.name = name

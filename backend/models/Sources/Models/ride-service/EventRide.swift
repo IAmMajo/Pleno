@@ -23,7 +23,7 @@ public final class EventRide: Model, @unchecked Sendable {
     public var longitude: Float
     
     @Field(key: "emptySeats")
-    public var emptySeats: Int
+    public var emptySeats: UInt8
     
     @Field(key: "description")
     public var description: String?
@@ -39,7 +39,7 @@ public final class EventRide: Model, @unchecked Sendable {
     
     public init(){}
     
-    public init(id: UUID? = nil, eventID: PlenoEvent.IDValue, participantID: EventParticipant.IDValue, starts: Date, latitude: Float, longitude: Float, emptySeats: Int, description: String? = nil, vehicleDescription: String? = nil, createdAt: Date? = nil, updatedAt: Date? = nil) {
+    public init(id: UUID? = nil, eventID: PlenoEvent.IDValue, participantID: EventParticipant.IDValue, starts: Date, latitude: Float, longitude: Float, emptySeats: UInt8, description: String? = nil, vehicleDescription: String? = nil, createdAt: Date? = nil, updatedAt: Date? = nil) {
         self.id = id
         self.$event.id = eventID
         self.$participant.id = participantID

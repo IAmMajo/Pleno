@@ -15,7 +15,7 @@ struct CreateSpecialRide: AsyncMigration {
             .field("start_longitude", .float, .required)
             .field("destination_latitude", .float, .required)
             .field("destination_longitude", .float, .required)
-            .field("emptySeats", .int, .required)
+            .field("emptySeats", .uint8, .required)
             .field("created_at", .datetime)
             .field("updated_at", .datetime)
             .create()

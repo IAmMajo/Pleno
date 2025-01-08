@@ -10,7 +10,7 @@ struct CreateEventRide: AsyncMigration {
             .field("starts", .datetime, .required)
             .field("latitude", .float, .required)
             .field("longitude", .float, .required)
-            .field("emptySeats", .int, .required)
+            .field("emptySeats", .uint8, .required)
             .field("description", .string)
             .field("vehicle_description", .string)
             .field("created_at", .datetime)
