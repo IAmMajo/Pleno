@@ -15,6 +15,8 @@ sealed class Screen(val rout: String) {
 
   object Events : Screen("events")
 
+  object Posters : Screen("posters")
+  //TODO: add id
   object Poster : Screen("poster")
 
   object Votings : Screen("abstimmungen") // todo remove

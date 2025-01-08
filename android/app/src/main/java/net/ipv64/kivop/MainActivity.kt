@@ -60,6 +60,7 @@ import net.ipv64.kivop.pages.mainApp.EventsPage
 import net.ipv64.kivop.pages.mainApp.HomePage
 import net.ipv64.kivop.pages.mainApp.MeetingsListPage
 import net.ipv64.kivop.pages.mainApp.PosterPage
+import net.ipv64.kivop.pages.mainApp.PostersListPage
 import net.ipv64.kivop.pages.mainApp.ProtocolListPage
 import net.ipv64.kivop.pages.mainApp.TravelPage
 import net.ipv64.kivop.pages.mainApp.UserPage
@@ -150,6 +151,8 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         composable(route = Screen.Travel.rout) { TravelPage(navController = navController) }
         // Events
         composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
+        // PostersList
+        composable(route = Screen.Posters.rout) { PostersListPage(navController = navController) }
         // Poster
         composable(route = Screen.Poster.rout) { PosterPage(navController = navController) }
         // Abstimmungen Listen Page
@@ -286,7 +289,7 @@ fun DrawerContent(
                 modifier = Modifier,
                 icon = Icons.Rounded.Home,
                 title = getString(R.string.poster),
-                route = Screen.Poster.rout),
+                route = Screen.Posters.rout),
         )
     drawerItems.forEach { item ->
       DrawerItem(
