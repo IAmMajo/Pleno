@@ -150,7 +150,7 @@ struct MeetingDetailAdminView: View {
                                 .foregroundColor(.secondary)
                         } else {
                             ForEach(votingManager.votings, id: \.id) { voting in
-                                NavigationLink(destination: AktivView(voting: voting, onBack: {
+                                NavigationLink(destination: AktivView(votingId: voting.id, onBack: {
                                     // Hier können Sie Aktionen definieren, die ausgeführt werden, wenn der Nutzer zurückgeht.
                                     print("Zurück zur vorherigen Ansicht.")
                                 })) {

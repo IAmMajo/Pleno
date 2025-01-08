@@ -1,82 +1,78 @@
-//
-//  WebSocketManager.swift
-//  kivopadmin
-//
-//  Created by Amine Ahamri on 07.01.25.
-//
-
-
-//
-//  WebSocketManager.swift
-//  kivopadmin
-//
-//  Created by Amine Ahamri on 02.01.25.
-//
-
-
 import Foundation
-import Combine
-import MeetingServiceDTOs
 
-class WebSocketManager: ObservableObject {
-    @Published var liveResults: GetVotingResultsDTO?
-
+class WebSocketService: ObservableObject {
     private var webSocketTask: URLSessionWebSocketTask?
-    private var cancellables = Set<AnyCancellable>()
+    private var urlSession: URLSession?
+    
+    @Published var liveStatus: String?
+    @Published var errorMessage: String?
+    
+    private var votingId: UUID?
 
-    init(url: URL) {
-        connect(to: url)
-    }
-
-    deinit {
+    func connect(to votingId: UUID) {
+        // Schließe bestehende Verbindung, falls aktiv
         disconnect()
-    }
+        
+        self.votingId = votingId
+        self.liveStatus = nil
+        self.errorMessage = nil
 
-    func connect(to url: URL) {
-        let session = URLSession(configuration: .default)
-        webSocketTask = session.webSocketTask(with: url)
-        listenForMessages()
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            self.errorMessage = "Unauthorized: Token not found"
+            return
+        }
+
+        let configuration = URLSessionConfiguration.default
+        configuration.httpAdditionalHeaders = ["Authorization": "Bearer \(token)"]
+        self.urlSession = URLSession(configuration: configuration)
+
+        guard let url = URL(string: "wss://kivop.ipv64.net/meetings/votings/\(votingId)/live-status") else {
+            self.errorMessage = "Invalid URL"
+            return
+        }
+
+        webSocketTask = urlSession?.webSocketTask(with: url)
         webSocketTask?.resume()
+        listenForMessages()
     }
 
     func disconnect() {
-        webSocketTask?.cancel(with: .goingAway, reason: nil)
+        webSocketTask?.cancel(with: .normalClosure, reason: nil)
+        webSocketTask = nil
     }
 
     private func listenForMessages() {
         webSocketTask?.receive { [weak self] result in
+            guard let self = self else { return }
             switch result {
-            case .success(let message):
-                switch message {
-                case .data(let data):
-                    self?.handleData(data)
-                case .string(let string):
-                    self?.handleString(string)
-                @unknown default:
-                    break
-                }
             case .failure(let error):
-                print("WebSocket error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.errorMessage = "WebSocket error: \(error.localizedDescription)"
+                }
+            case .success(let message):
+                DispatchQueue.main.async {
+                    self.handleMessage(message)
+                }
+                self.listenForMessages()
             }
-
-            // Weiter zuhören
-            self?.listenForMessages()
         }
     }
 
-    private func handleData(_ data: Data) {
-        do {
-            let decodedResults = try JSONDecoder().decode(GetVotingResultsDTO.self, from: data)
-            DispatchQueue.main.async {
-                self.liveResults = decodedResults
+    private func handleMessage(_ message: URLSessionWebSocketTask.Message) {
+        DispatchQueue.main.async {
+            switch message {
+            case .string(let text):
+                if text.starts(with: "ERROR:") {
+                    self.errorMessage = text
+                } else {
+                    self.liveStatus = text
+                }
+            case .data(_):
+                // Falls binäre Daten gesendet werden, kannst du hier Dekodierung implementieren
+                print("Received binary data")
+            @unknown default:
+                self.errorMessage = "Unknown message type received."
             }
-        } catch {
-            print("Fehler beim Decodieren der Daten: \(error)")
         }
-    }
-
-    private func handleString(_ string: String) {
-        guard let data = string.data(using: .utf8) else { return }
-        handleData(data)
     }
 }

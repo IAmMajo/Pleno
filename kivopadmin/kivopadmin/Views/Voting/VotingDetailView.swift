@@ -38,11 +38,11 @@ struct VotingDetailView: View {
 
                 } else if voting.isOpen {
                     AktivView(
-                        voting: voting,
-                        onBack: {
-                            print("Zurück zur Voting-Liste.") // Debugging
-                            onBack() // Navigation zur Voting-Liste
-                        }
+                        votingId: voting.id, // Die `id` des `GetVotingDTO`-Objekts extrahieren
+                                onBack: {
+                                    print("Zurück zur Voting-Liste.") // Debugging
+                                    onBack() // Navigation zur Voting-Liste
+                                }
                     )
                 } else {
                     AbgeschlossenView(voting: voting, votingResults: votingResults)
