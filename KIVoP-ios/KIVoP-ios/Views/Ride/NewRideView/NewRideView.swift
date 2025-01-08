@@ -7,9 +7,10 @@
 
 import SwiftUI
 
-struct NewRideView: View {
+struct NewRideView: View {  
     @ObservedObject var viewModel: NewRideViewModel
     @State var showingSaveAlert = false
+    @State var selectingSaveAlert: ActiveAlert = .error
     @State var showingBackAlert = false
     @State var showingSelectionAlert = false
     @Environment(\.dismiss) private var dismiss
@@ -35,21 +36,35 @@ struct NewRideView: View {
                 // Speichern Button
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
+                        if viewModel.isFormValid {
+                            selectingSaveAlert = .save
+                        } else {
+                            selectingSaveAlert = .error
+                        }
                         showingSaveAlert.toggle()
                     }) {
                         Text("Speichern")
                             .font(.body)
                     }
                     .alert(isPresented: $showingSaveAlert) {
-                        Alert(
-                            title: Text("Möchtest du wirklich speichern?"),
-                            message: Text("Deine Fahrt wird dann veröffentlicht und andere können dieser beitreten."),
-                            primaryButton: .default(Text("Ja"), action: {
-                                viewModel.saveRide()
-                                dismiss()
-                            }),
-                            secondaryButton: .cancel()
-                        )
+                        switch selectingSaveAlert {
+                        case .save:
+                            Alert(
+                                title: Text("Möchtest du wirklich speichern?"),
+                                message: Text("Deine Fahrt wird dann veröffentlicht und andere können dieser beitreten."),
+                                primaryButton: .default(Text("Ja"), action: {
+                                    viewModel.saveRide()
+                                    dismiss()
+                                }),
+                                secondaryButton: .cancel()
+                            )
+                        case .error:
+                            Alert(
+                                title: Text("Fehler"),
+                                message: Text("Bitte füllen Sie alle Felder aus. Das Startdatum muss außerdem in der Zukunft liegen."),
+                                dismissButton: .default(Text("OK"))
+                            )
+                        }
                     }
                 }
                 
@@ -89,5 +104,12 @@ struct NewRideView: View {
                 )
             }
         }
+    }
+}
+
+struct NewRideView_Previews: PreviewProvider {
+    static var previews: some View {
+        // Beispiel-Preview für NewRideView mit einem ViewModel
+        NewRideView(viewModel: NewRideViewModel())
     }
 }

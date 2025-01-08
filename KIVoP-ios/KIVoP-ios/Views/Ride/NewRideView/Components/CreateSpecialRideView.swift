@@ -36,10 +36,10 @@ struct CreateSpecialRideView: View {
                     DatePicker("Startzeit", selection: $viewModel.starts, displayedComponents: [.date, .hourAndMinute])
                 }
                 Section(header: Text("Startort")) {
-
+                    Text("Baut Adrian noch")
                 }
                 Section(header: Text("Zielort")) {
-                    Text("Zielort eingeben")
+                    Text("Baut Adrian noch")
                 }
                 Section(header: Text("Auto und Sitzplätze")) {
                     HStack {

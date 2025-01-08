@@ -498,6 +498,9 @@
     "Auto und Sitzplätze" : {
 
     },
+    "Baut Adrian noch" : {
+
+    },
     "Bearbeiten" : {
       "localizations" : {
         "de" : {
@@ -533,6 +536,9 @@
 
     },
     "Bist du sicher, dass du das Plakat abhängen möchtest?" : {
+
+    },
+    "Bitte füllen Sie alle Felder aus. Das Startdatum muss außerdem in der Zukunft liegen." : {
 
     },
     "Bitte klicke nun auf den " : {
@@ -725,19 +731,16 @@
         }
       }
     },
-    "Event Fahrt" : {
+    "Event" : {
 
     },
-    "Event-spezifische Details" : {
+    "Event Fahrt" : {
 
     },
     "Events" : {
 
     },
     "Fahrgemeinschaften" : {
-
-    },
-    "Fahrzeug und Sitzplatzdetails" : {
 
     },
     "Fast fertig" : {
@@ -764,6 +767,9 @@
       }
     },
     "Fast Fertig" : {
+
+    },
+    "Fehler" : {
 
     },
     "Franz" : {
@@ -1304,6 +1310,9 @@
     "Öffnen mit Google Maps" : {
 
     },
+    "OK" : {
+
+    },
     "Option" : {
 
     },
@@ -1689,9 +1698,6 @@
     "Startort" : {
 
     },
-    "Startort für die Event Fahrt" : {
-
-    },
     "Startzeit" : {
 
     },
@@ -1953,6 +1959,9 @@
     "Wähle die Art der Fahrt" : {
 
     },
+    "Wählen Sie ein Event" : {
+
+    },
     "Weiter" : {
       "localizations" : {
         "de" : {
@@ -1974,6 +1983,9 @@
           }
         }
       }
+    },
+    "Wird vom Event ausgelesen" : {
+
     },
     "Wirklich abmelden?" : {
       "localizations" : {
@@ -1998,12 +2010,6 @@
       }
     },
     "Zielort" : {
-
-    },
-    "Zielort eingeben" : {
-
-    },
-    "Zielort für die Event Fahrt" : {
 
     },
     "zu einer verbesserten " : {
