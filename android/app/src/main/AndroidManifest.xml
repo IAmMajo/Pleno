@@ -33,7 +33,8 @@ xmlns:tools="http://schemas.android.com/tools">
         <intent-filter>
             <data
                 android:host="kivop.ipv64.net"
-                android:scheme="https" />
+                android:scheme="https"
+                android:pathPattern="/auth/email/verify/.*" />
             <category android:name="android.intent.category.DEFAULT"/>
             <category android:name="android.intent.category.BROWSABLE"/>
             <action android:name="android.intent.action.VIEW"/>
