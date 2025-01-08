@@ -271,7 +271,7 @@ services:
       <<: *shared_environment
     labels:
       traefik.enable: true
-      traefik.http.routers.ride-service.rule: PathPrefix(`/ride-service`) || PathPrefix(`/ride`)
+      traefik.http.routers.ride-service.rule: PathPrefix(`/ride-service`) || PathPrefix(`/ride`) || PathPrefix(`/specialrides`)
       traefik.http.routers.ride-service.middlewares: ride-service-replace-path-regex
       traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.regex: ^/ride-service(:/(.*))?
       traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.replacement: /$$1
