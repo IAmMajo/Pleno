@@ -60,7 +60,6 @@ struct VotingLiveStatusView: View {
                
                Text("Es haben \(value) von \(total) Personen abgestimmt.")
                   .foregroundStyle(Color(UIColor.label).opacity(0.6))
-//                  .padding(.top)
             }
          }
          
