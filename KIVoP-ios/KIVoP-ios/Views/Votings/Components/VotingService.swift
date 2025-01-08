@@ -178,7 +178,7 @@ class VotingService: ObservableObject {
    }
    
    
-   //Meetings
+   //Meeting
    
    func fetchMeeting(byId meetingId: UUID, completion: @escaping (Result<GetMeetingDTO, Error>) -> Void) {
        guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId)") else {
@@ -218,139 +218,6 @@ class VotingService: ObservableObject {
            }
        }.resume()
    }
-   
-//   func fetchMeetings(completion: @escaping (Result<[GetMeetingDTO], Error>) -> Void) {
-//       guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
-//           completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
-//           return
-//       }
-//       
-//       var request = URLRequest(url: url)
-//       request.httpMethod = "GET"
-//       request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//       
-//       if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-//           request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-//       } else {
-//           completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
-//           return
-//       }
-//       
-//       URLSession.shared.dataTask(with: request) { data, response, error in
-//           if let error = error {
-//               completion(.failure(error))
-//               return
-//           }
-//           
-//           guard let data = data else {
-//               completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
-//               return
-//           }
-//           
-//           do {
-//               let decoder = JSONDecoder()
-//               decoder.dateDecodingStrategy = .iso8601
-//               let fetchedMeetings = try decoder.decode([GetMeetingDTO].self, from: data)
-//               completion(.success(fetchedMeetings))
-//           } catch {
-//               completion(.failure(error))
-//           }
-//       }.resume()
-//   }
-   
-//   func fetchMeeting(meetingId: UUID, completion: @escaping (Result<GetMeetingDTO, Error>) -> Void) {
-////      guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId)") else {
-////          completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
-////          return
-////      }
-////
-////      var request = URLRequest(url: url)
-////      request.httpMethod = "GET"
-////      request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-////
-////      if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-////          request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-////      } else {
-////          completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
-////          return
-////      }
-////
-////      URLSession.shared.dataTask(with: request) { data, response, error in
-////          if let error = error {
-////              completion(.failure(error))
-////              return
-////          }
-////
-////          guard let data = data else {
-////              completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
-////              return
-////          }
-////
-////          if let httpResponse = response as? HTTPURLResponse {
-////              print("HTTP-Status: \(httpResponse.statusCode)")
-////          }
-////          if let responseText = String(data: data, encoding: .utf8) {
-////              print("Antwort: \(responseText)")
-////          }
-////
-////          do {
-////              let decoder = JSONDecoder()
-////              decoder.dateDecodingStrategy = .iso8601
-////              let meeting = try decoder.decode(GetMeetingDTO.self, from: data)
-////              completion(.success(meeting))
-////          } catch {
-////              completion(.failure(error))
-////          }
-////      }.resume()
-//      
-//       guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)") else {
-//           completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
-//           return
-//       }
-//
-//       var request = URLRequest(url: url)
-//       request.httpMethod = "GET"
-//       
-//       if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-//           request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-//       } else {
-//           completion(.failure(NSError(domain: "Unauthorized", code: 2, userInfo: nil)))
-//           return
-//       }
-//
-//       URLSession.shared.dataTask(with: request) { data, response, error in
-//           if let error = error {
-//               completion(.failure(error))
-//               return
-//           }
-//           
-//           guard let data = data else {
-//               completion(.failure(NSError(domain: "No Data", code: 3, userInfo: nil)))
-//               return
-//           }
-//
-//           // Debugging-Ausgabe: Zeigt den erhaltenen JSON-String an
-//           if let jsonString = String(data: data, encoding: .utf8) {
-//               print("Server Response: \(jsonString)") // Zeigt den Roh-JSON-Text an
-//           }
-//
-//           let decoder = JSONDecoder()
-//
-//           // Konfiguriere benutzerdefinierte Strategien für Datum und UUID
-//           decoder.dateDecodingStrategy = .iso8601
-//           decoder.keyDecodingStrategy = .convertFromSnakeCase
-//
-//           do {
-//               // Versuche, die Antwort in das erwartete Model zu dekodieren
-//               let meeting = try decoder.decode(GetMeetingDTO.self, from: data)
-//               completion(.success(meeting))
-//           } catch {
-//               completion(.failure(error)) // Fehler beim Dekodieren
-//               print("JSON Decode Error: \(error.localizedDescription)") // Zeigt den Fehler beim Dekodieren an
-//           }
-//       }.resume()
-//   }
-   
 }
 
 extension VotingService {

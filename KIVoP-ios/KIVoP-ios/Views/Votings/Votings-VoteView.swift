@@ -31,7 +31,12 @@ struct Votings_VoteView: View {
                Text(voting.question)
                   .font(.title)
                   .fontWeight(.semibold)
-                  .padding(.top).padding(.leading).padding(.trailing)
+                  .padding(.top).padding(.bottom, 2)
+                  .padding(.leading).padding(.trailing)
+               Divider()
+               Text(voting.description)
+                  .frame(maxWidth: .infinity, alignment: .center)
+                  .padding(.leading).padding(.top, 2).padding(.trailing)
                
                List(voting.options, id: \.self, selection: $selection) { option in
                   if option.index != 0 {
@@ -98,7 +103,7 @@ struct Votings_VoteView: View {
    }
    
    private func castVote(voting: GetVotingDTO, selection: GetVotingOptionDTO?) async {
-      VotingService.shared.castVote(votingID: voting.id, index: selection!.index) { result in
+      VotingService.shared.castVote(votingID: voting.id, index: selection != nil ? selection!.index : 0) { result in
           DispatchQueue.main.async {
               switch result {
               case .success:

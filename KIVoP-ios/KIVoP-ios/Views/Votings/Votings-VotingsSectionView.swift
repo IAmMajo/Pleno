@@ -14,7 +14,7 @@ struct Votings_VotingsSectionView: View {
    
    var votingsView: VotingsView
    
-   let votingGroup: [GetVotingDTO]
+   @State var votingGroup: [GetVotingDTO]
    let mockVotingResults: GetVotingResultsDTO
    var onVotingSelected: (GetVotingDTO) -> Void
    
@@ -28,7 +28,7 @@ struct Votings_VotingsSectionView: View {
    
     var body: some View {
        Section(header: Text(meetingName)) {
-          ForEach(votingViewModels) { viewModel in
+          ForEach(votingViewModels, id: \.id) { viewModel in
              if (viewModel.voting.startedAt == nil) {
              } else {
                 Votings_VotingRowView(viewModel: viewModel, onVotingSelected: onVotingSelected)
@@ -40,12 +40,24 @@ struct Votings_VotingsSectionView: View {
              await initializeViewModelsAndMeetingName()
           }
        }
+       .onChange(of: votingGroup) { old, newValue in
+          Task {
+//             print("SectionView: votingGroup changed")
+             await initializeViewModelsAndMeetingName()
+          }
+       }
     }
    
    private func initializeViewModelsAndMeetingName() async {
-          votingViewModels = votingGroup.map { VotingViewModel(voting: $0) }
-          await loadMeetingName(votingGroup: votingGroup)
+//          votingViewModels = votingGroup.map { VotingViewModel(voting: $0) }
+//          await loadMeetingName(votingGroup: votingGroup)
+      if votingViewModels.isEmpty || votingViewModels.count != votingGroup.count {
+         votingViewModels = votingGroup.map { VotingViewModel(voting: $0) }
+//         print("initializeViewModelsAndMeetingName votingViewModels reinitialized")
       }
+      await loadMeetingName(votingGroup: votingGroup)
+//      print("initializeViewModelsAndMeetingName executed")
+   }
    
    private func loadMeetingName(votingGroup: [GetVotingDTO]) async {
       do {
