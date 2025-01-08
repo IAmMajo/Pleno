@@ -42,7 +42,8 @@ struct Votings_VotingsSectionView: View {
        }
        .onChange(of: votingGroup) { old, newValue in
           Task {
-//             print("SectionView: votingGroup changed")
+             print("SectionView: votingGroup changed")
+             votingViewModels = newValue.map { VotingViewModel(voting: $0) } // Reset view models
              await initializeViewModelsAndMeetingName()
           }
        }
@@ -53,10 +54,10 @@ struct Votings_VotingsSectionView: View {
 //          await loadMeetingName(votingGroup: votingGroup)
       if votingViewModels.isEmpty || votingViewModels.count != votingGroup.count {
          votingViewModels = votingGroup.map { VotingViewModel(voting: $0) }
-//         print("initializeViewModelsAndMeetingName votingViewModels reinitialized")
+         print("initializeViewModelsAndMeetingName votingViewModels reinitialized")
       }
       await loadMeetingName(votingGroup: votingGroup)
-//      print("initializeViewModelsAndMeetingName executed")
+      print("initializeViewModelsAndMeetingName executed")
    }
    
    private func loadMeetingName(votingGroup: [GetVotingDTO]) async {

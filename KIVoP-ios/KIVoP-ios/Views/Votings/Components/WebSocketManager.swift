@@ -56,48 +56,87 @@ class WebSocketService: ObservableObject {
         webSocketTask = nil
     }
     
-    private func listenForMessages() {
-        webSocketTask?.receive { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.errorMessage = "WebSocket error: \(error.localizedDescription)"
-                }
-                
-            case .success(let message):
-                DispatchQueue.main.async {
-                    self.handleMessage(message)
-                }
-                
-                // Continue listening for messages
-                self.listenForMessages()
-            }
-        }
-    }
-    
-    private func handleMessage(_ message: URLSessionWebSocketTask.Message) {
-        switch message {
-        case .string(let text):
-            if text.starts(with: "ERROR:") {
-                self.errorMessage = text
-            } else {
-                self.liveStatus = text
-            }
-            
-        case .data(let data):
-            do {
-                let decoder = JSONDecoder()
-                let results = try decoder.decode(GetVotingResultsDTO.self, from: data)
-                self.votingResults = results
-                disconnect() // Disconnect after receiving results
-            } catch {
-                self.errorMessage = "Failed to decode voting results: \(error.localizedDescription)"
-            }
-            
-        @unknown default:
-            self.errorMessage = "Unknown message type received"
-        }
-    }
+//    private func listenForMessages() {
+//        webSocketTask?.receive { [weak self] result in
+//            guard let self = self else { return }
+//            
+//            switch result {
+//            case .failure(let error):
+//                DispatchQueue.main.async {
+//                    self.errorMessage = "WebSocket error: \(error.localizedDescription)"
+//                }
+//                
+//            case .success(let message):
+//                DispatchQueue.main.async {
+//                    self.handleMessage(message)
+//                }
+//                
+//                // Continue listening for messages
+//                self.listenForMessages()
+//            }
+//        }
+//    }
+//    
+//    private func handleMessage(_ message: URLSessionWebSocketTask.Message) {
+//        switch message {
+//        case .string(let text):
+//            if text.starts(with: "ERROR:") {
+//                self.errorMessage = text
+//            } else {
+//                self.liveStatus = text
+//            }
+//            
+//        case .data(let data):
+//            do {
+//                let decoder = JSONDecoder()
+//                let results = try decoder.decode(GetVotingResultsDTO.self, from: data)
+//                self.votingResults = results
+//                disconnect() // Disconnect after receiving results
+//            } catch {
+//                self.errorMessage = "Failed to decode voting results: \(error.localizedDescription)"
+//            }
+//            
+//        @unknown default:
+//            self.errorMessage = "Unknown message type received"
+//        }
+//    }
+   private func listenForMessages() {
+       webSocketTask?.receive { [weak self] result in
+           guard let self = self else { return }
+           
+           switch result {
+           case .failure:
+               // Ignore client-side WebSocket errors; server errors come as messages.
+               self.listenForMessages() // Continue listening for server messages
+               
+           case .success(let message):
+               DispatchQueue.main.async {
+                   self.handleMessage(message)
+               }
+               
+               // Continue listening for messages
+               self.listenForMessages()
+           }
+       }
+   }
+
+   private func handleMessage(_ message: URLSessionWebSocketTask.Message) {
+       switch message {
+       case .string(let text):
+           if text.starts(with: "ERROR:") {
+               // Process server errors only
+               self.errorMessage = text
+           } else {
+               // Optionally handle other server messages
+               self.liveStatus = text
+           }
+           
+       case .data:
+           // Ignore non-string messages, as server errors are expected as strings
+           break
+           
+       @unknown default:
+           self.errorMessage = "Unknown message type received"
+       }
+   }
 }

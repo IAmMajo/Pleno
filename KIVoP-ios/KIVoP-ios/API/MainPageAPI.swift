@@ -37,7 +37,7 @@ struct MainPageAPI {
 
                // Debugging: JSON überprüfen
                if let jsonString = String(data: data, encoding: .utf8) {
-                   print("API Response JSON: \(jsonString)")
+//                   print("API Response JSON: \(jsonString)")
                }
 
                do {

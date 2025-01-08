@@ -150,9 +150,9 @@ struct VotingsView: View {
                                  
                                  let hasVotedForOpenVoting = await hasVotedForOpenVoting(votingId: updatedVoting.id)
                                  
-//                                 print("Selected Voting isOpen: \(selectedVoting?.isOpen ?? false)")
-//                                 print(updatedVoting.isOpen)
-//                                 print(!hasVotedForOpenVoting)
+                                 print("Selected Voting isOpen: \(selectedVoting?.isOpen ?? false)")
+                                 print(updatedVoting.isOpen)
+                                 print(!hasVotedForOpenVoting)
                                  
                                  if(updatedVoting.isOpen && !hasVotedForOpenVoting) {
                                     isShowingVoteSheet = true
@@ -164,12 +164,12 @@ struct VotingsView: View {
                      })
                   }
                }
-//               .id(UUID()) // Force list refresh
+               .id(UUID()) // Force list refresh
                .refreshable {
                   await loadVotings()
                   votingsFiltered = votingService.votings
                   await setVotingsOfMeetings()
-//                  print("refreshed")
+                  print("refreshed")
                }
                .sheet(isPresented: $isShowingVoteSheet) {
                   if let voting = selectedVoting {
@@ -209,9 +209,11 @@ struct VotingsView: View {
             Task {
 //               votingsFiltered = votingService.votings
                // Refilter votings based on the updated data
-               votingsFiltered = votingService.votings.filter { $0.isOpen }
-//               print("votingsFiltered: \(votingsFiltered.map { ($0.id, $0.isOpen) })")
+//               votingsFiltered = votingService.votings.filter { $0.isOpen }
+               votingsFiltered = new
+//               votingsFiltered = votingService.votings
                await setVotingsOfMeetings()
+               print("votingsFiltered: \(votingsFiltered.map { ($0.id, $0.isOpen) })")
             }
          }
          .overlay {
@@ -239,16 +241,11 @@ struct VotingsView: View {
    private func loadVotings() async {
       do {
          let votings = try await votingService.fetchVotings()
-         // Update the votings in the state
          votingService.votings = votings
-//         for voting in votings {
-//            if (voting.isOpen) {
-//               votingsFiltered.append(voting)
-//            }
-//         }
-//         print("loadVotings: \(votingService.votings.map { ($0.id, $0.isOpen) })")
          votingsFiltered = votings
-//         print("Loaded \(votings.count) votings")
+         await setVotingsOfMeetings()
+         print("loadVotings: \(votingService.votings.map { ($0.id, $0.isOpen) })")
+         print("Loaded \(votings.count) votings")
       } catch {
          // Handle error
          alertMessage = AlertMessage(message: "Fehler beim Laden der Abstimmungen: \(error.localizedDescription)")

@@ -27,15 +27,15 @@ class VotingViewModel: ObservableObject, Identifiable {
       VotingService.shared.fetchVotingResults(votingId: voting.id) { result in
          DispatchQueue.main.async {
             switch result {
-            case .success(let results):
-               if results.myVote != nil {
+            case .success(let results): //isOpen = false, Abstimmung vorbei
+               if results.myVote != nil { //hasVoted
                   self.symbolColor = .blue
                   self.status = "checkmark"
-               } else {
+               } else { //hasVoted = false
                   self.symbolColor = self.voting.isOpen ? .orange : .black
                   self.status = self.voting.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
                }
-            case .failure(_ /*let error*/):
+            case .failure(_ /*let error*/): //isOpen = true, oder noch nicht geöffnet worden
                //                   print("Fehler beim Abrufen der Ergebnisse: \(error.localizedDescription)")
                if self.hasVoted {
                   self.symbolColor = .blue
@@ -50,4 +50,5 @@ class VotingViewModel: ObservableObject, Identifiable {
          }
       }
    }
+   
 }
