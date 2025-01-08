@@ -1,4 +1,5 @@
 import Fluent
+import SwiftOpenAPI
 import Models
 import Vapor
 @preconcurrency import JWTKit
@@ -29,10 +30,12 @@ struct ConfigController: RouteCollection{
             // Authentifizierte Routen
             let authProtected = routes.grouped(authMiddleware)
             let adminProtected = authProtected.grouped(adminMiddleware)
-            
+            let openAPITagConfig = TagObject(name: "Konfigurations Einstellungen")
+
             // Routen für Konfigurationseinstellungen
             let settings = adminProtected.grouped("config")
             settings.get(use: index).openAPI(
+                tags: openAPITagConfig,
                 summary: "Alle aktiven Einstellungen abrufen",
                 description: "Gibt eine Liste aller Einstellungen zurück, die mit aktiven Services verknüpft sind.",
                 query: [],
@@ -41,23 +44,26 @@ struct ConfigController: RouteCollection{
                 responseContentType: .application(.json)
             )
             settings.get(":id", use: show).openAPI(
+                tags: openAPITagConfig,
                 summary: "Eine bestimmte Einstellung abrufen",
                 description: "Gibt eine Einstellung anhand ihrer ID zurück.",
-                path: ["id":.string],
+                path: .type(Setting.IDValue.self),
                 body: nil,
                 response: .type(SettingResponseDTO.self),
                 responseContentType: .application(.json)
             )
             settings.patch(":id", use: update).openAPI(
+                tags: openAPITagConfig,
                 summary: "Eine Einstellung aktualisieren",
                 description: "Aktualisiert den Wert einer einzelnen Einstellung anhand ihrer ID.",
-                path: ["id":.string],
+                path: .type(Setting.IDValue.self),
                 body: .type(SettingUpdateDTO.self),
                 contentType: .application(.json),
                 response: .type(SettingResponseDTO.self),
                 responseContentType: .application(.json)
             )
             settings.patch(use: bulkUpdate).openAPI(
+                tags: openAPITagConfig,
                 summary: "Mehrere Einstellungen gleichzeitig aktualisieren",
                 description: """
                     Aktualisiert mehrere Einstellungen in einem Batch.
@@ -69,16 +75,15 @@ struct ConfigController: RouteCollection{
                 response: .type(BulkUpdateResponseDTO.self),
                 responseContentType: .application(.json)
             )
-            
+            let openAPITagIntern = TagObject(name: "Intern")
+
             // Servicebezogene Routen
             let services = routes.grouped("service")
-            services.get(":serviceID", use: settingsForService).openAPI(
+            services.get(":id", use: settingsForService).openAPI(
+                tags: openAPITagIntern,
                 summary: "Einstellungen für einen bestimmten Service abrufen",
                 description: "Gibt alle Einstellungen zurück, die einem bestimmten Service zugeordnet sind.",
-                path: [
-                    "serviceID": .string
-                ],
-                body: nil,
+                path: .type(Service.IDValue.self),                body: nil,
                 response: .type([SettingResponseDTO].self),
                 responseContentType: .application(.json)
             )
@@ -209,8 +214,8 @@ struct ConfigController: RouteCollection{
         /// Gibt alle Einstellungen für einen bestimmten Service zurück.
         @Sendable
         func settingsForService(req: Request) async throws -> Response {
-            guard let serviceID = req.parameters.get("serviceID", as: UUID.self) else {
-                req.logger.warning("Ungültige Service-ID bei Anfrage /service/:serviceID")
+            guard let serviceID = req.parameters.get("id", as: UUID.self) else {
+                req.logger.warning("Ungültige Service-ID bei Anfrage /service/:sid")
                 return try await createJSONErrorResponse(reason: "Ungültige Service-ID.", status: .badRequest, on: req)
             }
 
