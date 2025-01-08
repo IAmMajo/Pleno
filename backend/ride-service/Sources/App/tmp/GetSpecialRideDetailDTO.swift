@@ -14,7 +14,7 @@
 
 // liste an namen der teilnehmer inkl status ob angefragt/angenommen je nach dem ob man fahrer ist oder nicht [GetRiderDTO]
 
-import Foundation
+import Foundation 
 
 public struct GetSpecialRideDetailDTO: Codable {
     public var id: UUID?
