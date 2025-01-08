@@ -74,9 +74,11 @@ struct PosterController: RouteCollection, Sendable {
     func boot(routes: RoutesBuilder) throws {
         // Authentifizierte Routen
         let authProtected = routes.grouped(authMiddleware)
-        
+        let poster = authProtected.grouped("posters")
+        let openAPITagPoster = TagObject(name: "Poster")
         // Poster-Routen
-        authProtected.get(":posterId",use: getPoster).openAPI(
+        authProtected.get(":id",use: getPoster).openAPI(
+            tags: openAPITagPoster,
             summary: "Poster abfragen",
             description: """
                 Diese Route gibt ein Poster anhand der ID zurück. 
@@ -91,6 +93,7 @@ struct PosterController: RouteCollection, Sendable {
         )
         
         authProtected.get(use: getPosters).openAPI(
+            tags: openAPITagPoster,
             summary: "Alle verfügbaren Poster abfragen",
             description: """
                 Diese Route gibt eine Liste aller verfügbaren Poster zurück. Optional kann über die Query-Parameter
@@ -106,6 +109,7 @@ struct PosterController: RouteCollection, Sendable {
             auth: .bearer()
         )
         authProtected.post(use: createPoster).openAPI(
+            tags: openAPITagPoster,
             summary: "Erstellt ein neues Poster",
             description: """
                 Diese Route ermöglicht das Erstellen eines neuen Posters. Der Request muss als `multipart/form-data` gesendet werden
@@ -124,14 +128,15 @@ struct PosterController: RouteCollection, Sendable {
             responseContentType: .application(.json),
             auth: .bearer()
         )
-        authProtected.patch(":posterId", use: updatePoster).openAPI(
+        authProtected.patch(":id", use: updatePoster).openAPI(
+            tags: openAPITagPoster,
             summary: "Updatet ein Poster",
             description: """
                 Aktualisiert ein vorhandenes Poster basierend auf seiner ID. Der Request muss als `multipart/form-data` gesendet werden
                 und kann Felder wie `name`, `description` oder ein neues `image` enthalten. Nur Felder, die angegeben werden, werden aktualisiert.
                 
                 **Ablauf:**
-                - Gib die ID des zu aktualisierenden Posters als Pfadparameter `:posterId` an.
+                - Gib die ID des zu aktualisierenden Posters als Pfadparameter `:id` an.
                 - Senden Sie ein `UpdatePosterDTO` mit den zu ändernden Feldern. Nicht übergebene Felder bleiben unverändert.
                 - Wird ein neues Bild übertragen, wird das alte Bild gelöscht und durch das neue ersetzt.
                 - Die Route gibt ein `PosterResponseDTO` mit den aktualisierten Daten zurück.
@@ -147,6 +152,7 @@ struct PosterController: RouteCollection, Sendable {
         
         let adminRoutesPoster = authProtected.grouped(adminMiddleware)
         adminRoutesPoster.delete(":id", use: deletePoster).openAPI(
+            tags: openAPITagPoster,
             summary: "Löscht ein Poster",
             description: """
                 Löscht ein vorhandenes Poster anhand seiner ID. Das zugehörige Bild wird ebenfalls entfernt.
@@ -163,6 +169,7 @@ struct PosterController: RouteCollection, Sendable {
             auth: .bearer()
         )
         adminRoutesPoster.delete("batch", use: deletePosters).openAPI(
+            tags: openAPITagPoster,
             summary: "Löscht mehrere Poster",
             description: """
                 Löscht mehrere Poster anhand einer Liste von IDs. Die zugehörigen Bilder werden ebenfalls entfernt.
@@ -182,10 +189,12 @@ struct PosterController: RouteCollection, Sendable {
         
         // PosterPosition-Routen
         let posterPositions = authProtected.grouped("positions")
-        
-        posterPositions.get(":positionId",use: getPostersPosition)
+        let openAPITagPosterPosition = TagObject(name: "Poster Position")
+
+        posterPositions.get(":id",use: getPostersPosition)
         
         posterPositions.get(use: getPostersPositions).openAPI(
+            tags: openAPITagPosterPosition,
             summary: "Poster Positionen abfragen",
             description: """
             Diese Route gibt eine Liste von Poster-Positionen zurück. Dabei können verschiedene Filter- und Paginierungsoptionen über Query-Parameter genutzt werden:
@@ -212,6 +221,7 @@ struct PosterController: RouteCollection, Sendable {
         )
         
         posterPositions.put("hang", use: hangPosterPosition).openAPI(
+            tags: openAPITagPosterPosition,
             summary: "Hängt eine Poster-Position auf",
             description: """
                 Markiert eine bestimmte Poster-Position als aufgehängt. Die Aktion wird als `multipart/form-data` gesendet, muss ein Bild enthalten und setzt `posted_at` sowie `posted_by`.
@@ -230,6 +240,7 @@ struct PosterController: RouteCollection, Sendable {
         )
         
         posterPositions.put("take-down", use: takeDownPosterPosition).openAPI(
+            tags: openAPITagPosterPosition,
             summary: "Hängt eine Poster-Position ab",
             description: """
                 Markiert eine bestimmte Poster-Position als abgehängt. Die Aktion wird als `multipart/form-data` gesendet, muss ein neues Bild enthalten und setzt `removed_at` sowie `removed_by`.
@@ -251,6 +262,7 @@ struct PosterController: RouteCollection, Sendable {
         let adminRoutesPosterPositions = posterPositions.grouped(adminMiddleware)
         
         adminRoutesPosterPositions.post(use: createPosterPosition).openAPI(
+            tags: openAPITagPosterPosition,
             summary: "Erstellt eine neue Poster-Position",
             description: """
                 Erstellt eine neue Poster-Position mit Poster-Bezug, Koordinaten, Verantwortlichen und Ablaufdatum.
@@ -269,6 +281,7 @@ struct PosterController: RouteCollection, Sendable {
         )
         
         adminRoutesPosterPositions.patch(":positionId", use: updatePosterPosition).openAPI(
+            tags: openAPITagPosterPosition,
             summary: "Aktualisiert eine bestehende Poster-Position",
             description: """
                 Aktualisiert eine vorhandene Poster-Position anhand ihrer ID. Der Request muss als `multipart/form-data` gesendet werden.
@@ -292,6 +305,7 @@ struct PosterController: RouteCollection, Sendable {
         
         
         adminRoutesPosterPositions.delete(":id", use: deletePosterPosition).openAPI(
+            tags: openAPITagPosterPosition,
             summary: "Löscht ein Poster",
             description: """
                 Löscht eine vorhandene Poster-Position anhand ihrer ID. Das zugehörige Bild wird ebenfalls entfernt.
@@ -306,6 +320,7 @@ struct PosterController: RouteCollection, Sendable {
             auth: .bearer()
         )
         adminRoutesPosterPositions.delete("batch", use: deletePosterPositions).openAPI(
+            tags: openAPITagPosterPosition,
             summary: "Löscht mehrere Poster Positonen",
             description: """
                 Löscht mehrere Poster-Positionen anhand einer übergebenen Liste von IDs. Die zugehörigen Bilder werden ebenfalls entfernt.
@@ -322,8 +337,11 @@ struct PosterController: RouteCollection, Sendable {
             auth: .bearer()
         )
         let images = authProtected.grouped("images")
+        let openAPITagImage = TagObject(name: "Image")
+
         // Bild-Routen
         images.get(":folder" ,":imageURL", use: getImageFile).openAPI(
+            tags: openAPITagImage,
             summary: "Gibt ein gespeichertes Bild zurück",
             description: """
             Diese Route gibt eine zuvor gespeicherte Bilddatei zurück.Der Pfadparameter imageURL gibt den relativen Speicherort bzw. Dateinamen an und der Pfadparameter folder, ob es sich um ein Poster oder Poster Position Bild handelt.
@@ -482,7 +500,7 @@ struct PosterController: RouteCollection, Sendable {
     
     @Sendable
     func getPoster(req: Request) async throws -> Response {
-        guard let posterId = req.parameters.get("posterId", as: UUID.self) else {
+        guard let posterId = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Ungültige Position-ID.")
         }
         guard let poster = try await Poster.find(posterId, on: req.db) else {
@@ -549,7 +567,7 @@ struct PosterController: RouteCollection, Sendable {
     /// Aktualisiert ein bestehendes Poster (Name, Beschreibung und/oder Bild).
     @Sendable
     func updatePoster(req: Request) async throws -> Response {
-        guard let posterId = req.parameters.get("posterId", as: UUID.self) else {
+        guard let posterId = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Ungültige Poster-ID.")
         }
         
