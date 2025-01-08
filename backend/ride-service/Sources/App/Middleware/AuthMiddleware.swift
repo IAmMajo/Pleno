@@ -1,6 +1,6 @@
 import Vapor
 @preconcurrency import JWT
-@preconcurrency import VaporToOpenAPI
+//@preconcurrency import VaporToOpenAPI
 
 struct AuthMiddleware: AsyncMiddleware {
     
@@ -34,6 +34,6 @@ extension Request {
     }
 }
 
-extension AuthMiddleware {
-    static let schemeObject = AuthSchemeObject.bearer()
-}
+//extension AuthMiddleware {
+//    static let schemeObject = AuthSchemeObject.bearer()
+//}
