@@ -25,7 +25,7 @@ fun OnboardingNav(
             deepLinks =
                 listOf(
                     navDeepLink {
-                      uriPattern = "https://kivop.ipv64.net/auth/email/verify"
+                      uriPattern = "https://kivop.ipv64.net/auth/email/verify/{id}"
                       action = Intent.ACTION_VIEW
                     })) { backStackEntry ->
               val isFromDeepLink = backStackEntry.arguments?.getString("argName") != null
