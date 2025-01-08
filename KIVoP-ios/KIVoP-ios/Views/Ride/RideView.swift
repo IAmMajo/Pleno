@@ -1,10 +1,3 @@
-//
-//  RideView.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 04.01.25.
-//
-
 import SwiftUI
 
 struct RideView: View {
@@ -22,32 +15,21 @@ struct RideView: View {
                     // TabView Event Fahrten, Sonstige, meine Fahrten
                     Picker("", selection: $viewModel.selectedTab) {
                         Text("Events").tag(0)
-                        Text("Sonstige Fahrten").tag(1)
+                        Text("Sonderfahrten").tag(1)
                         Text("Meine Fahrten").tag(2)
                     }
                     .pickerStyle(.segmented)
                     .listRowBackground(Color.clear)
                     
-                    // Liste für die jeweiligen Fahrten
-                    Section{
-                        ForEach(viewModel.rides, id: \.id) { ride in
-                            //NavigationLink(viewModel.destinationView(for: ride)) {
-                                HStack {
-                                    VStack(alignment: .leading) {
-                                        Text(ride.name)
-                                            .font(.headline)
-                                        Text(DateTimeFormatter.formatDate(ride.starts))
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
-                                    }
-                                    Spacer()
-                                    
-                                    Image(systemName: "car.fill")
-                                        // Symbol Grau, da noch keine Teilnehmer-Logik verfügbar
-                                        .foregroundColor(.gray)
-                                        .font(.system(size: 18))
-                                }
-                            //}
+                    ForEach(viewModel.groupedRides, id: \.key) { group in
+                        Section(header: Text(group.key)
+                            .padding(.leading, -5)
+                        ) {
+                            if viewModel.selectedTab == 0 {
+                                //EventList(events: group.value)
+                            } else {
+                                RideList(rides: group.value)
+                            }
                         }
                     }
                 }
@@ -59,12 +41,12 @@ struct RideView: View {
                 }
                 .onAppear {
                    Task {
-                       //viewModel.fetchMeetings()
+                       viewModel.fetchSpecialRides()
                    }
                 }
                 .refreshable {
                     Task {
-                        //viewModel.fetchMeetings()
+                        viewModel.fetchSpecialRides()
                     }
                 }
             }

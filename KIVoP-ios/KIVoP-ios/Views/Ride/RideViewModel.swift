@@ -1,10 +1,3 @@
-//
-//  RideViewModel.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 04.01.25.
-//
-
 import Foundation
 import SwiftUI
 import RideServiceDTOs
@@ -14,53 +7,8 @@ class RideViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedTab: Int = 0
     @Published var isLoading: Bool = false
-    // Beispieldaten:
-    @Published var rides: [GetRideOverviewDTO] = [
-        GetRideOverviewDTO(
-            id: UUID(),
-            name: "Stadtbesichtigung Berlin",
-            description: "Eine entspannte Fahrt durch die Hauptstadt, vorbei an den bekanntesten Sehenswürdigkeiten.",
-            starts: Calendar.current.date(byAdding: .hour, value: 2, to: Date())!,
-            latitude: 52.5200,
-            longitude: 13.4050
-        ),
-        
-        GetRideOverviewDTO(
-            id: UUID(),
-            name: "Alpenpanorama-Tour",
-            description: "Fahrt durch die atemberaubenden Alpen mit spektakulären Ausblicken auf die Berge.",
-            starts: Calendar.current.date(byAdding: .hour, value: 3, to: Date())!,
-            latitude: 47.3769,
-            longitude: 8.5417
-        ),
-        
-        GetRideOverviewDTO(
-            id: UUID(),
-            name: "Woche in den Vogesen",
-            description: "Erkunden Sie die malerischen Vogesen mit einer Mischung aus Natur und Geschichte.",
-            starts: Calendar.current.date(byAdding: .hour, value: 6, to: Date())!,
-            latitude: 48.7072,
-            longitude: 7.3513
-        ),
-        
-        GetRideOverviewDTO(
-            id: UUID(),
-            name: "Nordseeküste Erleben",
-            description: "Eine Fahrt entlang der Nordseeküste, mit Halt in historischen Küstenstädten.",
-            starts: Calendar.current.date(byAdding: .hour, value: 1, to: Date())!,
-            latitude: 53.5511,
-            longitude: 9.9937
-        ),
-        
-        GetRideOverviewDTO(
-            id: UUID(),
-            name: "Weinregion Rhein-Mosel",
-            description: "Genießen Sie eine Fahrt durch die Weinberge und kleinen Dörfer der Rhein-Mosel-Region.",
-            starts: Calendar.current.date(byAdding: .hour, value: 5, to: Date())!,
-            latitude: 50.0946,
-            longitude: 7.2730
-        )
-    ]
+    @Published var rides: [GetSpecialRideDTO] = []
+    private let baseURL = "https://kivop.ipv64.net"
     
     init() {
         // Konfigurieren der Navbar
@@ -74,14 +22,94 @@ class RideViewModel: ObservableObject {
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
     }
     
-    // Wechsel zwischen den destinations je nach ride option
-    func destinationView(for ride: GetRideDetailDTO, selectedTab: Int) -> some View {
-        if selectedTab == 0 {
-            let viewModel = EventRideViewModel(ride: ride)
-            return AnyView(EventRideView(viewModel: viewModel))
+    func fetchSpecialRides() {
+        // URL für die Route GET /specialrides
+        guard let url = URL(string: "\(baseURL)/specialrides") else {
+            print("Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        // Füge JWT Token zu den Headern hinzu
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         } else {
-            let viewModel = SpecialRideViewModel(ride: ride)
-            return AnyView(SpecialRideView(viewModel: viewModel))
+            print("Unauthorized: No token found")
+            return
+        }
+        
+        // Führe den Netzwerkaufruf aus
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            if let error = error {
+                print("Network error: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received from server")
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            
+            do {
+                // Decodieren der Antwort in ein Array von GetSpecialRideDTO
+                let decodedRides = try decoder.decode([GetSpecialRideDTO].self, from: data)
+                
+                // Sicherstellen, dass die Updates im Main-Thread ausgeführt werden
+                DispatchQueue.main.async {
+                    self?.rides = decodedRides // Array mit den Sonderfahrten speichern
+                }
+            } catch {
+                print("JSON Decode Error: \(error.localizedDescription)")
+            }
+        }.resume()
+    }
+    
+    // Gruppiert die Fahrten nach Monat und Jahr
+    var groupedRides: [Dictionary<String, [GetSpecialRideDTO]>.Element] {
+        let filtered = filteredRides()
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMMM - yyyy"
+
+        // Gruppierung
+        var grouped = Dictionary(grouping: filtered) { ride in
+            dateFormatter.string(from: ride.starts)
+        }
+
+        // Sortierung innerhalb der Gruppen
+        for (key, rides) in grouped {
+            grouped[key] = rides.sorted { lhs, rhs in
+                return lhs.starts < rhs.starts // Sortiert immer aufsteigend nach dem Startdatum
+            }
+        }
+
+        // Sortierung der Gruppen
+        return grouped.sorted { lhs, rhs in
+            guard let lhsDate = dateFormatter.date(from: lhs.key),
+                  let rhsDate = dateFormatter.date(from: rhs.key) else {
+                return lhs.key < rhs.key
+            }
+            return lhsDate < rhsDate // Sortiert die Gruppen nach Monat/Jahr
+        }
+    }
+
+    // Filtert Rides basierend auf dem Tab
+    private func filteredRides() -> [GetSpecialRideDTO] {
+        switch selectedTab {
+        case 0:
+            return [] // Events -> drauf klicken um die Fahrten zum Event zu sehen
+        case 1:
+            return rides // Sonstige Fahrten (Fahrten die keinem Event zugehören)
+        case 2:
+            return [] // Meine Fahrten
+        default:
+            return []
         }
     }
 }

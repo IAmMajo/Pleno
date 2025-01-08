@@ -411,6 +411,9 @@
         }
       }
     },
+    "Alle Mitfahrer" : {
+
+    },
     "Alles im Blick?" : {
 
     },
@@ -529,7 +532,7 @@
     "Beschreibung Auto" : {
 
     },
-    "Beschreibung der Fahrt" : {
+    "Beschreibung oder weitere Infos zu deiner Fahrt" : {
 
     },
     "Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt." : {
@@ -740,6 +743,9 @@
     "Events" : {
 
     },
+    "Fahrer" : {
+
+    },
     "Fahrgemeinschaften" : {
 
     },
@@ -799,6 +805,9 @@
           }
         }
       }
+    },
+    "Geokoordinaten" : {
+
     },
     "Hallo" : {
 
@@ -1086,6 +1095,12 @@
           }
         }
       }
+    },
+    "Mitfahren - oder stornieren - oder Fahrt löschen" : {
+
+    },
+    "Mitfahrer" : {
+
     },
     "Mitglieder" : {
       "localizations" : {
@@ -1664,7 +1679,7 @@
     "Sonderfahrt" : {
 
     },
-    "Sonstige Fahrten" : {
+    "Sonderfahrten" : {
 
     },
     "Speichern" : {

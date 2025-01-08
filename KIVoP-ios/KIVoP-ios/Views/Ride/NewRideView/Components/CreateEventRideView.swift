@@ -1,10 +1,3 @@
-//
-//  CreateEventRideView.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 07.01.25.
-//
-
 import SwiftUI
 
 struct CreateEventRideView: View {
@@ -32,9 +25,9 @@ struct CreateEventRideView: View {
                     ZStack(alignment: .topLeading) {
                         // Placeholder Text
                         if viewModel.rideDescription.isEmpty {
-                            Text("Beschreibung der Fahrt")
+                            Text("Beschreibung oder weitere Infos zu deiner Fahrt")
                                 .foregroundColor(.gray)
-                                .padding(.top, -11)
+                                .padding(.top, 7)
                                 .padding(.leading, 4)
                                 .opacity(0.7)
                                 .frame(height: 50)

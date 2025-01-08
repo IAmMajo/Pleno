@@ -8,7 +8,7 @@
 import Foundation
 import RideServiceDTOs
 
-class SpecialRideViewModel: ObservableObject {
+class RideDetailViewModel: ObservableObject {
     var ride: GetRideDetailDTO
     
     init(ride: GetRideDetailDTO){

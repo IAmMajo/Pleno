@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SpecialRideView: View {
+struct RideDetailView: View {
     @ObservedObject var viewModel: SpecialRideViewModel
     
     var body: some View {

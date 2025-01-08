@@ -1,17 +1,10 @@
-//
-//  EventRideViewModel.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 04.01.25.
-//
-
 import Foundation
 import RideServiceDTOs
 
 class EventRideViewModel: ObservableObject {
-    var ride: GetRideDetailDTO
+    var ride: GetSpecialRideDTO
     
-    init(ride: GetRideDetailDTO){
+    init(ride: GetSpecialRideDTO){
         self.ride = ride
     }
 }

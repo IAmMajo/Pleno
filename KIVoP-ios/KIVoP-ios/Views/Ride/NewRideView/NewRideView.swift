@@ -1,10 +1,3 @@
-//
-//  NewRideView.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 06.01.25.
-//
-
 import SwiftUI
 
 struct NewRideView: View {  
@@ -31,6 +24,11 @@ struct NewRideView: View {
             .navigationBarBackButtonHidden(true)
             .onAppear {
                 showingSelectionAlert = true
+            }
+            .overlay {
+                if viewModel.isLoading {
+                  ProgressView("Lädt...")
+               }
             }
             .toolbar {
                 // Speichern Button
@@ -104,12 +102,5 @@ struct NewRideView: View {
                 )
             }
         }
-    }
-}
-
-struct NewRideView_Previews: PreviewProvider {
-    static var previews: some View {
-        // Beispiel-Preview für NewRideView mit einem ViewModel
-        NewRideView(viewModel: NewRideViewModel())
     }
 }
