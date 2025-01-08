@@ -602,7 +602,10 @@
         }
       }
     },
-    "Die Abstimmung läuft noch" : {
+    "Die Abstimmung läuft noch. Du hast bereits abgestimmt." : {
+
+    },
+    "Die Abstimmungsergebnisse konnten nicht geladen werden" : {
 
     },
     "Die Passwörter stimmen nicht überein." : {
@@ -623,9 +626,6 @@
           }
         }
       }
-    },
-    "Du hast bereits abgestimmt. In Zukunft werden hier die Live-Ergebnisse einer offenen Abstimmung angezeigt." : {
-
     },
     "Du kannst deine Wahl danach nciht mehr ändern!" : {
 
@@ -707,6 +707,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "oluştur"
+          }
+        }
+      }
+    },
+    "Es haben %lld von %lld Personen abgestimmt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Es haben %1$lld von %2$lld Personen abgestimmt."
           }
         }
       }
@@ -977,7 +987,7 @@
         }
       }
     },
-    "Live Status: %@" : {
+    "Live-Status" : {
 
     },
     "Loading meetings..." : {

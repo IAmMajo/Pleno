@@ -42,7 +42,7 @@ struct Votings_VotingsSectionView: View {
        }
        .onChange(of: votingGroup) { old, newValue in
           Task {
-             print("SectionView: votingGroup changed")
+//             print("SectionView: votingGroup changed")
              await initializeViewModelsAndMeetingName()
           }
        }

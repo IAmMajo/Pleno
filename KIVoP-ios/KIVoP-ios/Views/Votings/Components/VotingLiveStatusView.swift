@@ -11,65 +11,96 @@ import MeetingServiceDTOs
 struct VotingLiveStatusView: View {
    @StateObject private var webSocketService: WebSocketService
    let votingId: UUID
-   @State var votingResults: GetVotingResultsDTO
+   let votingResults: GetVotingResultsDTO
    
-   init(votingId: UUID) {
+   var onWebSocketError: (() -> Void)? // Callback for error handling
+   
+   @State private var value: Int = 0
+   @State private var total: Int = 0
+   @State private var progress: Double = 0
+   
+   init(votingId: UUID, onWebSocketError: (() -> Void)? = nil) {
       self.votingId = votingId
       _webSocketService = StateObject(wrappedValue: WebSocketService())
+      self.onWebSocketError = onWebSocketError
       self.votingResults = VotingsView().mockVotingResults
    }
    
    var body: some View {
       VStack {
          if let liveStatus = webSocketService.liveStatus {
-            Text("Live Status: \(liveStatus)")
-               .font(.title)
-               .padding()
+            VStack {
+               ZStack {
+                  Circle()
+                     .stroke(
+                        .blue.opacity(0.3),
+                        lineWidth: 35
+                     )
+                     .overlay (
+                        Text("\(liveStatus)")
+//                        Text("2/4")
+                           .tracking(5)
+                           .font(.system(size: 50))
+                           .fontWeight(.bold)
+                           .foregroundStyle(Color(UIColor.label).opacity(0.6).mix(with: Color.blue, by: 0.5))
+                     )
+                  Circle()
+                     .trim(from: 0, to: progress) // updated es sich? ändern zu @State ?
+                     .stroke(
+                        .blue,
+                        style: StrokeStyle(
+                           lineWidth: 35,
+                           lineCap: .round
+                        )
+                     )
+                     .rotationEffect(.degrees(-90))
+                     .animation(.easeOut(duration: 0.8), value: progress)
+               }
+               .padding(30)
+               
+               Text("Es haben \(value) von \(total) Personen abgestimmt.")
+                  .foregroundStyle(Color(UIColor.label).opacity(0.6))
+//                  .padding(.top)
+            }
          }
          
          if let votingResults = webSocketService.votingResults {
-//            Text("Voting Results: \(self.votingResults)")
-//               .font(.headline)
-//               .padding()
-//            List{
-//               Section {
-//                  ForEach (self.votingResults.results, id: \.self) { result in
-//                     HStack {
-//                        Image(systemName: self.votingResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill")
-//                       
-//                        Spacer()
-//                        Text("\(result.percentage, specifier: "%.2f")%")
-//                           .opacity(0.6)
-//                     }
-//                  }
-//               } header: {
-//                  Spacer(minLength: 0).listRowInsets(EdgeInsets())
-//               }
-//            }
-//            .onAppear() {
-//               self.votingResults = votingResults
-//            }
+            Text("Voting Results: \(votingResults)")
+               .font(.headline)
+               .padding()
          }
          
          if let errorMessage = webSocketService.errorMessage {
             Text("Error: \(errorMessage)")
                .foregroundColor(.red)
+               .onAppear {
+                  onWebSocketError?() // Trigger callback when an error occurs
+               }
          }
       }
       .onAppear {
          webSocketService.connect(to: votingId)
-//         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-//            print("liveStatus: \(webSocketService.liveStatus ?? "")")
-//            print("votingResults: \(String(describing: webSocketService.votingResults))")
-//            print("errorMessage: \(webSocketService.errorMessage ?? "")")
-//         }
       }
       .onDisappear {
          webSocketService.disconnect()
       }
+      .onChange(of: webSocketService.liveStatus) { old, newLiveStatus in
+         guard let newLiveStatus = newLiveStatus else { return }
+         setValueTotalProgress(liveStatus: newLiveStatus)
+      }
    }
+   
+   private func setValueTotalProgress(liveStatus: String) {
+      let liveStatusSplit = liveStatus.split(separator: "/")
+      self.value = Int(liveStatusSplit[0]) ?? 0
+      self.total = Int(liveStatusSplit[1]) ?? 0
+      withAnimation(.easeOut(duration: 0.8)) {
+         self.progress = Double(value) / Double(total)
+      }
+   }
+   
 }
 
 #Preview {
-   VotingLiveStatusView(votingId: UUID(uuidString: "")!)
+   VotingLiveStatusView(votingId: UUID(uuidString: "1A21089E-58EC-4B43-87E0-873D1743E14D")!)
 }

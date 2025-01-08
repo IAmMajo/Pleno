@@ -30,7 +30,7 @@ struct Votings_VotingRowView: View {
            .task {
                await viewModel.loadSymbolColorAndStatus()
            }
-           .onChange(of: viewModel.voting.id) { old, newValue in
+           .onChange(of: viewModel.voting.isOpen) { old, newValue in
               Task {
 //                 print("RowView: viewModel.voting changed")
                  await viewModel.loadSymbolColorAndStatus()

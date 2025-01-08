@@ -94,7 +94,8 @@ struct VotingsView: View {
            return meeting1Start > meeting2Start
        }
 //         print("setVotingsOfMeetings sorted")
-         self.votingsOfMeetings = votingsOfMeetingsSorted
+      self.votingsOfMeetings = votingsOfMeetingsSorted
+//      print("setVotingsOfMeetings updated: \(self.votingsOfMeetings.flatMap { $0.map { $0.isOpen } })")
    }
    
    private func hasVotedForOpenVoting(votingId: UUID) async -> Bool {
@@ -140,27 +141,35 @@ struct VotingsView: View {
                         votingGroup: votingGroup,
                         mockVotingResults: mockVotingResults,
                         onVotingSelected: { voting in
-                        selectedVoting = voting
-                        Task {
-                           let hasVoted = await hasVotedForOpenVoting(votingId: voting.id)
-                           
-                           print(voting.isOpen)
-                           print(!hasVoted)
-                           
-                           if(voting.isOpen && !hasVoted) {
-                              isShowingVoteSheet = true
-                           } else {
-                              navigateToResultView = true
+                           selectedVoting = voting
+                           Task {
+                              await loadVotings()
+                              // Find the updated voting in the refreshed votings
+                              if let updatedVoting = votingService.votings.first(where: { $0.id == voting.id }) {
+                                 selectedVoting = updatedVoting
+                                 
+                                 let hasVotedForOpenVoting = await hasVotedForOpenVoting(votingId: updatedVoting.id)
+                                 
+//                                 print("Selected Voting isOpen: \(selectedVoting?.isOpen ?? false)")
+//                                 print(updatedVoting.isOpen)
+//                                 print(!hasVotedForOpenVoting)
+                                 
+                                 if(updatedVoting.isOpen && !hasVotedForOpenVoting) {
+                                    isShowingVoteSheet = true
+                                 } else {
+                                    navigateToResultView = true
+                                 }
+                              }
                            }
-                        }
                      })
                   }
                }
+//               .id(UUID()) // Force list refresh
                .refreshable {
                   await loadVotings()
                   votingsFiltered = votingService.votings
                   await setVotingsOfMeetings()
-                  print("refreshed")
+//                  print("refreshed")
                }
                .sheet(isPresented: $isShowingVoteSheet) {
                   if let voting = selectedVoting {
@@ -174,7 +183,7 @@ struct VotingsView: View {
                .navigationDestination(isPresented: $navigateToResultView) {
                   if let voting = selectedVoting {
                      Votings_VotingResultView(votingsView: VotingsView(), voting: voting, votingResults: mockVotingResults)
-                        .navigationTitle("Abstimmungs-Ergebnis")
+//                        .navigationTitle("Abstimmungs-Ergebnis")
                   }
                }
                .navigationDestination(isPresented: $navigateToNextView) {
@@ -196,11 +205,13 @@ struct VotingsView: View {
                isLoading = false
             }
          }
-         .onChange(of: votingService.votings) { old, _ in
+         .onChange(of: votingService.votings) { old, new in
             Task {
-               votingsFiltered = votingService.votings
+//               votingsFiltered = votingService.votings
+               // Refilter votings based on the updated data
+               votingsFiltered = votingService.votings.filter { $0.isOpen }
+//               print("votingsFiltered: \(votingsFiltered.map { ($0.id, $0.isOpen) })")
                await setVotingsOfMeetings()
-               print("onChange: Votings updated")
             }
          }
          .overlay {
@@ -214,15 +225,12 @@ struct VotingsView: View {
          
       }
       .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen")
-      .onChange(of: searchText) {
+      .onChange(of: searchText) { old, newValue in
+         votingsFiltered = votingService.votings.filter { voting in
+            newValue.isEmpty || voting.question.localizedCaseInsensitiveContains(newValue)
+         }
          Task {
-            if searchText.isEmpty {
-               votingsFiltered = votings
-            } else {
-               votingsFiltered = votings.filter { voting in
-                  return voting.question.contains(searchText)
-               }
-            }
+            await setVotingsOfMeetings()
          }
       }
       
@@ -238,8 +246,9 @@ struct VotingsView: View {
 //               votingsFiltered.append(voting)
 //            }
 //         }
+//         print("loadVotings: \(votingService.votings.map { ($0.id, $0.isOpen) })")
          votingsFiltered = votings
-         print("Loaded \(votings.count) votings")
+//         print("Loaded \(votings.count) votings")
       } catch {
          // Handle error
          alertMessage = AlertMessage(message: "Fehler beim Laden der Abstimmungen: \(error.localizedDescription)")
@@ -364,7 +373,7 @@ struct VotingsView: View {
    var mockVotingResult1: GetVotingResultDTO {
       return GetVotingResultDTO(
          index: 0, // Index 0: Abstention
-         total: 2,
+         count: 2,
          percentage: 2,
          identities: []
       )
@@ -372,7 +381,7 @@ struct VotingsView: View {
    var mockVotingResult2: GetVotingResultDTO {
       return GetVotingResultDTO(
          index: 1, // Index 0: Abstention
-         total: 8,
+         count: 8,
          percentage: 8,
          identities: []
       )
@@ -380,7 +389,7 @@ struct VotingsView: View {
    var mockVotingResult3: GetVotingResultDTO {
       return GetVotingResultDTO(
          index: 2, // Index 0: Abstention
-         total: 10,
+         count: 10,
          percentage: 10,
          identities: []
       )
@@ -388,7 +397,7 @@ struct VotingsView: View {
    var mockVotingResult4: GetVotingResultDTO {
       return GetVotingResultDTO(
          index: 3, // Index 0: Abstention
-         total: 30,
+         count: 30,
          percentage: 30,
          identities: []
       )
