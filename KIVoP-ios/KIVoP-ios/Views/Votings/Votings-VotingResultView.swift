@@ -39,99 +39,53 @@ struct Votings_VotingResultView: View {
                             await loadVotingResults(voting: voting)
                          }
                       }
-                         .padding()
+                      .padding(.vertical) .padding(.top, -5)
                    } else {
                       PieChartView(optionTextMap: optionTextMap, votingResults: votingResults)
-                         .padding()
+                         .padding(.vertical)
                    }
                 }
-//                .padding(-5)
                 .background(Color(UIColor.systemBackground))
-                .padding(.bottom, 10)
+                .cornerRadius(10)
+                .padding() .padding(.top, -8)
+
+                HStack {
+                   Image(systemName: "person.bust.fill")
+                   Text(meetingName)
+//                   Text("Sitzungsname")
+                      .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .foregroundStyle(Color(UIColor.label).opacity(0.6))
+                .padding(.leading).padding(.bottom, 1)
                 
                 Text(voting.question)
-                   .frame(maxWidth: .infinity, alignment: .leading)
-                   .padding(.leading).padding(.trailing)
                    .font(.title2)
                    .fontWeight(.bold)
-                
-                LazyVStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Image(systemName: "person.bust.fill")
-                            Text(meetingName)
-                        }
-                        .foregroundStyle(Color(UIColor.label).opacity(0.6))
-                        
-                        Text(voting.description)
-                            .fixedSize(horizontal: false, vertical: true) // Allow multi-line text
-                    }
-                .padding(.horizontal)
-                
-//                List {
-//                    Section {
-////                       VStack {
-//                          HStack {
-//                             Image(systemName: "person.bust.fill")
-//                             Text(meetingName)
-//                          }
-//                          .foregroundStyle(Color(UIColor.label).opacity(0.6))
-//                          
-////                       }
-//                       HStack {
-//                          Text(voting.description)
-////                             .fixedSize(horizontal: false, vertical: true) // Allow dynamic height
-//                       }
-//                    } header: {
-//                       Spacer(minLength: 0).listRowInsets(EdgeInsets())
-//                    }
-//                }
-//                .scrollDisabled(true)
-//                .frame(height: CGFloat((voting.description.count * 2) + (votingResults.results.count < 4 ? 200 : 0)), alignment: .top)
-//                .environment(\.defaultMinListHeaderHeight, 10)
-                
-//                HStack {
-//                   Image(systemName: "person.bust.fill")
-//                   Text(meetingName)
-//                      .frame(maxWidth: .infinity, alignment: .leading)
-//                }
-//                .foregroundStyle(Color(UIColor.label).opacity(0.6))
-//                .padding(.leading).padding(.top, 1)
-//                
-//                Divider()
-//                Text(voting.description)
-//                   .frame(maxWidth: .infinity, alignment: .leading)
-//                   .padding(.leading).padding(.top, 3).padding(.trailing)
-                
-                if isLiveStatusAvailable {
-//                   HStack(alignment: .top) {
-//                      Image(systemName: "info.circle.fill")
-//                         .padding(.top, 1)
-//                      Text("Die Abstimmung läuft noch. Du hast bereits abgestimmt.")
-//                   }
-//                   .padding()
-//                   .foregroundStyle(Color(UIColor.label).opacity(0.6))
-//                   .background(Color(UIColor.systemBackground))
-//                   .cornerRadius(10)
-//                   .padding(.top, 20) .padding(.leading, 2) .padding(.trailing, 2)
+                   .frame(maxWidth: .infinity, alignment: .leading)
+                   .padding(.leading).padding(.trailing)
                    
-                   List {
-                       Section {
-                           HStack(alignment: .top) {
-                               Image(systemName: "info.circle.fill")
-                                   .padding(.top, 1)
-                               Text("Die Abstimmung läuft noch. Du hast bereits abgestimmt.")
-                           }
-                           .foregroundStyle(Color(UIColor.label).opacity(0.6))
-                           .background(Color(UIColor.systemBackground))
-                           .cornerRadius(10)
-                       } header: {
-                          Spacer(minLength: 0).listRowInsets(EdgeInsets())
-                       }
-                   }
-                   .frame(height: 100, alignment: .top)
-                   .environment(\.defaultMinListHeaderHeight, 10)
-
-                      
+                
+                ZStack {
+                   Text(voting.description)
+                      .padding()
+                      .frame(maxWidth: .infinity, alignment: .leading)
+                }.background(Color(UIColor.systemBackground))
+                   .cornerRadius(10)
+                   .padding(.horizontal)
+      
+                if isLiveStatusAvailable {
+                   ZStack {
+                      HStack {
+                         Image(systemName: "info.circle.fill")
+                            .padding(.top, 1)
+                         Text("Die Abstimmung läuft noch. Du hast bereits abgestimmt.")
+                      }
+                      .foregroundStyle(Color(UIColor.label).opacity(0.6))
+                      .padding()
+                      .frame(maxWidth: .infinity, alignment: .leading)
+                   }.background(Color(UIColor.systemBackground))
+                      .cornerRadius(10)
+                      .padding(.horizontal) .padding(.top)
                 } else {
                    List{
                       Section {
@@ -154,11 +108,14 @@ struct Votings_VotingResultView: View {
                    .environment(\.defaultMinListHeaderHeight, 10)
                 }
              }
+          } else if isLoading {
+             ProgressView("Loading...")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(UIColor.secondarySystemBackground))
           } else {
              ContentUnavailableView(
                "Die Abstimmungsergebnisse konnten nicht geladen werden",
                systemImage: "chart.pie.fill"
-//               description: Text("Du hast bereits abgestimmt. In Zukunft werden hier die Live-Ergebnisse einer offenen Abstimmung angezeigt.")
              )
           }
        }
@@ -168,11 +125,9 @@ struct Votings_VotingResultView: View {
              await loadVotingResults(voting: voting)
           }
        }
-       .navigationTitle(isLiveStatusAvailable ? "Live-Status" : "Abstimmungs-Ergebnis")
-       .navigationBarTitleDisplayMode(.inline)
-       .background(Color(UIColor.secondarySystemBackground))
        .onAppear {
           Task {
+             isLoading = true
              self.isLiveStatusAvailable = await isLiveStatusAvailable(votingId: voting.id)
              if !isLiveStatusAvailable {
                 await loadVotingResults(voting: voting)
@@ -180,7 +135,11 @@ struct Votings_VotingResultView: View {
              await loadMeetingName(voting: voting)
           }
           fillOptionTextMap(voting: voting)
+          isLoading = false
        }
+       .navigationTitle(isLiveStatusAvailable ? "Live-Status" : "Abstimmungs-Ergebnis")
+       .navigationBarTitleDisplayMode(.inline)
+       .background(Color(UIColor.secondarySystemBackground))
     }
    
    private func isLiveStatusAvailable(votingId: UUID) async -> Bool {
@@ -248,5 +207,18 @@ struct Votings_VotingResultView: View {
 #Preview() {
    var votingsView: VotingsView = .init()
    
-   Votings_VotingResultView(votingsView: VotingsView(), voting: votingsView.mockVotings[1], votingResults: votingsView.mockVotingResults)
+   Votings_VotingResultView(votingsView: VotingsView(), voting: votingsView.mockVotings[0], votingResults: votingsView.mockVotingResults)
+//      .navigationTitle("lol")
+//      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+         ToolbarItem(placement: .navigationBarLeading) {
+            Button {
+            } label: {
+               HStack {
+                  Image(systemName: "chevron.backward")
+                  Text("Zurück")
+               }
+            }
+         }
+      }
 }
