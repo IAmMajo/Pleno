@@ -2,7 +2,7 @@ import SwiftUI
 import AuthServiceDTOs
 
 enum Pages: Hashable {
-    case vereinseinstellungen, nutzerverwaltung, abstimmungen, sitzungen, protokolle, plakatpositionen
+    case vereinseinstellungen, nutzerverwaltung, abstimmungen, sitzungen, protokolle, plakatpositionen, events
 }
 
 struct MainPage: View {
@@ -39,6 +39,9 @@ struct MainPage: View {
                 }
                 Tab("Plakatpositionen", systemImage: "mappin.and.ellipse", value: .plakatpositionen) {
                     PostersMainView()
+                }
+                Tab("Events", systemImage: "star", value: .events) {
+                    EventsMainView()
                 }
 
 

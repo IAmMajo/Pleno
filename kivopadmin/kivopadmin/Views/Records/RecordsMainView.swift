@@ -7,6 +7,7 @@ struct RecordsMainView: View {
     @State private var searchText: String = ""
     @State private var showCreateMeeting = false
     @StateObject private var recordManager = RecordManager()
+    @State private var expandedMeetingID: UUID?
 
     // Berechnete Eigenschaft für die gefilterten Meetings basierend auf dem Suchtext
     var filteredMeetingsWithRecords: [MeetingWithRecords] {
@@ -51,50 +52,74 @@ struct RecordsMainView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Liste der Meetings mit den Sprachen der zugehörigen Records
                     List {
                         ForEach(filteredMeetingsWithRecords, id: \.meeting.id) { meetingWithRecords in
-                            VStack(alignment: .leading, spacing: 5) {
-                                HStack {
-                                    // Name des Meetings
-                                    Text(meetingWithRecords.meeting.name)
-                                        .font(.headline)
-                                        .foregroundColor(.primary)
-                                    
-                                    Spacer()
-                                    
-                                    // Sprachen der zugehörigen Records
-                                    HStack(spacing: 8) {
-                                        ForEach(meetingWithRecords.records, id: \.lang) { record in
-                                            //NavigationLink(destination: MarkdownEditorView(meetingId: meetingWithRecords.meeting.id, lang: record.lang)) {
+                            Button(action: {
+                                // Toggle des Dropdowns
+                                if expandedMeetingID == meetingWithRecords.meeting.id {
+                                    expandedMeetingID = nil
+                                } else {
+                                    expandedMeetingID = meetingWithRecords.meeting.id
+                                }
+                            }) {
+                                VStack(alignment: .leading, spacing: 5) {
+                                    HStack {
+                                        // Name des Meetings
+                                        Text(meetingWithRecords.meeting.name)
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
+
+                                        Spacer()
+                                        // Sprachen der zugehörigen Records
+                                        HStack(spacing: 8) {
+                                            ForEach(meetingWithRecords.records, id: \.lang) { record in
                                                 Text(record.lang)
                                                     .font(.subheadline)
                                                     .foregroundColor(.secondary)
                                                     .padding(4)
                                                     .background(Color.blue.opacity(0.2))
                                                     .cornerRadius(4)
-                                                    .overlay {
-                                                        NavigationLink(destination: MarkdownEditorView(meetingId: meetingWithRecords.meeting.id, lang: record.lang)) {}
-                                                            .opacity(0)
-                                                    }
-                                            //}
+                                            }
                                         }
+
+                                        // Pfeilsymbol (Optional: Sichtbar, um Interaktion zu zeigen)
+                                        Image(systemName: expandedMeetingID == meetingWithRecords.meeting.id ? "chevron.up" : "chevron.down")
+                                            .foregroundColor(.blue)
                                     }
 
+                                    // Optional: Zeige das Startdatum des Meetings
+                                    Text("Start: \(meetingWithRecords.meeting.start.formatted(date: .abbreviated, time: .shortened))")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+
+                                    // Dropdown: Zeige Sprachen, wenn das aktuelle Meeting erweitert ist
+                                    if expandedMeetingID == meetingWithRecords.meeting.id {
+                                        ScrollView {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                ForEach(meetingWithRecords.records, id: \.lang) { record in
+                                                    NavigationLink(destination: MarkdownEditorView(meetingId: meetingWithRecords.meeting.id, lang: record.lang)) {
+                                                        Text("Protokoll öffnen in")
+                                                        Text("\(record.lang)")
+                                                            .padding(4)
+                                                            .background(Color.blue.opacity(0.2))
+                                                            .cornerRadius(4)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .padding(.top, 5)
+                                        .frame(maxHeight: 200) // Maximalhöhe für den Dropdown festlegen
+                                    }
                                 }
-                                
-                                // Optional: Zeige das Startdatum des Meetings
-                                Text("Start: \(meetingWithRecords.meeting.start.formatted(date: .abbreviated, time: .shortened))")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                
+                                .padding(.vertical, 8)
+                                .background(Color(.systemBackground))
+                                .cornerRadius(8)
                             }
-                            .padding(.vertical, 8)
-                            .background(Color(.systemBackground))
-                            .cornerRadius(8)
+                            .buttonStyle(PlainButtonStyle()) // Entfernt Klick-Hervorhebungseffekt
                         }
                     }
-                    .listStyle(PlainListStyle()) // Optionale Listensytle
+                    .listStyle(PlainListStyle())
+
                 }
             }
             .navigationTitle("Protokolle")

@@ -54,7 +54,7 @@ struct MeetingAdminView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "magnifyingglass")
                                 .foregroundColor(.gray)
-                            TextField("Nach Frage suchen", text: $searchText)
+                            TextField("Nach Sitzung suchen", text: $searchText)
                                 .textFieldStyle(PlainTextFieldStyle())
                         }
                         .padding(8)
@@ -71,7 +71,7 @@ struct MeetingAdminView: View {
                                     Text(meeting.name)
                                         .font(.headline)
                                         .foregroundColor(.primary)
-                                    Text("Start: \(meeting.start.formatted(date: .abbreviated, time: .shortened))")
+                                    Text("Sitzung am \(DateTimeFormatter.formatDate(meeting.start)) um \(DateTimeFormatter.formatTime(meeting.start))")
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
                                 }
