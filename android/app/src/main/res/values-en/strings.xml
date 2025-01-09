@@ -9,7 +9,7 @@
     <!-- Navigation drawer items-->
     <string name="meetings">Meetings</string>
     <string name="protocol">Protocols</string>
-    <string name="travel_planning">Travel planning</string>
+    <string name="carpooling">Carpooling</string>
     <string name="events">Events</string>
     <string name="poster">Poster</string>
 

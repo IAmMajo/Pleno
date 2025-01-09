@@ -1,6 +1,5 @@
 package net.ipv64.kivop.components
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.InputTransformation.Companion.keyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
@@ -55,7 +53,7 @@ fun IconTextField(
               .background(Background_secondary, shape = RoundedCornerShape(8.dp))
               .padding(10.dp),
       verticalAlignment = Alignment.CenterVertically) {
-        IconBox(
+        IconBoxClickable(
             icon = icon,
             height = 50.dp,
             backgroundColor = Tertiary.copy(0.2f),
