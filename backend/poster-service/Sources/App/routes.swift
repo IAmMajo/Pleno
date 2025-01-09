@@ -4,7 +4,8 @@ import VaporToOpenAPI
 
 func routes(_ app: Application) throws {
 
-    try app.register(collection: PosterController())
+    let posters = app.grouped("posters")
+    try posters.register(collection: PosterController())
     try app.register(collection: WebhookController())
 
     app.get("openapi.json") { req in
