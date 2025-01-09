@@ -7,7 +7,7 @@ import RideServiceDTOs
 /**
  TODO
  
- GET /specialrides/:id/requests
+ GET /specialrides/:id/requests ?? notwendig?
  POST /specialrides/:id/requests
  PATCH /specialrides/:id/requests
  DELETE /specialrides/:id/requests
@@ -21,23 +21,38 @@ struct SpecialRideController: RouteCollection {
         specialRideRoutes.post("", use: newSpecialRide)
         specialRideRoutes.patch(":id", use: patchSpecialRide)
         specialRideRoutes.delete(":id", use: deleteSpecialRide)
+        
+        specialRideRoutes.post(":id", "request", use: newRequestToSpecialRide)
     }
     
     @Sendable
     func getAllSpecialRides(req: Request) async throws -> [GetSpecialRideDTO] {
-        let specialRides = try await SpecialRide.query(on: req.db).all().map{ specialRide in
-            GetSpecialRideDTO(
-                id: specialRide.id,
-                name: specialRide.name,
-                starts: specialRide.starts,
-                ends: specialRide.ends,
-                emptySeats: specialRide.emptySeats,
-                allocatedSeats: 0,
-                isSelfDriver: specialRide.$user.id == req.jwtPayload.userID,
-                isSelfAccepted: false)
+        let specialRides = try await SpecialRide.query(on: req.db).all()
+        
+        var responseRides: [GetSpecialRideDTO] = []
+        
+        for specialRide in specialRides {
+            if let ride_id = specialRide.id {
+                let allocatedSeats = try await SpecialRideRequest.query(on: req.db)
+                    .filter(\.$ride.$id == ride_id)
+                    .filter(\.$accepted == true)
+                    .count()
+                
+                responseRides.append(
+                    GetSpecialRideDTO(
+                    id: specialRide.id,
+                    name: specialRide.name,
+                    starts: specialRide.starts,
+                    ends: specialRide.ends,
+                    emptySeats: specialRide.emptySeats,
+                    allocatedSeats: UInt8(allocatedSeats),
+                    isSelfDriver: specialRide.$user.id == req.jwtPayload.userID,
+                    isSelfAccepted: false)
+                )
+            }
         }
         
-        return specialRides
+        return responseRides
     }
     
     @Sendable
@@ -49,6 +64,27 @@ struct SpecialRideController: RouteCollection {
 
         // extract ride id
         let ride_id = try specialRide.requireID()
+        
+        // get riders
+        let riders = try await SpecialRideRequest.query(on: req.db)
+            .filter(\.$ride.$id == ride_id)
+            .join(User.self, on: \SpecialRideRequest.$user.$id == \User.$id)
+            .join(Identity.self, on: \User.$identity.$id == \Identity.$id)
+            .all()
+            .map{ rider in
+                let rider_id = try rider.requireID()
+                let identity = try rider.joined(Identity.self)
+                let username = identity.name
+                
+                return GetRiderDTO(
+                    id: rider_id,
+                    username: username,
+                    latitude: rider.latitude,
+                    longitude: rider.longitude,
+                    istMe: rider.$user.id == req.jwtPayload.userID,
+                    accepted: rider.accepted
+                )
+            }
         
         let drivername = try await User.query(on: req.db)
             .filter(\.$id == specialRide.$user.id)
@@ -71,7 +107,7 @@ struct SpecialRideController: RouteCollection {
             destinationLatitude: specialRide.destinationLatitude,
             destinationLongitude: specialRide.destinationLongitude,
             emptySeats: specialRide.emptySeats,
-            riders: []
+            riders: riders
         )
         
         return specialRideDetailDTO
@@ -196,9 +232,81 @@ struct SpecialRideController: RouteCollection {
             throw Abort(.forbidden, reason: "you are not the driver")
         }
         
+        // extract ride id
+        let ride_id = try specialRide.requireID()
+        
+        // delete all requests to this ride
+        try await SpecialRideRequest.query(on: req.db)
+            .filter(\.$ride.$id == ride_id)
+            .delete()
+        
         // delete specialride
         try await specialRide.delete(on: req.db)
         
         return .noContent
+    }
+    
+    @Sendable
+    func newRequestToSpecialRide(req: Request) async throws -> Response {
+        // get ride by id
+        guard let specialRide = try await SpecialRide.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        // parse DTO
+        guard let createSpecialRideRequestDTO = try? req.content.decode(CreateSpecialRideRequestDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected CreateSpecialRideRequestDTO.")
+        }
+        
+        // extract ride id
+        let ride_id = try specialRide.requireID()
+        
+        // check if already requested
+        let count = try await SpecialRideRequest.query(on: req.db)
+            .filter(\.$user.$id == req.jwtPayload.userID)
+            .filter(\.$ride.$id == ride_id)
+            .count()
+        
+        if count != 0 {
+            throw Abort(.badRequest, reason: "You already requested this ride!")
+        }
+        
+        // check if user is driver from this ride
+        if specialRide.$user.id == req.jwtPayload.userID {
+            throw Abort(.badRequest, reason: "You cannot request your own ride!")
+        }
+        
+        // create request
+        let request = SpecialRideRequest(
+            userID: req.jwtPayload.userID,
+            rideID: ride_id,
+            accepted: false,
+            latitude: createSpecialRideRequestDTO.latitude,
+            longitude: createSpecialRideRequestDTO.longitude
+        )
+        
+        // save request
+        try await request.save(on: req.db)
+        
+        // query data for reponse
+        let rider_id = try request.requireID()
+        let username = try await User.query(on: req.db)
+            .filter(\.$id == req.jwtPayload.userID)
+            .with(\.$identity)
+            .first()
+            .map { user in
+                user.identity.name
+            }
+        
+        // build response dto
+        let getRiderDTO = GetRiderDTO(
+            id: rider_id,
+            username: username ?? "",
+            latitude: request.latitude,
+            longitude: request.longitude,
+            istMe: true,
+            accepted: request.accepted)
+        
+        return try await getRiderDTO.encodeResponse(status: .created, for: req)
     }
 }
