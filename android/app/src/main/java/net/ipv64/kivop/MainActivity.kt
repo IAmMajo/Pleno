@@ -66,7 +66,6 @@ import net.ipv64.kivop.pages.mainApp.ProtocolListPage
 import net.ipv64.kivop.pages.mainApp.UserPage
 import net.ipv64.kivop.pages.mainApp.VotePage
 import net.ipv64.kivop.pages.mainApp.VotingResultPage
-import net.ipv64.kivop.pages.mainApp.VotingsListPage
 import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.StringProvider.getString
 import net.ipv64.kivop.ui.theme.Background_prime
@@ -159,8 +158,8 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
         // Poster
         composable(route = Screen.Poster.rout) { PosterPage(navController = navController) }
-        // Abstimmungen Listen Page
-        composable(route = Screen.Votings.rout) { VotingsListPage(navController = navController) }
+//        // Abstimmungen Listen Page
+//        composable(route = Screen.Votings.rout) { VotingsListPage(navController = navController) }
         // Abstimmung Resultat Page
         composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
           AttendancesCoordinationPage(
