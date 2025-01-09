@@ -38,6 +38,24 @@ struct SpecialRideController: RouteCollection {
                     .filter(\.$accepted == true)
                     .count()
                 
+                var usersState = usersSpecialRideState.nothing
+                if specialRide.$user.id == req.jwtPayload.userID {
+                    usersState = usersSpecialRideState.driver
+                } else {
+                    let request = try await SpecialRideRequest.query(on: req.db)
+                        .filter(\.$ride.$id == ride_id)
+                        .filter(\.$user.$id == req.jwtPayload.userID)
+                        .first()
+                    
+                    if let request = request {
+                        if request.accepted {
+                            usersState = usersSpecialRideState.accepted
+                        } else {
+                            usersState = usersSpecialRideState.requested
+                        }
+                    }
+                }
+                
                 responseRides.append(
                     GetSpecialRideDTO(
                     id: specialRide.id,
@@ -46,8 +64,7 @@ struct SpecialRideController: RouteCollection {
                     ends: specialRide.ends,
                     emptySeats: specialRide.emptySeats,
                     allocatedSeats: UInt8(allocatedSeats),
-                    isSelfDriver: specialRide.$user.id == req.jwtPayload.userID,
-                    isSelfAccepted: false)
+                    myState: usersState)
                 )
             }
         }
