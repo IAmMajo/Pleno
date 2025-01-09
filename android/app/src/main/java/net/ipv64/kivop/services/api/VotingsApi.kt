@@ -20,9 +20,9 @@ import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
-suspend fun GetVotings(context: Context): List<GetVotingDTO> =
+suspend fun getVotings(meetingId: String): List<GetVotingDTO> =
     withContext(Dispatchers.IO) {
-      val path = "meetings/votings"
+      val path = "meetings/$meetingId/votings"
 
       val token = auth.getSessionToken()
 
