@@ -827,6 +827,9 @@
     "Heinz-Peters" : {
 
     },
+    "Hier werden die Abstimmungen stehen." : {
+
+    },
     "In der alten Turnhalle hinter dem Friedhof\nAltes Grab 5 b, 42069 Hölle" : {
 
     },
@@ -1483,6 +1486,9 @@
     "Protokoll" : {
 
     },
+    "Protokoll öffnen in" : {
+
+    },
     "Protokoll:" : {
 
     },
@@ -1719,9 +1725,6 @@
           }
         }
       }
-    },
-    "Test" : {
-
     },
     "Umfragen, " : {
       "localizations" : {
