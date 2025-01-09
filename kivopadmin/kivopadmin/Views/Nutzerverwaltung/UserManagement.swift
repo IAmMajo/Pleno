@@ -95,7 +95,9 @@ struct NutzerverwaltungView: View {
 
             Spacer()
         }
-        .sheet(isPresented: $isUserPopupPresented) {
+        .sheet(isPresented: $isUserPopupPresented, onDismiss: {
+            fetchAllData() // Aktualisiere die Nutzerverwaltung nach Verlassen des User-Popups
+        }) {
             if let user = selectedUser {
                 UserPopupView(user: .constant(user), isPresented: $isUserPopupPresented)
             } else {
