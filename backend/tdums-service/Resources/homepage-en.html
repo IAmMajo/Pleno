@@ -44,6 +44,53 @@ body, html {
 .w3-bar .w3-button {
   padding: 16px;
 }
+
+#popup-container {
+  position: fixed;
+  top: 10vh;
+  left: 10vw;
+  width: 80vw;
+  height: 80vh;
+  background-color: rgba(0, 0, 0, 0.9);
+  border: 2px solid black;
+  border-radius: 2em;
+  padding: 3em;
+  color: whitesmoke;
+  text-align: justify;
+  overflow: auto;
+}
+
+#popup-container>h1 {
+  font-size: 3rem;
+  font-weight: bolder;
+  text-transform: uppercase;
+}
+
+#popup-container>button.close-button {
+  position: absolute;
+  font-size: large;
+  right: 1em;
+  top: 1em;
+  background: none;
+  border: none;
+  padding: .5em 1em;
+  text-align: center;
+  color: whitesmoke;
+  transition: color .5s, transform .5s;
+}
+
+#popup-container>button.close-button:hover {
+  cursor: pointer;
+  transform: rotate(90deg);
+  color: red;
+}
+
+.red {
+  color: red;
+}
+.red:hover {
+  color: red !important;
+}
 </style>
 </head>
 <body>
@@ -57,6 +104,7 @@ body, html {
     </a>
     <!-- Right-sided navbar links -->
     <div class="w3-right w3-hide-small">
+      <button onclick="openPopup()" class="w3-bar-item w3-button red">DISCLOSURE</button>
       <a href="#home" class="w3-bar-item w3-button">HOME</a>
       <a href="#about" class="w3-bar-item w3-button"><i class="fa fa-th"></i> ABOUT</a>
       <a href="#donate" class="w3-bar-item w3-button"><i class="fa fa-usd"></i> DONATE</a>
@@ -137,6 +185,45 @@ body, html {
   <a href="#home" class="w3-button w3-light-grey"><i class="fa fa-arrow-up w3-margin-right"></i>To the top</a>
   <p><a href="mailto:info@weihnachts-wuensche-ev.de"><i class="fa fa-envelope w3-margin-right"></i>Contact</a></p>
 </footer>
+  
+<div id="popup-container">
+  <button class="close-button" onclick="closePopup()">✕</button>
+  <h1>Disclosure</h1>
+      <p>
+        Thank you for visiting our website!
+      </p>
+      <p>
+        We would like to inform you that the campaign "Weihnachtswünsche" was created as part of a scientific
+        experiment.
+        Everything related to "Weihnachtswünsche" is <b>purely fictional and made up</b>!
+        The goal of the experiment was to demonstrate the mechanisms and risks of social engineering in a playful way and raise awareness of the importance of cyber security.
+      </p>
+      <p>
+        The content of this website, as well as the contest, were specifically designed for this experiment and have
+        no real background. <b>No data was collected or processed</b>, and the experiment was completely harmless for all participants.
+      </p>
+      <p>
+        For more information on social engineering and how you can protect yourself, we recommend the following
+        sources:
+      </p>
+  <ul>
+    <li>
+      <a href='https://www.bsi.bund.de/EN/Themen/Verbraucherinnen-und-Verbraucher/Cyber-Sicherheitslage/Methoden-der-Cyber-Kriminalitaet/Social-Engineering/social-engineering_node.html' target='_blank'>BSI: Social Engineering – the &quot;Human Factor&quot;</a>
+    </li>
+    <li>
+        <a href='https://www.kaspersky.com/resource-center/definitions/what-is-social-engineering' target='_blank'>Kaspersky: What is Social Engineering?</a>
+    </li>
+    <li>
+        <a href='https://www.kaspersky.com/resource-center/threats/how-to-avoid-social-engineering-attacks' target='_blank'>Kaspersky: Social Engineering – Protection &amp; Prevention</a>
+    </li>
+    <li>
+        <a href='https://en.wikipedia.org/wiki/Social_engineering_(security)' target='_blank'>Wikipedia: Social Engineering (security)</a>
+    </li>
+</ul>
+<p>
+  We thank you for your participation and hope that this experiment has helped you better understand the dangers and techniques of social engineering.
+</p>
+</div>
  
 <script>
 // Modal Image Gallery
@@ -150,6 +237,7 @@ function onClick(element) {
 
 // Toggle between showing and hiding the sidebar when clicking the menu icon
 var mySidebar = document.getElementById("mySidebar");
+var popup = document.getElementById("popup-container");
 
 function w3_open() {
   if (mySidebar.style.display === 'block') {
@@ -162,6 +250,13 @@ function w3_open() {
 // Close the sidebar with the close button
 function w3_close() {
     mySidebar.style.display = "none";
+}
+
+function closePopup() {
+  popup.style.display = "none";
+}
+function openPopup() {
+  popup.style.display = "initial";
 }
 </script>
 
