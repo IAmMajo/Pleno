@@ -4,14 +4,6 @@ import Models
 //import VaporToOpenAPI
 import RideServiceDTOs
 
-/**
- TODO
- 
- GET /specialrides/:id/requests ?? notwendig?
- POST /specialrides/:id/requests
- PATCH /specialrides/:id/requests
- DELETE /specialrides/:id/requests
- */
 
 struct SpecialRideController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -23,6 +15,7 @@ struct SpecialRideController: RouteCollection {
         specialRideRoutes.delete(":id", use: deleteSpecialRide)
         
         specialRideRoutes.post(":id", "request", use: newRequestToSpecialRide)
+        specialRideRoutes.patch(":id", "request", ":request_id", use: patchSpecialRideRequest)
         specialRideRoutes.delete(":id", "request", use: deleteSpecialRideRequest)
     }
     
@@ -326,6 +319,59 @@ struct SpecialRideController: RouteCollection {
             accepted: request.accepted)
         
         return try await getRiderDTO.encodeResponse(status: .created, for: req)
+    }
+    
+    @Sendable
+    func patchSpecialRideRequest(req: Request) async throws -> GetRiderDTO {
+        // get ride by id
+        guard let specialRide = try await SpecialRide.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        // get request by id
+        guard let specialRideRequest = try await SpecialRideRequest.find(req.parameters.get("request_id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        //parse DTO
+        guard let patchSpecialRideRequestDTO = try? req.content.decode(PatchSpecialRideRequestDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected PatchSpecialRideRequestDTO.")
+        }
+        
+        // check if user is allowed to patch
+        if specialRide.$user.id == req.jwtPayload.userID {
+            specialRideRequest.patchWithDTO(dto: patchSpecialRideRequestDTO, isDriver: true)
+        } else if specialRideRequest.$user.id == req.jwtPayload.userID {
+            specialRideRequest.patchWithDTO(dto: patchSpecialRideRequestDTO, isDriver: false)
+        } else {
+            throw Abort(.forbidden, reason: "You are not allowed to change the request!")
+        }
+        
+        // save changes
+        try await specialRideRequest.update(on: req.db)
+        
+        // query data for reponse
+        let rider_id = try specialRideRequest.requireID()
+        
+        let username = try await User.query(on: req.db)
+            .filter(\.$id == specialRideRequest.$user.id)
+            .with(\.$identity)
+            .first()
+            .map { user in
+                user.identity.name
+            }
+        
+        // build response dto
+        let getRiderDTO = GetRiderDTO(
+            id: rider_id,
+            username: username ?? "",
+            latitude: specialRideRequest.latitude,
+            longitude: specialRideRequest.longitude,
+            istMe: specialRideRequest.$user.id == req.jwtPayload.userID,
+            accepted: specialRideRequest.accepted)
+        
+        return getRiderDTO
+        
     }
     
     @Sendable
