@@ -70,12 +70,11 @@ suspend fun getAttendances(id: String): List<GetAttendanceDTO> =
     }
 
 suspend fun putPlanAttendance(
-    context: Context,
     meetingId: String,
     status: PlanAttendance
 ): Boolean =
     withContext(Dispatchers.IO) {
-      val path = "/meetings/$meetingId/plan-attendance/${status.name}"
+      val path = "meetings/$meetingId/plan-attendance/${status.name}"
 
       val token = auth.getSessionToken()
 
@@ -109,7 +108,7 @@ suspend fun putPlanAttendance(
 
 suspend fun putAttend(meetingId: String, code: String): Boolean =
     withContext(Dispatchers.IO) {
-      val path = "/meetings/$meetingId/attend/$code"
+      val path = "meetings/$meetingId/attend/$code"
 
       val token = auth.getSessionToken()
 
