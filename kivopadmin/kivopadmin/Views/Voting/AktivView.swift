@@ -1,7 +1,8 @@
 import SwiftUI
+import MeetingServiceDTOs
 
 struct AktivView: View {
-    let votingId: UUID
+    let voting: GetVotingDTO // Voting-Daten direkt einbinden
     let onBack: () -> Void // Callback für die Rücknavigation
     
     @StateObject private var webSocketService = WebSocketService()
@@ -18,20 +19,13 @@ struct AktivView: View {
                     ZStack {
                         Circle()
                             .stroke(
-                                .blue.opacity(0.3),
+                                Color.blue.opacity(0.3),
                                 lineWidth: 35
-                            )
-                            .overlay(
-                                Text("\(value)/\(total)")
-                                    .tracking(5)
-                                    .font(.system(size: 50))
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(Color(UIColor.label).opacity(0.6).mix(with: Color.blue, by: 0.5))
                             )
                         Circle()
                             .trim(from: 0, to: progress)
                             .stroke(
-                                .blue,
+                                Color.blue,
                                 style: StrokeStyle(
                                     lineWidth: 35,
                                     lineCap: .round
@@ -39,25 +33,60 @@ struct AktivView: View {
                             )
                             .rotationEffect(.degrees(-90))
                             .animation(.easeOut(duration: 0.8), value: progress)
+                        Text("\(value)/\(total)")
+                            .font(.system(size: 50))
+                            .fontWeight(.bold)
+                            .foregroundColor(Color.blue)
                     }
                     .padding(30)
-
-                    Text("Es haben \(value) von \(total) Personen abgestimmt.")
-                        .foregroundStyle(Color(UIColor.label).opacity(0.6))
+                    
+                    Text(votingProgressText)
+                        .font(.headline)
+                        .foregroundColor(.gray)
                 }
             } else if let errorMessage = webSocketService.errorMessage {
+                // Fehleranzeige
                 Text(errorMessage)
                     .foregroundColor(.red)
+                    .font(.headline)
                     .padding()
             } else {
-                Text("Warte auf Echtzeit-Daten...")
-                    .foregroundColor(.gray)
-                    .padding()
+                // Ladeanzeige
+                VStack {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                        .scaleEffect(2)
+                    Text("Warte auf Echtzeit-Daten...")
+                        .foregroundColor(.gray)
+                        .padding()
+                }
             }
 
             Spacer()
+            
+            // Voting-Details
+            VStack(alignment: .leading, spacing: 10) {
+                Text(voting.question)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.leading)
+                
+                if !voting.description.isEmpty {
+                    Text(voting.description)
+                        .font(.body)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.leading)
+                }
+            }
+            .padding()
 
-            // Button für die Rücknavigation
+            .padding()
+            .cornerRadius(10)
+            .padding([.leading, .trailing])
+
+            Spacer()
+
+            // Umfrage beenden Button
             Button(action: closeVoting) {
                 Text("Umfrage beenden")
                     .frame(maxWidth: .infinity)
@@ -69,9 +98,11 @@ struct AktivView: View {
             .padding()
         }
         .onAppear {
-            webSocketService.connect(to: votingId)
+            print("Verbinde mit Voting ID: \(voting.id)")
+            webSocketService.connect(to: voting.id)
         }
         .onDisappear {
+            print("Trenne WebSocket-Verbindung für Voting ID: \(voting.id)")
             webSocketService.disconnect()
         }
         .onChange(of: webSocketService.liveStatus) { _, newLiveStatus in
@@ -80,7 +111,21 @@ struct AktivView: View {
         }
     }
 
+    private var votingProgressText: String {
+        if value == 0 {
+            return "Noch keine Stimmen abgegeben."
+        } else if value == 1 {
+            return "Es hat \(value) von \(total) Personen abgestimmt."
+        } else if value < total {
+            return "Es haben \(value) von \(total) Personen abgestimmt."
+        } else {
+            return "Alle \(total) Personen haben abgestimmt."
+        }
+    }
+
+
     private func updateProgress(liveStatus: String) {
+        print("Empfangener Live-Status: \(liveStatus)")
         let parts = liveStatus.split(separator: "/")
         if let currentValue = Int(parts.first ?? ""), let totalValue = Int(parts.last ?? "") {
             self.value = currentValue
@@ -92,8 +137,8 @@ struct AktivView: View {
     }
 
     private func closeVoting() {
-        // Beispiel für API-Aufruf zum Beenden der Umfrage
-        print("Beenden der Umfrage wurde gestartet.")
+        print("Beenden der Umfrage für Voting ID: \(voting.id)")
+        webSocketService.disconnect()
         onBack()
     }
 }

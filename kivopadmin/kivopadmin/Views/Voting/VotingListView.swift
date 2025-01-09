@@ -147,7 +147,7 @@ struct VotingListView: View {
                 case .success(let votings):
                     votingService.votings = votings
                 case .failure(let error):
-                    alertMessage = AlertMessage(message: "Fehler beim Laden der Umfragen: \(error.localizedDescription)")
+                    alertMessage = AlertMessage(message: "Fehler beim Laden der Abstimmung: \(error.localizedDescription)")
                 }
             }
         }
