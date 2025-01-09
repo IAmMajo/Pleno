@@ -15,6 +15,15 @@ struct RideList: View {
                             .font(.subheadline)
                             .foregroundColor(.gray)
                     }
+                    Spacer()
+                    HStack{
+                        Text("\(ride.allocatedSeats) / \(ride.emptySeats)")
+                        Image(systemName: "car.fill" )
+                    }
+                    .foregroundColor(
+                        ride.isSelfDriver ? .blue : .gray
+                    )
+                    .font(.system(size: 15))
                 }
             }
         }

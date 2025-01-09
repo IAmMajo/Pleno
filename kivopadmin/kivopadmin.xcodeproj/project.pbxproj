@@ -16,7 +16,6 @@
 		AF3458E42CECCC75008C18D2 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF3458E32CECCC75008C18D2 /* AuthServiceDTOs */; };
 		AF3458E62CECCC75008C18D2 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF3458E52CECCC75008C18D2 /* MeetingServiceDTOs */; };
 		AF3458E82CECCC75008C18D2 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF3458E72CECCC75008C18D2 /* NotificationsServiceDTOs */; };
-		AFAEE2EF2CEFAF020017CDB7 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AFAEE2EE2CEFAF020017CDB7 /* AuthServiceDTOs */; };
 		AFAEE2F12CEFAF020017CDB7 /* ConfigServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AFAEE2F02CEFAF020017CDB7 /* ConfigServiceDTOs */; };
 		AFAEE2F32CEFAF020017CDB7 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AFAEE2F22CEFAF020017CDB7 /* MeetingServiceDTOs */; };
 		AFAEE2F52CEFAF020017CDB7 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AFAEE2F42CEFAF020017CDB7 /* NotificationsServiceDTOs */; };
@@ -68,7 +67,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AFAEE2EF2CEFAF020017CDB7 /* AuthServiceDTOs in Frameworks */,
 				AFAEE2F12CEFAF020017CDB7 /* ConfigServiceDTOs in Frameworks */,
 				AF3458E82CECCC75008C18D2 /* NotificationsServiceDTOs in Frameworks */,
 				3A926B1A2D203BDF00988BF4 /* MarkdownUI in Frameworks */,
@@ -144,7 +142,6 @@
 				AF3458E32CECCC75008C18D2 /* AuthServiceDTOs */,
 				AF3458E52CECCC75008C18D2 /* MeetingServiceDTOs */,
 				AF3458E72CECCC75008C18D2 /* NotificationsServiceDTOs */,
-				AFAEE2EE2CEFAF020017CDB7 /* AuthServiceDTOs */,
 				AFAEE2F02CEFAF020017CDB7 /* ConfigServiceDTOs */,
 				AFAEE2F22CEFAF020017CDB7 /* MeetingServiceDTOs */,
 				AFAEE2F42CEFAF020017CDB7 /* NotificationsServiceDTOs */,
@@ -658,10 +655,6 @@
 		AF3458E72CECCC75008C18D2 /* NotificationsServiceDTOs */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = NotificationsServiceDTOs;
-		};
-		AFAEE2EE2CEFAF020017CDB7 /* AuthServiceDTOs */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = AuthServiceDTOs;
 		};
 		AFAEE2F02CEFAF020017CDB7 /* ConfigServiceDTOs */ = {
 			isa = XCSwiftPackageProductDependency;

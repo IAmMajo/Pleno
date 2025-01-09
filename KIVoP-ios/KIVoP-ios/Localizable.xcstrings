@@ -76,6 +76,16 @@
     "%lld" : {
 
     },
+    "%u / %u" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$u / %2$u"
+          }
+        }
+      }
+    },
     "1/4" : {
 
     },
@@ -410,9 +420,6 @@
           }
         }
       }
-    },
-    "Alle Mitfahrer" : {
-
     },
     "Alles im Blick?" : {
 
@@ -947,6 +954,12 @@
 
     },
     "Keine anstehenden Sitzungen." : {
+
+    },
+    "Keine Fahrzeugbeschreibung vorhanden." : {
+
+    },
+    "Keine Mitfahrer" : {
 
     },
     "Keine Sitzung verfügbar" : {
@@ -2025,6 +2038,9 @@
       }
     },
     "Zielort" : {
+
+    },
+    "Zielort - als Bild" : {
 
     },
     "zu einer verbesserten " : {

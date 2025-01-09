@@ -62,7 +62,6 @@ struct RideView: View {
                             .font(.body)
                     }
                 }
-                
                 // Zurück Button
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
