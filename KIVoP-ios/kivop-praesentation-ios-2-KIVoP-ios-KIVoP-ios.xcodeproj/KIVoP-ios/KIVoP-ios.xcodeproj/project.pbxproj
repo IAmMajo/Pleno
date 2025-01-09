@@ -16,7 +16,8 @@
 		AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF182CEFA8F100582C70 /* MeetingServiceDTOs */; };
 		AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */; };
 		B57A28C82D29F23F004D5AC2 /* PosterServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = B57A28C72D29F23F004D5AC2 /* PosterServiceDTOs */; };
-		F77C44052D3015BC0008DB5D /* RideServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = F77C44042D3015BC0008DB5D /* RideServiceDTOs */; };
+		F77C36702D2C2C1E0008DB5D /* RideServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = F77C366F2D2C2C1E0008DB5D /* RideServiceDTOs */; };
+
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,11 +81,12 @@
 			files = (
 				AF0EDF152CEFA8F100582C70 /* AuthServiceDTOs in Frameworks */,
 				AF0EDF172CEFA8F100582C70 /* ConfigServiceDTOs in Frameworks */,
+				F77C36702D2C2C1E0008DB5D /* RideServiceDTOs in Frameworks */,
+				F77C36722D2C2C240008DB5D /* PosterServiceDTOs in Frameworks */,
 				AF04581F2CECCA540071EDF8 /* NotificationsServiceDTOs in Frameworks */,
 				B57A28C82D29F23F004D5AC2 /* PosterServiceDTOs in Frameworks */,
 				23DADFFB2CF7A5DC004B15C1 /* MarkdownUI in Frameworks */,
 				AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */,
-				F77C44052D3015BC0008DB5D /* RideServiceDTOs in Frameworks */,
 				AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */,
 				AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */,
 				AF04581B2CECCA540071EDF8 /* AuthServiceDTOs in Frameworks */,
@@ -115,6 +117,7 @@
 				A81ABAA52CD130F20026F492 /* KIVoP-iosTests */,
 				A81ABAAF2CD130F20026F492 /* KIVoP-iosUITests */,
 				B57A28C62D29F23F004D5AC2 /* Frameworks */,
+				F77C366E2D2C2C1E0008DB5D /* Frameworks */,
 				A81ABA932CD130F00026F492 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -130,6 +133,7 @@
 			sourceTree = "<group>";
 		};
 		B57A28C62D29F23F004D5AC2 /* Frameworks */ = {
+		F77C366E2D2C2C1E0008DB5D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 			);
@@ -165,7 +169,8 @@
 				AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */,
 				23DADFFA2CF7A5DC004B15C1 /* MarkdownUI */,
 				B57A28C72D29F23F004D5AC2 /* PosterServiceDTOs */,
-				F77C44042D3015BC0008DB5D /* RideServiceDTOs */,
+				F77C366F2D2C2C1E0008DB5D /* RideServiceDTOs */,
+				F77C36712D2C2C240008DB5D /* PosterServiceDTOs */,
 			);
 			productName = "KIVoP-ios";
 			productReference = A81ABA922CD130F00026F492 /* KIVoP-ios.app */;
@@ -458,14 +463,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"KIVoP-ios/Preview Content\"";
-				DEVELOPMENT_TEAM = G395PB833W;
+				DEVELOPMENT_TEAM = 7AH738D47W;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "KIVoP-ios/Info.plist";
-				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera to take photos.";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "We need your location to provide better services.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need access to your location to attach GPS data to photos you capture.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photo library to extract metadata from images.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Kamera wird für das Scannen von QR-Codes benötigt";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -476,7 +478,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Test.KIVoP-ios2te";
+				PRODUCT_BUNDLE_IDENTIFIER = "Test.KIVoP-ios2tes";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -492,14 +494,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"KIVoP-ios/Preview Content\"";
-				DEVELOPMENT_TEAM = G395PB833W;
+				DEVELOPMENT_TEAM = 7AH738D47W;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "KIVoP-ios/Info.plist";
-				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera to take photos.";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "We need your location to provide better services.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need access to your location to attach GPS data to photos you capture.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photo library to extract metadata from images.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Kamera wird für das Scannen von QR-Codes benötigt";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -510,7 +509,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Test.KIVoP-ios2te";
+				PRODUCT_BUNDLE_IDENTIFIER = "Test.KIVoP-ios2tes";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -680,14 +679,15 @@
 			productName = NotificationsServiceDTOs;
 		};
 		B57A28C72D29F23F004D5AC2 /* PosterServiceDTOs */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
-			productName = PosterServiceDTOs;
-		};
-		F77C44042D3015BC0008DB5D /* RideServiceDTOs */ = {
+		F77C366F2D2C2C1E0008DB5D /* RideServiceDTOs */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
 			productName = RideServiceDTOs;
+		};
+		F77C36712D2C2C240008DB5D /* PosterServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
+			productName = PosterServiceDTOs;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

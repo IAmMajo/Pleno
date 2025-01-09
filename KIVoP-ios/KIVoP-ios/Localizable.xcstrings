@@ -87,7 +87,6 @@
 
     },
     "%lld/%lld" : {
-    "%u / %u" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -96,16 +95,16 @@
           }
         }
       }
+    },
+    "%u / %u" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
             "value" : "%1$u / %2$u"
           }
         }
       }
-    },
-    "1/4" : {
-
-    },
-    "2/3" : {
-
     },
     "8/12" : {
 
@@ -635,10 +634,6 @@
         }
       }
     },
-    "Die Abstimmung läuft noch. Du hast bereits abgestimmt." : {
-
-    },
-    "Die Abstimmungsergebnisse konnten nicht geladen werden" : {
     "Deine Fahrt wird dann veröffentlicht und andere können dieser beitreten." : {
 
     },
@@ -648,7 +643,10 @@
     "Details der Fahrt" : {
 
     },
-    "Die Abstimmung läuft noch" : {
+    "Die Abstimmung läuft noch. Du hast bereits abgestimmt." : {
+
+    },
+    "Die Abstimmungsergebnisse konnten nicht geladen werden" : {
 
     },
     "Die Passwörter stimmen nicht überein." : {
@@ -763,6 +761,7 @@
           }
         }
       }
+    },
     "Event" : {
 
     },
@@ -1373,6 +1372,8 @@
 
     },
     "Öffnen mit Waze" : {
+
+    },
     "OK" : {
 
     },
@@ -1833,9 +1834,6 @@
           }
         }
       }
-    },
-    "Test" : {
-
     },
     "Umfragen, " : {
       "localizations" : {
