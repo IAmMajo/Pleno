@@ -92,7 +92,7 @@ struct MarkdownEditorView: View {
         .onAppear {
             Task {
                 await recordManager.getRecordMeetingLang(meetingId: meetingId, lang: lang)
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                try? await Task.sleep(nanoseconds: 250_000_000)
                 if let record = recordManager.record {
                     markdownText = record.content
                     print("Das ist der Text: \(markdownText)")
