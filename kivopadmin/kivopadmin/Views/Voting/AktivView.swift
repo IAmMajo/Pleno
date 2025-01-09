@@ -2,153 +2,143 @@ import SwiftUI
 import MeetingServiceDTOs
 
 struct AktivView: View {
-    let voting: GetVotingDTO
-    let onBack: () -> Void
-
-    @StateObject private var webSocketManager: WebSocketManager
-    @State private var isClosing = false
+    let voting: GetVotingDTO // Voting-Daten direkt einbinden
+    let onBack: () -> Void // Callback für die Rücknavigation
+    
+    @StateObject private var webSocketService = WebSocketService()
+    @State private var value: Int = 0
+    @State private var total: Int = 0
+    @State private var progress: Double = 0
     @State private var errorMessage: String?
 
-    init(voting: GetVotingDTO, onBack: @escaping () -> Void) {
-        self.voting = voting
-        self.onBack = onBack
-        _webSocketManager = StateObject(wrappedValue: WebSocketManager(url: URL(string: "wss://kivop.ipv64.net/meetings/votings/\(voting.id)/live-status")!))
-    }
-
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                // Frage und Beschreibung anzeigen
-                Text(voting.question)
-                    .font(.title)
-                    .bold()
-                    .padding()
-
-                if !voting.description.isEmpty {
-                    Text(voting.description)
-                        .font(.body)
-                        .foregroundColor(.gray)
-                        .padding([.leading, .trailing])
-                }
-
-
-                // Echtzeit-Ergebnisse anzeigen
-                if let results = webSocketManager.liveResults {
-                    Text("Echtzeit-Ergebnisse")
+        VStack {
+            // Fortschrittsanzeige
+            if let liveStatus = webSocketService.liveStatus {
+                VStack {
+                    ZStack {
+                        Circle()
+                            .stroke(
+                                Color.blue.opacity(0.3),
+                                lineWidth: 35
+                            )
+                        Circle()
+                            .trim(from: 0, to: progress)
+                            .stroke(
+                                Color.blue,
+                                style: StrokeStyle(
+                                    lineWidth: 35,
+                                    lineCap: .round
+                                )
+                            )
+                            .rotationEffect(.degrees(-90))
+                            .animation(.easeOut(duration: 0.8), value: progress)
+                        Text("\(value)/\(total)")
+                            .font(.system(size: 50))
+                            .fontWeight(.bold)
+                            .foregroundColor(Color.blue)
+                    }
+                    .padding(30)
+                    
+                    Text(votingProgressText)
                         .font(.headline)
-                        .padding(.top)
-
-                    PieChartView(optionTextMap: optionTextMap, votingResults: results)
-                        .frame(height: 200)
-                        .padding()
-
-                    TableView2(results: results.results, optionTextMap: optionTextMap, totalVotes: totalVotes(results: results.results))
-                        .padding([.leading, .trailing])
-                } else {
+                        .foregroundColor(.gray)
+                }
+            } else if let errorMessage = webSocketService.errorMessage {
+                // Fehleranzeige
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .font(.headline)
+                    .padding()
+            } else {
+                // Ladeanzeige
+                VStack {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                        .scaleEffect(2)
                     Text("Warte auf Echtzeit-Daten...")
                         .foregroundColor(.gray)
                         .padding()
                 }
-
-                // Fehler anzeigen
-                if let errorMessage = errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.subheadline)
-                        .padding()
-                }
-
-                // Umfrage abschließen
-                actionButton(title: "Umfrage abschließen", icon: "checkmark", color: .orange, action: closeVoting)
             }
+
+            Spacer()
+            
+            // Voting-Details
+            VStack(alignment: .leading, spacing: 10) {
+                Text(voting.question)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.leading)
+                
+                if !voting.description.isEmpty {
+                    Text(voting.description)
+                        .font(.body)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.leading)
+                }
+            }
+            .padding()
+
+            .padding()
+            .cornerRadius(10)
+            .padding([.leading, .trailing])
+
+            Spacer()
+
+            // Umfrage beenden Button
+            Button(action: closeVoting) {
+                Text("Umfrage beenden")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.orange)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }
+            .padding()
+        }
+        .onAppear {
+            print("Verbinde mit Voting ID: \(voting.id)")
+            webSocketService.connect(to: voting.id)
         }
         .onDisappear {
-            webSocketManager.disconnect()
+            print("Trenne WebSocket-Verbindung für Voting ID: \(voting.id)")
+            webSocketService.disconnect()
+        }
+        .onChange(of: webSocketService.liveStatus) { _, newLiveStatus in
+            guard let newLiveStatus = newLiveStatus else { return }
+            updateProgress(liveStatus: newLiveStatus)
         }
     }
 
-    private var optionTextMap: [UInt8: String] {
-        Dictionary(uniqueKeysWithValues: voting.options.map { ($0.index, $0.text) })
+    private var votingProgressText: String {
+        if value == 0 {
+            return "Noch keine Stimmen abgegeben."
+        } else if value == 1 {
+            return "Es hat \(value) von \(total) Personen abgestimmt."
+        } else if value < total {
+            return "Es haben \(value) von \(total) Personen abgestimmt."
+        } else {
+            return "Alle \(total) Personen haben abgestimmt."
+        }
     }
 
-    private func totalVotes(results: [GetVotingResultDTO]?) -> Int {
-        guard let results = results else { return 0 }
-        return results.reduce(0) { $0 + Int($1.count) }
-    }
 
-    private func actionButton(title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            if isClosing {
-                ProgressView()
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.gray)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            } else {
-                Label(title, systemImage: icon)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(color)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+    private func updateProgress(liveStatus: String) {
+        print("Empfangener Live-Status: \(liveStatus)")
+        let parts = liveStatus.split(separator: "/")
+        if let currentValue = Int(parts.first ?? ""), let totalValue = Int(parts.last ?? "") {
+            self.value = currentValue
+            self.total = totalValue
+            withAnimation(.easeOut(duration: 0.8)) {
+                self.progress = Double(currentValue) / Double(totalValue)
             }
         }
-        .padding(.horizontal)
-        .disabled(isClosing)
     }
 
     private func closeVoting() {
-        guard !isClosing else {
-            print("Warnung: closeVoting bereits in Bearbeitung.")
-            return
-        }
-
-        isClosing = true
-        errorMessage = nil
-
-        VotingService.shared.closeVoting(votingId: voting.id) { result in
-            DispatchQueue.main.async {
-                self.isClosing = false
-                switch result {
-                case .success:
-                    print("Umfrage erfolgreich abgeschlossen: \(self.voting.id)")
-                    onBack() // Zurück zur Voting-Liste navigieren
-                case .failure(let error):
-                    self.errorMessage = "Fehler beim Abschließen der Umfrage: \(error.localizedDescription)"
-                    print("Fehler beim Abschließen: \(error)")
-                }
-            }
-        }
-    }
-}
-
-struct TableView2: View {
-    let results: [GetVotingResultDTO]?
-    let optionTextMap: [UInt8: String]?
-    let totalVotes: Int?
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let results = results, let optionTextMap = optionTextMap, let totalVotes = totalVotes {
-                ForEach(results, id: \ .index) { result in
-                    HStack {
-                        Text(optionTextMap[result.index] ?? "Enthaltung")
-                            .font(.body)
-                            .bold()
-                        Spacer()
-                        Text("\(result.count) Stimmen (\(percentage(for: result, totalVotes: totalVotes))%)")
-                            .font(.body)
-                    }
-                    Divider()
-                }
-            }
-        }
-    }
-
-    private func percentage(for result: GetVotingResultDTO, totalVotes: Int) -> String {
-        guard totalVotes > 0 else { return "0" }
-        let percent = Double(result.count) / Double(totalVotes) * 100
-        return String(format: "%.1f", percent)
+        print("Beenden der Umfrage für Voting ID: \(voting.id)")
+        webSocketService.disconnect()
+        onBack()
     }
 }

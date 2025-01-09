@@ -433,7 +433,7 @@ struct MainPageAPI {
 
             if let httpResponse = response as? HTTPURLResponse {
                 print("ℹ️ Antwortstatus von deleteUser: \(httpResponse.statusCode)")
-                if httpResponse.statusCode == 200 {
+                if httpResponse.statusCode == 200 || httpResponse.statusCode == 204 {
                     print("✅ Nutzer erfolgreich gelöscht.")
                     completion(.success(()))
                 } else {

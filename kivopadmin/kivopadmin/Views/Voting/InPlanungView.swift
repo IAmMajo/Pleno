@@ -49,11 +49,11 @@ struct InPlanungView: View {
                 }
 
                 // Buttons
-                actionButton(title: "Umfrage eröffnen", icon: "play.fill", color: .green, action: openVoting)
-                actionButton(title: "Umfrage bearbeiten", icon: "pencil", color: .blue) {
+                actionButton(title: "Abstimmung eröffnen", icon: "play.fill", color: .green, action: openVoting)
+                actionButton(title: "Abstimmung bearbeiten", icon: "pencil", color: .blue) {
                     showEditPopup = true
                 }
-                actionButton(title: "Umfrage löschen", icon: "trash", color: .red, action: deleteVoting)
+                actionButton(title: "Abstimmung löschen", icon: "trash", color: .red, action: deleteVoting)
             }
         }
         .background(Color.white)
@@ -111,10 +111,10 @@ struct InPlanungView: View {
                 self.isProcessing = false
                 switch result {
                 case .success:
-                    print("Umfrage erfolgreich eröffnet: \(self.voting.id)")
+                    print("Abstimmung erfolgreich eröffnet: \(self.voting.id)")
                     onOpen()
                 case .failure(let error):
-                    self.errorMessage = "Fehler beim Öffnen der Umfrage: \(error.localizedDescription)"
+                    self.errorMessage = "Fehler beim Öffnen der Abstimmung: \(error.localizedDescription)"
                     print("Fehler beim Öffnen: \(error)")
                 }
             }
@@ -135,10 +135,10 @@ struct InPlanungView: View {
                 self.isProcessing = false
                 switch result {
                 case .success:
-                    print("Umfrage erfolgreich gelöscht: \(self.voting.id)")
+                    print("Abstimmung erfolgreich gelöscht: \(self.voting.id)")
                     onDelete()
                 case .failure(let error):
-                    self.errorMessage = "Fehler beim Löschen der Umfrage: \(error.localizedDescription)"
+                    self.errorMessage = "Fehler beim Löschen der Abstimmung: \(error.localizedDescription)"
                     print("Fehler beim Löschen: \(error)")
                 }
             }

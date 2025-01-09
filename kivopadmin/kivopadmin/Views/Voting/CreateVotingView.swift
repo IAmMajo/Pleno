@@ -8,10 +8,12 @@ struct CreateVotingView: View {
     @State private var anonymous = false
     @State private var options: [String] = [""] // Mindestens ein leeres Feld für Optionen
     @State private var selectedMeetingId: UUID? = nil // Ausgewählte Meeting-ID
-    
+
     @ObservedObject var meetingManager: MeetingManager
     var onCreate: (GetVotingDTO) -> Void
-    
+
+    private let descriptionCharacterLimit = 300
+
     var body: some View {
         NavigationView {
             Form {
@@ -19,7 +21,7 @@ struct CreateVotingView: View {
                 Section(header: Text("Meeting auswählen")) {
                     if !meetingManager.meetings.isEmpty {
                         Menu {
-                            ForEach(meetingManager.meetings.filter { $0.status == .inSession }, id: \.id) { meeting in
+                            ForEach(meetingManager.meetings.filter { $0.status == .inSession }, id: \ .id) { meeting in
                                 Button(action: {
                                     selectedMeetingId = meeting.id
                                 }) {
@@ -58,6 +60,11 @@ struct CreateVotingView: View {
                 Section(header: Text("Beschreibung")) {
                     TextField("Beschreibung eingeben", text: $description)
                         .autocapitalization(.sentences)
+                        .onChange(of: description) { _, newValue in
+                            if newValue.count > descriptionCharacterLimit {
+                                description = String(newValue.prefix(descriptionCharacterLimit))
+                            }
+                        }
                 }
                 
                 // Anonyme Abstimmung
@@ -67,7 +74,7 @@ struct CreateVotingView: View {
                 
                 // Optionen
                 Section(header: Text("Optionen")) {
-                    ForEach($options.indices, id: \.self) { index in
+                    ForEach($options.indices, id: \ .self) { index in
                         HStack {
                             TextField("Option \(index + 1)", text: $options[index])
                             
@@ -86,7 +93,7 @@ struct CreateVotingView: View {
                     }
                 }
             }
-            .navigationTitle("Neue Umfrage")
+            .navigationTitle("Neue Abstimmung")
             .navigationBarItems(
                 leading: Button("Abbrechen") {
                     presentationMode.wrappedValue.dismiss()

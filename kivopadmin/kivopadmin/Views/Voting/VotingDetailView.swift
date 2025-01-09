@@ -17,7 +17,7 @@ struct VotingDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             if isLoadingVoting {
-                ProgressView("Umfrage wird geladen...")
+                ProgressView("Abstimmung wird geladen...")
                     .padding()
             } else if let voting = voting {
                 // Dynamische Auswahl der passenden View
@@ -38,12 +38,13 @@ struct VotingDetailView: View {
 
                 } else if voting.isOpen {
                     AktivView(
-                        voting: voting,
+                        voting: voting, // Das gesamte `GetVotingDTO`-Objekt übergeben
                         onBack: {
                             print("Zurück zur Voting-Liste.") // Debugging
                             onBack() // Navigation zur Voting-Liste
                         }
                     )
+
                 } else {
                     AbgeschlossenView(voting: voting, votingResults: votingResults)
                 }
@@ -52,7 +53,7 @@ struct VotingDetailView: View {
             }
         }
         .onAppear(perform: loadVoting)
-        .navigationTitle("Umfrage Details")
+        .navigationTitle("Details zur Abstimmung")
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { onBack() }) {
@@ -66,7 +67,7 @@ struct VotingDetailView: View {
     }
 
     private func loadVoting() {
-        print("Lade Umfrage-Daten...") // Debugging
+        print("Lade Abstimmung...") // Debugging
         isLoadingVoting = true
         errorMessage = nil
 
@@ -77,14 +78,14 @@ struct VotingDetailView: View {
                 case .success(let fetchedVoting):
                     self.voting = fetchedVoting
                     if fetchedVoting.startedAt != nil {
-                        print("Umfrage ist gestartet, lade Ergebnisse...") // Debugging
+                        print("Abstimmung ist gestartet, lade Ergebnisse...") // Debugging
                         fetchVotingResults()
                     } else {
-                        print("Umfrage-Daten erfolgreich geladen.") // Debugging
+                        print("Abstimmung erfolgreich geladen.") // Debugging
                     }
                 case .failure(let error):
-                    errorMessage = "Fehler beim Laden der Umfrage: \(error.localizedDescription)"
-                    print("Fehler beim Laden der Umfrage: \(error.localizedDescription)") // Debugging
+                    errorMessage = "Fehler beim Laden der Abstimmung: \(error.localizedDescription)"
+                    print("Fehler beim Laden der Abstimmung: \(error.localizedDescription)") // Debugging
                 }
             }
         }

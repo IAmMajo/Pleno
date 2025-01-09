@@ -43,7 +43,7 @@ struct NutzerverwaltungView: View {
                     isPendingRequestPopupPresented = true
                 }
                 .sheet(isPresented: $isPendingRequestPopupPresented, onDismiss: {
-                    fetchPendingRequestsCount() // Anzahl der ausstehenden Anfragen aktualisieren
+                    fetchAllData() // Daten aktualisieren nach Verlassen der Beitrittsverwaltung
                 }) {
                     PendingRequestsNavigationView(isPresented: $isPendingRequestPopupPresented, onListUpdate: {
                         fetchPendingRequestsCount() // Anzahl der ausstehenden Anfragen live aktualisieren
@@ -60,7 +60,7 @@ struct NutzerverwaltungView: View {
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
-                        ForEach(users, id: \.uid) { user in
+                        ForEach(users.filter { $0.isActive == true }, id: \.uid) { user in
                             VStack {
                                 if let imageData = user.profileImage, let uiImage = UIImage(data: imageData) {
                                     Image(uiImage: uiImage)
@@ -149,8 +149,8 @@ struct NutzerverwaltungView: View {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let fetchedUsers):
-                    users = fetchedUsers
-                    print("✅ Benutzerliste aktualisiert. Anzahl: \(fetchedUsers.count)")
+                    users = fetchedUsers.filter { $0.isActive == true } // Filtere inaktive Benutzer
+                    print("✅ Benutzerliste aktualisiert. Anzahl: \(users.count)")
                 case .failure(let error):
                     print("❌ Fehler beim Laden der Benutzer: \(error.localizedDescription)")
                 }

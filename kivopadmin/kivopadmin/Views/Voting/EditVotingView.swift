@@ -57,7 +57,7 @@ struct EditVotingView: View {
                     }
                 }
             }
-            .navigationTitle("Umfrage bearbeiten")
+            .navigationTitle("Abstimmung bearbeiten")
             .navigationBarItems(
                 leading: Button("Abbrechen") {
                     dismiss()
@@ -101,7 +101,7 @@ struct EditVotingView: View {
                 isSaving = false
                 switch result {
                 case .success:
-                    print("Umfrage erfolgreich bearbeitet.")
+                    print("Abstimmung erfolgreich bearbeitet.")
                     let updatedVoting = GetVotingDTO(
                         id: voting.id,
                         meetingId: voting.meetingId,
@@ -118,7 +118,7 @@ struct EditVotingView: View {
                     onSave(updatedVoting)
                     dismiss()
                 case .failure(let error):
-                    errorMessage = "Fehler beim Speichern der Umfrage: \(error.localizedDescription)"
+                    errorMessage = "Fehler beim Speichern der Abstimmung: \(error.localizedDescription)"
                 }
             }
         }
