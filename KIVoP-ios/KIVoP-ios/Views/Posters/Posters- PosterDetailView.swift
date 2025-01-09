@@ -29,6 +29,13 @@ struct Posters_PosterDetailView: View {
    
    @Environment(\.colorScheme) var colorScheme
    
+   let locations: [Location] = [
+      Location(name: "Am Grabstein 6", coordinate: CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)),
+      Location(name: "Hinter der Obergasse 27", coordinate: CLLocationCoordinate2D(latitude: 51.504906516488205, longitude: 6.525927532716446)),
+      Location(name: "Baumhaus 5", coordinate: CLLocationCoordinate2D(latitude: 51.494653516488205, longitude: 6.525307532716446)),
+      Location(name: "Katerstraße 3", coordinate: CLLocationCoordinate2D(latitude: 51.495553516488205, longitude: 6.565227532716446))
+   ]
+   
    let addresses = [
            "Am Grabstein 6, Transilvanien",
            "Hinter der Obergasse 27, am Obergipfelzelt hinter Neuss",
@@ -145,33 +152,66 @@ struct Posters_PosterDetailView: View {
                 HStack{
                    VStack{
                       CircularProgressView(value: 2, total: 3, status: Status.hung)
-                         .frame(maxWidth: 35, maxHeight: 35)
+                         .frame(maxWidth: 45, maxHeight: 45)
                          .padding(.bottom, 5)
-                      Text("2/3")
-                         .font(.title3)
-                         .fontWeight(.semibold)
+//                      Text("2/3")
+//                         .font(.title3)
+//                         .fontWeight(.semibold)
                       Text("Aufgehangen")
                          .font(.subheadline)
                          .foregroundStyle(Color(UIColor.label).opacity(0.6))
                    }
-                   .padding(.leading, 50)
+                   .padding(.leading, 35)
                    
                    Spacer()
                    
                    VStack{
                       CircularProgressView(value: 1, total: 4, status: Status.takenDown)
-                         .frame(maxWidth: 35, maxHeight: 35)
+                         .frame(maxWidth: 45, maxHeight: 45)
                          .padding(.bottom, 5)
-                      Text("1/4")
-                         .font(.title3)
-                         .fontWeight(.semibold)
+//                      Text("1/4")
+//                         .font(.title3)
+//                         .fontWeight(.semibold)
                       Text("Abgehangen")
                          .font(.subheadline)
                          .foregroundStyle(Color(UIColor.label).opacity(0.6))
                    }
-                   .padding(.trailing, 50)
+                   .padding(.trailing, 35)
                 }
                 
+                
+//                HStack{
+//                   VStack{
+//                      CircularProgressView(value: 2, total: 3, status: Status.hung)
+//                         .frame(maxWidth: 35, maxHeight: 35)
+//                         .padding(.bottom, 5)
+//                      Text("2/3")
+//                         .font(.title3)
+//                         .fontWeight(.semibold)
+//                      Text("Aufgehangen")
+//                         .font(.subheadline)
+//                         .foregroundStyle(Color(UIColor.label).opacity(0.6))
+//                   }
+//                   .padding(.leading, 50)
+//                   
+//                   Spacer()
+//                   
+//                   VStack{
+//                      CircularProgressView(value: 1, total: 4, status: Status.takenDown)
+//                         .frame(maxWidth: 35, maxHeight: 35)
+//                         .padding(.bottom, 5)
+//                      Text("1/4")
+//                         .font(.title3)
+//                         .fontWeight(.semibold)
+//                      Text("Abgehangen")
+//                         .font(.subheadline)
+//                         .foregroundStyle(Color(UIColor.label).opacity(0.6))
+//                   }
+//                   .padding(.trailing, 50)
+//                }
+                
+                
+                //Das zu nem ZStack machen (wie in VotingResultView)
                 Form {
                    Section {
                       Text("\(poster.description)")
@@ -181,6 +221,18 @@ struct Posters_PosterDetailView: View {
                 }
                 .scrollDisabled(true)
                 .frame(height: 150)
+                
+                
+                Rectangle()
+                   .frame(height: 215)
+                   .overlay(
+                      VStack {
+                         MapPositionsView(locations: locations)
+                      }
+                   )
+                   .cornerRadius(10)
+                   .padding(.horizontal) .padding(.top, -10)
+                
                 
                 List{
                    Section {

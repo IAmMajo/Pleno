@@ -20,6 +20,9 @@ struct Posters_PositionView: View {
    @State private var address: String?
    @State private var isLoadingAddress = true
    
+   @State private var isGoogleMapsInstalled = false
+   @State private var isWazeInstalled = false
+   
    @State private var isFullMapView: Bool = false
    @State private var showMapOptions: Bool = false
    @State private var shareLocation = false
@@ -221,13 +224,20 @@ struct Posters_PositionView: View {
              }
              .confirmationDialog("\(address ?? "Adresse")\n\(currentCoordinates!.latitude), \(currentCoordinates!.longitude)", isPresented: $showMapOptions, titleVisibility: .visible) {
                 Button("Öffnen mit Apple Maps") {
-                   openInAppleMaps()
+                   NavigationAppHelper.shared.openInAppleMaps(
+                     name: name,
+                     coordinate: currentCoordinates!
+                   )
                 }
-                Button("Öffnen mit Google Maps") {
-                   openInGoogleMaps()
+                if isGoogleMapsInstalled {
+                   Button("Öffnen mit Google Maps") {
+                      NavigationAppHelper.shared.openInGoogleMaps(coordinate: currentCoordinates!)
+                   }
                 }
-                Button("Öffnen mit Waze") {
-                   openInWaze()
+                if isWazeInstalled {
+                   Button("Öffnen mit Waze") {
+                      NavigationAppHelper.shared.openInWaze(coordinate: currentCoordinates!)
+                   }
                 }
                 Button("Teilen...") {
                    shareLocation = true
@@ -299,6 +309,9 @@ struct Posters_PositionView: View {
        .navigationBarTitleDisplayMode(.inline)
        .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
        .onAppear {
+          let installedApps = NavigationAppHelper.shared.checkInstalledApps()
+          isGoogleMapsInstalled = installedApps.isGoogleMapsInstalled
+          isWazeInstalled = installedApps.isWazeInstalled
           fetchAddress(latitude: currentCoordinates!.latitude, longitude: currentCoordinates!.longitude)
           Task {
              
@@ -308,36 +321,6 @@ struct Posters_PositionView: View {
           fetchAddress(latitude: currentCoordinates!.latitude, longitude: currentCoordinates!.longitude)
        }
     }
-   
-   private func openInAppleMaps() {
-      let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: currentCoordinates!))
-      mapItem.name = name
-      mapItem.openInMaps()
-   }
-   
-   private func openInGoogleMaps() {
-      let urlString = "comgooglemaps://?q=\(currentCoordinates!.latitude),\(currentCoordinates!.longitude)"
-      if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
-         UIApplication.shared.open(url)
-      } else {
-         // Fallback to Google Maps in browser if the app is not installed
-         if let webUrl = URL(string: "https://www.google.com/maps?q=\(currentCoordinates!.latitude),\(currentCoordinates!.longitude)") {
-            UIApplication.shared.open(webUrl)
-         }
-      }
-   }
-   
-   private func openInWaze() {
-      let urlString = "waze://?ll=\(currentCoordinates!.latitude),\(currentCoordinates!.longitude)&navigate=yes"
-      if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
-         UIApplication.shared.open(url)
-      } else {
-         // Fallback to Waze in browser if the app is not installed
-         if let webUrl = URL(string: "https://www.waze.com/ul?ll=\(currentCoordinates!.latitude),\(currentCoordinates!.longitude)&navigate=yes") {
-            UIApplication.shared.open(webUrl)
-         }
-      }
-   }
    
    private func formattedShareText() -> String {
 //      """

@@ -14,12 +14,20 @@ struct FullMapView: View {
    let name: String
    let coordinate: CLLocationCoordinate2D
    
+   @State private var isGoogleMapsInstalled = false
+   @State private var isWazeInstalled = false
+   
    @State private var showMapOptions: Bool = false
    @State private var shareLocation = false
    
    var body: some View {
       
       MapView(name: self.name, coordinate: self.coordinate)
+         .onAppear {
+            let installedApps = NavigationAppHelper.shared.checkInstalledApps()
+            isGoogleMapsInstalled = installedApps.isGoogleMapsInstalled
+            isWazeInstalled = installedApps.isWazeInstalled
+         }
          .navigationBarBackButtonHidden(true)
          .navigationTitle(name)
          .navigationBarTitleDisplayMode(.inline)
@@ -46,13 +54,20 @@ struct FullMapView: View {
          }
          .confirmationDialog("\(address)\n\(coordinate.latitude), \(coordinate.longitude)", isPresented: $showMapOptions, titleVisibility: .visible) {
             Button("Öffnen mit Apple Maps") {
-               openInAppleMaps()
+               NavigationAppHelper.shared.openInAppleMaps(
+                  name: name,
+                  coordinate: coordinate
+               )
             }
-            Button("Öffnen mit Google Maps") {
-               openInGoogleMaps()
+            if isGoogleMapsInstalled {
+               Button("Öffnen mit Google Maps") {
+                  NavigationAppHelper.shared.openInGoogleMaps(coordinate: coordinate)
+               }
             }
-            Button("Öffnen mit Waze") {
-               openInWaze()
+            if isWazeInstalled {
+               Button("Öffnen mit Waze") {
+                  NavigationAppHelper.shared.openInWaze(coordinate: coordinate)
+               }
             }
             Button("Teilen...") {
                shareLocation = true
@@ -66,36 +81,6 @@ struct FullMapView: View {
          }
    }
    
-   private func openInAppleMaps() {
-      let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
-      mapItem.name = name
-      mapItem.openInMaps()
-   }
-
-   private func openInGoogleMaps() {
-      let urlString = "comgooglemaps://?q=\(coordinate.latitude),\(coordinate.longitude)"
-      if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
-         UIApplication.shared.open(url)
-      } else {
-         // Fallback to Google Maps in browser if the app is not installed
-         if let webUrl = URL(string: "https://www.google.com/maps?q=\(coordinate.latitude),\(coordinate.longitude)") {
-            UIApplication.shared.open(webUrl)
-         }
-      }
-   }
-   
-   private func openInWaze() {
-      let urlString = "waze://?ll=\(coordinate.latitude),\(coordinate.longitude)&navigate=yes"
-      if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
-         UIApplication.shared.open(url)
-      } else {
-         // Fallback to Waze in browser if the app is not installed
-         if let webUrl = URL(string: "https://www.waze.com/ul?ll=\(coordinate.latitude),\(coordinate.longitude)&navigate=yes") {
-            UIApplication.shared.open(webUrl)
-         }
-      }
-   }
-
    private func formattedShareText() -> String {
       """
       \(address)

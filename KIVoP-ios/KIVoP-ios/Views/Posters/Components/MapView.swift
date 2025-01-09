@@ -30,7 +30,10 @@ struct MapView: View {
    
    init(name: String, coordinate: CLLocationCoordinate2D) {
       self.name = name
-      self.coordinate = coordinate
+      self.coordinate = CLLocationCoordinate2D(
+         latitude: coordinate.latitude,
+         longitude: coordinate.longitude
+      )
       self._position = State(initialValue: .region(MKCoordinateRegion(
          center: coordinate,
          span: MKCoordinateSpan(latitudeDelta: 0.004, longitudeDelta: 0.004)
@@ -57,6 +60,7 @@ struct MapView: View {
                      .frame(width: 20, height: 15)
                      .offset(y: 8)
                }
+               .offset(y: -(65/2)) // align the bottom with the coordinate
          }
          .annotationTitles(.hidden)
       }
@@ -77,7 +81,7 @@ struct MapView: View {
    
    private func shiftedCoordinate(_ coordinate: CLLocationCoordinate2D) -> CLLocationCoordinate2D {
       // shifts the latitude upwards to move the annotation to the top
-      let offset: CLLocationDegrees = 0.001
+      let offset: CLLocationDegrees = 0.0004
       return CLLocationCoordinate2D(
          latitude: coordinate.latitude - offset,
          longitude: coordinate.longitude
