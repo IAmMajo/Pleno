@@ -4,8 +4,9 @@ import MeetingServiceDTOs
 struct AktivView: View {
     let voting: GetVotingDTO // Voting-Daten direkt einbinden
     let onBack: () -> Void // Callback für die Rücknavigation
-    
+
     @StateObject private var webSocketService = WebSocketService()
+    @State private var isClosing = false
     @State private var value: Int = 0
     @State private var total: Int = 0
     @State private var progress: Double = 0
@@ -14,7 +15,7 @@ struct AktivView: View {
     var body: some View {
         VStack {
             // Fortschrittsanzeige
-            if let liveStatus = webSocketService.liveStatus {
+            if webSocketService.liveStatus != nil {
                 VStack {
                     ZStack {
                         Circle()
@@ -22,6 +23,7 @@ struct AktivView: View {
                                 Color.blue.opacity(0.3),
                                 lineWidth: 35
                             )
+                       
                         Circle()
                             .trim(from: 0, to: progress)
                             .stroke(
@@ -39,7 +41,7 @@ struct AktivView: View {
                             .foregroundColor(Color.blue)
                     }
                     .padding(30)
-                    
+
                     Text(votingProgressText)
                         .font(.headline)
                         .foregroundColor(.gray)
@@ -63,14 +65,14 @@ struct AktivView: View {
             }
 
             Spacer()
-            
+
             // Voting-Details
             VStack(alignment: .leading, spacing: 10) {
                 Text(voting.question)
                     .font(.title2)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.leading)
-                
+
                 if !voting.description.isEmpty {
                     Text(voting.description)
                         .font(.body)
@@ -79,8 +81,6 @@ struct AktivView: View {
                 }
             }
             .padding()
-
-            .padding()
             .cornerRadius(10)
             .padding([.leading, .trailing])
 
@@ -88,14 +88,24 @@ struct AktivView: View {
 
             // Umfrage beenden Button
             Button(action: closeVoting) {
-                Text("Umfrage beenden")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.orange)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+                if isClosing {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                } else {
+                    Text("Umfrage beenden")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.orange)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
             }
             .padding()
+            .disabled(isClosing)
         }
         .onAppear {
             print("Verbinde mit Voting ID: \(voting.id)")
@@ -123,7 +133,6 @@ struct AktivView: View {
         }
     }
 
-
     private func updateProgress(liveStatus: String) {
         print("Empfangener Live-Status: \(liveStatus)")
         let parts = liveStatus.split(separator: "/")
@@ -137,8 +146,29 @@ struct AktivView: View {
     }
 
     private func closeVoting() {
-        print("Beenden der Umfrage für Voting ID: \(voting.id)")
-        webSocketService.disconnect()
-        onBack()
+        guard !isClosing else {
+            print("Warnung: closeVoting bereits in Bearbeitung.")
+            return
+        }
+
+        isClosing = true
+        errorMessage = nil
+
+        print("Sende Anfrage zum Beenden der Umfrage mit ID: \(voting.id)")
+
+        VotingService.shared.closeVoting(votingId: voting.id) { result in
+            DispatchQueue.main.async {
+                self.isClosing = false
+                switch result {
+                case .success:
+                    print("Umfrage erfolgreich abgeschlossen: \(self.voting.id)")
+                    webSocketService.disconnect() // Beende die WebSocket-Verbindung
+                    onBack() // Automatische Rückkehr zur Voting-Liste
+                case .failure(let error):
+                    self.errorMessage = "Fehler beim Abschließen der Umfrage: \(error.localizedDescription)"
+                    print("Fehler beim Abschließen: \(error)")
+                }
+            }
+        }
     }
 }
