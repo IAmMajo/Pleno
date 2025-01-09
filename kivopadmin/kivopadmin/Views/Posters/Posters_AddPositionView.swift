@@ -63,6 +63,7 @@ struct Posters_AddPositionView: View {
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
     @ObservedObject var userManager = UserManager()
+    @ObservedObject private var posterManager = PosterManager()
     
     @State private var expiresAt: Date = Date()
     @State private var showUserSelectionSheet = false
@@ -85,6 +86,24 @@ struct Posters_AddPositionView: View {
             }
             .frame(width: 300)
             .background(Color.gray.opacity(0.1))
+            
+//            if posterManager.isLoading {
+//                ProgressView("Loading...")
+//            } else if let errorMessage = posterManager.errorMessage {
+//                Text("Error: \(errorMessage)").foregroundColor(.red)
+//            } else {
+//                // Zeige die Liste der Positionen
+//                List(posterManager.positions, id: \.posterId) { posterLocation in
+//                    Button(action: {
+//                        zoomToLocation(latitude: posterLocation.latitude, longitude: posterLocation.longitude)
+//                    }) {
+//                        Text("Lat: \(posterLocation.latitude), Lon: \(posterLocation.longitude)")
+//                            .font(.body)
+//                    }
+//                }
+//                .frame(width: 300)
+//                .background(Color.gray.opacity(0.1))
+//            }
 
             VStack {
                 ZStack {
@@ -184,6 +203,7 @@ struct Posters_AddPositionView: View {
         .onAppear {
             // Benutzer laden, wenn die View erscheint
             userManager.fetchUsers()
+            posterManager.fetchPosterPositions()
         }
     }
 

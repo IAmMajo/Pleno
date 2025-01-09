@@ -36,33 +36,33 @@ struct EditMeetingView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(header: Text("Meeting Details")) {
-                    TextField("Meeting Name", text: $name)
-                    TextField("Description", text: $description)
-                    DatePicker("Start Date", selection: $start, displayedComponents: [.date, .hourAndMinute])
-                    TextField("Duration (minutes)", text: $duration)
+                Section(header: Text("Details zur Sitzung")) {
+                    TextField("Name der Sitzung", text: $name)
+                    TextField("Beschreibung", text: $description)
+                    DatePicker("Datum", selection: $start, displayedComponents: [.date, .hourAndMinute])
+                    TextField("Dauer (in Minutes)", text: $duration)
                         .keyboardType(.numberPad)
                 }
 
-                Section(header: Text("Location")) {
-                    TextField("Location Name", text: $locationName)
-                    TextField("Street", text: $locationStreet)
-                    TextField("Number", text: $locationNumber)
-                    TextField("Letter", text: $locationLetter)
-                    TextField("Postal Code", text: $locationPostalCode)
-                    TextField("Place", text: $locationPlace)
+                Section(header: Text("Ort")) {
+                    TextField("Name des Ortes", text: $locationName)
+                    TextField("Straße", text: $locationStreet)
+                    TextField("Nummer", text: $locationNumber)
+                    TextField("Buchstabe", text: $locationLetter)
+                    TextField("Postleitzahl", text: $locationPostalCode)
+                    TextField("Stadt", text: $locationPlace)
                 }
             }
-            .navigationTitle("Edit Meeting")
+            .navigationTitle("Sitzung bearbeiten")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
+                    Button("Speichern") {
                         saveChanges()
                     }
                     .disabled(meetingManager.isLoading)
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Delete") {
+                    Button("Löschen") {
                         deleteMeeting()
                     }
                     .foregroundColor(.red)
