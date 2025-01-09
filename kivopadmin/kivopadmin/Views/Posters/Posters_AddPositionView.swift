@@ -64,10 +64,12 @@ struct Posters_AddPositionView: View {
     )
     @ObservedObject var userManager = UserManager()
     @ObservedObject private var posterManager = PosterManager()
+    @ObservedObject private var locationMapManager = LocationMapManager()
     
     @State private var expiresAt: Date = Date()
     @State private var showUserSelectionSheet = false
     @State private var selectedUsers: [UUID] = []
+    @State private var searchText: String = ""
 
     
     // Array to hold CreatePosterPositionDTO objects
@@ -106,13 +108,45 @@ struct Posters_AddPositionView: View {
 //            }
 
             VStack {
+
+                
                 ZStack {
                     CustomMapView(region: $mapRegion, posterPositions: posterPositions, onRegionChange: { newRegion in
                         mapRegion = newRegion
                     })
                     .ignoresSafeArea()
                         .frame(maxHeight: .infinity)
-
+                    VStack {
+                        ZStack {
+                            TextField("Adresse suchen", text: $searchText, onCommit: {
+                                performSearch()
+                            })
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding()
+                            HStack {
+                                Spacer()
+                                Button(action: performSearch) {
+                                    Image(systemName: "magnifyingglass")
+                                        .padding()
+                                }.padding(.trailing, 20)
+                            }
+                        }
+                        HStack {
+                            Spacer()
+                            Button(action: centerOnUserLocation) {
+                                HStack {
+                                    Image(systemName: "location.fill")
+                                    Text("Meine Position")
+                                }
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                            }
+                            .padding()
+                        }
+                        Spacer()
+                    }
                     VStack {
                         Spacer()
                         ZStack {
@@ -242,6 +276,40 @@ struct Posters_AddPositionView: View {
         mapRegion.span = newSpan
     }
 
+    private func performSearch() {
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = searchText
+        let search = MKLocalSearch(request: request)
+        
+        search.start { response, error in
+            guard let response = response, error == nil else {
+                print("Fehler bei der Suche: \(error?.localizedDescription ?? "Unbekannter Fehler")")
+                return
+            }
+            
+            // Wähle das erste Ergebnis aus
+            if let firstResult = response.mapItems.first {
+                let coordinate = firstResult.placemark.coordinate
+                mapRegion = MKCoordinateRegion(
+                    center: coordinate,
+                    span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+                )
+            }
+        }
+    }
+    private func centerOnUserLocation() {
+        locationMapManager.requestLocation()
+        if let userLocation = locationMapManager.currentLocation {
+            mapRegion = MKCoordinateRegion(
+                center: userLocation.coordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+            )
+        } else {
+            print("Standort nicht verfügbar")
+        }
+        locationMapManager.stopLocationUpdates()
+    }
+    
     private func zoomOut() {
         let newSpan = MKCoordinateSpan(
             latitudeDelta: mapRegion.span.latitudeDelta * 1.2,
@@ -250,6 +318,16 @@ struct Posters_AddPositionView: View {
         mapRegion.span = newSpan
     }
 }
+
+//struct PosterRowMiniView: View {
+//
+//    var body: some View {
+//        Text("Hallo")
+//    }
+//
+//}
+//
+//
 
 struct UserSelectionSheet: View {
     var users: [UserProfileDTO]
