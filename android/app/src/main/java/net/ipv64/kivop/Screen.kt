@@ -12,7 +12,7 @@ sealed class Screen(val rout: String) {
   object Protocol : Screen("protokolle")
 
   object CarpoolingList : Screen("carpoolingList")
-  
+
   object Carpool : Screen("carpool")
 
   object Events : Screen("events")

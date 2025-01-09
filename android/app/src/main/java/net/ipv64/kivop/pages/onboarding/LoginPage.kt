@@ -102,7 +102,8 @@ fun LoginPage(navController: NavController) {
                   val response = handleLogin(email.lowercase(), password)
                   if (response === "Successful Login!") {
                     navigateToMainActivity(navController.context)
-                  } else if (response === "This account is inactiv" || response === "Email not verified") {
+                  } else if (response === "This account is inactiv" ||
+                      response === "Email not verified") {
                     navController.navigate(OnboardingScreen.AlmostDone.rout)
                   } else {
                     Toast.makeText(navController.context, "Login failed", Toast.LENGTH_SHORT).show()

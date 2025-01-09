@@ -10,15 +10,13 @@ import kotlinx.coroutines.launch
 import net.ipv64.kivop.models.GetSpecialRideDetailDTO
 import net.ipv64.kivop.services.api.getCarpoolApi
 
-class CarpoolViewModel(private val carpoolId: String): ViewModel() {
+class CarpoolViewModel(private val carpoolId: String) : ViewModel() {
   var Carpool by mutableStateOf<GetSpecialRideDetailDTO?>(null)
 
   fun fetchCarpool() {
     viewModelScope.launch {
       val response = getCarpoolApi(carpoolId)
-      response.let {
-        Carpool = it
-      }
+      response.let { Carpool = it }
     }
   }
 

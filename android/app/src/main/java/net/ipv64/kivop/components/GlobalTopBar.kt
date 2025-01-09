@@ -1,7 +1,6 @@
 package net.ipv64.kivop.components
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -39,7 +38,7 @@ import net.ipv64.kivop.ui.theme.Text_prime
 fun GlobalTopBar(navController: NavController, onOpenDrawer: () -> Unit) {
   val currentBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = currentBackStackEntry?.destination?.route
-  
+
   LaunchedEffect(currentRoute) { isBackPressed = false }
 
   val modifier = Modifier.padding(vertical = 12.dp, horizontal = 14.dp).height(48.dp)
@@ -84,60 +83,61 @@ fun GlobalTopBar(navController: NavController, onOpenDrawer: () -> Unit) {
       Screen.User.rout -> {}
       Screen.CarpoolingList.rout -> {
         TopAppBar(
-          modifier = modifier,
-          colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent), // transparente NavBar
-          title = {
-            Box(
-              modifier = Modifier.fillMaxSize()
-            ) {
-              Text(text = "Carpooling", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.align(alignment = Alignment.Center))
-            }
-          },
-          actions = {
-            IconBoxClickable(
-              Icons.Default.Menu,
-              height = 50.dp,
-              Color.Transparent,
-              Text_prime,
-              onClick = { onOpenDrawer() })
-          },
-          navigationIcon = {
-            IconBoxClickable(
-              Icons.Default.KeyboardArrowLeft,
-              height = 50.dp,
-              Color.Transparent,
-              Text_prime,
-              onClick = {
-                isBackPressed = true
-                navController.popBackStack()
-              })
-          })
+            modifier = modifier,
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent), // transparente NavBar
+            title = {
+              Box(modifier = Modifier.fillMaxSize()) {
+                Text(
+                    text = "Carpooling",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.align(alignment = Alignment.Center))
+              }
+            },
+            actions = {
+              IconBoxClickable(
+                  Icons.Default.Menu,
+                  height = 50.dp,
+                  Color.Transparent,
+                  Text_prime,
+                  onClick = { onOpenDrawer() })
+            },
+            navigationIcon = {
+              IconBoxClickable(
+                  Icons.Default.KeyboardArrowLeft,
+                  height = 50.dp,
+                  Color.Transparent,
+                  Text_prime,
+                  onClick = {
+                    isBackPressed = true
+                    navController.popBackStack()
+                  })
+            })
       }
       Screen.Carpool.rout -> {
         TopAppBar(
-          modifier = modifier,
-          colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent), // transparente NavBar
-          title = {},
-          actions = {
-            IconBoxClickable(
-              Icons.Default.Menu,
-              height = 50.dp,
-              Background_secondary.copy(alpha = 0.15f),
-              Background_secondary,
-              onClick = { onOpenDrawer() })
-          },
-          navigationIcon = {
-            IconBoxClickable(
-              Icons.Default.Notifications,
-              height = 50.dp,
-              Background_secondary.copy(alpha = 0.15f),
-              Background_secondary,
-              onClick = { onOpenDrawer() })
-          })
+            modifier = modifier,
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent), // transparente NavBar
+            title = {},
+            actions = {
+              IconBoxClickable(
+                  Icons.Default.Menu,
+                  height = 50.dp,
+                  Background_secondary.copy(alpha = 0.15f),
+                  Background_secondary,
+                  onClick = { onOpenDrawer() })
+            },
+            navigationIcon = {
+              IconBoxClickable(
+                  Icons.Default.Notifications,
+                  height = 50.dp,
+                  Background_secondary.copy(alpha = 0.15f),
+                  Background_secondary,
+                  onClick = { onOpenDrawer() })
+            })
       }
       else -> {
         TopAppBar(

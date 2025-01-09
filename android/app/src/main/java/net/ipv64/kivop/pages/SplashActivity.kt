@@ -47,7 +47,7 @@ class SplashActivity : ComponentActivity() {
               navigateToLoginActivity(context, true, 1)
             } else if (response == "This account is inactiv") {
               navigateToLoginActivity(context, true, 2)
-            }else {
+            } else {
               auth.logout()
               navigateToLoginActivity(context)
             }

@@ -10,15 +10,15 @@ import kotlinx.coroutines.launch
 import net.ipv64.kivop.models.GetSpecialRideDTO
 import net.ipv64.kivop.services.api.getCarpoolingListApi
 
-class CarpoolingListViewModel: ViewModel() {
+class CarpoolingListViewModel : ViewModel() {
   var CarpoolingList by mutableStateOf<List<GetSpecialRideDTO?>>(emptyList())
-  
+
   fun fetchCarpoolingList() {
     viewModelScope.launch {
       val response = getCarpoolingListApi()
-      response.let { 
+      response.let {
         // Only set list when its a different list
-        if (it != CarpoolingList){
+        if (it != CarpoolingList) {
           CarpoolingList = it
           Log.i("CarpoolingViewModel", "fetchCarpoolingList: $it")
         }

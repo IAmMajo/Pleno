@@ -18,23 +18,23 @@ import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.models.viewModel.CarpoolingListViewModel
 
 @Composable
-fun CarpoolingList(navController: NavController, carpoolingListViewModel: CarpoolingListViewModel = viewModel()) {
+fun CarpoolingList(
+    navController: NavController,
+    carpoolingListViewModel: CarpoolingListViewModel = viewModel()
+) {
   val carpoolingList = carpoolingListViewModel.CarpoolingList
-  
+
   BackHandler {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
-  Column(
-    modifier = Modifier.padding(18.dp)
-  ) { 
+  Column(modifier = Modifier.padding(18.dp)) {
     SpacerTopBar()
-    LazyColumn(){
-      items(carpoolingList){ carpool ->
+    LazyColumn() {
+      items(carpoolingList) { carpool ->
         if (carpool != null) {
-          CarpoolCard(carpool = carpool, onClick = {
-            navController.navigate("carpool/${carpool.id}")
-          })
+          CarpoolCard(
+              carpool = carpool, onClick = { navController.navigate("carpool/${carpool.id}") })
           SpacerBetweenElements()
         }
       }
