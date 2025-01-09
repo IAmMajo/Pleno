@@ -1,5 +1,6 @@
 package net.ipv64.kivop
 
+import AttendancesCoordinationPage
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -52,7 +53,6 @@ import net.ipv64.kivop.components.drawerItem
 import net.ipv64.kivop.models.viewModel.MeetingsViewModel
 import net.ipv64.kivop.models.viewModel.UserViewModel
 import net.ipv64.kivop.pages.mainApp.AlreadyVoted
-import net.ipv64.kivop.pages.mainApp.AttendancesCoordinationPage
 import net.ipv64.kivop.pages.mainApp.AttendancesListPage
 import net.ipv64.kivop.pages.mainApp.EventsPage
 import net.ipv64.kivop.pages.mainApp.HomePage
