@@ -1,7 +1,6 @@
 // todo: delete this file
 package net.ipv64.kivop.services.api
 
-import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonArray
@@ -69,10 +68,7 @@ suspend fun getAttendances(id: String): List<GetAttendanceDTO> =
       }
     }
 
-suspend fun putPlanAttendance(
-    meetingId: String,
-    status: PlanAttendance
-): Boolean =
+suspend fun putPlanAttendance(meetingId: String, status: PlanAttendance): Boolean =
     withContext(Dispatchers.IO) {
       val path = "meetings/$meetingId/plan-attendance/${status.name}"
 

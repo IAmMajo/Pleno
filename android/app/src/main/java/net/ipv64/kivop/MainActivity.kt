@@ -158,8 +158,9 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
         // Poster
         composable(route = Screen.Poster.rout) { PosterPage(navController = navController) }
-//        // Abstimmungen Listen Page
-//        composable(route = Screen.Votings.rout) { VotingsListPage(navController = navController) }
+        //        // Abstimmungen Listen Page
+        //        composable(route = Screen.Votings.rout) { VotingsListPage(navController =
+        // navController) }
         // Abstimmung Resultat Page
         composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
           AttendancesCoordinationPage(
