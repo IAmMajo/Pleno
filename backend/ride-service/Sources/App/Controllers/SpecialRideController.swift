@@ -23,6 +23,7 @@ struct SpecialRideController: RouteCollection {
         specialRideRoutes.delete(":id", use: deleteSpecialRide)
         
         specialRideRoutes.post(":id", "request", use: newRequestToSpecialRide)
+        specialRideRoutes.delete(":id", "request", use: deleteSpecialRideRequest)
     }
     
     @Sendable
@@ -325,5 +326,24 @@ struct SpecialRideController: RouteCollection {
             accepted: request.accepted)
         
         return try await getRiderDTO.encodeResponse(status: .created, for: req)
+    }
+    
+    @Sendable
+    func deleteSpecialRideRequest(req: Request) async throws -> HTTPStatus {
+        // get ride by id
+        guard let specialRide = try await SpecialRide.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        // extract ride id
+        let ride_id = try specialRide.requireID()
+        
+        // delete all request with rideID and userID
+        try await SpecialRideRequest.query(on: req.db)
+            .filter(\.$ride.$id == ride_id)
+            .filter(\.$user.$id == req.jwtPayload.userID)
+            .delete()
+        
+        return .noContent
     }
 }
