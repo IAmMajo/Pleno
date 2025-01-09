@@ -87,6 +87,7 @@
 
     },
     "%lld/%lld" : {
+    "%u / %u" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -95,6 +96,16 @@
           }
         }
       }
+            "value" : "%1$u / %2$u"
+          }
+        }
+      }
+    },
+    "1/4" : {
+
+    },
+    "2/3" : {
+
     },
     "8/12" : {
 
@@ -509,6 +520,12 @@
     "Auswahl" : {
 
     },
+    "Auto und Sitzplätze" : {
+
+    },
+    "Baut Adrian noch" : {
+
+    },
     "Bearbeiten" : {
       "localizations" : {
         "de" : {
@@ -534,10 +551,19 @@
     "Beschreibung" : {
 
     },
+    "Beschreibung Auto" : {
+
+    },
+    "Beschreibung oder weitere Infos zu deiner Fahrt" : {
+
+    },
     "Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt." : {
 
     },
     "Bist du sicher, dass du das Plakat abhängen möchtest?" : {
+
+    },
+    "Bitte füllen Sie alle Felder aus. Das Startdatum muss außerdem in der Zukunft liegen." : {
 
     },
     "Bitte klicke nun auf den " : {
@@ -561,6 +587,9 @@
           }
         }
       }
+    },
+    "Bitte wähle, ob du eine Event Fahrt oder eine Sonderfahrt anlegen möchtest." : {
+
     },
     "Code scannen" : {
       "localizations" : {
@@ -610,6 +639,16 @@
 
     },
     "Die Abstimmungsergebnisse konnten nicht geladen werden" : {
+    "Deine Fahrt wird dann veröffentlicht und andere können dieser beitreten." : {
+
+    },
+    "Deine gesamten Änderungen gehen verloren!" : {
+
+    },
+    "Details der Fahrt" : {
+
+    },
+    "Die Abstimmung läuft noch" : {
 
     },
     "Die Passwörter stimmen nicht überein." : {
@@ -724,6 +763,20 @@
           }
         }
       }
+    "Event" : {
+
+    },
+    "Event Fahrt" : {
+
+    },
+    "Events" : {
+
+    },
+    "Fahrer" : {
+
+    },
+    "Fahrgemeinschaften" : {
+
     },
     "Fast fertig" : {
       "extractionState" : "manual",
@@ -751,7 +804,13 @@
     "Fast Fertig" : {
 
     },
+    "Fehler" : {
+
+    },
     "Franz" : {
+
+    },
+    "Freie Plätze" : {
 
     },
     "Galerie" : {
@@ -775,6 +834,9 @@
           }
         }
       }
+    },
+    "Geokoordinaten" : {
+
     },
     "Hallo" : {
 
@@ -925,6 +987,12 @@
     "Keine anstehenden Sitzungen." : {
 
     },
+    "Keine Fahrzeugbeschreibung vorhanden." : {
+
+    },
+    "Keine Mitfahrer" : {
+
+    },
     "Keine Sitzung verfügbar" : {
 
     },
@@ -1050,6 +1118,9 @@
     "Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position" : {
 
     },
+    "Meine Fahrten" : {
+
+    },
     "Mit " : {
       "localizations" : {
         "de" : {
@@ -1071,6 +1142,12 @@
           }
         }
       }
+    },
+    "Mitfahren - oder stornieren - oder Fahrt löschen" : {
+
+    },
+    "Mitfahrer" : {
+
     },
     "Mitglieder" : {
       "localizations" : {
@@ -1136,6 +1213,12 @@
     "Möchtest du wirklich abstimmen" : {
 
     },
+    "Möchtest du wirklich speichern?" : {
+
+    },
+    "Möchtest du wirklich zurück?" : {
+
+    },
     "Nach Meeting suchen" : {
 
     },
@@ -1161,6 +1244,9 @@
         }
       }
     },
+    "Name der Fahrt" : {
+
+    },
     "Name eingeben" : {
 
     },
@@ -1181,6 +1267,12 @@
       }
     },
     "Neu laden" : {
+
+    },
+    "Neue Fahrt" : {
+
+    },
+    "Neue Fahrt anbieten" : {
 
     },
     "Neues Passwort" : {
@@ -1281,6 +1373,7 @@
 
     },
     "Öffnen mit Waze" : {
+    "OK" : {
 
     },
     "Option" : {
@@ -1412,6 +1505,9 @@
 
     },
     "Plakate" : {
+
+    },
+    "Planned Ride for %@" : {
 
     },
     "Pleno " : {
@@ -1631,6 +1727,12 @@
         }
       }
     },
+    "Sonderfahrt" : {
+
+    },
+    "Sonderfahrten" : {
+
+    },
     "Speichern" : {
       "localizations" : {
         "de" : {
@@ -1657,6 +1759,12 @@
 
     },
     "Start: %@" : {
+
+    },
+    "Startort" : {
+
+    },
+    "Startzeit" : {
 
     },
     "Suchen" : {
@@ -1725,6 +1833,9 @@
           }
         }
       }
+    },
+    "Test" : {
+
     },
     "Umfragen, " : {
       "localizations" : {
@@ -1911,6 +2022,12 @@
         }
       }
     },
+    "Wähle die Art der Fahrt" : {
+
+    },
+    "Wählen Sie ein Event" : {
+
+    },
     "Weiter" : {
       "localizations" : {
         "de" : {
@@ -1933,6 +2050,9 @@
         }
       }
     },
+    "Wird vom Event ausgelesen" : {
+
+    },
     "Wirklich abmelden?" : {
       "localizations" : {
         "de" : {
@@ -1954,6 +2074,12 @@
           }
         }
       }
+    },
+    "Zielort" : {
+
+    },
+    "Zielort - als Bild" : {
+
     },
     "zu einer verbesserten " : {
       "localizations" : {

@@ -134,6 +134,7 @@ struct AttendanceView: View {
                 }
             }
             .navigationTitle("Anwesenheit")
+            .navigationBarTitleDisplayMode(.large)
             .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
         }
     }
