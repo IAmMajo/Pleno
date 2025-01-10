@@ -208,26 +208,26 @@ build-backend-docker-image-notifications-service:
     action: prepare
     deployment_tier: production
 
-# build-backend-docker-image-poster-service:
-#   stage: build
-#   script:
-#     - cd "$PROD_DIR_LOCATION"
-#     - docker compose build poster-service
-#   rules:
-#     # - changes:
-#     #     - backend/models/**/*
-#     #     - DTOs/**/*
-#     #   when: never
-#     - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
-#       changes:
-#         - backend/poster-service/**/*
-#         - backend/models/**/*
-#         - DTOs/**/*
-#   environment:
-#     name: Production
-#     url: https://kivop.ipv64.net
-#     action: prepare
-#     deployment_tier: production
+build-backend-docker-image-poster-service:
+  stage: build
+  script:
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose build poster-service
+  rules:
+    # - changes:
+    #     - backend/models/**/*
+    #     - DTOs/**/*
+    #   when: never
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/poster-service/**/*
+        - backend/models/**/*
+        - DTOs/**/*
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: prepare
+    deployment_tier: production
 
 build-backend-docker-image-ride-service:
   stage: build
@@ -286,6 +286,17 @@ deploy-containers-on-prod-server:
     url: https://kivop.ipv64.net
     action: start
     deployment_tier: production
+    on_stop: stop-containers-on-prod-server
+
+stop-containers-on-prod-server:
+  stage: deploy
+  script:
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose down
+  environment:
+    name: Production
+    action: stop
+  when: manual
 
 format-android:
   rules:
