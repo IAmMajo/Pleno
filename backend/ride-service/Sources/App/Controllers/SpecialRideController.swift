@@ -14,9 +14,9 @@ struct SpecialRideController: RouteCollection {
         specialRideRoutes.patch(":id", use: patchSpecialRide)
         specialRideRoutes.delete(":id", use: deleteSpecialRide)
         
-        specialRideRoutes.post(":id", "request", use: newRequestToSpecialRide)
-        specialRideRoutes.patch(":id", "request", ":request_id", use: patchSpecialRideRequest)
-        specialRideRoutes.delete(":id", "request", use: deleteSpecialRideRequest)
+        specialRideRoutes.post(":id", "requests", use: newRequestToSpecialRide)
+        specialRideRoutes.patch("requests", ":request_id", use: patchSpecialRideRequest)
+        specialRideRoutes.delete("requests", ":request_id",use: deleteSpecialRideRequest)
     }
     
     @Sendable
@@ -204,6 +204,26 @@ struct SpecialRideController: RouteCollection {
         
         // create response DTO
         let ride_id = try specialRide.requireID()
+        let riders = try await SpecialRideRequest.query(on: req.db)
+            .filter(\.$ride.$id == ride_id)
+            .join(User.self, on: \SpecialRideRequest.$user.$id == \User.$id)
+            .join(Identity.self, on: \User.$identity.$id == \Identity.$id)
+            .all()
+            .map{ rider in
+                let rider_id = try rider.requireID()
+                let identity = try rider.joined(Identity.self)
+                let username = identity.name
+                
+                return GetRiderDTO(
+                    id: rider_id,
+                    username: username,
+                    latitude: rider.latitude,
+                    longitude: rider.longitude,
+                    istMe: rider.$user.id == req.jwtPayload.userID,
+                    accepted: rider.accepted
+                )
+            }
+        
         let drivername = try await User.query(on: req.db)
             .filter(\.$id == req.jwtPayload.userID)
             .with(\.$identity)
@@ -225,7 +245,7 @@ struct SpecialRideController: RouteCollection {
             destinationLatitude: specialRide.destinationLatitude,
             destinationLongitude: specialRide.destinationLongitude,
             emptySeats: specialRide.emptySeats,
-            riders: []
+            riders: riders
         )
         
         return specialRideDetailDTO
@@ -323,13 +343,15 @@ struct SpecialRideController: RouteCollection {
     
     @Sendable
     func patchSpecialRideRequest(req: Request) async throws -> GetRiderDTO {
-        // get ride by id
-        guard let specialRide = try await SpecialRide.find(req.parameters.get("id"), on: req.db) else {
-            throw Abort(.notFound)
-        }
         
         // get request by id
         guard let specialRideRequest = try await SpecialRideRequest.find(req.parameters.get("request_id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        // get ride by id
+        let ride_id = specialRideRequest.$ride.id
+        guard let specialRide = try await SpecialRide.find(ride_id, on: req.db) else {
             throw Abort(.notFound)
         }
         
@@ -376,19 +398,18 @@ struct SpecialRideController: RouteCollection {
     
     @Sendable
     func deleteSpecialRideRequest(req: Request) async throws -> HTTPStatus {
-        // get ride by id
-        guard let specialRide = try await SpecialRide.find(req.parameters.get("id"), on: req.db) else {
+        // get request by id
+        guard let specialRideRequest = try await SpecialRideRequest.find(req.parameters.get("request_id"), on: req.db) else {
             throw Abort(.notFound)
         }
         
-        // extract ride id
-        let ride_id = try specialRide.requireID()
+        // check if user is allowed to delete
+        if specialRideRequest.$user.id != req.jwtPayload.userID {
+            throw Abort(.forbidden, reason: "You are not allowed to delete this request!")
+        }
         
-        // delete all request with rideID and userID
-        try await SpecialRideRequest.query(on: req.db)
-            .filter(\.$ride.$id == ride_id)
-            .filter(\.$user.$id == req.jwtPayload.userID)
-            .delete()
+        // delete request
+        try await specialRideRequest.delete(on: req.db)
         
         return .noContent
     }
