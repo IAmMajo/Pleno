@@ -3,7 +3,7 @@ import Vapor
 import Models
 @preconcurrency import JWT
 
-public struct JWTPayloadDTO: JWTPayload, Authenticatable, Sendable, Content {
+public struct JWTPayloadDTO: JWTPayload, Authenticatable, Sendable {
     public var userID: UUID?
     public var exp: ExpirationClaim
     public var isAdmin: Bool?
@@ -18,3 +18,4 @@ public struct JWTPayloadDTO: JWTPayload, Authenticatable, Sendable, Content {
         try exp.verifyNotExpired()
     }
 }
+
