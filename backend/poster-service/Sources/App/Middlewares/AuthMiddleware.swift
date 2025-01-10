@@ -1,6 +1,7 @@
 import Vapor
 @preconcurrency import JWT
 
+
 struct AuthMiddleware: AsyncMiddleware {
     let jwtSigner: JWTSigner
     let payloadType: JWTPayloadDTO.Type
