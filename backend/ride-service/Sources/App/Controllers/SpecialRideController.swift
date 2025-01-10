@@ -307,6 +307,15 @@ struct SpecialRideController: RouteCollection {
             throw Abort(.badRequest, reason: "You cannot request your own ride!")
         }
         
+        // check if ride is full
+        let countAccepted = try await SpecialRideRequest.query(on: req.db)
+            .filter(\.$ride.$id == ride_id)
+            .filter(\.$accepted == true)
+            .count()
+        if countAccepted >= specialRide.emptySeats {
+            throw Abort(.badRequest, reason: "This ride is full!")
+        }
+        
         // create request
         let request = SpecialRideRequest(
             userID: req.jwtPayload.userID,
@@ -362,7 +371,22 @@ struct SpecialRideController: RouteCollection {
         
         // check if user is allowed to patch
         if specialRide.$user.id == req.jwtPayload.userID {
+            
+            // if driver wants to accept a new rider
+            if patchSpecialRideRequestDTO.accepted == true && specialRideRequest.accepted == false {
+                // check if ride is full
+                let countAccepted = try await SpecialRideRequest.query(on: req.db)
+                    .filter(\.$ride.$id == ride_id)
+                    .filter(\.$accepted == true)
+                    .count()
+                if countAccepted >= specialRide.emptySeats {
+                    throw Abort(.badRequest, reason: "This ride is full!")
+                }
+                
+            }
+            // patch rider
             specialRideRequest.patchWithDTO(dto: patchSpecialRideRequestDTO, isDriver: true)
+            
         } else if specialRideRequest.$user.id == req.jwtPayload.userID {
             specialRideRequest.patchWithDTO(dto: patchSpecialRideRequestDTO, isDriver: false)
         } else {
@@ -413,4 +437,5 @@ struct SpecialRideController: RouteCollection {
         
         return .noContent
     }
+    
 }
