@@ -19,8 +19,7 @@ struct NewRideView: View {
                     }
                 }
             }
-            .navigationTitle("Neue Fahrt")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitle("Neue Fahrt", displayMode: .inline)
             .navigationBarBackButtonHidden(true)
             .onAppear {
                 showingSelectionAlert = true
@@ -52,7 +51,6 @@ struct NewRideView: View {
                                 message: Text("Deine Fahrt wird dann veröffentlicht und andere können dieser beitreten."),
                                 primaryButton: .default(Text("Ja"), action: {
                                     viewModel.saveRide()
-                                    dismiss()
                                 }),
                                 secondaryButton: .cancel()
                             )
@@ -62,6 +60,34 @@ struct NewRideView: View {
                                 message: Text("Bitte füllen Sie alle Felder aus. Das Startdatum muss außerdem in der Zukunft liegen."),
                                 dismissButton: .default(Text("OK"))
                             )
+                        }
+                    }
+                    .fullScreenCover(isPresented: $viewModel.isSaved){
+                        NavigationView {
+                            RideDetailView(viewModel: RideDetailViewModel(ride: viewModel.ride))
+                            .navigationTitle("Test")
+                            .toolbar {
+                                
+                                ToolbarItem(placement: .navigationBarLeading) {
+                                    Button(action: {
+                                        viewModel.isSaved = false
+                                        dismiss()
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "chevron.left")
+                                            Text("Zurück")
+                                                .font(.body)
+                                        }
+                                    }
+                                    Spacer()
+                                }
+                                
+                                // Titel, weil navTitle bei fullScreenCover nicht funktioniert
+                                ToolbarItem(placement: .principal){
+                                    Text(viewModel.ride.name)
+                                        .bold()
+                                }
+                            }
                         }
                     }
                 }

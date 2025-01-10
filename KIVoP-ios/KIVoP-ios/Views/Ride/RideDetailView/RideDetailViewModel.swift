@@ -74,7 +74,7 @@ class RideDetailViewModel: ObservableObject {
                 }
             } catch {
                 DispatchQueue.main.async {
-                    //self.isLoading = false
+                    self.isLoading = false
                 }
             }
         }

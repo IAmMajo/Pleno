@@ -51,26 +51,24 @@ struct RideDetailView: View {
                                 }
                             }
                         }
-                        Button("Mitfahren - oder stornieren - oder Fahrt löschen"){
-                            
-                        }
                     }
                     .listStyle(.insetGrouped)
-                    .overlay {
-                        if viewModel.isLoading {
-                          ProgressView("Lädt...")
-                       }
-                    }
-                    .onAppear {
-                       Task {
-                           viewModel.fetchRideDetails()
-                       }
-                    }
-                    .refreshable {
-                        Task {
-                            viewModel.fetchRideDetails()
-                        }
-                    }
+                    RideDecision(viewModel: viewModel)
+                }
+            }
+            .overlay {
+                if viewModel.isLoading {
+                  ProgressView("Lädt...")
+               }
+            }
+            .onAppear {
+               Task {
+                   viewModel.fetchRideDetails()
+               }
+            }
+            .refreshable {
+                Task {
+                    viewModel.fetchRideDetails()
                 }
             }
         }

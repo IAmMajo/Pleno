@@ -756,6 +756,9 @@
     "Fahrgemeinschaften" : {
 
     },
+    "Fahrt löschen" : {
+
+    },
     "Fast fertig" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1108,9 +1111,6 @@
           }
         }
       }
-    },
-    "Mitfahren - oder stornieren - oder Fahrt löschen" : {
-
     },
     "Mitfahrer" : {
 

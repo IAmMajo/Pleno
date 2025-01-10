@@ -5,6 +5,8 @@ class NewRideViewModel: ObservableObject {
     @Published var selectedOption: String?
     private let baseURL = "https://kivop.ipv64.net"
     @Published var isLoading: Bool = false
+    @Published var isSaved: Bool = false
+    var ride: GetSpecialRideDTO = GetSpecialRideDTO(name: "", starts: Date(), ends: Date(), emptySeats: 0, allocatedSeats: 0, isSelfDriver: false, isSelfAccepted: false)
     
     // New Ride Vars
     @Published var eventId: UUID = UUID() // Event
@@ -77,7 +79,7 @@ class NewRideViewModel: ObservableObject {
     }
     
     func saveSpecialRide(){
-        // Koordinaten sind Beisüpieldaten, da noch nicht in der View vorhanden.
+        // Koordinaten sind Beispieldaten, da noch nicht in der View vorhanden.
         let specialRide = CreateSpecialRideDTO(
             name: rideName,
             description: rideDescription,
@@ -161,8 +163,11 @@ class NewRideViewModel: ObservableObject {
             do {
                 // Decodieren der Antwort in ein GetSpecialRideDetailDTO
                 let specialRideDetail = try decoder.decode(GetSpecialRideDetailDTO.self, from: data)
+                self?.ride.id = specialRideDetail.id
+                self?.ride.name = specialRideDetail.name
                 DispatchQueue.main.async {
                     print("Fahrt erstellt: \(specialRideDetail)")
+                    self?.isSaved = true
                 }
             } catch {
                 // Erweiterte Fehlerbehandlung: Zeige den Fehler genau an
