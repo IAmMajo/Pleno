@@ -293,6 +293,8 @@ stop-containers-on-prod-server:
   script:
     - cd "$PROD_DIR_LOCATION"
     - docker compose down
+  rules:
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
   environment:
     name: Production
     action: stop
