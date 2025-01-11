@@ -286,9 +286,9 @@ struct MeetingController: RouteCollection {
         }
         var placeId: Place.IDValue? = nil
         if let postalCode = createLocationDTO.postalCode, let place = createLocationDTO.place { // If this executes, placeId is not going to be nil
-            do {
-                placeId = try await Place.query(on: db).filter(\.$postalCode == postalCode).filter(\.$place == place).first()!.requireID()
-            } catch {
+            if let existingPlaceId = try await Place.query(on: db).filter(\.$postalCode == postalCode).filter(\.$place == place).first()?.requireID() {
+                placeId = existingPlaceId
+            } else {
                 let placeModel: Place = .init(postalCode: postalCode, place: place)
                 try await placeModel.create(on: db)
                 placeId = try placeModel.requireID()
