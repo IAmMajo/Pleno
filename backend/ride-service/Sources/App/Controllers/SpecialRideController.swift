@@ -369,6 +369,9 @@ struct SpecialRideController: RouteCollection {
             throw Abort(.badRequest, reason: "Invalid request body! Expected PatchSpecialRideRequestDTO.")
         }
         
+        // save isNewRider state
+        var isFullWithNewRider = false
+        
         // check if user is allowed to patch
         if specialRide.$user.id == req.jwtPayload.userID {
             
@@ -383,6 +386,10 @@ struct SpecialRideController: RouteCollection {
                     throw Abort(.badRequest, reason: "This ride is full!")
                 }
                 
+                // check if ride is full with a new rider
+                if countAccepted + 1 >= specialRide.emptySeats {
+                    isFullWithNewRider = true
+                }
             }
             // patch rider
             specialRideRequest.patchWithDTO(dto: patchSpecialRideRequestDTO, isDriver: true)
@@ -393,8 +400,22 @@ struct SpecialRideController: RouteCollection {
             throw Abort(.forbidden, reason: "You are not allowed to change the request!")
         }
         
-        // save changes
-        try await specialRideRequest.update(on: req.db)
+        // if isFullWithNewRider save changes in a transaction
+        if isFullWithNewRider == true {
+            try await req.db.transaction{ db in
+                // save changes in request
+                try await specialRideRequest.update(on: db)
+                
+                // delete all open requests, if ride is full
+                try await SpecialRideRequest.query(on: db)
+                    .filter(\.$ride.$id == ride_id)
+                    .filter(\.$accepted == false)
+                    .delete()
+            }
+        } else {
+            // save changes in request
+            try await specialRideRequest.update(on: req.db)
+        }
         
         // query data for reponse
         let rider_id = try specialRideRequest.requireID()
