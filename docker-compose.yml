@@ -199,7 +199,7 @@ services:
       - not-default
     extends:
       file: ./backend/docker-compose.yml
-      service: ride-service-migration
+      service: ride-service-revert
 #
 # Vapor: poster-service
 #
