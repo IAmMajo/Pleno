@@ -2,9 +2,6 @@ import Models
 import RideServiceDTOs
 
 extension SpecialRide {
-//    public func toGetSpecialRideDetailDTO() -> GetSpecialRideDetailDTO {
-//        return .init(id: self.id, name: self.name, description: self.description, starts: self.starts, latitude: self.latitude, longitude: self.longitude)
-//    }
     
     public func patchWithDTO(dto: PatchSpecialRideDTO) {
         if let name = dto.name {
