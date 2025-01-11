@@ -1,6 +1,8 @@
 import Combine
 import AuthServiceDTOs
 import Foundation
+import MeetingServiceDTOs
+
 
 class UserManager: ObservableObject {
     @Published var users: [UserProfileDTO] = [] // Beobachtbare Benutzerliste
@@ -116,4 +118,56 @@ class UserManager: ObservableObject {
             }
         }.resume()
     }
+    var userIdentity: GetIdentityDTO?
+    func getUserIdentity(userId: UUID) async {
+        // Erstelle die URL für die Anfrage
+        guard let url = URL(string: "https://kivop.ipv64.net/users/identities/\(userId)") else {
+            print("Invalid URL")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        // Füge das Token hinzu, falls vorhanden
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            print("Unauthorized: No token found")
+            return
+        }
+
+        do {
+            // Sende die Anfrage und hole die Antwort
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            // Überprüfe den Statuscode der Antwort
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                print("Invalid response or status code")
+                return
+            }
+
+            // Debugging: Serverantwort in Klartext ausgeben
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("Server Response: \(jsonString)")
+            }
+
+            // Dekodiere das Antwort-Datenobjekt
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+            let decodedUserIdentity = try decoder.decode(GetIdentityDTO.self, from: data)
+
+            // Stelle sicher, dass du auf dem Hauptthread arbeitest, wenn du auf UI zugreifst
+            DispatchQueue.main.async {
+                self.userIdentity = decodedUserIdentity // Die Identität speichern
+            }
+            
+        } catch {
+            // Fehlerbehandlung
+            print("Fehler beim Abrufen der Benutzeridentität: \(error.localizedDescription)")
+        }
+    }
+
+    
 }
