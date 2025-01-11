@@ -7,7 +7,6 @@ func routes(_ app: Application) throws {
     
     let authProtected = app.grouped(AuthMiddleware())
     
-    try authProtected.register(collection: RideController())
     try authProtected.register(collection: SpecialRideController())
     
     try app.register(collection: WebhookController())

@@ -34,9 +34,6 @@ public func configure(_ app: Application) async throws {
 //        }
 //    }
     
-    app.migrations.add(CreateRide())
-    app.migrations.add(CreateParticipant())
-    
     app.migrations.add(CreatePlenoEvent())
     app.migrations.add(CreateEventParticipant())
     app.migrations.add(CreateEventRideInterestedParty())
