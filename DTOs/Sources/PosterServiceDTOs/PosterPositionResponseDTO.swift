@@ -5,16 +5,16 @@ public struct PosterPositionResponseDTO: Codable {
     public var posterId: UUID?
     public var latitude: Double
     public var longitude: Double
-    public var postedBy: UUID?
+    public var postedBy: String?
     public var postedAt: Date?
     public var expiresAt: Date
-    public var removedBy: UUID?
+    public var removedBy: String?
     public var removedAt: Date?
     public var imageUrl: String?
-    public var responsibleUsers: [UUID]
+    public var responsibleUsers: [ResponsibleUsersDTO]
     public var status: String
 
-    public init(id: UUID, posterId: UUID? = nil, latitude: Double, longitude: Double, postedBy: UUID? = nil, postedAt: Date? = nil, expiresAt: Date, removedBy: UUID? = nil, removedAt: Date? = nil, imageUrl: String? = nil, responsibleUsers: [UUID], status: String) {
+    public init(id: UUID, posterId: UUID? = nil, latitude: Double, longitude: Double, postedBy: String? = nil, postedAt: Date? = nil, expiresAt: Date, removedBy: String? = nil, removedAt: Date? = nil, imageUrl: String? = nil, responsibleUsers: [ResponsibleUsersDTO], status: String) {
         self.id = id
         self.posterId = posterId
         self.latitude = latitude 
@@ -27,5 +27,15 @@ public struct PosterPositionResponseDTO: Codable {
         self.imageUrl = imageUrl
         self.responsibleUsers = responsibleUsers
         self.status = status
+    }
+}
+
+public struct ResponsibleUsersDTO: Codable {
+    public var id: UUID
+    public var name: String
+   
+    public init(id: UUID, name: String) {
+        self.id = id
+        self.name = name
     }
 }
