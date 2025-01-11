@@ -10,9 +10,9 @@ data class GetSpecialRideDTO (
     var ends : LocalDateTime,
     var emptySeats : UByte,
     var allocatedSeats : UByte,
-    var myState : usersSpecialRideState,
+    var myState : UsersSpecialRideState,
 )
-enum usersSpecialRideState: String, Codable {
+enum class UsersSpecialRideState {
     nothing,
     requested,
     accepted,
