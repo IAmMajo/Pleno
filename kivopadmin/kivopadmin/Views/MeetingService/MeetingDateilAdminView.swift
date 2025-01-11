@@ -106,7 +106,7 @@ struct MeetingDetailAdminView: View {
                                         }
                                     }
                                     Spacer()
-                                    Text("Andern").foregroundStyle(.blue)
+                                    Text("Ändern").foregroundStyle(.blue)
                                 }
                             }.buttonStyle(PlainButtonStyle())
 
@@ -339,6 +339,13 @@ struct RecorderSelectionSheet: View {
                             selectUser(user)
                         }
                     }
+                    Section {
+                        Text("Nutzer werden hier angezeigt, wenn sie an der Sitzung teilnehmen")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .padding(.vertical, 10)
+                    }
+                    .textCase(nil) // Entfernt Großbuchstaben, falls Section Text beeinflusst
                 }
 
                 .navigationTitle("Benutzer auswählen")

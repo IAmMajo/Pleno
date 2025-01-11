@@ -48,7 +48,9 @@ struct MainPage: View {
             }.tabViewStyle(.sidebarAdaptable)
             .tabViewSidebarBottomBar{
                 CurrentMeetingBottomView()
-                    .padding(.vertical, 70)
+                    .padding(.vertical, 70).refreshable{
+                        meetingManager.fetchAllMeetings()
+                    }
             }
             // Header mit Begrüßung
             .tabViewSidebarHeader {
