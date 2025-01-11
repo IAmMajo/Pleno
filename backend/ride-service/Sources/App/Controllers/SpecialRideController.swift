@@ -77,7 +77,7 @@ struct SpecialRideController: RouteCollection {
         let ride_id = try specialRide.requireID()
         
         // get riders
-        let riders = try await SpecialRideRequest.query(on: req.db)
+        var riders = try await SpecialRideRequest.query(on: req.db)
             .filter(\.$ride.$id == ride_id)
             .join(User.self, on: \SpecialRideRequest.$user.$id == \User.$id)
             .join(Identity.self, on: \User.$identity.$id == \Identity.$id)
@@ -96,6 +96,11 @@ struct SpecialRideController: RouteCollection {
                     accepted: rider.accepted
                 )
             }
+        
+        // delete all open requests, if user is not the driver
+        if specialRide.$user.id != req.jwtPayload.userID {
+            riders.removeAll{ $0.accepted == false && $0.istMe == false }
+        }
         
         let drivername = try await User.query(on: req.db)
             .filter(\.$id == specialRide.$user.id)
