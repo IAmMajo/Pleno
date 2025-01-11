@@ -1,22 +1,110 @@
 import Fluent
 import Vapor
 import Models
-//import VaporToOpenAPI
+import VaporToOpenAPI
 import RideServiceDTOs
 
 
 struct SpecialRideController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let specialRideRoutes = routes.grouped("specialrides")
-        specialRideRoutes.get("", use: getAllSpecialRides)
-        specialRideRoutes.get(":id", use: getSpecialRide)
-        specialRideRoutes.post("", use: newSpecialRide)
-        specialRideRoutes.patch(":id", use: patchSpecialRide)
-        specialRideRoutes.delete(":id", use: deleteSpecialRide)
+        let openAPITag = TagObject(name: "Sonderfahrten")
         
+        let specialRideRoutes = routes.grouped("specialrides")
+        // GET /specialrides/
+        specialRideRoutes.get("", use: getAllSpecialRides)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Übersicht der Sonderfahrten abfragen.",
+                response: .type([GetSpecialRideDTO].self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
+        // GET /specialrides/:id
+        specialRideRoutes.get(":id", use: getSpecialRide)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Details einer Sonderfahrten abfragen.",
+                description: "Hinweis: Der Fahrer bekommt alle Details zu den Teilnehmern, alle anderen bekomme nur die bestätigten Teilnehmer.",
+                path: .type(SpecialRide.IDValue.self),
+                response: .type(GetSpecialRideDetailDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
+        // POST /specialrides/
+        specialRideRoutes.post("", use: newSpecialRide)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Neue Sonderfahrten anbieten.",
+                body: .type(CreateSpecialRideDTO.self),
+                contentType: .application(.json),
+                response: .type(GetSpecialRideDetailDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .created,
+                auth: AuthMiddleware.schemeObject
+            )
+        // PATCH /specialrides/:id
+        specialRideRoutes.patch(":id", use: patchSpecialRide)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Eine Sonderfahrten anpassen.",
+                description: "Hinweis: Die Fahrt kann nur der Fahrer anpassen.",
+                path: .type(SpecialRide.IDValue.self),
+                body: .type(PatchSpecialRideDTO.self),
+                contentType: .application(.json),
+                response: .type(GetSpecialRideDetailDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
+        // DELETE /specialrides/:id
+        specialRideRoutes.delete(":id", use: deleteSpecialRide)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Eine Sonderfahrten löschen.",
+                description: "Hinweis: Die Fahrt kann nur der Fahrer löschen.",
+                path: .type(SpecialRide.IDValue.self),
+                statusCode: .noContent,
+                auth: AuthMiddleware.schemeObject
+            )
+        
+        // POST /specialrides/:id/requests
         specialRideRoutes.post(":id", "requests", use: newRequestToSpecialRide)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Mitnahme bei einer Sonderfahrten anfragen.",
+                path: .type(SpecialRide.IDValue.self),
+                body: .type(CreateSpecialRideRequestDTO.self),
+                contentType: .application(.json),
+                response: .type(GetRiderDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .created,
+                auth: AuthMiddleware.schemeObject
+            )
+        // PATCH /specialrides/requests/:request_id
         specialRideRoutes.patch("requests", ":request_id", use: patchSpecialRideRequest)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Mitnahme bei einer Sonderfahrten bearbeiten.",
+                description: "Hinweis: Der Fahrer kann über diese Route die Mitnahme bestätigen, der Mitfahrer kann nur die Location anpassen.",
+                path: .type(SpecialRideRequest.IDValue.self),
+                body: .type(PatchSpecialRideRequestDTO.self),
+                contentType: .application(.json),
+                response: .type(GetRiderDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
+        // DELETE /specialrides/requests/:request_id
         specialRideRoutes.delete("requests", ":request_id",use: deleteSpecialRideRequest)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Mitnahme bei einer Sonderfahrten löschen.",
+                path: .type(SpecialRideRequest.IDValue.self),
+                statusCode: .noContent,
+                auth: AuthMiddleware.schemeObject
+            )
     }
     
     @Sendable
