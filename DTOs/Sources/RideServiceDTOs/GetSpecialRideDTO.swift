@@ -7,9 +7,9 @@ public struct GetSpecialRideDTO: Codable {
     public var ends: Date
     public var emptySeats: UInt8
     public var allocatedSeats: UInt8
-    public var myState: usersSpecialRideState
+    public var myState: UsersSpecialRideState
     
-    public init(id: UUID? = nil, name: String, starts: Date, ends: Date, emptySeats: UInt8, allocatedSeats: UInt8, myState: usersSpecialRideState) {
+    public init(id: UUID? = nil, name: String, starts: Date, ends: Date, emptySeats: UInt8, allocatedSeats: UInt8, myState: UsersSpecialRideState) {
         self.id = id
         self.name = name
         self.starts = starts
@@ -20,7 +20,7 @@ public struct GetSpecialRideDTO: Codable {
     }
 }
 
-public enum usersSpecialRideState: String, Codable {
+public enum UsersSpecialRideState: String, Codable, CaseIterable {
     case nothing
     case requested
     case accepted
