@@ -32,9 +32,9 @@ struct SpecialRideController: RouteCollection {
                     .filter(\.$accepted == true)
                     .count()
                 
-                var usersState = usersSpecialRideState.nothing
+                var usersState = UsersSpecialRideState.nothing
                 if specialRide.$user.id == req.jwtPayload.userID {
-                    usersState = usersSpecialRideState.driver
+                    usersState = UsersSpecialRideState.driver
                 } else {
                     let request = try await SpecialRideRequest.query(on: req.db)
                         .filter(\.$ride.$id == ride_id)
@@ -43,9 +43,9 @@ struct SpecialRideController: RouteCollection {
                     
                     if let request = request {
                         if request.accepted {
-                            usersState = usersSpecialRideState.accepted
+                            usersState = UsersSpecialRideState.accepted
                         } else {
-                            usersState = usersSpecialRideState.requested
+                            usersState = UsersSpecialRideState.requested
                         }
                     }
                 }
