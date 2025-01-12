@@ -22,8 +22,15 @@ ticketflow:
   script:
     - 'MERGE_REQ="$(curl -s --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN" $COMMIT_MERGE_REQ_URL)"'
     - if [[ "$(echo "$MERGE_REQ" | jq -r ". | length")" == "0" || "$(echo "$MERGE_REQ" | jq -r ".[0].target_branch")" != "$CI_COMMIT_BRANCH" || "$(echo "$MERGE_REQ" | jq -r ".[0].source_branch")" == "$CI_DEFAULT_BRANCH" ]]; then exit 0; fi
+    - echo 1
+    - echo "$(echo "$MERGE_REQ")"
+    - echo "$(echo "$MERGE_REQ" | jq -r '.[0].description')"
+    - echo "$(echo "$MERGE_REQ" | jq -r '.[0].description' | grep -oP "${TICKET_ID_REGEX}")"
+    - echo "$(echo "$MERGE_REQ" | jq -r '.[0].description' | grep -oP "${TICKET_ID_REGEX}" | grep -oP '\d+')"
     - TICKET_IIDS="$(echo "$MERGE_REQ" | jq -r '.[0].description' | grep -oP "${TICKET_ID_REGEX}" | grep -oP '\d+')"
+    - echo 2
     - echo "$TICKET_IIDS"
+    - echo 3
     - >
       if [[ $TICKET_IIDS ]]; then
       echo "$TICKET_IIDS" | while IFS= read -r iid ; do
@@ -35,6 +42,7 @@ ticketflow:
       "$(printf "$PUT_ISSUE_URL_UNFORMATTED" "${iid}")" | jq -r '.labels[]';
       done;
       fi
+    - echo 4
     - 'MERGE_REQ_INTO_MAIN="$(curl -s --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN" $GET_MERGE_REQ_INTO_MAIN_URL)"'
     - MERGE_REQ_INTO_MAIN_COUNT="$(echo "$MERGE_REQ_INTO_MAIN" | jq -r ". | length")"
     - >
