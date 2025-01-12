@@ -95,7 +95,6 @@ fun AttendancesCoordinationPage(navController: NavController, meetingId: String)
     Column(
       modifier = Modifier
         .fillMaxWidth()
-        .weight(0.5f)
        // .padding(start = 18.dp, end = 18.dp)
         .onGloballyPositioned { coordinates ->
           val newHeightDp = with(density) { coordinates.size.height.toDp() }
