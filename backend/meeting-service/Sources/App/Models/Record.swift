@@ -22,7 +22,7 @@ extension Record {
         
         return try await .init(meetingId: self.requireID().$meeting.id,
                                lang: self.requireID().lang,
-                               identity: self.identity.toGetIdentityDTO(),
+                               identity: self.$identity.get(on: db).toGetIdentityDTO(),
                                status: self.status.convert(),
                                content: self.content,
                                attendancesAppendix: "# \(LocalizableManager.shared.translate(key: "Attendees", into: lang))\n\(attendances)",
