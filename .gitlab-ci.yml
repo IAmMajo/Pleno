@@ -27,7 +27,7 @@ ticketflow:
       if [[ "$(echo "$MERGE_REQ" | jq -r '.[0].description' | grep -oP "${TICKET_ID_REGEX}" | grep -oP '\d+')" ]]; then
       TICKET_IIDS="$(echo "$MERGE_REQ" | jq -r '.[0].description' | grep -oP "${TICKET_ID_REGEX}" | grep -oP '\d+')";
       echo "Adding labels to the following ticket:";
-      echo "$TICKET_IIDS"
+      echo "$TICKET_IIDS";
       echo "$TICKET_IIDS" | while IFS= read -r iid ; do
       curl
       --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN"
