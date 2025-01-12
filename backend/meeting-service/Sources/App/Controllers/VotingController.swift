@@ -233,10 +233,10 @@ struct VotingController: RouteCollection {
             throw Abort(.notFound)
         }
         try await voting.$votingOptions.load(on: req.db)
-        guard let index = UInt8(req.parameters.get("index")!), try index == 0 || voting.votingOptions.contains(where: { votingOption in
+        guard let indexParam = req.parameters.get("index"), let index = UInt8(indexParam), try index == 0 || voting.votingOptions.contains(where: { votingOption in
             try votingOption.requireID().index == index
         }) else {
-            throw Abort(.notFound)
+            throw Abort(.notFound, reason: "Invalid index '\(req.parameters.get("index") ?? "nil")'.")
         }
         guard voting.isOpen && voting.startedAt != nil && voting.closedAt == nil else {
             throw Abort(.badRequest, reason: "You can only vote on votings which are currently open.")
@@ -247,6 +247,9 @@ struct VotingController: RouteCollection {
         let identity = try await Identity.byUserId(userId, req.db)
         guard try await Vote.find(.init(voting: voting, identity: identity), on: req.db) == nil else {
             throw Abort(.badRequest, reason: "You have already voted on this voting.")
+        }
+        guard let _ = try await Attendance.find(.init(meetingId: voting.$meeting.id, identity: identity), on: req.db) else {
+            throw Abort(.badRequest, reason: "You must be attending the voting's corresponding meeting in order to vote on it.")
         }
         
         let vote = try Vote(id: .init(voting: voting, identity: identity), index: index)
