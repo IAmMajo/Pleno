@@ -5,3 +5,35 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
 	CREATE DATABASE kivop;
 	GRANT ALL PRIVILEGES ON DATABASE kivop TO vapor;
 EOSQL
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname 'kivop' <<-EOSQL
+	CREATE TABLE IF NOT EXISTS "_fluent_migrations" ("id" UUID PRIMARY KEY, "name" TEXT NOT NULL, "batch" BIGINT NOT NULL, "created_at" TIMESTAMPTZ, "updated_at" TIMESTAMPTZ, CONSTRAINT "uq:_fluent_migrations.name" UNIQUE ("name"));
+	CREATE TABLE IF NOT EXISTS "_fluent_enums" ("id" UUID PRIMARY KEY, "name" TEXT NOT NULL, "case" TEXT NOT NULL, CONSTRAINT "uq:_fluent_enums.name+_fluent_enums.case" UNIQUE ("name", "case"));
+	
+	CREATE GROUP services;
+	GRANT CREATE, CONNECT ON DATABASE kivop TO GROUP services;
+
+	GRANT SELECT, REFERENCES, INSERT, UPDATE, DELETE ON TABLE "_fluent_migrations" TO GROUP services;
+	GRANT SELECT, REFERENCES, INSERT, UPDATE, DELETE ON TABLE "_fluent_enums" TO GROUP services;
+	GRANT SELECT, REFERENCES ON ALL TABLES IN SCHEMA public TO GROUP services;
+	GRANT USAGE, CREATE ON SCHEMA public TO GROUP services;
+	ALTER DEFAULT PRIVILEGES FOR ROLE services IN SCHEMA public GRANT SELECT, REFERENCES ON TABLES TO GROUP services;
+
+	-- Service-Users
+	CREATE USER ai_service WITH PASSWORD '}d]TJuame!aJ[#-;fSSK%o;28[b|GAQ3S6<e!c.wC;!T]SryVA<KGrcC_6Q%S]Wp-q' IN GROUP services;
+	CREATE USER ride_service WITH PASSWORD 'd.N-B;a2W:qaUc1(/HnlsL?V#tfGf1)yEZEVZ&j=P4WF3ZkJUSWIQ?a2;kk9' IN GROUP services;
+	CREATE USER poster_service WITH PASSWORD '|X[Of8o&HnjZX8F62I=LJ@B+-B?I:+F][pRI~=in~syi{kPl7L' IN GROUP services;
+	CREATE USER notifications_service WITH PASSWORD '-9_U!9<Xtmd(<R)nifb:-skVLRol}F7ri8Z*|)oA/o>+Y!O4mu-p7IT>3W@kado+4G' IN GROUP services;
+	CREATE USER auth_service WITH PASSWORD '<|j?#(b1?(E676,V#i3Y4cS]Fyk&RoTX(#=elGaJEWRo0nF.|U)Q(u<3<RY]2/%qj7GS@29OYs{;#S' IN GROUP services;
+	CREATE USER meeting_service WITH PASSWORD 'b^CPC@OsRvIfA4p?vYgX[MKM^jO6Dy&Wq#Rq<zrCI/' IN GROUP services;
+	CREATE USER config_service WITH PASSWORD 'xJd+>(XFBxs3{|81bm%VQnwKOhZY+km2FDbtMbRb,m:Hj:h5&W9t0kD2g]f5zI_+(Ko5hyP&D>hupG3a<' IN GROUP services;
+
+	-- Service-User-Privileges
+	ALTER DEFAULT PRIVILEGES FOR USER ai_service IN SCHEMA public GRANT SELECT, REFERENCES ON TABLES TO GROUP services;
+	ALTER DEFAULT PRIVILEGES FOR USER ride_service IN SCHEMA public GRANT SELECT, REFERENCES ON TABLES TO GROUP services;
+	ALTER DEFAULT PRIVILEGES FOR USER poster_service IN SCHEMA public GRANT SELECT, REFERENCES ON TABLES TO GROUP services;
+	ALTER DEFAULT PRIVILEGES FOR USER notifications_service IN SCHEMA public GRANT SELECT, REFERENCES ON TABLES TO GROUP services;
+	ALTER DEFAULT PRIVILEGES FOR USER auth_service IN SCHEMA public GRANT SELECT, REFERENCES ON TABLES TO GROUP services;
+	ALTER DEFAULT PRIVILEGES FOR USER meeting_service IN SCHEMA public GRANT SELECT, REFERENCES ON TABLES TO GROUP services;
+	ALTER DEFAULT PRIVILEGES FOR USER config_service IN SCHEMA public GRANT SELECT, REFERENCES ON TABLES TO GROUP services;
+EOSQL
