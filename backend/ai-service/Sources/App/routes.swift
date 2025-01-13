@@ -4,6 +4,7 @@ import VaporToOpenAPI
 
 func routes(_ app: Application) throws {
     try app.register(collection: AIController())
+
     try app.register(collection: WebhookController())
 
     app.get("openapi.json") { req in

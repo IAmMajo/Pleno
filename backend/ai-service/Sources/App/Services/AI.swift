@@ -3,9 +3,54 @@ import Vapor
 
 struct AI {
     let application: Application
+    let client: Client
     let fileio: FileIO
+    
+    func getAIResponse(promptName: String, message: String, maxCompletionTokens: Int) async throws -> String {
+        let aiURL = Environment.get("AI_URL") ?? ""
+        let apiKey = Environment.get("AI_API_KEY") ?? ""
+        let aiModel = Environment.get("AI_MODEL") ?? ""
+        if aiURL.isEmpty || apiKey.isEmpty || aiModel.isEmpty {
+            throw Abort(.internalServerError, reason: "AI configuration is missing")
+        }
+        let prompt = try await fileio.collectFile(
+            at: "\(application.directory.resourcesDirectory)Prompts/\(promptName).md"
+        )
+        let json: [String: Any] = [
+            "model": aiModel,
+            "messages": [
+                [
+                    "role": "system",
+                    "content": [
+                        [
+                            "type": "text",
+                            "text": String(buffer: prompt)
+                        ]
+                    ]
+                ],
+                [
+                    "role": "user",
+                    "content": [
+                        [
+                            "type": "text",
+                            "text": message
+                        ]
+                    ]
+                ]
+            ],
+            "max_completion_tokens": maxCompletionTokens,
+        ]
+        let response = try await client.post("\(aiURL)chat/completions") { req in
+            req.headers.add(name: "Authorization", value: "Bearer \(apiKey)")
+            req.headers.add(name: "Content-Type", value: "application/json")
+            req.body = .init(data: try JSONSerialization.data(withJSONObject: json))
+        }
+        let responseJSON = try JSONSerialization.jsonObject(with: response.body!) as! [String: Any]
+        let message = (responseJSON["choices"] as! [[String: Any]])[0]["message"] as! [String: Any]
+        return message["content"] as! String
+    }
 
-    func getAIResponse(promptName: String, message: String, maxCompletionTokens: Int) async throws -> Response {
+    func getStreamedAIResponse(promptName: String, message: String, maxCompletionTokens: Int) async throws -> Response {
         let aiURL = Environment.get("AI_URL") ?? ""
         let apiKey = Environment.get("AI_API_KEY") ?? ""
         let aiModel = Environment.get("AI_MODEL") ?? ""
@@ -76,6 +121,10 @@ struct AI {
 
 extension Request {
     var ai: AI {
-        .init(application: self.application, fileio: self.fileio)
+        .init(
+            application: self.application,
+            client: self.client,
+            fileio: self.fileio
+        )
     }
 }
