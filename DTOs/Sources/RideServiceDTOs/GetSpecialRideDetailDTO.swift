@@ -32,4 +32,5 @@ public struct GetSpecialRideDetailDTO: Codable {
         self.emptySeats = emptySeats
         self.riders = riders
     }
+    
 }

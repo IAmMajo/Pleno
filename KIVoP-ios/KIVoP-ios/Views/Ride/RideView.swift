@@ -28,7 +28,7 @@ struct RideView: View {
                             if viewModel.selectedTab == 0 {
                                 //EventList(events: group.value)
                             } else if viewModel.selectedTab == 1 {
-                                RideList(rides: group.value)
+                                RideList(rides: group.value, viewModel: viewModel)
                             } else {
                                 //MyRidesList(rides: group.value)
                             }
@@ -59,7 +59,7 @@ struct RideView: View {
             .toolbar {
                 // Neue Fahrt anbieten
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: NewRideView(viewModel: NewRideViewModel())) {
+                    NavigationLink(destination: NewRideView(viewModel: NewRideViewModel(), rideViewModel: viewModel)) {
                         Text("Neue Fahrt anbieten")
                             .font(.body)
                     }

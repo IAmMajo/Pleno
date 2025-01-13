@@ -6,7 +6,7 @@ class NewRideViewModel: ObservableObject {
     private let baseURL = "https://kivop.ipv64.net"
     @Published var isLoading: Bool = false
     @Published var isSaved: Bool = false
-    var ride: GetSpecialRideDTO = GetSpecialRideDTO(name: "", starts: Date(), ends: Date(), emptySeats: 0, allocatedSeats: 0, isSelfDriver: false, isSelfAccepted: false)
+    var ride: GetSpecialRideDTO = GetSpecialRideDTO(name: "", starts: Date(), ends: Date(), emptySeats: 0, allocatedSeats: 0, myState: .nothing)
     
     // New Ride Vars
     @Published var eventId: UUID = UUID() // Event
@@ -93,8 +93,6 @@ class NewRideViewModel: ObservableObject {
             emptySeats: UInt8(emptySeats ?? 0)
         )
         
-        // Sende den POST-Request
-        print(specialRide)
         createSpecialRide(specialRide)
     }
     
@@ -164,7 +162,6 @@ class NewRideViewModel: ObservableObject {
                 // Decodieren der Antwort in ein GetSpecialRideDetailDTO
                 let specialRideDetail = try decoder.decode(GetSpecialRideDetailDTO.self, from: data)
                 self?.ride.id = specialRideDetail.id
-                self?.ride.name = specialRideDetail.name
                 DispatchQueue.main.async {
                     print("Fahrt erstellt: \(specialRideDetail)")
                     self?.isSaved = true

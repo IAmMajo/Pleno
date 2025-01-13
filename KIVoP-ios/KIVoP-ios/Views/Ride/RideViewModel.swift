@@ -22,6 +22,10 @@ class RideViewModel: ObservableObject {
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
     }
     
+    func fetchRides() {
+        fetchSpecialRides()
+    }
+    
     func fetchSpecialRides() {
         // URL für die Route GET /specialrides
         guard let url = URL(string: "\(baseURL)/specialrides") else {
@@ -62,6 +66,7 @@ class RideViewModel: ObservableObject {
                 
                 // Sicherstellen, dass die Updates im Main-Thread ausgeführt werden
                 DispatchQueue.main.async {
+                    self?.rides = []
                     self?.rides = decodedRides // Array mit den Sonderfahrten speichern
                 }
             } catch {
