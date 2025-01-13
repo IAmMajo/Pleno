@@ -1,18 +1,3 @@
-/**
- latitude float [not null]
- longitude float [not null]
- dst_latitude float [not null]
- dst_longitude float [not null]
- emptySeats int [not null]
- description text
- vehicle_description text
- name text
- starts datetime
-
- created_at timestamp
- updated_at timestamp
- */
-
 import Foundation
 
 public struct CreateSpecialRideDTO: Codable {

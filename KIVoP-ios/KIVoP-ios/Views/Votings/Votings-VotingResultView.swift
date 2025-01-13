@@ -10,6 +10,9 @@ import LocalAuthentication
 import MeetingServiceDTOs
 
 struct Votings_VotingResultView: View {
+   @StateObject private var webSocketService = WebSocketService()
+   @StateObject private var meetingViewModel = MeetingViewModel()
+
    let votingsView: VotingsView
    
    let voting: GetVotingDTO
@@ -19,101 +22,169 @@ struct Votings_VotingResultView: View {
    @State private var isLoading = false
    @State private var error: String?
    @State private var resultsLoaded: Bool = false
+   @State private var isLiveStatusAvailable: Bool = false
    
    @State var optionTextMap: [UInt8: String] = [:]
    
     var body: some View {
        ScrollView {
-          if resultsLoaded {
+          if (isLiveStatusAvailable || resultsLoaded) {
              VStack {
-                Divider()
-                
-                PieChartView(optionTextMap: optionTextMap, votingResults: votingResults)
-                   .padding()
-                
-                Divider()
-                
+                ZStack {
+                   if isLiveStatusAvailable {
+                      VotingLiveStatusView(votingId: voting.id) {
+                         // Handle WebSocket error
+                         Task {
+                            self.isLiveStatusAvailable = false
+                            await loadVotingResults(voting: voting)
+                         }
+                      }
+                      .padding(.vertical) .padding(.top, -5)
+                   } else {
+                      PieChartView(optionTextMap: optionTextMap, votingResults: votingResults)
+                         .padding(.vertical)
+                   }
+                }
+                .background(Color(UIColor.systemBackground))
+                .cornerRadius(10)
+                .padding() .padding(.top, -8)
+
                 HStack {
                    Image(systemName: "person.bust.fill")
                    Text(meetingName)
+//                   Text("Sitzungsname")
                       .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding(.leading)
-                Text(voting.question)
-                   .frame(maxWidth: .infinity, alignment: .leading)
-                   .padding(.leading).padding(.top, 2).padding(.trailing)
-                   .font(.title2)
-                   .fontWeight(.medium)
-                Divider()
-                Text(voting.description)
-                   .frame(maxWidth: .infinity, alignment: .leading)
-                   .padding(.leading).padding(.top, 2).padding(.trailing)
+                .foregroundStyle(Color(UIColor.label).opacity(0.6))
+                .padding(.leading).padding(.bottom, 1)
                 
-                List{
-                   Section {
-                      ForEach (votingResults.results, id: \.self) { result in
-                         HStack {
-                            Image(systemName: votingResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill")
-                               .foregroundStyle(getColor(index: result.index))
-                            Text(optionTextMap[result.index] ?? "")
-                            Spacer()
-                            Text("\(result.percentage, specifier: "%.2f")%") //mit 1-2 Nachkommastellen?
-                               .opacity(0.6)
-                         }
+                Text(voting.question)
+                   .font(.title2)
+                   .fontWeight(.bold)
+                   .frame(maxWidth: .infinity, alignment: .leading)
+                   .padding(.leading).padding(.trailing)
+                   
+                
+                ZStack {
+                   Text(voting.description)
+                      .padding()
+                      .frame(maxWidth: .infinity, alignment: .leading)
+                }.background(Color(UIColor.systemBackground))
+                   .cornerRadius(10)
+                   .padding(.horizontal)
+      
+                if isLiveStatusAvailable {
+                   ZStack {
+                      HStack {
+                         Image(systemName: "info.circle.fill")
+                            .padding(.top, 1)
+                         Text("Die Abstimmung läuft noch. Du hast bereits abgestimmt.")
                       }
-                   } header: {
-                      Spacer(minLength: 0).listRowInsets(EdgeInsets())
+                      .foregroundStyle(Color(UIColor.label).opacity(0.6))
+                      .padding()
+                      .frame(maxWidth: .infinity, alignment: .leading)
+                   }.background(Color(UIColor.systemBackground))
+                      .cornerRadius(10)
+                      .padding(.horizontal) .padding(.top)
+                } else {
+                   List{
+                      Section {
+                         ForEach (votingResults.results, id: \.self) { result in
+                            HStack {
+                               Image(systemName: votingResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill")
+                                  .foregroundStyle(getColor(index: result.index))
+                               Text(optionTextMap[result.index] ?? "")
+                               Spacer()
+                               Text("\(result.percentage, specifier: "%.2f")%")
+                                  .opacity(0.6)
+                            }
+                         }
+                      } header: {
+                         Spacer(minLength: 0).listRowInsets(EdgeInsets())
+                      }
                    }
+                   .frame(height: CGFloat((votingResults.results.count * 65) + (votingResults.results.count < 4 ? 200 : 0)), alignment: .top)
+                   //             .scrollContentBackground(.hidden)
+                   .environment(\.defaultMinListHeaderHeight, 10)
                 }
-                .frame(height: CGFloat((votingResults.results.count * 65) + (votingResults.results.count < 4 ? 200 : 0)), alignment: .top)
-                //             .scrollContentBackground(.hidden)
-                .environment(\.defaultMinListHeaderHeight, 10)
              }
+          } else if isLoading {
+             ProgressView("Loading...")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(UIColor.secondarySystemBackground))
           } else {
              ContentUnavailableView(
-               "Die Abstimmung läuft noch",
-               systemImage: "chart.pie.fill",
-               description: Text("Du hast bereits abgestimmt. In Zukunft werden hier die Live-Ergebnisse einer offenen Abstimmung angezeigt.")
+               "Die Abstimmungsergebnisse konnten nicht geladen werden",
+               systemImage: "chart.pie.fill"
              )
           }
        }
        .refreshable {
-          await loadVotingResults(voting: voting)
+          self.isLiveStatusAvailable = await isLiveStatusAvailable(votingId: voting.id)
+          if !isLiveStatusAvailable {
+             await loadVotingResults(voting: voting)
+          }
        }
-       .navigationBarTitleDisplayMode(.inline)
-       .background(Color(UIColor.secondarySystemBackground))
        .onAppear {
           Task {
-             await loadVotingResults(voting: voting)
+             isLoading = true
+             self.isLiveStatusAvailable = await isLiveStatusAvailable(votingId: voting.id)
+             if !isLiveStatusAvailable {
+                await loadVotingResults(voting: voting)
+             }
              await loadMeetingName(voting: voting)
           }
           fillOptionTextMap(voting: voting)
+          isLoading = false
        }
+       .navigationTitle(isLiveStatusAvailable ? "Live-Status" : "Abstimmungs-Ergebnis")
+       .navigationBarTitleDisplayMode(.inline)
+       .background(Color(UIColor.secondarySystemBackground))
     }
+   
+   private func isLiveStatusAvailable(votingId: UUID) async -> Bool {
+      await withCheckedContinuation { continuation in
+         webSocketService.connect(to: votingId)
+         // Wait for the WebSocket to receive messages
+         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            if let liveStatus = webSocketService.liveStatus, !liveStatus.isEmpty {
+               webSocketService.disconnect()
+               continuation.resume(returning: true)
+            } else if webSocketService.votingResults != nil {
+               webSocketService.disconnect()
+               continuation.resume(returning: false)
+            } else if webSocketService.errorMessage != nil {
+               webSocketService.disconnect()
+               continuation.resume(returning: false)
+            } else {
+               webSocketService.disconnect()
+               continuation.resume(returning: false)
+            }
+         }
+      }
+   }
 
    private func loadVotingResults(voting: GetVotingDTO) async {
-      isLoading = true
-      error = nil
-      do {
-         votingResults = try await APIService.shared.fetchVotingResults(by: voting.id)
-         resultsLoaded = true
-      } catch {
-         resultsLoaded = false
-         print("error: ", error)
+      VotingService.shared.fetchVotingResults(votingId: voting.id) { result in
+         DispatchQueue.main.async {
+            switch result {
+            case .success(let results):
+               self.votingResults = results
+               resultsLoaded = true
+            case .failure(let error):
+               print("Fehler beim Abrufen der Ergebnisse: \(error.localizedDescription)")
+            }
+         }
       }
-      isLoading = false
    }
    
    private func loadMeetingName(voting: GetVotingDTO) async {
-      isLoading = true
-      error = nil
       do {
-         let meeting = try await APIService.shared.fetchMeeting(by: voting.meetingId)
+         let meeting = try await meetingViewModel.fetchMeeting(byId: voting.meetingId)
          meetingName = meeting.name
       } catch {
-         print("error: ", error)
+         print("Error fetching meeting: \(error.localizedDescription)")
       }
-      isLoading = false
    }
    
    func getColor (index: UInt8) -> Color {
@@ -136,5 +207,18 @@ struct Votings_VotingResultView: View {
 #Preview() {
    var votingsView: VotingsView = .init()
    
-   Votings_VotingResultView(votingsView: VotingsView(), voting: votingsView.mockVotings[1], votingResults: votingsView.mockVotingResults)
+   Votings_VotingResultView(votingsView: VotingsView(), voting: votingsView.mockVotings[0], votingResults: votingsView.mockVotingResults)
+//      .navigationTitle("lol")
+//      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+         ToolbarItem(placement: .navigationBarLeading) {
+            Button {
+            } label: {
+               HStack {
+                  Image(systemName: "chevron.backward")
+                  Text("Zurück")
+               }
+            }
+         }
+      }
 }

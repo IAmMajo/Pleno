@@ -9,6 +9,7 @@ import SwiftUI
 import MeetingServiceDTOs
 import MapKit
 import UIKit
+//import CoreHaptics
 
 struct Posters_PositionView: View {
    let position: PosterPosition
@@ -19,11 +20,18 @@ struct Posters_PositionView: View {
    @State private var address: String?
    @State private var isLoadingAddress = true
    
+   @State private var isGoogleMapsInstalled = false
+   @State private var isWazeInstalled = false
+   
    @State private var isFullMapView: Bool = false
    @State private var showMapOptions: Bool = false
    @State private var shareLocation = false
    @State private var showTakeDownAlert = false
    @State private var showUndoTakeDownAlert = false
+   @State private var copiedToClipboard: Bool = false
+   @State private var tappedCopyButton: Bool = false
+   @FocusState private var isFocused: Bool
+   @State private var text = "Sample text"
    @Environment(\.dismiss) private var dismiss
    @Environment(\.colorScheme) var colorScheme
    
@@ -152,43 +160,84 @@ struct Posters_PositionView: View {
                 Form {
                    Section {
                       HStack(spacing: 0) {
-                         SelectableTextView(text: address ?? "")
-                            .frame(maxWidth: .infinity, alignment: .topLeading)
-                            .fixedSize(horizontal: false, vertical: true)
+                         Text(address ?? "")
+                            .textSelection(.enabled)
+                         
                          Spacer()
                          
                          VStack {
-                            HStack {
-                               Spacer()
-                               
-                               Button(action: { showMapOptions = true }) {
-                                  Image(systemName: "square.and.arrow.up")
-                               }
-                               .buttonStyle(PlainButtonStyle())
-                               .foregroundStyle(.blue)
-                               .frame(width: 25, height: 25)
-                               .padding(.top, 8)
+                            Button(action: { showMapOptions = true }) {
+                               Image(systemName: "square.and.arrow.up")
                             }
+                            .buttonStyle(PlainButtonStyle())
+                            .foregroundStyle(.blue)
+                            .frame(width: 25, height: 25)
+                            .padding(.top, 8)
                             
                             Spacer()
                          }
-                         .frame(maxWidth: .infinity)
                       }
-                      SelectableTextView(text: "\(String(format: "%.6f", currentCoordinates!.latitude))° N, \(String(format: "%.6f", currentCoordinates!.longitude))° E")
-                         .padding(.top, 8)
+                      HStack {
+                         Text("\(String(format: "%.6f", currentCoordinates!.latitude))° N, \(String(format: "%.6f", currentCoordinates!.longitude))° E")
+                            .textSelection(.enabled)
+                         
+                         Spacer()
+                         
+                         Button(action: {
+                            tappedCopyButton.toggle()
+                            UIPasteboard.general.string = "\(String(format: "%.6f", currentCoordinates!.latitude))° N, \(String(format: "%.6f", currentCoordinates!.longitude))° E"
+                            withAnimation(.snappy) {
+                               copiedToClipboard = true
+                            }
+                            DispatchQueue.main.asyncAfter (deadline: .now() + 1.8) {
+                               withAnimation(.snappy) {
+                                  copiedToClipboard = false
+                               }
+                            }
+                         }) {
+                            Image(systemName: "document.on.document")
+                         }
+                         .buttonStyle(PlainButtonStyle())
+                         .foregroundStyle(.blue)
+                         .frame(width: 25, height: 25)
+                         .sensoryFeedback(.success, trigger: tappedCopyButton)
+                      }
                    } header: {
                       Text("Adresse in der Nähe")
                    }
                 }
                 .scrollDisabled(true)
                 .frame(height: 185)
+                .overlay {
+                   if copiedToClipboard {
+                      Text ("In Zwischenablage kopiert") // Copied to Clipboard
+                         .font(.system(.body, design: .rounded, weight: .semibold))
+                         .foregroundStyle(.white)
+                         .padding ()
+                         .background(Color.blue.cornerRadius(12))
+                         .padding(.bottom)
+                         .shadow(radius: 5)
+                         .transition(.move (edge: .bottom))
+                         .frame(maxHeight: .infinity, alignment: .bottom)
+                   }
+                }
              }
              .confirmationDialog("\(address ?? "Adresse")\n\(currentCoordinates!.latitude), \(currentCoordinates!.longitude)", isPresented: $showMapOptions, titleVisibility: .visible) {
                 Button("Öffnen mit Apple Maps") {
-                   openInAppleMaps()
+                   NavigationAppHelper.shared.openInAppleMaps(
+                     name: name,
+                     coordinate: currentCoordinates!
+                   )
                 }
-                Button("Öffnen mit Google Maps") {
-                   openInGoogleMaps()
+                if isGoogleMapsInstalled {
+                   Button("Öffnen mit Google Maps") {
+                      NavigationAppHelper.shared.openInGoogleMaps(coordinate: currentCoordinates!)
+                   }
+                }
+                if isWazeInstalled {
+                   Button("Öffnen mit Waze") {
+                      NavigationAppHelper.shared.openInWaze(coordinate: currentCoordinates!)
+                   }
                 }
                 Button("Teilen...") {
                    shareLocation = true
@@ -260,6 +309,9 @@ struct Posters_PositionView: View {
        .navigationBarTitleDisplayMode(.inline)
        .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
        .onAppear {
+          let installedApps = NavigationAppHelper.shared.checkInstalledApps()
+          isGoogleMapsInstalled = installedApps.isGoogleMapsInstalled
+          isWazeInstalled = installedApps.isWazeInstalled
           fetchAddress(latitude: currentCoordinates!.latitude, longitude: currentCoordinates!.longitude)
           Task {
              
@@ -269,24 +321,6 @@ struct Posters_PositionView: View {
           fetchAddress(latitude: currentCoordinates!.latitude, longitude: currentCoordinates!.longitude)
        }
     }
-   
-   private func openInAppleMaps() {
-      let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: currentCoordinates!))
-      mapItem.name = name
-      mapItem.openInMaps()
-   }
-   
-   private func openInGoogleMaps() {
-      let urlString = "comgooglemaps://?q=\(currentCoordinates!.latitude),\(currentCoordinates!.longitude)"
-      if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
-         UIApplication.shared.open(url)
-      } else {
-         // Fallback to Google Maps in browser if the app is not installed
-         if let webUrl = URL(string: "https://www.google.com/maps?q=\(currentCoordinates!.latitude),\(currentCoordinates!.longitude)") {
-            UIApplication.shared.open(webUrl)
-         }
-      }
-   }
    
    private func formattedShareText() -> String {
 //      """

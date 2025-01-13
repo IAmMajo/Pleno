@@ -31,7 +31,12 @@ struct Votings_VoteView: View {
                Text(voting.question)
                   .font(.title)
                   .fontWeight(.semibold)
-                  .padding(.top)
+                  .padding(.top).padding(.bottom, 2)
+                  .padding(.leading).padding(.trailing)
+               Divider()
+               Text(voting.description)
+                  .frame(maxWidth: .infinity, alignment: .center)
+                  .padding(.leading).padding(.top, 2).padding(.trailing)
                
                List(voting.options, id: \.self, selection: $selection) { option in
                   if option.index != 0 {
@@ -98,18 +103,16 @@ struct Votings_VoteView: View {
    }
    
    private func castVote(voting: GetVotingDTO, selection: GetVotingOptionDTO?) async {
-      isLoading = true
-      error = nil
-      do {
-         if selection != nil {
-            try await APIService.shared.castVote(of: voting.id, with: selection!.index)
-         } else {
-            print("selection is nil")
-         }
-      } catch {
-         print("error: ", error)
+      VotingService.shared.castVote(votingID: voting.id, index: selection != nil ? selection!.index : 0) { result in
+          DispatchQueue.main.async {
+              switch result {
+              case .success:
+                  print("Vote cast successfully!")
+              case .failure(let error):
+                  print("Failed to cast vote: \(error.localizedDescription)")
+              }
+          }
       }
-      isLoading = false
    }
    
    func updateMyVote(selection: GetVotingOptionDTO?) -> GetVotingResultsDTO {

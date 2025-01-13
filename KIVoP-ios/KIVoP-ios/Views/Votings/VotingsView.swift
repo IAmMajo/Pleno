@@ -10,9 +10,25 @@ import MeetingServiceDTOs
 
 
 struct VotingsView: View {
+   @StateObject private var webSocketService = WebSocketService()
+   @StateObject private var votingService = VotingService.shared
+   @StateObject private var meetingViewModel = MeetingViewModel()
    
    @State private var meetings: [GetMeetingDTO] = []
-   @State private var votings: [GetVotingDTO] = []
+   var votings: [GetVotingDTO] {
+//      let votings = votingService.votings
+//      var openVotings: [GetVotingDTO] = []
+//      for voting in votings {
+//         if (voting.isOpen) {
+//            openVotings.append(voting)
+//         }
+//      }
+//      return openVotings
+      
+//      votingsOfMeetings = allVotings.filter { $0.isOpen }
+      
+      return votingService.votings
+   }
    @State private var votingResults: GetVotingResultsDTO?
    @State private var votingsFiltered: [GetVotingDTO] = []
    @State private var voting: GetVotingDTO?
@@ -25,12 +41,19 @@ struct VotingsView: View {
 
    @State private var selectedVoting: GetVotingDTO?
    @State private var updatedResults: GetVotingResultsDTO?
-   @State private var hasVoted: Bool = false
+//   @State private var hasVoted: Bool = false
    @State private var selectedOption: UInt8?
    
    @State private var isShowingVoteSheet = false
    @State private var navigateToResultView = false
    @State private var navigateToNextView = false
+   
+   @State private var alertMessage: AlertMessage?
+
+   struct AlertMessage: Identifiable {
+       let id = UUID()
+       let message: String
+   }
  
    func setVotingsOfMeetings() async {
        var votingsByMeeting: [UUID: [GetVotingDTO]] = [:]
@@ -53,15 +76,12 @@ struct VotingsView: View {
        var meetingStartDates: [UUID: Date] = [:]
        for group in votingsOfMeetingsSorted {
            if let firstVoting = group.first {
-              isLoading = true
-              error = nil
               do {
-                 let meeting = try await APIService.shared.fetchMeeting(by: firstVoting.meetingId)
+                 let meeting = try await meetingViewModel.fetchMeeting(byId: firstVoting.meetingId)
                  meetingStartDates[firstVoting.meetingId] = meeting.start
               } catch {
-                  self.error = error.localizedDescription
+                 print("Error fetching meeting: \(error.localizedDescription)")
               }
-              isLoading = false
            }
        }
 
@@ -73,37 +93,83 @@ struct VotingsView: View {
            }
            return meeting1Start > meeting2Start
        }
-       
-       self.votingsOfMeetings = votingsOfMeetingsSorted
+//         print("setVotingsOfMeetings sorted")
+      self.votingsOfMeetings = votingsOfMeetingsSorted
+//      print("setVotingsOfMeetings updated: \(self.votingsOfMeetings.flatMap { $0.map { $0.isOpen } })")
+   }
+   
+   private func hasVotedForOpenVoting(votingId: UUID) async -> Bool {
+      await withCheckedContinuation { continuation in
+         webSocketService.connect(to: votingId)
+         
+         // Wait for the WebSocket to receive messages
+         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//            print("liveStatus: \(webSocketService.liveStatus ?? "")")
+//            print("votingResults: \(String(describing: webSocketService.votingResults))")
+//            print("errorMessage: \(webSocketService.errorMessage ?? "")")
+            if let liveStatus = webSocketService.liveStatus, !liveStatus.isEmpty {
+               webSocketService.disconnect()
+               continuation.resume(returning: true)
+            } else if webSocketService.votingResults != nil {
+               webSocketService.disconnect()
+               continuation.resume(returning: false)
+            } else if webSocketService.errorMessage != nil {
+               webSocketService.disconnect()
+               continuation.resume(returning: false)
+            } else {
+               webSocketService.disconnect()
+               continuation.resume(returning: false)
+            }
+         }
+      }
    }
    
    var body: some View {
       ZStack {
          ZStack {
-            if !votingsOfMeetings.isEmpty {
+            if isLoading {
+                        ProgressView("Loading...")
+                    } else if votingsOfMeetings.isEmpty {
+                        ContentUnavailableView {
+                            Label("Keine Abstimmungen gefunden", systemImage: "document")
+                        }
+                    } else {
                List {
                   ForEach(votingsOfMeetings, id: \.self) { votingGroup in
-                     Votings_VotingsSectionView(votingsView: VotingsView(), votingGroup: votingGroup, mockVotingResults: mockVotingResults, onVotingSelected: { voting in
-                        selectedVoting = voting
-                        Task {
-                           if (selectedVoting != nil) {
-                              hasVoted = false
-                              hasVoted = VotingStateTracker.hasVoted(for: voting.id)
-                              await loadVotingResults(voting: voting)
+                     Votings_VotingsSectionView(
+                        votingsView: self,
+                        votingGroup: votingGroup,
+                        mockVotingResults: mockVotingResults,
+                        onVotingSelected: { voting in
+                           selectedVoting = voting
+                           Task {
+                              await loadVotings()
+                              // Find the updated voting in the refreshed votings
+                              if let updatedVoting = votingService.votings.first(where: { $0.id == voting.id }) {
+                                 selectedVoting = updatedVoting
+                                 
+                                 let hasVotedForOpenVoting = await hasVotedForOpenVoting(votingId: updatedVoting.id)
+                                 
+//                                 print("Selected Voting isOpen: \(selectedVoting?.isOpen ?? false)")
+//                                 print(updatedVoting.isOpen)
+//                                 print(!hasVotedForOpenVoting)
+                                 
+                                 if(updatedVoting.isOpen && !hasVotedForOpenVoting) {
+                                    isShowingVoteSheet = true
+                                 } else {
+                                    navigateToResultView = true
+                                 }
+                              }
                            }
-                           if(votingResults?.myVote == nil && voting.isOpen && !hasVoted) {
-                              isShowingVoteSheet = true
-                           } else {
-                              navigateToResultView = true
-                           }
-                        }
                      })
                   }
                }
+//               .id(UUID()) // Force list refresh
                .refreshable {
                   await loadVotings()
-                  votingsFiltered = votings
+                  votingsFiltered = votingService.votings
                   await setVotingsOfMeetings()
+//                  print("refreshed")
                }
                .sheet(isPresented: $isShowingVoteSheet) {
                   if let voting = selectedVoting {
@@ -117,7 +183,7 @@ struct VotingsView: View {
                .navigationDestination(isPresented: $navigateToResultView) {
                   if let voting = selectedVoting {
                      Votings_VotingResultView(votingsView: VotingsView(), voting: voting, votingResults: mockVotingResults)
-                        .navigationTitle("Abstimmungs-Ergebnis")
+//                        .navigationTitle("Abstimmungs-Ergebnis")
                   }
                }
                .navigationDestination(isPresented: $navigateToNextView) {
@@ -125,30 +191,26 @@ struct VotingsView: View {
                      Votings_VotingResultView(votingsView: VotingsView(), voting: voting, votingResults: results)
                   }
                }
-            } else {
-               ContentUnavailableView {
-//                  Label("Keine Abstimmungen gefunden", systemImage: "document")
-               }
             }
-            
          }
          .navigationTitle("Abstimmungen")
          .navigationBarTitleDisplayMode(.large)
-//         .task(id: selectedVoting) {
-//            if let voting = selectedVoting {
-//               hasVoted = VotingStateTracker.hasVoted(for: voting.id)
-//               await loadVotingResults(voting: voting)
-//            }
-//         }
          .onAppear {
             Task {
-//               try await AuthController.shared.login(email: "admin@kivop.ipv64.net", password: "admin")
-//               let token = try await AuthController.shared.getAuthToken()
-//               print("Token: \(token)")
-
+               isLoading = true
                await loadVotings()
 //               votings = mockVotings
                votingsFiltered = votings
+               await setVotingsOfMeetings()
+               isLoading = false
+            }
+         }
+         .onChange(of: votingService.votings) { old, new in
+            Task {
+//               votingsFiltered = votingService.votings
+               // Refilter votings based on the updated data
+               votingsFiltered = votingService.votings.filter { $0.isOpen }
+//               print("votingsFiltered: \(votingsFiltered.map { ($0.id, $0.isOpen) })")
                await setVotingsOfMeetings()
             }
          }
@@ -163,61 +225,49 @@ struct VotingsView: View {
          
       }
       .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen")
-      .onChange(of: searchText) {
+      .onChange(of: searchText) { old, newValue in
+         votingsFiltered = votingService.votings.filter { voting in
+            newValue.isEmpty || voting.question.localizedCaseInsensitiveContains(newValue)
+         }
          Task {
-            if searchText.isEmpty {
-               votingsFiltered = votings
-            } else {
-               votingsFiltered = votings.filter { voting in
-                  return voting.question.contains(searchText)
-               }
-            }
+            await setVotingsOfMeetings()
          }
       }
       
    }
    
-
    private func loadVotings() async {
-      isLoading = true
-      error = nil
       do {
-         votings = try await APIService.shared.fetchAllVotings()
+         let votings = try await votingService.fetchVotings()
+         // Update the votings in the state
+         votingService.votings = votings
+//         for voting in votings {
+//            if (voting.isOpen) {
+//               votingsFiltered.append(voting)
+//            }
+//         }
+//         print("loadVotings: \(votingService.votings.map { ($0.id, $0.isOpen) })")
+         votingsFiltered = votings
+//         print("Loaded \(votings.count) votings")
       } catch {
-         print("error: ", error)
+         // Handle error
+         alertMessage = AlertMessage(message: "Fehler beim Laden der Abstimmungen: \(error.localizedDescription)")
+         print("Error loading votings: \(error.localizedDescription)")
       }
-      isLoading = false
    }
    
    private func loadVotingResults(voting: GetVotingDTO) async {
-      isLoading = true
-      error = nil
-      do {
-         votingResults = try await APIService.shared.fetchVotingResults(by: voting.id)
-      } catch {
-         print("error: ", error)
-      }
-      isLoading = false
+      VotingService.shared.fetchVotingResults(votingId: voting.id) { result in
+           DispatchQueue.main.async {
+               switch result {
+               case .success(let results):
+                   self.votingResults = results
+               case .failure(_ /*let error*/): break
+//                   print("Fehler beim Abrufen der Ergebnisse: \(error.localizedDescription)")
+               }
+           }
+       }
    }
-   
-   private func loadMeetings() async {
-      isLoading = true
-      error = nil
-      do {
-         meetings = try await APIService.shared.fetchAllMeetings()
-      } catch {
-         print("error: ", error)
-      }
-      isLoading = false
-   }
-   
-   
-   
-//   func getMeeting(meetingId: UUID) -> GetMeetingDTO {
-//      // API Call
-//      // loadMeetings()
-//      mockMeetings.first(where: { $0.id == meetingID }) ?? mockMeeting2
-//   }
    
    
    var mockVotings: [GetVotingDTO] {
@@ -323,7 +373,7 @@ struct VotingsView: View {
    var mockVotingResult1: GetVotingResultDTO {
       return GetVotingResultDTO(
          index: 0, // Index 0: Abstention
-         total: 2,
+         count: 2,
          percentage: 2,
          identities: []
       )
@@ -331,7 +381,7 @@ struct VotingsView: View {
    var mockVotingResult2: GetVotingResultDTO {
       return GetVotingResultDTO(
          index: 1, // Index 0: Abstention
-         total: 8,
+         count: 8,
          percentage: 8,
          identities: []
       )
@@ -339,7 +389,7 @@ struct VotingsView: View {
    var mockVotingResult3: GetVotingResultDTO {
       return GetVotingResultDTO(
          index: 2, // Index 0: Abstention
-         total: 10,
+         count: 10,
          percentage: 10,
          identities: []
       )
@@ -347,7 +397,7 @@ struct VotingsView: View {
    var mockVotingResult4: GetVotingResultDTO {
       return GetVotingResultDTO(
          index: 3, // Index 0: Abstention
-         total: 30,
+         count: 30,
          percentage: 30,
          identities: []
       )

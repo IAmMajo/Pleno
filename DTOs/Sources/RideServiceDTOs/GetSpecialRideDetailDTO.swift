@@ -1,19 +1,3 @@
-/**
- id uuid [primary key]
- latitude float [not null]
- longitude float [not null]
- emptySeats int [not null]
- name text
- description text
- vehicle_description text
- starts datetime
-
- created_at timestamp
- updated_at timestamp
- */
-
-// liste an namen der teilnehmer inkl status ob angefragt/angenommen je nach dem ob man fahrer ist oder nicht [GetRiderDTO]
-
 import Foundation
 
 public struct GetSpecialRideDetailDTO: Codable {

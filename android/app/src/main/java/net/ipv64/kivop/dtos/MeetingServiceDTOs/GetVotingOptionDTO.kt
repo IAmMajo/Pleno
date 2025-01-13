@@ -1,6 +1,9 @@
 package net.ipv64.kivop.dtos.MeetingServiceDTOs
 
-data class GetVotingOptionDTO(
-    var index: UByte,
-    var text: String,
+import java.util.UUID
+import java.time.LocalDateTime
+
+data class GetVotingOptionDTO (
+    var index : UByte,
+    var text : String,
 )

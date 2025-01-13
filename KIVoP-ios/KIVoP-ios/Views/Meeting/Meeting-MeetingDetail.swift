@@ -116,7 +116,7 @@ struct MeetingDetailView: View {
 //                                    Text("\(voting.question)")
 //                                }
 //                            }
-                            Text("Test")
+                            Text("Hier werden die Abstimmungen stehen.")
                         }
                     }
                 }

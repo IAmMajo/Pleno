@@ -1,10 +1,3 @@
-// eigentlich requests tabelle
-
-// name des users
-// lat und long
-// itsMe boolean
-// status boolean: accepted
-
 import Foundation
 
 public struct GetRiderDTO: Codable {

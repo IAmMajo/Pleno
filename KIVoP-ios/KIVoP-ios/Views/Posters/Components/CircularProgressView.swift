@@ -38,10 +38,17 @@ struct CircularProgressView: View {
                )
             )
             .rotationEffect(.degrees(-90))
+            .overlay (
+            Text("\(value)/\(total)")
+               .font(.system(size: 18))
+               .fontWeight(.semibold)
+               .foregroundStyle(Color(UIColor.label).opacity(0.6).mix(with: getColor, by: 0.6))
+            )
       }
    }
 }
 
 #Preview {
    CircularProgressView(value: 2, total: 3, status: Status.hung)
+      .frame(maxWidth: 45, maxHeight: 45)
 }

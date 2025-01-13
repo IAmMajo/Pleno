@@ -9,9 +9,12 @@ import SwiftUI
 import MeetingServiceDTOs
 
 struct Votings_VotingsSectionView: View {
+   @StateObject private var votingService = VotingService.shared
+   @StateObject private var meetingViewModel = MeetingViewModel()
+   
    var votingsView: VotingsView
    
-   let votingGroup: [GetVotingDTO]
+   @State var votingGroup: [GetVotingDTO]
    let mockVotingResults: GetVotingResultsDTO
    var onVotingSelected: (GetVotingDTO) -> Void
    
@@ -25,24 +28,9 @@ struct Votings_VotingsSectionView: View {
    
     var body: some View {
        Section(header: Text(meetingName)) {
-          ForEach(votingViewModels) { viewModel in
+          ForEach(votingViewModels, id: \.id) { viewModel in
              if (viewModel.voting.startedAt == nil) {
              } else {
-//                HStack {
-//                   Text(viewModel.voting.question)
-//                      .frame(maxWidth: .infinity, alignment: .leading)
-//                   Spacer()
-//                   Image(systemName: "\(viewModel.status)")
-//                      .foregroundStyle(viewModel.symbolColor)
-//                   Spacer()
-//                }
-//                .contentShape(Rectangle())
-//                .onTapGesture {
-//                   onVotingSelected(viewModel.voting)
-//                }
-//                .task {
-//                   await viewModel.loadSymbolColorAndStatus()
-//                }
                 Votings_VotingRowView(viewModel: viewModel, onVotingSelected: onVotingSelected)
              }
           }
@@ -52,19 +40,28 @@ struct Votings_VotingsSectionView: View {
              await initializeViewModelsAndMeetingName()
           }
        }
+       .onChange(of: votingGroup) { old, newValue in
+          Task {
+//             print("SectionView: votingGroup changed")
+             await initializeViewModelsAndMeetingName()
+          }
+       }
     }
    
    private func initializeViewModelsAndMeetingName() async {
-          votingViewModels = votingGroup.map { VotingViewModel(voting: $0) }
-          await loadMeetingName(votingGroup: votingGroup)
+//          votingViewModels = votingGroup.map { VotingViewModel(voting: $0) }
+//          await loadMeetingName(votingGroup: votingGroup)
+      if votingViewModels.isEmpty || votingViewModels.count != votingGroup.count {
+         votingViewModels = votingGroup.map { VotingViewModel(voting: $0) }
+//         print("initializeViewModelsAndMeetingName votingViewModels reinitialized")
       }
+      await loadMeetingName(votingGroup: votingGroup)
+//      print("initializeViewModelsAndMeetingName executed")
+   }
    
    private func loadMeetingName(votingGroup: [GetVotingDTO]) async {
-      isLoading = true
-      error = nil
       do {
-         let meeting = try await APIService.shared.fetchMeeting(by: votingGroup.first!.meetingId)
-         
+         let meeting = try await meetingViewModel.fetchMeeting(byId: votingGroup.first!.meetingId)
          let status = meeting.status
          if(status == MeetingStatus.inSession) {
             meetingName = "Aktuelle Sitzung"
@@ -72,63 +69,9 @@ struct Votings_VotingsSectionView: View {
             meetingName = "\(meeting.name) - \(DateTimeFormatter.formatDate(meeting.start))"
          }
       } catch {
-         print("error: ", error)
+         print("Error fetching meeting: \(error.localizedDescription)")
       }
-      isLoading = false
    }
-   
-//   func setSymbolColorAndStatus(voting: GetVotingDTO) async {
-//      isLoading = true
-//      error = nil
-//      do {
-//         let results = try await APIService.shared.fetchVotingResults(by: voting.id)
-////         let results = mockVotingResults
-//         if (results.myVote != nil) {
-//            voteCastedSymbolColor = .blue
-//            voteCastedStatus = "checkmark"
-//         } else {
-//            voteCastedSymbolColor = voting.isOpen ? .orange : .black
-//            voteCastedStatus = voting.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
-//         }
-//      } catch {
-//         print("error: ", error)
-//         voteCastedSymbolColor = voting.isOpen ? .orange : .black
-//         print("voteCastedSymbolColor: \(voteCastedSymbolColor)")
-//         voteCastedStatus = voting.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
-//         print("voteCastStatus: \(voteCastedStatus)")
-//      }
-//      isLoading = false
-//   }
-   
-   
-   //   func getMeetingName(votingGroup: [GetVotingDTO]) -> String {
-   //      let status = votingsView.getMeeting(meetingID: votingGroup.first!.meetingId).status
-   //      if(status == MeetingStatus.inSession) {
-   //         return "Aktuelle Sitzung"
-   //      } else {
-   //         return "\(votingsView.getMeeting(meetingID: votingGroup.first!.meetingId).name) - \(DateTimeFormatter.formatDate(votingsView.getMeeting(meetingID: votingGroup.first!.meetingId).start))"
-   //      }
-   //   }
-   
-//   func getVotingResults(votingID: UUID) -> GetVotingResultsDTO {
-//      return mockVotingResults
-//   }
-//   
-//   func voteCastedSymbolColor (voting: GetVotingDTO) -> Color {
-//      if (getVotingResults(votingID: voting.id).myVote != nil) {
-//         return .blue
-//      } else {
-//         return voting.isOpen ? .orange : .black
-//      }
-//   }
-//   
-//   func voteCastedStatus (voting: GetVotingDTO) -> String {
-//      if (getVotingResults(votingID: voting.id).myVote != nil) {
-//         return "checkmark"
-//      } else {
-//         return voting.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
-//      }
-//   }
 }
 
 #Preview {

@@ -84,11 +84,11 @@ public enum Status: String, Codable {
    case expired
 }
 
-let mockPosterPosition1: PosterPosition = PosterPosition(
+let mockPosterPosition1: PosterPosition = PosterPosition( //poster1
    id: UUID(),
    responsibleUserIds: [mockIdentity1.id, mockIdentity2.id],
-   latitude: 0,
-   longitude: 0,
+   latitude: 51.500603516488205,
+   longitude: 6.545327532716446,
    status: Status.expired,
    imageBase64: "bild",
    expiresAt: Date.now,
@@ -104,11 +104,11 @@ let mockPosterPosition2: PosterPosition = PosterPosition(
    expiresAt: Calendar.current.date(byAdding: .day, value: 1, to: Date())!,
    postedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!
 )
-let mockPosterPosition3: PosterPosition = PosterPosition(
+let mockPosterPosition3: PosterPosition = PosterPosition( //poster1
    id: UUID(),
    responsibleUserIds: [mockIdentity1.id],
-   latitude: 0,
-   longitude: 0,
+   latitude: 51.500903516488205,
+   longitude: 6.545927532716446,
    status: Status.notDisplayed,
    imageBase64: "bild",
    expiresAt: Calendar.current.date(byAdding: .day, value: 16, to: Date())!,
@@ -124,21 +124,21 @@ let mockPosterPosition4: PosterPosition = PosterPosition(
    expiresAt: Calendar.current.date(byAdding: .day, value: 30, to: Date())!,
    postedAt: Calendar.current.date(byAdding: .day, value: -2, to: Date())!
 )
-let mockPosterPosition5: PosterPosition = PosterPosition(
+let mockPosterPosition5: PosterPosition = PosterPosition( //poster1
    id: UUID(),
    responsibleUserIds: [mockIdentity1.id],
-   latitude: 0,
-   longitude: 0,
+   latitude: 51.500653516488205,
+   longitude: 6.545387532716446,
    status: Status.expired,
    imageBase64: "bild",
    expiresAt: Date.now,
    postedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!
 )
-let mockPosterPosition6: PosterPosition = PosterPosition(
+let mockPosterPosition6: PosterPosition = PosterPosition( //poster1
    id: UUID(),
    responsibleUserIds: [mockIdentity1.id],
-   latitude: 0,
-   longitude: 0,
+   latitude: 51.500604516488205,
+   longitude: 6.545322532716446,
    status: Status.takenDown,
    imageBase64: "bild",
    expiresAt: Calendar.current.date(byAdding: .day, value: 1, to: Date())!,

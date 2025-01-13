@@ -73,24 +73,28 @@
         }
       }
     },
-    "%lld" : {
-
-    },
-    "%u / %u" : {
+    "%@° N, %@° E" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "%1$u / %2$u"
+            "value" : "%1$@° N, %2$@° E"
           }
         }
       }
     },
-    "1/4" : {
+    "%lld" : {
 
     },
-    "2/3" : {
-
+    "%lld/%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
     },
     "8/12" : {
 
@@ -505,12 +509,6 @@
     "Auswahl" : {
 
     },
-    "Auto und Sitzplätze" : {
-
-    },
-    "Baut Adrian noch" : {
-
-    },
     "Bearbeiten" : {
       "localizations" : {
         "de" : {
@@ -536,19 +534,10 @@
     "Beschreibung" : {
 
     },
-    "Beschreibung Auto" : {
-
-    },
-    "Beschreibung oder weitere Infos zu deiner Fahrt" : {
-
-    },
     "Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt." : {
 
     },
     "Bist du sicher, dass du das Plakat abhängen möchtest?" : {
-
-    },
-    "Bitte füllen Sie alle Felder aus. Das Startdatum muss außerdem in der Zukunft liegen." : {
 
     },
     "Bitte klicke nun auf den " : {
@@ -573,9 +562,6 @@
         }
       }
     },
-    "Bitte wähle, ob du eine Event Fahrt oder eine Sonderfahrt anlegen möchtest." : {
-
-    },
     "Code scannen" : {
       "localizations" : {
         "de" : {
@@ -591,9 +577,6 @@
           }
         }
       }
-    },
-    "Copy" : {
-
     },
     "Count" : {
 
@@ -623,16 +606,10 @@
         }
       }
     },
-    "Deine Fahrt wird dann veröffentlicht und andere können dieser beitreten." : {
+    "Die Abstimmung läuft noch. Du hast bereits abgestimmt." : {
 
     },
-    "Deine gesamten Änderungen gehen verloren!" : {
-
-    },
-    "Details der Fahrt" : {
-
-    },
-    "Die Abstimmung läuft noch" : {
+    "Die Abstimmungsergebnisse konnten nicht geladen werden" : {
 
     },
     "Die Passwörter stimmen nicht überein." : {
@@ -653,9 +630,6 @@
           }
         }
       }
-    },
-    "Du hast bereits abgestimmt. In Zukunft werden hier die Live-Ergebnisse einer offenen Abstimmung angezeigt." : {
-
     },
     "Du kannst deine Wahl danach nciht mehr ändern!" : {
 
@@ -741,23 +715,15 @@
         }
       }
     },
-    "Event" : {
-
-    },
-    "Event Fahrt" : {
-
-    },
-    "Events" : {
-
-    },
-    "Fahrer" : {
-
-    },
-    "Fahrgemeinschaften" : {
-
-    },
-    "Fahrt löschen" : {
-
+    "Es haben %lld von %lld Personen abgestimmt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Es haben %1$lld von %2$lld Personen abgestimmt."
+          }
+        }
+      }
     },
     "Fast fertig" : {
       "extractionState" : "manual",
@@ -785,13 +751,7 @@
     "Fast Fertig" : {
 
     },
-    "Fehler" : {
-
-    },
     "Franz" : {
-
-    },
-    "Freie Plätze" : {
 
     },
     "Galerie" : {
@@ -815,9 +775,6 @@
           }
         }
       }
-    },
-    "Geokoordinaten" : {
-
     },
     "Hallo" : {
 
@@ -870,7 +827,13 @@
     "Heinz-Peters" : {
 
     },
+    "Hier werden die Abstimmungen stehen." : {
+
+    },
     "In der alten Turnhalle hinter dem Friedhof\nAltes Grab 5 b, 42069 Hölle" : {
+
+    },
+    "In Zwischenablage kopiert" : {
 
     },
     "Ja" : {
@@ -950,6 +913,9 @@
         }
       }
     },
+    "Keine Abstimmungen gefunden" : {
+
+    },
     "Keine Abstimmungen gefunden." : {
 
     },
@@ -957,12 +923,6 @@
 
     },
     "Keine anstehenden Sitzungen." : {
-
-    },
-    "Keine Fahrzeugbeschreibung vorhanden." : {
-
-    },
-    "Keine Mitfahrer" : {
 
     },
     "Keine Sitzung verfügbar" : {
@@ -1034,6 +994,9 @@
         }
       }
     },
+    "Live-Status" : {
+
+    },
     "Loading meetings..." : {
 
     },
@@ -1087,9 +1050,6 @@
     "Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position" : {
 
     },
-    "Meine Fahrten" : {
-
-    },
     "Mit " : {
       "localizations" : {
         "de" : {
@@ -1111,9 +1071,6 @@
           }
         }
       }
-    },
-    "Mitfahrer" : {
-
     },
     "Mitglieder" : {
       "localizations" : {
@@ -1179,12 +1136,6 @@
     "Möchtest du wirklich abstimmen" : {
 
     },
-    "Möchtest du wirklich speichern?" : {
-
-    },
-    "Möchtest du wirklich zurück?" : {
-
-    },
     "Nach Meeting suchen" : {
 
     },
@@ -1210,9 +1161,6 @@
         }
       }
     },
-    "Name der Fahrt" : {
-
-    },
     "Name eingeben" : {
 
     },
@@ -1233,12 +1181,6 @@
       }
     },
     "Neu laden" : {
-
-    },
-    "Neue Fahrt" : {
-
-    },
-    "Neue Fahrt anbieten" : {
 
     },
     "Neues Passwort" : {
@@ -1338,7 +1280,7 @@
     "Öffnen mit Google Maps" : {
 
     },
-    "OK" : {
+    "Öffnen mit Waze" : {
 
     },
     "Option" : {
@@ -1472,9 +1414,6 @@
     "Plakate" : {
 
     },
-    "Planned Ride for %@" : {
-
-    },
     "Pleno " : {
 
     },
@@ -1545,6 +1484,9 @@
       }
     },
     "Protokoll" : {
+
+    },
+    "Protokoll öffnen in" : {
 
     },
     "Protokoll:" : {
@@ -1689,12 +1631,6 @@
         }
       }
     },
-    "Sonderfahrt" : {
-
-    },
-    "Sonderfahrten" : {
-
-    },
     "Speichern" : {
       "localizations" : {
         "de" : {
@@ -1721,12 +1657,6 @@
 
     },
     "Start: %@" : {
-
-    },
-    "Startort" : {
-
-    },
-    "Startzeit" : {
 
     },
     "Suchen" : {
@@ -1795,9 +1725,6 @@
           }
         }
       }
-    },
-    "Test" : {
-
     },
     "Umfragen, " : {
       "localizations" : {
@@ -1984,12 +1911,6 @@
         }
       }
     },
-    "Wähle die Art der Fahrt" : {
-
-    },
-    "Wählen Sie ein Event" : {
-
-    },
     "Weiter" : {
       "localizations" : {
         "de" : {
@@ -2012,9 +1933,6 @@
         }
       }
     },
-    "Wird vom Event ausgelesen" : {
-
-    },
     "Wirklich abmelden?" : {
       "localizations" : {
         "de" : {
@@ -2036,12 +1954,6 @@
           }
         }
       }
-    },
-    "Zielort" : {
-
-    },
-    "Zielort - als Bild" : {
-
     },
     "zu einer verbesserten " : {
       "localizations" : {

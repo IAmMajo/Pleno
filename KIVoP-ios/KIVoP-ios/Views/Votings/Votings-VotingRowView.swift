@@ -17,8 +17,10 @@ struct Votings_VotingRowView: View {
                Text(viewModel.voting.question)
                    .frame(maxWidth: .infinity, alignment: .leading)
                Spacer()
-               Image(systemName: viewModel.status)
-                   .foregroundStyle(viewModel.symbolColor)
+              if viewModel.status != "" {
+                 Image(systemName: viewModel.status)
+                    .foregroundStyle(viewModel.symbolColor)
+              }
                Spacer()
            }
            .contentShape(Rectangle())
@@ -27,6 +29,12 @@ struct Votings_VotingRowView: View {
            }
            .task {
                await viewModel.loadSymbolColorAndStatus()
+           }
+           .onChange(of: viewModel.voting.isOpen) { old, newValue in
+              Task {
+//                 print("RowView: viewModel.voting changed")
+                 await viewModel.loadSymbolColorAndStatus()
+              }
            }
        }
 }
