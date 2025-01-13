@@ -1,7 +1,5 @@
 x-shared_environment: &shared_environment
   DATABASE_HOST: postgres
-  DATABASE_USERNAME: vapor
-  DATABASE_PASSWORD: example
   DATABASE_NAME: kivop
 
 services:                                                                                                                                      
@@ -54,6 +52,8 @@ services:
       - postgres
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${CONFIG_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${CONFIG_SERVICE_POSTGRES_PASSWORD:?error}
     labels:
       traefik.enable: true
       traefik.http.routers.config-service.rule: PathPrefix(`/config-service`) || PathPrefix(`/config`)
@@ -71,6 +71,8 @@ services:
     container_name: kivop-config-service-migration
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${CONFIG_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${CONFIG_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
       - postgres
     command: ["migrate", "--yes"]
@@ -85,6 +87,8 @@ services:
     container_name: kivop-config-service-revert
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${CONFIG_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${CONFIG_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
       - postgres
     command: ["migrate", "--revert", "--yes"]
@@ -102,6 +106,8 @@ services:
       - config-service
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${MEETING_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${MEETING_SERVICE_POSTGRES_PASSWORD:?error}
     labels:
       traefik.enable: true
       traefik.http.routers.meeting-service.rule: PathPrefix(`/meeting-service`) || PathPrefix(`/meeting`)
@@ -119,6 +125,8 @@ services:
     container_name: kivop-meeting-service-migration
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${MEETING_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${MEETING_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
       - postgres
     command: ["migrate", "--yes"]
@@ -133,6 +141,8 @@ services:
     container_name: kivop-meeting-service-revert
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${MEETING_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${MEETING_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
       - postgres
     command: ["migrate", "--revert", "--yes"]
@@ -150,6 +160,8 @@ services:
      - config-service
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${AUTH_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${AUTH_SERVICE_POSTGRES_PASSWORD:?error}
     labels:
       traefik.enable: true
       traefik.http.routers.auth-service.rule: PathPrefix(`/auth-service`) || PathPrefix(`/auth`) || PathPrefix(`/users`) || PathPrefix(`/.well-known`)
@@ -167,6 +179,8 @@ services:
     container_name: kivop-auth-service-migration
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${AUTH_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${AUTH_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
       - postgres
     command: ["migrate", "--yes"]
@@ -181,6 +195,8 @@ services:
     container_name: kivop-auth-service-revert
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${AUTH_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${AUTH_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
       - postgres
     command: ["migrate", "--revert", "--yes"]
@@ -198,6 +214,8 @@ services:
       - config-service
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${NOTIFICATIONS_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${NOTIFICATIONS_SERVICE_POSTGRES_PASSWORD:?error}
     env_file: ./../.env
     labels:
       traefik.enable: true
@@ -219,6 +237,8 @@ services:
      - config-service
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${POSTER_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${POSTER_SERVICE_POSTGRES_PASSWORD:?error}
     labels:
       traefik.enable: true
       traefik.http.routers.poster-service.rule: PathPrefix(`/poster-service`) || PathPrefix(`/posters`)
@@ -238,6 +258,8 @@ services:
     container_name: kivop-poster-service-migration
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${POSTER_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${POSTER_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
       - postgres
     command: ["migrate", "--yes"]
@@ -252,6 +274,8 @@ services:
     container_name: kivop-poster-service-revert
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${POSTER_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${POSTER_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
       - postgres
     command: ["migrate", "--revert", "--yes"]
@@ -269,6 +293,8 @@ services:
       - config-service
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${RIDE_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${RIDE_SERVICE_POSTGRES_PASSWORD:?error}
     labels:
       traefik.enable: true
       traefik.http.routers.ride-service.rule: PathPrefix(`/ride-service`) || PathPrefix(`/ride`) || PathPrefix(`/specialrides`)
@@ -286,6 +312,8 @@ services:
     container_name: kivop-ride-service-migration
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${RIDE_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${RIDE_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
       - postgres
     command: ["migrate", "--yes"]
@@ -300,6 +328,8 @@ services:
     container_name: kivop-ride-service-revert
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${RIDE_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${RIDE_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
       - postgres
     command: ["migrate", "--revert", "--yes"]
@@ -317,6 +347,8 @@ services:
      - config-service
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${AI_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${AI_SERVICE_POSTGRES_PASSWORD:?error}
     env_file: ./../.env
     labels:
       traefik.enable: true
