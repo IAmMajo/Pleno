@@ -1,8 +1,5 @@
-import Fluent
 import Vapor
-import Models
+import AuthServiceDTOs
 
-public struct TokenResponseDTO: Content {
-    public var token: String?
-}
+extension TokenResponseDTO: @retroactive Content, @unchecked @retroactive Sendable {}
 

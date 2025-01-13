@@ -2,6 +2,7 @@ import Fluent
 import Vapor
 import Models
 import JWT
+import AuthServiceDTOs
 
 struct AuthController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -19,11 +20,19 @@ struct AuthController: RouteCollection {
         )
         
         //Email Verifizieren
-        authRoutes.get("email", "verify", ":code", use: self.verifyEmail).openAPI(
+        authRoutes.get("email", "verify",":email", ":code", use: self.verifyEmail).openAPI(
             summary: "Verify email",
-            description: "Verify email with code. HTML = without Query for Browser, API = Route/code/?statusCodeResponse=true",
+            description: "Verify email with code. HTML = without Query for Browser, API = Route/Email/Code?statusCodeResponse=true",
             response: .type(HTTPResponseStatus.self)
         )
+        .response(statusCode: 204, description: "Email successfully verified")
+        .response(statusCode: 400, description: "Bad Request. Invalid or missing email/code")
+        .response(statusCode: 404, description: "Verification code not found")
+        .response(statusCode: 409, description: "Conflict. Verification failed due to status being already failed")
+        .response(statusCode: 410, description: "Gone. Verification code has expired")
+        .response(statusCode: 208, description: "Already Reported")
+        .response(statusCode: 500, description: "Internal Server Error")
+        
 
         // geschützte Auth-Routen
         let protectedRoutes = authRoutes.grouped(authMiddleware)
@@ -156,36 +165,60 @@ struct AuthController: RouteCollection {
         }
             
         guard let code = req.parameters.get("code", as: String.self) else {
-            throw Abort(.badRequest, reason: "Invalid or missing code")
+            throw Abort(.badRequest, reason: "Missing code")
         }
-        guard let verification = try await EmailVerification.query(on: req.db)
-            .filter(\.$code == code)
-            .first() else {
+        
+        guard let email = req.parameters.get("email", as: String.self) else {
+            throw Abort(.badRequest, reason: "Missing email")
+        }
+                
+        guard let verification = try await EmailVerification.find(email, on: req.db) else {
             if statusCodeResponse == true {
                 return Response(status: .notFound)
             } else {
                 return req.fileio.streamFile(at: "Resources/Views/emailVerificationFailed.html")
             }
         }
+        
         guard verification.status == .pending else {
-            if statusCodeResponse == true {
-                return Response(status: .alreadyReported)
-            } else {
-                return req.fileio.streamFile(at: "Resources/Views/emailVerificationVerified.html")
+            if verification.status == .failed {
+                if statusCodeResponse == true {
+                    return Response(status: .conflict)
+                } else {
+                    return req.fileio.streamFile(at: "Resources/Views/emailVerificationFailed.html")
+                }
             }
+            if verification.status == .verified {
+                if statusCodeResponse == true {
+                    return Response(status: .alreadyReported)
+                } else {
+                    return req.fileio.streamFile(at: "Resources/Views/emailVerificationVerified.html")
+                }
+            }
+            throw Abort(.internalServerError)
         }
-        let expiresAt = verification.expiresAt!
-        guard expiresAt > Date() else {
+        
+        guard let expiresAt = verification.expiresAt, expiresAt > Date() else {
             if statusCodeResponse == true {
                 return Response(status: .gone)
             }
             return req.fileio.streamFile(at: "Resources/Views/emailVerificationFailed.html")
         }
         
+        guard verification.code == code else {
+            verification.status = .failed
+            try await verification.update(on: req.db)
+            if statusCodeResponse == true {
+                return Response(status: .notFound)
+            } else {
+                return req.fileio.streamFile(at: "Resources/Views/emailVerificationFailed.html")
+            }
+        }
+            
         verification.status = .verified
         verification.verifiedAt = Date()
         
-        try await verification.save(on: req.db)
+        try await verification.update(on: req.db)
         
         if statusCodeResponse == true {
             return Response(status: .noContent)

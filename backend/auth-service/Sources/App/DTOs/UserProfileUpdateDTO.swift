@@ -1,13 +1,8 @@
-import Fluent
 import Vapor
+import AuthServiceDTOs
 
-public struct UserProfileUpdateDTO: Content, Sendable {
-    public var name: String?
-    public var profileImage: Data?
-}
-
-extension UserProfileUpdateDTO: Validatable {
-    static public func validations(_ validations: inout Validations) {
+extension UserProfileUpdateDTO: @retroactive Content, @unchecked @retroactive Sendable, @retroactive Validatable {
+    public static func validations(_ validations: inout Vapor.Validations) {
         validations.add("name", as: String.self, is: !.empty, required: false)
         validations.add("profileImage", as: Data.self, required: false)
     }

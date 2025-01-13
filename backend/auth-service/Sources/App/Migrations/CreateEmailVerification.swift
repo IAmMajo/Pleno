@@ -10,15 +10,15 @@ struct CreateEmailVerification: AsyncMigration {
                     .create()
 
         try await database.schema(EmailVerification.schema)
-            .id()
+            .field("email", .string, .identifier(auto: false))
             .field("user_id", .uuid, .required, .references(User.schema, "id", onDelete: .cascade))
-            .field("email", .string, .required)
             .field("code", .string, .required)
             .field("status", verificationStatus)
             .field("expires_at", .datetime)
             .field("created_at", .datetime, .required, .custom("DEFAULT CURRENT_TIMESTAMP"))
             .field("verified_at", .datetime)
-            .unique(on: "code")
+            .unique(on: "user_id")
+            .unique(on: "email")
             .create()
     }
 
