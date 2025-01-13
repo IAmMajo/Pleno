@@ -4,14 +4,11 @@ import Vapor
 public final class EmailVerification: Model, Content, @unchecked Sendable {
     public static let schema = "email_verifications"
     
-    @ID(key: .id)
-    public var id: UUID?
+    @ID(custom: "email", generatedBy: .user)
+    public var id: String?
     
     @Parent(key: "user_id")
     public var user: User
-    
-    @Field(key: "email")
-    public var email: String
     
     @Field(key: "code")
     public var code: String
@@ -28,12 +25,12 @@ public final class EmailVerification: Model, Content, @unchecked Sendable {
     @Timestamp(key: "verified_at", on: .none)
     public var verifiedAt: Date?
     
+    
     public init() { }
 
-    public init(id: UUID? = nil, user: User.IDValue, email: String, code: String, status: VerificationStatus, expiresAt: Date) {
-        self.id = id
+    public init(email: String, user: User.IDValue, code: String, status: VerificationStatus, expiresAt: Date) {
+        self.id = email
         self.$user.id = user
-        self.email = email
         self.code = code
         self.status = status
         self.expiresAt = expiresAt

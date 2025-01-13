@@ -1,8 +1,4 @@
 import Vapor
-import Fluent
+import AuthServiceDTOs
 
-public struct ResetPasswordDTO: Content {
-    public var email: String?
-    public var resetCode: String?
-    public var newPassword: String?
-}
+extension ResetPasswordDTO: @retroactive Content, @unchecked @retroactive Sendable {}

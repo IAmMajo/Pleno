@@ -1,8 +1,5 @@
-import Fluent
 import Vapor
+import AuthServiceDTOs
 
-public struct ChangePasswordDTO: Content {
-    public var oldPassword: String?
-    public var newPassword: String?
-}
+extension ChangePasswordDTO: @retroactive Content, @unchecked @retroactive Sendable {}
 

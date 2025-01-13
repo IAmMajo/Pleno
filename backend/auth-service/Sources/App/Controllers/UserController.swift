@@ -3,6 +3,7 @@ import Vapor
 import Models
 import JWT
 import NotificationsServiceDTOs
+import AuthServiceDTOs
 
 extension SendEmailDTO: @retroactive AsyncResponseEncodable {}
 extension SendEmailDTO: @retroactive AsyncRequestDecodable {}
@@ -50,7 +51,7 @@ struct UserController: RouteCollection {
             responseContentType: .application(.json),
             auth: .bearer()
         )
-        protectedRoutes.on(.PATCH, "profile", body: .collect(maxSize: "7000kb"), use: self.updateProfile).openAPI(
+        protectedRoutes.on(.PATCH, "profile", body: .collect(maxSize: "7000kb"), use: self.userUpdateUserProfile).openAPI(
             summary: "Update profile",
             description: "Update identity and/or profileImage",
             body: .type(UserProfileUpdateDTO.self),
@@ -58,6 +59,13 @@ struct UserController: RouteCollection {
             auth: .bearer()
         )
         
+        protectedRoutes.on(.PATCH, "profile", ":id", body: .collect(maxSize: "7000kb"), use: self.adminUpdateUserProfile).openAPI(
+            summary: "Admin Update user profile",
+            description: "Admin Update identity and/or profileImage",
+            body: .type(UserProfileUpdateDTO.self),
+            response: .type(HTTPResponseStatus.self),
+            auth: .bearer()
+        )
         
         // GET /users -> alle User
         protectedRoutes.get(use: self.getAllUsers).openAPI(
@@ -151,15 +159,37 @@ struct UserController: RouteCollection {
     }
     
     @Sendable
-    func updateProfile(req: Request) async throws -> HTTPStatus {
-        // parse and verify jwt token
-        let token = try req.jwt.verify(as: JWTPayloadDTO.self)
-        
+    func adminUpdateUserProfile(req: Request) async throws -> HTTPStatus {
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        guard payload.isAdmin == true else {
+            throw Abort(.forbidden, reason: "User is not an admin")
+        }
+        guard let userID = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing user id")
+        }
+        return try await updateProfile(req: req, userID: userID)
+    }
+    
+    @Sendable
+    func userUpdateUserProfile(req: Request) async throws -> HTTPStatus {
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
+        guard let userID = payload.userID else {
+            throw Abort(.internalServerError)
+        }
+        return try await updateProfile(req: req, userID: userID)
+    }
+    
+    
+    func updateProfile(req: Request, userID: UUID) async throws -> HTTPStatus {
         // decode updates
         let update = try req.content.decode(UserProfileUpdateDTO.self)
         
         /// **Verbesserungsvorschlag**:
-        guard let userID = token.userID, let user = try await User.find(userID, on: req.db) else {
+        guard let user = try await User.find(userID, on: req.db) else {
             throw Abort(.unauthorized)
         }
         let oldIdentity = try await user.$identity.get(on: req.db)
@@ -226,11 +256,10 @@ struct UserController: RouteCollection {
                 guard response.status == .noContent else {
                     throw Abort(response.status) // Should never be necessary (except for wrong response status definitions)
                 }
-            } catch { 
+            } catch {
                 return .multiStatus
             }
         }
-        
         return .ok
     }
     
@@ -243,20 +272,22 @@ struct UserController: RouteCollection {
         guard let user = try await User.query(on: req.db)
             .filter(\.$id == token.userID!)
             .with(\.$identity)
+            .with(\.$emailVerification)
             .first() else {
             throw Abort(.notFound)
         }
         
         // build reponse object
-        var response = UserProfileDTO()
-        response.uid = user.id
-        response.email = user.email
-        response.isAdmin = user.isAdmin
-        response.isActive = user.isActive
-        response.createdAt = user.createdAt
-        response.name = user.identity.name
-        response.profileImage = user.profileImage
-        
+        let response = UserProfileDTO(
+            uid: user.id!,
+            email: user.email,
+            name: user.identity.name,
+            profileImage: user.profileImage,
+            isAdmin: user.isAdmin,
+            isActive: user.isActive,
+            emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue),
+            createdAt: user.createdAt
+        )
         return response
     }
     
@@ -315,8 +346,8 @@ struct UserController: RouteCollection {
         // save history entry
         try await history.save(on: req.db)
         
-        let registeredUser = UserProfileDTO(
-            uid: user.id,
+        var registeredUser = UserProfileDTO(
+            uid: user.id!,
             email: user.email,
             name: identity.name,
             profileImage: user.profileImage,
@@ -326,18 +357,22 @@ struct UserController: RouteCollection {
         )
         
         let verificationCode = String(format: "%06d", Int.random(in: 0...999999))
-        
+            
         let emailVerification = EmailVerification(
-            user: user.id!,
             email: user.email,
+            user: user.id!,
             code: verificationCode,
             status: .pending,
             expiresAt: Date().addingTimeInterval(3600)
         )
-            
+        
         try await emailVerification.save(on: req.db)
         
-        let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(verificationCode)"
+        registeredUser.emailVerification = VerificationStatus(rawValue: emailVerification.status.rawValue)
+        
+        let emailString = try emailVerification.requireID()
+        
+        let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailString)/\(verificationCode)"
         
         let emailData = SendEmailDTO(
             receiver: user.email,
@@ -358,63 +393,67 @@ struct UserController: RouteCollection {
     
     @Sendable
     func resendVerificationEmail(req: Request) async throws -> Response {
+        // Übergibt Email aus Parameter
         guard let email = req.parameters.get("email", as: String.self) else {
             throw Abort(.badRequest, reason: "Invalid or missing email")
         }
         
-        guard let user = try await User.query(on: req.db)
-            .filter(\.$email == email)
-            .first() else {
-            throw Abort(.notFound, reason: "No user found with the given email")
+        // Sucht den Eintrag anhand der Email
+        guard let emailVerification = try await EmailVerification.find(email, on: req.db) else {
+            return Response(status: .ok, body: .init(string: "If the email exists, a new verification email has been sent."))
         }
         
-        guard let emailVerification = try await user.$emailVerification.get(on: req.db),
-              emailVerification.status == .pending else {
-            throw Abort(.badRequest, reason: "User's email has already been verified")
+        // Prüft ob der Eintrag noch nicht als verifiziert wurde
+        guard emailVerification.status != .verified else {
+            return Response(status: .alreadyReported, body: .init(string: "Email already verified"))
         }
         
+        // Prüft ob der Eintrag schon abgelaufen ist
         if emailVerification.expiresAt! < Date() {
             let newVerificationCode = String(format: "%06d", Int.random(in: 0...999999))
-            
+                    
+            if emailVerification.status == .failed {
+                emailVerification.status = .pending
+            }
             emailVerification.code = newVerificationCode
             emailVerification.expiresAt = Date().addingTimeInterval(3600)
             
             try await emailVerification.save(on: req.db)
             
-            let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(newVerificationCode)"
+            let emailString = try emailVerification.requireID()
+            
+            let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailString)/\(emailVerification.code)"
             
             let emailData = SendEmailDTO(
-                receiver: user.email,
+                receiver: emailString,
                 subject: "Email-Verifizierung",
                 message: "Verifizierungslink: \(verifyLink)"
             )
             
-            let response = try await req.client.post("https://kivop.ipv64.net/email") { request in
-                try request.content.encode(emailData)
-            }
-            
-            guard response.status == .ok else {
-                throw Abort(.internalServerError, reason: "Failed to send email: \(response.status)")
-            }
-            return Response(status: .ok, body: .init(string: "A new verification email has been sent"))
+            _ = try await req.client.post("https://kivop.ipv64.net/email", content: emailData)
+    
+            return Response(status: .ok, body: .init(string: "If the email exists, a new verification email has been sent."))
         } else {
-
-            let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailVerification.code)"
+            if emailVerification.status == .failed {
+                emailVerification.status = .pending
+                let newVerificationCode = String(format: "%06d", Int.random(in: 0...999999))
+                emailVerification.code = newVerificationCode
+                try await emailVerification.update(on: req.db)
+            }
+            
+            let emailString = try emailVerification.requireID()
+            
+            let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailString)/\(emailVerification.code)"
             
             let emailData = SendEmailDTO(
-                receiver: user.email,
+                receiver: emailString,
                 subject: "Email-Verifizierung",
                 message: "Verifizierungslink: \(verifyLink)"
             )
             
-            let response = try await req.client.post("https://kivop.ipv64.net/email") { request in
-                try request.content.encode(emailData)
-            }
+            _ = try await req.client.post("https://kivop.ipv64.net/email", content: emailData)
             
-            guard response.status == .ok else {
-                throw Abort(.internalServerError, reason: "Failed to send email: \(response.status)")
-            }
-            return Response(status: .ok, body: .init(string: "A new verification email has been sent"))
+            return Response(status: .ok, body: .init(string: "If the email exists, a new verification email has been sent."))
         }
     }
     
@@ -437,7 +476,7 @@ struct UserController: RouteCollection {
         
         for user in users {
             let profileDTO = UserProfileDTO(
-                uid: user.id,
+                uid: user.id!,
                 email: user.email,
                 name: user.identity.name,
                 profileImage: user.profileImage,
@@ -473,10 +512,10 @@ struct UserController: RouteCollection {
             .first() else {
             throw Abort(.notFound, reason: "User not found")
         }
-    
+        
         // Gibt ProfilDTO zurück
         return UserProfileDTO(
-            uid: user.id,
+            uid: user.id!,
             email: user.email,
             name: user.identity.name,
             profileImage: user.profileImage,
@@ -655,7 +694,7 @@ struct UserController: RouteCollection {
             throw Abort(.internalServerError, reason: "Error deleting user: \(error.localizedDescription)")
         }
     }
-     
+    
     @Sendable
     func userChangePassword(req: Request) async throws -> Response {
         guard let payload = req.jwtPayload else {
@@ -710,7 +749,7 @@ struct UserController: RouteCollection {
             subject: "Passwort zurücksetzen",
             message: "Einmal-Code: \(tokenEntry.token)"
         )
-
+        
         let response = try await req.client.post("https://kivop.ipv64.net/email") { request in
             try request.content.encode(emailData)
         }
@@ -750,6 +789,7 @@ struct UserController: RouteCollection {
         }
         return Response(status: .ok, body: .init(string: "Password has been reset successfully"))
     }
+    
 }
 
 extension Attendance: @retroactive Content { }
