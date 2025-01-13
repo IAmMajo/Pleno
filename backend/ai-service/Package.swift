@@ -33,7 +33,7 @@ let package = Package(
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "Models", package: "models"),
                 .product(name: "ConfigServiceDTOs", package: "dtos"),
-                // .product(name: "AIServiceDTOs", package: "dtos"),
+                .product(name: "AIServiceDTOs", package: "dtos"),
                 .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
             ],
             swiftSettings: swiftSettings
