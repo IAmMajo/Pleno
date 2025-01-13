@@ -127,7 +127,7 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.meeting-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/meeting-service`) || PathPrefix(`/meeting`))
+      traefik.http.routers.meeting-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/meeting-service`) || PathPrefix(`/meetings`))
       traefik.http.routers.meeting-service.middlewares: meeting-service-replace-path-regex
       traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.regex: ^/meeting-service(:/(.*))?
       traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.replacement: /$$1
