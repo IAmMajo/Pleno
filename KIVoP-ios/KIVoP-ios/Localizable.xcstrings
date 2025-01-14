@@ -441,6 +441,9 @@
     "Akzeptieren" : {
 
     },
+    "Alle nicht gespeicherten Änderungen gehen verloren!" : {
+
+    },
     "Alles im Blick?" : {
 
     },
@@ -804,10 +807,10 @@
     "Fahrgemeinschaften" : {
 
     },
-    "Fahrt bearbeiten!" : {
+    "Fahrt löschen" : {
 
     },
-    "Fahrt löschen" : {
+    "Fahrtbeschreibung" : {
 
     },
     "Fast fertig" : {
@@ -1474,6 +1477,9 @@
           }
         }
       }
+    },
+    "Ort" : {
+
     },
     "Passwort" : {
       "localizations" : {

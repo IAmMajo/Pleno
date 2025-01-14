@@ -124,7 +124,6 @@ class NewRideViewModel: ObservableObject {
         
         // Setze den Request-Body mit den DTO-Daten
         do {
-            print("Vorm encoden : \(specialRideDTO)")
             let jsonData = try encoder.encode(specialRideDTO)
             request.httpBody = jsonData
         } catch {
@@ -163,7 +162,6 @@ class NewRideViewModel: ObservableObject {
                 let specialRideDetail = try decoder.decode(GetSpecialRideDetailDTO.self, from: data)
                 self?.ride.id = specialRideDetail.id
                 DispatchQueue.main.async {
-                    print("Fahrt erstellt: \(specialRideDetail)")
                     self?.isSaved = true
                 }
             } catch {

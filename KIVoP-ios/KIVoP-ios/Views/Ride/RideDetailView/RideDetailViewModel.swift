@@ -5,6 +5,7 @@ import RideServiceDTOs
 class RideDetailViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
+    @Published var selectedOption: String // Für EventDetails anpassen
     @Published var rideDetail: GetSpecialRideDetailDTO
     @Published var requestedRiders: [GetRiderDTO] = []
     @Published var acceptedRiders: [GetRiderDTO] = []
@@ -23,6 +24,7 @@ class RideDetailViewModel: ObservableObject {
     
     init(ride: GetSpecialRideDTO) {
         self.ride = ride
+        self.selectedOption = "SonderFahrt"
         self.rideDetail = GetSpecialRideDetailDTO(
             id: nil,
             driverName: "",

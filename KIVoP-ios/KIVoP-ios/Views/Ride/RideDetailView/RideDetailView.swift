@@ -29,9 +29,17 @@ struct RideDetailView: View {
                     }
                     
                     List{
-                        Text("Zielort - als Bild")
-                        Text("Adresse")
-                        Text("Geokoordinaten")
+                        
+                        Section(header: Text("Fahrtbeschreibung")){
+                            Text(viewModel.rideDetail.description ?? "Keine Beschreibung vorhanden")
+                        }
+                        
+                        Section(header: Text("Ort")){
+                            Text("Zielort - als Bild")
+                            Text("Adresse")
+                            Text("Geokoordinaten")
+                        }
+
                         Section(header: Text("Beschreibung Auto")){
                             if let vehicleDescription = viewModel.rideDetail.vehicleDescription {
                                 Text(vehicleDescription)
@@ -165,20 +173,18 @@ struct RideDetailView: View {
                 }
             }
         }
-        .navigationTitle(viewModel.ride.name)
+        .navigationTitle(viewModel.rideDetail.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar{
             if viewModel.rideDetail.isSelfDriver {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Text("Fahrt bearbeiten!")
-//                    NavigationLink(destination: NewRideView(viewModel: NewRideViewModel(), rideViewModel: viewModel)) {
-//                        Text("Neue Fahrt anbieten")
-//                            .font(.body)
-//                    }
+                    NavigationLink(destination: EditSpecialRideView(viewModel: EditRideViewModel(ride: viewModel.rideDetail, selectedOption: viewModel.selectedOption))) {
+                        Text("Bearbeiten")
+                            .font(.body)
+                    }
                 }
             }
         }
-        
         // .sheet() für die Location Request
         .sheet(isPresented: $viewModel.showLocationRequest) {
             LocationRequestView(viewModel: viewModel)
