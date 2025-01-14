@@ -78,14 +78,21 @@ struct Posters_AddPositionView: View {
     var body: some View {
         HStack {
             // List of Poster Positions
-            List(posterPositions, id: \.posterId) { posterLocation in
+            List(0..<posterPositions.count, id: \.self) { index in
+                let posterLocation = posterPositions[index]
                 Button(action: {
                     zoomToLocation(latitude: posterLocation.latitude, longitude: posterLocation.longitude)
                 }) {
-                    Text("Lat: \(posterLocation.latitude), Lon: \(posterLocation.longitude)")
-                        .font(.body)
+                    VStack(alignment: .leading) {
+                        Text("Lat: \(posterLocation.latitude), Lon: \(posterLocation.longitude)")
+                            .font(.body)
+                        Text("Läuft ab: \(DateTimeFormatter.formatDate(posterLocation.expiresAt))")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                 }
             }
+            .navigationTitle("Poster Positions")
             .frame(width: 300)
             .background(Color.gray.opacity(0.1))
             
@@ -246,7 +253,6 @@ struct Posters_AddPositionView: View {
         
         // Create a new CreatePosterPositionDTO object
         let newPosterPosition = CreatePosterPositionDTO(
-            posterId: UUID(),
             latitude: currentLocation.latitude,
             longitude: currentLocation.longitude,
             responsibleUsers: selectedUsers,
