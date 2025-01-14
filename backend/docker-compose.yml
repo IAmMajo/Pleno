@@ -33,6 +33,7 @@ services:
     environment:
       POSTGRES_USER: vapor # only for development
       POSTGRES_PASSWORD: example # only for development
+      # PostgreSQL-Credentials
       AI_SERVICE_POSTGRES_USERNAME: ${AI_SERVICE_POSTGRES_USERNAME:?error}
       AI_SERVICE_POSTGRES_PASSWORD: ${AI_SERVICE_POSTGRES_PASSWORD:?error}
       RIDE_SERVICE_POSTGRES_USERNAME: ${RIDE_SERVICE_POSTGRES_USERNAME:?error}

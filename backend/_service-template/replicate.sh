@@ -177,9 +177,14 @@ CONFIG_SERVICE_SERVICE_TEMPLATE=",
                 active: true
             ) // Initialdaten für die Services einfügen: END"
 
+POSTGRES_CREDENTIAL_ENV_COMPOSE_TEMPLATE="# PostgreSQL-Credentials
+      ${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_USERNAME: \${${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_USERNAME:?error}
+      ${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_PASSWORD: \${${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_PASSWORD:?error}"
+
 ESCAPED_COMPOSE_TEMPLATE=$(echo "$COMPOSE_TEMPLATE" | awk '{if (NR > 1) printf "\\n"; printf "%s", $0}')
 ESCAPED_ROOT_COMPOSE_TEMPLATE=$(echo "$ROOT_COMPOSE_TEMPLATE" | awk '{if (NR > 1) printf "\\n"; printf "%s", $0}')
 ESCAPED_CONFIG_SERVICE_SERVICE_TEMPLATE=$(echo "$CONFIG_SERVICE_SERVICE_TEMPLATE" | awk '{if (NR > 1) printf "\\n"; printf "%s", $0}')
+ESCAPED_POSTGRES_CREDENTIAL_ENV_COMPOSE_TEMPLATE=$(echo "$POSTGRES_CREDENTIAL_ENV_COMPOSE_TEMPLATE" | awk '{if (NR > 1) printf "\\n"; printf "%s", $0}')
 
 cp -r . "../${SRVNAME}-service" && rm "../${SRVNAME}-service/replicate.sh" # Copy entire template to new service-folder and remove replicate.sh
 
@@ -194,6 +199,7 @@ find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swa
 find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swagger*" ! -path "*.swiftpm*" -print0 | xargs -0 sed -i '' -e "s/SRV_CONFIG_SERVICE_UUID_PLACEHOLDER/${SRV_CONFIG_SERVICE_UUID}/g"
 
 # Add service to /backend/docker-compose.yml and /docker-compose.yml
+sed -i '' -e "s;# PostgreSQL-Credentials$;${ESCAPED_POSTGRES_CREDENTIAL_ENV_COMPOSE_TEMPLATE};" ../docker-compose.yml
 sed -i '' -e "s;^# Volumes$;${ESCAPED_COMPOSE_TEMPLATE};" ../docker-compose.yml
 sed -i '' -e "s;^# Volumes$;${ESCAPED_ROOT_COMPOSE_TEMPLATE};" ../../docker-compose.yml
 
