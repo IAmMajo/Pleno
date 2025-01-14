@@ -7,18 +7,101 @@ import RideServiceDTOs
 
 struct EventController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
+        let openAPITag = TagObject(name: "Events")
+        
         let eventRoutes = routes.grouped("events")
         let adminEventRoutes = eventRoutes.grouped(AdminMiddleware())
         
+        // GET /events/
         eventRoutes.get("", use: getAllPlenoEvents)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Übersicht der Events abfragen.",
+                response: .type([GetEventDTO].self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
+        // GET /events/:id
         eventRoutes.get(":id", use: getPlenoEvent)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Details eines Events abfragen.",
+                path: .type(PlenoEvent.IDValue.self),
+                response: .type(GetEventDetailDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
+        // POST /events/
         adminEventRoutes.post("", use: newPlenoEvent)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Neues Event anlegen.",
+                body: .type(CreateEventDTO.self),
+                contentType: .application(.json),
+                response: .type(GetEventDetailDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .created,
+                auth: AdminMiddleware.schemeObject
+            )
+        // PATCH /events/:id
         adminEventRoutes.patch(":id", use: patchPlenoEvent)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Ein Event anpassen.",
+                path: .type(PlenoEvent.IDValue.self),
+                body: .type(PatchEventDTO.self),
+                contentType: .application(.json),
+                response: .type(GetEventDetailDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AdminMiddleware.schemeObject
+            )
+        // DELETE /events/:id
         adminEventRoutes.delete(":id", use: deletePlenoEvent)
-        
+            .openAPI(
+                tags: openAPITag,
+                summary: "Ein Event löschen.",
+                path: .type(PlenoEvent.IDValue.self),
+                statusCode: .noContent,
+                auth: AdminMiddleware.schemeObject
+            )
+        // POST /events/:id/participations
         eventRoutes.post(":id", "participations", use: newParticipation)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Rückmeldung zu einem Event geben (zusagen/absagen)",
+                path: .type(PlenoEvent.IDValue.self),
+                body: .type(CreateEventParticipationDTO.self),
+                contentType: .application(.json),
+                response: .type(GetEventParticipationDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .created,
+                auth: AuthMiddleware.schemeObject
+            )
+        // PATCH /events/participations/:id
         eventRoutes.patch("participations", ":participant_id", use: patchParticipation)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Rückmeldung zu einem Event anpassen.",
+                path: .type(EventParticipant.IDValue.self),
+                body: .type(PatchEventParticipationDTO.self),
+                contentType: .application(.json),
+                response: .type(GetEventParticipationDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
+        // DELETE /events/participations/:id
         eventRoutes.delete("participations", ":participant_id", use: deleteParticipation)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Rückmeldung zu einem Event löschen.",
+                path: .type(SpecialRideRequest.IDValue.self),
+                statusCode: .noContent,
+                auth: AuthMiddleware.schemeObject
+            )
     }
     
     /*
