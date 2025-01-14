@@ -5,15 +5,15 @@ public struct GetRiderDTO: Codable {
     public var username: String
     public var latitude: Float
     public var longitude: Float
-    public var istMe: Bool
+    public var itsMe: Bool
     public var accepted: Bool
     
-    public init(id: UUID, username: String, latitude: Float, longitude: Float, istMe: Bool, accepted: Bool) {
+    public init(id: UUID, username: String, latitude: Float, longitude: Float, itsMe: Bool, accepted: Bool) {
         self.id = id
         self.username = username
         self.latitude = latitude
         self.longitude = longitude
-        self.istMe = istMe
+        self.itsMe = itsMe
         self.accepted = accepted
     }
 }
