@@ -86,11 +86,10 @@ struct AuthController: RouteCollection {
             throw Abort(.notFound, reason: "Invalid credentials")
         }
         
-        if user.isAdmin == false {
-            guard user.emailVerification?.status == .verified else {
-                throw Abort(.unauthorized, reason: "Email not verified")
-            }
+        guard user.emailVerification?.status == .verified else {
+            throw Abort(.unauthorized, reason: "Email not verified")
         }
+        
         // Hat der Nutzer einen aktiven Account
         guard user.isActive == true else {
             throw Abort(.forbidden, reason: "This account is inactiv")
