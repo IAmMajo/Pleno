@@ -177,9 +177,14 @@ CONFIG_SERVICE_SERVICE_TEMPLATE=",
                 active: true
             ) // Initialdaten für die Services einfügen: END"
 
+POSTGRES_CREDENTIAL_ENV_COMPOSE_TEMPLATE="# PostgreSQL-Credentials
+      ${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_USERNAME: \${${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_USERNAME:?error}
+      ${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_PASSWORD: \${${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_PASSWORD:?error}"
+
 ESCAPED_COMPOSE_TEMPLATE=$(echo "$COMPOSE_TEMPLATE" | awk '{if (NR > 1) printf "\\n"; printf "%s", $0}')
 ESCAPED_ROOT_COMPOSE_TEMPLATE=$(echo "$ROOT_COMPOSE_TEMPLATE" | awk '{if (NR > 1) printf "\\n"; printf "%s", $0}')
 ESCAPED_CONFIG_SERVICE_SERVICE_TEMPLATE=$(echo "$CONFIG_SERVICE_SERVICE_TEMPLATE" | awk '{if (NR > 1) printf "\\n"; printf "%s", $0}')
+ESCAPED_POSTGRES_CREDENTIAL_ENV_COMPOSE_TEMPLATE=$(echo "$POSTGRES_CREDENTIAL_ENV_COMPOSE_TEMPLATE" | awk '{if (NR > 1) printf "\\n"; printf "%s", $0}')
 
 cp -r . "../${SRVNAME}-service" && rm "../${SRVNAME}-service/replicate.sh" # Copy entire template to new service-folder and remove replicate.sh
 
@@ -194,6 +199,7 @@ find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swa
 find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swagger*" ! -path "*.swiftpm*" -print0 | xargs -0 sed -i '' -e "s/SRV_CONFIG_SERVICE_UUID_PLACEHOLDER/${SRV_CONFIG_SERVICE_UUID}/g"
 
 # Add service to /backend/docker-compose.yml and /docker-compose.yml
+sed -i '' -e "s;# PostgreSQL-Credentials$;${ESCAPED_POSTGRES_CREDENTIAL_ENV_COMPOSE_TEMPLATE};" ../docker-compose.yml
 sed -i '' -e "s;^# Volumes$;${ESCAPED_COMPOSE_TEMPLATE};" ../docker-compose.yml
 sed -i '' -e "s;^# Volumes$;${ESCAPED_ROOT_COMPOSE_TEMPLATE};" ../../docker-compose.yml
 
@@ -201,8 +207,8 @@ sed -i '' -e "s;^# Volumes$;${ESCAPED_ROOT_COMPOSE_TEMPLATE};" ../../docker-comp
 sed -i '' -e "s;^\"\"\" \/\/ Description: END$;- [${FIRST_LETTER_CAPITAL_SRVNAME}-Service](/${SRVNAME}-service/swagger/#/)\n\"\"\" \/\/ Description: END;" ../models/Sources/Models/_misc/OpenAPIInfo.swift
 
 # Add service's psql-user to /backend/init-dbs.sh
-sed -i '' -e "s/^\t-- Service-Users$/\t-- Service-Users\n\tCREATE USER ${SRVNAME}_service WITH PASSWORD '${SRV_PSQL_PASSWORD}' IN GROUP services;/" ../init-dbs.sh
-sed -i '' -e "s/^\t-- Service-User-Privileges$/\t-- Service-User-Privileges\n\tALTER DEFAULT PRIVILEGES FOR USER ${SRVNAME}_service IN SCHEMA public GRANT SELECT, REFERENCES ON TABLES TO GROUP services;/" ../init-dbs.sh
+sed -i '' -e "s/^\t-- Service-Users$/\t-- Service-Users\n\tCREATE USER \${${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_USERNAME} WITH PASSWORD '\${${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_PASSWORD}' IN GROUP services;/" ../init-dbs.sh
+sed -i '' -e "s/^\t-- Service-User-Privileges$/\t-- Service-User-Privileges\n\tALTER DEFAULT PRIVILEGES FOR USER \${${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_USERNAME} IN SCHEMA public GRANT SELECT, REFERENCES ON TABLES TO GROUP services;/" ../init-dbs.sh
 
 # Add service's psql-credentials to /.env and (without password to) /.env.example
 echo "${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_USERNAME=${SRVNAME}_service" >> ../../.env
