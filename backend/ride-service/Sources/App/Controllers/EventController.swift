@@ -29,14 +29,30 @@ struct EventController: RouteCollection {
     
     @Sendable
     func getAllPlenoEvents(req: Request) async throws -> [GetEventDTO] {
+        // query my participations
+        let participations = try await EventParticipant.query(on: req.db)
+            .filter(\.$user.$id == req.jwtPayload.userID)
+            .all()
+        
         // query all events and convert to GetEventDTO
         let plenoEvents = try await PlenoEvent.query(on: req.db).all().map{ plenoEvent in
             let event_id = try plenoEvent.requireID()
+            
+            var myState = UsersEventState.nothing
+            if let participation = participations.first(where: { $0.$event.id == event_id }) {
+                if participation.participates {
+                    myState = UsersEventState.present
+                } else {
+                    myState = UsersEventState.absent
+                }
+            }
+            
             return GetEventDTO(
                 id: event_id,
                 name: plenoEvent.name,
                 starts: plenoEvent.starts,
-                ends: plenoEvent.ends
+                ends: plenoEvent.ends,
+                myState: myState
             )
         }
         return plenoEvents
@@ -49,8 +65,11 @@ struct EventController: RouteCollection {
             throw Abort(.notFound)
         }
         
-        // convert event to GetEventDetailDTO
+        // query all participations
         let event_id = try plenoEvent.requireID()
+        let participations = try await allParticipationsForEvent(event_id: event_id, user_id: req.jwtPayload.userID, db: req.db)
+        
+        // convert event to GetEventDetailDTO
         let getEventDetailDTO = GetEventDetailDTO(
             id: event_id,
             name: plenoEvent.name,
@@ -58,7 +77,8 @@ struct EventController: RouteCollection {
             starts: plenoEvent.starts,
             ends: plenoEvent.ends,
             latitude: plenoEvent.latitude,
-            longitude: plenoEvent.longitude
+            longitude: plenoEvent.longitude,
+            participations: participations
         )
         
         return getEventDetailDTO
@@ -93,7 +113,8 @@ struct EventController: RouteCollection {
             starts: plenoEvent.starts,
             ends: plenoEvent.ends,
             latitude: plenoEvent.latitude,
-            longitude: plenoEvent.longitude
+            longitude: plenoEvent.longitude,
+            participations: []
         )
         
         return try await getEventDetailDTO.encodeResponse(status: .created, for: req)
@@ -119,6 +140,7 @@ struct EventController: RouteCollection {
         
         // create reponse DTO
         let event_id = try plenoEvent.requireID()
+        let participations = try await allParticipationsForEvent(event_id: event_id, user_id: req.jwtPayload.userID, db: req.db)
         let getEventDetailDTO = GetEventDetailDTO(
             id: event_id,
             name: plenoEvent.name,
@@ -126,7 +148,8 @@ struct EventController: RouteCollection {
             starts: plenoEvent.starts,
             ends: plenoEvent.ends,
             latitude: plenoEvent.latitude,
-            longitude: plenoEvent.longitude
+            longitude: plenoEvent.longitude,
+            participations: participations
         )
         
         return getEventDetailDTO
@@ -187,11 +210,12 @@ struct EventController: RouteCollection {
         // create response
         let username = try await usernameByUserID(userID: participant.$user.id, db: req.db)
         let participantID = try participant.requireID()
+        let state = participant.participates ? UsersParticipationState.present : UsersParticipationState.absent
         let getEventParticipationDTO = GetEventParticipationDTO(
             id: participantID,
             name: username,
             itsMe: true,
-            participates: participant.participates
+            participates: state
         )
         
         return try await getEventParticipationDTO.encodeResponse(status: .created, for: req)
@@ -223,11 +247,12 @@ struct EventController: RouteCollection {
         // create response
         let username = try await usernameByUserID(userID: participant.$user.id, db: req.db)
         let participantID = try participant.requireID()
+        let state = participant.participates ? UsersParticipationState.present : UsersParticipationState.absent
         let getEventParticipationDTO = GetEventParticipationDTO(
             id: participantID,
             name: username,
             itsMe: true,
-            participates: participant.participates
+            participates: state
         )
         
         return getEventParticipationDTO
@@ -266,5 +291,32 @@ struct EventController: RouteCollection {
                 user.identity.name
             }
         return username ?? ""
+    }
+    
+    func allParticipationsForEvent(event_id: UUID, user_id: UUID, db: Database) async throws -> [GetEventParticipationDTO] {
+        let participants = try await EventParticipant.query(on: db)
+            .filter(\.$event.$id == event_id)
+            .join(User.self, on: \EventParticipant.$user.$id == \User.$id)
+            .join(Identity.self, on: \User.$identity.$id == \Identity.$id)
+            .all()
+            .map{ participant in
+                let id = try participant.requireID()
+                let identity = try participant.joined(Identity.self)
+                let username = identity.name
+                
+                var state = UsersParticipationState.absent
+                if participant.participates {
+                    state = UsersParticipationState.present
+                }
+                
+                return GetEventParticipationDTO(
+                    id: id,
+                    name: username,
+                    itsMe: participant.$user.id == user_id,
+                    participates: state
+                )
+            }
+        
+        return participants
     }
 }
