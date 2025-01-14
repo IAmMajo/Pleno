@@ -94,4 +94,9 @@ extension AttendanceManager {
     func numberOfParticipants() -> Int {
         return attendances.filter { $0.status == .present }.count
     }
+    
+    /// Gibt ein Array aller teilnehmenden Personen zurück
+    func allParticipants() -> [GetIdentityDTO] {
+        return attendances.map { $0.identity }
+    }
 }

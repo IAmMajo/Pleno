@@ -11,6 +11,7 @@ struct MeetingDetailAdminView: View {
     @State private var selectedUser: UUID?
     @State private var selectedUserName: String?
     @State private var showRecorderSelectionSheet = false
+    @State private var recordLanguages: [String] = []
     
     @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
     @StateObject private var recordManager = RecordManager() // RecordManager als StateObject
@@ -86,6 +87,31 @@ struct MeetingDetailAdminView: View {
                                 }
                             }
                         }
+                        if selectedUserName != nil {
+                            Button(action: {
+                                showRecorderSelectionSheet.toggle()
+                            }) {
+                                
+                                HStack {
+                                    HStack {
+                                        Image(systemName: "person.circle")
+                                            .resizable()
+                                            .frame(width: 30, height: 30)
+                                            .foregroundColor(.gray)
+                                        VStack(alignment: .leading) {
+                                            Text(selectedUserName ?? "Kein Protokollant")
+                                            Text("Protokollant")
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                    Spacer()
+                                    Text("Ändern").foregroundStyle(.blue)
+                                }
+                            }.buttonStyle(PlainButtonStyle())
+
+
+                        }
                     }
                     
                     // Beschreibung
@@ -110,23 +136,6 @@ struct MeetingDetailAdminView: View {
                                 ForEach(recordManager.records, id: \.lang) { record in
                                     NavigationLink(destination: MarkdownEditorView(meetingId: record.meetingId, lang: record.lang)) {
                                         Text("Protokoll: \(record.lang)")
-                                    }
-                                }
-                                Button(action: {
-                                    showRecorderSelectionSheet.toggle()
-                                }) {
-                                    if userManager.user == nil {
-                                        HStack {
-                                            Image(systemName: "person.circle")
-                                            Text(selectedUserName ?? "Protokollanten auswählen")
-                                                .cornerRadius(8)
-                                        }
-                                    } else {
-                                        HStack {
-                                            Image(systemName: "person.circle")
-                                            Text(userManager.user?.name ?? "Protokollanten auswählen")
-                                                .cornerRadius(8)
-                                        }
                                     }
 
                                 }
@@ -233,21 +242,38 @@ struct MeetingDetailAdminView: View {
                 )
             }
             .sheet(isPresented: $showRecorderSelectionSheet) {
-                RecorderSelectionSheet(users: userManager.users, recordLang: recordManager.records.first?.lang, meetingId: meeting.id, selectedUser: $selectedUser, selectedUserName: $selectedUserName)
+                RecorderSelectionSheet(recordLanguages: recordLanguages, users: attendanceManager.allParticipants(), recordLang: recordManager.records.first?.lang, meetingId: meeting.id, selectedUser: $selectedUser, selectedUserName: $selectedUserName)
             }
             .onAppear(){
-                recordManager.getRecordsMeeting(meetingId: meeting.id)
-                votingManager.getRecordsMeeting(meetingId: meeting.id)
-                attendanceManager.fetchAttendances(meetingId: meeting.id)
-                userManager.fetchUsers()
-                if let userId = recordManager.records.first?.identity.id {
-                    userManager.getUser(userId: userId)
+                Task {
+                    await loadView()
+                    // Array mit allen verügbaren Sprachen, um allen Sprachen den gleichen Protokollanten zuzuordnen
+                    recordLanguages = recordManager.records.map { $0.lang }
+                    recordLanguages = Array(Set(recordLanguages)) // Entfernt Duplikate, falls nötig
                 }
-
-                
             }
         }
     }
+    private func loadView() async {
+        do {
+            // 1. Abrufen der Meeting-Daten für die Records
+            recordManager.getRecordsMeeting(meetingId: meeting.id)
+            
+            // 2. Abrufen der Voting-Daten für das Meeting
+            votingManager.getRecordsMeeting(meetingId: meeting.id)
+            
+            // 3. Abrufen der Teilnehmer-Daten für das Meeting
+            attendanceManager.fetchAttendances(meetingId: meeting.id)
+            
+            // 4. Abrufen der Benutzer
+            userManager.fetchUsers()
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            selectedUser = recordManager.records.first?.identity.id
+            selectedUserName = recordManager.records.first?.identity.name
+            // 5. Abrufen der User Identity für das erste Record (falls vorhanden)
+        }
+    }
+
     
     // Funktion zum Starten des Meetings
     func startMeeting() {
@@ -280,35 +306,48 @@ struct MeetingDetailAdminView: View {
     }
 }
 struct RecorderSelectionSheet: View {
-    var users: [UserProfileDTO]
+    @Environment(\.dismiss) private var dismiss
+
+    var recordLanguages: [String]
+    var users: [GetIdentityDTO]
     var recordLang: String?
     var meetingId: UUID
     @Binding var selectedUser: UUID? // Speichert die Benutzer-ID
     @Binding var selectedUserName: String? // Speichert den Benutzernamen
     @State private var searchText: String = ""
-    
-    @ObservedObject var userManager = UserManager()
-    @StateObject private var recordManager = RecordManager()
+    @State private var filteredUsers: [GetIdentityDTO] = []
+
+    @StateObject private var recordManager = RecordManager() // RecordManager als StateObject
+
 
     var body: some View {
         NavigationStack { // NavigationStack hier außen
             VStack {
                 List {
-                    ForEach(filteredUsers, id: \.email) { user in
+                    ForEach(filteredUsers) { user in
                         HStack {
-                            Text(user.name ?? "Unbekannter Name") // Fallback, falls name nil ist
+                            Text(user.name) // Fallback, falls name nil ist
                             Spacer()
-                            if let uid = user.uid, uid == selectedUser { // Prüfen, ob dieser Benutzer ausgewählt ist
+                            if user.id == selectedUser { // Prüfen, ob dieser Benutzer ausgewählt ist
                                 Image(systemName: "checkmark")
                                     .foregroundColor(.blue)
                             }
+
                         }
                         .contentShape(Rectangle())
                         .onTapGesture {
                             selectUser(user)
                         }
                     }
+                    Section {
+                        Text("Nutzer werden hier angezeigt, wenn sie an der Sitzung teilnehmen")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .padding(.vertical, 10)
+                    }
+                    .textCase(nil) // Entfernt Großbuchstaben, falls Section Text beeinflusst
                 }
+
                 .navigationTitle("Benutzer auswählen")
                 .searchable(text: $searchText)
                 .toolbar {
@@ -323,49 +362,47 @@ struct RecorderSelectionSheet: View {
             }
         }
         .onAppear {
-            userManager.fetchUsers()
+            updateFilteredUsers()
+        }
+        .onChange(of: searchText) {
+            updateFilteredUsers()
         }
     }
     private func saveRecord() {
         Task {
             let patchDTO = PatchRecordDTO(identityId: selectedUser)
-            await recordManager.patchRecordMeetingLang(patchRecordDTO: patchDTO, meetingId: meetingId, lang: recordLang ?? "DE")
+            
+            for language in recordLanguages {
+                await recordManager.patchRecordMeetingLang(patchRecordDTO: patchDTO, meetingId: meetingId, lang: language)
+            }
+            
+            
         }
     }
     
 
-    private var filteredUsers: [UserProfileDTO] {
+    private func updateFilteredUsers() {
         if searchText.isEmpty {
-            return users
+            filteredUsers = users
         } else {
-            return users.filter { user in
-                if let name = user.name {
-                    return name.localizedCaseInsensitiveContains(searchText)
-                }
-                return false
+            filteredUsers = users.filter { user in
+                user.name.localizedCaseInsensitiveContains(searchText) ?? false
             }
         }
     }
 
-    private func selectUser(_ user: UserProfileDTO) {
-        if let uid = user.uid {
-            // Wenn derselbe Benutzer ausgewählt ist, entfernen; ansonsten neu setzen
-            if selectedUser == uid {
-                selectedUser = nil
-                selectedUserName = nil
-            } else {
-                selectedUser = uid
-                selectedUserName = user.name
-            }
+    private func selectUser(_ user: GetIdentityDTO) {
+        // Wenn derselbe Benutzer ausgewählt ist, entfernen; ansonsten neu setzen
+        if selectedUser == user.id {
+            selectedUser = nil
+            selectedUserName = nil
+        } else {
+            selectedUser = user.id
+            selectedUserName = user.name
         }
+        
     }
 
-    private func dismiss() {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first?.rootViewController {
-            rootVC.dismiss(animated: true, completion: nil)
-        }
-    }
 }
 
 

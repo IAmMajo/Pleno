@@ -153,6 +153,7 @@ struct CreateMeetingView: View {
             locationId: isAddingNewLocation ? nil : selectedLocationID,
             location: location//isAddingNewLocation ? location : nil
         )
+        print(meeting)
 
         // Meeting über MeetingManager erstellen
         meetingManager.createMeeting(meeting)
