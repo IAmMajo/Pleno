@@ -67,7 +67,10 @@ struct EventController: RouteCollection {
         
         // query all participations
         let event_id = try plenoEvent.requireID()
-        let participations = try await allParticipationsForEvent(event_id: event_id, user_id: req.jwtPayload.userID, db: req.db)
+        let (participations, userIDs) = try await allParticipationsForEvent(event_id: event_id, user_id: req.jwtPayload.userID, db: req.db)
+        
+        // query users without feedback
+        let usersWithoutFeedback = try await getUsersWithoutFeedback(user_id: req.jwtPayload.userID, participants: userIDs, db: req.db)
         
         // convert event to GetEventDetailDTO
         let getEventDetailDTO = GetEventDetailDTO(
@@ -78,7 +81,8 @@ struct EventController: RouteCollection {
             ends: plenoEvent.ends,
             latitude: plenoEvent.latitude,
             longitude: plenoEvent.longitude,
-            participations: participations
+            participations: participations,
+            userWithoutFeedback: usersWithoutFeedback
         )
         
         return getEventDetailDTO
@@ -114,7 +118,8 @@ struct EventController: RouteCollection {
             ends: plenoEvent.ends,
             latitude: plenoEvent.latitude,
             longitude: plenoEvent.longitude,
-            participations: []
+            participations: [],
+            userWithoutFeedback: []
         )
         
         return try await getEventDetailDTO.encodeResponse(status: .created, for: req)
@@ -140,7 +145,8 @@ struct EventController: RouteCollection {
         
         // create reponse DTO
         let event_id = try plenoEvent.requireID()
-        let participations = try await allParticipationsForEvent(event_id: event_id, user_id: req.jwtPayload.userID, db: req.db)
+        let (participations, userIDs) = try await allParticipationsForEvent(event_id: event_id, user_id: req.jwtPayload.userID, db: req.db)
+        let usersWithoutFeedback = try await getUsersWithoutFeedback(user_id: req.jwtPayload.userID, participants: userIDs, db: req.db)
         let getEventDetailDTO = GetEventDetailDTO(
             id: event_id,
             name: plenoEvent.name,
@@ -149,7 +155,8 @@ struct EventController: RouteCollection {
             ends: plenoEvent.ends,
             latitude: plenoEvent.latitude,
             longitude: plenoEvent.longitude,
-            participations: participations
+            participations: participations,
+            userWithoutFeedback: usersWithoutFeedback
         )
         
         return getEventDetailDTO
@@ -293,7 +300,8 @@ struct EventController: RouteCollection {
         return username ?? ""
     }
     
-    func allParticipationsForEvent(event_id: UUID, user_id: UUID, db: Database) async throws -> [GetEventParticipationDTO] {
+    func allParticipationsForEvent(event_id: UUID, user_id: UUID, db: Database) async throws -> ([GetEventParticipationDTO], [UUID]) {
+        var userIDs: [UUID] = []
         let participants = try await EventParticipant.query(on: db)
             .filter(\.$event.$id == event_id)
             .join(User.self, on: \EventParticipant.$user.$id == \User.$id)
@@ -309,6 +317,8 @@ struct EventController: RouteCollection {
                     state = UsersParticipationState.present
                 }
                 
+                userIDs.append(participant.$user.id)
+                
                 return GetEventParticipationDTO(
                     id: id,
                     name: username,
@@ -317,6 +327,21 @@ struct EventController: RouteCollection {
                 )
             }
         
-        return participants
+        return (participants, userIDs)
+    }
+    
+    func getUsersWithoutFeedback(user_id: UUID, participants: [UUID], db: Database) async throws -> [GetUserWithoutFeedbackDTO] {
+        try await User.query(on: db)
+            .filter(\.$id !~ participants)
+            .join(Identity.self, on: \User.$identity.$id == \Identity.$id)
+            .all()
+            .map{ user in
+                let userID = try user.requireID()
+                let identity = try user.joined(Identity.self)
+                return GetUserWithoutFeedbackDTO(
+                    name: identity.name,
+                    itsMe: userID == user_id
+                )
+            }
     }
 }
