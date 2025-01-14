@@ -24,7 +24,7 @@ public func configure(_ app: Application) async throws {
     Task {
         do {
             let configServiceURL = Environment.get("CONFIG_SERVICE_URL") ?? "http://kivop-config-service"
-            let serviceIDString = Environment.get("SERVICE_ID") ?? "76f93894-7573-4ccd-a067-66c2180750e0"
+            let serviceIDString = Environment.get("SERVICE_ID") ?? "SRV_CONFIG_SERVICE_UUID_PLACEHOLDER"
             guard let serviceID = UUID(uuidString: serviceIDString) else {
                 app.logger.error("Ungültige Service-ID.")
                 return

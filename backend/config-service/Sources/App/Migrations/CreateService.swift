@@ -56,8 +56,7 @@ struct CreateService: AsyncMigration {
                 webhook_url: "http://kivop-ai-service/webhook",
                 description: "Mit dem Ai-Service lassen sich Protokolle ausformulieren und Social Media Posts erstellen",
                 active: true
-            )
-            
+            ), // Initialdaten für die Services einfügen: END
         ]
 
         for service in services {
