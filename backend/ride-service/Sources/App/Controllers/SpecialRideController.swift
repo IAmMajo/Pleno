@@ -180,14 +180,14 @@ struct SpecialRideController: RouteCollection {
                     username: username,
                     latitude: rider.latitude,
                     longitude: rider.longitude,
-                    istMe: rider.$user.id == req.jwtPayload.userID,
+                    itsMe: rider.$user.id == req.jwtPayload.userID,
                     accepted: rider.accepted
                 )
             }
         
         // delete all open requests, if user is not the driver
         if specialRide.$user.id != req.jwtPayload.userID {
-            riders.removeAll{ $0.accepted == false && $0.istMe == false }
+            riders.removeAll{ $0.accepted == false && $0.itsMe == false }
         }
         
         let drivername = try await User.query(on: req.db)
@@ -312,7 +312,7 @@ struct SpecialRideController: RouteCollection {
                     username: username,
                     latitude: rider.latitude,
                     longitude: rider.longitude,
-                    istMe: rider.$user.id == req.jwtPayload.userID,
+                    itsMe: rider.$user.id == req.jwtPayload.userID,
                     accepted: rider.accepted
                 )
             }
@@ -437,7 +437,7 @@ struct SpecialRideController: RouteCollection {
             username: username ?? "",
             latitude: request.latitude,
             longitude: request.longitude,
-            istMe: true,
+            itsMe: true,
             accepted: request.accepted)
         
         return try await getRiderDTO.encodeResponse(status: .created, for: req)
@@ -527,7 +527,7 @@ struct SpecialRideController: RouteCollection {
             username: username ?? "",
             latitude: specialRideRequest.latitude,
             longitude: specialRideRequest.longitude,
-            istMe: specialRideRequest.$user.id == req.jwtPayload.userID,
+            itsMe: specialRideRequest.$user.id == req.jwtPayload.userID,
             accepted: specialRideRequest.accepted)
         
         return getRiderDTO
