@@ -169,8 +169,17 @@ struct EventController: RouteCollection {
             throw Abort(.notFound)
         }
         
-        // delete event
-        try await plenoEvent.delete(on: req.db)
+        // delete in transaction
+        let eventID = try plenoEvent.requireID()
+        try await req.db.transaction{ db in
+            // delete participants
+            try await EventParticipant.query(on: db)
+                .filter(\.$event.$id == eventID)
+                .delete()
+            
+            // delete event
+            try await plenoEvent.delete(on: db)
+        }
         
         return .noContent
     }
