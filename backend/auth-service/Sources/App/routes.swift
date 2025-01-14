@@ -1,6 +1,7 @@
 import Fluent
 import Vapor
 import VaporToOpenAPI
+import Models
 
 func routes(_ app: Application) throws {
     try app.register(collection: AuthController())
@@ -9,19 +10,28 @@ func routes(_ app: Application) throws {
     try app.register(collection: UniversalLinkController())
     
     app.get("openapi.json") { req in
-      app.routes.openAPI(
-        info: .init(
-          title: "KIVoP Auth Service API",
-          license: .init(
-            name: "MIT-0",
-            url: URL(string: "https://github.com/aws/mit-0")
-          ),
-          version: "0.1.0"
+        app.routes.openAPI(
+            info: .init(
+                title: OpenAPIInfo.title,
+                summary: OpenAPIInfo.summary,
+                description: OpenAPIInfo.description,
+                termsOfService: OpenAPIInfo.termsOfService,
+                contact: OpenAPIInfo.contact == nil ? nil :
+                        .init(name: OpenAPIInfo.contact!.name,
+                              url: OpenAPIInfo.contact!.url,
+                              email: OpenAPIInfo.contact!.email),
+                license: OpenAPIInfo.license == nil ? nil :
+                        .init(
+                            name: OpenAPIInfo.license!.name,
+                            identifier: OpenAPIInfo.license!.identifier,
+                            url: OpenAPIInfo.license!.url
+                        ),
+                version: "\(OpenAPIInfo.version.major).\(OpenAPIInfo.version.minor).\(OpenAPIInfo.version.patch)"
+            )
         )
-      )
     }
     .excludeFromOpenAPI()
-
+    
     app.stoplightDocumentation(
         "stoplight",
         openAPIPath: "/auth-service/openapi.json"
