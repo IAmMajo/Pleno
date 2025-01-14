@@ -201,8 +201,8 @@ sed -i '' -e "s;^# Volumes$;${ESCAPED_ROOT_COMPOSE_TEMPLATE};" ../../docker-comp
 sed -i '' -e "s;^\"\"\" \/\/ Description: END$;- [${FIRST_LETTER_CAPITAL_SRVNAME}-Service](/${SRVNAME}-service/swagger/#/)\n\"\"\" \/\/ Description: END;" ../models/Sources/Models/_misc/OpenAPIInfo.swift
 
 # Add service's psql-user to /backend/init-dbs.sh
-sed -i '' -e "s/^\t-- Service-Users$/\t-- Service-Users\n\tCREATE USER ${SRVNAME}_service WITH PASSWORD '${SRV_PSQL_PASSWORD}' IN GROUP services;/" ../init-dbs.sh
-sed -i '' -e "s/^\t-- Service-User-Privileges$/\t-- Service-User-Privileges\n\tALTER DEFAULT PRIVILEGES FOR USER ${SRVNAME}_service IN SCHEMA public GRANT SELECT, REFERENCES ON TABLES TO GROUP services;/" ../init-dbs.sh
+sed -i '' -e "s/^\t-- Service-Users$/\t-- Service-Users\n\tCREATE USER \${${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_USERNAME} WITH PASSWORD '\${${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_PASSWORD}' IN GROUP services;/" ../init-dbs.sh
+sed -i '' -e "s/^\t-- Service-User-Privileges$/\t-- Service-User-Privileges\n\tALTER DEFAULT PRIVILEGES FOR USER \${${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_USERNAME} IN SCHEMA public GRANT SELECT, REFERENCES ON TABLES TO GROUP services;/" ../init-dbs.sh
 
 # Add service's psql-credentials to /.env and (without password to) /.env.example
 echo "${ALL_LETTERS_CAPITAL_SRVNAME}_SERVICE_POSTGRES_USERNAME=${SRVNAME}_service" >> ../../.env
