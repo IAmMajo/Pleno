@@ -4,7 +4,10 @@ import AuthServiceDTOs
 struct UserPopupView: View {
     @Binding var user: UserProfileDTO
     @Binding var isPresented: Bool
-    
+
+    @State private var tempIsAdmin: Bool = false
+    @State private var isLoading = false
+    @State private var showError = false
     @State private var isEditingName = false
     @State private var editedName = ""
     @State private var isDeletingProfilePicture = false
@@ -13,7 +16,7 @@ struct UserPopupView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
-                // Profilbild anzeigen oder bearbeiten
+                // Profilbild
                 VStack {
                     if let imageData = user.profileImage, let uiImage = UIImage(data: imageData) {
                         Image(uiImage: uiImage)
@@ -41,108 +44,184 @@ struct UserPopupView: View {
                             )
                     }
                 }
-                
-                // Benutzerinformationen anzeigen
+
+                // Benutzername bearbeiten
                 if isEditingName {
-                    TextField("Name eingeben", text: $editedName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
-                    Button("Speichern") {
-                        updateUserName()
+                    VStack(spacing: 10) {
+                        TextField("Neuen Namen eingeben", text: $editedName)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal)
+                        HStack {
+                            Button("Abbrechen") {
+                                isEditingName = false
+                            }
+                            .foregroundColor(.red)
+
+                            Spacer()
+
+                            Button("Speichern") {
+                                updateUserName()
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        .padding(.horizontal)
                     }
-                    .buttonStyle(.borderedProminent)
                 } else {
                     HStack {
-                        Text("Name:")
+                        Text("Benutzername:")
                         Spacer()
                         Text(user.name ?? "Unbekannt").foregroundColor(.gray)
-                        Button("Bearbeiten") {
+                        Button(action: {
                             editedName = user.name ?? ""
                             isEditingName = true
+                        }) {
+                            Image(systemName: "pencil")
+                                .foregroundColor(.blue)
                         }
-                        .foregroundColor(.blue)
                     }
                     Divider()
                 }
-                
+
+                // E-Mail-Adresse
                 HStack {
                     Text("E-Mail:")
                     Spacer()
                     Text(user.email ?? "Keine E-Mail").foregroundColor(.gray)
                 }
                 Divider()
+
+                // Admin-Status Toggle
                 HStack {
                     Text("Admin:")
                     Spacer()
-                    Toggle("", isOn: Binding<Bool>(
-                        get: { user.isAdmin ?? false },
-                        set: { isAdmin in
-                            updateAdminStatus(isAdmin: isAdmin)
-                        }
-                    ))
-                    .labelsHidden()
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                    } else {
+                        Toggle("", isOn: $tempIsAdmin)
+                            .labelsHidden()
+                    }
                 }
                 Divider()
-                HStack {
-                    Text("Aktiv:")
-                    Spacer()
-                    Text(user.isActive == true ? "Ja" : "Nein").foregroundColor(.gray)
-                }
 
                 Spacer()
 
-                // Profil löschen
-                Button("Profil löschen") {
+                // Fehleranzeige
+                if showError {
+                    Text("Fehler beim Speichern der Änderungen.")
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                }
+
+                // Speichern-Button
+                Button(action: saveChanges) {
+                    Text("Speichern")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+                .disabled(isLoading)
+
+
+                // Konto löschen Button
+                Button("Konto löschen") {
                     isDeletingAccount = true
                 }
-                .foregroundColor(.red)
-
-                Button("Schließen") {
-                    isPresented = false
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.red)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+                .alert("Konto löschen", isPresented: $isDeletingAccount) {
+                    Button("Abbrechen", role: .cancel) {}
+                    Button("Löschen", role: .destructive) {
+                        deleteAccount()
+                    }
+                } message: {
+                    Text("Möchten Sie dieses Konto wirklich löschen?")
                 }
-                .foregroundColor(.blue)
+
             }
             .padding()
-            .alert("Profil löschen", isPresented: $isDeletingAccount) {
-                Button("Abbrechen", role: .cancel) { }
-                Button("Löschen", role: .destructive) {
-                    deleteAccount()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Abbrechen") {
+                        isPresented = false
+                    }
+                    .foregroundColor(.red)
                 }
+            }
+            .onAppear {
+                debugPrint("🟢 Popup geöffnet")
+                loadInitialData()
+            }
+            .alert("Fehler", isPresented: $showError) {
+                Button("OK", role: .cancel) {}
             } message: {
-                Text("Möchtest du dieses Profil wirklich löschen?")
+                Text("Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.")
             }
         }
     }
-    
+
     // MARK: - Funktionen
 
-    private func updateUserName() {
-        MainPageAPI.updateUserName(name: editedName) { result in
+    private func loadInitialData() {
+        debugPrint("🔄 Benutzerprofil wird geladen...")
+        MainPageAPI.fetchUserByID(userID: user.uid ?? UUID()) { result in
             DispatchQueue.main.async {
                 switch result {
-                case .success:
-                    user.name = editedName
-                    isEditingName = false
+                case .success(let fetchedUser):
+                    self.user = fetchedUser
+                    self.tempIsAdmin = fetchedUser.isAdmin ?? false
+                    debugPrint("✅ Benutzerprofil geladen: \(fetchedUser)")
                 case .failure(let error):
-                    print("❌ Fehler beim Aktualisieren des Namens: \(error.localizedDescription)")
+                    debugPrint("❌ Fehler beim Laden des Benutzerprofils: \(error.localizedDescription)")
+                    self.showError = true
                 }
             }
         }
     }
 
-    private func updateAdminStatus(isAdmin: Bool) {
+    private func saveChanges() {
         guard let userId = user.uid?.uuidString else {
-            print("❌ Fehler: Benutzer-ID ist ungültig.")
+            debugPrint("❌ Fehler: Benutzer-ID ungültig.")
+            showError = true
             return
         }
 
-        MainPageAPI.updateAdminStatus(userId: userId, isAdmin: isAdmin) { result in
+        isLoading = true
+        showError = false
+
+        MainPageAPI.updateAdminStatus(userId: userId, isAdmin: tempIsAdmin, isActive: user.isActive ?? true) { result in
             DispatchQueue.main.async {
+                self.isLoading = false
                 switch result {
                 case .success:
-                    user.isAdmin = isAdmin
+                    debugPrint("✅ Admin-Status erfolgreich aktualisiert auf \(self.tempIsAdmin).")
+                    self.loadUserAndClosePopup(userId: userId)
                 case .failure(let error):
-                    print("❌ Fehler beim Aktualisieren des Admin-Status: \(error.localizedDescription)")
+                    debugPrint("❌ Fehler beim Aktualisieren: \(error.localizedDescription)")
+                    self.showError = true
+                    self.tempIsAdmin = self.user.isAdmin ?? false
+                }
+            }
+        }
+    }
+
+    private func loadUserAndClosePopup(userId: String) {
+        MainPageAPI.fetchUserByID(userID: UUID(uuidString: userId) ?? UUID()) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let fetchedUser):
+                    self.user = fetchedUser
+                    debugPrint("✅ Profil erfolgreich neu geladen. Popup wird geschlossen.")
+                    self.isPresented = false
+                case .failure(let error):
+                    debugPrint("❌ Fehler beim Neuladen des Profils: \(error.localizedDescription)")
+                    self.showError = true
                 }
             }
         }
@@ -150,31 +229,52 @@ struct UserPopupView: View {
 
     private func deleteAccount() {
         guard let userId = user.uid?.uuidString else {
-            print("❌ Fehler: Benutzer-ID ist ungültig.")
+            debugPrint("❌ Fehler: Benutzer-ID ungültig.")
+            showError = true
             return
         }
 
+        debugPrint("➡️ Sende Löschanfrage für Benutzer: \(userId)")
         MainPageAPI.deleteUser(userId: userId) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:
+                    debugPrint("✅ Benutzer erfolgreich gelöscht.")
                     isPresented = false
                 case .failure(let error):
-                    print("❌ Fehler beim Löschen des Kontos: \(error.localizedDescription)")
+                    debugPrint("❌ Fehler beim Löschen des Kontos: \(error.localizedDescription)")
+                    showError = true
                 }
             }
         }
     }
-
 
     private func deleteProfilePicture() {
         MainPageAPI.deleteProfilePicture { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:
+                    debugPrint("✅ Profilbild erfolgreich gelöscht.")
                     user.profileImage = nil
                 case .failure(let error):
-                    print("❌ Fehler beim Löschen des Profilbilds: \(error.localizedDescription)")
+                    debugPrint("❌ Fehler beim Löschen des Profilbilds: \(error.localizedDescription)")
+                    showError = true
+                }
+            }
+        }
+    }
+
+    private func updateUserName() {
+        MainPageAPI.updateUserName(name: editedName) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    debugPrint("✅ Benutzername erfolgreich aktualisiert auf \(editedName).")
+                    user.name = editedName
+                    isEditingName = false
+                case .failure(let error):
+                    debugPrint("❌ Fehler beim Aktualisieren des Benutzernamens: \(error.localizedDescription)")
+                    showError = true
                 }
             }
         }

@@ -119,13 +119,11 @@ struct VotingListView: View {
                     VStack(alignment: .leading, spacing: 5) {
                         Text(voting.question)
                             .font(.headline)
-                            .foregroundColor(.black)
                         Text(voting.startedAt == nil ? "In Planung" : (voting.isOpen ? "Aktiv" : "Abgeschlossen"))
                             .font(.subheadline)
                             .foregroundColor(voting.startedAt == nil ? .orange : (voting.isOpen ? .green : .red))
                     }
                 }
-                .listRowBackground(Color.white)
                 .swipeActions {
                     if voting.startedAt == nil {
                         Button(role: .destructive) {

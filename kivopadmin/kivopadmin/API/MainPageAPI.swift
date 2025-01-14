@@ -540,7 +540,8 @@ struct MainPageAPI {
        }
     
     // MARK: - Admin-Status aktualisieren
-    static func updateAdminStatus(userId: String, isAdmin: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
+    // MARK: - Admin-Status aktualisieren
+    static func updateAdminStatus(userId: String, isAdmin: Bool, isActive: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let url = URL(string: "\(baseURL)/users/\(userId)") else {
             completion(.failure(APIError.invalidURL))
             return
@@ -551,8 +552,13 @@ struct MainPageAPI {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
 
-        let body = ["isAdmin": isAdmin]
-        request.httpBody = try? JSONEncoder().encode(body)
+        let body: [String: Any] = ["isAdmin": isAdmin, "isActive": isActive]
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            completion(.failure(error))
+            return
+        }
 
         URLSession.shared.dataTask(with: request) { _, response, error in
             if let error = error {
@@ -568,6 +574,9 @@ struct MainPageAPI {
             completion(.success(()))
         }.resume()
     }
+
+
+
 
 
 
