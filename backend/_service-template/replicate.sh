@@ -39,6 +39,7 @@ function read_user_inputs {
         read SRV_DESCRIPTION
     done
 
+    echo -e "${RESET_COLOR}\n${GRAY}vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv${RESET_COLOR}\n"
     echo -e "${RESET_COLOR}Your service is going to be named ${ITALIC_CYAN}${SRVNAME}-service${RESET_COLOR}."
     echo -e "${RESET_COLOR}Your service is going to have the following description:"
     echo -e "${RESET_COLOR}\"${ITALIC_CYAN}${SRV_DESCRIPTION}${RESET_COLOR}\""
@@ -188,9 +189,9 @@ find "../${SRVNAME}-service/" -type f -name '*FIRST_LETTER_CAPITAL_SRVNAME_PLACE
 done
 
 # Replace placeholders in files
-find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swagger*" -print0 | xargs -0 sed -i '' -e "s/FIRST_LETTER_CAPITAL_SRVNAME_PLACEHOLDER/${FIRST_LETTER_CAPITAL_SRVNAME}/g"
-find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swagger*" -print0 | xargs -0 sed -i '' -e "s/SRVNAME_PLACEHOLDER/${SRVNAME}/g"
-find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swagger*" -print0 | xargs -0 sed -i '' -e "s/SRV_CONFIG_SERVICE_UUID_PLACEHOLDER/${SRV_CONFIG_SERVICE_UUID}/g"
+find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swagger*" ! -path "*.swiftpm*" -print0 | xargs -0 sed -i '' -e "s/FIRST_LETTER_CAPITAL_SRVNAME_PLACEHOLDER/${FIRST_LETTER_CAPITAL_SRVNAME}/g"
+find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swagger*" ! -path "*.swiftpm*" -print0 | xargs -0 sed -i '' -e "s/SRVNAME_PLACEHOLDER/${SRVNAME}/g"
+find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swagger*" ! -path "*.swiftpm*" -print0 | xargs -0 sed -i '' -e "s/SRV_CONFIG_SERVICE_UUID_PLACEHOLDER/${SRV_CONFIG_SERVICE_UUID}/g"
 
 # Add service to /backend/docker-compose.yml and /docker-compose.yml
 sed -i '' -e "s;^# Volumes$;${ESCAPED_COMPOSE_TEMPLATE};" ../docker-compose.yml
