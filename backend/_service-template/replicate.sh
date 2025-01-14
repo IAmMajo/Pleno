@@ -75,7 +75,7 @@ echo ''
 read_user_inputs
 
 SRV_CONFIG_SERVICE_UUID="$(echo "$(uuidgen)" | awk '{$1=tolower($1)}1')"
-SRV_PSQL_PASSWORD="$(LC_CTYPE=C < /dev/urandom tr -dc '[:graph:]' | tr -d "'\`\"$\/\\\\" | head -c $((RANDOM % 84 + 16)))"
+SRV_PSQL_PASSWORD="$(LC_CTYPE=C < /dev/urandom tr -dc '[:graph:]' | tr -d "'\`\"$\&\/\\\\" | head -c $((RANDOM % 84 + 16)))"
 
 COMPOSE_TEMPLATE="# Vapor: ${SRVNAME}-service
 #
@@ -143,7 +143,7 @@ ROOT_COMPOSE_TEMPLATE="# Vapor: ${SRVNAME}-service
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.${SRVNAME}-service.rule: Host(\`kivop.ipv64.net\`) && (PathPrefix(\`/${SRVNAME}-service\`) || PathPrefix(\`/${SRVNAME}s\`))
+      traefik.http.routers.${SRVNAME}-service.rule: Host(\`kivop.ipv64.net\`) \&\& (PathPrefix(\`/${SRVNAME}-service\`) || PathPrefix(\`/${SRVNAME}s\`))
       traefik.http.routers.${SRVNAME}-service.middlewares: ${SRVNAME}-service-replace-path-regex
       traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.regex: ^/${SRVNAME}-service(:/(.*))?
       traefik.http.middlewares.${SRVNAME}-service-replace-path-regex.replacepathregex.replacement: /\$\$1
