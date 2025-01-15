@@ -200,6 +200,7 @@ find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swa
 
 # Add service to /backend/docker-compose.yml and /docker-compose.yml
 sed -i '' -e "s;# PostgreSQL-Credentials$;${ESCAPED_POSTGRES_CREDENTIAL_ENV_COMPOSE_TEMPLATE};" ../docker-compose.yml
+sed -i '' -e "s;# PostgreSQL-Credentials$;${ESCAPED_POSTGRES_CREDENTIAL_ENV_COMPOSE_TEMPLATE};" ../../docker-compose.yml
 sed -i '' -e "s;^# Volumes$;${ESCAPED_COMPOSE_TEMPLATE};" ../docker-compose.yml
 sed -i '' -e "s;^# Volumes$;${ESCAPED_ROOT_COMPOSE_TEMPLATE};" ../../docker-compose.yml
 
