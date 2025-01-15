@@ -185,7 +185,7 @@ struct EventController: RouteCollection {
             starts: createEventDTO.starts,
             ends: createEventDTO.ends,
             latitude: createEventDTO.latitude,
-            longitude: createEventDTO.latitude
+            longitude: createEventDTO.longitude
         )
         
         // save new event
