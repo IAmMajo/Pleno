@@ -8,7 +8,6 @@ import AuthServiceDTOs
 
 struct SelectPlaceMapView: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion
-    var posterPositions: [CreatePosterPositionDTO]
     var onRegionChange: (MKCoordinateRegion) -> Void
 
     class Coordinator: NSObject, MKMapViewDelegate {
@@ -51,13 +50,9 @@ struct SelectPlaceView: View {
         center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
-    @ObservedObject var userManager = UserManager()
-    @ObservedObject private var posterManager = PosterManager()
+
     @ObservedObject private var locationMapManager = LocationMapManager()
     
-    @State private var expiresAt: Date = Date()
-    @State private var showUserSelectionSheet = false
-    @State private var selectedUsers: [UUID] = []
     @State private var searchText: String = ""
 
     
@@ -70,7 +65,7 @@ struct SelectPlaceView: View {
 
                 
                 ZStack {
-                    SelectPlaceMapView(region: $mapRegion, posterPositions: posterPositions, onRegionChange: { newRegion in
+                    SelectPlaceMapView(region: $mapRegion, onRegionChange: { newRegion in
                         mapRegion = newRegion
                     })
                     .ignoresSafeArea()
@@ -170,17 +165,8 @@ struct SelectPlaceView: View {
         let currentLocation = mapRegion.center
         
         // Hier kommt das hin, was du mit dem ausgewählten Ort machen möchtest
-        // Create a new CreatePosterPositionDTO object
-        let newPosterPosition = CreatePosterPositionDTO(
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-            responsibleUsers: selectedUsers,
-            expiresAt: expiresAt
-        )
-        
-        
-        // Debugging output
-        print("Added new poster position: \(newPosterPosition)")
+
+
     }
 
     private func zoomToLocation(latitude: Double, longitude: Double) {
