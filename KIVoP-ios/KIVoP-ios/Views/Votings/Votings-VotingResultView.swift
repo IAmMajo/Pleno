@@ -43,6 +43,7 @@ struct Votings_VotingResultView: View {
                    } else {
                       PieChartView(optionTextMap: optionTextMap, votingResults: votingResults)
                          .padding(.vertical)
+                         .padding(.horizontal)
                    }
                 }
                 .background(Color(UIColor.systemBackground))
@@ -64,15 +65,17 @@ struct Votings_VotingResultView: View {
                    .frame(maxWidth: .infinity, alignment: .leading)
                    .padding(.leading).padding(.trailing)
                    
-                
-                ZStack {
-                   Text(voting.description)
-                      .padding()
-                      .frame(maxWidth: .infinity, alignment: .leading)
-                }.background(Color(UIColor.systemBackground))
+                if !voting.description.isEmpty {
+                   ZStack {
+                      Text(voting.description)
+                         .padding()
+                         .frame(maxWidth: .infinity, alignment: .leading)
+                   }
+                   .background(Color(UIColor.systemBackground))
                    .cornerRadius(10)
                    .padding(.horizontal)
-      
+                }
+                
                 if isLiveStatusAvailable {
                    ZStack {
                       HStack {
