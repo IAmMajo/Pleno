@@ -11,16 +11,21 @@ struct CurrentMeetingBottomView: View {
         Group {
             if let currentMeeting = meetingManager.currentMeeting {
                 VStack {
-                    ScrollView(.horizontal) {
-                        HStack {
-                            filteredMeetingsView
+                    if meetingManager.meetings.filter { $0.status == .inSession }.count > 1 {
+                        ScrollView(.horizontal) {
+                            HStack {
+                                filteredMeetingsView
+                            }
+                            .scrollTargetLayout()
                         }
-                        .scrollTargetLayout()
+                        .scrollTargetBehavior(.viewAligned)
+                        .scrollPosition(id: $activeMeetingID) // Verwende nur die ID für die Scroll-Position
+                        .scrollIndicators(.never)
+                        pagingControl
+                    } else {
+                        // Zeige das einzelne Meeting ohne ScrollView an
+                        filteredMeetingsView
                     }
-                    .scrollTargetBehavior(.viewAligned)
-                    .scrollPosition(id: $activeMeetingID) // Verwende nur die ID für die Scroll-Position
-                    .scrollIndicators(.never)
-                    pagingControl
                 }
                 .onAppear {
                     // Setze die erste Sitzung mit Status 'inSession' als aktive Sitzung

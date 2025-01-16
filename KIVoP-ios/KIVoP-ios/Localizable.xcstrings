@@ -840,9 +840,6 @@
         }
       }
     },
-    "Hallo" : {
-
-    },
     "Hallo, %@" : {
       "localizations" : {
         "de" : {
@@ -889,9 +886,6 @@
       }
     },
     "Heinz-Peters" : {
-
-    },
-    "Hier werden die Abstimmungen stehen." : {
 
     },
     "In der alten Turnhalle hinter dem Friedhof\nAltes Grab 5 b, 42069 Hölle" : {
@@ -989,6 +983,9 @@
     "Keine anstehenden Sitzungen." : {
 
     },
+    "Keine Protokollanten gefunden." : {
+
+    },
     "Keine Sitzung verfügbar" : {
 
     },
@@ -1025,6 +1022,9 @@
 
     },
     "Lade Profilbild..." : {
+
+    },
+    "Lade Protokollanten..." : {
 
     },
     "Lade Protokolle..." : {
@@ -1554,9 +1554,6 @@
         }
       }
     },
-    "Protokoll" : {
-
-    },
     "Protokoll öffnen in" : {
 
     },
@@ -1590,6 +1587,9 @@
           }
         }
       }
+    },
+    "Protokolle zu %@" : {
+
     },
     "Ratssitzungen, " : {
       "localizations" : {
