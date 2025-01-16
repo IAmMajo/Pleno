@@ -64,6 +64,18 @@ struct PosterController: RouteCollection, Sendable {
         
         let openAPITagPoster = TagObject(name: "Poster")
         
+        routes.get("summary", use: getPostersSummary).openAPI(
+            tags: openAPITagPoster,
+            summary: "Anzahl der verschiedenen PosterPositionen Staten abfragen",
+            description: """
+                        Diese Route für die Staten hangs,toHang,overdue und takenDown einen numerischen Wert zurück, welcher die Anzahl der gefunden Einträge abbildet. 
+                        """,
+            body: nil,
+            response: .type(PosterSummaryResponseDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+        )
+        
         // GET /posters
         routes.get(":id", use: getPoster).openAPI(
             tags: openAPITagPoster,
@@ -399,6 +411,45 @@ struct PosterController: RouteCollection, Sendable {
             return try await createResponse(with: response, on: req)
         }
     }
+    
+    @Sendable
+        func getPostersSummary(req: Request) async throws -> Response {
+            let currentDate = Date()
+            
+            // 1. "hangs": posted_by != nil && removed_by == nil
+            let hangsCount = try await PosterPosition.query(on: req.db)
+                .filter(\.$posted_by.$id != nil)
+                .filter(\.$removed_by.$id == nil)
+                .count()
+            
+            // 2. "toHang": posted_by == nil && expires_at > currentDate
+            let toHangCount = try await PosterPosition.query(on: req.db)
+                .filter(\.$posted_by.$id == nil)
+                .filter(\.$expires_at > currentDate)
+                .count()
+            
+            // 3. "overdue": posted_by != nil && removed_by == nil && expires_at <= currentDate
+            let overdueCount = try await PosterPosition.query(on: req.db)
+                .filter(\.$posted_by.$id != nil)
+                .filter(\.$removed_by.$id == nil)
+                .filter(\.$expires_at <= currentDate)
+                .count()
+            
+            // 4. "takenDown": removed_by != nil
+            let takenDownCount = try await PosterPosition.query(on: req.db)
+                .filter(\.$removed_by.$id != nil)
+                .count()
+            
+            // Zusammenbauen des DTO
+            let summary = PosterSummaryResponseDTO(
+                hangs: hangsCount,
+                toHang: toHangCount,
+                overdue: overdueCount,
+                takenDown: takenDownCount
+            )
+            
+            return try await createResponse(with: summary, on: req)
+        }
     
     
     /// Aktualisiert ein bestehendes Poster (Name, Beschreibung und/oder Bild).
