@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 import MeetingServiceDTOs
-//import PosterServiceDTOs
+import PosterServiceDTOs
 
 extension GetIdentityDTO: @retroactive Identifiable {}
 extension GetIdentityDTO: @retroactive Equatable {}

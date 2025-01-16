@@ -50,7 +50,7 @@ struct SelectPlaceView: View {
         center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
-
+    @Environment(\.dismiss) private var dismiss
     @ObservedObject private var locationMapManager = LocationMapManager()
     
     @State private var searchText: String = ""
@@ -120,7 +120,7 @@ struct SelectPlaceView: View {
 
                             Spacer()
                             Button(action: addLocation) {
-                                Text("Standort hinzufügen")
+                                Text("Standort auswählen")
                                     .padding()
                                     .background(Color.blue)
                                     .foregroundColor(.white)
@@ -165,7 +165,7 @@ struct SelectPlaceView: View {
         let currentLocation = mapRegion.center
         
         // Hier kommt das hin, was du mit dem ausgewählten Ort machen möchtest
-
+        dismiss()
 
     }
 

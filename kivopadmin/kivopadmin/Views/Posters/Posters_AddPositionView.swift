@@ -244,7 +244,7 @@ struct Posters_AddPositionView: View {
         .onAppear {
             // Benutzer laden, wenn die View erscheint
             userManager.fetchUsers()
-            posterManager.fetchPosterPositions()
+            //posterManager.fetchPosterPositions()
         }
     }
 

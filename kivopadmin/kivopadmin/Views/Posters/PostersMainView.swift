@@ -10,6 +10,7 @@ struct PostersMainView: View {
    @State private var postersFiltered: [Poster] = []
    
    @StateObject private var postersViewModel = PostersViewModel()
+    @StateObject private var posterManager = PosterManager() // MeetingManager als StateObject
    
    @State private var isLoading = false
    @State private var error: String?
@@ -154,6 +155,9 @@ struct PostersMainView: View {
         .sheet(isPresented: $isPostenSheetPresented) {
             SammelpostenErstellenView()
         }
+        .onAppear(){
+            posterManager.fetchPoster()
+        }
     }
 }
 
@@ -164,6 +168,7 @@ struct SammelpostenErstellenView: View {
     @State private var description: String = ""
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var imageData: Data? = nil // Optional Data für das Bild
+    @StateObject private var posterManager = PosterManager() // MeetingManager als StateObject
 
     var body: some View {
         NavigationView {
@@ -230,14 +235,19 @@ struct SammelpostenErstellenView: View {
             print("Titel oder Bild fehlt!")
             return
         }
-
+        let resizedImageData = resizeAndCompressImageData(imageData: imageData, maxWidth: 32, maxHeight: 32, compressionQuality: 0.8)
+            
         let newPoster = CreatePosterDTO(
             name: title,
-            description: description.isEmpty ? nil : description,
-            image: imageData
+            description: description,
+            image: resizedImageData
         )
 
-        print("Sammelposten erstellt: \(newPoster)")
+        let imageName = "example.jpg"
+        let mimeType = "image/jpeg"
+        
+        //posterManager.createPoster(poster: newPoster)
+        posterManager.createPoster(poster: newPoster)
         dismiss()
     }
 }

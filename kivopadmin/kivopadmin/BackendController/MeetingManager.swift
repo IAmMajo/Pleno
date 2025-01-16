@@ -218,19 +218,6 @@ class MeetingManager: ObservableObject {
                     return
                 }
 
-//                // Erfolgreiches Update: Kein erneutes Abrufen der Daten, nur das lokale Array aktualisieren
-//                if let data = data {
-//                    do {
-//                        let updatedMeeting = try JSONDecoder().decode(GetMeetingDTO.self, from: data)
-//                        if let index = self?.meetings.firstIndex(where: { $0.id == meetingId }) {
-//                            self?.meetings[index] = updatedMeeting
-//                        }
-//                        completion()
-//                    } catch {
-//                        self?.errorMessage = "Failed to decode updated meeting: \(error.localizedDescription)"
-//                        print("Decoding error: \(error)") // Debugging
-//                    }
-//                }
             }
         }.resume()
     }

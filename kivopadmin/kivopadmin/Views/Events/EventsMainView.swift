@@ -104,7 +104,7 @@ struct EventErstellenView: View {
     @StateObject private var locationManager = LocationManager() // MeetingManager
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(header: Text("Allgemeine Informationen")) {
                     TextField("Titel", text: $title)
@@ -113,53 +113,12 @@ struct EventErstellenView: View {
                 }
                 Section(header: Text("Location Details")) {
                     VStack(alignment: .leading) {
-                        Toggle("Neuen Ort hinzufügen", isOn: $isAddingNewLocation)
-                                                    
-                        if isAddingNewLocation {
-                            TextField("Location Name", text: $locationName)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            // Eingabefelder für einen neuen Ort
-                            TextField("Street", text: $locationStreet)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            
-                            HStack {
-                                TextField("Number", text: $locationNumber)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                
-                                TextField("Letter", text: $locationLetter)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                            }
-                            
-                            TextField("Postal Code", text: $locationPostalCode)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            
-                            TextField("Place", text: $locationPlace)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                        } else {
-                            // Auswahl eines bestehenden Ortes über den Picker
-                            if locationManager.isLoading {
-                                ProgressView("Loading locations...")
-                            } else if let errorMessage = locationManager.errorMessage {
-                                Text("Error: \(errorMessage)")
-                                    .foregroundColor(.red)
-                                    .multilineTextAlignment(.center)
-                            } else if locationManager.locations.isEmpty {
-                                Text("No locations available.")
-                                    .foregroundColor(.gray)
-                            } else {
-                                Picker("Location Name", selection: $selectedLocationID) {
-                                    Text("Keine Auswahl").tag(nil as UUID?) // Option für "keine Auswahl"
-                                    
-                                    ForEach(locationManager.locations, id: \.id) { location in
-                                        Text(location.name).tag(location.id as UUID?)
-                                    }
-                                }
-                                .pickerStyle(MenuPickerStyle())
-
-                            }
+                        NavigationLink(destination: SelectPlaceView()){
+                            Text("Ort auswählen")
                         }
                     }
                 }
+                
 
                 
                 
@@ -174,6 +133,11 @@ struct EventErstellenView: View {
                 .cornerRadius(10)
             }
             .navigationTitle("Event erstellen")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+
+                }
+            }
         }
         .onAppear(){
             locationManager.fetchLocations()
