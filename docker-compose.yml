@@ -195,7 +195,7 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.ride-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/ride-service`) || PathPrefix(`/specialrides`) || PathPrefix(`/events`)
+      traefik.http.routers.ride-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/ride-service`) || PathPrefix(`/specialrides`) || PathPrefix(`/events`))
       traefik.http.routers.ride-service.middlewares: ride-service-replace-path-regex
       traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.regex: ^/ride-service(:/(.*))?
       traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.replacement: /$$1
