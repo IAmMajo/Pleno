@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Willkommen bei der KI-basierten Volunteering-Plattform</title>
+    <title>Willkommen bei Pleno</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -22,7 +22,7 @@
       }
       .verification-code {
         font-size: 24px;
-        color: #ff6600;
+        color: #10667f;
         margin: 20px 0;
       }
       .footer {
@@ -35,14 +35,14 @@
   <body>
     <div class="container">
       <img
-        src="https://kivop.ipv64.net/email/logo.png"
-        alt="Plattform-Logo"
+        src="https://kivop.ipv64.net/notifications-service/logo.png"
+        alt="Pleno-Logo"
         class="logo"
       />
       #import("message")
       <div class="footer">
         <p>
-          Mit freundlichen Grüßen,<br />Das Team der KI-Volunteering-Plattform
+          Mit freundlichen Grüßen,<br />Das Team von Pleno
         </p>
       </div>
     </div>

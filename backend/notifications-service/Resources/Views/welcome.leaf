@@ -6,8 +6,7 @@
         <h1>Willkommen!</h1>
       #endif
       <p>
-        Vielen Dank für deine Registrierung bei unserer KI-basierten
-        Volunteering-Plattform.
+        Vielen Dank für deine Registrierung bei Pleno.
       </p>
       #if(verificationCode):
         <p>
