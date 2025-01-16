@@ -30,6 +30,6 @@ func routes(_ app: Application) throws {
     
     app.stoplightDocumentation(
         "stoplight",
-        openAPIPath: "./openapi.json"
+        openAPIPath: "/notifications-service/openapi.json"
     )
 }
