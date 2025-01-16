@@ -252,7 +252,24 @@
       }
     },
     "Abstimmen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vote"
+          }
+        }
+      }
+    },
+    "Abstimmen nicht möglich" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voting not possible"
+          }
+        }
+      }
     },
     "Abstimmung" : {
       "extractionState" : "stale",
@@ -665,7 +682,14 @@
       }
     },
     "Du kannst deine Wahl danach nciht mehr ändern!" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You cannot change your choice afterwards!"
+          }
+        }
+      }
     },
     "Du kannst deine Wahl danach nicht mehr ändern!" : {
       "localizations" : {
@@ -721,7 +745,14 @@
       }
     },
     "Enthalten" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abstain"
+          }
+        }
+      }
     },
     "Error: %@" : {
 
@@ -964,6 +995,9 @@
     "Keine vergangenen Sitzungen." : {
 
     },
+    "Key" : {
+      "extractionState" : "manual"
+    },
     "KIVoP " : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1166,8 +1200,15 @@
         }
       }
     },
-    "Möchtest du wirklich abstimmen" : {
-
+    "Möchtest du wirklich abstimmen?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to vote?"
+          }
+        }
+      }
     },
     "Nach Meeting suchen" : {
 
@@ -1778,6 +1819,17 @@
         }
       }
     },
+    "Unbekannter Fehler." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown error."
+          }
+        }
+      }
+    },
     "Unknown Action" : {
 
     },
@@ -1984,6 +2036,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gerçekten çıkış yapmak istiyor musunuz?"
+          }
+        }
+      }
+    },
+    "You must be attending the voting's corresponding meeting in order to vote on it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um abstimmen zu können, musst du an der zugehörigen Sitzung teilnehmen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You must be attending the voting's corresponding meeting in order to vote on it."
           }
         }
       }
