@@ -160,22 +160,6 @@ class VotingService: ObservableObject {
            completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
            return
        }
-
-//       // Perform the request
-//       URLSession.shared.dataTask(with: request) { data, response, error in
-//           if let error = error {
-//               completion(.failure(error))
-//               return
-//           }
-//
-//           if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
-//               completion(.success(())) // Vote was successful
-//           } else {
-//               let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 500
-      //               completion(.failure(NSError(domain: "Unexpected server response", code: statusCode, userInfo: nil)))
-      //           }
-      //       }.resume()
-      
       
       // Perform the request
       URLSession.shared.dataTask(with: request) { data, response, error in
