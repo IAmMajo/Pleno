@@ -240,6 +240,38 @@ services:
       traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.regex: ^/notifications-service(:/(.*))?
       traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.replacement: /$$1
 
+  notifications-service-migration:
+    profiles:
+      - not-default
+    image: kivop-notifications-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/notifications-service/Dockerfile
+    container_name: kivop-notifications-service-migration
+    environment:
+      <<: *shared_environment
+      DATABASE_USERNAME: ${NOTIFICATIONS_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${NOTIFICATIONS_SERVICE_POSTGRES_PASSWORD:?error}
+    depends_on:
+      - postgres
+    command: ["migrate", "--yes"]
+
+  notifications-service-revert:
+    profiles:
+      - not-default
+    image: kivop-notifications-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/notifications-service/Dockerfile
+    container_name: kivop-notifications-service-revert
+    environment:
+      <<: *shared_environment
+      DATABASE_USERNAME: ${NOTIFICATIONS_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${NOTIFICATIONS_SERVICE_POSTGRES_PASSWORD:?error}
+    depends_on:
+      - postgres
+    command: ["migrate", "--revert", "--yes"]
+
 #
 # Vapor: poster-service
 #
