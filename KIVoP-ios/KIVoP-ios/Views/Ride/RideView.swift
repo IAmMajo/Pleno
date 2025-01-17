@@ -59,7 +59,7 @@ struct RideView: View {
             .toolbar {
                 // Neue Fahrt anbieten
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: NewRideView(viewModel: NewRideViewModel(), rideViewModel: viewModel)) {
+                    NavigationLink(destination: NewRideView(viewModel: EditRideViewModel(), rideViewModel: viewModel)) {
                         Text("Neue Fahrt anbieten")
                             .font(.body)
                     }

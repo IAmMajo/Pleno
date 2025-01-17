@@ -83,6 +83,26 @@
         }
       }
     },
+    "%f, %f" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$f, %2$f"
+          }
+        }
+      }
+    },
+    "%lf, %lf" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lf, %2$lf"
+          }
+        }
+      }
+    },
     "%lld" : {
 
     },
@@ -311,6 +331,9 @@
 
     },
     "Adresse in der Nähe" : {
+
+    },
+    "Adresse suchen" : {
 
     },
     "AKTIONEN" : {
@@ -608,7 +631,16 @@
         }
       }
     },
+    "Bitte überprüfe und bestätige die Adresse von der du abgeholt werden möchtest" : {
+
+    },
     "Bitte wähle, ob du eine Event Fahrt oder eine Sonderfahrt anlegen möchtest." : {
+
+    },
+    "Bitte wählen Sie einen Startort aus." : {
+
+    },
+    "Bitte wählen Sie einen Zielort aus." : {
 
     },
     "Code scannen" : {
@@ -810,9 +842,6 @@
     "Fahrt löschen" : {
 
     },
-    "Fahrtbeschreibung" : {
-
-    },
     "Fast fertig" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -873,9 +902,6 @@
         }
       }
     },
-    "Geokoordinaten" : {
-
-    },
     "Hallo" : {
 
     },
@@ -928,6 +954,9 @@
 
     },
     "Hier werden die Abstimmungen stehen." : {
+
+    },
+    "Hiermit betsätigst du, dass du von dieser Adresse abgeholt werden möchtest und an dieser Fahrgemeinschaft teilnimmst" : {
 
     },
     "Hinzufügen" : {
@@ -1015,9 +1044,6 @@
           }
         }
       }
-    },
-    "Karte zum Standort auswählen wird noch hinzugefügt." : {
-
     },
     "Keine Abstimmungen gefunden" : {
 
@@ -1165,6 +1191,9 @@
     "Meine Fahrten" : {
 
     },
+    "Meine Position" : {
+
+    },
     "Mit " : {
       "localizations" : {
         "de" : {
@@ -1286,9 +1315,6 @@
 
     },
     "Möchtest du wirklich zurück?" : {
-
-    },
-    "Momentan Base Koordinaten 0,0" : {
 
     },
     "Nach Meeting suchen" : {
@@ -1477,9 +1503,6 @@
           }
         }
       }
-    },
-    "Ort" : {
-
     },
     "Passwort" : {
       "localizations" : {
@@ -1832,6 +1855,12 @@
         }
       }
     },
+    "Standort außerhalb der Anwendung öffnen?" : {
+
+    },
+    "Standort hinzufügen" : {
+
+    },
     "Standorte (3)" : {
 
     },
@@ -2150,9 +2179,6 @@
       }
     },
     "Zielort" : {
-
-    },
-    "Zielort - als Bild" : {
 
     },
     "zu einer verbesserten " : {

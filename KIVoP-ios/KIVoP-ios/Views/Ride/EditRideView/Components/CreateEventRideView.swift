@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CreateEventRideView: View {
-    @ObservedObject var viewModel: NewRideViewModel
+    @ObservedObject var viewModel: EditRideViewModel
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedOption: String?
 

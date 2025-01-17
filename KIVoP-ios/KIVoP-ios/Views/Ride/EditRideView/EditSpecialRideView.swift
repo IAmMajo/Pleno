@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 
 struct EditSpecialRideView: View {
     @ObservedObject var viewModel: EditRideViewModel
@@ -8,10 +9,10 @@ struct EditSpecialRideView: View {
         VStack {
             List {
                 Section(header: Text("Details der Fahrt")) {
-                    TextField("Name der Fahrt", text: $viewModel.ride.name)
+                    TextField("Name der Fahrt", text: $viewModel.rideDetail.name)
                     ZStack(alignment: .topLeading) {
                         // Placeholder Text
-                        if viewModel.ride.description == "" {
+                        if viewModel.rideDetail.description == "" {
                             Text("Beschreibung oder weitere Infos zu deiner Fahrt")
                                 .foregroundColor(.gray)
                                 .padding(.top, 7)
@@ -21,26 +22,24 @@ struct EditSpecialRideView: View {
                         }
                         
                         TextEditor(text: Binding(
-                            get: { viewModel.ride.description ?? "" },
-                            set: { viewModel.ride.description = $0 }
+                            get: { viewModel.rideDetail.description ?? "" },
+                            set: { viewModel.rideDetail.description = $0 }
                         ))
-                            .foregroundColor(.black)
-                            .frame(minHeight: 50, maxHeight: .infinity)
+                        .foregroundColor(.black)
+                        .frame(minHeight: 50, maxHeight: .infinity)
+
                     }
                     .padding(.leading, -3)
-                    DatePicker("Startzeit", selection: $viewModel.ride.starts, displayedComponents: [.date, .hourAndMinute])
+                    DatePicker("Startzeit", selection: $viewModel.rideDetail.starts, displayedComponents: [.date, .hourAndMinute])
                 }
-                Section(header: Text("Startort")) {
-                    Text("Baut Adrian noch")
-                }
-                Section(header: Text("Zielort")) {
-                    Text("Baut Adrian noch")
-                }
+                
+                LocationPickerView(viewModel: viewModel)
+                
                 Section(header: Text("Auto und Sitzplätze")) {
                     HStack {
                         ZStack(alignment: .topLeading){
                             // Placeholder Text
-                            if viewModel.ride.vehicleDescription == "" {
+                            if viewModel.rideDetail.vehicleDescription == "" {
                                 Text("Beschreibung Auto")
                                     .foregroundColor(.gray)
                                     .padding(.top, 10)
@@ -49,8 +48,8 @@ struct EditSpecialRideView: View {
                             }
                             
                             TextEditor(text: Binding(
-                                get: { viewModel.ride.vehicleDescription ?? "" },
-                                set: { viewModel.ride.vehicleDescription = $0 }
+                                get: { viewModel.rideDetail.vehicleDescription ?? "" },
+                                set: { viewModel.rideDetail.vehicleDescription = $0 }
                             ))
                                 .foregroundColor(.black)
                                 .frame(minHeight: 50, maxHeight: .infinity)
@@ -58,7 +57,7 @@ struct EditSpecialRideView: View {
                         
                         HStack {
                             // Picker für die Auswahl der freien Sitze
-                            Picker("", selection: $viewModel.ride.emptySeats) {
+                            Picker("", selection: $viewModel.rideDetail.emptySeats) {
                                 ForEach(0..<100) { number in
                                     Text("\(number)").tag(UInt8(number))
                                 }
@@ -71,7 +70,7 @@ struct EditSpecialRideView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .navigationTitle(viewModel.ride.name)
+            .navigationTitle(viewModel.rideDetail.name)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar{
@@ -79,8 +78,11 @@ struct EditSpecialRideView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         if viewModel.isFormValid {
-                            viewModel.saveRide()
-                            dismiss()
+                            viewModel.selectedOption = "SonderFahrt"
+                            viewModel.saveEditedRide()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                dismiss()
+                            }
                         } else {
                             viewModel.showSaveAlert = true
                         }

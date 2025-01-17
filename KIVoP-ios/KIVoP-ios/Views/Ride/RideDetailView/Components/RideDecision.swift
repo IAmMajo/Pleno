@@ -31,7 +31,9 @@ struct RideDecision: View {
                         viewModel.deleteRide()
                         viewModel.showDeleteRideAlert = false
                         rideViewModel.fetchRides()
-                        dismiss()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            dismiss()
+                        }
                     },
                     secondaryButton: .cancel()
                 )
@@ -59,8 +61,8 @@ struct RideDecision: View {
                         primaryButton: .destructive(Text("Löschen")) {
                             // Aktion zum Löschen der Fahrt
                             viewModel.deleteRideRequestedSeat(rider: viewModel.rider!)
-                            viewModel.showDeleteRideRequest = false
                             viewModel.fetchRideDetails()
+                            viewModel.showDeleteRideRequest = false
                         },
                         secondaryButton: .cancel()
                     )
@@ -87,8 +89,8 @@ struct RideDecision: View {
                         primaryButton: .destructive(Text("Freigeben")) {
                             // Aktion zum Löschen der Fahrt
                             viewModel.deleteRideRequestedSeat(rider: viewModel.rider!)
-                            viewModel.showRiderDeleteRequest = false
                             viewModel.fetchRideDetails()
+                            viewModel.showRiderDeleteRequest = false
                         },
                         secondaryButton: .cancel()
                     )

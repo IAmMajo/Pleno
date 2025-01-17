@@ -1,9 +1,23 @@
 import SwiftUI
+import MapKit
 
 struct RideDetailView: View {
     @StateObject var viewModel: RideDetailViewModel
     @ObservedObject var rideViewModel: RideViewModel
     @Environment(\.dismiss) private var dismiss
+    
+    // Vars um Standort zu kopieren
+    @State private var shareLocation = false
+    @State private var isGoogleMapsInstalled = false
+    @State private var isWazeInstalled = false
+    @State private var showMapOptions: Bool = false
+    @State private var setKoords: CLLocationCoordinate2D?
+    @State private var setAddress: String?
+    private func formattedShareText() -> String {
+       """
+       \(setAddress ?? "")
+       """
+    }
     
     var body: some View {
         NavigationStack {
@@ -28,25 +42,60 @@ struct RideDetailView: View {
                             .frame(maxWidth: 250, alignment: .center)
                     }
                     
-                    List{
-                        
-                        Section(header: Text("Fahrtbeschreibung")){
-                            Text(viewModel.rideDetail.description ?? "Keine Beschreibung vorhanden")
-                        }
-                        
-                        Section(header: Text("Ort")){
-                            Text("Zielort - als Bild")
-                            Text("Adresse")
-                            Text("Geokoordinaten")
-                        }
+                    // Fahrtbeschreibung
+                    Text(viewModel.rideDetail.description ?? "Keine Beschreibung zur Fahrt vorhanden")
 
-                        Section(header: Text("Beschreibung Auto")){
-                            if let vehicleDescription = viewModel.rideDetail.vehicleDescription {
-                                Text(vehicleDescription)
-                            } else {
-                                Text("Keine Fahrzeugbeschreibung vorhanden.")
+                    // Ort
+                    RideLocationView(selectedLocation: $viewModel.location)
+                        .cornerRadius(10)
+                        .frame(width: 350, height: 150)
+                    Text(viewModel.destinationAddress)
+                        .foregroundColor(.blue)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                viewModel.getAddressFromCoordinates(latitude: viewModel.rideDetail.destinationLatitude, longitude: viewModel.rideDetail.destinationLongitude) { address in
+                                    if let address = address {
+                                        viewModel.destinationAddress = address
+                                    }
+                                }
                             }
                         }
+                        .onTapGesture {
+                            showMapOptions = true
+                            setKoords = CLLocationCoordinate2D(
+                                latitude: CLLocationDegrees(viewModel.rideDetail.destinationLatitude),
+                                longitude: CLLocationDegrees(viewModel.rideDetail.destinationLongitude)
+                            )
+                            setAddress = viewModel.destinationAddress
+                        }
+                        .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $showMapOptions) {
+                           Button("Öffnen mit Apple Maps") {
+                              NavigationAppHelper.shared.openInAppleMaps(
+                                name: setAddress,
+                                coordinate: setKoords!
+                              )
+                           }
+                           if isGoogleMapsInstalled {
+                              Button("Öffnen mit Google Maps") {
+                                  NavigationAppHelper.shared.openInGoogleMaps(coordinate: setKoords!)
+                              }
+                           }
+                           if isWazeInstalled {
+                              Button("Öffnen mit Waze") {
+                                 NavigationAppHelper.shared.openInWaze(coordinate: setKoords!)
+                              }
+                           }
+                           Button("Teilen...") {
+                              shareLocation = true
+                           }
+                           Button("Abbrechen", role: .cancel) {}
+                        }
+                    Text("\(viewModel.rideDetail.destinationLatitude), \(viewModel.rideDetail.destinationLongitude)")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+
+                    List{
+                        
                         Section(header: Text("Fahrer")){
                             HStack{
                                 Circle()
@@ -54,14 +103,53 @@ struct RideDetailView: View {
                                     .frame(width: 40, height: 40)
                                 VStack{
                                     Text(viewModel.rideDetail.driverName)
-                                    Text("Adresse")
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    Text(viewModel.driverAddress)
                                         .font(.subheadline)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor(.gray)
+                                        .onAppear {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                                viewModel.getAddressFromCoordinates(latitude: viewModel.rideDetail.startLatitude, longitude: viewModel.rideDetail.startLongitude) { address in
+                                                    if let address = address {
+                                                        viewModel.driverAddress = address
+                                                    }
+                                                }
+                                            }
+                                        }
                                 }
                                 Spacer()
                                 Image(systemName: "square.and.arrow.up")
                                     .foregroundColor(.blue)
                                     .onTapGesture {
-                                        print("Standort kopiert!")
+                                        showMapOptions = true
+                                        setKoords = CLLocationCoordinate2D(
+                                            latitude: CLLocationDegrees(viewModel.rideDetail.startLatitude),
+                                            longitude: CLLocationDegrees(viewModel.rideDetail.startLongitude)
+                                        )
+                                        setAddress = viewModel.driverAddress
+                                    }
+                                    .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $showMapOptions) {
+                                       Button("Öffnen mit Apple Maps") {
+                                          NavigationAppHelper.shared.openInAppleMaps(
+                                            name: setAddress,
+                                            coordinate: setKoords!
+                                          )
+                                       }
+                                       if isGoogleMapsInstalled {
+                                          Button("Öffnen mit Google Maps") {
+                                              NavigationAppHelper.shared.openInGoogleMaps(coordinate: setKoords!)
+                                          }
+                                       }
+                                       if isWazeInstalled {
+                                          Button("Öffnen mit Waze") {
+                                             NavigationAppHelper.shared.openInWaze(coordinate: setKoords!)
+                                          }
+                                       }
+                                       Button("Teilen...") {
+                                          shareLocation = true
+                                       }
+                                       Button("Abbrechen", role: .cancel) {}
                                     }
                             }
                         }
@@ -75,15 +163,47 @@ struct RideDetailView: View {
                                     HStack {
                                         VStack{
                                             Text(rider.username)
-                                            Text("Adresse")
-                                                .font(.subheadline)
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                            if viewModel.rideDetail.isSelfDriver {
+                                                Text(viewModel.riderAddresses[rider.id] ?? "Lädt Adresse...")
+                                                    .font(.subheadline)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                                    .foregroundColor(.gray)
+                                            }
                                         }
                                         Spacer()
                                         if viewModel.rideDetail.isSelfDriver {
                                             Image(systemName: "square.and.arrow.up")
                                                 .foregroundColor(.blue)
                                                 .onTapGesture {
-                                                    print("Standort kopiert!")
+                                                    showMapOptions = true
+                                                    setKoords = CLLocationCoordinate2D(
+                                                        latitude: CLLocationDegrees(rider.latitude),
+                                                        longitude: CLLocationDegrees(rider.longitude)
+                                                    )
+                                                    setAddress = viewModel.riderAddresses[rider.id]
+                                                }
+                                                .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $showMapOptions) {
+                                                   Button("Öffnen mit Apple Maps") {
+                                                      NavigationAppHelper.shared.openInAppleMaps(
+                                                        name: setAddress,
+                                                        coordinate: setKoords!
+                                                      )
+                                                   }
+                                                   if isGoogleMapsInstalled {
+                                                      Button("Öffnen mit Google Maps") {
+                                                          NavigationAppHelper.shared.openInGoogleMaps(coordinate: setKoords!)
+                                                      }
+                                                   }
+                                                   if isWazeInstalled {
+                                                      Button("Öffnen mit Waze") {
+                                                         NavigationAppHelper.shared.openInWaze(coordinate: setKoords!)
+                                                      }
+                                                   }
+                                                   Button("Teilen...") {
+                                                       shareLocation.toggle()
+                                                   }
+                                                   Button("Abbrechen", role: .cancel) {}
                                                 }
                                             Image(systemName: "trash")
                                                 .foregroundColor(.red)
@@ -112,8 +232,8 @@ struct RideDetailView: View {
                             }
                         }
                         
-                        if viewModel.requestedRiders.isEmpty {
-                        // Nichts wird angezeigt wenn es keine Requests gibt
+                        if viewModel.requestedRiders.isEmpty || !viewModel.rideDetail.isSelfDriver {
+                        // Nichts wird angezeigt wenn es keine Requests gibt oder man nicht Fahrer ist
                         } else {
                             // Anfragen
                             Section(header: Text("Anfragen zum Mitnehmen (\(viewModel.requestedRiders.count))")){
@@ -121,8 +241,13 @@ struct RideDetailView: View {
                                     HStack {
                                         VStack{
                                             Text(rider.username)
-                                            Text("Adresse")
-                                                .font(.subheadline)
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                            if viewModel.rideDetail.isSelfDriver {
+                                                Text(viewModel.riderAddresses[rider.id] ?? "Lädt Adresse...")
+                                                    .font(.subheadline)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                                    .foregroundColor(.gray)
+                                            }
                                         }
                                         Spacer()
                                         if viewModel.rideDetail.isSelfDriver {
@@ -152,6 +277,14 @@ struct RideDetailView: View {
                                 }
                             }
                         }
+                        // Beschreibung zum Auto
+                        Section(header: Text("Beschreibung Auto")){
+                            if let vehicleDescription = viewModel.rideDetail.vehicleDescription {
+                                Text(vehicleDescription)
+                            } else {
+                                Text("Keine Fahrzeugbeschreibung vorhanden.")
+                            }
+                        }
                     }
                     .listStyle(.insetGrouped)
                     RideDecision(viewModel: viewModel, rideViewModel: rideViewModel)
@@ -173,12 +306,17 @@ struct RideDetailView: View {
                 }
             }
         }
+        .sheet(isPresented: $shareLocation) {
+            ShareSheet(activityItems: [formattedShareText()])
+               .presentationDetents([.medium, .large])
+               .presentationDragIndicator(.hidden)
+        }
         .navigationTitle(viewModel.rideDetail.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar{
             if viewModel.rideDetail.isSelfDriver {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: EditSpecialRideView(viewModel: EditRideViewModel(ride: viewModel.rideDetail, selectedOption: viewModel.selectedOption))) {
+                    NavigationLink(destination: EditSpecialRideView(viewModel: EditRideViewModel(rideDetail: viewModel.rideDetail))) {
                         Text("Bearbeiten")
                             .font(.body)
                     }

@@ -1,4 +1,6 @@
 import Foundation
+import CoreLocation
+import MapKit
 import RideServiceDTOs
 
 @MainActor
@@ -17,6 +19,13 @@ class RideDetailViewModel: ObservableObject {
     @Published var showLocationRequest: Bool = false // sheet um die Location festzulegen vor einer Anfrage
     @Published var requestLat: Float = 0
     @Published var requestLong: Float = 0
+    @Published var driverAddress: String = ""
+    @Published var requestedAdress: String = "" // Adresse für die Anzeige beim Auswählen der Location für einen Mitfahrer
+    @Published var riderAddresses: [UUID: String] = [:] // Um die Adressen für die Mitfahrer zu berechnen
+    @Published var destinationAddress: String = ""
+    @Published var location: CLLocationCoordinate2D?
+    @Published var requestedLocation: CLLocationCoordinate2D? // Location für die Anfrage
+    @Published var startLocation: CLLocationCoordinate2D?
     
     private let baseURL = "https://kivop.ipv64.net"
     var ride: GetSpecialRideDTO
@@ -80,8 +89,19 @@ class RideDetailViewModel: ObservableObject {
                             let fetchedRideDetail = try decoder.decode(GetSpecialRideDetailDTO.self, from: data)
                             self.rideDetail = fetchedRideDetail
                             self.groupRiders()
-                            self.rider = self.rideDetail.riders.first(where: { $0.istMe })
+                            self.rider = self.rideDetail.riders.first(where: { $0.itsMe })
                             self.isLoading = false
+                            self.location = CLLocationCoordinate2D(latitude: CLLocationDegrees(self.rideDetail.destinationLatitude) , longitude: CLLocationDegrees(self.rideDetail.destinationLongitude) )
+                            self.startLocation = CLLocationCoordinate2D(latitude: CLLocationDegrees(self.rideDetail.startLatitude), longitude: CLLocationDegrees(self.rideDetail.startLongitude))
+                            // Durchlaufe alle Fahrer und rufe die Adresse für jedes Fahrer-Standort ab
+                            for rider in self.rideDetail.riders {
+                                self.getAddressFromCoordinates(latitude: rider.latitude, longitude: rider.longitude) { address in
+                                    if let address = address {
+                                        // Speichere die Adresse im Dictionary mit der Rider ID als Schlüssel
+                                        self.riderAddresses[rider.id] = address
+                                    }
+                                }
+                            }
                         } catch {
                             print("Fehler beim Dekodieren der Ride Details: \(error.localizedDescription)")
                             self.isLoading = false
@@ -129,7 +149,7 @@ class RideDetailViewModel: ObservableObject {
                 
                 DispatchQueue.main.async {
                     // Erfolgreiches Löschen
-                    if let index = self.requestedRiders.firstIndex(where: { $0.istMe }) {
+                    if let index = self.requestedRiders.firstIndex(where: { $0.itsMe }) {
                         self.requestedRiders.remove(at: index)
                     }
                     self.isLoading = false
@@ -408,6 +428,39 @@ class RideDetailViewModel: ObservableObject {
                     print("Fehler beim Akzeptieren des angefragten Mitfahrers: \(error.localizedDescription)")
                 }
             }
+        }
+    }
+    
+    func getAddressFromCoordinates(latitude: Float, longitude: Float, completion: @escaping (String?) -> Void) {
+        let clLocation = CLLocation(latitude: Double(latitude), longitude: Double(longitude))
+        
+        CLGeocoder().reverseGeocodeLocation(clLocation) { placemarks, error in
+            if let error = error {
+                print("Geocoding error: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+            
+            guard let placemark = placemarks?.first else {
+                completion(nil)
+                return
+            }
+            
+            var addressString = ""
+            if let name = placemark.name {
+                addressString += name
+            }
+            if let postalCode = placemark.postalCode {
+                addressString += ", \(postalCode)"
+            }
+            if let city = placemark.locality {
+                addressString += " \(city)"
+            }
+//            if let country = placemark.country {
+//                addressString += ", \(country)"
+//            }
+            
+            completion(addressString)
         }
     }
 

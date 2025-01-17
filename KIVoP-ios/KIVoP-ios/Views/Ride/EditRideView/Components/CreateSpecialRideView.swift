@@ -1,10 +1,11 @@
 import SwiftUI
+import MapKit
 
 struct CreateSpecialRideView: View {
-    @ObservedObject var viewModel: NewRideViewModel
+    @ObservedObject var viewModel: EditRideViewModel
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedOption: String?
-
+    
     var body: some View {
         VStack {
             List {
@@ -28,12 +29,9 @@ struct CreateSpecialRideView: View {
                     .padding(.leading, -3)
                     DatePicker("Startzeit", selection: $viewModel.starts, displayedComponents: [.date, .hourAndMinute])
                 }
-                Section(header: Text("Startort")) {
-                    Text("Baut Adrian noch")
-                }
-                Section(header: Text("Zielort")) {
-                    Text("Baut Adrian noch")
-                }
+
+                LocationPickerView(viewModel: viewModel)
+                
                 Section(header: Text("Auto und Sitzplätze")) {
                     HStack {
                         ZStack(alignment: .topLeading){

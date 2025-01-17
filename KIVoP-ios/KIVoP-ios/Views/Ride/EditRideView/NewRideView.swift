@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct NewRideView: View {  
-    @ObservedObject var viewModel: NewRideViewModel
+    @ObservedObject var viewModel: EditRideViewModel
     @ObservedObject var rideViewModel: RideViewModel
     @State var showingSaveAlert = false
     @State var selectingSaveAlert: ActiveAlert = .error
