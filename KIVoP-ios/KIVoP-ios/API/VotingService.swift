@@ -160,21 +160,50 @@ class VotingService: ObservableObject {
            completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
            return
        }
-
-       // Perform the request
-       URLSession.shared.dataTask(with: request) { data, response, error in
-           if let error = error {
+      
+      // Perform the request
+      URLSession.shared.dataTask(with: request) { data, response, error in
+         // Handle network errors
+         if let error = error {
+            completion(.failure(error))
+            return
+         }
+         
+         // Check the HTTP response status
+         guard let httpResponse = response as? HTTPURLResponse else {
+            completion(.failure(NSError(domain: "Invalid response", code: 500, userInfo: nil)))
+            return
+         }
+         
+         // Parse the response
+         if (200...299).contains(httpResponse.statusCode) {
+            completion(.success(())) // Vote was successful
+         } else {
+            // Parse the error message from the server
+            if let data = data {
+               do {
+                  if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                     let reason = json["reason"] as? String {
+                     // Include the reason in the error
+                     let error = NSError(domain: "Server Error", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: reason])
+                     completion(.failure(error))
+                  } else {
+                     // Fallback for unexpected response structure
+                     let error = NSError(domain: "Server Error", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Unexpected server response"])
+                     completion(.failure(error))
+                  }
+               } catch {
+                  // JSON parsing error
+                  let parseError = NSError(domain: "Server Error", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to parse error response"])
+                  completion(.failure(parseError))
+               }
+            } else {
+               // No data in response
+               let error = NSError(domain: "Server Error", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "No error details received"])
                completion(.failure(error))
-               return
-           }
-
-           if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
-               completion(.success(())) // Vote was successful
-           } else {
-               let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 500
-               completion(.failure(NSError(domain: "Unexpected server response", code: statusCode, userInfo: nil)))
-           }
-       }.resume()
+            }
+         }
+      }.resume()
    }
    
    

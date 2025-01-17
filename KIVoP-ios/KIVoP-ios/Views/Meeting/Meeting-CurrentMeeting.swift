@@ -80,14 +80,14 @@ struct CurrentMeetingView: View {
                     }
                     
                     // Sitzung
-                    Section(header: Text("Sitzung")) {
-                        NavigationLink(destination: PlaceholderView()) {
-                            Text("Protokoll")
-                        }
-                        NavigationLink(destination: PlaceholderView()) {
-                            Text("Anwesenheit")
-                        }
-                    }
+//                    Section(header: Text("Sitzung")) {
+//                        NavigationLink(destination: PlaceholderView()) {
+//                            Text("Protokoll")
+//                        }
+//                        NavigationLink(destination: PlaceholderView()) {
+//                            Text("Anwesenheit")
+//                        }
+//                    }
                 }
             }.toolbar { // Toolbar hinzufügen
                 ToolbarItem(placement: .navigationBarTrailing) { // Position auf der rechten Seite

@@ -11,7 +11,7 @@ import MeetingServiceDTOs
 struct Votings_VoteView: View {
       
    let voting: GetVotingDTO
-   let votingResults: GetVotingResultsDTO
+//   let votingResults: GetVotingResultsDTO
    
    @State private var isLoading = false
    @State private var error: String?
@@ -22,7 +22,7 @@ struct Votings_VoteView: View {
    @Environment(\.dismiss) private var dismiss
    
 //   var onNavigate: (GetVotingResultsDTO) -> Void
-   var onNavigate: (GetVotingResultsDTO) -> Void
+   var onNavigate: () -> Void
    
 
    var body: some View {
@@ -34,9 +34,11 @@ struct Votings_VoteView: View {
                   .padding(.top).padding(.bottom, 2)
                   .padding(.leading).padding(.trailing)
                Divider()
-               Text(voting.description)
-                  .frame(maxWidth: .infinity, alignment: .center)
-                  .padding(.leading).padding(.top, 2).padding(.trailing)
+               if !voting.description.isEmpty {
+                  Text(voting.description)
+                     .frame(maxWidth: .infinity, alignment: .center)
+                     .padding(.leading).padding(.top, 2).padding(.trailing)
+               }
                
                List(voting.options, id: \.self, selection: $selection) { option in
                   if option.index != 0 {
@@ -59,6 +61,19 @@ struct Votings_VoteView: View {
                   }
                }
                
+               if error != nil {
+                  VStack(alignment: .center, spacing: 8) {
+                     Text("Abstimmen nicht möglich")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.red.opacity(0.8).mix(with: Color(UIColor.label), by: 0.1))
+                     Text(NSLocalizedString(error ?? "Unbekannter Fehler.", comment: ""))
+                        .foregroundStyle(.red.opacity(0.8).mix(with: Color(UIColor.label), by: 0.5))
+                        .multilineTextAlignment(.center)
+                  }
+                  .padding(.horizontal)
+               }
+               
                Button {
                   showingAlert = true
                } label: {
@@ -73,15 +88,27 @@ struct Votings_VoteView: View {
                .controlSize(.large)
                .alert(isPresented:$showingAlert) {
                   Alert(
-                     title: Text("Möchtest du wirklich abstimmen"),
+                     title: Text("Möchtest du wirklich abstimmen?"),
                      message: Text("Du kannst deine Wahl danach nciht mehr ändern!"),
                      primaryButton: .default(Text("Abstimmen")) {
                         Task {
                            await BiometricAuth.executeIfSuccessfulAuth {
                               print("Successful Auth!")
-                              await castVote(voting: voting, selection: selection ?? nil)
-                              dismiss()
-                              onNavigate(updateMyVote(selection: selection ?? nil))
+                              VotingService.shared.castVote(votingID: voting.id, index: selection != nil ? selection!.index : 0) { result in
+                                  DispatchQueue.main.async {
+                                      switch result {
+                                      case .success:
+                                         print("Vote cast successfully!")
+                                         dismiss()
+                                         updateMyVote(selection: selection ?? nil)
+                                         onNavigate()
+//                                         onNavigate(updateMyVote(selection: selection ?? nil))
+                                      case .failure(let error):
+                                         print("Failed to cast vote: \(error.localizedDescription)")
+                                         self.error = error.localizedDescription
+                                      }
+                                  }
+                              }
                            } otherwise: {
                               print("Failed Auth!")
                            }
@@ -101,35 +128,22 @@ struct Votings_VoteView: View {
          }
          .navigationBarTitleDisplayMode(.inline)
    }
-   
-   private func castVote(voting: GetVotingDTO, selection: GetVotingOptionDTO?) async {
-      VotingService.shared.castVote(votingID: voting.id, index: selection != nil ? selection!.index : 0) { result in
-          DispatchQueue.main.async {
-              switch result {
-              case .success:
-                  print("Vote cast successfully!")
-              case .failure(let error):
-                  print("Failed to cast vote: \(error.localizedDescription)")
-              }
-          }
-      }
-   }
-   
-   func updateMyVote(selection: GetVotingOptionDTO?) -> GetVotingResultsDTO {
+ 
+   func updateMyVote(selection: GetVotingOptionDTO?) {
       
       VotingStateTracker.saveVote(votingId: voting.id, voteIndex: selection?.index ?? 0)
 
-      var results = votingResults
-      results.myVote = selection?.index
-      return results
+//      var results = votingResults
+//      results.myVote = selection?.index
+//      return results
    }
 }
 
 #Preview {
    NavigationView {
-      var votingsView: VotingsView = .init()
+//      var votingsView: VotingsView = .init()
       
-      Votings_VoteView(voting: votingsView.mockVotings[0], votingResults: votingsView.mockVotingResults, onNavigate: {results in})
+      Votings_VoteView(voting: /*votingsView.*/mockVotings[0], onNavigate: {})
       .toolbar {
          ToolbarItem(placement: .navigationBarLeading) {
             Button {

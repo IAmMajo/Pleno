@@ -23,7 +23,7 @@ struct VotingLiveStatusView: View {
       self.votingId = votingId
       _webSocketService = StateObject(wrappedValue: WebSocketService())
       self.onWebSocketError = onWebSocketError
-      self.votingResults = VotingsView().mockVotingResults
+      self.votingResults = /*VotingsView().*/mockVotingResults
    }
    
    var body: some View {

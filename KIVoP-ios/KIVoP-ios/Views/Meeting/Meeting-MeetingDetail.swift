@@ -8,6 +8,7 @@ struct MeetingDetailView: View {
     @StateObject private var recordManager = RecordManager() // RecordManager als StateObject
     @StateObject private var votingManager = VotingManager() // RecordManager als StateObject
     @StateObject private var attendanceManager = AttendanceManager() // RecordManager als StateObject
+    @StateObject private var viewModel = AttendanceViewModel()
     
     var body: some View {
         NavigationStack {
@@ -68,6 +69,30 @@ struct MeetingDetailView: View {
                                 }
                             }
                         }
+                        if recordManager.isLoading {
+                            ProgressView("Lade Protokollanten...")
+                                .progressViewStyle(CircularProgressViewStyle())
+                        } else if let errorMessage = recordManager.errorMessage {
+                            Text("Error: \(errorMessage)")
+                                .foregroundColor(.red)
+                        } else if recordManager.records.isEmpty {
+                            Text("Keine Protokollanten gefunden.")
+                                .foregroundColor(.secondary)
+                        } else {
+                            HStack {
+                                Image(systemName: "person.circle")
+                                    .resizable()
+                                    .frame(width: 30, height: 30)
+                                    .foregroundColor(.gray)
+                                VStack(alignment: .leading) {
+                                    Text(recordManager.records.first?.identity.name ?? "") 
+                                    Text("Protokollant")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                        }
+
                     }
                     
                     // Beschreibung
@@ -77,47 +102,43 @@ struct MeetingDetailView: View {
                         }
                     }
                     
-                    // Protokolle
-                    Section(header: Text("Protokolle")) {
-                        if recordManager.isLoading {
-                            ProgressView("Lade Protokolle...")
-                                .progressViewStyle(CircularProgressViewStyle())
-                        } else if let errorMessage = recordManager.errorMessage {
-                            Text("Error: \(errorMessage)")
-                                .foregroundColor(.red)
-                        } else if recordManager.records.isEmpty {
-                            Text("No records available.")
-                                .foregroundColor(.secondary)
-                        } else {
-                            ForEach(recordManager.records, id: \.lang) { record in
-                                NavigationLink(destination: MarkdownEditorView(meetingId: record.meetingId, lang: record.lang)) {
-                                    Text("Protokoll: \(record.lang)")
-                                }
+                    Section(header: Text("Sitzung")) {
+                        NavigationLink(destination: MeetingRecordsView(meeting: meeting)) {
+                            Text("Protokolle")
+                        }
+                        NavigationLink(destination: viewModel.destinationView(for: meeting)) {
+                            HStack{
+                                Text("Anwesenheit")
+                                Spacer()
+                                
+                                // Logik für die Symbolauswahl. Bei vergangenen Terminen gibt es kein Kalender Symbol. Wenn dort der Status noch nicht gesetzt ist, hat man am Meeting nicht teilgenommen.
+                                Image(systemName: {
+                                    switch meeting.myAttendanceStatus {
+                                    case .accepted, .present:
+                                        return "checkmark.circle"
+                                    case .absent:
+                                        return "xmark.circle"
+                                    default:
+                                        return viewModel.selectedTab == 0 ? "xmark.circle" : "calendar"
+                                    }
+                                }())
+                                .foregroundColor({
+                                    switch meeting.myAttendanceStatus {
+                                    case .accepted, .present:
+                                        return .blue
+                                    case .absent:
+                                        return .red
+                                    default:
+                                        return viewModel.selectedTab == 0 ? .red : .orange
+                                    }
+                                }())
+                                .font(.system(size: 18))
                             }
                         }
                     }
                     // Abstimmugnen
                     Section(header: Text("Abstimmungen")) {
-                        if votingManager.isLoading {
-                            ProgressView("Lade Abstimmungen...")
-                                .progressViewStyle(CircularProgressViewStyle())
-                        } else if let errorMessage = votingManager.errorMessage {
-                            Text("Error: \(errorMessage)")
-                                .foregroundColor(.red)
-                        } else if votingManager.votings.isEmpty {
-                            Text("Keine Abstimmungen gefunden.")
-                                .foregroundColor(.secondary)
-                        } else {
-//                            ForEach(votingManager.votings, id: \.id) { voting in
-//                                NavigationLink(destination: AktivView(voting: voting, votingResults: nil, onBack: {
-//                                    // Hier können Sie Aktionen definieren, die ausgeführt werden, wenn der Nutzer zurückgeht.
-//                                    print("Zurück zur vorherigen Ansicht.")
-//                                })) {
-//                                    Text("\(voting.question)")
-//                                }
-//                            }
-                            Text("Hier werden die Abstimmungen stehen.")
-                        }
+                        VotingSectionView(votingManager: votingManager)
                     }
                 }
             }.toolbar { // Toolbar hinzufügen
@@ -137,11 +158,40 @@ struct MeetingDetailView: View {
     }
 }
 
-struct PlaceholderView: View {
+struct VotingSectionView: View {
+    @ObservedObject var votingManager: VotingManager // Ersetze `VotingManager` durch den tatsächlichen Typ.
+    
+   // var voting: GetVotingDTO
+
     var body: some View {
-        Text("Hallo")
+        VStack {
+            
+
+            if votingManager.isLoading {
+                ProgressView("Lade Abstimmungen...")
+                    .progressViewStyle(CircularProgressViewStyle())
+            } else if let errorMessage = votingManager.errorMessage {
+                Text("Error: \(errorMessage)")
+                    .foregroundColor(.red)
+            } else if votingManager.votings.isEmpty {
+                Text("Keine Abstimmungen gefunden.")
+                    .foregroundColor(.secondary)
+            } else {
+                ForEach(votingManager.combinedData, id: \.voting.id) { combined in
+                    NavigationLink(destination: Votings_VotingResultView(
+                        votingsView: VotingsView(), voting: combined.voting,
+                        votingResults: combined.votingResult
+                    )) {
+                        Text("\(combined.voting.question)")
+                    }
+                }
+            }
+            
+        }
     }
 }
+
+
 
 
 #Preview {

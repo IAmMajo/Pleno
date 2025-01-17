@@ -13,7 +13,7 @@ struct Votings_VotingResultView: View {
    @StateObject private var webSocketService = WebSocketService()
    @StateObject private var meetingViewModel = MeetingViewModel()
 
-   let votingsView: VotingsView
+//   let votingsView: VotingsView
    
    let voting: GetVotingDTO
    @State var votingResults: GetVotingResultsDTO
@@ -25,6 +25,11 @@ struct Votings_VotingResultView: View {
    @State private var isLiveStatusAvailable: Bool = false
    
    @State var optionTextMap: [UInt8: String] = [:]
+   
+   init(voting: GetVotingDTO) {
+      self.voting = voting
+      self.votingResults = mockVotingResults
+   }
    
     var body: some View {
        ScrollView {
@@ -43,6 +48,7 @@ struct Votings_VotingResultView: View {
                    } else {
                       PieChartView(optionTextMap: optionTextMap, votingResults: votingResults)
                          .padding(.vertical)
+                         .padding(.horizontal)
                    }
                 }
                 .background(Color(UIColor.systemBackground))
@@ -64,15 +70,17 @@ struct Votings_VotingResultView: View {
                    .frame(maxWidth: .infinity, alignment: .leading)
                    .padding(.leading).padding(.trailing)
                    
-                
-                ZStack {
-                   Text(voting.description)
-                      .padding()
-                      .frame(maxWidth: .infinity, alignment: .leading)
-                }.background(Color(UIColor.systemBackground))
+                if !voting.description.isEmpty {
+                   ZStack {
+                      Text(voting.description)
+                         .padding()
+                         .frame(maxWidth: .infinity, alignment: .leading)
+                   }
+                   .background(Color(UIColor.systemBackground))
                    .cornerRadius(10)
                    .padding(.horizontal)
-      
+                }
+                
                 if isLiveStatusAvailable {
                    ZStack {
                       HStack {
@@ -205,9 +213,9 @@ struct Votings_VotingResultView: View {
 }
 
 #Preview() {
-   var votingsView: VotingsView = .init()
+//   var votingsView: VotingsView = .init()
    
-   Votings_VotingResultView(votingsView: VotingsView(), voting: votingsView.mockVotings[0], votingResults: votingsView.mockVotingResults)
+   Votings_VotingResultView(/*votingsView: VotingsView(), */voting: /*votingsView.*/mockVotings[0])
 //      .navigationTitle("lol")
 //      .navigationBarTitleDisplayMode(.inline)
       .toolbar {
