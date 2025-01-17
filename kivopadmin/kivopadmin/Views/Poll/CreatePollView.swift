@@ -16,7 +16,7 @@ struct CreatePollView: View {
                 Section(header: Text("Allgemeine Informationen")) {
                     TextField("Frage", text: $question)
                     TextField("Beschreibung", text: $description)
-                        .onChange(of: description) { newValue in
+                        .onChange(of: description) { oldValue, newValue in
                             if newValue.count > 300 {
                                 description = String(newValue.prefix(300))
                             }
@@ -27,7 +27,7 @@ struct CreatePollView: View {
                     ForEach(options.indices, id: \.self) { index in
                         HStack {
                             TextField("Option \(index + 1)", text: $options[index])
-                                .onChange(of: options[index]) { newValue in
+                                .onChange(of: options[index]) { oldValue, newValue in
                                     if !newValue.isEmpty && index == options.count - 1 {
                                         options.append("")
                                     }

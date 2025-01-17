@@ -11,7 +11,8 @@ struct UserPopupView: View {
     @State private var showError = false
     @State private var editedName = ""
     @State private var isDeletingAccount = false
-    
+    @State private var isEditing = false
+
     // Lokale Kopie des Profilbilds, um direkte UI-Aktualisierungen zu steuern
     @State private var profileImageData: Data?
 
@@ -53,9 +54,20 @@ struct UserPopupView: View {
                         Text("Benutzername:")
                         Spacer()
                     }
-                    TextField("Neuen Namen eingeben", text: $editedName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
+                    HStack {
+                        TextField("Benutzernamen eingeben", text: $editedName)
+                            .disabled(!isEditing) // Standardmäßig nicht bearbeitbar
+                            .textFieldStyle(PlainTextFieldStyle()) // Kein Rahmen
+                            .padding(4)
+                            .background(isEditing ? Color(UIColor.systemBackground) : Color.clear) // Hintergrund, wenn bearbeitbar
+                            .cornerRadius(8)
+                        Button(action: {
+                            isEditing.toggle() // Bearbeiten aktivieren
+                        }) {
+                            Image(systemName: isEditing ? "checkmark" : "pencil")
+                                .foregroundColor(.blue)
+                        }
+                    }
                 }
                 Divider()
 
