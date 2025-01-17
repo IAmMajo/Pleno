@@ -9,6 +9,12 @@ struct EventRideController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let eventRideRoutes = routes.grouped("eventrides")
         
+        eventRideRoutes.get("", use: getAllEventRides)
+        eventRideRoutes.get(":id", use: getEventRide)
+        eventRideRoutes.post("", use: newEventRide)
+        eventRideRoutes.patch(":id", use: patchEventRide)
+        eventRideRoutes.delete(":id", use: deleteEventRide)
+        
         eventRideRoutes.get("interested", use: getInterestedParties)
         eventRideRoutes.post("interested", use: newInterestedParty)
         eventRideRoutes.patch("interested", "party_id", use: patchInterestedParty)
@@ -16,10 +22,10 @@ struct EventRideController: RouteCollection {
     }
     
     /*
-    *
-    *   Interested Party
-    *
-    */
+     *
+     *   Interested Party
+     *
+     */
     
     @Sendable
     func getInterestedParties(req: Request) async throws -> [GetInterestedPartyDTO] {
@@ -138,10 +144,288 @@ struct EventRideController: RouteCollection {
     }
     
     /*
-    *
-    *   Helper
-    *
-    */
+     *
+     *   Eventrides
+     *
+     */
+    
+    @Sendable
+    func getAllEventRides(req: Request) async throws -> [GetEventRideDTO] {
+        let eventRides = try await EventRide.query(on: req.db).all()
+        var responseRides: [GetEventRideDTO] = []
+        
+        for eventRide in eventRides {
+            if let rideID = eventRide.id {
+                let allocatedSeats = try await EventRideRequest.query(on: req.db)
+                    .filter(\.$ride.$id == rideID)
+                    .filter(\.$accepted == true)
+                    .count()
+                
+                let participant = try await EventParticipant.query(on: req.db)
+                    .filter(\.$event.$id == eventRide.$event.id)
+                    .filter(\.$user.$id == req.jwtPayload.userID)
+                    .first()
+                
+                var usersState = UsersEventRideState.nothing
+                if let participant = participant {
+                    let participantID = try participant.requireID()
+                    
+                    if eventRide.$participant.id == participantID {
+                        usersState = UsersEventRideState.driver
+                    } else {
+                        let request = try await EventRideRequest.query(on: req.db)
+                            .with(\.$interestedParty) { party in
+                                party.with(\.$participant)
+                            }
+                            .filter(\.$ride.$id == rideID)
+                            .filter(\.interestedParty.$participant.$id == req.jwtPayload.userID)
+                            .first()
+                        
+                        if let request = request {
+                            if request.accepted {
+                                usersState = UsersEventRideState.accepted
+                            } else {
+                                usersState = UsersEventRideState.requested
+                            }
+                        }
+                    }
+                }
+                
+                let eventName = try await getEventNameByID(eventID: eventRide.$event.id, db: req.db)
+                responseRides.append(
+                    GetEventRideDTO(
+                        id: rideID,
+                        eventID: eventRide.$event.id,
+                        eventName: eventName,
+                        starts: eventRide.starts,
+                        emptySeats: eventRide.emptySeats,
+                        allocatedSeats: UInt8(allocatedSeats),
+                        myState: usersState
+                    )
+                )
+            }
+        }
+        
+        return responseRides
+    }
+    
+    @Sendable
+    func getEventRide(req: Request) async throws -> GetEventRideDetailDTO {
+        // get ride by id
+        guard let eventRide = try await EventRide.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        // extract ride id
+        let rideID = try eventRide.requireID()
+        
+        // get riders
+        var riders = try await EventRideRequest.query(on: req.db)
+            .filter(\.$ride.$id == rideID)
+            .with(\.$interestedParty) { party in
+                party.with(\.$participant) { participant in
+                    participant.with(\.$user) { user in
+                        user.with(\.$identity)
+                    }
+                }
+            }
+            .all()
+            .map { rider in
+                let riderID = try rider.requireID()
+                
+                return GetRiderDTO(
+                    id: riderID,
+                    username: rider.interestedParty.participant.user.identity.name,
+                    latitude: rider.interestedParty.latitude,
+                    longitude: rider.interestedParty.longitude,
+                    itsMe: rider.interestedParty.participant.user.id == req.jwtPayload.userID,
+                    accepted: rider.accepted)
+            }
+        
+        // delete all open requests, if user is not the driver
+        if eventRide.participant.$user.id != req.jwtPayload.userID {
+            riders.removeAll{ $0.accepted == false && $0.itsMe == false }
+        }
+        
+        // create response DTO
+        let drivername = try await User.query(on: req.db)
+            .filter(\.$id == eventRide.participant.$user.id)
+            .with(\.$identity)
+            .first()
+            .map { user in
+                user.identity.name
+            }
+        let eventRideDetailDTO = GetEventRideDetailDTO(
+            id: rideID,
+            eventID: eventRide.$event.id,
+            eventName: eventRide.$event.name,
+            driverName: drivername ?? "",
+            isSelfDriver: eventRide.participant.$user.id == req.jwtPayload.userID,
+            description: eventRide.description,
+            vehicleDescription: eventRide.vehicleDescription,
+            starts: eventRide.starts,
+            latitude: eventRide.latitude,
+            longitude: eventRide.longitude,
+            emptySeats: eventRide.emptySeats,
+            riders: riders
+        )
+        
+        return eventRideDetailDTO
+    }
+    
+    @Sendable
+    func newEventRide(req: Request) async throws -> Response {
+        // parse DTO
+        guard let createEventRideDTO = try? req.content.decode(CreateEventRideDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected CreateEventRideDTO.")
+        }
+        
+        // check if current user is participant
+        let participant = try await checkIfUserParticipatesToEvent(eventID: createEventRideDTO.eventID, userID: req.jwtPayload.userID, db: req.db)
+        
+        // TODO check if current user has already a ride
+        
+        // create new event ride
+        let participantID = try participant.requireID()
+        let eventRide = EventRide(
+            eventID: createEventRideDTO.eventID,
+            participantID: participantID,
+            starts: createEventRideDTO.starts,
+            latitude: createEventRideDTO.latitude,
+            longitude: createEventRideDTO.longitude,
+            emptySeats: createEventRideDTO.emptySeats,
+            description: createEventRideDTO.description,
+            vehicleDescription: createEventRideDTO.vehicleDescription
+        )
+        
+        // save ride
+        try await eventRide.save(on: req.db)
+        
+        // TODO delete interested parties
+        
+        
+        // create response
+        let rideID = try eventRide.requireID()
+        let eventName = try await getEventNameByID(eventID: eventRide.$event.id, db: req.db)
+        let drivername = try await User.query(on: req.db)
+            .filter(\.$id == req.jwtPayload.userID)
+            .with(\.$identity)
+            .first()
+            .map { user in
+                user.identity.name
+            }
+        let getEventRideDetailDTO = GetEventRideDetailDTO(
+            id: rideID,
+            eventID: eventRide.$event.id,
+            eventName: eventName,
+            driverName: drivername ?? "",
+            isSelfDriver: true,
+            description: eventRide.description,
+            vehicleDescription: eventRide.vehicleDescription,
+            starts: eventRide.starts,
+            latitude: eventRide.latitude,
+            longitude: eventRide.longitude,
+            emptySeats: eventRide.emptySeats,
+            riders: []
+        )
+        
+        return try await getEventRideDetailDTO.encodeResponse(status: .created, for: req)
+    }
+    
+    @Sendable
+    func patchEventRide(req: Request) async throws -> GetEventRideDetailDTO {
+        // get ride by id
+        guard let eventRide = try await EventRide.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        // check if current user is driver
+        if eventRide.participant.$user.id != req.jwtPayload.userID {
+            throw Abort(.forbidden, reason: "You are not the driver!")
+        }
+        
+        //parse DTO
+        guard let patchEventRideDTO = try? req.content.decode(PatchEventRideDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected PatchEventRideDTO.")
+        }
+        
+        // patch ride
+        eventRide.patchWithDTO(dto: patchEventRideDTO)
+        
+        // save changes
+        try await eventRide.save(on: req.db)
+        
+        // create response
+        let rideID = try eventRide.requireID()
+        let riders = try await EventRideRequest.query(on: req.db)
+            .filter(\.$ride.$id == rideID)
+            .with(\.$interestedParty) { party in
+                party.with(\.$participant) { participant in
+                    participant.with(\.$user) { user in
+                        user.with(\.$identity)
+                    }
+                }
+            }
+            .all()
+            .map { rider in
+                let riderID = try rider.requireID()
+                
+                return GetRiderDTO(
+                    id: riderID,
+                    username: rider.interestedParty.participant.user.identity.name,
+                    latitude: rider.interestedParty.latitude,
+                    longitude: rider.interestedParty.longitude,
+                    itsMe: rider.interestedParty.participant.user.id == req.jwtPayload.userID,
+                    accepted: rider.accepted)
+            }
+        let drivername = try await User.query(on: req.db)
+            .filter(\.$id == req.jwtPayload.userID)
+            .with(\.$identity)
+            .first()
+            .map { user in
+                user.identity.name
+            }
+        let eventRideDetailDTO = GetEventRideDetailDTO(
+            id: rideID,
+            eventID: eventRide.$event.id,
+            eventName: eventRide.$event.name,
+            driverName: drivername ?? "",
+            isSelfDriver: eventRide.participant.$user.id == req.jwtPayload.userID,
+            description: eventRide.description,
+            vehicleDescription: eventRide.vehicleDescription,
+            starts: eventRide.starts,
+            latitude: eventRide.latitude,
+            longitude: eventRide.longitude,
+            emptySeats: eventRide.emptySeats,
+            riders: riders
+        )
+        
+        return eventRideDetailDTO
+    }
+    
+    @Sendable
+    func deleteEventRide(req: Request) async throws -> HTTPStatus {
+        // get ride by id
+        guard let eventRide = try await EventRide.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        // check if current user is driver
+        if eventRide.participant.$user.id != req.jwtPayload.userID {
+            throw Abort(.forbidden, reason: "You are not the driver!")
+        }
+        
+        // delete ride
+        try await eventRide.delete(on: req.db)
+        
+        return .noContent
+    }
+    
+    /*
+     *
+     *   Helper
+     *
+     */
     
     // return a EventParticipant if a participant exists and accepted to the event
     func checkIfUserParticipatesToEvent(eventID: UUID, userID: UUID, db: Database) async throws -> EventParticipant {
