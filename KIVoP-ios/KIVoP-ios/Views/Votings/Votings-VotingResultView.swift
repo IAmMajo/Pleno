@@ -95,25 +95,19 @@ struct Votings_VotingResultView: View {
                       .cornerRadius(10)
                       .padding(.horizontal) .padding(.top)
                 } else {
-                   List{
-                      Section {
-                         ForEach (votingResults.results, id: \.self) { result in
-                            HStack {
-                               Image(systemName: votingResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill")
-                                  .foregroundStyle(getColor(index: result.index))
-                               Text(optionTextMap[result.index] ?? "")
-                               Spacer()
-                               Text("\(result.percentage, specifier: "%.2f")%")
-                                  .opacity(0.6)
-                            }
-                         }
-                      } header: {
-                         Spacer(minLength: 0).listRowInsets(EdgeInsets())
-                      }
-                   }
-                   .frame(height: CGFloat((votingResults.results.count * 65) + (votingResults.results.count < 4 ? 200 : 0)), alignment: .top)
-                   //             .scrollContentBackground(.hidden)
-                   .environment(\.defaultMinListHeaderHeight, 10)
+                   ResultList(resultData: getResultData(votingResults: votingResults), resultDataCount: votingResults.results.count)
+                      .offset(y: -25)
+//                   List{
+//                      Section {
+//                         ForEach (votingResults.results, id: \.self) { result in
+//                            ...
+//                      } header: {
+//                         Spacer(minLength: 0).listRowInsets(EdgeInsets())
+//                      }
+//                   }
+//                   .frame(height: CGFloat((votingResults.results.count * 65) + (votingResults.results.count < 4 ? 200 : 0)), alignment: .top)
+//                   //             .scrollContentBackground(.hidden)
+//                   .environment(\.defaultMinListHeaderHeight, 10)
                 }
              }
           } else if isLoading {
@@ -149,6 +143,38 @@ struct Votings_VotingResultView: View {
        .navigationBarTitleDisplayMode(.inline)
        .background(Color(UIColor.secondarySystemBackground))
     }
+   
+   private func getResultData(votingResults: GetVotingResultsDTO) -> [ResultData] {
+      var resultDatas: [ResultData] = []
+      
+      for result in votingResults.results {
+         var resultIdentities: [ResultData] = []
+         for identity in getIdentities(result: result) {
+            resultIdentities.append(ResultData(
+                  icon: "checkmark.circle.fill",
+                  color: getColor(index: result.index).opacity(0.5).mix(with: .gray, by: 0.3),
+                  name: identity.name,
+                  percentage: nil
+               ))
+         }
+         resultDatas.append(ResultData(
+            icon: votingResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill",
+            color: getColor(index: result.index),
+            name: optionTextMap[result.index] ?? "",
+            percentage: result.percentage,
+            identities: resultIdentities
+         ))
+      }
+      return resultDatas
+   }
+   
+   private func getIdentities(result: GetVotingResultDTO) -> [GetIdentityDTO] {
+      if let identities = result.identities {
+         return identities
+      } else {
+         return []
+      }
+   }
    
    private func isLiveStatusAvailable(votingId: UUID) async -> Bool {
       await withCheckedContinuation { continuation in
@@ -205,19 +231,47 @@ struct Votings_VotingResultView: View {
       }
       optionTextMap[0] = "Enthaltung"
    }
-   
+
+// für Mock-Daten
 //   func getMeetingName(voting: GetVotingDTO) -> String {
 //      return votingsView.getMeeting(meetingID: voting.meetingId).name
 //   }
 
 }
 
-#Preview() {
-//   var votingsView: VotingsView = .init()
+struct ResultData: Identifiable {
+   let id = UUID()
+   let icon: String
+   let color: Color
+   let name: String
+   let percentage: Double?
+   var identities: [ResultData]?
+}
+
+struct ResultList: View {
+   let resultData: [ResultData]
+   let resultDataCount: Int
    
-   Votings_VotingResultView(/*votingsView: VotingsView(), */voting: /*votingsView.*/mockVotings[0])
-//      .navigationTitle("lol")
-//      .navigationBarTitleDisplayMode(.inline)
+   var body: some View {
+      List(resultData, children: \.identities) { resultData in
+         HStack {
+            Image(systemName: resultData.icon)
+               .foregroundStyle(resultData.color)
+            Text(resultData.name)
+            Spacer()
+            if let percentage = resultData.percentage {
+               Text("\(percentage, specifier: "%.2f")%")
+                  .opacity(0.6)
+            }
+         }
+      }
+      .frame(height: CGFloat((resultDataCount * 65) + (resultDataCount < 4 ? 200 : 0)), alignment: .top)
+      .scrollContentBackground(.hidden)
+   }
+}
+
+#Preview() {
+   Votings_VotingResultView(voting: mockVotings[0])
       .toolbar {
          ToolbarItem(placement: .navigationBarLeading) {
             Button {

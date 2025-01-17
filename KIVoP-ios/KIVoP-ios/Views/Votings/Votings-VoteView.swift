@@ -141,9 +141,7 @@ struct Votings_VoteView: View {
 
 #Preview {
    NavigationView {
-//      var votingsView: VotingsView = .init()
-      
-      Votings_VoteView(voting: /*votingsView.*/mockVotings[0], onNavigate: {})
+      Votings_VoteView(voting: mockVotings[0], onNavigate: {})
       .toolbar {
          ToolbarItem(placement: .navigationBarLeading) {
             Button {
