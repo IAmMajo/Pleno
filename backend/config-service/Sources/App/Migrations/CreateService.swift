@@ -56,7 +56,7 @@ struct CreateService: AsyncMigration {
                 webhook_url: "http://kivop-ai-service/webhook",
                 description: "Mit dem Ai-Service lassen sich Protokolle ausformulieren und Social Media Posts erstellen",
                 active: true
-            ),,
+            ),
             Service(
                 id: UUID(uuidString: "157bd8fe-0d3c-4efb-b525-33f86d3dd504")!,
                 name: "Poll-Service",

@@ -34,6 +34,11 @@ public func configure(_ app: Application) async throws {
             app.logger.error("Fehler beim Laden der Einstellungen: \(error.localizedDescription)")
         }
     }
+    
+    app.migrations.add(CreatePoll())
+    app.migrations.add(CreatePollVotingOption())
+    app.migrations.add(CreatePollVote())
+    
     // register routes
     try routes(app)
 }
