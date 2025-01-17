@@ -176,7 +176,7 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.notifications-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/notifications-service`) || PathPrefix(`/email`))
+      traefik.http.routers.notifications-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/notifications-service`)
       traefik.http.routers.notifications-service.middlewares: notifications-service-replace-path-regex
       traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.regex: ^/notifications-service(:/(.*))?
       traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.replacement: /$$1

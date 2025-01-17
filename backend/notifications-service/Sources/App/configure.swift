@@ -48,14 +48,14 @@ public func configure(_ app: Application) async throws {
     }
     let smtpSecure: SmtpSecureChannel =
         switch Environment.get("SMTP_SECURE") {
-        case "SSL":
-            .ssl
-        case "STARTTLS":
-            .startTls
-        case "STARTTLS_WHEN_AVAILABLE":
-            .startTlsWhenAvailable
-        default:
-            .none
+            case "SSL":
+                .ssl
+            case "STARTTLS":
+                .startTls
+            case "STARTTLS_WHEN_AVAILABLE":
+                .startTlsWhenAvailable
+            default:
+                .none
         }
     app.smtp.configuration = .init(
         hostname: Environment.get("SMTP_HOST") ?? "",
