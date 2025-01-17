@@ -145,7 +145,7 @@ struct RecordController: RouteCollection {
         guard let record = try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard try identityId == record.identity.requireID() else {
+        guard identityId == record.$identity.id else {
             throw Abort(.forbidden, reason: "You are not allowed to submit this record.")
         }
         guard record.status == .underway else {
