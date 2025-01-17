@@ -16,7 +16,7 @@ struct PollDetailView: View {
             // Tortendiagramm
             PollPieChartView(
                 optionen: poll.options,
-                stimmen: Array(poll.votes.values) // Werte in ein Array umwandeln
+                stimmen: Array(poll.votes.values.flatMap { $0 }) // Werte in ein Array umwandeln
             )
             .frame(height: 200)
             .padding()
@@ -26,7 +26,7 @@ struct PollDetailView: View {
                 HStack {
                     Text(option)
                     Spacer()
-                    Text("\(poll.votes[option] ?? 0) Stimmen")
+                    Text("\(poll.votes[option]?.count ?? 0) Stimmen")
                 }
             }
 

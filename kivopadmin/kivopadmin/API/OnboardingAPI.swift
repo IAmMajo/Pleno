@@ -17,17 +17,17 @@ class OnboardingAPI {
     ///   - completion: Callback mit einem optionalen Fehler und einer Erfolgsmeldung.
     static func registerUser(
         with registrationDTO: UserRegistrationDTO,
-        completion: @escaping (Result<Void, Error>) -> Void
+        completion: @escaping (Result<String, Error>) -> Void
     ) {
         guard let url = URL(string: "\(baseURL)/users/register") else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL"])))
             return
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+
         do {
             let jsonData = try JSONEncoder().encode(registrationDTO)
             request.httpBody = jsonData
@@ -35,20 +35,22 @@ class OnboardingAPI {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Fehler beim Verarbeiten der Daten."])))
             return
         }
-        
+
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return
             }
-            
+
             guard let httpResponse = response as? HTTPURLResponse else {
                 completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Ungültige Antwort vom Server."])))
                 return
             }
-            
+
             if httpResponse.statusCode == 201 {
-                completion(.success(()))
+                // Registrierung erfolgreich
+                print("Registrierung erfolgreich.")
+                completion(.success("Registrierung erfolgreich."))
             } else {
                 let errorMessage = "Registrierung fehlgeschlagen. Status: \(httpResponse.statusCode)"
                 completion(.failure(NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])))

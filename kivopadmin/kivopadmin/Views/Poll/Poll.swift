@@ -10,10 +10,11 @@ import Foundation
 
 struct Poll: Identifiable {
     let id: UUID
-    var question: String
-    var description: String
-    var options: [String]
-    var votes: [String: Int]
-    var deadline: Date
+    let question: String
+    let description: String
+    let options: [String]
+    let votes: [String: [Int]] // Nutzer-ID und gewählte Optionen
+    let deadline: Date
     var isActive: Bool
+    let allowsMultipleSelections: Bool // Neu hinzugefügt
 }

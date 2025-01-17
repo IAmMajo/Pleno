@@ -4,21 +4,23 @@ import AuthServiceDTOs
 struct UserPopupView: View {
     @Binding var user: UserProfileDTO
     @Binding var isPresented: Bool
+    var onSave: () -> Void // Callback für die NutzerverwaltungsView
 
     @State private var tempIsAdmin: Bool = false
     @State private var isLoading = false
     @State private var showError = false
-    @State private var isEditingName = false
     @State private var editedName = ""
-    @State private var isDeletingProfilePicture = false
     @State private var isDeletingAccount = false
+    
+    // Lokale Kopie des Profilbilds, um direkte UI-Aktualisierungen zu steuern
+    @State private var profileImageData: Data?
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
                 // Profilbild
                 VStack {
-                    if let imageData = user.profileImage, let uiImage = UIImage(data: imageData) {
+                    if let imageData = profileImageData, let uiImage = UIImage(data: imageData) {
                         Image(uiImage: uiImage)
                             .resizable()
                             .scaledToFill()
@@ -46,41 +48,16 @@ struct UserPopupView: View {
                 }
 
                 // Benutzername bearbeiten
-                if isEditingName {
-                    VStack(spacing: 10) {
-                        TextField("Neuen Namen eingeben", text: $editedName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.horizontal)
-                        HStack {
-                            Button("Abbrechen") {
-                                isEditingName = false
-                            }
-                            .foregroundColor(.red)
-
-                            Spacer()
-
-                            Button("Speichern") {
-                                updateUserName()
-                            }
-                            .buttonStyle(.borderedProminent)
-                        }
-                        .padding(.horizontal)
-                    }
-                } else {
+                VStack {
                     HStack {
                         Text("Benutzername:")
                         Spacer()
-                        Text(user.name ?? "Unbekannt").foregroundColor(.gray)
-                        Button(action: {
-                            editedName = user.name ?? ""
-                            isEditingName = true
-                        }) {
-                            Image(systemName: "pencil")
-                                .foregroundColor(.blue)
-                        }
                     }
-                    Divider()
+                    TextField("Neuen Namen eingeben", text: $editedName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
                 }
+                Divider()
 
                 // E-Mail-Adresse
                 HStack {
@@ -125,7 +102,6 @@ struct UserPopupView: View {
                 }
                 .disabled(isLoading)
 
-
                 // Konto löschen Button
                 Button("Konto löschen") {
                     isDeletingAccount = true
@@ -143,7 +119,6 @@ struct UserPopupView: View {
                 } message: {
                     Text("Möchten Sie dieses Konto wirklich löschen?")
                 }
-
             }
             .padding()
             .toolbar {
@@ -170,19 +145,9 @@ struct UserPopupView: View {
 
     private func loadInitialData() {
         debugPrint("🔄 Benutzerprofil wird geladen...")
-        MainPageAPI.fetchUserByID(userID: user.uid ?? UUID()) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let fetchedUser):
-                    self.user = fetchedUser
-                    self.tempIsAdmin = fetchedUser.isAdmin ?? false
-                    debugPrint("✅ Benutzerprofil geladen: \(fetchedUser)")
-                case .failure(let error):
-                    debugPrint("❌ Fehler beim Laden des Benutzerprofils: \(error.localizedDescription)")
-                    self.showError = true
-                }
-            }
-        }
+        editedName = user.name ?? ""
+        tempIsAdmin = user.isAdmin ?? false
+        profileImageData = user.profileImage // Lokale Kopie des Profilbilds
     }
 
     private func saveChanges() {
@@ -195,34 +160,49 @@ struct UserPopupView: View {
         isLoading = true
         showError = false
 
-        MainPageAPI.updateAdminStatus(userId: userId, isAdmin: tempIsAdmin, isActive: user.isActive ?? true) { result in
-            DispatchQueue.main.async {
-                self.isLoading = false
-                switch result {
-                case .success:
-                    debugPrint("✅ Admin-Status erfolgreich aktualisiert auf \(self.tempIsAdmin).")
-                    self.loadUserAndClosePopup(userId: userId)
-                case .failure(let error):
-                    debugPrint("❌ Fehler beim Aktualisieren: \(error.localizedDescription)")
-                    self.showError = true
-                    self.tempIsAdmin = self.user.isAdmin ?? false
+        let dispatchGroup = DispatchGroup()
+
+        // Benutzername und Profilbild aktualisieren
+        if editedName != user.name || profileImageData == nil {
+            dispatchGroup.enter()
+            MainPageAPI.updateUserProfile(userId: userId, name: editedName, profileImage: profileImageData == nil ? nil : String(data: profileImageData!, encoding: .utf8)) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success:
+                        debugPrint("✅ Benutzerprofil erfolgreich aktualisiert.")
+                        onSave() // Callback aufrufen, um die Nutzerliste neu zu laden
+                    case .failure(let error):
+                        debugPrint("❌ Fehler beim Aktualisieren des Profils: \(error.localizedDescription)")
+                        self.showError = true
+                    }
+                    dispatchGroup.leave()
                 }
             }
         }
-    }
 
-    private func loadUserAndClosePopup(userId: String) {
-        MainPageAPI.fetchUserByID(userID: UUID(uuidString: userId) ?? UUID()) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let fetchedUser):
-                    self.user = fetchedUser
-                    debugPrint("✅ Profil erfolgreich neu geladen. Popup wird geschlossen.")
-                    self.isPresented = false
-                case .failure(let error):
-                    debugPrint("❌ Fehler beim Neuladen des Profils: \(error.localizedDescription)")
-                    self.showError = true
+        // Admin-Status aktualisieren
+        if tempIsAdmin != (user.isAdmin ?? false) {
+            dispatchGroup.enter()
+            MainPageAPI.updateAdminStatus(userId: userId, isAdmin: tempIsAdmin, isActive: user.isActive ?? true) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success:
+                        debugPrint("✅ Admin-Status erfolgreich aktualisiert.")
+                    case .failure(let error):
+                        debugPrint("❌ Fehler beim Aktualisieren des Admin-Status: \(error.localizedDescription)")
+                        self.showError = true
+                    }
+                    dispatchGroup.leave()
                 }
+            }
+        }
+
+        // Alle Änderungen speichern und Popup schließen
+        dispatchGroup.notify(queue: .main) {
+            self.isLoading = false
+            if !self.showError {
+                debugPrint("✅ Alle Änderungen erfolgreich gespeichert. Popup wird geschlossen.")
+                self.isPresented = false
             }
         }
     }
@@ -250,7 +230,15 @@ struct UserPopupView: View {
     }
 
     private func deleteProfilePicture() {
-        MainPageAPI.deleteProfilePicture { result in
+        guard let userId = user.uid?.uuidString else {
+            debugPrint("❌ Fehler: Benutzer-ID ungültig.")
+            showError = true
+            return
+        }
+
+        profileImageData = nil // Sofortiges UI-Update
+
+        MainPageAPI.deleteProfilePicture(userId: userId) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:
@@ -259,22 +247,7 @@ struct UserPopupView: View {
                 case .failure(let error):
                     debugPrint("❌ Fehler beim Löschen des Profilbilds: \(error.localizedDescription)")
                     showError = true
-                }
-            }
-        }
-    }
-
-    private func updateUserName() {
-        MainPageAPI.updateUserName(name: editedName) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    debugPrint("✅ Benutzername erfolgreich aktualisiert auf \(editedName).")
-                    user.name = editedName
-                    isEditingName = false
-                case .failure(let error):
-                    debugPrint("❌ Fehler beim Aktualisieren des Benutzernamens: \(error.localizedDescription)")
-                    showError = true
+                    profileImageData = user.profileImage // Rollback bei Fehler
                 }
             }
         }

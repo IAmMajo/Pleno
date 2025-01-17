@@ -41,7 +41,7 @@ struct PollListView: View {
                             PollResultsView(
                                     frage: poll.question,
                                     optionen: poll.options,
-                                    stimmen: poll.votes.map { $0.value }
+                                    stimmen: poll.votes.values.flatMap { $0 }
                                 )                        },
                         dateFormatter: dateFormatter,
                         isCompleted: true
@@ -100,80 +100,3 @@ struct PollListViewSection<Destination: View>: View {
 }
 
 
-struct CreatePollView: View {
-    @Environment(\.dismiss) var dismiss
-    @State private var question: String = ""
-    @State private var description: String = ""
-    @State private var options: [String] = [""]
-    @State private var deadline: Date = Date()
-    let onPollCreated: (Poll) -> Void
-
-    var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Allgemeine Informationen")) {
-                    TextField("Frage", text: $question)
-                    TextField("Beschreibung", text: $description)
-                        .onChange(of: description) { _ in
-                            if description.count > 300 {
-                                description = String(description.prefix(300))
-                            }
-                        }
-                }
-
-                Section(header: Text("Auswahlmöglichkeiten")) {
-                    ForEach(options.indices, id: \ .self) { index in
-                        HStack {
-                            TextField("Option \(index + 1)", text: $options[index])
-                                .onChange(of: options[index]) { newValue in
-                                    if !newValue.isEmpty && index == options.count - 1 {
-                                        options.append("")
-                                    }
-                                }
-                            if options.count > 1 {
-                                Button(action: {
-                                    options.remove(at: index)
-                                }) {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.red)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Section(header: Text("Abschlusszeit")) {
-                    DatePicker("Deadline", selection: $deadline, displayedComponents: .date)
-                }
-            }
-            .navigationTitle("Umfrage erstellen")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Erstellen") {
-                        guard options.filter({ !$0.isEmpty }).count >= 2 else {
-                            return
-                        }
-                        let newPoll = Poll(
-                            id: UUID(),
-                            question: question,
-                            description: description,
-                            options: options.filter { !$0.isEmpty },
-                            votes: [:],
-                            deadline: deadline,
-                            isActive: true
-                        )
-                        onPollCreated(newPoll)
-                        dismiss()
-                    }
-                    .disabled(question.isEmpty || options.filter({ !$0.isEmpty }).count < 2)
-                }
-
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Abbrechen") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}

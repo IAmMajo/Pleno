@@ -540,7 +540,6 @@ struct MainPageAPI {
        }
     
     // MARK: - Admin-Status aktualisieren
-    // MARK: - Admin-Status aktualisieren
     static func updateAdminStatus(userId: String, isAdmin: Bool, isActive: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let url = URL(string: "\(baseURL)/users/\(userId)") else {
             completion(.failure(APIError.invalidURL))
@@ -574,6 +573,172 @@ struct MainPageAPI {
             completion(.success(()))
         }.resume()
     }
+    
+    // MARK: - Benutzerprofil aktualisieren
+    static func updateUserProfile(userId: String, name: String, isAdmin: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users/\(userId)") else {
+            print("❌ Fehler: Ungültige URL.")
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
+
+        let body: [String: Any] = ["name": name, "isAdmin": isAdmin]
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+            if let jsonString = String(data: request.httpBody ?? Data(), encoding: .utf8) {
+                print("➡️ Sende PATCH-Anfrage mit Body: \(jsonString)")
+            }
+        } catch {
+            print("❌ Fehler beim Kodieren des JSON-Bodys: \(error.localizedDescription)")
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ Netzwerkfehler: \(error.localizedDescription)")
+                completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("❌ Fehler: Keine gültige Serverantwort.")
+                completion(.failure(APIError.invalidResponse))
+                return
+            }
+
+            print("ℹ️ Status Code: \(httpResponse.statusCode)")
+
+            if httpResponse.statusCode == 200 {
+                print("✅ Benutzerprofil erfolgreich aktualisiert.")
+                completion(.success(()))
+            } else {
+                if let data = data, let responseBody = String(data: data, encoding: .utf8) {
+                    print("❌ Fehlerhafte Antwort: \(responseBody)")
+                }
+                completion(.failure(APIError.invalidResponse))
+            }
+        }.resume()
+    }
+
+    
+    
+    static func updateUserProfile(userId: String, name: String, profileImage: String? = nil, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users/profile/\(userId)") else {
+            print("❌ Fehler: Ungültige URL.")
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            print("❌ Fehler: Kein JWT-Token gefunden.")
+            completion(.failure(APIError.invalidRequest))
+            return
+        }
+
+        // Erstelle die Payload
+        let body: [String: Any] = [
+            "name": name,
+            "profileImage": profileImage ?? "" // Sende leeren String, wenn kein Bild angegeben wird
+        ]
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+            if let jsonString = String(data: request.httpBody ?? Data(), encoding: .utf8) {
+                print("➡️ Sende PATCH-Anfrage mit Body: \(jsonString)")
+            }
+        } catch {
+            print("❌ Fehler beim Kodieren des JSON-Bodys: \(error.localizedDescription)")
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ Netzwerkfehler: \(error.localizedDescription)")
+                completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("❌ Fehler: Keine gültige Serverantwort.")
+                completion(.failure(APIError.invalidResponse))
+                return
+            }
+
+            print("ℹ️ Status Code: \(httpResponse.statusCode)")
+
+            if httpResponse.statusCode == 200 {
+                print("✅ Benutzerprofil erfolgreich aktualisiert.")
+                completion(.success(()))
+            } else {
+                if let data = data, let responseBody = String(data: data, encoding: .utf8) {
+                    print("❌ Fehlerhafte Antwort: \(responseBody)")
+                }
+                completion(.failure(APIError.invalidResponse))
+            }
+        }.resume()
+    }
+
+
+    
+    // MARK: - Profilbild löschen
+    static func deleteProfilePicture(userId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users/profile/\(userId)") else {
+            print("❌ Fehler: Ungültige URL.")
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("Bearer \(UserDefaults.standard.string(forKey: "jwtToken") ?? "")", forHTTPHeaderField: "Authorization")
+
+        let body: [String: Any] = ["profileImage": ""]
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            print("❌ Fehler beim Kodieren des JSON-Bodys: \(error.localizedDescription)")
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 200 {
+                    print("✅ Profilbild erfolgreich gelöscht.")
+                    completion(.success(()))
+                } else {
+                    print("❌ Fehlerhafte Antwort: Status \(httpResponse.statusCode)")
+                    completion(.failure(APIError.invalidResponse))
+                }
+            } else {
+                print("❌ Fehler: Ungültige Antwort vom Server.")
+                completion(.failure(APIError.invalidResponse))
+            }
+        }.resume()
+    }
+
+
 
 
 

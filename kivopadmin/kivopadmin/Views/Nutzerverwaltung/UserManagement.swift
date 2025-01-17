@@ -95,15 +95,30 @@ struct NutzerverwaltungView: View {
 
             Spacer()
         }
-        .sheet(isPresented: $isUserPopupPresented, onDismiss: {
-            fetchAllData() // Aktualisiere die Nutzerverwaltung nach Verlassen des User-Popups
-        }) {
+        .sheet(isPresented: Binding(
+            get: { selectedUser != nil },
+            set: { if !$0 { selectedUser = nil } } // Wenn das Popup geschlossen wird, setze selectedUser auf nil
+        )) {
             if let user = selectedUser {
-                UserPopupView(user: .constant(user), isPresented: $isUserPopupPresented)
+                UserPopupView(
+                    user: .constant(user),
+                    isPresented: Binding(
+                        get: { selectedUser != nil },
+                        set: { if !$0 { selectedUser = nil } }
+                    ),
+                    onSave: fetchAllUsers // Nutzerliste neu laden
+                )
             } else {
                 ProgressView("Benutzer wird geladen...")
             }
         }
+
+
+
+
+
+
+
         .onAppear {
             fetchAllData() // Alle relevanten Daten beim Start laden
         }
@@ -114,28 +129,30 @@ struct NutzerverwaltungView: View {
     private func selectUser(_ user: UserProfileDTO) {
         print("🔍 Benutzer ausgewählt: \(user.name ?? "Unbekannt")")
         guard loadingUserID != user.uid else {
-            // Verhindere Doppelanfragen für denselben Benutzer
             print("🔄 Benutzer wird bereits geladen...")
             return
         }
 
-        loadingUserID = user.uid // Setze die aktuell geladene Benutzer-ID
-        isUserPopupPresented = true // Öffne Pop-up vor dem Laden
+        loadingUserID = user.uid // Benutzer wird geladen markieren
+        selectedUser = nil // Vorherige Daten zurücksetzen
+        isUserPopupPresented = false // Sicherstellen, dass das Pop-up geschlossen ist
 
         MainPageAPI.fetchUserByID(userID: user.uid!) { result in
             DispatchQueue.main.async {
-                loadingUserID = nil // Ladevorgang abgeschlossen
+                self.loadingUserID = nil // Ladevorgang abgeschlossen
                 switch result {
                 case .success(let fetchedUser):
-                    selectedUser = fetchedUser
-                    print("✅ Benutzerdetails erfolgreich geladen: \(fetchedUser.name ?? "Unbekannt")")
+                    self.selectedUser = fetchedUser // Benutzer setzen
+                    print("✅ Benutzer erfolgreich geladen: \(fetchedUser.name ?? "Unbekannt")")
+                    self.isUserPopupPresented = true // Popup öffnen
                 case .failure(let error):
-                    print("❌ Fehler beim Abrufen der Benutzerdetails: \(error.localizedDescription)")
-                    isUserPopupPresented = false // Schließe Pop-up bei Fehler
+                    print("❌ Fehler beim Laden des Benutzers: \(error.localizedDescription)")
                 }
             }
         }
     }
+
+
 
     // Funktion: Alle Daten abrufen
     private func fetchAllData() {
