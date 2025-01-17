@@ -12,6 +12,7 @@ public struct OpenAPIInfo {
 - [Poster-Service](/poster-service/swagger/#/)
 - [Ride-Service](/ride-service/swagger/#/)
 - [Ai-Service](/ai-service/swagger/#/)
+- [Poll-Service](/poll-service/swagger/#/)
 """ // Description: END
     public static let termsOfService: URL? = nil
     public static let contact: Contact? = nil
