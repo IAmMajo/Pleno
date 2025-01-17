@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import net.ipv64.kivop.R
-import net.ipv64.kivop.services.base64ToBitmap
+import net.ipv64.kivop.services.byteArrayToBitmap
 import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Secondary
@@ -39,7 +39,7 @@ import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
 fun ImgPicker(
-    img: String? = null,
+    img: ByteArray? = null,
     size: Dp = 150.dp,
     userName: String = "Max",
     edit: Boolean = true
@@ -69,7 +69,7 @@ fun ImgPicker(
       )
     } else if (img != null) {
       AsyncImage(
-          model = base64ToBitmap(img),
+          model = byteArrayToBitmap(img),
           contentDescription = "Profile Picture",
           contentScale = ContentScale.Crop,
           modifier = Modifier.align(Alignment.Center).fillMaxSize().clip(shape = CircleShape),

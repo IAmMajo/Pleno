@@ -24,6 +24,6 @@ val Background_tertiary = Color(0xFFCDEAF7)
 val Checkbox_background = Color(0xFFD4D7DB)
 
 // signal colors
-val Signal_blue = Color(0xFF1061DA) // das ist Tertiary - TODO: austauschen
+val Signal_blue = Color(0xFF1061DA) // das ist Tertiary - TO DO: austauschen
 val Signal_red = Color(0xFFDA1043)
 val Signal_neutral = Color(0xFF686D74)

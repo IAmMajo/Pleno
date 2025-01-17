@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import net.ipv64.kivop.services.base64ToBitmap
+import net.ipv64.kivop.services.byteArrayToBitmap
 import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Signal_blue
@@ -37,7 +37,7 @@ import net.ipv64.kivop.ui.theme.Text_prime
 @Composable
 fun ProfileCardSmall(
     name: String,
-    profilePicture: String?,
+    profilePicture: ByteArray?,
     role: String,
     backgroundColor: Color = Background_secondary,
     texColor: Color = Text_prime,
@@ -54,7 +54,7 @@ fun ProfileCardSmall(
               .padding(8.dp)) {
         Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
           if (profilePicture != null) {
-            base64ToBitmap(profilePicture)?.asImageBitmap()?.let {
+            byteArrayToBitmap(profilePicture)?.asImageBitmap()?.let {
               Image(
                   it,
                   contentDescription = "Profile Picture",

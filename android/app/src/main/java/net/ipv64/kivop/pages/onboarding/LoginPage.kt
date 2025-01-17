@@ -2,8 +2,6 @@ package net.ipv64.kivop.pages.onboarding
 
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -86,7 +84,7 @@ fun LoginPage(navController: NavController) {
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = Color.Transparent, contentColor = Signal_blue),
-              onClick = { navController.navigate(OnboardingScreen.Register.rout) }) {
+              onClick = { navController.navigate(OnboardingScreen.Description1.rout) }) {
                 Text(
                     text = "Regestrieren",
                     style = MaterialTheme.typography.labelMedium,
@@ -99,14 +97,9 @@ fun LoginPage(navController: NavController) {
                       containerColor = Signal_blue, contentColor = Text_prime_light),
               onClick = {
                 scope.launch {
-                  val response = handleLogin(email.lowercase(), password)
-                  if (response === "Successful Login!") {
+                  val success = handleLogin(email, password)
+                  if (success) {
                     navigateToMainActivity(navController.context)
-                  } else if (response === "This account is inactiv" ||
-                      response === "Email not verified") {
-                    navController.navigate(OnboardingScreen.AlmostDone.rout)
-                  } else {
-                    Toast.makeText(navController.context, "Login failed", Toast.LENGTH_SHORT).show()
                   }
                 }
               }) {
@@ -116,7 +109,7 @@ fun LoginPage(navController: NavController) {
   }
 }
 
-private suspend fun handleLogin(email: String, password: String): String? {
+private suspend fun handleLogin(email: String, password: String): Boolean {
   return auth.login(email, password)
 }
 
@@ -124,5 +117,4 @@ private fun navigateToMainActivity(context: Context) {
   var appContext = context.applicationContext
   val intent = Intent(appContext, MainActivity::class.java)
   context.startActivity(intent)
-  (context as? ComponentActivity)?.finish()
 }

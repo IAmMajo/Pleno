@@ -1,6 +1,5 @@
 package net.ipv64.kivop.pages.onboarding
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,25 +9,24 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import net.ipv64.kivop.R
-import net.ipv64.kivop.services.StringProvider.getString
+import androidx.navigation.NavController
 import net.ipv64.kivop.ui.customRoundedBottom
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
 @Composable
-fun DescriptionTwoPage() {
+fun DescriptionTwoPage(navController: NavController) {
   Column(modifier = Modifier.fillMaxWidth().background(Color.Green)) {
     Column(
         modifier =
@@ -41,11 +39,8 @@ fun DescriptionTwoPage() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       Spacer(modifier = Modifier.weight(1f))
-      Box(modifier = Modifier.height(250.dp).aspectRatio(1f)) {
-        Image(
-            painter = painterResource(id = R.drawable.onboardingscreen2),
-            contentDescription = "Onboarding Screen 1",
-            modifier = Modifier.fillMaxWidth().aspectRatio(1f))
+      Box(modifier = Modifier.height(250.dp).aspectRatio(1f).background(Color.Red)) {
+        // Box for image
       }
       Spacer(modifier = Modifier.height(16.dp))
       Box(modifier = Modifier.weight(1f)) {
@@ -59,11 +54,16 @@ fun DescriptionTwoPage() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       Text(
-          text = getString(R.string.description_two),
+          text =
+              "Verwalte Ratssitzungen, \nerstelle Umfragen, oder \nplane die perfekte \nVereinsreise...",
           color = Text_prime_light,
           textAlign = TextAlign.Center,
           style = MaterialTheme.typography.headlineLarge,
       )
+      // Todo: Temp Button! Wie geht es weiter?
+      Button(onClick = { navController.navigate(OnboardingScreen.Register.rout) }) {
+        Text(text = "Weiter")
+      }
     }
   }
 }

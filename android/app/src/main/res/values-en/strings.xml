@@ -1,15 +1,9 @@
 <resources>
     <string name="app_name">Pleno</string>
-    <!-- OnBoarding Login/Register todo:translate-->
-    <string name="description_one">Mit Pleno \nzu einer verbesserten \nVereinsplannung</string>
-    <string name="description_two">Verwalte Ratssitzungen, \nerstelle Umfragen, oder \nplane die perfekte \nVereinsreise…</string>
-    <string name="missing_email_verification">Bitte bestätige deine E-Mail Addresse.</string>
-    <string name="missing_admin_verification">Warten sie auf die Freischaltung durch den Administrator.</string>
-
     <!-- Navigation drawer items-->
     <string name="meetings">Meetings</string>
     <string name="protocol">Protocols</string>
-    <string name="carpooling">Carpooling</string>
+    <string name="travel_planning">Travel planning</string>
     <string name="events">Events</string>
     <string name="poster">Poster</string>
 

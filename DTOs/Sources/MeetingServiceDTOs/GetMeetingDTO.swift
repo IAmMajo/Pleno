@@ -26,7 +26,7 @@ public struct GetMeetingDTO: Codable {
     }
 }
 
-public enum MeetingStatus: String, Codable, CaseIterable {
+public enum MeetingStatus: String, Codable {
     case scheduled
     case inSession
     case completed

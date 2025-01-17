@@ -5,11 +5,8 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserLoginDTO
-import net.ipv64.kivop.dtos.AuthServiceDTOs.UserRegistrationDTO
 import net.ipv64.kivop.services.api.getToken
 import net.ipv64.kivop.services.api.getValidateToken
-import net.ipv64.kivop.services.api.postRegister
-import net.ipv64.kivop.services.api.postResendEmail
 
 class AuthController(private val context: Context) {
   companion object {
@@ -20,41 +17,14 @@ class AuthController(private val context: Context) {
 
   private val appContext = context.applicationContext
 
-  suspend fun login(email: String, password: String): String? {
-    val (token, status) = getToken(email, password)
-    return when (status) {
-      "loggedin" -> {
-        // Save session and credentials if login is successful
-        saveSessionToken(token)
-        saveCredentials(email, password)
-        "Successful Login!"
-      }
-      "This account is inactiv" -> {
-        saveSessionToken(token)
-        saveCredentials(email, password)
-        "This account is inactiv"
-      }
-      "Email not verified" -> {
-        saveSessionToken(token)
-        saveCredentials(email, password)
-        "Email not verified"
-      }
-      "Invalid credentials" -> "Invalid credentials"
-      else -> "Unexpected error: $status"
-    }
-  }
-
-  suspend fun register(user: UserRegistrationDTO): Boolean {
-    if (postRegister(user)) {
-      saveCredentials(user.email!!, user.password!!)
+  suspend fun login(email: String, password: String): Boolean {
+    val token = getToken(email, password)
+    if (token != "") {
+      saveSessionToken(token)
+      saveCredentials(email, password)
       return true
     }
     return false
-  }
-
-  suspend fun resendEmail() {
-    val credentials = getCredentials()
-    postResendEmail(credentials.email!!)
   }
 
   fun logout() {
@@ -69,13 +39,9 @@ class AuthController(private val context: Context) {
     return getValidateToken(token)
   }
 
-  suspend fun refreshSession(): Boolean {
+  suspend fun refreshSession() {
     val credentials = getCredentials()
-    val response = login(credentials.email!!, credentials.password!!)
-    if (response == "Successful Login!") {
-      return true
-    }
-    return false
+    login(credentials.email!!, credentials.password!!)
   }
 
   suspend fun getSessionToken(): String {
@@ -138,20 +104,6 @@ class AuthController(private val context: Context) {
         )
   }
 
-  fun hasCredentials(): Boolean {
-    val userLoginDTO = getCredentials()
-    if (userLoginDTO.email?.isNotEmpty() == true && userLoginDTO.password?.isNotEmpty() == true) {
-      return true
-    }
-    return false
-  }
-
-  suspend fun isActivated(): String? {
-    val userLoginDTO = getCredentials()
-    val response = login(userLoginDTO.email!!, userLoginDTO.password!!)
-    return response
-  }
-
   suspend fun isLoggedIn(): Boolean {
     val userLoginDTO = getCredentials()
     val token = getSessionToken()
@@ -160,8 +112,10 @@ class AuthController(private val context: Context) {
         return true
       } else {
         try {
-          return refreshSession()
+          refreshSession()
+          return true
         } catch (e: Exception) {
+          logout()
           return false
         }
       }

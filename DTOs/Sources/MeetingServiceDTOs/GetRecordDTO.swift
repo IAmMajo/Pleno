@@ -6,21 +6,17 @@ public struct GetRecordDTO: Codable {
     public var identity: GetIdentityDTO
     public var status: RecordStatus
     public var content: String
-    public var attendancesAppendix: String
-    public var votingResultsAppendix: String?
     
-    public init(meetingId: UUID, lang: String, identity: GetIdentityDTO, status: RecordStatus, content: String, attendancesAppendix: String, votingResultsAppendix: String? = nil) {
+    public init(meetingId: UUID, lang: String, identity: GetIdentityDTO, status: RecordStatus, content: String) {
         self.meetingId = meetingId
         self.lang = lang
         self.identity = identity
         self.status = status
         self.content = content
-        self.attendancesAppendix = attendancesAppendix
-        self.votingResultsAppendix = votingResultsAppendix
     }
 }
 
-public enum RecordStatus: String, Codable, CaseIterable {
+public enum RecordStatus: String, Codable {
     case underway
     case submitted
     case approved
