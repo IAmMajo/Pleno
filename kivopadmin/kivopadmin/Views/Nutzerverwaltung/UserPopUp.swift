@@ -5,6 +5,7 @@ struct UserPopupView: View {
     @Binding var user: UserProfileDTO
     @Binding var isPresented: Bool
     var onSave: () -> Void // Callback für die NutzerverwaltungsView
+    var onDelete: () -> Void
 
     @State private var tempIsAdmin: Bool = false
     @State private var isLoading = false
@@ -232,6 +233,7 @@ struct UserPopupView: View {
                 switch result {
                 case .success:
                     debugPrint("✅ Benutzer erfolgreich gelöscht.")
+                    onDelete()
                     isPresented = false
                 case .failure(let error):
                     debugPrint("❌ Fehler beim Löschen des Kontos: \(error.localizedDescription)")

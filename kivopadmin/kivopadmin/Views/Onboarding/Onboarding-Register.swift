@@ -8,13 +8,11 @@ struct Onboarding_Register: View {
     @State private var confirmPassword: String = ""
     @State private var errorMessage: String? = nil
     @State private var isLoading: Bool = false
-    @State private var navigateToMainPage: Bool = false
     @State private var showPrivacyPolicy: Bool = false
     @State private var registrationSuccessful: Bool = false
-    @State private var selectedImage: UIImage? = nil // Für das Profilbild
+    @State private var selectedImage: UIImage? = nil
+    @State private var navigateToWaitingView: Bool = false // Navigation zur WaitingView
 
-    
-    
     @Binding var isLoggedIn: Bool
 
     var body: some View {
@@ -130,6 +128,14 @@ struct Onboarding_Register: View {
                 .padding(.bottom, 10)
                 .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty)
                 
+                // Navigation zur WaitingView
+                NavigationLink(
+                    destination: Onboarding_Wait(email: $email),
+                    isActive: $navigateToWaitingView
+                ) {
+                    EmptyView()
+                }
+                
                 // Zurück zu Login Button
                 NavigationLink(destination: Onboarding_Login(isLoggedIn: $isLoggedIn)) {
                     Text("Zurück zum Login")
@@ -158,9 +164,6 @@ struct Onboarding_Register: View {
                     }
                 )
             }
-//            .navigationDestination(isPresented: $navigateToMainPage) {
-//                MainPage()
-//            }
         }
     }
     
@@ -192,15 +195,17 @@ struct Onboarding_Register: View {
                 self.isLoading = false
                 switch result {
                 case .success:
-                    KeychainHelper.save(key: "password", value: password)
-                    KeychainHelper.save(key: "email", value: email)
+                    saveCredentialsToKeychain(email: email, password: password)
                     registrationSuccessful = true
+                    navigateToWaitingView = true // Navigiere zur WaitingView
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
                 }
             }
         }
     }
+}
+
     
     private func compressImage(_ image: UIImage) -> Data? {
         let targetSize = CGSize(width: 200, height: 200)
@@ -247,7 +252,6 @@ struct Onboarding_Register: View {
         .padding(.horizontal, 24)
         .padding(.bottom, 10)
     }
-}
 
 struct PrivacyPolicyView: View {
     let onAccept: () -> Void
