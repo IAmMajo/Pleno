@@ -62,7 +62,7 @@ struct MarkdownEditorView: View {
 
                         dismiss()
                     }) {
-                        Text("Veröffentlichen")
+                        Text("Einreichen")
                             .font(.headline)
                             .foregroundColor(.white)
                             .padding()
