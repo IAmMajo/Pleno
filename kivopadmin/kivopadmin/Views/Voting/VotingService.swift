@@ -449,6 +449,28 @@ class VotingService: ObservableObject {
             }
         }.resume()
     }
+    
+    func fetchProfileImage(forIdentityId id: UUID, completion: @escaping (Result<Data?, Error>) -> Void) {
+        guard let url = URL(string: "https://kivop.ipv64.net/users/profile-image/identity/\(id)") else {
+            completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            completion(.success(data))
+        }.resume()
+    }
+
 
 
 

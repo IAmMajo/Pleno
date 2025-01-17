@@ -2,7 +2,7 @@ import SwiftUI
 import AuthServiceDTOs
 
 enum Pages: Hashable {
-    case vereinseinstellungen, nutzerverwaltung, abstimmungen, sitzungen, protokolle, plakatpositionen, events
+    case vereinseinstellungen, nutzerverwaltung, abstimmungen, sitzungen, protokolle, plakatpositionen, events, umfragen
 }
 
 struct MainPage: View {
@@ -42,6 +42,9 @@ struct MainPage: View {
                 }
                 Tab("Events", systemImage: "star", value: .events) {
                     EventsMainView()
+                }
+                Tab("Umfragen", systemImage: "bubble.left.and.bubble.right.fill", value: .umfragen) {
+                    PollListView()
                 }
 
 

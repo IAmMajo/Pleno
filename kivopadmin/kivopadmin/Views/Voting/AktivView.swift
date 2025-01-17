@@ -10,11 +10,11 @@ struct AktivView: View {
     @State private var value: Int = 0
     @State private var total: Int = 0
     @State private var progress: Double = 0
-    @State private var errorMessage: String?
+    @State private var showParticipationQuestion = false // Flag für Frage nach Teilnahme
+    @State private var errorMessageReplaced = false // Flag für benutzerfreundliche Nachricht
 
     var body: some View {
         VStack {
-            // Fortschrittsanzeige
             if webSocketService.liveStatus != nil {
                 VStack {
                     ZStack {
@@ -23,7 +23,6 @@ struct AktivView: View {
                                 Color.blue.opacity(0.3),
                                 lineWidth: 35
                             )
-                       
                         Circle()
                             .trim(from: 0, to: progress)
                             .stroke(
@@ -46,21 +45,52 @@ struct AktivView: View {
                         .font(.headline)
                         .foregroundColor(.gray)
                 }
-            } else if let errorMessage = webSocketService.errorMessage {
-                // Fehleranzeige
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .font(.headline)
-                    .padding()
+            } else if let errorMessage = webSocketService.errorMessage, !errorMessageReplaced {
+                if showParticipationQuestion {
+                    VStack {
+                        Spacer()
+                        Text("Haben Sie selbst schon an der Umfrage teilgenommen?")
+                            .font(.headline)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.gray)
+                            .padding()
+                        Spacer()
+                    }
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                            onBack()
+                        }
+                    }
+                } else {
+                    VStack {
+                        Spacer()
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                            .scaleEffect(2)
+                            .padding()
+                        Text("Lade Daten...")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                            .padding()
+                        Spacer()
+                    }
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            showParticipationQuestion = true
+                        }
+                    }
+                }
             } else {
                 // Ladeanzeige
                 VStack {
+                    Spacer()
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .blue))
                         .scaleEffect(2)
                     Text("Warte auf Echtzeit-Daten...")
                         .foregroundColor(.gray)
                         .padding()
+                    Spacer()
                 }
             }
 
@@ -152,7 +182,6 @@ struct AktivView: View {
         }
 
         isClosing = true
-        errorMessage = nil
 
         print("Sende Anfrage zum Beenden der Umfrage mit ID: \(voting.id)")
 
@@ -165,7 +194,6 @@ struct AktivView: View {
                     webSocketService.disconnect() // Beende die WebSocket-Verbindung
                     onBack() // Automatische Rückkehr zur Voting-Liste
                 case .failure(let error):
-                    self.errorMessage = "Fehler beim Abschließen der Umfrage: \(error.localizedDescription)"
                     print("Fehler beim Abschließen: \(error)")
                 }
             }
