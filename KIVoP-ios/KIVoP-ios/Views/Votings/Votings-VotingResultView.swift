@@ -13,7 +13,7 @@ struct Votings_VotingResultView: View {
    @StateObject private var webSocketService = WebSocketService()
    @StateObject private var meetingViewModel = MeetingViewModel()
 
-   let votingsView: VotingsView
+//   let votingsView: VotingsView
    
    let voting: GetVotingDTO
    @State var votingResults: GetVotingResultsDTO
@@ -25,6 +25,11 @@ struct Votings_VotingResultView: View {
    @State private var isLiveStatusAvailable: Bool = false
    
    @State var optionTextMap: [UInt8: String] = [:]
+   
+   init(voting: GetVotingDTO) {
+      self.voting = voting
+      self.votingResults = mockVotingResults
+   }
    
     var body: some View {
        ScrollView {
@@ -208,9 +213,9 @@ struct Votings_VotingResultView: View {
 }
 
 #Preview() {
-   var votingsView: VotingsView = .init()
+//   var votingsView: VotingsView = .init()
    
-   Votings_VotingResultView(votingsView: VotingsView(), voting: votingsView.mockVotings[0], votingResults: votingsView.mockVotingResults)
+   Votings_VotingResultView(/*votingsView: VotingsView(), */voting: /*votingsView.*/mockVotings[0])
 //      .navigationTitle("lol")
 //      .navigationBarTitleDisplayMode(.inline)
       .toolbar {

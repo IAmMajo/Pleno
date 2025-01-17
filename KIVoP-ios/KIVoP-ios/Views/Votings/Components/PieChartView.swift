@@ -119,12 +119,12 @@ extension Color {
 }
 
 #Preview {
-   var votingsView: VotingsView = .init()
+//   var votingsView: VotingsView = .init()
    
    PieChartView(optionTextMap: [
       0: "Enthaltung",
       1: "Rot",
       2: "Grün",
       3: "Blau"
-   ], votingResults: votingsView.mockVotingResults)
+   ], votingResults:/* votingsView.*/mockVotingResults)
 }
