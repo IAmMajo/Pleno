@@ -20,11 +20,6 @@
         width: 150px;
         margin-bottom: 20px;
       }
-      .verification-code {
-        font-size: 24px;
-        color: #10667f;
-        margin: 20px 0;
-      }
       .footer {
         margin-top: 30px;
         font-size: 12px;
