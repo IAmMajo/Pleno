@@ -178,9 +178,7 @@ struct VotingSectionView: View {
                     .foregroundColor(.secondary)
             } else {
                 ForEach(votingManager.combinedData, id: \.voting.id) { combined in
-                    NavigationLink(destination: Votings_VotingResultView(
-                        votingsView: VotingsView(), voting: combined.voting,
-                        votingResults: combined.votingResult
+                    NavigationLink(destination: Votings_VotingResultView(voting: combined.voting/*, votingResults: combined.votingResult*/
                     )) {
                         Text("\(combined.voting.question)")
                     }

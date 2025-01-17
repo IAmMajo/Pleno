@@ -51,7 +51,7 @@ struct VotingsView: View {
     @State private var error: String?
 
     var body: some View {
-        NavigationView {
+        ZStack {
             List {
                 ForEach(groupedVotings, id: \.0) { (meetingName, votingGroup) in
                     Section(header: Text(meetingName)) {
