@@ -1,4 +1,4 @@
-import Foundation 
+import Foundation
 
 public struct GetSpecialRideDetailDTO: Codable {
     public var id: UUID?

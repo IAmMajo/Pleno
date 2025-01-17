@@ -95,6 +95,26 @@
         }
       }
     },
+    "%f, %f" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$f, %2$f"
+          }
+        }
+      }
+    },
+    "%lf, %lf" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lf, %2$lf"
+          }
+        }
+      }
+    },
     "%lld" : {
 
     },
@@ -341,7 +361,13 @@
     "Adresse" : {
 
     },
+    "Adresse bestätigen" : {
+
+    },
     "Adresse in der Nähe" : {
+
+    },
+    "Adresse suchen" : {
 
     },
     "AKTIONEN" : {
@@ -475,6 +501,12 @@
     "Alles im Blick?" : {
 
     },
+    "Anfrage zurücknehmen" : {
+
+    },
+    "Anfragen zum Mitnehmen (%lld)" : {
+
+    },
     "Anmeldung wird überprüft..." : {
 
     },
@@ -556,6 +588,12 @@
     "Auswahl" : {
 
     },
+    "Auto und Sitzplätze" : {
+
+    },
+    "Baut Adrian noch" : {
+
+    },
     "Bearbeiten" : {
       "localizations" : {
         "de" : {
@@ -581,10 +619,25 @@
     "Beschreibung" : {
 
     },
+    "Beschreibung Auto" : {
+
+    },
+    "Beschreibung oder weitere Infos zu deiner Fahrt" : {
+
+    },
+    "Bestätigen" : {
+
+    },
+    "Bestätigung" : {
+
+    },
     "Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt." : {
 
     },
     "Bist du sicher, dass du das Plakat abhängen möchtest?" : {
+
+    },
+    "Bitte füllen Sie alle Felder aus. Das Startdatum muss außerdem in der Zukunft liegen." : {
 
     },
     "Bitte klicke nun auf den " : {
@@ -608,6 +661,18 @@
           }
         }
       }
+    },
+    "Bitte überprüfe und bestätige die Adresse von der du abgeholt werden möchtest" : {
+
+    },
+    "Bitte wähle, ob du eine Event Fahrt oder eine Sonderfahrt anlegen möchtest." : {
+
+    },
+    "Bitte wählen Sie einen Startort aus." : {
+
+    },
+    "Bitte wählen Sie einen Zielort aus." : {
+
     },
     "Code scannen" : {
       "localizations" : {
@@ -656,6 +721,15 @@
         }
       }
     },
+    "Deine Fahrt wird dann veröffentlicht und andere können dieser beitreten." : {
+
+    },
+    "Deine gesamten Änderungen gehen verloren!" : {
+
+    },
+    "Details der Fahrt" : {
+
+    },
     "Die Abstimmung läuft noch. Du hast bereits abgestimmt." : {
 
     },
@@ -680,6 +754,9 @@
           }
         }
       }
+    },
+    "Du hast bereits angefragt mitgenommen zu werden." : {
+
     },
     "Du kannst deine Wahl danach nciht mehr ändern!" : {
       "localizations" : {
@@ -744,6 +821,9 @@
         }
       }
     },
+    "Entfernen" : {
+
+    },
     "Enthalten" : {
       "localizations" : {
         "en" : {
@@ -789,6 +869,24 @@
         }
       }
     },
+    "Event" : {
+
+    },
+    "Event Fahrt" : {
+
+    },
+    "Events" : {
+
+    },
+    "Fahrer" : {
+
+    },
+    "Fahrgemeinschaften" : {
+
+    },
+    "Fahrt löschen" : {
+
+    },
     "Fast fertig" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -815,7 +913,16 @@
     "Fast Fertig" : {
 
     },
+    "Fehler" : {
+
+    },
     "Franz" : {
+
+    },
+    "Freie Plätze" : {
+
+    },
+    "Freigeben" : {
 
     },
     "Galerie" : {
@@ -1114,6 +1221,12 @@
     "Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position" : {
 
     },
+    "Meine Fahrten" : {
+
+    },
+    "Meine Position" : {
+
+    },
     "Mit " : {
       "localizations" : {
         "de" : {
@@ -1135,6 +1248,22 @@
           }
         }
       }
+    },
+    "Mitfahrer (%lld/%u)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mitfahrer (%1$lld/%2$u)"
+          }
+        }
+      }
+    },
+    "Mitfahrt anfragen" : {
+
+    },
+    "Mitfahrt löschen" : {
+
     },
     "Mitglieder" : {
       "localizations" : {
@@ -1175,6 +1304,21 @@
         }
       }
     },
+    "Möchten Sie die Anfrage wirklich löschen?" : {
+
+    },
+    "Möchten Sie die Fahrt wirklich löschen?" : {
+
+    },
+    "Möchten Sie die Person wirklich aus der Fahrgemeinschaft entfernen?" : {
+
+    },
+    "Möchten Sie die Person wirklich zu der Fahrgemeinschaft hinzufügen?" : {
+
+    },
+    "Möchten Sie Ihren Platz wirklich wieder freigeben?" : {
+
+    },
     "Möchtest du deinen Account wirklich löschen?" : {
       "localizations" : {
         "de" : {
@@ -1207,6 +1351,12 @@
         }
       }
     },
+    "Möchtest du wirklich speichern?" : {
+
+    },
+    "Möchtest du wirklich zurück?" : {
+
+    },
     "Nach Meeting suchen" : {
 
     },
@@ -1232,6 +1382,9 @@
         }
       }
     },
+    "Name der Fahrt" : {
+
+    },
     "Name eingeben" : {
 
     },
@@ -1252,6 +1405,12 @@
       }
     },
     "Neu laden" : {
+
+    },
+    "Neue Fahrt" : {
+
+    },
+    "Neue Fahrt anbieten" : {
 
     },
     "Neues Passwort" : {
@@ -1482,6 +1641,9 @@
     "Plakate" : {
 
     },
+    "Planned Ride for %@" : {
+
+    },
     "Pleno " : {
 
     },
@@ -1699,6 +1861,12 @@
         }
       }
     },
+    "Sonderfahrt" : {
+
+    },
+    "Sonderfahrten" : {
+
+    },
     "Speichern" : {
       "localizations" : {
         "de" : {
@@ -1721,10 +1889,22 @@
         }
       }
     },
+    "Standort außerhalb der Anwendung öffnen?" : {
+
+    },
+    "Standort hinzufügen" : {
+
+    },
     "Standorte (3)" : {
 
     },
     "Start: %@" : {
+
+    },
+    "Startort" : {
+
+    },
+    "Startzeit" : {
 
     },
     "Suchen" : {
@@ -1989,6 +2169,12 @@
           }
         }
       }
+    },
+    "Wähle die Art der Fahrt" : {
+
+    },
+    "Wählen Sie ein Event" : {
+
     },
     "Weiter" : {
       "localizations" : {
