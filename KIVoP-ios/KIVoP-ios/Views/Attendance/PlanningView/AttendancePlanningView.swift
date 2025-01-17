@@ -145,6 +145,7 @@ struct AttendancePlanningView: View {
                 }
             }
             .navigationTitle(Text(viewModel.meeting.start, style: .date))
+            .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
         }
     }
