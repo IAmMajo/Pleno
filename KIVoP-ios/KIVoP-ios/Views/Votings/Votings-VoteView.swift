@@ -11,7 +11,7 @@ import MeetingServiceDTOs
 struct Votings_VoteView: View {
       
    let voting: GetVotingDTO
-   let votingResults: GetVotingResultsDTO
+//   let votingResults: GetVotingResultsDTO
    
    @State private var isLoading = false
    @State private var error: String?
@@ -22,7 +22,7 @@ struct Votings_VoteView: View {
    @Environment(\.dismiss) private var dismiss
    
 //   var onNavigate: (GetVotingResultsDTO) -> Void
-   var onNavigate: (GetVotingResultsDTO) -> Void
+   var onNavigate: () -> Void
    
 
    var body: some View {
@@ -66,9 +66,9 @@ struct Votings_VoteView: View {
                      Text("Abstimmen nicht möglich")
                         .font(.title3)
                         .fontWeight(.semibold)
-                        .foregroundStyle(.red.opacity(0.8).mix(with: .black, by: 0.1))
+                        .foregroundStyle(.red.opacity(0.8).mix(with: Color(UIColor.label), by: 0.1))
                      Text(NSLocalizedString(error ?? "Unbekannter Fehler.", comment: ""))
-                        .foregroundStyle(.red.opacity(0.8).mix(with: .black, by: 0.5))
+                        .foregroundStyle(.red.opacity(0.8).mix(with: Color(UIColor.label), by: 0.5))
                         .multilineTextAlignment(.center)
                   }
                   .padding(.horizontal)
@@ -100,7 +100,9 @@ struct Votings_VoteView: View {
                                       case .success:
                                          print("Vote cast successfully!")
                                          dismiss()
-                                         onNavigate(updateMyVote(selection: selection ?? nil))
+                                         updateMyVote(selection: selection ?? nil)
+                                         onNavigate()
+//                                         onNavigate(updateMyVote(selection: selection ?? nil))
                                       case .failure(let error):
                                          print("Failed to cast vote: \(error.localizedDescription)")
                                          self.error = error.localizedDescription
@@ -127,21 +129,21 @@ struct Votings_VoteView: View {
          .navigationBarTitleDisplayMode(.inline)
    }
  
-   func updateMyVote(selection: GetVotingOptionDTO?) -> GetVotingResultsDTO {
+   func updateMyVote(selection: GetVotingOptionDTO?) {
       
       VotingStateTracker.saveVote(votingId: voting.id, voteIndex: selection?.index ?? 0)
 
-      var results = votingResults
-      results.myVote = selection?.index
-      return results
+//      var results = votingResults
+//      results.myVote = selection?.index
+//      return results
    }
 }
 
 #Preview {
    NavigationView {
-      var votingsView: VotingsView = .init()
+//      var votingsView: VotingsView = .init()
       
-      Votings_VoteView(voting: votingsView.mockVotings[0], votingResults: votingsView.mockVotingResults, onNavigate: {results in})
+      Votings_VoteView(voting: /*votingsView.*/mockVotings[0], onNavigate: {})
       .toolbar {
          ToolbarItem(placement: .navigationBarLeading) {
             Button {

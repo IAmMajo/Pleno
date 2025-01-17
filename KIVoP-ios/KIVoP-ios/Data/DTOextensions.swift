@@ -9,6 +9,16 @@ import Foundation
 import MeetingServiceDTOs
 
 // Extension der DTOs
+extension GetMeetingDTO: @retroactive Identifiable {}
+extension GetMeetingDTO: @retroactive Equatable {}
+extension GetMeetingDTO: @retroactive Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    public static func == (lhs: GetMeetingDTO, rhs: GetMeetingDTO) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
 extension GetMeetingDTO: @retroactive @unchecked Sendable {}
 
 extension GetVotingDTO: @retroactive Identifiable {}
