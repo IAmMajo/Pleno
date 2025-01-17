@@ -106,7 +106,8 @@ struct NutzerverwaltungView: View {
                         get: { selectedUser != nil },
                         set: { if !$0 { selectedUser = nil } }
                     ),
-                    onSave: fetchAllUsers // Nutzerliste neu laden
+                    onSave: fetchAllUsers, // Nutzerliste neu laden
+                    onDelete: fetchAllUsers
                 )
             } else {
                 ProgressView("Benutzer wird geladen...")

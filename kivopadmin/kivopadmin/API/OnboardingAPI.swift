@@ -237,6 +237,31 @@ class OnboardingAPI {
             }
         }.resume()
     }
+    
+    static func resendVerificationEmail(email: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users/email/resend/\(email)") else {
+            completion(.failure(NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                completion(.failure(NSError(domain: "", code: 500, userInfo: [NSLocalizedDescriptionKey: "Fehler beim erneuten Senden der Verifizierungs-E-Mail"])))
+                return
+            }
+
+            completion(.success(()))
+        }.resume()
+    }
+
 }
 
 
