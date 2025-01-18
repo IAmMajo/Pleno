@@ -117,6 +117,7 @@ Dialog(
          if (code == userInput){
            //putAttend(meetingId = meetingId, code = userInput)
            onConfirmation()
+           isCorrect = true
          }
          else { isCorrect = false }
        }, 
