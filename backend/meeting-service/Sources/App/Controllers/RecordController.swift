@@ -83,7 +83,7 @@ struct RecordController: RouteCollection {
         guard let record = try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard try isAdmin || (identityId == record.identity.requireID() && patchRecordDTO.identityId == nil ) else {
+        guard isAdmin || (identityId == record.$identity.id && patchRecordDTO.identityId == nil ) else {
             throw Abort(.forbidden)
         }
         guard record.status == .underway || (record.status == .submitted && isAdmin) else {
