@@ -176,9 +176,10 @@ struct UserPopupView: View {
         let dispatchGroup = DispatchGroup()
 
         // Benutzername und Profilbild aktualisieren
-        if editedName != user.name || profileImageData == nil {
+        if editedName != user.name {
             dispatchGroup.enter()
-            MainPageAPI.updateUserProfile(userId: userId, name: editedName, profileImage: profileImageData == nil ? nil : String(data: profileImageData!, encoding: .utf8)) { result in
+            let updatedProfileImage = profileImageData ?? user.profileImage
+            MainPageAPI.updateUserProfile(userId: userId, name: editedName, profileImage: updatedProfileImage == nil ? nil : String(data: updatedProfileImage!, encoding: .utf8)) { result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
@@ -192,6 +193,7 @@ struct UserPopupView: View {
                 }
             }
         }
+
 
         // Admin-Status aktualisieren
         if tempIsAdmin != (user.isAdmin ?? false) {
@@ -257,6 +259,7 @@ struct UserPopupView: View {
                 switch result {
                 case .success:
                     debugPrint("✅ Profilbild erfolgreich gelöscht.")
+                    onSave() // Callback aufrufen, um die Nutzerliste neu zu laden
                     user.profileImage = nil
                 case .failure(let error):
                     debugPrint("❌ Fehler beim Löschen des Profilbilds: \(error.localizedDescription)")

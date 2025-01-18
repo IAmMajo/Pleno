@@ -649,10 +649,17 @@ struct MainPageAPI {
         }
 
         // Erstelle die Payload
-        let body: [String: Any] = [
-            "name": name,
-            "profileImage": profileImage ?? "" // Sende leeren String, wenn kein Bild angegeben wird
-        ]
+        let body: [String: Any]
+        if let profileImage = profileImage {
+            body = [
+                "name": name,
+                "profileImage": profileImage
+            ]
+        } else {
+            body = [
+                "name": name
+            ]
+        }
 
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
