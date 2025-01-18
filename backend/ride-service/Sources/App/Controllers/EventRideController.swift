@@ -15,10 +15,14 @@ struct EventRideController: RouteCollection {
         eventRideRoutes.patch(":id", use: patchEventRide)
         eventRideRoutes.delete(":id", use: deleteEventRide)
         
+        eventRideRoutes.post(":id", "requests", use: newRequestToEventRide)
+        eventRideRoutes.patch("requests", ":request_id", use: patchEventRideRequest)
+        eventRideRoutes.delete("requests", ":request_id", use: deleteEventRideRequest)
+        
         eventRideRoutes.get("interested", use: getInterestedParties)
         eventRideRoutes.post("interested", use: newInterestedParty)
-        eventRideRoutes.patch("interested", "party_id", use: patchInterestedParty)
-        eventRideRoutes.delete("interested", "party_id", use: deleteInterestedParty)
+        eventRideRoutes.patch("interested", ":party_id", use: patchInterestedParty)
+        eventRideRoutes.delete("interested", ":party_id", use: deleteInterestedParty)
     }
     
     /*
@@ -423,11 +427,208 @@ struct EventRideController: RouteCollection {
     
     /*
      *
+     *   EventRideRequests
+     *
+     */
+    
+    @Sendable
+    func newRequestToEventRide(req: Request) async throws -> Response {
+        // get ride by id
+        guard let eventRide = try await EventRide.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        let rideID = try eventRide.requireID()
+        
+        // check if current user is in interested party
+        guard let party = try await EventRideInteresedParty.query(on: req.db)
+            .with(\.$participant)
+            .filter(\.participant.user.$id == req.jwtPayload.userID)
+            .filter(\.participant.event.$id == eventRide.$event.id)
+            .first() else {
+            throw Abort(.notFound)
+        }
+        
+        // check if current user already requested to this ride
+        let partyID = try party.requireID()
+        let count = try await EventRideRequest.query(on: req.db)
+            .filter(\.$ride.$id == rideID)
+            .filter(\.$interestedParty.$id == partyID)
+            .count()
+        
+        if count != 0 {
+            throw Abort(.badRequest, reason: "You already requested this ride!")
+        }
+        
+        // check if current user is driver of this ride
+        if eventRide.$participant.id == party.$participant.id {
+            throw Abort(.badRequest, reason: "You cannot request your own ride!")
+        }
+        
+        // check if ride is full
+        let countAccepted = try await EventRideRequest.query(on: req.db)
+            .filter(\.$ride.$id == rideID)
+            .filter(\.$accepted == true)
+            .count()
+        
+        if countAccepted >= eventRide.emptySeats {
+            throw Abort(.badRequest, reason: "This ride is full!")
+        }
+        
+        // create request
+        let request = EventRideRequest(
+            rideID: rideID,
+            interestedPartyID: partyID,
+            accepted: false
+        )
+        
+        // save request
+        try await request.save(on: req.db)
+        
+        // create response
+        let rider_id = try request.requireID()
+        let username = try await User.query(on: req.db)
+            .filter(\.$id == req.jwtPayload.userID)
+            .with(\.$identity)
+            .first()
+            .map { user in
+                user.identity.name
+            }
+        let getRiderDTO = GetRiderDTO(
+            id: rider_id,
+            username: username ?? "",
+            latitude: party.latitude,
+            longitude: party.longitude,
+            itsMe: true,
+            accepted: request.accepted
+        )
+        
+        return try await getRiderDTO.encodeResponse(status: .created, for: req)
+    }
+    
+    @Sendable
+    func patchEventRideRequest(req: Request) async throws -> GetRiderDTO {
+        // get request by id
+        guard let request = try await EventRideRequest.find(req.parameters.get("request_id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        // get ride by id
+        let rideID = request.$ride.id
+        guard let eventRide = try await EventRide.find(rideID, on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        //parse DTO
+        guard let patchEventRideRequestDTO = try? req.content.decode(PatchEventRideRequestDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected PatchEventRideRequestDTO.")
+        }
+        
+        // check if current user is driver
+        if eventRide.participant.user.id != req.jwtPayload.userID {
+            throw Abort(.forbidden, reason: "You are not allowed to change the request!")
+        }
+        
+        // check if current accepted == new accepted
+        if patchEventRideRequestDTO.accepted == request.accepted {
+            throw Abort(.badRequest, reason: "There is nothing to patch!")
+        }
+        
+        // save isNewRider state
+        var isFullWithNewRider = false
+        
+        // check if driver wants to accept a new rider
+        if patchEventRideRequestDTO.accepted == true {
+            // check if ride is full
+            let countAccepted = try await EventRideRequest.query(on: req.db)
+                .filter(\.$ride.$id == rideID)
+                .filter(\.$accepted == true)
+                .count()
+            
+            if countAccepted >= eventRide.emptySeats {
+                throw Abort(.badRequest, reason: "This ride is full!")
+            }
+    
+            // check if ride is now full - delete all open requests
+            if countAccepted + 1 >= eventRide.emptySeats {
+                isFullWithNewRider = true
+            }
+        }
+        
+        // patch
+        request.patchWithDTO(dto: patchEventRideRequestDTO)
+        
+        // save changes
+        // if isFullWithNewRider save changes in a transaction
+        if isFullWithNewRider == true {
+            try await req.db.transaction{ db in
+                // save changes in request
+                try await request.update(on: db)
+                
+                // delete all open requests
+                try await EventRideRequest.query(on: db)
+                    .filter(\.$ride.$id == rideID)
+                    .filter(\.$accepted == false)
+                    .delete()
+            }
+        } else {
+            // save changes in request
+            try await request.update(on: req.db)
+        }
+        
+        // create response
+        let rider_id = try request.requireID()
+        let username = try await User.query(on: req.db)
+            .filter(\.$id == request.interestedParty.participant.$user.id)
+            .with(\.$identity)
+            .first()
+            .map { user in
+                user.identity.name
+            }
+        guard let party = try await EventRideInteresedParty.query(on: req.db)
+            .with(\.$participant)
+            .filter(\.participant.user.$id == request.interestedParty.participant.$user.id)
+            .filter(\.participant.event.$id == eventRide.$event.id)
+            .first() else {
+            throw Abort(.notFound)
+        }
+        let getRiderDTO = GetRiderDTO(
+            id: rider_id,
+            username: username ?? "",
+            latitude: party.latitude,
+            longitude: party.longitude,
+            itsMe: request.interestedParty.participant.$user.id == req.jwtPayload.userID,
+            accepted: request.accepted
+        )
+        
+        return getRiderDTO
+    }
+    
+    @Sendable
+    func deleteEventRideRequest(req: Request) async throws -> HTTPStatus {
+        // get request by id
+        guard let request = try await EventRideRequest.find(req.parameters.get("request_id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        // check if user is allowed to delete
+        if request.interestedParty.participant.$user.id != req.jwtPayload.userID {
+            throw Abort(.forbidden, reason: "You are not allowed to delete this request!")
+        }
+        
+        // delete request
+        try await request.delete(on: req.db)
+        
+        return .noContent
+    }
+    
+    /*
+     *
      *   Helper
      *
      */
     
-    // return a EventParticipant if a participant exists and accepted to the event
+    // return an EventParticipant if a participant exists and accepted to the event
     func checkIfUserParticipatesToEvent(eventID: UUID, userID: UUID, db: Database) async throws -> EventParticipant {
         // check if participant exists
         guard let participant = try await EventParticipant.query(on: db)
