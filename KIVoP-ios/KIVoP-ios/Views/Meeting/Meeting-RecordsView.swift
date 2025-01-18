@@ -3,10 +3,7 @@ import MeetingServiceDTOs
 
 struct MeetingRecordsView: View {
     var meeting: GetMeetingDTO
-    @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
     @StateObject private var recordManager = RecordManager() // RecordManager als StateObject
-    @StateObject private var votingManager = VotingManager() // RecordManager als StateObject
-    @StateObject private var attendanceManager = AttendanceManager() // RecordManager als StateObject
     
     var body: some View {
         NavigationStack {
@@ -40,8 +37,6 @@ struct MeetingRecordsView: View {
         }
         .onAppear(){
             recordManager.getRecordsMeeting(meetingId: meeting.id)
-            votingManager.getVotingsMeeting(meetingId: meeting.id)
-            attendanceManager.fetchAttendances(meetingId: meeting.id)
         }
     }
 

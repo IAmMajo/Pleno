@@ -709,6 +709,9 @@
     "Das Passwort ist zu schwach. Bitte verwenden Sie mindestens 8 Zeichen, eine Zahl und ein Sonderzeichen." : {
 
     },
+    "Das Protokoll wurde noch nicht veröffentlicht." : {
+
+    },
     "Datenschutzerklärung" : {
 
     },
@@ -1484,6 +1487,9 @@
           }
         }
       }
+    },
+    "No Data" : {
+
     },
     "No expiration date" : {
 
