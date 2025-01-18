@@ -12,10 +12,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.ipv64.kivop.models.ButtonStyle
+import net.ipv64.kivop.models.primaryButtonStyle
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 
@@ -35,9 +37,9 @@ fun CustomButton(
       modifier =
       modifier
         .fillMaxWidth()
-        .height(60.dp) // todo: get dp from stylesheet
+        .height(44.dp) 
         .background(
-          color = color, shape = RoundedCornerShape(16.dp) // todo: get dp from stylesheet
+          color = color, shape = RoundedCornerShape(100.dp) 
         )
         .clickable(onClick = onClick)
   ){
@@ -56,13 +58,14 @@ fun CustomPopupButton(
   if(buttonStyle == null){
       Button(
         onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(100.dp),
         colors = ButtonDefaults.buttonColors(
           containerColor = Primary,
           contentColor = Background_secondary
         ),
-//        modifier = modifier
-//          .clip(shape = RoundedCornerShape(20.dp)),
+        modifier = modifier
+          .height(35.dp)
+          .clip(shape = RoundedCornerShape(20.dp)),
         ){ 
         Text(
           text = text,
@@ -76,8 +79,9 @@ fun CustomPopupButton(
         containerColor = buttonStyle.backgroundColor,
         contentColor = buttonStyle.contentColor
       ),
-//      modifier = modifier
-//        .clip(shape = RoundedCornerShape(20.dp)),
+      modifier = modifier
+        .height(35.dp)
+        .clip(shape = RoundedCornerShape(20.dp)),
     ){
       Text(
         text = text,
@@ -85,3 +89,10 @@ fun CustomPopupButton(
     } 
   }
 }
+
+//@Preview
+//@Composable
+//fun PreviewScreen(){
+//  CustomPopupButton("hello,click me", primaryButtonStyle, onClick = {}, modifier = Modifier)
+//  
+//}
