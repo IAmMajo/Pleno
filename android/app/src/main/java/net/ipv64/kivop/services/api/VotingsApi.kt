@@ -1,6 +1,5 @@
 package net.ipv64.kivop.models
 
-import android.content.Context
 import android.util.Log
 import com.example.kivopandriod.services.stringToLocalDateTime
 import com.google.gson.Gson
@@ -20,9 +19,9 @@ import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
-suspend fun GetVotings(context: Context): List<GetVotingDTO> =
+suspend fun getVotings(meetingId: String): List<GetVotingDTO> =
     withContext(Dispatchers.IO) {
-      val path = "meetings/votings"
+      val path = "meetings/$meetingId/votings"
 
       val token = auth.getSessionToken()
 
@@ -114,6 +113,7 @@ suspend fun GetVotingResultByID(id: UUID): GetVotingResultsDTO? =
             val votingResult = Gson().fromJson(responseBody, JsonObject::class.java)
             val votingId = votingResult.get("votingId").asString.let { UUID.fromString(it) }
             val myVote = votingResult.get("myVote")?.asInt?.toUByte() // Handle nullable "myVote"
+            val totalCount = votingResult.get("totalCount").asInt.toUInt()
             val resultsArray = votingResult.getAsJsonArray("results")
 
             val results =
@@ -129,11 +129,12 @@ suspend fun GetVotingResultByID(id: UUID): GetVotingResultsDTO? =
 
                   GetVotingResultDTO(
                       index = resultObject.get("index").asInt.toUByte(),
-                      total = resultObject.get("total").asInt.toUByte(),
+                      count = resultObject.get("count").asInt.toUInt(),
                       percentage = resultObject.get("percentage").asDouble,
                       identities = identitiesArray)
                 }
-            GetVotingResultsDTO(votingId = votingId, myVote = myVote, results = results)
+            GetVotingResultsDTO(
+                votingId = votingId, myVote = myVote, totalCount = totalCount, results = results)
           } else {
             println("Fehler: Leere Antwort erhalten.")
             null

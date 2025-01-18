@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
@@ -35,7 +34,7 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.R
-import net.ipv64.kivop.components.IconBox
+import net.ipv64.kivop.components.IconBoxClickable
 import net.ipv64.kivop.components.IconTextField
 import net.ipv64.kivop.components.ImgPicker
 import net.ipv64.kivop.components.SpacerBetweenElements
@@ -43,7 +42,7 @@ import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.handleLogout
 import net.ipv64.kivop.models.viewModel.UserViewModel
 import net.ipv64.kivop.services.StringProvider.getString
-import net.ipv64.kivop.services.uriToByteArray
+import net.ipv64.kivop.services.uriToBase64String
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
@@ -60,7 +59,7 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
   }
   var editMode by remember { mutableStateOf(false) }
   val user = userViewModel.getProfile()
-  var newImgByteArray: ByteArray? = null
+  var newImgByteArray: String? = null
   val topBarModifier =
       Modifier.zIndex(1f).padding(vertical = 12.dp, horizontal = 14.dp).height(48.dp)
 
@@ -71,7 +70,7 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
               containerColor = Color.Transparent), // transparente NavBar
       title = {},
       actions = {
-        IconBox(
+        IconBoxClickable(
             Icons.Default.Edit,
             height = 50.dp,
             Background_secondary.copy(alpha = 0.15f),
@@ -79,7 +78,7 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
             onClick = { editMode = true })
       },
       navigationIcon = {
-        IconBox(
+        IconBoxClickable(
             Icons.Default.KeyboardArrowLeft,
             height = 50.dp,
             Background_secondary.copy(alpha = 0.15f),
@@ -103,7 +102,7 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
           newImgByteArray =
               user.name
                   ?.let { name -> ImgPicker(user.profileImage, userName = name) }
-                  ?.let { uriToByteArray(navController.context, it) }
+                  ?.let { uriToBase64String(navController.context, it) }
         } else {
           if (user.profileImage != null) {
             ImgPicker(user.profileImage, edit = false)

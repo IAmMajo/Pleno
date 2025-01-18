@@ -14,13 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Signal_blue
+import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
@@ -58,8 +58,12 @@ fun CustomInputField(
         singleLine = true,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
+        textStyle = MaterialTheme.typography.titleMedium.copy(color = Text_prime),
         placeholder = {
-          Text(text = placeholder, color = Text_tertiary, fontWeight = FontWeight.SemiBold)
+          Text(
+              text = placeholder,
+              color = Text_tertiary.copy(0.4f),
+              style = MaterialTheme.typography.titleMedium)
         })
   }
 }

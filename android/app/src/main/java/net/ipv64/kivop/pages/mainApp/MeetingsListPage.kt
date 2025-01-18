@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,120 +27,58 @@ fun MeetingsListPage(navController: NavController, meetingsViewModel: MeetingsVi
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
-  val meetings = meetingsViewModel.meetings
-  var tabs = listOf<String>()
+  val tabs = listOf("Anstehende Sitzungen", "Vergangene Sitzungen")
+  val meetings = meetingsViewModel.loadMeetings()
+
   val scheduledMeetings = meetings.filter { it?.status == MeetingStatus.scheduled }
   val completedMeetings = meetings.filter { it?.status == MeetingStatus.completed }
-  var inSessionMeetings = meetings.filter { it?.status == MeetingStatus.inSession }
- 
+  val inSessionMeetings = meetings.filter { it?.status == MeetingStatus.inSession }
 
-  if(inSessionMeetings.isEmpty()){
-    tabs = listOf("Anstehende Sitzungen", "Vergangene Sitzungen")
-  }
-  else{
-    tabs = listOf("Laufende Sitzungen","Anstehende Sitzungen", "Vergangene Sitzungen")
-  }
-
-  
   // Tab-Inhalte definieren
-  val tabContents: List<@Composable () -> Unit> = if (inSessionMeetings.isEmpty()) {
-    listOf(
-      {
-        LazyColumn(
-          modifier = Modifier.fillMaxHeight(),
-          verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-          items(scheduledMeetings) { meeting ->
-            if (meeting != null) {
-              ListenItem(
-                itemListData = meeting,
-                onClick = { navController.navigate("anwesenheit/${meeting.id}") }
-              )
-            }
-          }
-        }
-      },
-      {
-        LazyColumn(
-          modifier = Modifier.fillMaxHeight(),
-          verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-          items(completedMeetings) { meeting ->
-            if (meeting != null) {
-              ListenItem(
-                itemListData = meeting,
-                onClick = { navController.navigate("anwesenheit/${meeting.id}") }
-              )
-            }
-          }
-        }
-      }
-    )
-  } else {
-    listOf(
-      {
-        LazyColumn(
-          modifier = Modifier.fillMaxHeight(),
-          verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-          items(inSessionMeetings) { meeting ->
-            if (meeting != null) {
-              ListenItem(
-                itemListData = meeting,
-                onClick = { navController.navigate("anwesenheit/${meeting.id}") }
-              )
-            }
-          }
-        }
-      },
-      {
-        LazyColumn(
-          modifier = Modifier.fillMaxHeight(),
-          verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-          items(scheduledMeetings) { meeting ->
-            if (meeting != null) {
-              ListenItem(
-                itemListData = meeting,
-                onClick = { navController.navigate("anwesenheit/${meeting.id}") }
-              )
-            }
-          }
-        }
-      },
-      {
-        LazyColumn(
-          modifier = Modifier.fillMaxHeight(),
-          verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-          items(completedMeetings) { meeting ->
-            if (meeting != null) {
-              ListenItem(
-                itemListData = meeting,
-                onClick = { navController.navigate("anwesenheit/${meeting.id}") }
-              )
-            }
-          }
-        }
-      }
-    )
-  }
+  val tabContents =
+      listOf<@Composable () -> Unit>(
+          {
+            LazyColumn(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                  items(scheduledMeetings) { meeting ->
+                    if (meeting != null) {
+                      ListenItem(
+                          itemListData = meeting,
+                          onClick = { navController.navigate("anwesenheit/${meeting.id}") })
+                    }
+                  }
+                }
+          },
+          {
+            LazyColumn(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                  items(completedMeetings) { meeting ->
+                    if (meeting != null) {
+                      ListenItem(
+                          itemListData = meeting,
+                          onClick = { navController.navigate("anwesenheit/${meeting.id}") })
+                    }
+                  }
+                }
+          })
 
   // Layout mit Tabs und aktuellen Meetings
   Column {
     SpacerTopBar()
     // Aktuelle Meetings anzeigen
-//    LazyColumn(
-//        modifier = Modifier.heightIn(max = 210.dp),
-//        verticalArrangement = Arrangement.spacedBy(12.dp)) {
-//          items(inSessionMeetings) { meeting ->
-//            if (meeting != null) {
-//              ListenItem(
-//                  itemListData = meeting,
-//                  onClick = { navController.navigate("anwesenheit/${meeting.id}") })
-//            }
-//          }
-//        }
+    LazyColumn(
+        modifier = Modifier.heightIn(max = 210.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          items(inSessionMeetings) { meeting ->
+            if (meeting != null) {
+              ListenItem(
+                  itemListData = meeting,
+                  onClick = { navController.navigate("anwesenheit/${meeting.id}") })
+            }
+          }
+        }
     Spacer(Modifier.size(18.dp))
     // Tabs anzeigen
     GenerateTabs(tabs = tabs, tabContents = tabContents)

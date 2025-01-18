@@ -10,7 +10,6 @@ import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileDTO
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileUpdateDTO
 import net.ipv64.kivop.services.api.getUserProfile
 import net.ipv64.kivop.services.api.patchUserProfile
-import net.ipv64.kivop.services.encodeImageToBase64
 
 class UserViewModel : ViewModel() {
   private var user by mutableStateOf<UserProfileDTO?>(null)
@@ -27,7 +26,7 @@ class UserViewModel : ViewModel() {
     return this.user
   }
 
-  fun updateUser(email: String? = null, name: String? = null, profileImage: ByteArray? = null) {
+  fun updateUser(email: String? = null, name: String? = null, profileImage: String? = null) {
     user?.let {
       val updatedUser =
           it.copy(
@@ -40,8 +39,7 @@ class UserViewModel : ViewModel() {
           val response =
               patchUserProfile(
                   UserProfileUpdateDTO(
-                      name = if (name.isNullOrEmpty()) null else name,
-                      profileImage?.let { it1 -> encodeImageToBase64(it1) }))
+                      name = if (name.isNullOrEmpty()) null else name, profileImage))
           if (response?.isSuccessful == true) {
             user = updatedUser
           }
