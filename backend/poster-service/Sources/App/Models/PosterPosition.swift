@@ -1,4 +1,5 @@
 import Models
+import PosterServiceDTOs
 import Vapor
 import Fluent
 
@@ -27,7 +28,7 @@ extension PosterPosition {
             expiresAt: self.expires_at!,
             removedBy: self.removed_by?.name,
             removedAt: self.removed_at,
-            imageUrl: self.image_url,
+            image: self.image,
             responsibleUsers: responsibleUsers,
             status: status
         )

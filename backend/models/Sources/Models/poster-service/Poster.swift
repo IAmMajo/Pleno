@@ -23,19 +23,19 @@ public final class Poster: Model, @unchecked Sendable {
     @OptionalField(key: "description")
     public var description: String?
 
-    @Field(key: "image_url")
-    public var image_url: String
+    @Field(key: "image")
+    public var image: Data
     
     @Children(for: \.$poster)
     public var positions: [PosterPosition]
    
     public init() { }
 
-    public init(id: UUID? = nil, name: String,  description: String? = "", imageUrl: String) {
+    public init(id: UUID? = nil, name: String,  description: String? = "", image: Data) {
         self.id = id
         self.name = name
         self.description = description
-        self.image_url = imageUrl
+        self.image = image
     }
     
 }
