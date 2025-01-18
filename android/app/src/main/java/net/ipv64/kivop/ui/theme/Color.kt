@@ -13,7 +13,7 @@ val Text_prime = Color(0xff373434)
 val Text_secondary = Color(0xFF43578A)
 val Text_tertiary = Color(0xFF404445)
 // Text colors light
-val Text_prime_light = Color(0xFFF7FBFC)
+val Text_prime_light = Color(0xFFF7FBFC) // = Background_prime
 val Text_secondary_light = Color(0xFFE4EAEC)
 
 // Background colors

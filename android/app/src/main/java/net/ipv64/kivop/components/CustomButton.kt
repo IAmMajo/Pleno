@@ -21,11 +21,11 @@ import net.ipv64.kivop.models.primaryButtonStyle
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 
-@Preview
+
 @Composable
 //ToDo - ButtonStyle ergänzen
 fun CustomButton(
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
     text: String = "Button",
     color: Color = Color.Gray,
     fontColor: Color = Color.Black,
