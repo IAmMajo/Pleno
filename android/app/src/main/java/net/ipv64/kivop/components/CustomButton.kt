@@ -14,16 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.ipv64.kivop.models.ButtonStyle
-import net.ipv64.kivop.models.primaryButtonStyle
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 
-
 @Composable
-//ToDo - ButtonStyle ergänzen
+// ToDo - ButtonStyle ergänzen
 fun CustomButton(
     modifier: Modifier,
     text: String = "Button",
@@ -35,64 +32,56 @@ fun CustomButton(
   Box(
       contentAlignment = Alignment.Center,
       modifier =
-      modifier
-        .fillMaxWidth()
-        .height(44.dp) 
-        .background(
-          color = color, shape = RoundedCornerShape(100.dp) 
-        )
-        .clickable(onClick = onClick)
-  ){
+          modifier
+              .fillMaxWidth()
+              .height(44.dp)
+              .background(color = color, shape = RoundedCornerShape(100.dp))
+              .clickable(onClick = onClick)) {
         Text(text, color = fontColor)
-  }
+      }
 }
 
 @Composable
 fun CustomPopupButton(
-  text: String,
-  buttonStyle: ButtonStyle?,
- // isEnabled: Boolean,
-  onClick: () -> Unit,
-  modifier: Modifier
-) { 
-  if(buttonStyle == null){
-      Button(
+    text: String,
+    buttonStyle: ButtonStyle?,
+    // isEnabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier
+) {
+  if (buttonStyle == null) {
+    Button(
         onClick = onClick,
         shape = RoundedCornerShape(100.dp),
-        colors = ButtonDefaults.buttonColors(
-          containerColor = Primary,
-          contentColor = Background_secondary
-        ),
-        modifier = modifier
-          .height(35.dp)
-          .clip(shape = RoundedCornerShape(20.dp)),
-        ){ 
-        Text(
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = Primary, contentColor = Background_secondary),
+        modifier = modifier.height(35.dp).clip(shape = RoundedCornerShape(20.dp)),
+    ) {
+      Text(
           text = text,
-          )
+      )
     }
   } else {
     Button(
-      onClick = onClick,
-      shape = RoundedCornerShape(20.dp),
-      colors = ButtonDefaults.buttonColors(
-        containerColor = buttonStyle.backgroundColor,
-        contentColor = buttonStyle.contentColor
-      ),
-      modifier = modifier
-        .height(35.dp)
-        .clip(shape = RoundedCornerShape(20.dp)),
-    ){
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = buttonStyle.backgroundColor,
+                contentColor = buttonStyle.contentColor),
+        modifier = modifier.height(35.dp).clip(shape = RoundedCornerShape(20.dp)),
+    ) {
       Text(
-        text = text,
+          text = text,
       )
-    } 
+    }
   }
 }
 
-//@Preview
-//@Composable
-//fun PreviewScreen(){
+// @Preview
+// @Composable
+// fun PreviewScreen(){
 //  CustomPopupButton("hello,click me", primaryButtonStyle, onClick = {}, modifier = Modifier)
-//  
-//}
+//
+// }
