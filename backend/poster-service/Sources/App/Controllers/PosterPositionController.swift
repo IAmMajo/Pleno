@@ -58,7 +58,7 @@ struct PosterPositionController: RouteCollection, Sendable {
                     description: """
                                  Markiert eine bestimmte Poster-Position als aufgehängt. Die Aktion wird als `multipart/form-data` gesendet ...
                                  """,
-                    query: [],
+                    path: .type(PosterPosition.IDValue.self),
                     body: .type(HangPosterPositionDTO.self),
                     contentType: .multipart(.formData),
                     response: .type(HangPosterPositionResponseDTO.self),
@@ -73,7 +73,7 @@ struct PosterPositionController: RouteCollection, Sendable {
                     description: """
                                  Markiert eine bestimmte Poster-Position als abgehängt. Die Aktion wird als `multipart/form-data` gesendet ...
                                  """,
-                    query: [],
+                    path: .type(PosterPosition.IDValue.self),
                     body: .type(TakeDownPosterPositionDTO.self),
                     contentType: .application(.json),
                     response: .type(TakeDownPosterPositionResponseDTO.self),
