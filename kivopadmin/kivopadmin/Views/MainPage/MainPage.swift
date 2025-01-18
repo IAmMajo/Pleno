@@ -81,6 +81,10 @@ struct MainPage: View {
             .navigationBarHidden(true)
         .onAppear {
             loadUserProfile()
+            meetingManager.fetchAllMeetings()
+        }
+        .refreshable {
+            meetingManager.fetchAllMeetings()
         }
     }
     
