@@ -43,6 +43,7 @@ import net.ipv64.kivop.ui.theme.Signal_neutral
 import net.ipv64.kivop.ui.theme.Signal_neutral_20
 import net.ipv64.kivop.ui.theme.Signal_red
 import net.ipv64.kivop.ui.theme.Text_prime
+import net.ipv64.kivop.ui.theme.Text_tertiary
 import net.ipv64.kivop.ui.theme.textContentStyle
 import net.ipv64.kivop.ui.theme.textHeadingStyle
 import net.ipv64.kivop.ui.theme.textSubHeadingStyle
@@ -92,7 +93,7 @@ Dialog(
      fontWeight = textContentStyle.fontWeight,
      fontSize = textContentStyle.fontSize,
      fontFamily = textContentStyle.fontFamily,
-     color = Text_prime,)
+     color = Text_tertiary,)
    SpacerBetweenElements(12.dp)
    // ToDo - styling font
    if (!isCorrect) {
