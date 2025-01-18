@@ -449,9 +449,15 @@ struct PosterPositionController: RouteCollection, Sendable {
         
         let dto = try req.content.decode(UpdatePosterPositionDTO.self)
         
-        guard let position = try await PosterPosition.find(positionId, on: req.db) else {
+        guard let position = try await PosterPosition.query(on: req.db)
+            .with(\.$posted_by)
+            .with(\.$removed_by)
+            .filter(\.$id == positionId)
+            .first()
+        else {
             throw Abort(.notFound, reason: "PosterPosition nicht gefunden.")
         }
+
         
         // Nur updaten, was im DTO vorhanden ist
         if let newLatitude = dto.latitude {
@@ -511,17 +517,18 @@ struct PosterPositionController: RouteCollection, Sendable {
             let identityName = rsp.user.identity.name
             return ResponsibleUsersDTO(id: userId, name: identityName)
         }
-        
+    
+
         // DTO zurückgeben
         return PosterPositionResponseDTO(
             id: position.id!,
             posterId: position.$poster.id,
             latitude: position.latitude,
             longitude: position.longitude,
-            postedBy: position.$posted_by.name,
+            postedBy: position.$posted_by.value??.name,
             postedAt: position.posted_at,
             expiresAt: position.expires_at!,
-            removedBy: position.$removed_by.name,
+            removedBy: position.$removed_by.value??.name,
             removedAt: position.removed_at,
             image: position.image,
             responsibleUsers: responsibleUsers,
