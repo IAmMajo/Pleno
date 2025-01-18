@@ -106,6 +106,7 @@ struct EditMeetingView: View {
         meetingManager.updateMeeting(meetingId: meetingId, patchDTO: patchDTO) {
             dismiss()
         }
+        dismiss()
     }
 
     private func deleteMeeting() {

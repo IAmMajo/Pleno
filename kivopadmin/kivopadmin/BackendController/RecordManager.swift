@@ -13,6 +13,8 @@ class RecordManager: ObservableObject {
     @Published var errorMessage: String? = nil
 
     @Published var meetingsWithRecords: [MeetingWithRecords] = []
+    
+    @Published var recordsNotApproved: Int = 0
 
     @Published var records: [GetRecordDTO] = [] // Records-Array
 
@@ -89,7 +91,15 @@ class RecordManager: ObservableObject {
                     // Warten auf alle asynchronen Aufrufe
                     dispatchGroup.notify(queue: .main) {
                         self?.meetingsWithRecords = meetingsWithRecords
+                        let submittedRecordsCount = meetingsWithRecords.flatMap { $0.records }
+                            .filter { $0.status == .submitted } // Filtere nach 'submitted' Status
+                            .count
+
+                        // Setze die Zählung von nicht genehmigten Records (submitted)
+                        self?.recordsNotApproved = submittedRecordsCount
                     }
+                    
+                    
                     
 
                 } catch {
@@ -452,5 +462,44 @@ class RecordManager: ObservableObject {
         }
         task.resume()
     }
+    
+    func approveRecordMeetingLang(meetingId: UUID, lang: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records/\(lang)/approve") else {
+            print("Invalid URL")
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+            return
+        }
 
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            print("Unauthorized: No token found")
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unauthorized: No token found"])))
+            return
+        }
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error)) // Netzwerkfehler
+                return
+            }
+
+            if let httpResponse = response as? HTTPURLResponse {
+                if (200...299).contains(httpResponse.statusCode) {
+                    completion(.success(())) // Erfolg
+                } else {
+                    let errorMessage = String(data: data ?? Data(), encoding: .utf8) ?? "Unbekannter Fehler"
+                    let error = NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])
+                    completion(.failure(error)) // Serverfehler
+                }
+            } else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unerwartete Antwort"])))
+            }
+        }
+        task.resume()
+    }
 }

@@ -11,8 +11,9 @@ struct User: Identifiable {
 
 struct CustomMapView: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion
-    var posterPositions: [CreatePosterPositionDTO]
+    var createPosterPositions: [CreatePosterPositionDTO]
     var onRegionChange: (MKCoordinateRegion) -> Void
+    var posterPositions: [PosterPositionResponseDTO]
 
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: CustomMapView
@@ -47,9 +48,14 @@ struct CustomMapView: UIViewRepresentable {
         uiView.removeAnnotations(uiView.annotations)
 
         // Debugging output
-        print("Updating map with \(posterPositions.count) positions")
+        print("Updating map with \(createPosterPositions.count) positions")
         
-        for position in posterPositions {
+        for position in createPosterPositions {
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)
+            uiView.addAnnotation(annotation)
+        }
+        for position in posterPositions{
             let annotation = MKPointAnnotation()
             annotation.coordinate = CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)
             uiView.addAnnotation(annotation)
@@ -71,49 +77,63 @@ struct Posters_AddPositionView: View {
     @State private var selectedUsers: [UUID] = []
     @State private var searchText: String = ""
 
+    var poster: PosterResponseDTO
     
     // Array to hold CreatePosterPositionDTO objects
-    @State private var posterPositions: [CreatePosterPositionDTO] = []
+    @State private var createPosterPositions: [CreatePosterPositionDTO] = []
 
     var body: some View {
         HStack {
-            // List of Poster Positions
-            List(posterPositions, id: \.posterId) { posterLocation in
-                Button(action: {
-                    zoomToLocation(latitude: posterLocation.latitude, longitude: posterLocation.longitude)
-                }) {
-                    Text("Lat: \(posterLocation.latitude), Lon: \(posterLocation.longitude)")
-                        .font(.body)
-                }
-            }
-            .frame(width: 300)
-            .background(Color.gray.opacity(0.1))
-            
-//            if posterManager.isLoading {
-//                ProgressView("Loading...")
-//            } else if let errorMessage = posterManager.errorMessage {
-//                Text("Error: \(errorMessage)").foregroundColor(.red)
-//            } else {
-//                // Zeige die Liste der Positionen
-//                List(posterManager.positions, id: \.posterId) { posterLocation in
+            VStack{
+//                // List of Poster Positions
+//                List(0..<createPosterPositions.count, id: \.self) { index in
+//                    let posterLocation = createPosterPositions[index]
 //                    Button(action: {
 //                        zoomToLocation(latitude: posterLocation.latitude, longitude: posterLocation.longitude)
 //                    }) {
-//                        Text("Lat: \(posterLocation.latitude), Lon: \(posterLocation.longitude)")
-//                            .font(.body)
+//                        VStack(alignment: .leading) {
+//                            Text("Lat: \(posterLocation.latitude), Lon: \(posterLocation.longitude)")
+//                                .font(.body)
+//                            Text("Läuft ab: \(DateTimeFormatter.formatDate(posterLocation.expiresAt))")
+//                                .font(.caption)
+//                                .foregroundColor(.gray)
+//                        }
 //                    }
 //                }
-//                .frame(width: 300)
-//                .background(Color.gray.opacity(0.1))
-//            }
+                
+                if posterManager.isLoading {
+                    ProgressView("Loading...")
+                } else if let errorMessage = posterManager.errorMessage {
+                    Text("Error: \(errorMessage)").foregroundColor(.red)
+                } else {
+                    // Zeige die Liste der Positionen
+                    List(posterManager.posterPositions, id: \.id) { posterLocation in
+                        Button(action: {
+                            zoomToLocation(latitude: posterLocation.latitude, longitude: posterLocation.longitude)
+                        }) {
+                            VStack(alignment: .leading) {
+                                Text("Lat: \(posterLocation.latitude), Lon: \(posterLocation.longitude)")
+                                    .font(.body)
+                                Text("Läuft ab: \(DateTimeFormatter.formatDate(posterLocation.expiresAt))")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
+                    .navigationTitle("Plakatpositionen")
+                }
+            }.frame(width: 300)
 
             VStack {
 
                 
                 ZStack {
-                    CustomMapView(region: $mapRegion, posterPositions: posterPositions, onRegionChange: { newRegion in
-                        mapRegion = newRegion
-                    })
+                    CustomMapView(
+                        region: $mapRegion,
+                        createPosterPositions: createPosterPositions,
+                        onRegionChange: { newRegion in mapRegion = newRegion },
+                        posterPositions: posterManager.posterPositions
+                    )
                     .ignoresSafeArea()
                         .frame(maxHeight: .infinity)
                     VStack {
@@ -237,7 +257,7 @@ struct Posters_AddPositionView: View {
         .onAppear {
             // Benutzer laden, wenn die View erscheint
             userManager.fetchUsers()
-            posterManager.fetchPosterPositions()
+            posterManager.fetchPosterPositions(poster: poster)
         }
     }
 
@@ -246,16 +266,16 @@ struct Posters_AddPositionView: View {
         
         // Create a new CreatePosterPositionDTO object
         let newPosterPosition = CreatePosterPositionDTO(
-            posterId: UUID(),
             latitude: currentLocation.latitude,
             longitude: currentLocation.longitude,
             responsibleUsers: selectedUsers,
             expiresAt: expiresAt
         )
-        
+        posterManager.createPosterPosition(posterPosition: newPosterPosition, posterId: poster.id)
         // Add the new object to the list
-        posterPositions.append(newPosterPosition)
+        //createPosterPositions.append(newPosterPosition)
         
+        posterManager.fetchPosterPositions(poster: poster)
         // Debugging output
         print("Added new poster position: \(newPosterPosition)")
     }
@@ -401,7 +421,7 @@ struct UserSelectionSheet: View {
     }
 }
 
-
-#Preview {
-    Posters_AddPositionView()
-}
+//
+//#Preview {
+//    Posters_AddPositionView()
+//}

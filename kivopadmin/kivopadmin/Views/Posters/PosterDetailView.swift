@@ -6,35 +6,14 @@
 //
 
 import SwiftUI
+import PosterServiceDTOs
 
 struct PosterDetailView: View {
+    @StateObject private var posterManager = PosterManager() // MeetingManager als StateObject
+    let poster: PosterResponseDTO
+
+
    
-   let poster: Poster
-   var posterPositions: [PosterPosition] {
-      return getPosterPositions(poster: mockPosters[0])
-   }
-   
-   @StateObject private var postersViewModel = PostersViewModel()
-   
-   @State private var isLoading = false
-   @State private var error: String?
-   
-   @State var optionTextMap: [UInt8: String] = [:]
-   
-   let addresses = [
-           "Am Grabstein 6, Transilvanien",
-           "Hinter der Obergasse 27, am Obergipfelzelt hinter Neuss",
-           "Baumhaus 5, Wald",
-           "Katerstraße 3, Schnurrdorf"
-       ]
-   
-   private func getPosterPositions(poster: Poster) -> [PosterPosition] {
-      var posterPositions: [PosterPosition] = []
-      for id in poster.posterPositionIds {
-         posterPositions.append(mockPosterPositions.first { $0.id == id }!)
-      }
-      return posterPositions
-   }
    
    func getDateColor(status: Status) -> Color {
       switch status {
@@ -67,38 +46,107 @@ struct PosterDetailView: View {
    }
    
     var body: some View {
-       ScrollView {
-             VStack {
-                Divider()
-                
-                HStack {
-                   Text("Abhängedatum:")
-                      .fontWeight(.semibold)
-                      .padding(.trailing, -2)
-                   let poster = mockPosters[0]
-                   if let expirationPosition = postersViewModel.posterExpiresPositions[poster.id!] {
-                      Text("\(DateTimeFormatter.formatDate(expirationPosition.expiresAt))")
-                         .fontWeight(.semibold)
-                         .foregroundStyle(getDateColor(status: expirationPosition.status))
-                   } else {
-//                      Text("Nicht verfügbar")
-//                         .fontWeight(.semibold)
-                      Text(DateTimeFormatter.formatDate(Date.now))
-                         .fontWeight(.semibold)
-                         .foregroundStyle(.red)
+        VStack{
+            if posterManager.isLoading {
+                ProgressView("Loading meetings...") // Ladeanzeige
+                    .progressViewStyle(CircularProgressViewStyle())
+            } else if let errorMessage = posterManager.errorMessage {
+                Text("Error: \(errorMessage)")
+                    .foregroundColor(.red)
+            } else {
+                TopView(poster: poster, posterManager: posterManager)
+                MidView(poster: poster, posterManager: posterManager)
+            }
+        }
+
+       .refreshable {
+       }
+       .onAppear {
+           posterManager.fetchPosterPositions(poster: poster)
+           posterManager.fetchPosterPositionsToHang(poster: poster)
+           posterManager.fetchPosterPositionsTakendown(poster: poster)
+           posterManager.fetchPosterPositionsOverdue(poster: poster)
+           posterManager.fetchPosterPositionsHangs(poster: poster)
+       }
+       .toolbar {
+           // Sammelposten hinzufügen
+           ToolbarItem(placement: .navigationBarTrailing) {
+               NavigationStack{
+                   NavigationLink(destination: Posters_AddPositionView(poster: poster)){
+                       Text("Plakatposition hinzufügen") // Symbol für Übersetzung (Weltkugel)
+                           .foregroundColor(.blue) // Blaue Farbe für das Symbol
                    }
-                }.padding(.top, 5)
-                
-                Image("TestPosterImage")
-                   .resizable()
-                   .aspectRatio(contentMode: .fit)
-                   .frame(maxWidth: 200, maxHeight: 200)
-                   .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                   .foregroundStyle(.gray.opacity(0.5))
-                   .padding(.top, 10) .padding(.bottom, 10)
-                
+               }
+           }
+       }
+    }
+}
+
+struct TopView: View {
+    
+
+    let poster: PosterResponseDTO
+    let posterManager: PosterManager
+    
+    func getDateColor(status: Status) -> Color {
+       switch status {
+       case .hung:
+          return Color(UIColor.darkText)
+       case .takenDown:
+          return Color(UIColor.darkText)
+       case .notDisplayed:
+          return Color(UIColor.darkText)
+       case .expiresInOneDay:
+          return .orange
+       case .expired:
+          return .red
+       }
+    }
+    
+    func getDateStatusText(status: Status) -> String {
+       switch status {
+       case .hung:
+          return "hängt"
+       case .takenDown:
+          return "abgehangen"
+       case .notDisplayed:
+          return "hängt nicht"
+       case .expiresInOneDay:
+          return "morgen überfällig"
+       case .expired:
+          return "überfällig"
+       }
+    }
+    
+    var body: some View {
+        HStack {
+            AsyncImage(url: URL(string: "https://kivop.ipv64.net/posters/images/posters/\(poster.imageUrl)")) { image in
+                image.resizable()
+            } placeholder: {
+                ProgressView()
+            }
+            .frame(maxWidth: 200, maxHeight: 200)
+            .aspectRatio(contentMode: .fit)
+            .cornerRadius(8)
+            .foregroundStyle(.gray.opacity(0.5))
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            
+            VStack{
                 HStack{
-                   VStack{
+                        Text("Abhängedatum:")
+                           .fontWeight(.semibold)
+                           .padding(.trailing, -2)
+                    if let expirationPosition = posterManager.posterPositions.first?.expiresAt {
+                           Text("\(DateTimeFormatter.formatDate(expirationPosition))")
+                              .fontWeight(.semibold)
+                              //.foregroundStyle(getDateColor(status: expirationPosition))
+                        } else {
+                           Text(DateTimeFormatter.formatDate(Date.now))
+                              .fontWeight(.semibold)
+                              .foregroundStyle(.red)
+                    }
+                 }.padding(.top, 5)
+                VStack{
                       CircularProgressView(value: 2, total: 3, status: Status.hung)
                          .frame(maxWidth: 35, maxHeight: 35)
                          .padding(.bottom, 5)
@@ -109,9 +157,6 @@ struct PosterDetailView: View {
                          .font(.subheadline)
                          .foregroundStyle(.black.opacity(0.6))
                    }
-                   .padding(.leading, 50)
-                   
-                   Spacer()
                    
                    VStack{
                       CircularProgressView(value: 1, total: 4, status: Status.takenDown)
@@ -124,74 +169,61 @@ struct PosterDetailView: View {
                          .font(.subheadline)
                          .foregroundStyle(.black.opacity(0.6))
                    }
-                   .padding(.trailing, 50)
-                }
-                
-                Form {
-                   Section {
-                      Text("\(poster.description)")
-                   } header: {
-                      Text("Beschreibung")
-                   }
-                }
-                .scrollDisabled(true)
-                .frame(height: 150)
-                
-                List{
-                   Section {
-                      ForEach (posterPositions.indices, id: \.self) { index in
-                         let position = posterPositions[index]
-                         let address = addresses[index].components(separatedBy: ", ")[0]
-                         NavigationLink(destination: Posters_PositionView(position: position).navigationTitle("\(address)")) {
-                            HStack {
-                               VStack {
-                                  Text(addresses[index])
-                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                  
-                                  Text("\(DateTimeFormatter.formatDate(position.expiresAt))")
-                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                     .font(.callout)
-                                     .foregroundStyle(getDateColor(status: position.status))
-                                  
-                               }
-                               Spacer()
-                               Text(getDateStatusText(status: position.status))
-                                  .font(.caption)
-                                  .opacity(0.6)
-                            }
-                         }
-                      }
-                   } header: {
-                       
-                       HStack{
-                           Text("Standorte (3)")
-                           NavigationLink(destination: Posters_AddPositionView()) {
-                               Text("+ Hinzufügen").foregroundStyle(.blue)
-                           }
-                           Spacer()
-                       }
-                    
-                   }
-                }
-                .frame(height: CGFloat((poster.posterPositionIds.count * 100) + (poster.posterPositionIds.count < 4 ? 200 : 0)), alignment: .top)
-                //             .scrollContentBackground(.hidden)
-                .environment(\.defaultMinListHeaderHeight, 10)
-             }
-       }
-       .refreshable {
-       }
-       .navigationBarTitleDisplayMode(.inline)
-       .background(Color(UIColor.secondarySystemBackground))
-       .onAppear {
-          Task {
-
-          }
-       }
+            }
+        }
     }
 }
 
-#Preview {
-//   @StateObject private var postersViewModel = PostersViewModel()
+struct MidView: View {
+    
 
-   PosterDetailView(poster: mockPosters[0])
+    let poster: PosterResponseDTO
+    let posterManager: PosterManager
+    
+    func getDateColor(status: Status) -> Color {
+       switch status {
+       case .hung:
+          return Color(UIColor.darkText)
+       case .takenDown:
+          return Color(UIColor.darkText)
+       case .notDisplayed:
+          return Color(UIColor.darkText)
+       case .expiresInOneDay:
+          return .orange
+       case .expired:
+          return .red
+       }
+    }
+    
+    func getDateStatusText(status: Status) -> String {
+       switch status {
+       case .hung:
+          return "hängt"
+       case .takenDown:
+          return "abgehangen"
+       case .notDisplayed:
+          return "hängt nicht"
+       case .expiresInOneDay:
+          return "morgen überfällig"
+       case .expired:
+          return "überfällig"
+       }
+    }
+    
+    var body: some View {
+        List {
+            Section(header: Text("Positionen")) {
+                ForEach(posterManager.posterPositions, id: \.id) { position in
+                    Text("Test") // Zugriff auf ein Property des Elements
+                }
+            }
+        }
+    }
 }
+
+
+//#Preview {
+////   @StateObject private var postersViewModel = PostersViewModel()
+//
+//   PosterDetailView(poster: mockPosters[0])
+//}

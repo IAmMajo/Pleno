@@ -8,6 +8,9 @@ struct MarkdownEditorView: View {
     @State private var markdownText: String = ""
     @State private var isTranslationSheetPresented = false // Zustand für das Sheet
 
+    @State private var recordStatus: RecordStatus = .underway
+
+
     
     var meetingId: UUID
     var lang: String
@@ -40,32 +43,65 @@ struct MarkdownEditorView: View {
                         }
                     }
 
-                    Button(action: {
-                        recordManager.submitRecordMeetingLang(meetingId: meetingId, lang: lang) { result in
-                            DispatchQueue.main.async {
-                                switch result {
-                                case .success:
-                                    print("Record erfolgreich veröffentlicht")
-                                    // Hier kannst du das UI aktualisieren
-                                case .failure(let error):
-                                    print("Fehler beim Veröffentlichen: \(error.localizedDescription)")
-                                    // Fehler behandeln
+                    if recordStatus == .underway {
+                        Button(action: {
+                            // Aktion für den Zustand "underway"
+                            recordManager.submitRecordMeetingLang(meetingId: meetingId, lang: lang) { result in
+                                DispatchQueue.main.async {
+                                    switch result {
+                                    case .success:
+                                        print("Record erfolgreich eingereicht")
+                                        // Hier kannst du das UI aktualisieren
+                                    case .failure(let error):
+                                        print("Fehler beim Einreichen: \(error.localizedDescription)")
+                                        // Fehler behandeln
+                                    }
                                 }
                             }
+                            
+                            dismiss()
+                        }) {
+                            Text("Einreichen")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.green)
+                                .cornerRadius(12)
+                                .padding(.horizontal)
                         }
-
-                        dismiss()
-                    }) {
-                        Text("Veröffentlichen")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .cornerRadius(12)
-                            .padding(.horizontal)
+                        .padding(.bottom, 16)
+                    } else if recordStatus == .submitted {
+                        Button(action: {
+                            // Aktion für den Zustand "submitted"
+                            recordManager.approveRecordMeetingLang(meetingId: meetingId, lang: lang) { result in
+                                DispatchQueue.main.async {
+                                    switch result {
+                                    case .success:
+                                        print("Record erfolgreich veröffentlicht")
+                                        // Hier kannst du das UI aktualisieren
+                                    case .failure(let error):
+                                        print("Fehler beim Veröffentlichen: \(error.localizedDescription)")
+                                        // Fehler behandeln
+                                    }
+                                }
+                            }
+                            
+                            dismiss()
+                        }) {
+                            Text("Veröffentlichen")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.blue)
+                                .cornerRadius(12)
+                                .padding(.horizontal)
+                        }
+                        .padding(.bottom, 16)
                     }
-                    .padding(.bottom, 16)
+                    // Wenn `recordStatus` einen anderen Wert hat, wird nichts angezeigt.
+
                 }
                 .background(Color(.systemGray6)) // Hellgrauer Hintergrund
                 .animation(.easeInOut, value: isEditing) // Animation bei Statuswechsel
@@ -115,13 +151,16 @@ struct MarkdownEditorView: View {
             }
         }
         .onAppear {
+            
             Task {
                 await recordManager.getRecordMeetingLang(meetingId: meetingId, lang: lang)
                 try? await Task.sleep(nanoseconds: 250_000_000)
                 if let record = recordManager.record {
                     markdownText = record.content
                     print("Das ist der Text: \(markdownText)")
+                    recordStatus = record.status
                 }
+                
             }
         }
         .sheet(isPresented: $isTranslationSheetPresented) {

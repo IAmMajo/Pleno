@@ -3,13 +3,11 @@ import PosterServiceDTOs
 import PhotosUI
 
 struct PostersMainView: View {
-   @Environment(\.dismiss) var dismiss
    @State private var isPostenSheetPresented = false // Zustand für das Sheet
-   
-   @State private var posters: [Poster] = mockPosters
-   @State private var postersFiltered: [Poster] = []
+    @State private var postersFiltered: [PosterResponseDTO] = []
    
    @StateObject private var postersViewModel = PostersViewModel()
+    @StateObject private var posterManager = PosterManager() // MeetingManager als StateObject
    
    @State private var isLoading = false
    @State private var error: String?
@@ -37,122 +35,78 @@ struct PostersMainView: View {
    
     var body: some View {
         NavigationStack {
-            ZStack {
-                ZStack(alignment: .top) {
-                    if !posters.isEmpty {
-                        
-                        List {
-                            ForEach(postersViewModel.filteredPosters.indices, id: \.self) { index in
-                                let poster = postersViewModel.filteredPosters[index]
-                                NavigationLink(destination: PosterDetailView(poster: poster).navigationTitle(poster.name)) {
-                                    HStack {
-                                        VStack {
-                                            Text(poster.name)
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                            if let expirationPosition = postersViewModel.posterExpiresPositions[poster.id!] {
-                                                Text("\(DateTimeFormatter.formatDate(expirationPosition.expiresAt))")
-                                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                                    .font(.callout)
-                                                    .foregroundStyle(getDateColor(status: expirationPosition.status))
-                                            } else {
-                                                Text("No expiration date")
-                                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                                    .font(.callout)
-                                            }
-                                        }
-                                        Spacer()
-                                        if(postersViewModel.posterExpiresPositions[poster.id!]?.status != .notDisplayed){
-                                            if (numberOfPostersToHang[index] != 0) {
-                                                Image(systemName: "\(numberOfPostersToHang[index]).circle.fill")
-                                                    .resizable()
-                                                    .frame(maxWidth: 22, maxHeight: 22)
-                                                    .aspectRatio(1, contentMode: .fit)
-                                                    .foregroundStyle(.blue)
-                                                    .padding(.trailing, 5)
-                                            }
-                                        }
-                                        if(postersViewModel.posterExpiresPositions[poster.id!]?.status == .expired){
-                                            Image(systemName: "2.circle.fill")
-                                                .resizable()
-                                                .frame(maxWidth: 22, maxHeight: 22)
-                                                .aspectRatio(1, contentMode: .fit)
-                                                .foregroundStyle(.red)
-                                        }
-                                        
-                                        Spacer()
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.top, 20)
-                        .refreshable {
-                        }
-                        
-                        Picker("Termine", selection: $postersViewModel.selectedTab) {
-                            Text("Aktuell").tag(0)
-                            Text("Archiviert").tag(1)
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
-                        .padding(.horizontal) .padding(.bottom, 10)
-                        .background(.white)
-                        
-                    } else {
-                        ContentUnavailableView {
-                        }
-                    }
+            VStack {
+                if posterManager.isLoading {
+                    ProgressView("Loading meetings...") // Ladeanzeige
+                        .progressViewStyle(CircularProgressViewStyle())
+                } else if let errorMessage = posterManager.errorMessage {
+                    Text("Error: \(errorMessage)")
+                        .foregroundColor(.red)
+                } else if posterManager.posters.isEmpty {
+                    Text("No posters available.")
+                        .foregroundColor(.secondary)
+                } else {
                     
-                }
-                .navigationTitle("Plakate")
-                .navigationBarTitleDisplayMode(.large)
-                
-                //         .task(id: selectedVoting) {
-                //            if let voting = selectedVoting {
-                //               hasVoted = VotingStateTracker.hasVoted(for: voting.id)
-                //               await loadVotingResults(voting: voting)
-                //            }
-                //         }
-                .onAppear {
-                    Task {
-                        
-                    }
-                }
-                .overlay {
-                    if isLoading {
-                        ProgressView("Loading...")
-                    } else if let error = error {
-                        Text("Error: \(error)")
-                            .foregroundColor(.red)
-                    }
-                }
-                .toolbar {
-                    // Sammelposten hinzufügen
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: {
-                            isPostenSheetPresented.toggle()
-                        }) {
-                            Text("Sammelposten erstellen") // Symbol für Übersetzung (Weltkugel)
-                                .foregroundColor(.blue) // Blaue Farbe für das Symbol
+                    // Liste der Meetings
+                    List {
+                        ForEach(posterManager.posters, id: \.id) { poster in
+                            PosterRowView(poster: poster) // Unterview
                         }
                     }
                 }
-                
             }
-            .background(Color(UIColor.secondarySystemBackground))
+
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen")
-            .onChange(of: searchText) {
+            .onChange(of: searchText) { newValue in
                 Task {
-                    if searchText.isEmpty {
-                        postersFiltered = posters
+                    if newValue.isEmpty {
+                        postersFiltered = posterManager.posters
                     } else {
-                        postersFiltered = posters.filter { poster in
-                            return poster.name.contains(searchText)
+                        postersFiltered = posterManager.posters.filter { poster in
+                            poster.name.localizedCaseInsensitiveContains(newValue)
                         }
                     }
                 }
             }
+            .navigationTitle("Plakate")
         }
         .sheet(isPresented: $isPostenSheetPresented) {
             SammelpostenErstellenView()
+        }
+        .onAppear(){
+            posterManager.fetchPoster()
+        }
+        .toolbar {
+            // Sammelposten hinzufügen
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    isPostenSheetPresented.toggle()
+                }) {
+                    Text("Sammelposten erstellen") // Symbol für Übersetzung (Weltkugel)
+                        .foregroundColor(.blue) // Blaue Farbe für das Symbol
+                }
+            }
+        }
+    }
+}
+
+struct PosterRowView: View {
+    let poster: PosterResponseDTO
+    
+    var body: some View {
+        NavigationLink(destination: PosterDetailView(poster: poster)) {
+            HStack(spacing: 5) {
+                AsyncImage(url: URL(string: "https://kivop.ipv64.net/posters/images/posters/\(poster.imageUrl)")) { image in
+                    image.resizable()
+                } placeholder: {
+                    ProgressView()
+                }
+                .frame(width: 50, height: 50)
+                .cornerRadius(8)
+                
+                Text(poster.name)
+                    .font(.headline)
+            }
         }
     }
 }
@@ -164,6 +118,7 @@ struct SammelpostenErstellenView: View {
     @State private var description: String = ""
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var imageData: Data? = nil // Optional Data für das Bild
+    @StateObject private var posterManager = PosterManager() // MeetingManager als StateObject
 
     var body: some View {
         NavigationView {
@@ -230,14 +185,19 @@ struct SammelpostenErstellenView: View {
             print("Titel oder Bild fehlt!")
             return
         }
-
+        let resizedImageData = resizeAndCompressImageData(imageData: imageData, maxWidth: 32, maxHeight: 32, compressionQuality: 0.8)
+            
         let newPoster = CreatePosterDTO(
             name: title,
-            description: description.isEmpty ? nil : description,
-            image: imageData
+            description: description,
+            image: resizedImageData
         )
 
-        print("Sammelposten erstellt: \(newPoster)")
+        let imageName = "example.jpg"
+        let mimeType = "image/jpeg"
+        
+        //posterManager.createPoster(poster: newPoster)
+        posterManager.createPoster(poster: newPoster)
         dismiss()
     }
 }
