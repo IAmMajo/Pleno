@@ -12,7 +12,7 @@ public struct GetPollDTO: Codable {
     public var isOpen: Bool
     public var options: [GetPollVotingOptionDTO]
     
-    public init(id: UUID, question: String, description: String, startedAt: Date, closedAt: Date, anonymous: Bool, multiSelect: Bool, iVoted: Bool, isOpen: Bool, options: [GetVotingOptionDTO]) {
+    public init(id: UUID, question: String, description: String, startedAt: Date, closedAt: Date, anonymous: Bool, multiSelect: Bool, iVoted: Bool, isOpen: Bool, options: [GetPollVotingOptionDTO]) {
         self.id = id
         self.question = question
         self.description = description
