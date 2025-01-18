@@ -477,6 +477,7 @@ class PosterManager: ObservableObject {
 
     
     func createPosterPosition(posterPosition: CreatePosterPositionDTO, posterId: UUID) {
+        print("Angekommen")
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions") else {
             self.errorMessage = "Invalid URL."
             return

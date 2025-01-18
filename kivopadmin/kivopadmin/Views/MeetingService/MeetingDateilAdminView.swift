@@ -63,54 +63,68 @@ struct MeetingDetailAdminView: View {
                     if let location = meeting.location {
                         Section(header: Text("Adresse")) {
                             let address = """
-                            \(location.name)
                             \(location.street) \(location.number)\(location.letter)
                             \(location.postalCode ?? "") \(location.place ?? "")
                             """
-                            Text(address)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    // Organisation
-                    Section(header: Text("Organisation")) {
-                        if let chair = meeting.chair {
-                            HStack {
-                                Image(systemName: "person.circle")
-                                    .resizable()
-                                    .frame(width: 30, height: 30)
-                                    .foregroundColor(.gray)
-                                VStack(alignment: .leading) {
-                                    Text(chair.name)
-                                    Text("Sitzungsleiter")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                }
+                            Text(location.name)
+                            if address != "" {
+                                Button(action: {
+                                    UIPasteboard.general.string = address // Text in die Zwischenablage kopieren
+                                }) {
+                                    HStack{
+                                        Text(address)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                        Spacer()
+                                        Image(systemName: "doc.on.doc").foregroundColor(.blue)
+                                    }
+                                    
+                                }.buttonStyle(PlainButtonStyle())
+                                
                             }
                         }
-                        if selectedUserName != nil {
-                            Button(action: {
-                                showRecorderSelectionSheet.toggle()
-                            }) {
-                                
+                    }
+                    if meeting.status != .scheduled {
+                        // Organisation
+                        Section(header: Text("Organisation")) {
+                            if let chair = meeting.chair {
                                 HStack {
-                                    HStack {
-                                        Image(systemName: "person.circle")
-                                            .resizable()
-                                            .frame(width: 30, height: 30)
+                                    Image(systemName: "person.circle")
+                                        .resizable()
+                                        .frame(width: 30, height: 30)
+                                        .foregroundColor(.gray)
+                                    VStack(alignment: .leading) {
+                                        Text(chair.name)
+                                        Text("Sitzungsleiter")
+                                            .font(.caption)
                                             .foregroundColor(.gray)
-                                        VStack(alignment: .leading) {
-                                            Text(selectedUserName ?? "Kein Protokollant")
-                                            Text("Protokollant")
-                                                .font(.caption)
-                                                .foregroundColor(.gray)
-                                        }
                                     }
-                                    Spacer()
-                                    Text("Ändern").foregroundStyle(.blue)
                                 }
-                            }.buttonStyle(PlainButtonStyle())
+                            }
+                            if selectedUserName != nil {
+                                Button(action: {
+                                    showRecorderSelectionSheet.toggle()
+                                }) {
+                                    
+                                    HStack {
+                                        HStack {
+                                            Image(systemName: "person.circle")
+                                                .resizable()
+                                                .frame(width: 30, height: 30)
+                                                .foregroundColor(.gray)
+                                            VStack(alignment: .leading) {
+                                                Text(selectedUserName ?? "Kein Protokollant")
+                                                Text("Protokollant")
+                                                    .font(.caption)
+                                                    .foregroundColor(.gray)
+                                            }
+                                        }
+                                        Spacer()
+                                        Text("Ändern").foregroundStyle(.blue)
+                                    }
+                                }.buttonStyle(PlainButtonStyle())
 
 
+                            }
                         }
                     }
                     
@@ -142,32 +156,33 @@ struct MeetingDetailAdminView: View {
                             }
 
                         }
-                    }
-
-                    
-                    
-                    // Abstimmugnen
-                    Section(header: Text("Abstimmungen")) {
-                        if votingManager.isLoading {
-                            ProgressView("Lade Abstimmungen...")
-                                .progressViewStyle(CircularProgressViewStyle())
-                        } else if let errorMessage = votingManager.errorMessage {
-                            Text("Error: \(errorMessage)")
-                                .foregroundColor(.red)
-                        } else if votingManager.votings.isEmpty {
-                            Text("Keine Abstimmungen gefunden.")
-                                .foregroundColor(.secondary)
-                        } else {
-                            ForEach(votingManager.votings, id: \.id) { voting in
-                                NavigationLink(destination: AktivView(voting: voting, onBack: {
-                                    // Hier können Sie Aktionen definieren, die ausgeführt werden, wenn der Nutzer zurückgeht.
-                                    print("Zurück zur vorherigen Ansicht.")
-                                })) {
-                                    Text("\(voting.question)")
+                        // Abstimmugnen
+                        Section(header: Text("Abstimmungen")) {
+                            if votingManager.isLoading {
+                                ProgressView("Lade Abstimmungen...")
+                                    .progressViewStyle(CircularProgressViewStyle())
+                            } else if let errorMessage = votingManager.errorMessage {
+                                Text("Error: \(errorMessage)")
+                                    .foregroundColor(.red)
+                            } else if votingManager.votings.isEmpty {
+                                Text("Keine Abstimmungen gefunden.")
+                                    .foregroundColor(.secondary)
+                            } else {
+                                ForEach(votingManager.votings, id: \.id) { voting in
+                                    NavigationLink(destination: AktivView(voting: voting, onBack: {
+                                        // Hier können Sie Aktionen definieren, die ausgeführt werden, wenn der Nutzer zurückgeht.
+                                        print("Zurück zur vorherigen Ansicht.")
+                                    })) {
+                                        Text("\(voting.question)")
+                                    }
                                 }
                             }
                         }
                     }
+
+                    
+                    
+
 
                     
 
@@ -245,6 +260,14 @@ struct MeetingDetailAdminView: View {
                 RecorderSelectionSheet(recordLanguages: recordLanguages, users: attendanceManager.allParticipants(), recordLang: recordManager.records.first?.lang, meetingId: meeting.id, selectedUser: $selectedUser, selectedUserName: $selectedUserName)
             }
             .onAppear(){
+                updateMeeting { result in
+                    switch result {
+                    case .success(let meetingData):
+                        print("Meeting erfolgreich aktualisiert: \(meetingData)")
+                    case .failure(let error):
+                        print("Fehler beim Aktualisieren des Meetings: \(error.localizedDescription)")
+                    }
+                }
                 Task {
                     await loadView()
                     // Array mit allen verügbaren Sprachen, um allen Sprachen den gleichen Protokollanten zuzuordnen
@@ -301,6 +324,19 @@ struct MeetingDetailAdminView: View {
                 case .failure(let error):
                     print("Fehler beim Starten des Meetings: \(error.localizedDescription)")
                 }
+            }
+        }
+    }
+    
+    func updateMeeting(completion: @escaping (Result<GetMeetingDTO, Error>) -> Void) {
+        meetingManager.getSingleMeeting(meetingId: meeting.id) { result in
+            switch result {
+            case .success(let meetingData):
+                // Übergib die empfangenen Daten an den Completion-Handler
+                completion(.success(meetingData))
+            case .failure(let error):
+                // Übergib den Fehler an den Completion-Handler
+                completion(.failure(error))
             }
         }
     }

@@ -54,68 +54,10 @@ struct RecordsMainView: View {
                     
                     List {
                         ForEach(filteredMeetingsWithRecords, id: \.meeting.id) { meetingWithRecords in
-                            Button(action: {
-                                // Toggle des Dropdowns
-                                if expandedMeetingID == meetingWithRecords.meeting.id {
-                                    expandedMeetingID = nil
-                                } else {
-                                    expandedMeetingID = meetingWithRecords.meeting.id
-                                }
-                            }) {
-                                VStack(alignment: .leading, spacing: 5) {
-                                    HStack {
-                                        // Name des Meetings
-                                        Text(meetingWithRecords.meeting.name)
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
-
-                                        Spacer()
-                                        // Sprachen der zugehörigen Records
-                                        HStack(spacing: 8) {
-                                            ForEach(meetingWithRecords.records, id: \.lang) { record in
-                                                Text(record.lang)
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.secondary)
-                                                    .padding(4)
-                                                    .background(Color.blue.opacity(0.2))
-                                                    .cornerRadius(4)
-                                            }
-                                        }
-
-                                        // Pfeilsymbol (Optional: Sichtbar, um Interaktion zu zeigen)
-                                        Image(systemName: expandedMeetingID == meetingWithRecords.meeting.id ? "chevron.up" : "chevron.down")
-                                            .foregroundColor(.blue)
-                                    }
-
-                                    // Optional: Zeige das Startdatum des Meetings
-                                    Text("Start: \(meetingWithRecords.meeting.start.formatted(date: .abbreviated, time: .shortened))")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-
-                                    // Dropdown: Zeige Sprachen, wenn das aktuelle Meeting erweitert ist
-                                    if expandedMeetingID == meetingWithRecords.meeting.id {
-                                        ScrollView {
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                ForEach(meetingWithRecords.records, id: \.lang) { record in
-                                                    NavigationLink(destination: MarkdownEditorView(meetingId: meetingWithRecords.meeting.id, lang: record.lang)) {
-                                                        Text("Protokoll öffnen in")
-                                                        Text("\(record.lang)")
-                                                            .padding(4)
-                                                            .background(Color.blue.opacity(0.2))
-                                                            .cornerRadius(4)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        .padding(.top, 5)
-                                        .frame(maxHeight: 200) // Maximalhöhe für den Dropdown festlegen
-                                    }
-                                }
-                                .padding(.vertical, 8)
-                                .background(Color(.systemBackground))
-                                .cornerRadius(8)
-                            }
-                            .buttonStyle(PlainButtonStyle()) // Entfernt Klick-Hervorhebungseffekt
+                            MeetingRow(
+                                meetingWithRecords: meetingWithRecords,
+                                expandedMeetingID: $expandedMeetingID
+                            )
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -132,6 +74,120 @@ struct RecordsMainView: View {
 
 
 }
+
+
+
+struct MeetingRow: View {
+    let meetingWithRecords: MeetingWithRecords
+    @Binding var expandedMeetingID: UUID?
+
+    var body: some View {
+        Button(action: toggleExpansion) {
+            VStack(alignment: .leading, spacing: 5) {
+                HeaderView
+                if expandedMeetingID == meetingWithRecords.meeting.id {
+                    DropdownView
+                }
+            }
+            .padding(.vertical, 8)
+            .background(Color(.systemBackground))
+            .cornerRadius(8)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    private var HeaderView: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Text(meetingWithRecords.meeting.name)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Text({
+                    switch meetingWithRecords.records.first?.status {
+                    case .underway:
+                        return "In Bearbeitung"
+                    case .submitted:
+                        return "Eingereicht"
+                    case .approved:
+                        return "Veröffentlicht"
+                    case .none:
+                        return "Unbekannter Status"
+                    }
+                }()).font(.subheadline)
+                    .padding(4)
+                    .background({
+                        switch meetingWithRecords.records.first?.status {
+                        case .underway:
+                            return Color.orange.opacity(0.2)
+                        case .submitted:
+                            return Color.blue.opacity(0.2)
+                        case .approved:
+                            return Color.green.opacity(0.2)
+                        case .none:
+                            return Color.gray.opacity(0.2)
+                        }
+                    }())
+                    .cornerRadius(4)
+
+                
+                Spacer()
+                
+                HStack(spacing: 8) {
+                    ForEach(meetingWithRecords.records, id: \.lang) { record in
+                        Text(record.lang)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .padding(4)
+                            .background(Color.blue.opacity(0.2))
+                            .cornerRadius(4)
+                    }
+                }
+                
+                Image(systemName: expandedMeetingID == meetingWithRecords.meeting.id ? "chevron.up" : "chevron.down")
+                    .foregroundColor(.blue)
+            }
+            .padding(.bottom, 4)
+            
+            Text("Datum: \(DateTimeFormatter.formatDate(meetingWithRecords.meeting.start))")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+
+    }
+
+    private var DropdownView: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(meetingWithRecords.records, id: \.lang) { record in
+                    NavigationLink(destination: MarkdownEditorView(meetingId: meetingWithRecords.meeting.id, lang: record.lang)) {
+                        HStack {
+                            Text("Protokoll öffnen in")
+                            Text(record.lang)
+                                .padding(4)
+                                .background(Color.blue.opacity(0.2))
+                                .cornerRadius(4)
+
+
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.top, 5)
+        .frame(maxHeight: 200)
+    }
+
+    private func toggleExpansion() {
+        if expandedMeetingID == meetingWithRecords.meeting.id {
+            expandedMeetingID = nil
+        } else {
+            expandedMeetingID = meetingWithRecords.meeting.id
+        }
+    }
+}
+
+
 
 #Preview {
     RecordsMainView()
