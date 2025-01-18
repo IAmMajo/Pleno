@@ -82,6 +82,40 @@ class AttendanceManager: ObservableObject {
             }
         }.resume()
     }
+    
+    func fetchAttendances2(meetingId: UUID) async throws -> [GetAttendanceDTO] {
+        guard let url = URL(string: "\(baseURL)/meetings/\(meetingId.uuidString)/attendances") else {
+            throw URLError(.badURL, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            throw URLError(.userAuthenticationRequired, userInfo: [NSLocalizedDescriptionKey: "Unauthorized: No token found"])
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        // Überprüfen, ob die Antwort gültig ist
+        if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
+            throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Server responded with status code: \(httpResponse.statusCode)"])
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        do {
+            // Dekodieren der JSON-Daten in ein Array von `GetAttendanceDTO`
+            let decodedAttendances = try decoder.decode([GetAttendanceDTO].self, from: data)
+            return decodedAttendances
+        } catch {
+            throw URLError(.cannotDecodeContentData, userInfo: [NSLocalizedDescriptionKey: "JSON Decode Error: \(error.localizedDescription)"])
+        }
+    }
 }
 extension AttendanceManager {
     /// Gibt die Anzahl der Teilnehmer und die Gesamtzahl der Personen in einem Meeting zurück
