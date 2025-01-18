@@ -13,12 +13,14 @@ struct MarkdownEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isEditing: Bool = false
     @State private var markdownText: String = ""
-
+    
+    @State private var amIRecorder: Bool = false
     
     var meetingId: UUID
     var lang: String
     
-    @StateObject private var recordManager = RecordManager()
+    @ObservedObject private var recordManager = RecordManager()
+    @StateObject private var identityManager = IdentityManager()
 
     var body: some View {
         NavigationStack {
@@ -67,10 +69,11 @@ struct MarkdownEditorView: View {
                             .foregroundColor(.white)
                             .padding()
                             .frame(maxWidth: .infinity)
-                            .background(Color.blue)
+                            .background(amIRecorder ? Color.blue : Color.gray)
                             .cornerRadius(12)
                             .padding(.horizontal)
                     }
+                    .disabled(!amIRecorder)
                     .padding(.bottom, 16)
                 }
                 .background(Color(.systemGray6)) // Hellgrauer Hintergrund
@@ -85,17 +88,25 @@ struct MarkdownEditorView: View {
                         isEditing.toggle() // Umschalten zwischen Bearbeiten und Speichern
                     }) {
                         Text(isEditing ? "Speichern" : "Bearbeiten")
-                    }
+                    }.disabled(!amIRecorder)
                 }
             }
         }
         .onAppear {
+            identityManager.getMyIdentity()
             Task {
                 await recordManager.getRecordMeetingLang(meetingId: meetingId, lang: lang)
+                
                 try? await Task.sleep(nanoseconds: 250_000_000)
                 if let record = recordManager.record {
                     markdownText = record.content
                     print("Das ist der Text: \(markdownText)")
+                    print("identityManager: \(identityManager.identity)")
+                    print("recordIdentiy: \(record.identity.id)")
+                    if identityManager.identity == record.identity.id {
+                        amIRecorder = true
+                        print("Ich bin protokollant")
+                    }
                 }
             }
         }
