@@ -54,10 +54,7 @@ RUN [ -d /build/backend/poster-service/Resources ] && { \
         mv /build/backend/poster-service/Resources ./Resources && \
         chmod -R a-w ./Resources; \
     } || true
-RUN [ -d /build/backend/poster-service/Storage ] && { \
-        mv /build/backend/poster-service/Storage ./Storage && \
-        chmod -R a-w  ./Storage; \
-    } || true
+
 
 
 

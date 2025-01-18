@@ -38,8 +38,8 @@ public final class PosterPosition: Model,@unchecked Sendable {
     @OptionalParent(key: "removed_by")
     public var removed_by: Identity?
     
-    @Field(key:"image_url")
-    public var image_url: String?
+    @Field(key:"image")
+    public var image: Data?
     
     @Children(for: \.$poster_position)
     public var responsibilities: [PosterPositionResponsibilities]
@@ -58,7 +58,7 @@ public init(
     self.longitude = round(longitude * 1_000_000) / 1_000_000
     self.$poster.id = posterId
     self.expires_at = expiresAt
-    self.image_url = nil
+    self.image = nil
     self.posted_at = nil
     self.$posted_by.id = nil
     self.removed_at = nil
