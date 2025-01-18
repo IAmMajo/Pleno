@@ -30,7 +30,7 @@ let package = Package(
             targets: ["AIServiceDTOs"]),
         .library(
             name: "PollServiceDTOs",
-            targets: ["AIServiceDTOs"]),
+            targets: ["PollServiceDTOs"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
