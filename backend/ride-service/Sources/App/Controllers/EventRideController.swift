@@ -19,7 +19,6 @@ struct EventRideController: RouteCollection {
         eventRideRoutes.patch("requests", ":request_id", use: patchEventRideRequest)
         eventRideRoutes.delete("requests", ":request_id", use: deleteEventRideRequest)
         
-        eventRideRoutes.get("interested", use: getInterestedParties)
         eventRideRoutes.post("interested", use: newInterestedParty)
         eventRideRoutes.patch("interested", ":party_id", use: patchInterestedParty)
         eventRideRoutes.delete("interested", ":party_id", use: deleteInterestedParty)
@@ -32,27 +31,6 @@ struct EventRideController: RouteCollection {
      */
     
     @Sendable
-    func getInterestedParties(req: Request) async throws -> [GetInterestedPartyDTO] {
-        let parties = try await EventRideInteresedParty.query(on: req.db)
-            .join(EventParticipant.self, on: \EventRideInteresedParty.$participant.$id == \EventParticipant.$id)
-            .join(PlenoEvent.self, on: \EventParticipant.$event.$id == \PlenoEvent.$id)
-            .filter(EventParticipant.self, \.$user.$id == req.jwtPayload.userID)
-            .all()
-            .map{ party in
-                let participant = try party.joined(EventParticipant.self)
-                let plenoEvent = try participant.joined(PlenoEvent.self)
-                let partyID = try party.requireID()
-                return GetInterestedPartyDTO(
-                    id: partyID,
-                    eventName: plenoEvent.name,
-                    latitude: party.latitude,
-                    longitude: party.longitude)
-            }
-        
-        return parties
-    }
-    
-    @Sendable
     func newInterestedParty(req: Request) async throws -> Response {
         // parse DTO
         guard let createInterestedPartyDTO = try? req.content.decode(CreateInterestedPartyDTO.self) else {
@@ -61,9 +39,26 @@ struct EventRideController: RouteCollection {
         
         // check if user is participant
         let participant = try await checkIfUserParticipatesToEvent(eventID: createInterestedPartyDTO.eventID, userID: req.jwtPayload.userID, db: req.db)
+        let participantID = try participant.requireID()
+        
+        // check if user is driver
+        let count = try await EventRide.query(on: req.db)
+            .filter(\.$event.$id == createInterestedPartyDTO.eventID)
+            .filter(\.$participant.$id == participantID)
+            .count()
+        if count > 0 {
+            throw Abort(.badRequest, reason: "You are driver!")
+        }
+        
+        // check if user has already a party
+        let countParty = try await EventRideInteresedParty.query(on: req.db)
+            .filter(\.$participant.$id == participantID)
+            .count()
+        if count > 0 {
+            throw Abort(.badRequest, reason: "You are already interesed!")
+        }
         
         // create interested party
-        let participantID = try participant.requireID()
         let party = EventRideInteresedParty(
             participantID: participantID,
             latitude: createInterestedPartyDTO.latitude,
@@ -289,11 +284,18 @@ struct EventRideController: RouteCollection {
         
         // check if current user is participant
         let participant = try await checkIfUserParticipatesToEvent(eventID: createEventRideDTO.eventID, userID: req.jwtPayload.userID, db: req.db)
+        let participantID = try participant.requireID()
         
-        // TODO check if current user has already a ride
+        // check if user is already driver
+        let count = try await EventRide.query(on: req.db)
+            .filter(\.$event.$id == createEventRideDTO.eventID)
+            .filter(\.$participant.$id == participantID)
+            .count()
+        if count > 0 {
+            throw Abort(.badRequest, reason: "You are driver!")
+        }
         
         // create new event ride
-        let participantID = try participant.requireID()
         let eventRide = EventRide(
             eventID: createEventRideDTO.eventID,
             participantID: participantID,
@@ -305,11 +307,16 @@ struct EventRideController: RouteCollection {
             vehicleDescription: createEventRideDTO.vehicleDescription
         )
         
-        // save ride
-        try await eventRide.save(on: req.db)
-        
-        // TODO delete interested parties
-        
+        // open transaction to save and delete
+        try await req.db.transaction { db in
+            // save ride
+            try await eventRide.save(on: req.db)
+            
+            // delete interested party
+            try await EventRideInteresedParty.query(on: db)
+                .filter(\.$participant.$id == participantID)
+                .delete()
+        }
         
         // create response
         let rideID = try eventRide.requireID()
@@ -362,6 +369,8 @@ struct EventRideController: RouteCollection {
         guard let patchEventRideDTO = try? req.content.decode(PatchEventRideDTO.self) else {
             throw Abort(.badRequest, reason: "Invalid request body! Expected PatchEventRideDTO.")
         }
+        
+        // TODO check if accepted rider is > new emptySeats
         
         // patch ride
         eventRide.patchWithDTO(dto: patchEventRideDTO)
