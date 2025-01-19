@@ -18,8 +18,26 @@ struct RecordsMainView: View {
         }
     }
 
+    var onlySubmitted: [MeetingWithRecords] {
+        recordManager.meetingsWithRecords.filter { meeting in
+            // Behalte Meetings, die mindestens einen approved Record haben
+            meeting.records.contains { record in
+                record.status == .approved
+            }
+        }
+        .map { meeting in
+            // Erzeuge neue MeetingWithRecords, die nur approved Records enthalten
+            MeetingWithRecords(
+                meeting: meeting.meeting,
+                records: meeting.records.filter { record in
+                    record.status == .approved
+                }
+            )
+        }
+    }
+    
     var sortedMeetings: [MeetingWithRecords] {
-        recordManager.meetingsWithRecords.sorted { meeting1, meeting2 in
+        onlySubmitted.sorted { meeting1, meeting2 in
             meeting2.meeting.start < meeting1.meeting.start // Absteigende Reihenfolge
         }
     }

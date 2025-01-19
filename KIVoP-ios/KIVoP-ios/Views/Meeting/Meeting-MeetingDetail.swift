@@ -45,12 +45,24 @@ struct MeetingDetailView: View {
                     if let location = meeting.location {
                         Section(header: Text("Adresse")) {
                             let address = """
-                            \(location.name)
                             \(location.street) \(location.number)\(location.letter)
                             \(location.postalCode ?? "") \(location.place ?? "")
                             """
-                            Text(address)
-                                .fixedSize(horizontal: false, vertical: true) // Ermöglicht Zeilenumbruch
+                            Text(location.name)
+                            if address != "" {
+                                Button(action: {
+                                    UIPasteboard.general.string = address // Text in die Zwischenablage kopieren
+                                }) {
+                                    HStack{
+                                        Text(address)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                        Spacer()
+                                        Image(systemName: "doc.on.doc").foregroundColor(.blue)
+                                    }
+                                    
+                                }.buttonStyle(PlainButtonStyle())
+                                
+                            }
                         }
                     }
                     // Organiation
