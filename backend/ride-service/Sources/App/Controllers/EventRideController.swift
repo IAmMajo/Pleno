@@ -1,7 +1,7 @@
 import Fluent
 import Vapor
 import Models
-import VaporToOpenAPI
+//import VaporToOpenAPI
 import RideServiceDTOs
 
 
@@ -178,11 +178,10 @@ struct EventRideController: RouteCollection {
                         usersState = UsersEventRideState.driver
                     } else {
                         let request = try await EventRideRequest.query(on: req.db)
-                            .with(\.$interestedParty) { party in
-                                party.with(\.$participant)
-                            }
                             .filter(\.$ride.$id == rideID)
-                            .filter(\.interestedParty.$participant.$id == req.jwtPayload.userID)
+                            .join(EventRideInteresedParty.self, on: \EventRideRequest.$interestedParty.$id == \EventRideInteresedParty.$id)
+                            .join(EventParticipant.self, on: \EventRideInteresedParty.$participant.$id == \EventParticipant.$id)
+                            .filter(EventParticipant.self, \.$user.$id == req.jwtPayload.userID)
                             .first()
                         
                         if let request = request {
@@ -216,12 +215,16 @@ struct EventRideController: RouteCollection {
     @Sendable
     func getEventRide(req: Request) async throws -> GetEventRideDetailDTO {
         // get ride by id
-        guard let eventRide = try await EventRide.find(req.parameters.get("id"), on: req.db) else {
+        guard let rideID = UUID(uuidString: req.parameters.get("id") ?? "") else {
+            throw Abort(.badRequest)
+        }
+        guard let eventRide = try await EventRide.query(on: req.db)
+            .filter(\.$id == rideID)
+            .with(\.$participant)
+            .with(\.$event)
+            .first() else {
             throw Abort(.notFound)
         }
-        
-        // extract ride id
-        let rideID = try eventRide.requireID()
         
         // get riders
         var riders = try await EventRideRequest.query(on: req.db)
@@ -262,7 +265,7 @@ struct EventRideController: RouteCollection {
         let eventRideDetailDTO = GetEventRideDetailDTO(
             id: rideID,
             eventID: eventRide.$event.id,
-            eventName: eventRide.$event.name,
+            eventName: eventRide.event.name,
             driverName: drivername ?? "",
             isSelfDriver: eventRide.participant.$user.id == req.jwtPayload.userID,
             description: eventRide.description,
@@ -339,7 +342,14 @@ struct EventRideController: RouteCollection {
     @Sendable
     func patchEventRide(req: Request) async throws -> GetEventRideDetailDTO {
         // get ride by id
-        guard let eventRide = try await EventRide.find(req.parameters.get("id"), on: req.db) else {
+        guard let rideID = UUID(uuidString: req.parameters.get("id") ?? "") else {
+            throw Abort(.badRequest)
+        }
+        guard let eventRide = try await EventRide.query(on: req.db)
+            .filter(\.$id == rideID)
+            .with(\.$participant)
+            .with(\.$event)
+            .first() else {
             throw Abort(.notFound)
         }
         
@@ -360,7 +370,6 @@ struct EventRideController: RouteCollection {
         try await eventRide.save(on: req.db)
         
         // create response
-        let rideID = try eventRide.requireID()
         let riders = try await EventRideRequest.query(on: req.db)
             .filter(\.$ride.$id == rideID)
             .with(\.$interestedParty) { party in
@@ -392,7 +401,7 @@ struct EventRideController: RouteCollection {
         let eventRideDetailDTO = GetEventRideDetailDTO(
             id: rideID,
             eventID: eventRide.$event.id,
-            eventName: eventRide.$event.name,
+            eventName: eventRide.event.name,
             driverName: drivername ?? "",
             isSelfDriver: eventRide.participant.$user.id == req.jwtPayload.userID,
             description: eventRide.description,
@@ -410,7 +419,13 @@ struct EventRideController: RouteCollection {
     @Sendable
     func deleteEventRide(req: Request) async throws -> HTTPStatus {
         // get ride by id
-        guard let eventRide = try await EventRide.find(req.parameters.get("id"), on: req.db) else {
+        guard let rideID = UUID(uuidString: req.parameters.get("id") ?? "") else {
+            throw Abort(.badRequest)
+        }
+        guard let eventRide = try await EventRide.query(on: req.db)
+            .filter(\.$id == rideID)
+            .with(\.$participant)
+            .first() else {
             throw Abort(.notFound)
         }
         
@@ -434,19 +449,24 @@ struct EventRideController: RouteCollection {
     @Sendable
     func newRequestToEventRide(req: Request) async throws -> Response {
         // get ride by id
-        guard let eventRide = try await EventRide.find(req.parameters.get("id"), on: req.db) else {
+        guard let rideID = UUID(uuidString: req.parameters.get("id") ?? "") else {
+            throw Abort(.badRequest)
+        }
+        guard let eventRide = try await EventRide.query(on: req.db)
+            .filter(\.$id == rideID)
+            .with(\.$participant)
+            .first() else {
             throw Abort(.notFound)
         }
-        
-        let rideID = try eventRide.requireID()
         
         // check if current user is in interested party
         guard let party = try await EventRideInteresedParty.query(on: req.db)
             .with(\.$participant)
-            .filter(\.participant.user.$id == req.jwtPayload.userID)
-            .filter(\.participant.event.$id == eventRide.$event.id)
+            .join(EventParticipant.self, on: \EventRideInteresedParty.$participant.$id == \EventParticipant.$id)
+            .filter(EventParticipant.self, \.$user.$id == req.jwtPayload.userID)
+            .filter(EventParticipant.self, \.$event.$id == eventRide.$event.id)
             .first() else {
-            throw Abort(.notFound)
+            throw Abort(.notFound, reason: "No interested party found!")
         }
         
         // check if current user already requested to this ride
@@ -509,13 +529,33 @@ struct EventRideController: RouteCollection {
     @Sendable
     func patchEventRideRequest(req: Request) async throws -> GetRiderDTO {
         // get request by id
-        guard let request = try await EventRideRequest.find(req.parameters.get("request_id"), on: req.db) else {
+        guard let requestID = UUID(uuidString: req.parameters.get("request_id") ?? "" ) else {
+            throw Abort(.badRequest)
+        }
+        let request = try await EventRideRequest.query(on: req.db)
+            .filter(\.$id == requestID)
+            .with(\.$interestedParty) { party in
+                party.with(\.$participant) { participant in
+                    participant.with(\.$user) { user in
+                        user.with(\.$identity)
+                    }
+                }
+            }
+            .first()
+        
+        guard let request = request else {
             throw Abort(.notFound)
         }
         
         // get ride by id
         let rideID = request.$ride.id
-        guard let eventRide = try await EventRide.find(rideID, on: req.db) else {
+        let eventRide = try await EventRide.query(on: req.db)
+            .filter(\.$id == rideID)
+            .with(\.$participant) { participant in
+                participant.with(\.$user)
+            }
+            .first()
+        guard let eventRide = eventRide else {
             throw Abort(.notFound)
         }
         
@@ -586,9 +626,10 @@ struct EventRideController: RouteCollection {
                 user.identity.name
             }
         guard let party = try await EventRideInteresedParty.query(on: req.db)
+            .join(EventParticipant.self, on: \EventRideInteresedParty.$participant.$id == \EventParticipant.$id)
             .with(\.$participant)
-            .filter(\.participant.user.$id == request.interestedParty.participant.$user.id)
-            .filter(\.participant.event.$id == eventRide.$event.id)
+            .filter(EventParticipant.self, \.$user.$id == request.interestedParty.participant.$user.id)
+            .filter(EventParticipant.self, \.$event.$id == eventRide.$event.id)
             .first() else {
             throw Abort(.notFound)
         }
@@ -607,7 +648,21 @@ struct EventRideController: RouteCollection {
     @Sendable
     func deleteEventRideRequest(req: Request) async throws -> HTTPStatus {
         // get request by id
-        guard let request = try await EventRideRequest.find(req.parameters.get("request_id"), on: req.db) else {
+        guard let requestID = UUID(uuidString: req.parameters.get("request_id") ?? "" ) else {
+            throw Abort(.badRequest)
+        }
+        let request = try await EventRideRequest.query(on: req.db)
+            .filter(\.$id == requestID)
+            .with(\.$interestedParty) { party in
+                party.with(\.$participant) { participant in
+                    participant.with(\.$user) { user in
+                        user.with(\.$identity)
+                    }
+                }
+            }
+            .first()
+        
+        guard let request = request else {
             throw Abort(.notFound)
         }
         
