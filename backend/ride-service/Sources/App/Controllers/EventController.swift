@@ -326,6 +326,7 @@ struct EventController: RouteCollection {
         guard let participant = try await EventParticipant.find(req.parameters.get("participant_id"), on: req.db) else {
             throw Abort(.notFound)
         }
+        let participantID = try participant.requireID()
         
         // check if user is participant
         if participant.$user.id != req.jwtPayload.userID {
@@ -337,15 +338,37 @@ struct EventController: RouteCollection {
             throw Abort(.badRequest, reason: "Invalid request body! Expected PatchEventParticipationDTO.")
         }
         
+        // if new state is absent
+        var isNewAbsent = false
+        if patchEventParticipationDTO.participates == false && participant.participates == true {
+            isNewAbsent = true
+        }
+        
         // patch
         participant.patchWithDTO(dto: patchEventParticipationDTO)
         
-        // save changes
-        try await participant.save(on: req.db)
+        // save and delete
+        if isNewAbsent {
+            try await req.db.transaction { db in
+                // save changes
+                try await participant.save(on: db)
+                
+                // delete rides and interesed parties for this participant
+                try await EventRide.query(on: db)
+                    .filter(\.$participant.$id == participantID)
+                    .delete()
+                
+                try await EventRideInteresedParty.query(on: db)
+                    .filter(\.$participant.$id == participantID)
+                    .delete()
+            }
+        } else {
+            // save only changes
+            try await participant.save(on: req.db)
+        }
         
         // create response
         let username = try await usernameByUserID(userID: participant.$user.id, db: req.db)
-        let participantID = try participant.requireID()
         let state = participant.participates ? UsersParticipationState.present : UsersParticipationState.absent
         let getEventParticipationDTO = GetEventParticipationDTO(
             id: participantID,
