@@ -9,34 +9,32 @@ struct PollController: RouteCollection {
         let openAPITag = TagObject(name: "Umfragen")
         let adminMiddleware = AdminMiddleware()
         
-        routes.group("votings") { pollRoutes in
-            pollRoutes.get(use: getAllPolls)
-                .openAPI(tags: openAPITag, summary: "Alle Umfragen abfragen", response: .type([GetPollDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+        routes.get(use: getAllPolls)
+            .openAPI(tags: openAPITag, summary: "Alle Umfragen abfragen", response: .type([GetPollDTO].self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+        
+        routes.post(use: createPoll)
+            .openAPI(tags: openAPITag, summary: "Umfrage erstellen", body: .type(CreatePollDTO.self), contentType: .application(.json), response: .type(GetPollDTO.self), responseContentType: .application(.json), statusCode: .created, auth: AuthMiddleware.schemeObject)
+        
+        routes.group(":id") { singlePollRoutes in
+            singlePollRoutes.get(use: getSinglePoll)
+                .openAPI(tags: openAPITag, summary: "Eine Umfrage abfragen", path: .type(Poll.IDValue.self), response: .type(GetPollDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
             
-            pollRoutes.post(use: createPoll)
-                .openAPI(tags: openAPITag, summary: "Umfrage erstellen", body: .type(CreatePollDTO.self), contentType: .application(.json), response: .type(GetPollDTO.self), responseContentType: .application(.json), statusCode: .created, auth: AuthMiddleware.schemeObject)
+            singlePollRoutes.get("results", use: getPollResults)
+                .openAPI(tags: openAPITag, summary: "Aktuelle Ergebnisse einer Umfrage abfragen", path: .type(Poll.IDValue.self), response: .type(GetPollResultsDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
             
-            pollRoutes.group(":id") { singlePollRoutes in
-                singlePollRoutes.get(use: getSinglePoll)
-                    .openAPI(tags: openAPITag, summary: "Eine Umfrage abfragen", path: .type(Poll.IDValue.self), response: .type(GetPollDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+            singlePollRoutes.patch(use: updatePoll)
+                .openAPI(tags: openAPITag, summary: "Eine Umfrage updaten", description: "Umfragen können nicht geupdatet werden, da sie nach ihrer Erstellung live sind.", path: .type(Poll.IDValue.self), statusCode: .notImplemented, auth: AuthMiddleware.schemeObject)
+            
+            singlePollRoutes.group(adminMiddleware) { adminRoutes in
                 
-                singlePollRoutes.get("results", use: getPollResults)
-                    .openAPI(tags: openAPITag, summary: "Aktuelle Ergebnisse einer Umfrage abfragen", path: .type(Poll.IDValue.self), response: .type(GetPollResultsDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+                adminRoutes.delete(use: deletePoll)
+                    .openAPI(tags: openAPITag, summary: "Eine Umfrage löschen", description: "Umfragen könne nur durch einen Admin gelöscht werden. Löscht ebenfalls alle zugehörigen Optionen und Stimmen.", path: .type(Poll.IDValue.self), statusCode: .noContent, auth: AdminMiddleware.schemeObject)
                 
-                singlePollRoutes.patch(use: updatePoll)
-                    .openAPI(tags: openAPITag, summary: "Eine Umfrage updaten", description: "Umfragen können nicht geupdatet werden, da sie nach ihrer Erstellung live sind.", path: .type(Poll.IDValue.self), statusCode: .notImplemented, auth: AuthMiddleware.schemeObject)
-                
-                singlePollRoutes.group(adminMiddleware) { adminRoutes in
-                    
-                    adminRoutes.delete(use: deletePoll)
-                        .openAPI(tags: openAPITag, summary: "Eine Umfrage löschen", description: "Umfragen könne nur durch einen Admin gelöscht werden. Löscht ebenfalls alle zugehörigen Optionen und Stimmen.", path: .type(Poll.IDValue.self), statusCode: .noContent, auth: AdminMiddleware.schemeObject)
-                    
-                    //                            adminRoutes.put("close", use: closePoll)
-                    //                                .openAPI(tags: openAPITag, summary: "Eine Umfrage schließen", path: .type(Poll.IDValue.self), response: .type(GetPollDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
-                }
-                singlePollRoutes.put("vote", ":index", use: voteOnPoll)
-                    .openAPI(tags: openAPITag, summary: "Für eine Option bei einer Umfrage abstimmen. Wenn die Umfrage mehrere Stimmen erlaubt, können diese in der Form `.../vote/1,3,4` abgegeben werden.", path: .all(of: .type(Poll.IDValue.self), .type(String.self)), response: .type(GetPollResultsDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
+                //                            adminRoutes.put("close", use: closePoll)
+                //                                .openAPI(tags: openAPITag, summary: "Eine Umfrage schließen", path: .type(Poll.IDValue.self), response: .type(GetPollDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
             }
+            singlePollRoutes.put("vote", ":index", use: voteOnPoll)
+                .openAPI(tags: openAPITag, summary: "Für eine Option bei einer Umfrage abstimmen.", description: "Wenn die Umfrage mehrere Stimmen erlaubt, können diese in der Form `.../vote/1,3,4` abgegeben werden.", path: .all(of: .type(Poll.IDValue.self), .type(String.self)), response: .type(GetPollResultsDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
         }
     }
     
@@ -53,7 +51,7 @@ struct PollController: RouteCollection {
             .toGetPollDTOs(db: req.db, userId: userId)
     }
     
-    /// **POST** `/votings`
+    /// **POST** `/polls`
     @Sendable func createPoll(req: Request) async throws -> Response { // -> GetPollDTO
         guard let userId = req.jwtPayload?.userID else {
             throw Abort(.unauthorized)
@@ -147,7 +145,7 @@ struct PollController: RouteCollection {
     //    return try voting.toGetPollDTO()
     //}
     
-    /// **PUT** `/meetings/votings/{id}/vote/{index}`
+    /// **PUT** `/polls/{id}/vote/{index}`
     @Sendable func voteOnPoll(req: Request) async throws -> GetPollResultsDTO {
         guard let userId = req.jwtPayload?.userID else {
             throw Abort(.unauthorized)
