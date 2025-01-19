@@ -165,12 +165,15 @@ struct EventRideController: RouteCollection {
                     .filter(\.$user.$id == req.jwtPayload.userID)
                     .first()
                 
+                var openRequests: Int? = nil
                 var usersState = UsersEventRideState.nothing
+                
                 if let participant = participant {
                     let participantID = try participant.requireID()
                     
                     if eventRide.$participant.id == participantID {
                         usersState = UsersEventRideState.driver
+                        openRequests = try await getCountOpenRequests(rideID: rideID, db: req.db)
                     } else {
                         let request = try await EventRideRequest.query(on: req.db)
                             .filter(\.$ride.$id == rideID)
@@ -198,7 +201,8 @@ struct EventRideController: RouteCollection {
                         starts: eventRide.starts,
                         emptySeats: eventRide.emptySeats,
                         allocatedSeats: UInt8(allocatedSeats),
-                        myState: usersState
+                        myState: usersState,
+                        openRequests: openRequests
                     )
                 )
             }
@@ -717,5 +721,12 @@ struct EventRideController: RouteCollection {
         }
         
         return event.name
+    }
+    
+    func getCountOpenRequests(rideID: UUID, db: Database) async throws -> Int {
+        return try await EventRideRequest.query(on: db)
+            .filter(\.$ride.$id == rideID)
+            .filter(\.$accepted == false)
+            .count()
     }
 }

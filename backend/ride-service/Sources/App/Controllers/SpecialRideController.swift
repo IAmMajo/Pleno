@@ -120,9 +120,12 @@ struct SpecialRideController: RouteCollection {
                     .filter(\.$accepted == true)
                     .count()
                 
+                var openRequests: Int? = nil
                 var usersState = UsersSpecialRideState.nothing
+                
                 if specialRide.$user.id == req.jwtPayload.userID {
                     usersState = UsersSpecialRideState.driver
+                    openRequests = try await getCountOpenRequests(rideID: ride_id, db: req.db)
                 } else {
                     let request = try await SpecialRideRequest.query(on: req.db)
                         .filter(\.$ride.$id == ride_id)
@@ -146,7 +149,9 @@ struct SpecialRideController: RouteCollection {
                     ends: specialRide.ends,
                     emptySeats: specialRide.emptySeats,
                     allocatedSeats: UInt8(allocatedSeats),
-                    myState: usersState)
+                    myState: usersState,
+                    openRequests: openRequests
+                    )
                 )
             }
         }
@@ -550,6 +555,19 @@ struct SpecialRideController: RouteCollection {
         try await specialRideRequest.delete(on: req.db)
         
         return .noContent
+    }
+    
+    /*
+     *
+     *   Helper
+     *
+     */
+    
+    func getCountOpenRequests(rideID: UUID, db: Database) async throws -> Int {
+        return try await SpecialRideRequest.query(on: db)
+            .filter(\.$ride.$id == rideID)
+            .filter(\.$accepted == false)
+            .count()
     }
     
 }
