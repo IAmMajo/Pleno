@@ -89,19 +89,29 @@ struct PieChartView: View {
          .scaledToFit()
 //         .chartLegend(alignment: .center, spacing: 16)
          
-         HStack(alignment: .center, spacing: 13) { // Legende
-            ForEach (votingResults.results) { result in
-               HStack(spacing: 6) {
-                  Circle()
-                     .fill(colorMapping[result.index] ?? .black)
-                     .frame(width: 10, height: 10)
-                  Text(optionTextMap[result.index] ?? "")
-                     .font(.footnote)
-                     .foregroundStyle(Color(UIColor.secondaryLabel))
-               }
-            }
-         }
-         .padding(.top, 8)
+//         HStack(alignment: .center, spacing: 13) { // Legende
+//            ForEach (votingResults.results) { result in
+//               HStack(spacing: 6) {
+//                  Circle()
+//                     .fill(colorMapping[result.index] ?? .black)
+//                     .frame(width: 10, height: 10)
+//                  Text(optionTextMap[result.index] ?? "")
+//                     .font(.footnote)
+//                     .foregroundStyle(Color(UIColor.secondaryLabel))
+//               }
+//            }
+//         }
+//         .padding(.top, 8)
+         
+         let colorArray = colorMapping
+             .sorted(by: { $0.key < $1.key }) // Sort by key
+             .map { $0.value } // Extract values
+         let textArray = optionTextMap
+            .sorted(by: { $0.key < $1.key })
+            .map { $0.value }
+         
+         WrappedLayoutView(items: textArray, colors: colorArray)
+            .padding(.top, 8)
       }
    }
 }

@@ -145,6 +145,14 @@ struct MainPage: View {
                                     .foregroundColor(Color.primary)
                             }
                         }
+                       NavigationLink(destination: PollsView()) {
+                           HStack {
+                              Image(systemName: "bubble.left.and.bubble.right.fill")
+                                   .foregroundColor(.accentColor)
+                               Text("Umfragen")
+                                   .foregroundColor(Color.primary)
+                           }
+                       }
                     }
                 }
                 .listStyle(InsetGroupedListStyle())

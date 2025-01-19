@@ -85,6 +85,16 @@
         }
       }
     },
+    "%@ %@, %@ Uhr" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@, %3$@ Uhr"
+          }
+        }
+      }
+    },
     "%@° N, %@° E" : {
       "localizations" : {
         "en" : {
@@ -116,6 +126,9 @@
       }
     },
     "%lld" : {
+
+    },
+    "%lld Stimmen" : {
 
     },
     "%lld/%lld" : {
@@ -247,6 +260,9 @@
     "Abgehangen" : {
 
     },
+    "Abgeschlossen" : {
+
+    },
     "Abhängedatum:" : {
 
     },
@@ -280,6 +296,9 @@
           }
         }
       }
+    },
+    "Abschlusszeit" : {
+
     },
     "Abstimmen" : {
       "localizations" : {
@@ -368,6 +387,9 @@
     "Achte beim Aufnehmen des Bildes darauf, dass das Plakat sowie der Hintergrund und die Umgebung gut zu erkennen sind." : {
 
     },
+    "Add Item" : {
+
+    },
     "Adresse" : {
 
     },
@@ -401,6 +423,9 @@
           }
         }
       }
+    },
+    "Aktiv" : {
+
     },
     "Aktuell" : {
 
@@ -514,6 +539,9 @@
     "Alles im Blick?" : {
 
     },
+    "Allgemeine Informationen" : {
+
+    },
     "Anfrage zurücknehmen" : {
 
     },
@@ -599,6 +627,9 @@
 
     },
     "Auswahl" : {
+
+    },
+    "Auswahlmöglichkeiten" : {
 
     },
     "Auto und Sitzplätze" : {
@@ -715,6 +746,9 @@
     "Datenschutzerklärung" : {
 
     },
+    "Datum und Uhrzeit" : {
+
+    },
     "Dein Name: " : {
       "localizations" : {
         "de" : {
@@ -775,6 +809,7 @@
 
     },
     "Du kannst deine Wahl danach nciht mehr ändern!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -840,6 +875,9 @@
     "Einreichen" : {
 
     },
+    "Ende:" : {
+
+    },
     "Entfernen" : {
 
     },
@@ -877,6 +915,9 @@
           }
         }
       }
+    },
+    "Erstellen" : {
+
     },
     "Es haben %lld von %lld Personen abgestimmt." : {
       "localizations" : {
@@ -933,6 +974,9 @@
 
     },
     "Fehler" : {
+
+    },
+    "Frage" : {
 
     },
     "Franz" : {
@@ -1252,6 +1296,12 @@
     "Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position" : {
 
     },
+    "Mehrfachauswahl" : {
+
+    },
+    "Mehrfachauswahl erlauben" : {
+
+    },
     "Meine Fahrten" : {
 
     },
@@ -1548,6 +1598,12 @@
 
     },
     "OK" : {
+
+    },
+    "OK" : {
+
+    },
+    "Option %lld" : {
 
     },
     "Organisation" : {
@@ -2010,6 +2066,15 @@
           }
         }
       }
+    },
+    "Umfrage beenden" : {
+
+    },
+    "Umfrage erstellen" : {
+
+    },
+    "Umfragen" : {
+
     },
     "Umfragen, " : {
       "localizations" : {
