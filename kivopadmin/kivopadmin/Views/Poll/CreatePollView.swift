@@ -1,4 +1,5 @@
 import SwiftUI
+import PollServiceDTOs
 
 struct CreatePollView: View {
     @Environment(\.dismiss) var dismiss
@@ -8,7 +9,11 @@ struct CreatePollView: View {
     @State private var deadline: Date = Date()
     @State private var showDatePicker: Bool = false
     @State private var allowsMultipleSelections: Bool = false
-    let onPollCreated: (Poll) -> Void
+    @State private var isAnonymous: Bool = false
+    @State private var isLoading: Bool = false
+    @State private var errorMessage: String?
+
+    let onSave: () -> Void
 
     var body: some View {
         NavigationView {
@@ -44,8 +49,9 @@ struct CreatePollView: View {
                     }
                 }
 
-                Section(header: Text("Mehrfachauswahl")) {
+                Section(header: Text("Optionen")) {
                     Toggle("Mehrfachauswahl erlauben", isOn: $allowsMultipleSelections)
+                    Toggle("Anonymisierung aktivieren", isOn: $isAnonymous)
                 }
 
                 Section(header: Text("Abschlusszeit")) {
@@ -68,36 +74,32 @@ struct CreatePollView: View {
                     }
 
                     if showDatePicker {
-                        VStack {
-                            DatePicker(
-                                "Datum und Uhrzeit",
-                                selection: $deadline,
-                                displayedComponents: [.date, .hourAndMinute]
-                            )
-                            .datePickerStyle(GraphicalDatePickerStyle())
-                        }
+                        DatePicker(
+                            "Datum und Uhrzeit",
+                            selection: $deadline,
+                            displayedComponents: [.date, .hourAndMinute]
+                        )
+                        .datePickerStyle(GraphicalDatePickerStyle())
+                    }
+                }
+
+                if let errorMessage = errorMessage {
+                    Section {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                            .font(.footnote)
                     }
                 }
             }
             .navigationTitle("Umfrage erstellen")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Erstellen") {
-                        guard options.filter({ !$0.isEmpty }).count >= 2 else {
-                            return
+                    Button(action: createPoll) {
+                        if isLoading {
+                            ProgressView()
+                        } else {
+                            Text("Erstellen")
                         }
-                        let newPoll = Poll(
-                            id: UUID(),
-                            question: question,
-                            description: description,
-                            options: options.filter { !$0.isEmpty },
-                            votes: [:],
-                            deadline: deadline,
-                            isActive: true,
-                            allowsMultipleSelections: allowsMultipleSelections
-                        )
-                        onPollCreated(newPoll)
-                        dismiss()
                     }
                     .disabled(question.isEmpty || options.filter({ !$0.isEmpty }).count < 2)
                 }
@@ -110,4 +112,38 @@ struct CreatePollView: View {
             }
         }
     }
+
+    private func createPoll() {
+        isLoading = true
+        errorMessage = nil
+
+        let validOptions = options.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+        let pollOptions = validOptions.enumerated().map { GetPollVotingOptionDTO(index: UInt8($0.offset + 1), text: $0.element) }
+
+        let newPoll = CreatePollDTO(
+            question: question.trimmingCharacters(in: .whitespacesAndNewlines),
+            description: description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "" : description.trimmingCharacters(in: .whitespacesAndNewlines),
+            closedAt: deadline,
+            anonymous: isAnonymous,
+            multiSelect: allowsMultipleSelections,
+            options: pollOptions
+        )
+
+        PollAPI.shared.createPoll(poll: newPoll) { result in
+            DispatchQueue.main.async {
+                isLoading = false
+                switch result {
+                case .success:
+                    onSave()  // Signal to parent view
+                    dismiss() // Ensure view is dismissed
+                case .failure(let error):
+                    errorMessage = error.localizedDescription
+                    print("Fehler beim Erstellen: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+
+
 }
