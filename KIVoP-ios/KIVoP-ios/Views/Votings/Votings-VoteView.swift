@@ -89,7 +89,7 @@ struct Votings_VoteView: View {
                .alert(isPresented:$showingAlert) {
                   Alert(
                      title: Text("Möchtest du wirklich abstimmen?"),
-                     message: Text("Du kannst deine Wahl danach nciht mehr ändern!"),
+                     message: Text("Du kannst deine Wahl danach nicht mehr ändern!"),
                      primaryButton: .default(Text("Abstimmen")) {
                         Task {
                            await BiometricAuth.executeIfSuccessfulAuth {

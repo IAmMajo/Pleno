@@ -85,6 +85,16 @@
         }
       }
     },
+    "%@ %@, %@ Uhr" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@, %3$@ Uhr"
+          }
+        }
+      }
+    },
     "%@° N, %@° E" : {
       "localizations" : {
         "en" : {
@@ -118,12 +128,25 @@
     "%lld" : {
 
     },
+    "%lld Stimmen" : {
+
+    },
     "%lld/%lld" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "%u / %u" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$u / %2$u"
           }
         }
       }
@@ -237,6 +260,9 @@
     "Abgehangen" : {
 
     },
+    "Abgeschlossen" : {
+
+    },
     "Abhängedatum:" : {
 
     },
@@ -270,6 +296,9 @@
           }
         }
       }
+    },
+    "Abschlusszeit" : {
+
     },
     "Abstimmen" : {
       "localizations" : {
@@ -358,6 +387,9 @@
     "Achte beim Aufnehmen des Bildes darauf, dass das Plakat sowie der Hintergrund und die Umgebung gut zu erkennen sind." : {
 
     },
+    "Add Item" : {
+
+    },
     "Adresse" : {
 
     },
@@ -391,6 +423,9 @@
           }
         }
       }
+    },
+    "Aktiv" : {
+
     },
     "Aktuell" : {
 
@@ -498,7 +533,13 @@
     "Akzeptieren" : {
 
     },
+    "Alle nicht gespeicherten Änderungen gehen verloren!" : {
+
+    },
     "Alles im Blick?" : {
+
+    },
+    "Allgemeine Informationen" : {
 
     },
     "Anfrage zurücknehmen" : {
@@ -586,6 +627,9 @@
 
     },
     "Auswahl" : {
+
+    },
+    "Auswahlmöglichkeiten" : {
 
     },
     "Auto und Sitzplätze" : {
@@ -699,6 +743,9 @@
     "Datenschutzerklärung" : {
 
     },
+    "Datum und Uhrzeit" : {
+
+    },
     "Dein Name: " : {
       "localizations" : {
         "de" : {
@@ -759,6 +806,7 @@
 
     },
     "Du kannst deine Wahl danach nciht mehr ändern!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -821,6 +869,9 @@
         }
       }
     },
+    "Ende:" : {
+
+    },
     "Entfernen" : {
 
     },
@@ -858,6 +909,9 @@
           }
         }
       }
+    },
+    "Erstellen" : {
+
     },
     "Es haben %lld von %lld Personen abgestimmt." : {
       "localizations" : {
@@ -914,6 +968,9 @@
 
     },
     "Fehler" : {
+
+    },
+    "Frage" : {
 
     },
     "Franz" : {
@@ -993,6 +1050,12 @@
       }
     },
     "Heinz-Peters" : {
+
+    },
+    "Hiermit betsätigst du, dass du von dieser Adresse abgeholt werden möchtest und an dieser Fahrgemeinschaft teilnimmst" : {
+
+    },
+    "Hinzufügen" : {
 
     },
     "In der alten Turnhalle hinter dem Friedhof\nAltes Grab 5 b, 42069 Hölle" : {
@@ -1085,6 +1148,12 @@
 
     },
     "Keine anstehenden Sitzungen." : {
+
+    },
+    "Keine Fahrzeugbeschreibung vorhanden." : {
+
+    },
+    "Keine Mitfahrer" : {
 
     },
     "Keine Protokollanten gefunden." : {
@@ -1219,6 +1288,12 @@
       }
     },
     "Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position" : {
+
+    },
+    "Mehrfachauswahl" : {
+
+    },
+    "Mehrfachauswahl erlauben" : {
 
     },
     "Meine Fahrten" : {
@@ -1511,6 +1586,12 @@
 
     },
     "Öffnen mit Waze" : {
+
+    },
+    "OK" : {
+
+    },
+    "Option %lld" : {
 
     },
     "Organisation" : {
@@ -1974,6 +2055,15 @@
         }
       }
     },
+    "Umfrage beenden" : {
+
+    },
+    "Umfrage erstellen" : {
+
+    },
+    "Umfragen" : {
+
+    },
     "Umfragen, " : {
       "localizations" : {
         "de" : {
@@ -2201,6 +2291,9 @@
     "Wir hosten die Inhalte unserer Website bei folgendem Anbieter:\n\n**Hetzner**\n\nAnbieter ist die Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen (nachfolgend Hetzner).\n\nDetails entnehmen Sie der Datenschutzerklärung von Hetzner:\nhttps://www.hetzner.com/de/legal/privacy-policy/.\n\nDie Verwendung von Hetzner erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Wir haben ein berechtigtes Interesse an einer möglichst zuverlässigen Darstellung unserer Website. Sofern eine entsprechende Einwilligung abgefragt wurde, erfolgt die Verarbeitung ausschließlich auf Grundlage von Art.6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG, soweit die Einwilligung die Speicherung von Cookies oder den Zugriff auf Informationen im Endgerät des Nutzers (z. B. Device-Fingerprinting) im Sinne des TDDDG umfasst. Die Einwilligung ist jederzeit widerrufbar.\n\n**Auftragsverarbeitung**\nWir haben einen Vertrag über Auftragsverarbeitung (AVV) zur Nutzung des oben genannten Dienstes geschlossen. Hierbei handelt es sich um einen datenschutzrechtlich vorgeschriebenen Vertrag, der gewährleistet, dass dieser die personenbezogenen Daten unserer Websitebesucher nur nach unseren Weisungen und unter Einhaltung der DSGVO verarbeitet." : {
 
     },
+    "Wird vom Event ausgelesen" : {
+
+    },
     "Wirklich abmelden?" : {
       "localizations" : {
         "de" : {
@@ -2239,6 +2332,9 @@
           }
         }
       }
+    },
+    "Zielort" : {
+
     },
     "zu einer verbesserten " : {
       "localizations" : {
