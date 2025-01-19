@@ -1,6 +1,7 @@
 package net.ipv64.kivop.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -39,11 +40,12 @@ import net.ipv64.kivop.ui.theme.Text_prime
 
 @Composable
 fun IconTextField(
-    text: String = "Max MusteGGggrmann",
-    icon: ImageVector = Icons.Default.Notifications,
-    edit: Boolean = false,
-    newText: String = "",
-    onValueChange: (String) -> Unit = {}
+  text: String = "Max MusteGGggrmann",
+  icon: ImageVector = Icons.Default.Notifications,
+  edit: Boolean = false,
+  newText: String = "",
+  onClick: (() -> Unit)? = null,
+  onValueChange: (String) -> Unit = {}
 ) {
   val focusManager: FocusManager = LocalFocusManager.current
   Row(
@@ -51,8 +53,12 @@ fun IconTextField(
           Modifier.fillMaxWidth()
               .customShadow()
               .background(Background_secondary, shape = RoundedCornerShape(8.dp))
+              .clickable(onClick = onClick ?: {})
               .padding(10.dp),
-      verticalAlignment = Alignment.CenterVertically) {
+      verticalAlignment = Alignment.CenterVertically
+  ) 
+  {
+        
         IconBoxClickable(
             icon = icon,
             height = 50.dp,
