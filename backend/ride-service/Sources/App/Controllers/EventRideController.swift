@@ -310,7 +310,7 @@ struct EventRideController: RouteCollection {
         // open transaction to save and delete
         try await req.db.transaction { db in
             // save ride
-            try await eventRide.save(on: req.db)
+            try await eventRide.save(on: db)
             
             // delete interested party
             try await EventRideInteresedParty.query(on: db)
