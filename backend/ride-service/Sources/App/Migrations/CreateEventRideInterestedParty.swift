@@ -5,7 +5,7 @@ struct CreateEventRideInterestedParty: AsyncMigration {
     func prepare(on database: Database) async throws {
         try await database.schema(EventRideInteresedParty.schema)
             .id()
-            .field("participant_id", .uuid, .required, .references(EventParticipant.schema, "id"))
+            .field("participant_id", .uuid, .required, .references(EventParticipant.schema, "id", onDelete: .cascade))
             .field("latitude", .float, .required)
             .field("longitude", .float, .required)
             .field("created_at", .datetime)
