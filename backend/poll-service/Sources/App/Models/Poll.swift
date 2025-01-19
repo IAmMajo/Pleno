@@ -32,7 +32,7 @@ extension Poll {
             if let myVote = try await option.$votes.query(on: db)
                 .filter(\.$id.$identity.$id ~~ identityIds)
                 .first() {
-                return try myVote.requireID().index
+                return try myVote.requireID().$pollVotingOption.id.index
             }
             return 0
         }
@@ -91,7 +91,7 @@ extension Poll {
             percentageCutoff1.index < percentageCutoff2.index
         }
         
-        for index in 0...votingOptions.count {
+        for index in 0..<votingOptions.count {
             let percentageCutoff = percentageCutoffs[index]
             try await getPollResultsDTO.results.append(
                 GetPollResultDTO(

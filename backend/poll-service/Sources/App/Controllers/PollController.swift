@@ -182,7 +182,7 @@ struct PollController: RouteCollection {
         try await req.db.transaction { db in
             for index in indices {
                 let vote = try PollVote(id: .init(poll: poll, index: index, identity: identity))
-                try await vote.create(on: req.db)
+                try await vote.create(on: db)
             }
         }
         // Fetches the poll anew to reload all relations.
