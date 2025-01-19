@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
@@ -35,7 +34,7 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.R
-import net.ipv64.kivop.components.IconBox
+import net.ipv64.kivop.components.IconBoxClickable
 import net.ipv64.kivop.components.IconTextField
 import net.ipv64.kivop.components.ImgPicker
 import net.ipv64.kivop.components.SpacerBetweenElements
@@ -71,7 +70,7 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
               containerColor = Color.Transparent), // transparente NavBar
       title = {},
       actions = {
-        IconBox(
+        IconBoxClickable(
             Icons.Default.Edit,
             height = 50.dp,
             Background_secondary.copy(alpha = 0.15f),
@@ -79,7 +78,7 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
             onClick = { editMode = true })
       },
       navigationIcon = {
-        IconBox(
+        IconBoxClickable(
             Icons.Default.KeyboardArrowLeft,
             height = 50.dp,
             Background_secondary.copy(alpha = 0.15f),
