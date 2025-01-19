@@ -193,9 +193,10 @@ find "../${SRVNAME}-service/" -type f -name '*FIRST_LETTER_CAPITAL_SRVNAME_PLACE
     mv "$file" "`echo $file | sed "s/FIRST_LETTER_CAPITAL_SRVNAME_PLACEHOLDER/${FIRST_LETTER_CAPITAL_SRVNAME}/g"`"
 done
 
-# Replace placeholders in files
-find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swagger*" ! -path "*.swiftpm*" -print0 | xargs -0 sed -i '' -e "s/FIRST_LETTER_CAPITAL_SRVNAME_PLACEHOLDER/${FIRST_LETTER_CAPITAL_SRVNAME}/g"
+# Replace placeholders in files (generally excluding swagger files due to file encoding discrepancies)
+sed -i '' -e "s/SRVNAME_PLACEHOLDER/${SRVNAME}/g" ../${SRVNAME}-service/Public/swagger/swagger-initializer.js
 find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swagger*" ! -path "*.swiftpm*" -print0 | xargs -0 sed -i '' -e "s/SRVNAME_PLACEHOLDER/${SRVNAME}/g"
+find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swagger*" ! -path "*.swiftpm*" -print0 | xargs -0 sed -i '' -e "s/FIRST_LETTER_CAPITAL_SRVNAME_PLACEHOLDER/${FIRST_LETTER_CAPITAL_SRVNAME}/g"
 find "../${SRVNAME}-service/" -type f ! -name "*.png" ! -name ".*" ! -path "*swagger*" ! -path "*.swiftpm*" -print0 | xargs -0 sed -i '' -e "s/SRV_CONFIG_SERVICE_UUID_PLACEHOLDER/${SRV_CONFIG_SERVICE_UUID}/g"
 
 # Add service to /backend/docker-compose.yml and /docker-compose.yml
