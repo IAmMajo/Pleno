@@ -30,6 +30,8 @@ fun CustomInputField(
     placeholder: String,
     modifier: Modifier = Modifier,
     isPasswort: Boolean = false,
+    singleLine: Boolean = true,
+    lines: Int = 1,
     value: String,
     backgroundColor: Color = Background_prime,
     onValueChange: (String) -> Unit,
@@ -43,28 +45,31 @@ fun CustomInputField(
         color = labelColor,
         modifier = Modifier.fillMaxWidth())
     val visualTransformation =
-        if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None
-    OutlinedTextField(
-        visualTransformation = visualTransformation,
-        value = value,
-        colors =
-            OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = backgroundColor,
-                unfocusedContainerColor = backgroundColor,
-                disabledContainerColor = backgroundColor,
-                unfocusedBorderColor = backgroundColor,
-                focusedBorderColor = backgroundColor,
-            ),
-        singleLine = true,
-        onValueChange = onValueChange,
-        modifier = Modifier.fillMaxWidth(),
-        textStyle = MaterialTheme.typography.titleMedium.copy(color = Text_prime),
-        placeholder = {
-          Text(
-              text = placeholder,
-              color = Text_tertiary.copy(0.4f),
-              style = MaterialTheme.typography.titleMedium)
-        })
+      (if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None).also {
+        OutlinedTextField(
+            visualTransformation = it,
+            value = value,
+            colors =
+                OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = backgroundColor,
+                    unfocusedContainerColor = backgroundColor,
+                    disabledContainerColor = backgroundColor,
+                    unfocusedBorderColor = backgroundColor,
+                    focusedBorderColor = backgroundColor,
+                ),
+            singleLine = singleLine,
+            maxLines=  if (singleLine) 1 else lines,
+            minLines=  lines,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = MaterialTheme.typography.titleMedium.copy(color = Text_prime),
+            placeholder = {
+              Text(
+                  text = placeholder,
+                  color = Text_tertiary.copy(0.4f),
+                  style = MaterialTheme.typography.titleMedium)
+            })
+      }
   }
 }
 
@@ -84,6 +89,9 @@ fun CustomInputFieldPreview() {
         label = "Vorname",
         placeholder = "Gib deinen Vornamen ein",
         value = username,
-        onValueChange = { username = it })
+        onValueChange = { username = it },
+      singleLine = false,
+      lines = 3
+    )
   }
 }
