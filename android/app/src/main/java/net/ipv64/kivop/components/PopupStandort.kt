@@ -26,8 +26,6 @@ import net.ipv64.kivop.models.primaryButtonStyle
 import net.ipv64.kivop.models.secondaryButtonStyle
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Background_secondary
-import net.ipv64.kivop.ui.theme.Signal_neutral
-import net.ipv64.kivop.ui.theme.Signal_neutral_20
 import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_tertiary
 import net.ipv64.kivop.ui.theme.textContentStyle
@@ -36,104 +34,100 @@ import net.ipv64.kivop.ui.theme.textSubHeadingStyle
 
 @Composable
 fun PopupStandort(
-  onDismissRequest: () -> Unit,
-  title: String,
-  descriptionText: String,
-){
-  var userInput by remember{mutableStateOf("")}
+    onDismissRequest: () -> Unit,
+    title: String,
+    descriptionText: String,
+) {
+  var userInput by remember { mutableStateOf("") }
   Dialog(
-    onDismissRequest = onDismissRequest,
+      onDismissRequest = onDismissRequest,
   ) {
     Column(
-      modifier =
-      Modifier.wrapContentSize()
-        .clip(RoundedCornerShape(8.dp))
-        .background(Background_secondary)
-        .padding(horizontal = 25.dp, vertical = 20.dp),
+        modifier =
+            Modifier.wrapContentSize()
+                .clip(RoundedCornerShape(8.dp))
+                .background(Background_secondary)
+                .padding(horizontal = 25.dp, vertical = 20.dp),
     ) {
       // Titel
       Text(
-        text = title,
-        fontStyle = textSubHeadingStyle.fontStyle,
-        fontWeight = textSubHeadingStyle.fontWeight,
-        fontSize = textSubHeadingStyle.fontSize,
-        fontFamily = textHeadingStyle.fontFamily,
-        color = Text_prime,
+          text = title,
+          fontStyle = textSubHeadingStyle.fontStyle,
+          fontWeight = textSubHeadingStyle.fontWeight,
+          fontSize = textSubHeadingStyle.fontSize,
+          fontFamily = textHeadingStyle.fontFamily,
+          color = Text_prime,
       )
       SpacerBetweenElements(12.dp)
       // Beschreibung
       Text(
-        text = descriptionText,
-        fontStyle = textContentStyle.fontStyle,
-        fontWeight = textContentStyle.fontWeight,
-        fontSize = textContentStyle.fontSize,
-        fontFamily = textContentStyle.fontFamily,
-        color = Text_tertiary,
+          text = descriptionText,
+          fontStyle = textContentStyle.fontStyle,
+          fontWeight = textContentStyle.fontWeight,
+          fontSize = textContentStyle.fontSize,
+          fontFamily = textContentStyle.fontFamily,
+          color = Text_tertiary,
       )
       SpacerBetweenElements(12.dp)
       // InputFeld für die Adresse
       TextField(
-        value = userInput,
-        onValueChange = { newInput ->
-          userInput = newInput
-        },
-        placeholder = { Text("Ort, Plz.") },
-        colors =
-        TextFieldDefaults.colors(
-          unfocusedTextColor = Text_tertiary,
-          // focusedTextColor = Text_tertiary,
-          unfocusedContainerColor = Background_prime,
-          // focusedContainerColor = Background_prime,
-        ),
+          value = userInput,
+          onValueChange = { newInput -> userInput = newInput },
+          placeholder = { Text("Ort, Plz.") },
+          colors =
+              TextFieldDefaults.colors(
+                  unfocusedTextColor = Text_tertiary,
+                  // focusedTextColor = Text_tertiary,
+                  unfocusedContainerColor = Background_prime,
+                  // focusedContainerColor = Background_prime,
+              ),
       )
       SpacerBetweenElements(12.dp)
       TextField(
-        value = userInput,
-        onValueChange = { newInput ->
-          userInput = newInput
-        },
-        placeholder = { Text("Straßenname, Hausnummer") },
-        colors =
-        TextFieldDefaults.colors(
-          unfocusedTextColor = Text_tertiary,
-          // focusedTextColor = Text_tertiary,
-          unfocusedContainerColor = Background_prime,
-          // focusedContainerColor = Background_prime,
-        ),
+          value = userInput,
+          onValueChange = { newInput -> userInput = newInput },
+          placeholder = { Text("Straßenname, Hausnummer") },
+          colors =
+              TextFieldDefaults.colors(
+                  unfocusedTextColor = Text_tertiary,
+                  // focusedTextColor = Text_tertiary,
+                  unfocusedContainerColor = Background_prime,
+                  // focusedContainerColor = Background_prime,
+              ),
       )
       SpacerBetweenElements(12.dp)
       Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End) {
-        // Dismiss-Button
-        CustomPopupButton(
-          onClick = onDismissRequest,
-          text = "Abbrechen",
-          buttonStyle = secondaryButtonStyle,
-          modifier = Modifier,
-        )
-        SpacerBetweenElements(8.dp)
-        // Confirm-Button
-        CustomPopupButton(
-          onClick = {
-            // ToDo - hier muss die Addresse einmal geprüft werden
-          },
-          text = "Bestätigen",
-          buttonStyle = primaryButtonStyle,
-          modifier = Modifier,
-        )
-      }
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.End) {
+            // Dismiss-Button
+            CustomPopupButton(
+                onClick = onDismissRequest,
+                text = "Abbrechen",
+                buttonStyle = secondaryButtonStyle,
+                modifier = Modifier,
+            )
+            SpacerBetweenElements(8.dp)
+            // Confirm-Button
+            CustomPopupButton(
+                onClick = {
+                  // ToDo - hier muss die Addresse einmal geprüft werden
+                },
+                text = "Bestätigen",
+                buttonStyle = primaryButtonStyle,
+                modifier = Modifier,
+            )
+          }
     }
   }
 }
 
 @Preview
 @Composable
-fun ScreenPrev(){
+fun ScreenPrev() {
   PopupStandort(
-    onDismissRequest = {},
-    title = "Popup Titel",
-    descriptionText = "Das ist Text, das ist auch Text. usw usw usw usw ... Text",
+      onDismissRequest = {},
+      title = "Popup Titel",
+      descriptionText = "Das ist Text, das ist auch Text. usw usw usw usw ... Text",
   )
 }
