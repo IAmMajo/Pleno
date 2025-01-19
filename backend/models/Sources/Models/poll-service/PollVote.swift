@@ -15,9 +15,6 @@ public final class PollVote: Model, @unchecked Sendable {
         @Parent(key: "identity_id")
         public var identity: Identity
         
-        @Field(key: "index") // Index 0: Abstention
-        public var index: UInt8
-        
         public init() {}
         
         public convenience init(poll: Poll, index: UInt8, identity: Identity) throws {
