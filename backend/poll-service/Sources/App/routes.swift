@@ -1,16 +1,17 @@
 import Fluent
+import JWTKit
 import Vapor
 import VaporToOpenAPI
 import Models
 
 func routes(_ app: Application) throws {
-    app.get { req async in
-        "It works!"
-    }
+    // Einbinden der Middleware und des JWTSigner
+    let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
+    let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
     
-    app.get("hello") { req async -> String in
-        "Hello, world!"
-    }
+    let authProtected = app.grouped(authMiddleware)
+    let polls = authProtected.grouped("polls")
+    try polls.register(collection: PollController())
     
     try app.register(collection: WebhookController())
     

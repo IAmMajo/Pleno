@@ -29,11 +29,8 @@ public final class Poll: Model, @unchecked Sendable {
     @Field(key: "multi_select")
     public var multiSelect: Bool
     
-//    @Children(for: \.$id.$voting)
-//    public var votingOptions: [VotingOption]
-//    
-//    @Children(for: \.$id.$voting)
-//    public var votes: [Vote]
+    @Children(for: \.$id.$poll)
+    public var votingOptions: [PollVotingOption]
 
     public init() { }
     

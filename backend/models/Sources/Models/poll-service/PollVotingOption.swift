@@ -42,6 +42,9 @@ public final class PollVotingOption: Model, @unchecked Sendable {
     @Field(key: "text")
     public var text: String
     
+    @CompositeChildren(for: \PollVote.$id.$pollVotingOption)
+    public var votes: [PollVote]
+    
     public init() { }
     
     public init(id: IDValue, text: String) {
