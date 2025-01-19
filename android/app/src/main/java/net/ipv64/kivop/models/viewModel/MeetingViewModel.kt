@@ -6,14 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.bumptech.glide.Glide.init
 import kotlinx.coroutines.launch
-import net.ipv64.kivop.components.ResponseItem
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetAttendanceDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
 import net.ipv64.kivop.models.PlanAttendance
+import net.ipv64.kivop.models.attendancesList
 import net.ipv64.kivop.models.getVotings
 import net.ipv64.kivop.services.api.getAttendances
 import net.ipv64.kivop.services.api.getMeetingByID
@@ -25,16 +24,19 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
   var votings by mutableStateOf<List<GetVotingDTO>>(emptyList())
   var you by mutableStateOf<GetAttendanceDTO?>(null)
   
-  var responseItems by mutableStateOf<List<ResponseItem>>(emptyList())
-  var pendingList by mutableStateOf<List<ResponseItem>>(emptyList())
-  var presentList by mutableStateOf<List<ResponseItem>>(emptyList())
-  var absentList by mutableStateOf<List<ResponseItem>>(emptyList())
-  var acceptedList by mutableStateOf<List<ResponseItem>>(emptyList())
+  var responseItems by mutableStateOf<List<attendancesList>>(emptyList())
+  var pendingList by mutableStateOf<List<attendancesList>>(emptyList())
+  var presentList by mutableStateOf<List<attendancesList>>(emptyList())
+  var presentListcount: Int? = null;
+  var absentList by mutableStateOf<List<attendancesList>>(emptyList())
+  var acceptedList by mutableStateOf<List<attendancesList>>(emptyList())
+  var acceptedListcound: Int? = null;
   var maxMembernumber by mutableStateOf(0)
   var isPendingVisible by mutableStateOf(true) 
   var isPresentVisible by  mutableStateOf(true) 
   var isAbsentVisible by  mutableStateOf(true) 
   var isAcceptedVisible by mutableStateOf(true) 
+  var isAttendanceVisible by mutableStateOf(false) 
   
   fun fetchMeeting() {
     viewModelScope.launch {
@@ -56,12 +58,14 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
       try {
         you = response.find { it.itsame }
         responseItems = response.map {
-          ResponseItem(name = it.identity.name, status = it.status)
-        } 
+          attendancesList(name = it.identity.name, status = it.status)
+        }
         pendingList = responseItems.filter { it.status == null }
-        presentList= responseItems.filter { it.status == AttendanceStatus.present }
+        presentList = responseItems.filter { it.status == AttendanceStatus.present }
+        presentListcount = presentList.size
         absentList = responseItems.filter { it.status == AttendanceStatus.absent }
         acceptedList = responseItems.filter { it.status == AttendanceStatus.accepted }
+        acceptedListcound = acceptedList.size
         maxMembernumber = response.size
       }catch (e: Exception){
         you = null
@@ -83,7 +87,7 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
         responseItems = responseItems.filter { it.name != user.identity.name }
 
         // Add the user to the appropriate list
-        val updatedItem = ResponseItem(name = user.identity.name, status = updatedStatus)
+        val updatedItem = attendancesList(name = user.identity.name, status = updatedStatus)
         responseItems = responseItems + updatedItem
 
         // Rebuild the categorized lists
