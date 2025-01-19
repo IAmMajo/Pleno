@@ -69,7 +69,7 @@ fun PopupCheckIn(
                 .background(Background_prime)
                 .padding(horizontal = 25.dp, vertical = 20.dp),
     ) {
-      // ToDo - Styling von Titel & Beschreibung
+      // Titel
       Text(
           text = title,
           fontStyle = textSubHeadingStyle.fontStyle,
@@ -79,6 +79,7 @@ fun PopupCheckIn(
           color = Text_prime,
       )
       SpacerBetweenElements(12.dp)
+      // Beschreibung
       Text(
           text = descriptionText,
           fontStyle = textContentStyle.fontStyle,
