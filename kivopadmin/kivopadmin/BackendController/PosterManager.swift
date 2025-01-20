@@ -1,6 +1,8 @@
 import Combine
 import PosterServiceDTOs
 import Foundation
+import CoreLocation
+
 
 public struct PosterStatusDTO: Codable {
     public var overdue: Int
@@ -897,28 +899,10 @@ class PosterManager: ObservableObject {
         request.httpMethod = "DELETE"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        // Authentifizierung hinzufügen
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         } else {
             self.errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        // JSON-Daten in den Body der Anfrage schreiben
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601 // Datumsformatierung
-
-        do {
-            let jsonData = try encoder.encode(posters)
-            request.httpBody = jsonData
-
-            // JSON-Daten loggen (optional für Debugging)
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("JSON Payload for PATCH: \(jsonString)")
-            }
-        } catch {
-            self.errorMessage = "Failed to encode data: \(error.localizedDescription)"
             return
         }
 
@@ -933,25 +917,20 @@ class PosterManager: ObservableObject {
                     return
                 }
 
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    self?.errorMessage = "Unexpected response format."
+                guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                    self?.errorMessage = "Server error or unexpected response."
                     return
                 }
 
-                if !(200...299).contains(httpResponse.statusCode) {
-                    self?.errorMessage = "Server error: \(httpResponse.statusCode) - \(HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode))"
-                    if let data = data, let responseText = String(data: data, encoding: .utf8) {
-                        print("Server Response: \(responseText)")
-                    }
-                    return
-                }
-
+                // Erfolgsfall: Completion aufrufen
+                completion()
             }
         }.resume()
     }
+
     
-    func deletePosters(posterPositionsDelete: [DeleteDTO], completion: @escaping () -> Void) {
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/batch") else {
+    func deletePosterPosition(posterId: UUID, positionIds: [UUID], completion: @escaping () -> Void) {
+        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions/batch") else {
             self.errorMessage = "Invalid URL."
             return
         }
@@ -960,7 +939,6 @@ class PosterManager: ObservableObject {
         request.httpMethod = "DELETE"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        // Authentifizierung hinzufügen
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         } else {
@@ -968,20 +946,17 @@ class PosterManager: ObservableObject {
             return
         }
 
-        // JSON-Daten in den Body der Anfrage schreiben
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601 // Datumsformatierung
-
+        // Erstellen des JSON-Objekts
+        let body: [String: Any] = [
+            "ids": positionIds.map { $0.uuidString }
+        ]
+        
         do {
-            let jsonData = try encoder.encode(posterPositionsDelete)
+            // Kodieren des JSON-Objekts in den Body
+            let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
             request.httpBody = jsonData
-
-            // JSON-Daten loggen (optional für Debugging)
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("JSON Payload for DELETE: \(jsonString)")
-            }
         } catch {
-            self.errorMessage = "Failed to encode data: \(error.localizedDescription)"
+            self.errorMessage = "Failed to encode JSON: \(error.localizedDescription)"
             return
         }
 
@@ -996,23 +971,17 @@ class PosterManager: ObservableObject {
                     return
                 }
 
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    self?.errorMessage = "Unexpected response format."
+                guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                    self?.errorMessage = "Server error or unexpected response."
                     return
                 }
 
-                if !(200...299).contains(httpResponse.statusCode) {
-                    self?.errorMessage = "Server error: \(httpResponse.statusCode) - \(HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode))"
-                    if let data = data, let responseText = String(data: data, encoding: .utf8) {
-                        print("Server Response: \(responseText)")
-                    }
-                    return
-                }
-
+                // Erfolgsfall: Completion aufrufen
+                completion()
             }
         }.resume()
     }
-    
+
     
 
 }

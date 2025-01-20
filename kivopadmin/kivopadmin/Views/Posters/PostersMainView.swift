@@ -96,13 +96,12 @@ struct PosterRowView: View {
     var body: some View {
         NavigationLink(destination: PosterDetailView(poster: poster)) {
             HStack(spacing: 5) {
-                AsyncImage(url: URL(string: "https://kivop.ipv64.net/posters/images/posters/\(poster.imageUrl)")) { image in
-                    image.resizable()
-                } placeholder: {
-                    ProgressView()
+                if let uiImage = UIImage(data: poster.image) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 200) // Höhe einstellen
                 }
-                .frame(width: 50, height: 50)
-                .cornerRadius(8)
                 
                 Text(poster.name)
                     .font(.headline)

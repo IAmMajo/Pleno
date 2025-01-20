@@ -9,11 +9,14 @@ struct User: Identifiable {
     let name: String
 }
 
+
+
 struct CustomMapView: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion
     var createPosterPositions: [CreatePosterPositionDTO]
     var onRegionChange: (MKCoordinateRegion) -> Void
     var posterPositions: [PosterPositionResponseDTO]
+    var poster: PosterResponseDTO
 
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: CustomMapView
@@ -24,6 +27,40 @@ struct CustomMapView: UIViewRepresentable {
 
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
             parent.onRegionChange(mapView.region)
+        }
+
+        func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            let identifier = "CustomAnnotation"
+
+            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+
+            if annotationView == nil {
+                annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                annotationView?.canShowCallout = true
+            } else {
+                annotationView?.annotation = annotation
+            }
+
+            // Erstelle ein UIImageView mit abgerundeten Ecken
+            if let posterImage = UIImage(data: parent.poster.image) {
+                let imageView = UIImageView(image: posterImage)
+                imageView.contentMode = .scaleAspectFit // Behalte das Seitenverhältnis bei
+                imageView.frame = CGRect(x: 0, y: 0, width: 50, height: 50) // Quadratische Größe
+                imageView.layer.cornerRadius = 10 // Die Hälfte der Breite/Höhe für einen perfekten Kreis
+                imageView.layer.masksToBounds = true // Zuschneiden aktivieren
+
+                // Konvertiere UIImageView zu einem UIImage für die Annotation
+                let renderer = UIGraphicsImageRenderer(size: imageView.bounds.size)
+                let roundedImage = renderer.image { _ in
+                    imageView.drawHierarchy(in: imageView.bounds, afterScreenUpdates: true)
+                }
+
+                annotationView?.image = roundedImage
+            } else {
+                annotationView?.image = UIImage(systemName: "pin.fill") // Fallback-Bild
+            }
+
+            return annotationView
         }
     }
 
@@ -47,21 +84,20 @@ struct CustomMapView: UIViewRepresentable {
         uiView.setRegion(region, animated: true)
         uiView.removeAnnotations(uiView.annotations)
 
-        // Debugging output
-        print("Updating map with \(createPosterPositions.count) positions")
-        
         for position in createPosterPositions {
             let annotation = MKPointAnnotation()
             annotation.coordinate = CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)
             uiView.addAnnotation(annotation)
         }
-        for position in posterPositions{
+        for position in posterPositions {
             let annotation = MKPointAnnotation()
             annotation.coordinate = CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)
             uiView.addAnnotation(annotation)
         }
     }
 }
+
+
 
 struct Posters_AddPositionView: View {
     @State private var mapRegion = MKCoordinateRegion(
@@ -132,7 +168,8 @@ struct Posters_AddPositionView: View {
                         region: $mapRegion,
                         createPosterPositions: createPosterPositions,
                         onRegionChange: { newRegion in mapRegion = newRegion },
-                        posterPositions: posterManager.posterPositions
+                        posterPositions: posterManager.posterPositions,
+                        poster: poster
                     )
                     .ignoresSafeArea()
                         .frame(maxHeight: .infinity)

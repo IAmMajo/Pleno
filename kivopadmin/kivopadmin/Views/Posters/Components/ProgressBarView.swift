@@ -8,20 +8,22 @@
 import SwiftUI
 
 struct ProgressBarView: View {
-   let status: Status
+   let status: String
    
    var value: CGFloat {
       switch status {
-      case .hung:
+      case "hung":
          return 190
-      case .takenDown:
+      case "takenDown":
          return 500
-      case .notDisplayed:
+      case "notDisplayed":
          return 20
-      case .expiresInOneDay:
+      case "expiresInOneDay":
          return 190
-      case .expired:
+      case "expired":
          return 190
+      default:
+          return 0
       }
    }
    
@@ -41,6 +43,6 @@ struct ProgressBarView: View {
     }
 }
 
-#Preview {
-   ProgressBarView(status: Status.hung)
-}
+//#Preview {
+//   ProgressBarView(status: Status.hung)
+//}
