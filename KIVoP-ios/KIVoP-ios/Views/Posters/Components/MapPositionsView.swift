@@ -29,8 +29,16 @@ struct MapPositionsView: View {
         }
         self.locations = shiftedLocations
         
-        // Temporary placeholder for `@State` initialization
-        _position = State(initialValue: .automatic)
+//        // Temporary placeholder for `@State` initialization
+//        _position = State(initialValue: .automatic)
+       
+       if let initialRegion = locations.isEmpty
+            ? nil
+            : MapPositionsView.calculateRegion(for: locations.map { $0.coordinate }) {
+          _position = State(initialValue: .region(initialRegion))
+       } else {
+          _position = State(initialValue: .automatic)
+       }
     }
 
     var body: some View {
@@ -38,19 +46,6 @@ struct MapPositionsView: View {
             ForEach(locations) { location in
                 Annotation(location.name, coordinate: location.coordinate) {
                    VStack {
-                      // Title above the annotation
-//                      Text(location.name)
-//                         .font(.caption2)
-//                         .bold()
-//                         .foregroundColor(.primary)
-//                         .padding(3)
-//                         .background(
-//                           RoundedRectangle(cornerRadius: 5)
-//                              .fill(Color(UIColor.systemBackground).opacity(0.5))
-//                              .shadow(radius: 3)
-//                         )
-//                         .offset(y: 5)
-                      
                       Circle()
                          .fill(.background)
                          .shadow(radius: 5)
@@ -95,14 +90,16 @@ struct MapPositionsView: View {
             }
         }
         .onAppear {
-            // Set the position dynamically on appear
-            let allCoordinates = locations.map { $0.coordinate }
-            let region = calculateRegion(for: allCoordinates)
-            position = .region(region)
+//            // Set the position dynamically on appear
+           if !locations.isEmpty {
+              let allCoordinates = locations.map { $0.coordinate }
+              let region = MapPositionsView.calculateRegion(for: allCoordinates)
+              position = .region(region)
+           }
         }
     }
 
-    private func calculateRegion(for coordinates: [CLLocationCoordinate2D]) -> MKCoordinateRegion {
+    static func calculateRegion(for coordinates: [CLLocationCoordinate2D]) -> MKCoordinateRegion {
         let lats = coordinates.map { $0.latitude }
         let lons = coordinates.map { $0.longitude }
         let minLat = lats.min() ?? 0
@@ -115,8 +112,10 @@ struct MapPositionsView: View {
             longitude: (minLon + maxLon) / 2
         )
         let span = MKCoordinateSpan(
-            latitudeDelta: (maxLat - minLat) * 1.4,
-            longitudeDelta: (maxLon - minLon) * 1.4
+//            latitudeDelta: (maxLat - minLat) * 1.4,
+//            longitudeDelta: (maxLon - minLon) * 1.4
+         latitudeDelta: max(maxLat - minLat, 0.01) * 1.4,
+         longitudeDelta: max(maxLon - minLon, 0.01) * 1.4
         )
         return MKCoordinateRegion(center: center, span: span)
     }

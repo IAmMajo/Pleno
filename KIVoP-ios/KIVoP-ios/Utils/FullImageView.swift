@@ -12,10 +12,10 @@ struct FullImageView: View {
    @State private var currentZoom = 0.0
    @State private var totalZoom = 1.0
 
-   let image: String
+   let uiImage: UIImage
    
    var body: some View {
-      Image("\(image)")
+      Image(uiImage: uiImage)
          .resizable()
          .scaledToFit()
          .scaleEffect(currentZoom + totalZoom)
@@ -59,5 +59,5 @@ struct FullImageView: View {
 }
 
 #Preview {
-   FullImageView(image: "TestPositionImage")
+//   FullImageView(image: "TestPositionImage")
 }

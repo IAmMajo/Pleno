@@ -141,6 +141,16 @@
         }
       }
     },
+    "%llu Stimmen (%@%%)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$llu Stimmen (%2$@%%)"
+          }
+        }
+      }
+    },
     "%u / %u" : {
       "localizations" : {
         "en" : {
@@ -257,7 +267,13 @@
         }
       }
     },
+    "Abgehangen" : {
+
+    },
     "Abgeschlossen" : {
+
+    },
+    "Abgeschlossen am: %@" : {
 
     },
     "Abhängedatum:" : {
@@ -548,6 +564,9 @@
     "Anmeldung wird überprüft..." : {
 
     },
+    "Anonymisierung aktivieren" : {
+
+    },
     "Anschließend kann der " : {
       "localizations" : {
         "de" : {
@@ -617,6 +636,9 @@
     "Archiviert" : {
 
     },
+    "Aufgehangen" : {
+
+    },
     "Aufhängen\nbestätigen" : {
 
     },
@@ -655,6 +677,9 @@
       }
     },
     "Beschreibung" : {
+
+    },
+    "BESCHREIBUNG" : {
 
     },
     "Beschreibung Auto" : {
@@ -872,6 +897,9 @@
     "Ende:" : {
 
     },
+    "Endet: %@" : {
+
+    },
     "Entfernen" : {
 
     },
@@ -971,6 +999,12 @@
 
     },
     "Fehler" : {
+
+    },
+    "Fehler: %@" : {
+
+    },
+    "Fetching address..." : {
 
     },
     "Filter" : {
@@ -1168,7 +1202,16 @@
     "Keine Sitzung verfügbar" : {
 
     },
+    "Keine Teilnehmer sichtbar." : {
+
+    },
+    "Keine Umfragen verfügbar." : {
+
+    },
     "Keine vergangenen Sitzungen." : {
+
+    },
+    "Keins vorhanden" : {
 
     },
     "Key" : {
@@ -1200,6 +1243,9 @@
     "Lade Abstimmungen..." : {
 
     },
+    "Lade Ergebnisse..." : {
+
+    },
     "Lade Profilbild..." : {
 
     },
@@ -1207,6 +1253,9 @@
 
     },
     "Lade Protokolle..." : {
+
+    },
+    "Lade Umfragen..." : {
 
     },
     "Lade..." : {
@@ -1244,9 +1293,6 @@
 
     },
     "Loading meetings..." : {
-
-    },
-    "Loading poster details..." : {
 
     },
     "Loading..." : {
@@ -1607,6 +1653,12 @@
 
     },
     "Option %lld" : {
+
+    },
+    "Option %u" : {
+
+    },
+    "Optionen" : {
 
     },
     "Organisation" : {
@@ -1991,6 +2043,9 @@
     "Standort hinzufügen" : {
 
     },
+    "STANDORTE (%lld)" : {
+
+    },
     "Start: %@" : {
 
     },
@@ -2073,6 +2128,12 @@
     "Umfrage beenden" : {
 
     },
+    "Umfrage Details" : {
+
+    },
+    "Umfrage Ergebnisse" : {
+
+    },
     "Umfrage erstellen" : {
 
     },
@@ -2113,9 +2174,6 @@
       }
     },
     "Unknown Action" : {
-
-    },
-    "Verantwortliche (2)" : {
 
     },
     "Vereinsfarbe" : {

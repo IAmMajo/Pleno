@@ -36,7 +36,7 @@ struct CircleImageView: View {
                      showImage = true
                   }
                   .navigationDestination(isPresented: $showImage) {
-                     FullImageView(image: "TestPositionImage")
+//                     FullImageView(image: "TestPositionImage") Image(uiImage: uiImage)
                   }
             } else {
                Rectangle()
@@ -86,7 +86,7 @@ struct CircleImageView: View {
                   showImage = true
                }
                .navigationDestination(isPresented: $showImage) {
-                  FullImageView(image: "TestPositionImage")
+//                  FullImageView(image: "TestPositionImage") Image(uiImage: uiImage)
                }
          }
       }

@@ -15,6 +15,7 @@
 		AF0EDF172CEFA8F100582C70 /* ConfigServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF162CEFA8F100582C70 /* ConfigServiceDTOs */; };
 		AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF182CEFA8F100582C70 /* MeetingServiceDTOs */; };
 		AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */; };
+		B5B3FF522D3E5A1F00B12DF2 /* PollServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = B5B3FF512D3E5A1F00B12DF2 /* PollServiceDTOs */; };
 		F77C36702D2C2C1E0008DB5D /* RideServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = F77C366F2D2C2C1E0008DB5D /* RideServiceDTOs */; };
 		F77C36722D2C2C240008DB5D /* PosterServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = F77C36712D2C2C240008DB5D /* PosterServiceDTOs */; };
 /* End PBXBuildFile section */
@@ -84,6 +85,7 @@
 				F77C36722D2C2C240008DB5D /* PosterServiceDTOs in Frameworks */,
 				AF04581F2CECCA540071EDF8 /* NotificationsServiceDTOs in Frameworks */,
 				23DADFFB2CF7A5DC004B15C1 /* MarkdownUI in Frameworks */,
+				B5B3FF522D3E5A1F00B12DF2 /* PollServiceDTOs in Frameworks */,
 				AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */,
 				AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */,
 				AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */,
@@ -166,6 +168,7 @@
 				23DADFFA2CF7A5DC004B15C1 /* MarkdownUI */,
 				F77C366F2D2C2C1E0008DB5D /* RideServiceDTOs */,
 				F77C36712D2C2C240008DB5D /* PosterServiceDTOs */,
+				B5B3FF512D3E5A1F00B12DF2 /* PollServiceDTOs */,
 			);
 			productName = "KIVoP-ios";
 			productReference = A81ABA922CD130F00026F492 /* KIVoP-ios.app */;
@@ -672,6 +675,11 @@
 		AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = NotificationsServiceDTOs;
+		};
+		B5B3FF512D3E5A1F00B12DF2 /* PollServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
+			productName = PollServiceDTOs;
 		};
 		F77C366F2D2C2C1E0008DB5D /* RideServiceDTOs */ = {
 			isa = XCSwiftPackageProductDependency;

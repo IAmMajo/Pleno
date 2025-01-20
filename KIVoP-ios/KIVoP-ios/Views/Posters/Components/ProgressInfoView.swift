@@ -6,52 +6,60 @@
 //
 
 import SwiftUI
+import PosterServiceDTOs
 
 struct ProgressInfoView: View {
-   let status: Status
+   let position: PosterPositionResponseDTO
    
-   func getDateProgressText(status: Status) -> String {
+   func getDateProgressText(position: PosterPositionResponseDTO) -> String {
+      let status = position.status
       switch status {
-      case .hung:
+      case "hangs":
          return "hängt"
-      case .takenDown:
+      case "takenDown":
          return "abgehangen"
-      case .notDisplayed:
+      case "toHang":
          return "hängt noch nicht"
-      case .expiresInOneDay:
+      case "overdue":
          return "hängt"
-      case .expired:
-         return "hängt"
+      default:
+         return ""
       }
    }
    
    var value: CGFloat {
+      let status = position.status
       switch status {
-      case .hung:
+      case "hangs":
          return 100
-      case .takenDown:
+      case "takenDown":
          return 140
-      case .notDisplayed:
+      case "toHang":
          return 170
-      case .expiresInOneDay:
+      case "overdue":
          return 100
-      case .expired:
+      default:
          return 100
       }
    }
    
    var color: Color {
+      let status = position.status
       switch status {
-      case .hung:
-         return .blue
-      case .takenDown:
+      case "hangs":
+         if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
+            return .orange
+         } else {
+            return .blue
+         }
+      case "takenDown":
          return .green
-      case .notDisplayed:
+      case "toHang":
          return .gray
-      case .expiresInOneDay:
-         return .orange
-      case .expired:
+      case "overdue":
          return .red
+      default:
+         return .gray
       }
    }
    
@@ -62,7 +70,7 @@ struct ProgressInfoView: View {
            .overlay( // border as an overlay
              RoundedRectangle(cornerRadius: 10)
                .stroke(color.opacity(0.15), lineWidth: 1)
-                .overlay(Text("Plakat \(getDateProgressText(status: status))")
+                .overlay(Text("Plakat \(getDateProgressText(position: position))")
                   .foregroundStyle(color.mix(with: .black, by: 0.25))
                   .font(.footnote))
                   .fontWeight(.semibold)
@@ -72,5 +80,5 @@ struct ProgressInfoView: View {
 }
 
 #Preview {
-   ProgressInfoView(status: Status.hung)
+//   ProgressInfoView(status: Status.hung)
 }

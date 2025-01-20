@@ -57,20 +57,32 @@ struct PostersView: View {
                    ForEach(viewModel.filteredPosters, id: \.poster.id) { item in
 //                      NavigationLink(destination: Posters_PosterDetailView(poster: item.poster).navigationTitle(item.poster.name)) {
                          HStack {
-                            if let image = base64ToImage(base64String: item.poster.imageUrl) {
+//                            if let image = base64ToImage(base64String: item.poster.imageUrl) {
+//                               RoundedRectangle(cornerRadius: 5, style: .continuous)
+//                                  .fill(Color(UIColor.secondarySystemBackground))
+//                                  .frame(width: 45, height: 45)
+//                                  .overlay {
+//                                     Image(uiImage: image)
+//                                        .resizable()
+//                                                                       .scaledToFill()
+////                                        .aspectRatio(contentMode: .fit)
+//                                        .frame(width: 45, height: 45)
+//                                        .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+//                                        
+//                                  }
+                            if let uiImage = UIImage(data: item.poster.image) {
                                RoundedRectangle(cornerRadius: 5, style: .continuous)
                                   .fill(Color(UIColor.secondarySystemBackground))
                                   .frame(width: 45, height: 45)
                                   .overlay {
-                                     Image(uiImage: image)
+                                     Image(uiImage: uiImage)
                                         .resizable()
-                                                                       .scaledToFill()
+                                        .scaledToFill()
 //                                        .aspectRatio(contentMode: .fit)
                                         .frame(width: 45, height: 45)
                                         .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
                                         
                                   }
-                               
                             }
                             VStack {
                                Text(item.poster.name)
@@ -118,6 +130,7 @@ struct PostersView: View {
                 .navigationDestination(isPresented: $isShowingDetails) {
                    if let poster = selectedPoster {
                       Posters_PosterDetailView(posterId: poster.id)
+                         .navigationTitle(poster.name)
                     }
                 }
                 
