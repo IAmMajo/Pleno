@@ -39,7 +39,7 @@ struct PollResultsView: View {
             ForEach(results.results, id: \.index) { result in
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text("Option \(result.index)")
+                        Text((result.text))
                             .font(.headline)
                             .foregroundColor(.primary)
                         Spacer()
@@ -87,7 +87,7 @@ struct PollResultsView: View {
                         }
 
                         Text(identity.name)
-                            .font(.body)
+                            .font(.headline)
                             .foregroundColor(.primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
