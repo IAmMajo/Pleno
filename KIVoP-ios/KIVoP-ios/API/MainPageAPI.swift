@@ -361,10 +361,17 @@ struct MainPageAPI {
     // MARK: - Helferfunktionen
     static func calculateShortName(from fullName: String) -> String {
         let nameParts = fullName.split(separator: " ")
+        
+        if nameParts.count == 1 {
+            // Falls nur ein Name vorhanden ist, verwende die ersten zwei Buchstaben
+            return String(nameParts.first!.prefix(2)).uppercased()
+        }
+
         guard let firstInitial = nameParts.first?.prefix(1),
               let lastInitial = nameParts.last?.prefix(1) else {
             return "??"
         }
+        
         return "\(firstInitial)\(lastInitial)".uppercased()
     }
     
