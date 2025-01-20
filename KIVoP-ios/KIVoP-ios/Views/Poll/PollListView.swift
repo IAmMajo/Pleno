@@ -39,7 +39,7 @@ struct PollListView: View {
                         PollListViewSection(
                             polls: activePolls,
                             destinationBuilder: { poll in
-                                PollDetailView(poll: poll)
+                                poll.iVoted ? AnyView(PollResultsView(pollId: poll.id)) : AnyView(PollDetailView(poll: poll))
                             },
                             dateFormatter: dateFormatter,
                             isCompleted: false
@@ -93,13 +93,13 @@ struct PollListView: View {
                 case .success(let polls):
                     print("Erfolgreich erhaltene Daten: \(polls.count) Umfragen")
                     let now = Date()
-                    
-                    // Aktive Umfragen: Offen und nicht abgestimmt
-                    activePolls = polls.filter { $0.isOpen && !$0.iVoted && $0.closedAt > now }
+
+                    // Aktive Umfragen: Noch offene Umfragen
+                    activePolls = polls.filter { $0.isOpen && $0.closedAt > now }
                         .sorted { $0.closedAt < $1.closedAt }
 
-                    // Abgeschlossene Umfragen: Entweder teilgenommen oder abgelaufen
-                    completedPolls = polls.filter { !$0.isOpen || $0.iVoted || $0.closedAt <= now }
+                    // Abgeschlossene Umfragen: Geschlossen oder abgelaufen
+                    completedPolls = polls.filter { !$0.isOpen || $0.closedAt <= now }
                         .sorted { $0.closedAt > $1.closedAt }
 
                 case .failure(let error):
