@@ -7,30 +7,22 @@ struct MeetingRecordsView: View {
     
     var body: some View {
         NavigationStack {
-            List{
-                VStack (alignment: .leading){
-                    // Protokolle
-
-                    if recordManager.isLoading {
-                        ProgressView("Lade Protokolle...")
-                            .progressViewStyle(CircularProgressViewStyle())
-                    } else if let errorMessage = recordManager.errorMessage {
-                        Text("Error: \(errorMessage)")
-                            .foregroundColor(.red)
-                    } else if recordManager.records.isEmpty {
-                        Text("No records available.")
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(recordManager.records, id: \.lang) { record in
-                            NavigationLink(destination: MarkdownEditorView(meetingId: record.meetingId, lang: record.lang)) {
-                                Text("Protokoll: \(record.lang)")
-                            }
+            List {
+                if recordManager.isLoading {
+                    ProgressView("Lade Protokolle...")
+                        .progressViewStyle(CircularProgressViewStyle())
+                } else if let errorMessage = recordManager.errorMessage {
+                    Text("Error: \(errorMessage)")
+                        .foregroundColor(.red)
+                } else if recordManager.records.isEmpty {
+                    Text("No records available.")
+                        .foregroundColor(.secondary)
+                } else {
+                    ForEach(recordManager.records, id: \.lang) { record in
+                        NavigationLink(destination: MarkdownEditorView(meetingId: record.meetingId, lang: record.lang)) {
+                            Text("Protokoll: \(record.lang)")
                         }
-                        
-                        
                     }
-                    
-                    
                 }
             }
             .navigationTitle("Protokolle zu \(meeting.name)")

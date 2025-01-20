@@ -141,6 +141,16 @@
         }
       }
     },
+    "%llu Stimmen (%@%%)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$llu Stimmen (%2$@%%)"
+          }
+        }
+      }
+    },
     "%u / %u" : {
       "localizations" : {
         "en" : {
@@ -261,6 +271,9 @@
 
     },
     "Abgeschlossen" : {
+
+    },
+    "Abgeschlossen am: %@" : {
 
     },
     "Abhängedatum:" : {
@@ -549,6 +562,9 @@
 
     },
     "Anmeldung wird überprüft..." : {
+
+    },
+    "Anonymisierung aktivieren" : {
 
     },
     "Anschließend kann der " : {
@@ -878,6 +894,9 @@
     "Ende:" : {
 
     },
+    "Endet: %@" : {
+
+    },
     "Entfernen" : {
 
     },
@@ -974,6 +993,9 @@
 
     },
     "Fehler" : {
+
+    },
+    "Fehler: %@" : {
 
     },
     "Frage" : {
@@ -1168,6 +1190,12 @@
     "Keine Sitzung verfügbar" : {
 
     },
+    "Keine Teilnehmer sichtbar." : {
+
+    },
+    "Keine Umfragen verfügbar." : {
+
+    },
     "Keine vergangenen Sitzungen." : {
 
     },
@@ -1200,6 +1228,9 @@
     "Lade Abstimmungen..." : {
 
     },
+    "Lade Ergebnisse..." : {
+
+    },
     "Lade Profilbild..." : {
 
     },
@@ -1207,6 +1238,9 @@
 
     },
     "Lade Protokolle..." : {
+
+    },
+    "Lade Umfragen..." : {
 
     },
     "Lade..." : {
@@ -1600,10 +1634,13 @@
     "OK" : {
 
     },
-    "OK" : {
+    "Option %lld" : {
 
     },
-    "Option %lld" : {
+    "Option %u" : {
+
+    },
+    "Optionen" : {
 
     },
     "Organisation" : {
@@ -2068,6 +2105,12 @@
       }
     },
     "Umfrage beenden" : {
+
+    },
+    "Umfrage Details" : {
+
+    },
+    "Umfrage Ergebnisse" : {
 
     },
     "Umfrage erstellen" : {
