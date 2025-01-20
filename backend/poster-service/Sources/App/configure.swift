@@ -54,8 +54,6 @@ public func configure(_ app: Application) async throws {
     // Erinnerungen für aufgehangene Poster versenden
     app.lifecycle.use(DailyCheckTask())
 
-    app.routes.defaultMaxBodySize = "50mb"
-
     // Routen registrieren
     try routes(app)
 }

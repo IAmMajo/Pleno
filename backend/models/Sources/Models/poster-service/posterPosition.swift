@@ -14,8 +14,8 @@ public final class PosterPosition: Model,@unchecked Sendable {
     @ID(key: .id)
     public var id: UUID?
     
-    @OptionalParent(key: "poster_id")
-    public var poster: Poster?
+    @Parent(key: "poster_id")
+    public var poster: Poster
     
     @Field(key: "latitude")
     public var latitude: Double
@@ -30,7 +30,7 @@ public final class PosterPosition: Model,@unchecked Sendable {
     public var posted_by: Identity?
     
     @Field(key: "expires_at")
-    public var expires_at: Date?
+    public var expires_at: Date
     
     @Field(key: "removed_at")
     public var removed_at: Date?
@@ -48,7 +48,7 @@ public final class PosterPosition: Model,@unchecked Sendable {
 
 public init(
     id: UUID? = nil,
-    posterId: UUID? = nil,
+    posterId: UUID,
     latitude: Double,
     longitude: Double,
     expiresAt: Date

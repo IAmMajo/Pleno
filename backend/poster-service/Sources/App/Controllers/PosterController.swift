@@ -107,30 +107,30 @@ struct PosterController: RouteCollection, Sendable {
                 tags: openAPITagPoster,
                 summary: "Erstellt ein neues Poster",
                 description: """
-                    Diese Route ermöglicht das Erstellen eines neuen Posters. Der Request muss als `multipart/form-data`
-                    gesendet werden und sollte mindestens einen Namen (`name`) sowie ein Bild (`image`) enthalten.
+                    Diese Route ermöglicht das Erstellen eines neuen Posters. Der Request`
+                    sollte mindestens einen Namen (`name`) sowie ein Bild (`image`) enthalten.
                     """,
                 query: [],
                 body: .type(CreatePosterDTO.self),
-                contentType: .multipart(.formData),
+                contentType: .application(.json),
                 response: .type(PosterResponseDTO.self),
                 responseContentType: .application(.json),
                 auth: .bearer()
             )
         
         // PATCH /posters/:id
-        routes.on(.POST, ":id", body: .collect(maxSize: "7000kb"), use: updatePoster)
+        routes.on(.PATCH, ":id", body: .collect(maxSize: "7000kb"), use: updatePoster)
             .openAPI(
                 tags: openAPITagPoster,
                 summary: "Updatet ein Poster",
                 description: """
-                    Aktualisiert ein vorhandenes Poster basierend auf seiner ID. Der Request muss als `multipart/form-data` 
-                    gesendet werden und kann Felder wie `name`, `description` oder ein neues `image` enthalten.
+                    Aktualisiert ein vorhandenes Poster basierend auf seiner ID. Der Request
+                    kann Felder wie `name`, `description` oder ein neues `image` enthalten.
                     """,
                 query: [],
                 path: .type(Poster.IDValue.self),
                 body: .type(UpdatePosterDTO.self),
-                contentType: .multipart(.formData),
+                contentType: .application(.json),
                 response: .type(PosterResponseDTO.self),
                 responseContentType: .application(.json),
                 auth: .bearer()
@@ -173,16 +173,11 @@ struct PosterController: RouteCollection, Sendable {
     
     // MARK: - Poster-Routen
     
-    /// Erstellt ein neues Poster aus multipart/form-data.
+    /// Erstellt ein neues Poster aus ~~multipart/form-data~~.
     /// Erwartet mindestens `name` und `image` im Request Body.
     @Sendable
-    func createPoster(_ req: Request) async throws -> PosterResponseDTO {
+    func createPoster(_ req: Request) async throws -> Response {
         // Überprüfen des Content-Types
-        guard let contentType = req.headers.contentType,
-              contentType.type == "multipart",
-              contentType.subType == "form-data" else {
-            throw PosterCreationError.invalidContentType
-        }
         
         let posterData: CreatePosterDTO
         do {
@@ -210,12 +205,12 @@ struct PosterController: RouteCollection, Sendable {
         }
         
         // Antwort-DTO zurückgeben (Vapor encodiert es automatisch als JSON)
-        return PosterResponseDTO(
-            id: poster.id!,
+        return try await PosterResponseDTO(
+            id: poster.requireID(),
             name: poster.name,
             description: poster.description,
             image: poster.image
-        )
+        ).encodeResponse(status: .created, for: req)
     }
     
     /// Einzelnes Poster anhand seiner ID abrufen.
@@ -335,12 +330,6 @@ struct PosterController: RouteCollection, Sendable {
     func updatePoster(_ req: Request) async throws -> PosterResponseDTO {
         guard let posterId = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Ungültige Poster-ID.")
-        }
-        
-        guard let contentType = req.headers.contentType,
-              contentType.type == "multipart",
-              contentType.subType == "form-data" else {
-            throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
         }
         
         let dto = try req.content.decode(UpdatePosterDTO.self)

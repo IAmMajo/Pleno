@@ -42,9 +42,7 @@ struct PosterPositionController: RouteCollection, Sendable {
                     summary: "Poster Positionen abfragen",
                     description: """
                                  Diese Route gibt eine Liste von Poster-Positionen zurück. 
-                                 Über `page` und `per` kann paginiert, über `status` gefiltert werden.
                                  """,
-                    query: ["page": .integer, "per": .integer, "status": .string],
                     body: nil,
                     response: .type(PosterPositionResponseDTO.self),
                     responseContentType: .application(.json),
@@ -52,26 +50,26 @@ struct PosterPositionController: RouteCollection, Sendable {
                 )
                 
                 // PUT /posters/:id/positions/:positionid/hang
-                positions.on(.PUT,":positionid","hang",body: .collect(maxSize: "7000kb"), use: hangPosterPosition).openAPI(
+                positions.on(.PUT, ":positionid", "hang", body: .collect(maxSize: "7000kb"), use: hangPosterPosition).openAPI(
                     tags: openAPITagPosterPosition,
                     summary: "Hängt eine Poster-Position auf",
                     description: """
-                                 Markiert eine bestimmte Poster-Position als aufgehängt. Die Aktion wird als `multipart/form-data` gesendet ...
+                                 Markiert eine bestimmte Poster-Position als aufgehängt.
                                  """,
                     path: .type(PosterPosition.IDValue.self),
                     body: .type(HangPosterPositionDTO.self),
-                    contentType: .multipart(.formData),
+                    contentType: .application(.json),
                     response: .type(HangPosterPositionResponseDTO.self),
                     responseContentType: .application(.json),
                     auth: .bearer()
                 )
                 
                 // PUT /posters/:id/positions/:positionid/take-down
-                positions.on(.PUT ,":positionid" ,"takeDown",body: .collect(maxSize: "7000kb"), use: takeDownPosterPosition).openAPI(
+                positions.on(.PUT, ":positionid", "take-down", body: .collect(maxSize: "7000kb"), use: takeDownPosterPosition).openAPI(
                     tags: openAPITagPosterPosition,
                     summary: "Hängt eine Poster-Position ab",
                     description: """
-                                 Markiert eine bestimmte Poster-Position als abgehängt. Die Aktion wird als `multipart/form-data` gesendet ...
+                                 Markiert eine bestimmte Poster-Position als abgehängt.
                                  """,
                     path: .type(PosterPosition.IDValue.self),
                     body: .type(TakeDownPosterPositionDTO.self),
@@ -85,7 +83,7 @@ struct PosterPositionController: RouteCollection, Sendable {
                 let adminRoutesPosterPositions = positions.grouped(adminMiddleware)
                 
                 // POST /posters/:id/positions (admin)
-                adminRoutesPosterPositions.on(.POST,body: .collect(maxSize: "7000kb"),use: self.createPosterPosition).openAPI(
+                adminRoutesPosterPositions.on(.POST, body: .collect(maxSize: "7000kb"), use: self.createPosterPosition).openAPI(
                     tags: openAPITagPosterPosition,
                     summary: "Erstellt eine neue Poster-Position",
                     description: """
@@ -105,12 +103,11 @@ struct PosterPositionController: RouteCollection, Sendable {
                     summary: "Aktualisiert eine bestehende Poster-Position",
                     description: """
                                  Aktualisiert eine vorhandene Poster-Position anhand ihrer ID. 
-                                 Der Request muss als `multipart/form-data` gesendet werden ...
                                  """,
                     query: [],
                     path: .type(PosterPosition.IDValue.self),
                     body: .type(UpdatePosterPositionDTO.self),
-                    contentType: .multipart(.formData),
+                    contentType: .application(.json),
                     response: .type(PosterPositionResponseDTO.self),
                     responseContentType: .application(.json),
                     auth: .bearer()
@@ -165,6 +162,12 @@ struct PosterPositionController: RouteCollection, Sendable {
         guard (-180...180).contains(dto.longitude) else {
             throw Abort(.badRequest, reason: "Longitude muss zwischen -180 und 180 liegen.")
         }
+        let responsibleUserIDs = try await dto.responsibleUsers.uniqued().map { uuid in
+            guard let user = try await User.find(uuid, on: req.db) else {
+                throw Abort(.badRequest, reason: "Invalid user id '\(uuid)'.")
+            }
+            return try user.requireID()
+        }
         
         // Neue PosterPosition erstellen
         let posterPosition = PosterPosition(
@@ -173,61 +176,25 @@ struct PosterPositionController: RouteCollection, Sendable {
             longitude: dto.longitude,
             expiresAt: dto.expiresAt
         )
-        try await posterPosition.create(on: req.db)
         
-        // Verantwortliche User abgleichen
-        let userIDs = dto.responsibleUsers
-        let existingUsers = try await User.query(on: req.db)
-            .filter(\.$id ~~ userIDs)
-            .all()
-        let existingUserIDs = Set(existingUsers.compactMap { $0.id })
-        let validUserIDs = userIDs.filter { existingUserIDs.contains($0) }
         
-        for userId in validUserIDs {
-            let responsibility = PosterPositionResponsibilities(
-                userID: userId,
-                posterPositionID: posterPosition.id!
-            )
-            try await responsibility.save(on: req.db)
+        try await req.db.transaction { db in
+            try await posterPosition.create(on: db)
+            
+            try await responsibleUserIDs.map { userID in
+                try PosterPositionResponsibilities(userID: userID, posterPositionID: posterPosition.requireID())
+            }.create(on: db)
         }
         
-        // Verantwortlichkeiten laden
-        let responsibilities = try await PosterPositionResponsibilities.query(on: req.db)
-            .filter(\.$poster_position.$id == posterPosition.id!)
-            .with(\.$user) { user in
-                user.with(\.$identity) // Eager load Identity
-            }
-            .all()
-        
-        let responsibleUsers = responsibilities.compactMap { rsp -> ResponsibleUsersDTO? in
-            let user = rsp.user
-            // user.identity muss geladen sein
-            return ResponsibleUsersDTO(
-                id: user.id!,
-                name: user.identity.name
-            )
+        // Verantwortlichkeiten neu laden
+        try await posterPosition.$responsibilities.load(on: req.db)
+        for responsibility in posterPosition.responsibilities {
+            try await responsibility.$user.load(on: req.db)
+            try await responsibility.user.$identity.load(on: req.db)
         }
         
-        let responseDTO = PosterPositionResponseDTO(
-            id: posterPosition.id!,
-            posterId: posterPosition.$poster.id,
-            latitude: posterPosition.latitude,
-            longitude: posterPosition.longitude,
-            postedBy: posterPosition.posted_by?.name,
-            postedAt: posterPosition.posted_at,
-            expiresAt: posterPosition.expires_at!,
-            removedBy: posterPosition.removed_by?.name,
-            removedAt: posterPosition.removed_at,
-            image: posterPosition.image,
-            responsibleUsers: responsibleUsers,
-            status: "Created"
-        )
-        
-        // Manuell eine Response mit Status .created zurückgeben
-        let encoded = try JSONEncoder().encode(responseDTO)
-        var headers = HTTPHeaders()
-        headers.contentType = .json
-        return Response(status: .created, headers: headers, body: .init(data: encoded))
+        // DTO zurückgeben
+        return try await posterPosition.toPosterPositionResponseDTO().encodeResponse(status: .created, for: req)
     }
     
     /// Gibt eine einzelne PosterPosition als DTO zurück.
@@ -252,186 +219,26 @@ struct PosterPositionController: RouteCollection, Sendable {
             throw Abort(.notFound, reason: "PosterPosition nicht gefunden")
         }
         
-        // Status ermitteln
-        let currentDate = Date()
-        var status = ""
-        if position.posted_by != nil && position.removed_by == nil {
-            status = "hangs"
-        } else if position.posted_by == nil {
-            status = "toHang"
-        } else if position.removed_by != nil {
-            status = "takenDown"
-        }
-        if position.posted_by != nil && position.removed_by == nil && position.expires_at! <= currentDate {
-            status = "overdue"
-        }
-        
-        return position.posterPositionMapToDTO(status)
+        return try position.toPosterPositionResponseDTO()
     }
     
-    /// Gibt alle Positionen zu einem Poster zurück, gefiltert über `status` + optionale Paginierung.
+    /// Gibt alle Positionen zu einem Poster zurück.
     @Sendable
-    func getPostersPositions(_ req: Request) async throws -> Response {
-        guard let posterId = req.parameters.get("id", as: UUID.self) else {
-            throw Abort(.badRequest, reason: "Ungültige Poster-ID.")
+    func getPostersPositions(_ req: Request) async throws -> [PosterPositionResponseDTO] {
+        guard let poster = try await Poster.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
         }
-        
-        let statusQuery = (try? req.query.get(String.self, at: "status"))?.lowercased()
-        let page = try? req.query.get(Int.self, at: "page")
-        let per = try? req.query.get(Int.self, at: "per")
-        let currentDate = Date()
-        
-        // Kleine Hilfsfunktion für paginierte Abfragen über Fluent
-        func handlePagination(
-            query: QueryBuilder<PosterPosition>,
-            status: String
-        ) async throws -> Response {
-            if let page = page, let per = per {
-                let paginatedData = try await query.paginate(PageRequest(page: page, per: per))
-                let dtos = paginatedData.items.map { $0.posterPositionMapToDTO(status) }
-                
-                // Kopfzeilen für Pagination setzen
-                let metadata = paginatedData.metadata
-                let totalPages = Int(ceil(Double(metadata.total) / Double(metadata.per)))
-                
-                var headers = HTTPHeaders()
-                headers.add(name: .contentType, value: "application/json")
-                headers.add(name: "Pagination-Current-Page", value: "\(metadata.page)")
-                headers.add(name: "Pagination-Per-Page", value: "\(metadata.per)")
-                headers.add(name: "Pagination-Total-Items", value: "\(metadata.total)")
-                headers.add(name: "Pagination-Total-Pages", value: "\(totalPages)")
-                
-                let encoded = try JSONEncoder().encode(dtos)
-                return Response(status: .ok, headers: headers, body: .init(data: encoded))
-            } else {
-                // Ohne Paginierung
-                let positions = try await query.all()
-                let dtos = positions.map { $0.posterPositionMapToDTO(status) }
-                
-                let encoded = try JSONEncoder().encode(dtos)
-                var headers = HTTPHeaders()
-                headers.add(name: .contentType, value: "application/json")
-                return Response(status: .ok, headers: headers, body: .init(data: encoded))
-                
-            }
-        }
-        
-        switch statusQuery {
-        case "hangs":
-            let query = PosterPosition.query(on: req.db)
-                .filter(\.$poster.$id == posterId)
-                .with(\.$responsibilities) { $0.with(\.$user) { $0.with(\.$identity) } }
-                .with(\.$posted_by)
-                .with(\.$removed_by)
-                .filter(\.$posted_by.$id != nil)
-                .filter(\.$removed_by.$id == nil)
-                .sort(\.$expires_at, .ascending)
-            return try await handlePagination(query: query, status: "hangs")
-            
-        case "tohang":
-            let query = PosterPosition.query(on: req.db)
-                .filter(\.$poster.$id == posterId)
-                .with(\.$responsibilities) { $0.with(\.$user) { $0.with(\.$identity) } }
-                .with(\.$posted_by)
-                .with(\.$removed_by)
-                .filter(\.$posted_by.$id == nil)
-                .filter(\.$expires_at > currentDate)
-                .sort(\.$expires_at, .ascending)
-            return try await handlePagination(query: query, status: "toHang")
-            
-        case "overdue":
-            let query = PosterPosition.query(on: req.db)
-                .filter(\.$poster.$id == posterId)
-                .with(\.$responsibilities) { $0.with(\.$user) { $0.with(\.$identity) } }
-                .with(\.$posted_by)
-                .with(\.$removed_by)
-                .filter(\.$posted_by.$id != nil)
-                .filter(\.$removed_by.$id == nil)
-                .filter(\.$expires_at <= currentDate)
-                .sort(\.$expires_at, .ascending)
-            return try await handlePagination(query: query, status: "overdue")
-            
-        case "takendown":
-            let query = PosterPosition.query(on: req.db)
-                .filter(\.$poster.$id == posterId)
-                .with(\.$responsibilities) { $0.with(\.$user) { $0.with(\.$identity) } }
-                .with(\.$posted_by)
-                .with(\.$removed_by)
-                .filter(\.$removed_by.$id != nil)
-                .sort(\.$expires_at, .ascending)
-            return try await handlePagination(query: query, status: "takenDown")
-            
-        default:
-            // Kombiniere hangs + toHang + overdue
-            let hangsQuery = PosterPosition.query(on: req.db)
-                .filter(\.$poster.$id == posterId)
-                .with(\.$responsibilities) { $0.with(\.$user) { $0.with(\.$identity) } }
-                .with(\.$posted_by)
-                .with(\.$removed_by)
-                .filter(\.$posted_by.$id != nil)
-                .filter(\.$removed_by.$id == nil)
-                .sort(\.$expires_at, .ascending)
-            
-            let toHangQuery = PosterPosition.query(on: req.db)
-                .filter(\.$poster.$id == posterId)
-                .with(\.$responsibilities) { $0.with(\.$user) { $0.with(\.$identity) } }
-                .with(\.$posted_by)
-                .with(\.$removed_by)
-                .filter(\.$posted_by.$id == nil)
-                .filter(\.$expires_at > currentDate)
-                .sort(\.$expires_at, .ascending)
-            
-            let overdueQuery = PosterPosition.query(on: req.db)
-                .filter(\.$poster.$id == posterId)
-                .with(\.$responsibilities) { $0.with(\.$user) { $0.with(\.$identity) } }
-                .with(\.$posted_by)
-                .with(\.$removed_by)
-                .filter(\.$posted_by.$id != nil)
-                .filter(\.$removed_by.$id == nil)
-                .filter(\.$expires_at <= currentDate)
-                .sort(\.$expires_at, .ascending)
-            
-            let (hangs, toHang, overdue) = try await (
-                hangsQuery.all(),
-                toHangQuery.all(),
-                overdueQuery.all()
-            )
-            
-            let combined = hangs.map { $0.posterPositionMapToDTO("hangs") }
-            + toHang.map { $0.posterPositionMapToDTO("toHang") }
-            + overdue.map { $0.posterPositionMapToDTO("overdue") }
-            
-            // Falls page & per in der Query -> manuelle Pagination
-            if let page = page, let per = per {
-                let totalItems = combined.count
-                let totalPages = Int((Double(totalItems) / Double(per)).rounded(.up))
-                let start = (page - 1) * per
-                let end = min(start + per, totalItems)
-                
-                // Wenn die Paginierungswerte zu keiner gültigen Teilmenge führen -> Error
-                guard start < end else {
-                    throw Abort(.badRequest, reason: "Ungültige Paginierungs-Parameter.")
+        return try await poster.$positions.query(on: req.db)
+            .with(\.$responsibilities) { responsibilities in
+                responsibilities.with(\.$user) { user in
+                    user.with(\.$identity)
                 }
-                
-                let pagedItems = Array(combined[start..<end])
-                
-                var headers = HTTPHeaders()
-                headers.contentType = .json
-                headers.add(name: "Pagination-Current-Page", value: "\(page)")
-                headers.add(name: "Pagination-Per-Page", value: "\(per)")
-                headers.add(name: "Pagination-Total-Items", value: "\(totalItems)")
-                headers.add(name: "Pagination-Total-Pages", value: "\(totalPages)")
-                
-                let encoded = try JSONEncoder().encode(pagedItems)
-                return Response(status: .ok, headers: headers, body: .init(data: encoded))
-            } else {
-                let encoded = try JSONEncoder().encode(combined)
-                var headers = HTTPHeaders()
-                headers.add(name: .contentType, value: "application/json")
-                return Response(status: .ok, headers: headers, body: .init(data: encoded))
-                
             }
-        }
+            .with(\.$posted_by)
+            .with(\.$removed_by)
+            .sort(\.$expires_at, .ascending)
+            .all()
+            .toPosterPositionResponseDTOArray()
     }
     
     /// Aktualisiert eine vorhandene PosterPosition (Location, Ablaufdatum, Verantwortlicher etc.).
@@ -439,12 +246,6 @@ struct PosterPositionController: RouteCollection, Sendable {
     func updatePosterPosition(_ req: Request) async throws -> PosterPositionResponseDTO {
         guard let positionId = req.parameters.get("positionid", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Ungültige Position-ID.")
-        }
-        
-        guard let contentType = req.headers.contentType,
-              contentType.type == "multipart",
-              contentType.subType == "form-data" else {
-            throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
         }
         
         let dto = try req.content.decode(UpdatePosterPositionDTO.self)
@@ -457,7 +258,7 @@ struct PosterPositionController: RouteCollection, Sendable {
         else {
             throw Abort(.notFound, reason: "PosterPosition nicht gefunden.")
         }
-
+        
         
         // Nur updaten, was im DTO vorhanden ist
         if let newLatitude = dto.latitude {
@@ -506,45 +307,20 @@ struct PosterPositionController: RouteCollection, Sendable {
         try await position.update(on: req.db)
         
         // Verantwortlichkeiten neu laden
-        let updatedResponsibilities = try await PosterPositionResponsibilities.query(on: req.db)
-            .filter(\.$poster_position.$id == positionId)
-            .with(\.$user) { u in
-                u.with(\.$identity)
-            }
-            .all()
-        let responsibleUsers = updatedResponsibilities.compactMap { rsp -> ResponsibleUsersDTO in
-            let userId = rsp.$user.id
-            let identityName = rsp.user.identity.name
-            return ResponsibleUsersDTO(id: userId, name: identityName)
+        try await position.$responsibilities.load(on: req.db)
+        for responsibility in position.responsibilities {
+            try await responsibility.$user.load(on: req.db)
+            try await responsibility.user.$identity.load(on: req.db)
         }
-    
-
+        
+        
         // DTO zurückgeben
-        return PosterPositionResponseDTO(
-            id: position.id!,
-            posterId: position.$poster.id,
-            latitude: position.latitude,
-            longitude: position.longitude,
-            postedBy: position.$posted_by.value??.name,
-            postedAt: position.posted_at,
-            expiresAt: position.expires_at!,
-            removedBy: position.$removed_by.value??.name,
-            removedAt: position.removed_at,
-            image: position.image,
-            responsibleUsers: responsibleUsers,
-            status: "Updated"
-        )
+        return try position.toPosterPositionResponseDTO()
     }
     
     /// Markiert eine Poster-Position als aufgehängt (hängt Poster auf).
     @Sendable
     func hangPosterPosition(_ req: Request) async throws -> HangPosterPositionResponseDTO {
-        guard let contentType = req.headers.contentType,
-              contentType.type == "multipart",
-              contentType.subType == "form-data" else {
-            throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
-        }
-        
         guard let positionId = req.parameters.get("positionid", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Ungültige Position-ID.")
         }
@@ -589,12 +365,6 @@ struct PosterPositionController: RouteCollection, Sendable {
     /// Markiert eine Poster-Position als abgehängt.
     @Sendable
     func takeDownPosterPosition(_ req: Request) async throws -> TakeDownPosterPositionResponseDTO {
-        guard let contentType = req.headers.contentType,
-              contentType.type == "multipart",
-              contentType.subType == "form-data" else {
-            throw Abort(.unsupportedMediaType, reason: "Erwartet multipart/form-data")
-        }
-        
         guard let positionId = req.parameters.get("positionid", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Ungültige Position-ID.")
         }
@@ -626,8 +396,8 @@ struct PosterPositionController: RouteCollection, Sendable {
         position.$removed_by.id = identity.id
         try await position.save(on: req.db)
         
-        return TakeDownPosterPositionResponseDTO(
-            posterPosition: position.id!,
+        return try TakeDownPosterPositionResponseDTO(
+            posterPosition: position.requireID(),
             removedAt: position.removed_at!,
             removedBy: identity.id!,
             image: position.image!
