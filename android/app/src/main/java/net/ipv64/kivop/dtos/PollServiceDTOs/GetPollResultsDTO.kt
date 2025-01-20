@@ -11,6 +11,7 @@ data class GetPollResultsDTO (
 )
 data class GetPollResultDTO (
     var index : UByte,
+    var text : String,
     var count : UInt,
     var percentage : Double,
     var identities : List<GetIdentityDTO>?,

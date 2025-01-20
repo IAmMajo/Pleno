@@ -7,5 +7,5 @@ data class TakeDownPosterPositionResponseDTO (
     var posterPosition : UUID,
     var removedAt : LocalDateTime,
     var removedBy : UUID,
-    var imageUrl : String,
+    var image : String,
 )
