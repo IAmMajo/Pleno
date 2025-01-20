@@ -77,17 +77,13 @@ struct DailyCheckTask: LifecycleHandler {
             app.logger.info("Gefundene PosterPositionen für Erinnerungen: \(positions.count)")
             
             for position in positions {
-                guard let expiresAt = position.expires_at else {
-                                   app.logger.warning("PosterPosition (ID: \(position.id?.uuidString ?? "Unbekannt")) hat kein expires_at Datum.")
-                                   continue
-                               }
                 for responsible in position.responsibilities {
                     let email = responsible.user.email
                     
                     // Berechnen der Tage bis zum Ablaufdatum
                     let daysLeft: Int?
                     if reminderDays < 0 {
-                        daysLeft = calendar.dateComponents([.day], from: now, to: expiresAt).day
+                        daysLeft = calendar.dateComponents([.day], from: now, to: position.expires_at).day
                     } else {
                         daysLeft = nil
                     }
