@@ -9,7 +9,8 @@ struct PollListView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var shouldRefreshPolls = false
-
+    @State private var showDeleteConfirmation = false
+    @State private var pollToDelete: UUID?
 
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -22,8 +23,8 @@ struct PollListView: View {
         NavigationStack {
             VStack {
                 Picker("Umfragen", selection: $selectedTab) {
-                    Text("Aktiv").tag(0)
-                    Text("Abgeschlossen").tag(1)
+                    Text("Aktiv (\(activePolls.count))").tag(0)
+                    Text("Abgeschlossen (\(completedPolls.count))").tag(1)
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
@@ -39,9 +40,9 @@ struct PollListView: View {
                     if selectedTab == 0 {
                         PollListViewSection(
                             polls: activePolls,
-                            deletePoll: deletePoll,
+                            deletePoll: promptDeletePoll,
                             destinationBuilder: { poll in
-                                PollDetailView(poll: poll)
+                                PollResultsView(pollId: poll.id)
                             },
                             dateFormatter: dateFormatter,
                             isCompleted: false
@@ -49,7 +50,7 @@ struct PollListView: View {
                     } else {
                         PollListViewSection(
                             polls: completedPolls,
-                            deletePoll: deletePoll,
+                            deletePoll: promptDeletePoll,
                             destinationBuilder: { poll in
                                 PollResultsView(pollId: poll.id)
                             },
@@ -80,13 +81,21 @@ struct PollListView: View {
                     showCreatePoll = false
                 })
             }
-
-                   .onAppear {
-                       fetchPolls()
-                   }
-               }
+            .onAppear {
+                fetchPolls()
+            }
+            .alert("Umfrage löschen?", isPresented: $showDeleteConfirmation) {
+                Button("Abbrechen", role: .cancel) {}
+                Button("Löschen", role: .destructive) {
+                    if let pollId = pollToDelete {
+                        deletePoll(pollId: pollId)
+                    }
+                }
+            } message: {
+                Text("Möchtest du diese Umfrage wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.")
+            }
+        }
     }
-
 
     private func fetchPolls() {
         isLoading = true
@@ -99,12 +108,12 @@ struct PollListView: View {
                     print("Erfolgreich erhaltene Daten: \(polls.count) Umfragen")
                     let now = Date()
                     
-                    // Aktive Umfragen: Offen und nicht abgestimmt
-                    activePolls = polls.filter { $0.isOpen && !$0.iVoted && $0.closedAt > now }
+                    // Aktive Umfragen: Offen und noch nicht geschlossen
+                    activePolls = polls.filter { $0.isOpen && $0.closedAt > now }
                         .sorted { $0.closedAt < $1.closedAt }  // Nach Ablaufdatum aufsteigend sortieren
 
-                    // Abgeschlossene Umfragen: Entweder teilgenommen oder abgelaufen
-                    completedPolls = polls.filter { !$0.isOpen || $0.iVoted || $0.closedAt <= now }
+                    // Abgeschlossene Umfragen: Bereits geschlossen
+                    completedPolls = polls.filter { !$0.isOpen || $0.closedAt <= now }
                         .sorted { $0.closedAt > $1.closedAt }  // Nach Abschlussdatum absteigend sortieren
 
                 case .failure(let error):
@@ -113,6 +122,11 @@ struct PollListView: View {
                 }
             }
         }
+    }
+
+    private func promptDeletePoll(pollId: UUID) {
+        pollToDelete = pollId
+        showDeleteConfirmation = true
     }
 
     private func deletePoll(pollId: UUID) {

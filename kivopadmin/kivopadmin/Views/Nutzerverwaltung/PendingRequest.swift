@@ -26,23 +26,32 @@ struct PendingRequestsNavigationView: View {
                             NavigationLink(
                                 destination: PendingRequestPopup(
                                     user: request.name ?? "Unbekannt",
+                                    email: request.email ?? "Keine E-Mail",
                                     createdAt: request.createdAt,
                                     userId: request.uid?.uuidString ?? "",
+                                    profileImage: request.profileImage,
                                     onListUpdate: {
-                                        fetchPendingRequests() // Liste aktualisieren
-                                        onListUpdate?() // Callback zur Haupt-View
+                                        fetchPendingRequests()
+                                        onListUpdate?()
                                     }
                                 )
                             ) {
-                                VStack(alignment: .leading) {
-                                    Text(request.name ?? "Unbekannt")
-                                        .font(.system(size: 18))
-                                        .foregroundColor(Color.primary)
-                                    Text("Erstellt am: \(DateFormatterHelper.formattedDate(from: request.createdAt))")
-                                        .font(.system(size: 14))
-                                        .foregroundColor(Color.secondary)
+                                HStack {
+                                    profileImagePreview(for: request)
+                                        .frame(width: 40, height: 40)
+                                        .clipShape(Circle())
+                                    
+                                    VStack(alignment: .leading) {
+                                        Text(request.name ?? "Unbekannt")
+                                            .font(.system(size: 18))
+                                            .foregroundColor(Color.primary)
+                                        Text("Erstellt am: \(DateFormatterHelper.formattedDate(from: request.createdAt))")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(Color.secondary)
+                                    }
                                 }
                             }
+
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -60,6 +69,24 @@ struct PendingRequestsNavigationView: View {
             .onAppear {
                 fetchPendingRequests()
             }
+        }
+    }
+    
+    @ViewBuilder
+    private func profileImagePreview(for request: UserProfileDTO) -> some View {
+        if let imageData = request.profileImage, let uiImage = UIImage(data: imageData) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
+        } else {
+            Circle()
+                .fill(Color.gray.opacity(0.3))
+                .overlay(
+                    Text(getInitials(from: request.name ?? "Unbekannt"))
+                        .foregroundColor(.white)
+                        .font(.headline)
+                        .bold()
+                )
         }
     }
 
@@ -83,23 +110,37 @@ struct PendingRequestsNavigationView: View {
 
 struct PendingRequestPopup: View {
     var user: String
+    var email: String
     var createdAt: Date?
     var userId: String
+    var profileImage: Data?
     var onListUpdate: (() -> Void)? = nil // Optionaler Callback für Updates
 
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
-    @Environment(\ .presentationMode) var presentationMode
+    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         VStack {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text("Name")
+                    profileImageView()
+                        .frame(width: 80, height: 80)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                    
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(user)
+                            .font(.title3)
+                            .fontWeight(.bold)
+                        Text(email)
+                            .foregroundColor(.gray)
+                            .font(.subheadline)
+                    }
                     Spacer()
-                    Text(user)
-                        .foregroundColor(Color.secondary)
                 }
+                .padding(.bottom, 20)
+
                 HStack {
                     Text("Erstellt am")
                     Spacer()
@@ -144,9 +185,29 @@ struct PendingRequestPopup: View {
             .padding(.bottom, 20)
         }
         .padding()
-        .navigationTitle("Beitrittsanfrage: \(user)")
+        .navigationTitle("Beitrittsanfrage")
         .navigationBarTitleDisplayMode(.inline)
     }
+
+    // MARK: - Profile Image Handling
+    @ViewBuilder
+    private func profileImageView() -> some View {
+        if let imageData = profileImage, let uiImage = UIImage(data: imageData) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFit()
+        } else {
+            Circle()
+                .fill(Color.gray.opacity(0.3))
+                .overlay(
+                    Text(getInitials(from: user))
+                        .foregroundColor(.white)
+                        .font(.title)
+                        .bold()
+                )
+        }
+    }
+    
 
     private func handleUserAction(activate: Bool) {
         isLoading = true
@@ -187,4 +248,11 @@ struct DateFormatterHelper {
         formatter.timeStyle = .none
         return formatter.string(from: date)
     }
+}
+
+private func getInitials(from fullName: String) -> String {
+    let components = fullName.split(separator: " ")
+    let firstInitial = components.first?.first?.uppercased() ?? ""
+    let lastInitial = components.count > 1 ? components.last?.first?.uppercased() ?? "" : ""
+    return firstInitial + lastInitial
 }

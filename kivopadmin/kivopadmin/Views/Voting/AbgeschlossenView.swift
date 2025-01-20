@@ -24,7 +24,6 @@ struct AbgeschlossenView: View {
 
                 if let results = votingResults {
                     renderPieChart(for: results)
-
                     renderResultsList(for: results)
                 } else {
                     Text("Keine Abstimmungsergebnisse verfügbar.")
@@ -49,7 +48,8 @@ struct AbgeschlossenView: View {
                 VStack {
                     renderResultRow(result: result, optionTextMap: optionTextMap)
 
-                    if selectedOption == result.index {
+                    // Zeige die Identitäten nur, wenn die Abstimmung nicht anonym ist
+                    if !voting.anonymous && selectedOption == result.index {
                         renderIdentities(for: result.identities)
                     }
                 }
@@ -60,11 +60,13 @@ struct AbgeschlossenView: View {
 
     private func renderResultRow(result: GetVotingResultDTO, optionTextMap: [UInt8: String]) -> some View {
         Button(action: {
-            if selectedOption == result.index {
-                selectedOption = nil
-            } else {
-                selectedOption = result.index
-                loadIdentities(for: result.identities)
+            if !voting.anonymous {
+                if selectedOption == result.index {
+                    selectedOption = nil
+                } else {
+                    selectedOption = result.index
+                    loadIdentities(for: result.identities)
+                }
             }
         }) {
             HStack {
@@ -74,11 +76,18 @@ struct AbgeschlossenView: View {
                 Text("\(result.count) Stimmen (\(String(format: "%.1f", result.percentage))%)")
                     .font(.subheadline)
                     .foregroundColor(.gray)
+
+                // Zeige Pfeil nur bei nicht-anonymer Abstimmung
+                if !voting.anonymous {
+                    Image(systemName: selectedOption == result.index ? "chevron.down" : "chevron.right")
+                        .foregroundColor(.gray)
+                }
             }
         }
         .padding()
         .background(Color(UIColor.systemBackground))
         .cornerRadius(8)
+        .disabled(voting.anonymous)  // Deaktiviere Button für anonyme Abstimmung
     }
 
     private func renderIdentities(for identities: [GetIdentityDTO]?) -> some View {
@@ -86,27 +95,24 @@ struct AbgeschlossenView: View {
         return AnyView(
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(identities, id: \.id) { identity in
-                    HStack(alignment: .center, spacing: 12) { // Vertikal zentriert
+                    HStack(alignment: .center, spacing: 12) {
                         renderProfileImage(for: identity)
-                            .frame(width: 40, height: 40, alignment: .center) // Profilbild mit fester Größe
+                            .frame(width: 40, height: 40, alignment: .center)
 
                         Text(identity.name)
                             .font(.body)
                             .foregroundColor(.primary)
-                            .frame(maxWidth: .infinity, alignment: .leading) // Text linksbündig
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading) // HStack linksbündig
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-            .padding(.leading, 8) // Leichtes Padding für die gesamte Liste
+            .padding(.leading, 8)
         )
     }
 
-
-
-
     private func renderProfileImage(for identity: GetIdentityDTO) -> some View {
-        if let imageData = identityImages[identity.id] ?? nil, // Optionales Unwrapping
+        if let imageData = identityImages[identity.id] ?? nil,
            let uiImage = UIImage(data: imageData) {
             return AnyView(
                 Image(uiImage: uiImage)
@@ -127,7 +133,6 @@ struct AbgeschlossenView: View {
             )
         }
     }
-
 
     private func loadIdentities(for identities: [GetIdentityDTO]?) {
         guard let identities = identities else { return }
@@ -151,6 +156,6 @@ struct AbgeschlossenView: View {
     private func initials(for name: String) -> String {
         let components = name.split(separator: " ")
         let initials = components.compactMap { $0.first }.prefix(2)
-        return String(initials)
+        return String(initials).uppercased()
     }
 }
