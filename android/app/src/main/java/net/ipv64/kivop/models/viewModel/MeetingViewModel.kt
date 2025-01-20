@@ -1,5 +1,6 @@
 package net.ipv64.kivop.models.viewModel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,16 +11,20 @@ import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetAttendanceDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetRecordDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
 import net.ipv64.kivop.models.PlanAttendance
 import net.ipv64.kivop.models.attendancesList
 import net.ipv64.kivop.models.getVotings
 import net.ipv64.kivop.services.api.getAttendances
 import net.ipv64.kivop.services.api.getMeetingByID
+import net.ipv64.kivop.services.api.getProtocolsApi
 import net.ipv64.kivop.services.api.putPlanAttendance
 
 class MeetingViewModel(private val meetingId: String): ViewModel() {
   var meeting by mutableStateOf<GetMeetingDTO?>(null)
+  var protocols by mutableStateOf<List<GetRecordDTO>>(emptyList())
+  
   var attendance by mutableStateOf<List<GetAttendanceDTO>>(emptyList())
   var votings by mutableStateOf<List<GetVotingDTO>>(emptyList())
   var you by mutableStateOf<GetAttendanceDTO?>(null)
@@ -44,6 +49,15 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
       response.let { meeting = it }
     }
   }
+  
+  fun fetchProtocol() {
+    viewModelScope.launch {
+      val response = getProtocolsApi(meetingId)
+      Log.i("protocolTTTT", response.toString())
+      response.let { protocols = it }
+    }
+  }
+  
   fun fetchVotings() {
     viewModelScope.launch {
       val response = getVotings(meetingId)
@@ -103,6 +117,7 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
   init {
     fetchMeeting()
     fetchAttendance()
+    fetchProtocol()
     fetchVotings()
   }
 }

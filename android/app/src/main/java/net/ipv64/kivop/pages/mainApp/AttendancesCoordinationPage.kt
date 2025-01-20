@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.R
 import net.ipv64.kivop.components.IconTextField
+import net.ipv64.kivop.components.ListenItem
 import net.ipv64.kivop.components.LoggedUserAttendacneCard
 import net.ipv64.kivop.components.SitzungsCard
 import net.ipv64.kivop.components.SpacerBetweenElements
@@ -201,7 +202,27 @@ fun AttendancesCoordinationPage(
               }
             }
           }
+          SpacerBetweenElements()
         }
+
+        item {
+          Text(text = "Protokoll")
+          SpacerBetweenElements()
+          meetingViewModel.protocols.forEach { protocol -> 
+            meetingViewModel.meeting?.let {
+              ListenItem(
+                itemListData = it, 
+                onClick = {
+                  navController.navigate("protokolle/${it.id}/${protocol.lang}")
+                },
+                isProtokoll = true
+              )
+            }
+            SpacerBetweenElements()
+          }
+        }
+        
+        
       }
     }
   }

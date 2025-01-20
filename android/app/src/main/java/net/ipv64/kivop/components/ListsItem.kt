@@ -26,7 +26,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.time.format.DateTimeFormatter
 import net.ipv64.kivop.R
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
@@ -38,11 +37,12 @@ import net.ipv64.kivop.ui.theme.Signal_neutral
 import net.ipv64.kivop.ui.theme.Signal_red
 import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_secondary
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun ListenItem(
     itemListData: GetMeetingDTO,
-    onClick: () -> Unit = {},
+    onClick: (() -> Unit)? = {},
     isProtokoll: Boolean = false
 ) {
   val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
@@ -114,7 +114,7 @@ fun ListenItem(
               .clip(RoundedCornerShape(8.dp))
               .background(Background_secondary)
               .padding(8.dp)
-              .clickable(onClick = onClick),
+              .clickable(onClick = onClick!!),
   ) {
     Column(modifier = Modifier) {
       Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

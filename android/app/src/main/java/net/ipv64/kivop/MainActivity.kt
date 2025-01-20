@@ -114,7 +114,10 @@ fun handleLogout(context: Context) {
 fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
 
   val meetingsViewModel = viewModel<MeetingsViewModel>()
+  
+ 
   LaunchedEffect(Unit) { meetingsViewModel.fetchMeetings() }
+  
   NavHost(
       navController = navController,
       startDestination = Screen.Home.rout,
@@ -145,7 +148,11 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
               navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
         }
         // Protokolle
-        composable(route = Screen.Protocol.rout) { ProtocolListPage(navController = navController) }
+        composable("${Screen.Protocol.rout}/{meetingID}/{protocollang}") { backStackEntry ->
+          ProtocolListPage(
+            navController, backStackEntry.arguments?.getString("meetingID").orEmpty(),backStackEntry.arguments?.getString("protocollang").orEmpty())
+        }
+  //     composable(route = Screen.Protocol.rout) { ProtocolListPage(navController = navController) }
         // CarpoolingList
         composable(route = Screen.CarpoolingList.rout) {
           CarpoolingList(navController = navController)
