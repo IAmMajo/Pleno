@@ -40,19 +40,20 @@ import MeetingServiceDTOs
 //]
 
 let colorMapping: [UInt8: Color] = [
-   0: .blue,
-   1: .green,
-   2: .orange,
-   3: .purple,
-   4: .red,
-   5: .teal,
-   6: .yellow,
-   7: .indigo,
-   8: .mint,
-   9: .pink,
-   10: .cyan,
-   11: .brown,
+    0: Color(rgba: 0xf0d176),
+    1: Color(rgba: 0xfffb3a),
+    2: Color(rgba: 0x8bf024),
+    3: Color(rgba: 0x1db30c),
+    4: Color(rgba: 0x00c76d),
+    5: Color(rgba: 0x0ccdeb),
+    6: Color(rgba: 0x3d75fa),
+    7: Color(rgba: 0x231c3c),
+    8: Color(rgba: 0xac19bd),
+    9: Color(rgba: 0xc58cf5),
+    10: Color(rgba: 0xa87d52),
+    11: Color(rgba: 0x80150d),
 ]
+
 
 struct PieChartView: View {
 
