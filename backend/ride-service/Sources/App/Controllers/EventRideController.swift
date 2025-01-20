@@ -166,13 +166,13 @@ struct EventRideController: RouteCollection {
                     .first()
                 
                 var openRequests: Int? = nil
-                var usersState = UsersEventRideState.nothing
+                var usersState = UsersRideState.nothing
                 
                 if let participant = participant {
                     let participantID = try participant.requireID()
                     
                     if eventRide.$participant.id == participantID {
-                        usersState = UsersEventRideState.driver
+                        usersState = UsersRideState.driver
                         openRequests = try await getCountOpenRequests(rideID: rideID, db: req.db)
                     } else {
                         let request = try await EventRideRequest.query(on: req.db)
@@ -184,9 +184,9 @@ struct EventRideController: RouteCollection {
                         
                         if let request = request {
                             if request.accepted {
-                                usersState = UsersEventRideState.accepted
+                                usersState = UsersRideState.accepted
                             } else {
-                                usersState = UsersEventRideState.requested
+                                usersState = UsersRideState.requested
                             }
                         }
                     }
