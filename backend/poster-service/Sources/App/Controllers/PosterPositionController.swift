@@ -18,6 +18,66 @@ struct PosterPositionController: RouteCollection, Sendable {
     func boot(routes: RoutesBuilder) throws {
         let openAPITagPosterPosition = TagObject(name: "Poster Position")
         
+        let positions = routes.grouped("positions")
+        
+        // PUT /posters/positions/:positionid/hang
+        positions.on(.PUT, ":positionid", "hang", body: .collect(maxSize: "7000kb"), use: hangPosterPosition).openAPI(
+            tags: openAPITagPosterPosition,
+            summary: "Hängt eine Poster-Position auf",
+            description: """
+                         Markiert eine bestimmte Poster-Position als aufgehängt.
+                         """,
+            path: .type(PosterPosition.IDValue.self),
+            body: .type(HangPosterPositionDTO.self),
+            contentType: .application(.json),
+            response: .type(HangPosterPositionResponseDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+        )
+        
+        // PUT /posters/positions/:positionid/take-down
+        positions.on(.PUT, ":positionid", "take-down", body: .collect(maxSize: "7000kb"), use: takeDownPosterPosition).openAPI(
+            tags: openAPITagPosterPosition,
+            summary: "Hängt eine Poster-Position ab",
+            description: """
+                         Markiert eine bestimmte Poster-Position als abgehängt.
+                         """,
+            path: .type(PosterPosition.IDValue.self),
+            body: .type(TakeDownPosterPositionDTO.self),
+            contentType: .application(.json),
+            response: .type(TakeDownPosterPositionResponseDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+        )
+        
+        let adminRoutes = positions.grouped(adminMiddleware)
+        
+        // DELETE /posters/positions/:positionid (admin)
+        adminRoutes.delete(":positionid", use: deletePosterPosition).openAPI(
+            tags: openAPITagPosterPosition,
+            summary: "Löscht eine Poster-Position",
+            description: """
+                         Löscht eine vorhandene Poster-Position anhand ihrer ID, nur für Admins ...
+                         """,
+            query: [],
+            path: .type(PosterPosition.IDValue.self),
+            statusCode: .noContent,
+            auth: .bearer()
+        )
+        
+        // DELETE /posters/positions/batch (admin)
+        adminRoutes.delete("batch", use: deletePosterPositions).openAPI(
+            tags: openAPITagPosterPosition,
+            summary: "Löscht mehrere Poster Positionen",
+            description: """
+                         Löscht mehrere Poster-Positionen anhand einer Liste von IDs, nur für Admins ...
+                         """,
+            query: [],
+            body: .type(DeleteDTO.self),
+            contentType: .application(.json),
+            statusCode: .noContent,
+            auth: .bearer()
+        )
         routes.group(":id") { poster in
             // /posters/:id/positions
             poster.group("positions") { positions in
@@ -45,36 +105,6 @@ struct PosterPositionController: RouteCollection, Sendable {
                                  """,
                     body: nil,
                     response: .type(PosterPositionResponseDTO.self),
-                    responseContentType: .application(.json),
-                    auth: .bearer()
-                )
-                
-                // PUT /posters/:id/positions/:positionid/hang
-                positions.on(.PUT, ":positionid", "hang", body: .collect(maxSize: "7000kb"), use: hangPosterPosition).openAPI(
-                    tags: openAPITagPosterPosition,
-                    summary: "Hängt eine Poster-Position auf",
-                    description: """
-                                 Markiert eine bestimmte Poster-Position als aufgehängt.
-                                 """,
-                    path: .type(PosterPosition.IDValue.self),
-                    body: .type(HangPosterPositionDTO.self),
-                    contentType: .application(.json),
-                    response: .type(HangPosterPositionResponseDTO.self),
-                    responseContentType: .application(.json),
-                    auth: .bearer()
-                )
-                
-                // PUT /posters/:id/positions/:positionid/take-down
-                positions.on(.PUT, ":positionid", "take-down", body: .collect(maxSize: "7000kb"), use: takeDownPosterPosition).openAPI(
-                    tags: openAPITagPosterPosition,
-                    summary: "Hängt eine Poster-Position ab",
-                    description: """
-                                 Markiert eine bestimmte Poster-Position als abgehängt.
-                                 """,
-                    path: .type(PosterPosition.IDValue.self),
-                    body: .type(TakeDownPosterPositionDTO.self),
-                    contentType: .application(.json),
-                    response: .type(TakeDownPosterPositionResponseDTO.self),
                     responseContentType: .application(.json),
                     auth: .bearer()
                 )
@@ -113,32 +143,6 @@ struct PosterPositionController: RouteCollection, Sendable {
                     auth: .bearer()
                 )
                 
-                // DELETE /posters/:id/positions/:positionid (admin)
-                adminRoutesPosterPositions.delete(":positionid", use: deletePosterPosition).openAPI(
-                    tags: openAPITagPosterPosition,
-                    summary: "Löscht eine Poster-Position",
-                    description: """
-                                 Löscht eine vorhandene Poster-Position anhand ihrer ID, nur für Admins ...
-                                 """,
-                    query: [],
-                    path: .type(PosterPosition.IDValue.self),
-                    statusCode: .noContent,
-                    auth: .bearer()
-                )
-                
-                // DELETE /posters/:id/positions/batch (admin)
-                adminRoutesPosterPositions.delete("batch", use: deletePosterPositions).openAPI(
-                    tags: openAPITagPosterPosition,
-                    summary: "Löscht mehrere Poster Positionen",
-                    description: """
-                                 Löscht mehrere Poster-Positionen anhand einer Liste von IDs, nur für Admins ...
-                                 """,
-                    query: [],
-                    body: .type(DeleteDTO.self),
-                    contentType: .application(.json),
-                    statusCode: .noContent,
-                    auth: .bearer()
-                )
             }
         }
     }
@@ -355,9 +359,9 @@ struct PosterPositionController: RouteCollection, Sendable {
         try await position.save(on: req.db)
         
         return HangPosterPositionResponseDTO(
-            posterPosition: position.id!,
+            posterPosition: try position.requireID(),
             postedAt: position.posted_at!,
-            postedBy: identity.id!,
+            postedBy: try identity.requireID(),
             image: position.image!
         )
     }
@@ -399,7 +403,7 @@ struct PosterPositionController: RouteCollection, Sendable {
         return try TakeDownPosterPositionResponseDTO(
             posterPosition: position.requireID(),
             removedAt: position.removed_at!,
-            removedBy: identity.id!,
+            removedBy: try identity.requireID(),
             image: position.image!
         )
     }

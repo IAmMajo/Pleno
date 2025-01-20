@@ -225,7 +225,7 @@ struct PosterController: RouteCollection, Sendable {
         }
         
         return PosterResponseDTO(
-            id: poster.id!,
+            id: try poster.requireID(),
             name: poster.name,
             description: poster.description,
             image: poster.image
@@ -243,9 +243,9 @@ struct PosterController: RouteCollection, Sendable {
             let paginatedData = try await Poster.query(on: req.db)
                 .paginate(PageRequest(page: page, per: per))
             
-            let responseDTOs = paginatedData.items.map { poster in
+            let responseDTOs = try paginatedData.items.map { poster in
                 PosterResponseDTO(
-                    id: poster.id!,
+                    id: try poster.requireID(),
                     name: poster.name,
                     description: poster.description,
                     image: poster.image
@@ -272,9 +272,9 @@ struct PosterController: RouteCollection, Sendable {
         } else {
             // Keine Pagination
             let posters = try await Poster.query(on: req.db).all()
-            let responseDTOs = posters.map { poster in
+            let responseDTOs = try posters.map { poster in
                 PosterResponseDTO(
-                    id: poster.id!,
+                    id: try poster.requireID(),
                     name: poster.name,
                     description: poster.description,
                     image: poster.image
@@ -351,7 +351,7 @@ struct PosterController: RouteCollection, Sendable {
         try await poster.save(on: req.db)
         
         return PosterResponseDTO(
-            id: poster.id!,
+            id: try poster.requireID(),
             name: poster.name,
             description: poster.description,
             image: poster.image
