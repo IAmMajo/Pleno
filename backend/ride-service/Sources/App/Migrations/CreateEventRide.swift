@@ -5,8 +5,8 @@ struct CreateEventRide: AsyncMigration {
     func prepare(on database: Database) async throws {
         try await database.schema(EventRide.schema)
             .id()
-            .field("event_id", .uuid, .required, .references(PlenoEvent.schema, "id"))
-            .field("participant_id", .uuid, .required, .references(EventParticipant.schema, "id"))
+            .field("event_id", .uuid, .required, .references(PlenoEvent.schema, "id", onDelete: .cascade))
+            .field("participant_id", .uuid, .required, .references(EventParticipant.schema, "id", onDelete: .cascade))
             .field("starts", .datetime, .required)
             .field("latitude", .float, .required)
             .field("longitude", .float, .required)

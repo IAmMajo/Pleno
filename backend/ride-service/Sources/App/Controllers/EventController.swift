@@ -155,6 +155,12 @@ struct EventController: RouteCollection {
         // query users without feedback
         let usersWithoutFeedback = try await getUsersWithoutFeedback(user_id: req.jwtPayload.userID, participants: userIDs, db: req.db)
         
+        // query countRideInterested
+        let countRideInterested = try await getCountRideInterested(eventID: event_id, db: req.db)
+        
+        // query countEmptySeats
+        let countEmptySeats = try await getCountEmptySeats(eventID: event_id, db: req.db)
+        
         // convert event to GetEventDetailDTO
         let getEventDetailDTO = GetEventDetailDTO(
             id: event_id,
@@ -165,7 +171,9 @@ struct EventController: RouteCollection {
             latitude: plenoEvent.latitude,
             longitude: plenoEvent.longitude,
             participations: participations,
-            userWithoutFeedback: usersWithoutFeedback
+            userWithoutFeedback: usersWithoutFeedback,
+            countRideInterested: countRideInterested,
+            countEmptySeats: countEmptySeats
         )
         
         return getEventDetailDTO
@@ -202,7 +210,9 @@ struct EventController: RouteCollection {
             latitude: plenoEvent.latitude,
             longitude: plenoEvent.longitude,
             participations: [],
-            userWithoutFeedback: []
+            userWithoutFeedback: [],
+            countRideInterested: 0,
+            countEmptySeats: 0
         )
         
         return try await getEventDetailDTO.encodeResponse(status: .created, for: req)
@@ -230,6 +240,8 @@ struct EventController: RouteCollection {
         let event_id = try plenoEvent.requireID()
         let (participations, userIDs) = try await allParticipationsForEvent(event_id: event_id, user_id: req.jwtPayload.userID, db: req.db)
         let usersWithoutFeedback = try await getUsersWithoutFeedback(user_id: req.jwtPayload.userID, participants: userIDs, db: req.db)
+        let countRideInterested = try await getCountRideInterested(eventID: event_id, db: req.db)
+        let countEmptySeats = try await getCountEmptySeats(eventID: event_id, db: req.db)
         let getEventDetailDTO = GetEventDetailDTO(
             id: event_id,
             name: plenoEvent.name,
@@ -239,7 +251,9 @@ struct EventController: RouteCollection {
             latitude: plenoEvent.latitude,
             longitude: plenoEvent.longitude,
             participations: participations,
-            userWithoutFeedback: usersWithoutFeedback
+            userWithoutFeedback: usersWithoutFeedback,
+            countRideInterested: countRideInterested,
+            countEmptySeats: countEmptySeats
         )
         
         return getEventDetailDTO
@@ -326,6 +340,7 @@ struct EventController: RouteCollection {
         guard let participant = try await EventParticipant.find(req.parameters.get("participant_id"), on: req.db) else {
             throw Abort(.notFound)
         }
+        let participantID = try participant.requireID()
         
         // check if user is participant
         if participant.$user.id != req.jwtPayload.userID {
@@ -337,15 +352,37 @@ struct EventController: RouteCollection {
             throw Abort(.badRequest, reason: "Invalid request body! Expected PatchEventParticipationDTO.")
         }
         
+        // if new state is absent
+        var isNewAbsent = false
+        if patchEventParticipationDTO.participates == false && participant.participates == true {
+            isNewAbsent = true
+        }
+        
         // patch
         participant.patchWithDTO(dto: patchEventParticipationDTO)
         
-        // save changes
-        try await participant.save(on: req.db)
+        // save and delete
+        if isNewAbsent {
+            try await req.db.transaction { db in
+                // save changes
+                try await participant.save(on: db)
+                
+                // delete rides and interesed parties for this participant
+                try await EventRide.query(on: db)
+                    .filter(\.$participant.$id == participantID)
+                    .delete()
+                
+                try await EventRideInterestedParty.query(on: db)
+                    .filter(\.$participant.$id == participantID)
+                    .delete()
+            }
+        } else {
+            // save only changes
+            try await participant.save(on: req.db)
+        }
         
         // create response
         let username = try await usernameByUserID(userID: participant.$user.id, db: req.db)
-        let participantID = try participant.requireID()
         let state = participant.participates ? UsersParticipationState.present : UsersParticipationState.absent
         let getEventParticipationDTO = GetEventParticipationDTO(
             id: participantID,
@@ -435,5 +472,23 @@ struct EventController: RouteCollection {
                     itsMe: userID == user_id
                 )
             }
+    }
+    
+    func getCountRideInterested(eventID: UUID, db: Database) async throws -> Int {
+        return try await EventRideInterestedParty.query(on: db)
+            .join(EventParticipant.self, on: \EventRideInterestedParty.$participant.$id == \EventParticipant.$id)
+            .filter(EventParticipant.self, \.$event.$id == eventID)
+            .count()
+    }
+    
+    func getCountEmptySeats(eventID: UUID, db: Database) async throws -> Int {
+        let seats = try await EventRide.query(on: db)
+            .filter(\.$event.$id == eventID)
+            .all()
+            .map { ride in
+                return Int(ride.emptySeats)
+            }
+        
+        return seats.reduce(0, +)
     }
 }

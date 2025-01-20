@@ -3,9 +3,9 @@ import Models
 
 struct CreateEventRideInterestedParty: AsyncMigration {
     func prepare(on database: Database) async throws {
-        try await database.schema(EventRideInteresedParty.schema)
+        try await database.schema(EventRideInterestedParty.schema)
             .id()
-            .field("participant_id", .uuid, .required, .references(EventParticipant.schema, "id"))
+            .field("participant_id", .uuid, .required, .references(EventParticipant.schema, "id", onDelete: .cascade))
             .field("latitude", .float, .required)
             .field("longitude", .float, .required)
             .field("created_at", .datetime)
@@ -14,6 +14,6 @@ struct CreateEventRideInterestedParty: AsyncMigration {
     }
 
     func revert(on database: Database) async throws {
-        try await database.schema(EventRideInteresedParty.schema).delete()
+        try await database.schema(EventRideInterestedParty.schema).delete()
     }
 }
