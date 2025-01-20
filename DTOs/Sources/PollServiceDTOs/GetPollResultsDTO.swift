@@ -15,12 +15,14 @@ public struct GetPollResultsDTO: Codable {
 }
 public struct GetPollResultDTO: Codable {
     public var index: UInt8
+    public var text: String
     public var count: UInt
     public var percentage: Double
     public var identities: [GetIdentityDTO]?
     
-    public init(index: UInt8, count: UInt, percentage: Double, identities: [GetIdentityDTO]? = nil) {
+    public init(index: UInt8, text: String, count: UInt, percentage: Double, identities: [GetIdentityDTO]? = nil) {
         self.index = index
+        self.text = text
         self.count = count
         self.percentage = percentage
         self.identities = identities
