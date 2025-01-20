@@ -1,7 +1,7 @@
 import Models
 import RideServiceDTOs
 
-extension EventRideInteresedParty {
+extension EventRideInterestedParty {
     
     public func patchWithDTO(dto: PatchInterestedPartyDTO) {
         if let latitude = dto.latitude {

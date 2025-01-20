@@ -372,7 +372,7 @@ struct EventController: RouteCollection {
                     .filter(\.$participant.$id == participantID)
                     .delete()
                 
-                try await EventRideInteresedParty.query(on: db)
+                try await EventRideInterestedParty.query(on: db)
                     .filter(\.$participant.$id == participantID)
                     .delete()
             }
@@ -475,8 +475,8 @@ struct EventController: RouteCollection {
     }
     
     func getCountRideInterested(eventID: UUID, db: Database) async throws -> Int {
-        return try await EventRideInteresedParty.query(on: db)
-            .join(EventParticipant.self, on: \EventRideInteresedParty.$participant.$id == \EventParticipant.$id)
+        return try await EventRideInterestedParty.query(on: db)
+            .join(EventParticipant.self, on: \EventRideInterestedParty.$participant.$id == \EventParticipant.$id)
             .filter(EventParticipant.self, \.$event.$id == eventID)
             .count()
     }

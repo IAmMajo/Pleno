@@ -11,7 +11,7 @@ public final class EventRideRequest: Model, @unchecked Sendable {
     public var ride: EventRide
     
     @Parent(key: "interested_party_id")
-    public var interestedParty: EventRideInteresedParty
+    public var interestedParty: EventRideInterestedParty
     
     @Field(key: "accepted")
     public var accepted: Bool
@@ -24,7 +24,7 @@ public final class EventRideRequest: Model, @unchecked Sendable {
     
     public init(){}
     
-    public init(id: UUID? = nil, rideID: EventRide.IDValue, interestedPartyID: EventRideInteresedParty.IDValue, accepted: Bool, createdAt: Date? = nil, updatedAt: Date? = nil) {
+    public init(id: UUID? = nil, rideID: EventRide.IDValue, interestedPartyID: EventRideInterestedParty.IDValue, accepted: Bool, createdAt: Date? = nil, updatedAt: Date? = nil) {
         self.id = id
         self.$ride.id = rideID
         self.$interestedParty.id = interestedPartyID
