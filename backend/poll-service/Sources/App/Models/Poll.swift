@@ -29,13 +29,13 @@ extension Poll {
         }
         return try await self.$votingOptions.get(on: db)
             .map { option in
-            if let myVote = try await option.$votes.query(on: db)
-                .filter(\.$id.$identity.$id ~~ identityIds)
-                .first() {
-                return try myVote.requireID().$pollVotingOption.id.index
+                if let myVote = try await option.$votes.query(on: db)
+                    .filter(\.$id.$identity.$id ~~ identityIds)
+                    .first() {
+                    return try myVote.requireID().$pollVotingOption.id.index
+                }
+                return 0
             }
-            return 0
-        }
             .filter { index in
                 index > 0
             }
@@ -91,14 +91,16 @@ extension Poll {
             percentageCutoff1.index < percentageCutoff2.index
         }
         
-        for index in 0..<votingOptions.count {
-            let percentageCutoff = percentageCutoffs[index]
+        for (i, option) in votingOptions.enumerated() {
+            let index = try option.requireID().index
+            let percentageCutoff = percentageCutoffs[i]
             try await getPollResultsDTO.results.append(
                 GetPollResultDTO(
-                    index: UInt8(index + 1),
-                    count: UInt(totalVoteAmounts[index]),
+                    index: index,
+                    text: option.text,
+                    count: UInt(totalVoteAmounts[i]),
                     percentage: percentageCutoff.percentage,
-                    identities: self.anonymous ? nil : totalVotes[index].map({ vote in
+                    identities: self.anonymous ? nil : totalVotes[i].map({ vote in
                         try await vote.requireID().$identity.get(on: db).toGetIdentityDTO()
                     })))
         }
