@@ -257,9 +257,6 @@
         }
       }
     },
-    "Abgehangen" : {
-
-    },
     "Abgeschlossen" : {
 
     },
@@ -620,9 +617,6 @@
     "Archiviert" : {
 
     },
-    "Aufgehangen" : {
-
-    },
     "Aufhängen\nbestätigen" : {
 
     },
@@ -938,6 +932,9 @@
     "Events" : {
 
     },
+    "Expires At: %@" : {
+
+    },
     "Fahrer" : {
 
     },
@@ -974,6 +971,9 @@
 
     },
     "Fehler" : {
+
+    },
+    "Filter" : {
 
     },
     "Frage" : {
@@ -1244,6 +1244,9 @@
 
     },
     "Loading meetings..." : {
+
+    },
+    "Loading poster details..." : {
 
     },
     "Loading..." : {
@@ -1541,13 +1544,16 @@
     "No Data" : {
 
     },
-    "No expiration date" : {
-
-    },
     "No meetings available." : {
 
     },
+    "No poster data available." : {
+
+    },
     "No records available." : {
+
+    },
+    "Non-To-Hang" : {
 
     },
     "oder" : {
@@ -1595,9 +1601,6 @@
 
     },
     "Öffnen mit Waze" : {
-
-    },
-    "OK" : {
 
     },
     "OK" : {
@@ -1988,9 +1991,6 @@
     "Standort hinzufügen" : {
 
     },
-    "Standorte (3)" : {
-
-    },
     "Start: %@" : {
 
     },
@@ -2066,6 +2066,9 @@
           }
         }
       }
+    },
+    "To-Hang Only" : {
+
     },
     "Umfrage beenden" : {
 

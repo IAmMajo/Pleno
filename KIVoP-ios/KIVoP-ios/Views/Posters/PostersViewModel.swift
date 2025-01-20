@@ -7,19 +7,247 @@
 
 import Foundation
 import SwiftUI
+import Combine
+import PosterServiceDTOs
 import MeetingServiceDTOs
-//import PosterServiceDTOs
 
-extension GetIdentityDTO: @retroactive Identifiable {}
-extension GetIdentityDTO: @retroactive Equatable {}
-extension GetIdentityDTO: @retroactive Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+@MainActor
+class PostersViewModel: ObservableObject {
+    @Published var posters: [PosterResponseDTO] = []
+//   @Published var filteredPosters: [(poster: PosterResponseDTO, earliestPositionDate: Date/*, tohangCount: Int, expiredCount: Int*/)] = []
+   @Published var filteredPosters: [(poster: PosterResponseDTO, earliestPosition: PosterPositionResponseDTO, tohangCount: Int, expiredCount: Int)] = []
+    @Published var selectedTab: Int = 0 {
+        didSet {
+            filterPosters()
+        }
     }
-    public static func == (lhs: GetIdentityDTO, rhs: GetIdentityDTO) -> Bool {
-        return lhs.id == rhs.id
+
+    private var posterPositionsMap: [UUID: [PosterPositionResponseDTO]] = [:]
+
+    init() {
+        Task {
+            await fetchPosters()
+        }
     }
+
+    func fetchPosters() async {
+        do {
+            let fetchedPosters = try await PosterService.shared.fetchPostersAsync()
+            self.posters = fetchedPosters
+            await fetchPosterPositions()
+        } catch {
+            print("Error fetching posters: \(error)")
+        }
+    }
+
+    private func fetchPosterPositions() async {
+        for poster in posters {
+            do {
+                let positions = try await PosterService.shared.fetchPosterPositionsAsync(for: poster.id)
+                posterPositionsMap[poster.id] = positions
+            } catch {
+                print("Error fetching positions for poster \(poster.id): \(error)")
+            }
+        }
+        filterPosters()
+    }
+   
+   private func filterPosters() {
+       filteredPosters = posters.compactMap { poster in
+           guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { return nil }
+           
+           // Find the position with the earliest `expiresAt`
+           guard let earliestPosition = positions.min(by: { $0.expiresAt < $1.expiresAt }) else { return nil }
+           
+           // Additional fields
+//           let earliestPositionStatus = earliestPosition.status
+           let tohangCount = positions.filter { $0.status == "toHang" }.count
+           let expiredCount = positions.filter { $0.status == "overdue" }.count
+           
+           switch selectedTab {
+           case 0:
+               if positions.contains(where: { $0.status != "archived" }) { // archived (platzhalter) wegmachen, anders kalkulieren
+                   return (poster, earliestPosition, tohangCount, expiredCount)
+               }
+           case 1:
+               if !positions.contains(where: { $0.status != "archived" }) { // archived (platzhalter) wegmachen, anders
+                   return (poster, earliestPosition, tohangCount, expiredCount)
+               }
+           default:
+               break
+           }
+          return nil
+       }
+   }
+   
+//   private func filterPosters() {
+//       filteredPosters = posters.compactMap { poster in
+//           guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { return nil }
+//           
+//           // Find the position with the earliest expiresAt
+//          let earliestPositionDate = positions.min(by: { $0.expiresAt < $1.expiresAt })?.expiresAt
+////          let earliestPositionStatus = positions.min(by: { $0.expiresAt < $1.expiresAt })?.status
+////          let tohangCount = positions.filter { $0.status == "tohang" }.count
+////          let expiredCount = positions.filter { $0.status == "expired" }.count
+//           
+//           switch selectedTab {
+//           case 0:
+//               if positions.contains(where: { $0.status != "archived" }) {
+//                   if let earliestPositionDate = earliestPositionDate {
+//                      return (poster, earliestPositionDate/*, tohangCount, expiredCount*/)
+//                   }
+//               }
+//           case 1:
+//               if !positions.contains(where: { $0.status != "archived" }) {
+//                   if let earliestPositionDate = earliestPositionDate {
+//                      return (poster, earliestPositionDate/*, tohangCount, expiredCount*/)
+//                   }
+//               }
+//           default:
+//               return nil
+//           }
+//           return nil
+//       }
+//   }
 }
+
+//class PostersViewModel: ObservableObject {
+//   
+//   @Published var searchText: String = ""
+//   @Published var selectedTab: Int = 0
+//   @Published var meetings: [GetMeetingDTO] = []
+//   @Published var posters: [PosterResponseDTO] = []
+//   @Published var posterPositions: [PosterPositionResponseDTO] = []
+//   @Published var posterPositionsMap: [UUID: [PosterPositionResponseDTO]] = [:]
+//   @Published var isLoading: Bool = false
+//   @Published var errorMessage: String?
+//   
+//   private var cancellables = Set<AnyCancellable>()
+//
+//   
+//    init() {
+//       loadPosters()
+////       posters = mockPosters
+////       posterPositions = mockPosterPositions
+//    }
+//   
+//   func loadPosters() {
+//      isLoading = true
+//      PosterService.shared.fetchPosters { [weak self] result in
+//         DispatchQueue.main.async {
+//            switch result {
+//            case .success(let posters):
+//               self?.posters = posters
+//            case .failure(let error):
+//               self?.errorMessage = error.localizedDescription
+//               print("Fehler beim Laden der Poster: \(error)")
+//            }
+//         }
+//      }
+//      isLoading = false
+//   }
+//   
+//   func loadPosterPositions(posterId: UUID) {
+//      PosterService.shared.fetchPosterPositions(for: posterId) { [weak self] result in
+//         DispatchQueue.main.async {
+//            switch result {
+//            case .success(let positions):
+//               self?.posterPositions = positions
+//            case .failure(let error):
+//               self?.errorMessage = error.localizedDescription
+//               print("Fehler beim Laden der PosterPositions: \(error)")
+//            }
+//         }
+//      }
+//   }
+//   
+//   func loadPosterPositions(posterId: UUID) async {
+//      do {
+//         let positions = try await PosterService.shared.fetchPosterPositionsAsync(for: posterId)
+//         DispatchQueue.main.async {
+//            self.posterPositionsMap[posterId] = positions
+//         }
+//      } catch {
+//         DispatchQueue.main.async {
+//            self.errorMessage = error.localizedDescription
+//            print("Fehler beim Laden der PosterPositions: \(error)")
+//         }
+//      }
+//   }
+//
+//   func getFirstPosterExpiresPosition(posterId: UUID) async -> PosterPositionResponseDTO? {
+//      if posterPositionsMap[posterId] == nil {
+//         await loadPosterPositions(posterId: posterId)
+//      }
+//      guard let positions = posterPositionsMap[posterId] else { return nil }
+//      let positionsSorted = positions.sorted(by: { $0.expiresAt < $1.expiresAt })
+//      return positionsSorted.first
+//   }
+//   
+////   var posterExpiresDates: [UUID: Date] {
+////      var dates: [UUID: Date] = [:]
+////      for poster in posters {
+////         let positionsSorted = getPosterPositions(poster: poster).sorted(by: { $0.expiresAt < $1.expiresAt })
+////         dates[poster.id!] = positionsSorted.first?.expiresAt
+////      }
+////      return dates
+////   }
+////   
+//   var posterExpiresPositions: [UUID: PosterPositionResponseDTO] {
+//      var positions: [UUID: PosterPositionResponseDTO] = [:]
+//      for poster in posters {
+//         loadPosterPositions(posterId: poster.id)
+//         let positionsSorted = posterPositions.sorted(by: { $0.expiresAt < $1.expiresAt })
+//         positions[poster.id] = positionsSorted.first
+//      }
+//      return positions
+//   }
+////   
+//   private func sortedPosters() -> [PosterResponseDTO] {
+//      // Sort the posters by their corresponding expiration dates
+////      let sortedPosters = posters.sorted { poster1, poster2 in
+////         guard let date1 = posterExpiresDates[poster1.id!],
+////               let date2 = posterExpiresDates[poster2.id!] else {
+////            return false
+////         }
+////         return date1 < date2
+////      }
+//      
+//      let sortedPosters = posters.sorted { poster1, poster2 in
+//         guard let position1 = posterExpiresPositions[poster1.id],
+//               let position2 = posterExpiresPositions[poster2.id] else {
+//            return false
+//         }
+//         return position1.expiresAt < position2.expiresAt
+//      }
+//      
+//      return sortedPosters
+//   }
+//
+//    // Filtert Sitzungen basierend auf dem Tab
+//   var filteredPosters: [PosterResponseDTO] {
+//       var currentPosters: [PosterResponseDTO] = []
+//       var archivedPosters: [PosterResponseDTO] = []
+//      let sortedPosters = sortedPosters()
+//       for poster in sortedPosters {
+//          loadPosterPositions(posterId: poster.id)
+//          if posterPositions.contains(where: { $0.status != "tohang" }) {
+//             currentPosters.append(poster)
+//          } else {
+//             archivedPosters.append(poster)
+//          }
+//       }
+//        switch selectedTab {
+//        case 0:
+//           return currentPosters
+//        case 1:
+//            return archivedPosters
+//        default:
+//            return []
+//        }
+//    }
+//   
+//}
 
 public struct Poster: Identifiable, Codable, Hashable {
    public let id: UUID?
@@ -42,39 +270,69 @@ public struct PosterPosition: Identifiable, Codable, Hashable {
 
 let mockIdentity1: GetIdentityDTO = GetIdentityDTO(id: UUID(), name: "Heinz-Peters")
 let mockIdentity2: GetIdentityDTO = GetIdentityDTO(id: UUID(), name: "Franz")
+let mockUser1: ResponsibleUsersDTO = ResponsibleUsersDTO(id: UUID(), name: "Heinz-Peters")
+let mockUser2: ResponsibleUsersDTO = ResponsibleUsersDTO(id: UUID(), name: "Franz")
 
-var mockPosters: [Poster] {
+var mockPosters: [PosterResponseDTO] {
    return [
-      Poster(
+      PosterResponseDTO(
          id: UUID(),
-         posterPositionIds: [mockPosterPosition1.id, mockPosterPosition5.id, mockPosterPosition3.id, mockPosterPosition6.id],
          name: "Weihnachtsfeier",
          description: "Das ist das Plakat für unsere Weißnachtsfeier dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
-         imageBase64: "bild1"
-      ),
-      Poster(
+         imageUrl: "bild1"),
+      PosterResponseDTO(
          id: UUID(),
-         posterPositionIds: [mockPosterPosition2.id, mockPosterPosition3.id],
          name: "Zirkus",
          description: "Das ist das Plakat für unseren Zirkus dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
-         imageBase64: "bild2"
+         imageUrl: "bild2"
       ),
-      Poster(
+      PosterResponseDTO(
          id: UUID(),
-         posterPositionIds: [mockPosterPosition4.id],
          name: "Frühlingsfest",
          description: "Das ist das Plakat für unser Frühlingsfest dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
-         imageBase64: "bild3"
+         imageUrl: "bild3"
       ),
-      Poster(
+      PosterResponseDTO(
          id: UUID(),
-         posterPositionIds: [mockPosterPosition3.id],
          name: "Herbstfest",
          description: "Das ist das Plakat für unser Herbstfest dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
-         imageBase64: "bild4"
+         imageUrl: "bild4"
       ),
    ]
 }
+//
+//var mockPosters: [Poster] {
+//   return [
+//      Poster(
+//         id: UUID(),
+//         posterPositionIds: [mockPosterPosition1.id, mockPosterPosition5.id, mockPosterPosition3.id, mockPosterPosition6.id],
+//         name: "Weihnachtsfeier",
+//         description: "Das ist das Plakat für unsere Weißnachtsfeier dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
+//         imageBase64: "bild1"
+//      ),
+//      Poster(
+//         id: UUID(),
+//         posterPositionIds: [mockPosterPosition2.id, mockPosterPosition3.id],
+//         name: "Zirkus",
+//         description: "Das ist das Plakat für unseren Zirkus dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
+//         imageBase64: "bild2"
+//      ),
+//      Poster(
+//         id: UUID(),
+//         posterPositionIds: [mockPosterPosition4.id],
+//         name: "Frühlingsfest",
+//         description: "Das ist das Plakat für unser Frühlingsfest dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
+//         imageBase64: "bild3"
+//      ),
+//      Poster(
+//         id: UUID(),
+//         posterPositionIds: [mockPosterPosition3.id],
+//         name: "Herbstfest",
+//         description: "Das ist das Plakat für unser Herbstfest dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
+//         imageBase64: "bild4"
+//      ),
+//   ]
+//}
 
 public enum Status: String, Codable {
    case hung
@@ -83,6 +341,14 @@ public enum Status: String, Codable {
    case expiresInOneDay
    case expired
 }
+
+let mockPosterPosition0 = PosterPositionResponseDTO(
+   id: UUID(),
+   latitude: 51.500603516488205,
+   longitude: 6.545327532716446,
+   expiresAt: Date.now,
+   responsibleUsers: [mockUser1, mockUser2],
+   status: "toHang")
 
 let mockPosterPosition1: PosterPosition = PosterPosition( //poster1
    id: UUID(),
@@ -147,135 +413,4 @@ let mockPosterPosition6: PosterPosition = PosterPosition( //poster1
 
 var mockPosterPositions: [PosterPosition] {
    [mockPosterPosition2, mockPosterPosition4, mockPosterPosition1, mockPosterPosition5, mockPosterPosition3, mockPosterPosition6]
-}
-
-class PostersViewModel: ObservableObject {
-
-    @Published var searchText: String = ""
-    @Published var selectedTab: Int = 0
-    @Published var meetings: [GetMeetingDTO] = []
-   @Published var posters: [Poster] = []
-   @Published var posterPositions: [PosterPosition] = []
-    
-    init() {
-//       fetchPosters()
-       posters = mockPosters
-       posterPositions = mockPosterPositions
-    }
-    
-    // Abruf der Poster von der API
-//    func fetchPosters() {
-//        Task {
-//            do {
-//                // Statischer Login zum Testen, bis die Funktion implementiert wurde.
-//                try await AuthController.shared.login(email: "admin@kivop.ipv64.net", password: "admin")
-//                let token = try await AuthController.shared.getAuthToken()
-//                
-//                // Poster abrufen
-//                guard let url = URL(string: "https://kivop.ipv64.net/...") else {
-//                    throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
-//                }
-//                
-//                var request = URLRequest(url: url)
-//                request.httpMethod = "GET"
-//                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-//                
-//                let (data, response) = try await URLSession.shared.data(for: request)
-//                
-//                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-//                    throw NSError(domain: "Failed to fetch posters", code: 500, userInfo: nil)
-//                }
-//                
-//                do {
-//                    let decoder = JSONDecoder()
-//                    decoder.dateDecodingStrategy = .iso8601
-//                    // Die Dekodierung und die Fehlerbehandlung innerhalb der Hauptwarteschlange
-//                    DispatchQueue.main.async {
-//                        do {
-//                            let fetchedPosters = try decoder.decode([PosterResponseDTO].self, from: data)
-//                            self.posters.append(contentsOf: fetchedPosters)
-//                        } catch {
-//                            print("Fehler beim Dekodieren der Posters: \(error.localizedDescription)")
-//                        }
-//                    }
-//                }
-//            } catch {
-//                // Fehlerbehandlung auf dem Hauptthread
-//                DispatchQueue.main.async {
-//                    print("\(error.localizedDescription)")
-//                }
-//            }
-//        }
-//    }
-
-   
-   var posterExpiresDates: [UUID: Date] {
-      var dates: [UUID: Date] = [:]
-      for poster in posters {
-         let positionsSorted = getPosterPositions(poster: poster).sorted(by: { $0.expiresAt < $1.expiresAt })
-         dates[poster.id!] = positionsSorted.first?.expiresAt
-      }
-      return dates
-   }
-   
-   var posterExpiresPositions: [UUID: PosterPosition] {
-      var positions: [UUID: PosterPosition] = [:]
-      for poster in posters {
-         let positionsSorted = getPosterPositions(poster: poster).sorted(by: { $0.expiresAt < $1.expiresAt })
-         positions[poster.id!] = positionsSorted.first
-      }
-      return positions
-   }
-   
-   private func sortedPosters() -> [Poster] {
-      // Sort the posters by their corresponding expiration dates
-//      let sortedPosters = posters.sorted { poster1, poster2 in
-//         guard let date1 = posterExpiresDates[poster1.id!],
-//               let date2 = posterExpiresDates[poster2.id!] else {
-//            return false
-//         }
-//         return date1 < date2
-//      }
-      
-      let sortedPosters = posters.sorted { poster1, poster2 in
-         guard let position1 = posterExpiresPositions[poster1.id!],
-               let position2 = posterExpiresPositions[poster2.id!] else {
-            return false
-         }
-         return position1.expiresAt < position2.expiresAt
-      }
-      
-      return sortedPosters
-   }
-
-    // Filtert Sitzungen basierend auf dem Tab
-   var filteredPosters: [Poster] {
-       var currentPosters: [Poster] = []
-       var archivedPosters: [Poster] = []
-      let sortedPosters = sortedPosters()
-       for poster in sortedPosters {
-          if getPosterPositions(poster: poster).contains(where: { $0.status != .notDisplayed }) {
-             currentPosters.append(poster)
-          } else {
-             archivedPosters.append(poster)
-          }
-       }
-        switch selectedTab {
-        case 0:
-           return currentPosters
-        case 1:
-            return archivedPosters
-        default:
-            return []
-        }
-    }
-   
-   private func getPosterPositions(poster: Poster) -> [PosterPosition] {
-      var posterPositions: [PosterPosition] = []
-      for id in poster.posterPositionIds {
-         posterPositions.append(mockPosterPositions.first { $0.id == id }!)
-      }
-      return posterPositions
-   }
-   
 }
