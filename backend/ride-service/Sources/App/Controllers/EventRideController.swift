@@ -168,7 +168,7 @@ struct EventRideController: RouteCollection {
         let countParty = try await EventRideInteresedParty.query(on: req.db)
             .filter(\.$participant.$id == participantID)
             .count()
-        if count > 0 {
+        if countParty > 0 {
             throw Abort(.badRequest, reason: "You are already interesed!")
         }
         
