@@ -30,7 +30,7 @@ struct PollResultsView: View {
     private func renderPollResults(results: GetPollResultsDTO) -> some View {
         VStack(spacing: 16) {
             PieChartView_Polls(
-                optionTextMap: Dictionary(uniqueKeysWithValues: results.results.map { (Int($0.index), "Option \($0.index)") }),
+                optionTextMap: Dictionary(uniqueKeysWithValues: results.results.map { (Int($0.index), $0.text) }),
                 votingResults: results
             )
             .frame(height: 200)
