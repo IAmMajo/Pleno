@@ -1,27 +1,141 @@
 import Fluent
 import Vapor
 import Models
-//import VaporToOpenAPI
+import VaporToOpenAPI
 import RideServiceDTOs
 
 
 struct EventRideController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
+        let openAPITag = TagObject(name: "Eventfahrten")
+        
         let eventRideRoutes = routes.grouped("eventrides")
         
+        // GET /eventrides/
         eventRideRoutes.get("", use: getAllEventRides)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Alle Eventfahrten abfragen.",
+                response: .type([GetEventRideDTO].self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
+        // GET /eventrides/:id
         eventRideRoutes.get(":id", use: getEventRide)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Details einer Eventfahrt abfragen.",
+                path: .type(EventRide.IDValue.self),
+                response: .type(GetEventRideDetailDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
+        // POST /eventrides/
         eventRideRoutes.post("", use: newEventRide)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Neue Eventfahrt anlegen.",
+                body: .type(CreateEventRideDTO.self),
+                contentType: .application(.json),
+                response: .type(GetEventRideDetailDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .created,
+                auth: AuthMiddleware.schemeObject
+            )
+        // PATCH /eventrides/:id
         eventRideRoutes.patch(":id", use: patchEventRide)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Eventfahrt anpassen.",
+                path: .type(EventRide.IDValue.self),
+                body: .type(PatchEventRideDTO.self),
+                contentType: .application(.json),
+                response: .type(GetEventRideDetailDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
+        // DELETE /eventrides/:id
         eventRideRoutes.delete(":id", use: deleteEventRide)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Eventfahrt löschen.",
+                path: .type(EventRide.IDValue.self),
+                statusCode: .noContent,
+                auth: AuthMiddleware.schemeObject
+            )
         
+        // POST /eventrides/:id/requests
         eventRideRoutes.post(":id", "requests", use: newRequestToEventRide)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Mitnahme bei einer Eventfahrt anfragen.",
+                path: .type(EventRide.IDValue.self),
+                response: .type(GetRiderDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .created,
+                auth: AuthMiddleware.schemeObject
+            )
+        // PATCH /eventrides/requests/:request_id
         eventRideRoutes.patch("requests", ":request_id", use: patchEventRideRequest)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Mitnahme bei einer Eventfahrt bearbeiten.",
+                description: "Hinweis: Der Fahrer kann über diese Route die Mitnahme bestätigen, der Mitfahrer kann hier nichts anpassen.",
+                path: .type(EventRideRequest.IDValue.self),
+                body: .type(PatchEventRideRequestDTO.self),
+                contentType: .application(.json),
+                response: .type(GetRiderDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
+        // DELETE /eventrides/requests/:request_id
         eventRideRoutes.delete("requests", ":request_id", use: deleteEventRideRequest)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Mitnahme bei einer Eventfahrt löschen.",
+                path: .type(EventRideRequest.IDValue.self),
+                statusCode: .noContent,
+                auth: AuthMiddleware.schemeObject
+            )
         
+        // POST /eventrides/interested
         eventRideRoutes.post("interested", use: newInterestedParty)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Interesse an einer Mitnahme zu einem Event bekunden.",
+                body: .type(CreateInterestedPartyDTO.self),
+                contentType: .application(.json),
+                response: .type(GetInterestedPartyDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .created,
+                auth: AuthMiddleware.schemeObject
+            )
+        // PATCH /eventrides/interested/:party_id
         eventRideRoutes.patch("interested", ":party_id", use: patchInterestedParty)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Interesse an einer Mitnahme zu einem Event anpassen.",
+                path: .type(EventRideInteresedParty.IDValue.self),
+                body: .type(PatchInterestedPartyDTO.self),
+                contentType: .application(.json),
+                response: .type(GetInterestedPartyDTO.self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
+        // DELETE /eventrides/interested/:party_id
         eventRideRoutes.delete("interested", ":party_id", use: deleteInterestedParty)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Interesse an einer Mitnahme zu einem Event löschen.",
+                path: .type(EventRideInteresedParty.IDValue.self),
+                statusCode: .noContent,
+                auth: AuthMiddleware.schemeObject
+            )
     }
     
     /*
