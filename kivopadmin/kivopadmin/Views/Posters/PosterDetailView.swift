@@ -46,21 +46,21 @@ struct PosterDetailView: View {
    }
    
     var body: some View {
-        VStack{
-            if posterManager.isLoading {
-                ProgressView("Loading meetings...") // Ladeanzeige
-                    .progressViewStyle(CircularProgressViewStyle())
-            } else if let errorMessage = posterManager.errorMessage {
-                Text("Error: \(errorMessage)")
-                    .foregroundColor(.red)
-            } else {
-                TopView(poster: poster, posterManager: posterManager)
-                MidView(poster: poster, posterManager: posterManager)
+        NavigationStack{
+            VStack{
+                if posterManager.isLoading {
+                    ProgressView("Loading meetings...") // Ladeanzeige
+                        .progressViewStyle(CircularProgressViewStyle())
+                } else if let errorMessage = posterManager.errorMessage {
+                    Text("Error: \(errorMessage)")
+                        .foregroundColor(.red)
+                } else {
+                    TopView(poster: poster, posterManager: posterManager)
+                    MidView(poster: poster, posterManager: posterManager)
+                }
             }
         }
 
-       .refreshable {
-       }
        .onAppear {
            posterManager.fetchPosterPositions(poster: poster)
            posterManager.fetchPosterPositionsToHang(poster: poster)
@@ -120,16 +120,18 @@ struct TopView: View {
     
     var body: some View {
         HStack {
-            AsyncImage(url: URL(string: "https://kivop.ipv64.net/posters/images/posters/\(poster.imageUrl)")) { image in
-                image.resizable()
-            } placeholder: {
-                ProgressView()
+            if let uiImage = UIImage(data: poster.image) {
+                Image(uiImage: uiImage)
+                    .resizable() // Ermöglicht das Skalieren des Bildes
+                    .aspectRatio(contentMode: .fit) // Beibehaltung des Seitenverhältnisses
+                    .frame(maxWidth: 200, maxHeight: 200) // Begrenzung der Größe
+                    .cornerRadius(8) // Abrunden der Ecken
+                    .foregroundStyle(.gray.opacity(0.5)) // Graue Überlagerung (falls zutreffend)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous)) // Zuschneiden zu einer abgerundeten Form
+
+                    
             }
-            .frame(maxWidth: 200, maxHeight: 200)
-            .aspectRatio(contentMode: .fit)
-            .cornerRadius(8)
-            .foregroundStyle(.gray.opacity(0.5))
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+
             
             VStack{
                 HStack{
@@ -175,49 +177,79 @@ struct TopView: View {
 }
 
 struct MidView: View {
+    // Enum zur Definition der Status
+    enum Status: String, CaseIterable, Identifiable {
+        case all = "Alle"
+        case toHang = "Bereit zum Aufhängen"
+        case takendown = "Abgehangen"
+        case overdue = "Überfällig"
+        case hangs = "Aufgehangen"
+        
+        var id: String { self.rawValue } // Identifiable-Konformität
+    }
     
+    // Aktueller Status
+    @State private var selectedStatus: Status = .all
 
     let poster: PosterResponseDTO
     let posterManager: PosterManager
-    
-    func getDateColor(status: Status) -> Color {
-       switch status {
-       case .hung:
-          return Color(UIColor.darkText)
-       case .takenDown:
-          return Color(UIColor.darkText)
-       case .notDisplayed:
-          return Color(UIColor.darkText)
-       case .expiresInOneDay:
-          return .orange
-       case .expired:
-          return .red
-       }
-    }
-    
-    func getDateStatusText(status: Status) -> String {
-       switch status {
-       case .hung:
-          return "hängt"
-       case .takenDown:
-          return "abgehangen"
-       case .notDisplayed:
-          return "hängt nicht"
-       case .expiresInOneDay:
-          return "morgen überfällig"
-       case .expired:
-          return "überfällig"
-       }
-    }
+    @State private var selectedPositions: Set<String> = []  // Set für ausgewählte Positionen
     
     var body: some View {
+        // Picker-Komponente
+        Picker("Select Status", selection: $selectedStatus) {
+            // Iteriere über alle Status-Werte
+            ForEach(Status.allCases) { status in
+                Text(status.rawValue).tag(status) // Text und Tag für jeden Zustand
+            }
+        }
+        .pickerStyle(SegmentedPickerStyle()) // Oder .menu, .wheel, etc.
+        .padding()
+//        Button(action: deleteSelectedPositions) {
+//            Text("Ausgewählte löschen")
+//                .foregroundColor(.red)
+//        }
+//        .padding()
+//        .disabled(selectedPositions.isEmpty) // Button deaktivieren, wenn keine Auswahl getroffen
         List {
             Section(header: Text("Positionen")) {
-                ForEach(posterManager.posterPositions, id: \.id) { position in
-                    Text("Test") // Zugriff auf ein Property des Elements
+                ForEach(filteredPositions, id: \.id) { position in
+                    NavigationLink(destination: Posters_PositionView(posterPosition: position, image: poster.image, poster: poster, posterManager: posterManager)){
+                        Text("Zur Plakat Position")
+                    }
                 }
             }
         }
+    }
+    
+    private var filteredPositions: [PosterPositionResponseDTO] {
+        switch selectedStatus {
+        case .all:
+            return posterManager.posterPositions
+        case .toHang:
+            return posterManager.posterPositionsToHang
+        case .takendown:
+            return posterManager.posterPositionsTakendown
+        case .overdue:
+            return posterManager.posterPositionsOverdue
+        case .hangs:
+            return posterManager.posterPositionsHangs
+        }
+    }
+    // Toggle-Auswahl für Positionen
+    private func toggleSelection(for positionId: String) {
+        if selectedPositions.contains(positionId) {
+            selectedPositions.remove(positionId) // Abwählen
+        } else {
+            selectedPositions.insert(positionId) // Auswählen
+        }
+    }
+    
+    // Löschen der ausgewählten Positionen
+    private func deleteSelectedPositions() {
+        // Hier kannst du die Logik zum Löschen der Positionen hinzufügen
+        //posterManager.deletePosterPosition(posterId: poster.id, positionIds: <#T##[UUID]#>, completion: <#T##() -> Void#>)
+        selectedPositions.removeAll() // Nach dem Löschen die Auswahl zurücksetzen
     }
 }
 

@@ -18,6 +18,7 @@ struct MeetingDetailAdminView: View {
     @StateObject private var votingManager = VotingManager() // RecordManager als StateObject
     @StateObject private var attendanceManager = AttendanceManager() // RecordManager als StateObject
     @ObservedObject var userManager = UserManager()
+    @StateObject private var viewModel = AttendanceViewModel()
     
     enum ActionType {
         case start
@@ -134,6 +135,37 @@ struct MeetingDetailAdminView: View {
                             Text(meeting.description)
                         }
                     }
+                    Section(header: Text("Anwesenheit")){
+                        NavigationLink(destination: viewModel.destinationView(for: meeting)) {
+                            HStack{
+                                Text("Anwesenheit")
+                                Spacer()
+                                
+                                // Logik für die Symbolauswahl. Bei vergangenen Terminen gibt es kein Kalender Symbol. Wenn dort der Status noch nicht gesetzt ist, hat man am Meeting nicht teilgenommen.
+                                Image(systemName: {
+                                    switch meeting.myAttendanceStatus {
+                                    case .accepted, .present:
+                                        return "checkmark.circle"
+                                    case .absent:
+                                        return "xmark.circle"
+                                    default:
+                                        return viewModel.selectedTab == 0 ? "xmark.circle" : "calendar"
+                                    }
+                                }())
+                                .foregroundColor({
+                                    switch meeting.myAttendanceStatus {
+                                    case .accepted, .present:
+                                        return .blue
+                                    case .absent:
+                                        return .red
+                                    default:
+                                        return viewModel.selectedTab == 0 ? .red : .orange
+                                    }
+                                }())
+                                .font(.system(size: 18))
+                            }
+                        }
+                    }
                     if meeting.status != .scheduled {
                         // Protokolle
                         Section(header: Text("Protokolle")) {
@@ -179,14 +211,6 @@ struct MeetingDetailAdminView: View {
                             }
                         }
                     }
-
-                    
-                    
-
-
-                    
-
-                    
                     if let meetingCode = meeting.code {
                         // QR-Code
                         Section("Meeting-Code") {
