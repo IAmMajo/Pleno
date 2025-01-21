@@ -30,7 +30,7 @@ struct ProgressBarView: View {
     var body: some View {
        Rectangle()
            .fill(.gray.opacity(0.3))
-           .frame(width: .infinity, height: 15)
+           .frame(maxWidth: .infinity, maxHeight: 15)
            .overlay(
             HStack {
                RoundedRectangle(cornerRadius: 25)

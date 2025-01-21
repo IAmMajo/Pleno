@@ -54,9 +54,9 @@ struct MapPositionsView: View {
                               .resizable()
                               .scaledToFit()
                               .clipShape(RoundedRectangle(cornerRadius: 3))
-                              .frame(width: 38, height: 38)
+                              .frame(width: 35, height: 35)
                          )
-                         .frame(width: 55, height: 55)
+                         .frame(width: 52, height: 52)
                          .overlay(alignment: .bottom) {
                             IndicatorShape()
                                .fill(.background)
@@ -84,7 +84,7 @@ struct MapPositionsView: View {
                          )
                          .padding(.top, 5)
                    }
-                   .offset(y: -20)
+                   .offset(y: -18)
                 }
                 .annotationTitles(.hidden)
             }
@@ -108,14 +108,14 @@ struct MapPositionsView: View {
         let maxLon = lons.max() ?? 0
 
         let center = CLLocationCoordinate2D(
-         latitude: (minLat + maxLat) / 2 + 0.002,
-            longitude: (minLon + maxLon) / 2
+         latitude: (minLat + maxLat) / 2 /*+ 0.002*/,
+         longitude: (minLon + maxLon) / 2
         )
         let span = MKCoordinateSpan(
-//            latitudeDelta: (maxLat - minLat) * 1.4,
-//            longitudeDelta: (maxLon - minLon) * 1.4
-         latitudeDelta: max(maxLat - minLat, 0.01) * 1.4,
-         longitudeDelta: max(maxLon - minLon, 0.01) * 1.4
+            latitudeDelta: (maxLat - minLat) * 1.4,
+            longitudeDelta: (maxLon - minLon) * 1.4
+//         latitudeDelta: max(maxLat - minLat, 0.01) * 1.4,
+//         longitudeDelta: max(maxLon - minLon, 0.01) * 1.4
         )
         return MKCoordinateRegion(center: center, span: span)
     }

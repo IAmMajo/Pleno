@@ -84,3 +84,6 @@ extension GetIdentityDTO: @retroactive Hashable {
 extension PosterResponseDTO: @retroactive Identifiable {}
 extension PosterResponseDTO: @retroactive @unchecked Sendable {}
 extension PosterPositionResponseDTO: @retroactive @unchecked Sendable {}
+extension UpdatePosterPositionDTO: @retroactive @unchecked Sendable {}
+extension HangPosterPositionDTO: @retroactive @unchecked Sendable {}
+extension HangPosterPositionResponseDTO: @retroactive @unchecked Sendable {}

@@ -1655,9 +1655,6 @@
     "Option %lld" : {
 
     },
-    "Option %u" : {
-
-    },
     "Optionen" : {
 
     },
@@ -1776,6 +1773,9 @@
           }
         }
       }
+    },
+    "PASSWORT WIEDERHOLEN" : {
+
     },
     "Passwort zurücksetzen" : {
 
@@ -2174,6 +2174,9 @@
       }
     },
     "Unknown Action" : {
+
+    },
+    "VERANTWORTLICHE (%lld)" : {
 
     },
     "Vereinsfarbe" : {

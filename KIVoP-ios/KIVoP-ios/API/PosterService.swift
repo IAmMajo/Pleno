@@ -15,188 +15,154 @@ class PosterService: ObservableObject {
 
     @Published var posters: [PosterResponseDTO] = []
     
-    private func createAuthorizedRequest(url: URL, method: String, contentType: String = "application/json") -> URLRequest? {
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
-        
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            return nil
-        }
-        return request
+   private func createAuthorizedRequest(url: URL, method: String, contentType: String = "application/json") -> URLRequest? {
+      var request = URLRequest(url: url)
+      request.httpMethod = method
+      request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+      
+      if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+         request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+      } else {
+         return nil
+      }
+      return request
+   }
+   
+   func fetchPosters(completion: @escaping (Result<[PosterResponseDTO], Error>) -> Void) {
+      guard let url = URL(string: baseURL) else {
+         completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
+         return
+      }
+      
+      guard let request = createAuthorizedRequest(url: url, method: "GET") else {
+         completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
+         return
+      }
+      
+      URLSession.shared.dataTask(with: request) { data, _, error in
+         if let error = error {
+            completion(.failure(error))
+            return
+         }
+         
+         guard let data = data else {
+            completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
+            return
+         }
+         
+         do {
+            let decoder = JSONDecoder()
+            let posters = try decoder.decode([PosterResponseDTO].self, from: data)
+            DispatchQueue.main.async {
+               self.posters = posters
+            }
+            completion(.success(posters))
+         } catch {
+            completion(.failure(error))
+         }
+      }.resume()
+   }
+   
+   func fetchPoster(byId id: UUID, completion: @escaping (Result<PosterResponseDTO, Error>) -> Void) {
+      guard let url = URL(string: "\(baseURL)/\(id)") else {
+         completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
+         return
+      }
+      
+      guard let request = createAuthorizedRequest(url: url, method: "GET") else {
+         completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
+         return
+      }
+      
+      URLSession.shared.dataTask(with: request) { data, _, error in
+         if let error = error {
+            completion(.failure(error))
+            return
+         }
+         
+         guard let data = data else {
+            completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
+            return
+         }
+         
+         do {
+              let decoder = JSONDecoder()
+              let poster = try decoder.decode(PosterResponseDTO.self, from: data)
+              completion(.success(poster))
+           } catch {
+              completion(.failure(error))
+           }
+        }.resume()
     }
    
-    func fetchPosters(completion: @escaping (Result<[PosterResponseDTO], Error>) -> Void) {
-        guard let url = URL(string: baseURL) else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
+   private func createJSONDecoder() -> JSONDecoder {
+      let decoder = JSONDecoder()
+      decoder.dateDecodingStrategy = .iso8601
+      return decoder
+   }
+   
+   func fetchPosterPositions(for posterId: UUID, completion: @escaping (Result<[PosterPositionResponseDTO], Error>) -> Void) {
+      guard let url = URL(string: "\(baseURL)/\(posterId)/positions") else {
+         completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
+         return
+      }
+      
+      guard let request = createAuthorizedRequest(url: url, method: "GET") else {
+         completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
+         return
+      }
+      
+      URLSession.shared.dataTask(with: request) { data, _, error in
+         if let error = error {
+            completion(.failure(error))
             return
-        }
-
-        guard let request = createAuthorizedRequest(url: url, method: "GET") else {
-            completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
+         }
+         
+         guard let data = data else {
+            completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
             return
-        }
-
-        URLSession.shared.dataTask(with: request) { data, _, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
-                return
-            }
-
-            do {
-                let decoder = JSONDecoder()
-                let posters = try decoder.decode([PosterResponseDTO].self, from: data)
-                DispatchQueue.main.async {
-                    self.posters = posters
-                }
-                completion(.success(posters))
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
-    }
-
-    func fetchPoster(byId id: UUID, completion: @escaping (Result<PosterResponseDTO, Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/\(id)") else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
-            return
-        }
-
-        guard let request = createAuthorizedRequest(url: url, method: "GET") else {
-            completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
-            return
-        }
-
-        URLSession.shared.dataTask(with: request) { data, _, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
-                return
-            }
-
-            do {
-                let decoder = JSONDecoder()
-                let poster = try decoder.decode(PosterResponseDTO.self, from: data)
-                completion(.success(poster))
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
-    }
-
-    func fetchPosterPositions(for posterId: UUID, completion: @escaping (Result<[PosterPositionResponseDTO], Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/\(posterId)/positions") else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
-            return
-        }
-
-        guard let request = createAuthorizedRequest(url: url, method: "GET") else {
-            completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
-            return
-        }
-
-        URLSession.shared.dataTask(with: request) { data, _, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
-                return
-            }
-
-            do {
-                let decoder = JSONDecoder()
-                let positions = try decoder.decode([PosterPositionResponseDTO].self, from: data)
-                completion(.success(positions))
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
-    }
+         }
+         
+         do {
+            let decoder = self.createJSONDecoder()
+            let positions = try decoder.decode([PosterPositionResponseDTO].self, from: data)
+            completion(.success(positions))
+         } catch {
+            completion(.failure(error))
+         }
+      }.resume()
+   }
    
    func fetchPosterPosition(id: UUID, positionId: UUID, completion: @escaping (Result<PosterPositionResponseDTO, Error>) -> Void) {
-       guard let url = URL(string: "\(baseURL)/\(id)/positions/\(positionId)") else {
-           completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
-           return
-       }
-
-       guard let request = createAuthorizedRequest(url: url, method: "GET") else {
-           completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
-           return
-       }
-
-       URLSession.shared.dataTask(with: request) { data, _, error in
-           if let error = error {
-               completion(.failure(error))
-               return
-           }
-
-           guard let data = data else {
-               completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
-               return
-           }
-
-           do {
-               let decoder = JSONDecoder()
-               let position = try decoder.decode(PosterPositionResponseDTO.self, from: data)
-               completion(.success(position))
-           } catch {
-               completion(.failure(error))
-           }
-       }.resume()
-   }
-
-   func updatePosterPosition(id: UUID, positionId: UUID, dto: UpdatePosterPositionDTO, completion: @escaping (Result<PosterPositionResponseDTO, Error>) -> Void) {
-       guard let url = URL(string: "\(baseURL)/\(id)/positions/\(positionId)") else {
-           completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
-           return
-       }
-
-       guard var request = createAuthorizedRequest(url: url, method: "PATCH", contentType: "application/json") else {
-           completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
-           return
-       }
-
-       do {
-           let encoder = JSONEncoder()
-           request.httpBody = try encoder.encode(dto)
-       } catch {
-           completion(.failure(error))
-           return
-       }
-
-       URLSession.shared.dataTask(with: request) { data, _, error in
-           if let error = error {
-               completion(.failure(error))
-               return
-           }
-
-           guard let data = data else {
-               completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
-               return
-           }
-
-           do {
-               let decoder = JSONDecoder()
-               let updatedPosition = try decoder.decode(PosterPositionResponseDTO.self, from: data)
-               completion(.success(updatedPosition))
-           } catch {
-               completion(.failure(error))
-           }
-       }.resume()
+      guard let url = URL(string: "\(baseURL)/\(id)/positions/\(positionId)") else {
+         completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
+         return
+      }
+      
+      guard let request = createAuthorizedRequest(url: url, method: "GET") else {
+         completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
+         return
+      }
+      
+      URLSession.shared.dataTask(with: request) { data, _, error in
+         if let error = error {
+            completion(.failure(error))
+            return
+         }
+         
+         guard let data = data else {
+            completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
+            return
+         }
+         
+         do {
+            let decoder = self.createJSONDecoder()
+            let position = try decoder.decode(PosterPositionResponseDTO.self, from: data)
+            completion(.success(position))
+         } catch {
+            completion(.failure(error))
+         }
+      }.resume()
    }
 
     func fetchImage(folder: String, imageURL: String, completion: @escaping (Result<Data, Error>) -> Void) {
@@ -224,46 +190,90 @@ class PosterService: ObservableObject {
             completion(.success(data))
         }.resume()
     }
+   
+//   func updatePosition(posterId: UUID, positionId: UUID, dto: UpdatePosterPositionDTO) async throws -> PosterPositionResponseDTO {
+//       guard let url = URL(string: "\(baseURL)/\(posterId)/positions/\(positionId)") else {
+//           throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+//       }
+//
+//       guard var request = createAuthorizedRequest(url: url, method: "PATCH") else {
+//           throw NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)
+//       }
+//
+//       do {
+//           request.httpBody = try JSONEncoder().encode(dto)
+//       } catch {
+//           throw NSError(domain: "Failed to encode request body", code: 500, userInfo: nil)
+//       }
+//
+//       let (data, response) = try await URLSession.shared.data(for: request)
+//       guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+//           throw NSError(domain: "Failed to update position", code: 500, userInfo: nil)
+//       }
+//
+//       do {
+//           return try JSONDecoder().decode(PosterPositionResponseDTO.self, from: data)
+//       } catch {
+//           throw NSError(domain: "Failed to decode response", code: 500, userInfo: nil)
+//       }
+//   }
+   
+   func updatePosition(posterId: UUID, positionId: UUID, dto: UpdatePosterPositionDTO) async throws -> PosterPositionResponseDTO {
+       guard let url = URL(string: "\(baseURL)/\(posterId)/positions/\(positionId)") else {
+           throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+       }
 
-    func hangPosition(id: UUID, dto: HangPosterPositionDTO, completion: @escaping (Result<HangPosterPositionResponseDTO, Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/\(id)/positions/hang") else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
-            return
-        }
+       guard var request = createAuthorizedRequest(url: url, method: "PATCH") else {
+           throw NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)
+       }
 
-        guard var request = createAuthorizedRequest(url: url, method: "PUT", contentType: "multipart/form-data") else {
-            completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
-            return
-        }
+       do {
+           request.httpBody = try JSONEncoder().encode(dto)
+       } catch {
+           throw NSError(domain: "Failed to encode request body", code: 500, userInfo: nil)
+       }
 
-        do {
-            let encoder = JSONEncoder()
-            request.httpBody = try encoder.encode(dto)
-        } catch {
-            completion(.failure(error))
-            return
-        }
+       request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        URLSession.shared.dataTask(with: request) { data, _, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
+       let (data, response) = try await URLSession.shared.data(for: request)
+       guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+           print("Response: \(response), Data: \(String(data: data, encoding: .utf8) ?? "No Response Body")")
+           throw NSError(domain: "Failed to update position", code: 500, userInfo: nil)
+       }
 
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
-                return
-            }
+       do {
+           return try JSONDecoder().decode(PosterPositionResponseDTO.self, from: data)
+       } catch {
+           throw NSError(domain: "Failed to decode response", code: 500, userInfo: nil)
+       }
+   }
+   
+   func hangPosition(positionId: UUID, dto: HangPosterPositionDTO) async throws -> HangPosterPositionResponseDTO {
+       guard let url = URL(string: "\(baseURL)/positions/\(positionId)/hang") else {
+           throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+       }
 
-            do {
-                let decoder = JSONDecoder()
-                let response = try decoder.decode(HangPosterPositionResponseDTO.self, from: data)
-                completion(.success(response))
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
-    }
+       guard var request = createAuthorizedRequest(url: url, method: "PUT") else {
+           throw NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)
+       }
+
+       do {
+           request.httpBody = try JSONEncoder().encode(dto)
+       } catch {
+           throw NSError(domain: "Failed to encode request body", code: 500, userInfo: nil)
+       }
+
+       let (data, response) = try await URLSession.shared.data(for: request)
+       guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+           throw NSError(domain: "Failed to hang position", code: 500, userInfo: nil)
+       }
+
+       do {
+           return try JSONDecoder().decode(HangPosterPositionResponseDTO.self, from: data)
+       } catch {
+           throw NSError(domain: "Failed to decode response", code: 500, userInfo: nil)
+       }
+   }
 
     func takeDownPosition(id: UUID, dto: TakeDownPosterPositionDTO, completion: @escaping (Result<TakeDownPosterPositionResponseDTO, Error>) -> Void) {
         guard let url = URL(string: "\(baseURL)/\(id)/positions/take-down") else {
@@ -307,19 +317,6 @@ class PosterService: ObservableObject {
 }
 
 extension PosterService {
-   func fetchPosterPositionsAsync(for posterId: UUID) async throws -> [PosterPositionResponseDTO] {
-      try await withCheckedThrowingContinuation { continuation in
-         fetchPosterPositions(for: posterId) { result in
-            switch result {
-            case .success(let positions):
-               continuation.resume(returning: positions)
-            case .failure(let error):
-               continuation.resume(throwing: error)
-            }
-         }
-      }
-   }
-   
    func fetchPostersAsync() async throws -> [PosterResponseDTO] {
       try await withCheckedThrowingContinuation { continuation in
          fetchPosters() { result in
@@ -339,6 +336,19 @@ extension PosterService {
             switch result {
             case .success(let poster):
                continuation.resume(returning: poster)
+            case .failure(let error):
+               continuation.resume(throwing: error)
+            }
+         }
+      }
+   }
+   
+   func fetchPosterPositionsAsync(for posterId: UUID) async throws -> [PosterPositionResponseDTO] {
+      try await withCheckedThrowingContinuation { continuation in
+         fetchPosterPositions(for: posterId) { result in
+            switch result {
+            case .success(let positions):
+               continuation.resume(returning: positions)
             case .failure(let error):
                continuation.resume(throwing: error)
             }

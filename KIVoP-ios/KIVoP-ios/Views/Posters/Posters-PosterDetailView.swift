@@ -222,7 +222,7 @@ struct Posters_PosterDetailView: View {
                          .padding(.horizontal) .padding(.vertical, 12)
                          .frame(maxWidth: .infinity, alignment: .leading)
                    }
-                   .background(Color(UIColor.systemBackground))
+                   .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
                    .cornerRadius(10)
                    .padding(.horizontal)
                 }
@@ -285,7 +285,7 @@ struct Posters_PosterDetailView: View {
                       .padding(.horizontal) .padding(.vertical, 12)
                       .frame(maxWidth: .infinity, alignment: .leading)
                    }
-                   .background(Color(UIColor.systemBackground))
+                   .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
                    .cornerRadius(10)
                    .padding(.horizontal)
                 }

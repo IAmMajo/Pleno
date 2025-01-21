@@ -143,6 +143,43 @@ class PosterPositionViewModel: ObservableObject {
         }
         isLoading = false
     }
+   
+   func refreshPosition() async {
+       guard var position = position else { return }
+       do {
+           position = try await PosterService.shared.fetchPosterPositionAsync(
+               id: position.posterId ?? UUID(),
+               positionId: position.id
+           )
+       } catch {
+           print("Failed to refresh position: \(error)")
+       }
+   }
+   
+   func updatePosition(image: Data, latitude: Double, longitude: Double) async throws {
+       guard let position = position else { throw NSError(domain: "Position not found", code: 404, userInfo: nil) }
+
+       let updateDTO = UpdatePosterPositionDTO(
+           posterId: position.posterId,
+           latitude: latitude,
+           longitude: longitude,
+           image: image
+       )
+
+       self.position = try await PosterService.shared.updatePosition(
+           posterId: position.posterId ?? UUID(),
+           positionId: position.id,
+           dto: updateDTO
+       )
+   }
+   
+   func hangPosition() async throws {
+       guard let position = position else { throw NSError(domain: "Position not found", code: 404, userInfo: nil) }
+
+       let hangDTO = HangPosterPositionDTO(image: position.image ?? Data())
+       _ = try await PosterService.shared.hangPosition(positionId: position.id, dto: hangDTO)
+   }
+   
 
     private func fetchAddress(latitude: Double, longitude: Double) async {
         let geocoder = CLGeocoder()
@@ -151,15 +188,18 @@ class PosterPositionViewModel: ObservableObject {
         do {
             let placemarks = try await geocoder.reverseGeocodeLocation(location)
             if let placemark = placemarks.first {
-                let address = [
-                    placemark.name,
-                    placemark.locality,
-                    placemark.administrativeArea,
-                    placemark.country
-                ]
-                .compactMap { $0 }
-                .joined(separator: ", ")
-                self.address = address
+               let postalCodeAndLocality = [
+                  placemark.postalCode,
+                  placemark.locality
+               ]  .compactMap { $0 }
+                  .joined(separator: " ")
+               let address = [
+                  placemark.name,
+                  postalCodeAndLocality,
+                  placemark.country
+               ]  .compactMap { $0 }
+                  .joined(separator: "\n")
+               self.address = address
             } else {
                 self.address = "Address not found"
             }

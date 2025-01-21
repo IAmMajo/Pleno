@@ -22,6 +22,7 @@ struct Posters_PositionView: View {
    
    @State var name: String = "Am Grabstein 6"
    @State var coordinate: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)
+   
    @State private var currentCoordinates: CLLocationCoordinate2D? = CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)
    
    @State private var address: String?
@@ -103,18 +104,31 @@ struct Posters_PositionView: View {
             let address = viewModel.address {
             ScrollView {
                VStack {
-                  //                   MapView(name: name, coordinate: currentCoordinates!)
-                  //                      .frame(height: 250)
-                  //                      .onTapGesture {
-                  //                         //                      showMapOptions = true
-                  //                         isFullMapView = true
-                  //                      }
-                  //                      .navigationDestination(isPresented: $isFullMapView) { FullMapView(address: address ?? "", name: name, coordinate: currentCoordinates ?? CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446))}
-                  //
-                  //                   CircleImageView(status: position.status, currentCoordinates: $currentCoordinates)
-                  //                   //                   .offset(y: -47)
-                  //                      .padding(.top, -95)
-                  //                      .shadow(radius: 5)
+                  MapView(name: name, coordinate: currentCoordinates!)
+                     .frame(height: 250)
+                     .onTapGesture {
+                        //                      showMapOptions = true
+                        isFullMapView = true
+                     }
+                     .navigationDestination(isPresented: $isFullMapView) { FullMapView(address: address, name: String(address.split(separator: "\n").first ?? ""), coordinate: currentCoordinates ?? CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude))}
+                  
+                  CircleImageView(
+                     position: position,
+                     currentCoordinates: $currentCoordinates,
+                     onUpdate: { image, coordinates in
+                        Task {
+                           do {
+                              try await viewModel.updatePosition(image: image, latitude: coordinates.latitude, longitude: coordinates.longitude)
+                              
+                              await viewModel.fetchPosition()
+                           } catch {
+                              print("Error updating position: \(error)")
+                           }
+                        }
+                     }
+                  )
+                  .padding(.top, -95)
+                  .shadow(radius: 5)
                   
                   HStack {
                      Text("Abhängedatum:")
@@ -141,36 +155,39 @@ struct Posters_PositionView: View {
                      }
                   }
                   
-                  //                   var mockUsers: [GetIdentityDTO] {
-                  //                      [mockIdentity1, mockIdentity2]
-                  //                   }
-                  //                   List{
-                  //                      Section {
-                  //                         //                      var mockUsers: [GetIdentityDTO] {
-                  //                         //                         [mockIdentity1, mockIdentity2]
-                  //                         //                      }
-                  //                         //                      position.responsibleUserIds
-                  //                         ForEach (mockUsers, id: \.self) { user in
-                  //                            HStack {
-                  //                               Image(systemName: "person.crop.square.fill")
-                  //                                  .resizable()
-                  //                                  .frame(maxWidth: 40, maxHeight: 40)
-                  //                                  .aspectRatio(1, contentMode: .fit)
-                  //                                  .foregroundStyle(.gray.opacity(0.5))
-                  //                                  .padding(.trailing, 5)
-                  //
-                  //                               Text(user.name)
-                  //                            }
-                  //                         }
-                  //                      } header: {
-                  //                         Text("Verantwortliche (2)")
-                  //                      }
-                  //                   }
-                  //                   .scrollDisabled(true)
-                  //                   .frame(height: CGFloat((mockUsers.count * 15) + (mockUsers.count < 4 ? 130 : 0)), alignment: .top)
-                  //                   //             .scrollContentBackground(.hidden)
-                  //                   .environment(\.defaultMinListHeaderHeight, 10)
-                  
+                  VStack (alignment: .leading, spacing: 6) {
+                     Text("VERANTWORTLICHE (\(position.responsibleUsers.count))")
+                        .font(.footnote)
+                        .foregroundStyle(Color(UIColor.secondaryLabel))
+                        .padding(.leading, 32)
+                     ZStack {
+                        VStack {
+                           ForEach (position.responsibleUsers, id: \.id) { user in
+                              HStack {
+                                 Image(systemName: "person.crop.square.fill")
+                                    .resizable()
+                                    .frame(maxWidth: 40, maxHeight: 40)
+                                    .aspectRatio(1, contentMode: .fit)
+                                    .foregroundStyle(.gray.opacity(0.5))
+                                    .padding(.trailing, 5)
+                                 
+                                 Text(user.name)
+                              }
+                              if user.id != position.responsibleUsers.last?.id {
+                                 Divider()
+                                    .padding(.vertical, 2)
+                              }
+                           }
+                        }
+                        .padding(.horizontal) .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                     }
+                     .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
+                     .cornerRadius(10)
+                     .padding(.horizontal)
+                  }
+                  .padding(.vertical)
+               
                   Form {
                      Section {
                         HStack(spacing: 0) {
@@ -342,6 +359,9 @@ struct Posters_PositionView: View {
          //          fetchAddress(latitude: currentCoordinates!.latitude, longitude: currentCoordinates!.longitude)
          Task {
             await viewModel.fetchPosition()
+            if let position = viewModel.position {
+               currentCoordinates = CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)
+            }
          }
       }
       .onChange(of: currentCoordinates) { oldValue, newValue in

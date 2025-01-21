@@ -9,22 +9,26 @@ import SwiftUI
 import MapKit
 import AVFoundation
 import Photos
+import PosterServiceDTOs
 
 struct CircleImageView: View {
-   let status: Status
+   let position: PosterPositionResponseDTO
+   @Binding var currentCoordinates: CLLocationCoordinate2D?
+   @State private var selectedImage: UIImage? = nil
+   var onUpdate: (Data, CLLocationCoordinate2D) -> Void
+   
    @StateObject private var locationManager = LocationManager()
+   
    @State private var showImage: Bool = false
    @State private var showAlert: Bool = false
    @State private var showCamera: Bool = false
    @State private var showPhotoAlert: Bool = false
-   @State private var selectedImage: UIImage? = nil
-   @Binding var currentCoordinates: CLLocationCoordinate2D?
    @State private var showPhotoPicker = false
    @Environment(\.colorScheme) var colorScheme
    
    var body: some View {
       VStack {
-         if status == .notDisplayed {
+         if position.status == "toHang" {
             if let selectedImage{
                Image(uiImage: selectedImage)
                   .resizable()
@@ -67,27 +71,59 @@ struct CircleImageView: View {
                   } message: {
                      Text("Achte beim Aufnehmen des Bildes darauf, dass das Plakat sowie der Hintergrund und die Umgebung gut zu erkennen sind.")
                   }
-                  .fullScreenCover(isPresented: self.$showCamera) {
-                     accessCameraView(selectedImage: self.$selectedImage, showCamera: self.$showCamera, currentCoordinates: $currentCoordinates, onPhotoPicked: {
-                        print("onPhotoPicked called")
-                            showPhotoAlert = true
-                    })
-                        .background(.black)
+//                  .fullScreenCover(isPresented: self.$showCamera) {
+//                     accessCameraView(
+//                        selectedImage: self.$selectedImage,
+//                        showCamera: self.$showCamera,
+//                        currentCoordinates: $currentCoordinates,
+//                        onPhotoPicked: {
+//                        print("onPhotoPicked called")
+//                            showPhotoAlert = true
+//                    })
+//                        .background(.black)
+//                  }
+                  .fullScreenCover(isPresented: $showCamera) {
+                     accessCameraView(
+                        selectedImage: $selectedImage,
+                        showCamera: $showCamera,
+                        currentCoordinates: $currentCoordinates
+                     ) {
+                        if let image = selectedImage,
+                           let imageData = image.jpegData(compressionQuality: 0.8),
+                           let coordinates = currentCoordinates {
+                           onUpdate(imageData, coordinates)
+                        }
+                     }
                   }
             }
          } else {
-            Image("TestPositionImage")
-               .resizable()
-               .scaledToFill()
-               .frame(width: 165, height: 165)
-               .clipShape(Circle())
-               .shadow(radius: 5)
-               .onTapGesture {
-                  showImage = true
-               }
-               .navigationDestination(isPresented: $showImage) {
-//                  FullImageView(image: "TestPositionImage") Image(uiImage: uiImage)
-               }
+            if let image = position.image {
+               let uiImage = UIImage(data: image)
+               Image(uiImage: uiImage!)
+                  .resizable()
+                  .scaledToFill()
+                  .frame(width: 165, height: 165)
+                  .clipShape(Circle())
+                  .shadow(radius: 5)
+                  .onTapGesture {
+                     showImage = true
+                  }
+                  .navigationDestination(isPresented: $showImage) {
+   //                  FullImageView(image: "TestPositionImage") Image(uiImage: uiImage)
+                  }
+            }
+//            Image("TestPositionImage")
+//               .resizable()
+//               .scaledToFill()
+//               .frame(width: 165, height: 165)
+//               .clipShape(Circle())
+//               .shadow(radius: 5)
+//               .onTapGesture {
+//                  showImage = true
+//               }
+//               .navigationDestination(isPresented: $showImage) {
+////                  FullImageView(image: "TestPositionImage") Image(uiImage: uiImage)
+//               }
          }
       }
       .onChange(of: currentCoordinates) { oldCoordinates, newCoordinates in
