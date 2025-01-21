@@ -8,6 +8,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Signal_blue
 import net.ipv64.kivop.ui.theme.TextStyles
@@ -27,7 +29,7 @@ import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
-fun CustomInputField(
+fun DebouncedTextFieldCustomInputField(
     label: String,
     labelColor: Color = Background_prime,
     placeholder: String,
@@ -38,9 +40,13 @@ fun CustomInputField(
     value: String,
     backgroundColor: Color = Background_prime,
     onValueChange: (String) -> Unit,
+    onDebouncedChange: (String) -> Unit
 ) {
   val textState = remember { mutableStateOf(TextFieldValue()) }
-
+  LaunchedEffect(value) {
+    delay(2000)
+    onDebouncedChange(value) // Call function after user stops typing
+  }
   Column(modifier = modifier.fillMaxWidth()) {
     Text(
         text = label,
@@ -79,25 +85,3 @@ fun CustomInputField(
   }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun CustomInputFieldPreview() {
-  var username by remember { mutableStateOf("") }
-  Column(modifier = Modifier.background(Signal_blue)) {
-    // Erstes CustomInputField
-    CustomInputField(
-        label = "Vorname",
-        placeholder = "Gib deinen Vornamen ein",
-        value = username,
-        onValueChange = { username = it })
-
-    CustomInputField(
-        label = "Vorname",
-        placeholder = "Gib deinen Vornamen ein",
-        value = username,
-        onValueChange = { username = it },
-      singleLine = false,
-      lines = 3
-    )
-  }
-}
