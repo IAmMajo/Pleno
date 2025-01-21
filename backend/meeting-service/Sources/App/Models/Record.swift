@@ -28,8 +28,8 @@ extension Record {
                                attendancesAppendix: "# \(LocalizableManager.shared.translate(key: "Attendees", into: lang))\n\(attendances)",
                                votingResultsAppendix: """
 # \(LocalizableManager.shared.translate(key: "Votings", into: lang))
-\(votings.asyncMap({ voting in
-let getVotingDTO = try voting.toGetVotingDTO()
+\(votings.map({ voting in
+let getVotingDTO = try await voting.toGetVotingDTO(db: db)
 let getVotingResultsDTO = try await voting.toGetVotingResultsDTO(db: db)
 return await """
 ## \(unsafeRaw: voting.question)
@@ -38,7 +38,7 @@ _\(unsafeRaw: voting.description)_
 **\(unsafeRaw: LocalizableManager.shared.translate(key: "Closed at", into: lang))**: \(unsafeRaw: voting.closedAt?.description(with: Locale(identifier: lang)) ?? "X")
 ** \(unsafeRaw: LocalizableManager.shared.translate(key: "Options",  into: lang))**: \(unsafeRaw: getVotingDTO.options.map(\.text).joined(separator: ", "))
 ### \(unsafeRaw: LocalizableManager.shared.translate(key: "Distribution of votes",  into: lang))
-\(unsafeRaw: getVotingResultsDTO.results.asyncMap({ getVotingResultDTO in
+\(unsafeRaw: getVotingResultsDTO.results.map({ getVotingResultDTO in
 let votingOptionText: String
 if let text = getVotingDTO.options.first(where: {$0.index == getVotingResultDTO.index})?.text {
     votingOptionText = text
