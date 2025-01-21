@@ -163,7 +163,16 @@ struct Onboarding_Register: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 10)
-                .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty)
+                .disabled(
+                    isLoading ||
+                    name.isEmpty ||
+                    email.isEmpty ||
+                    password.isEmpty ||
+                    confirmPassword.isEmpty ||
+                    passwordValidationMessage != "✔︎" ||
+                    confirmPasswordValidationMessage != "✔︎"
+                )
+
 
                 // Zurück zu Login Button
                 NavigationLink(destination: Onboarding_Login()) {
@@ -201,18 +210,6 @@ struct Onboarding_Register: View {
     private func registerUser() {
         isLoading = true
         errorMessage = nil
-
-        guard passwordValidationMessage.isEmpty else {
-            errorMessage = "Das Passwort erfüllt nicht die Anforderungen."
-            isLoading = false
-            return
-        }
-
-        guard confirmPasswordValidationMessage.isEmpty else {
-            errorMessage = "Die Passwörter stimmen nicht überein."
-            isLoading = false
-            return
-        }
 
         let registrationDTO = UserRegistrationDTO(
             name: name,
