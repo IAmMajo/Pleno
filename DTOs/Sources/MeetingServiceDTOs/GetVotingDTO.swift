@@ -9,9 +9,10 @@ public struct GetVotingDTO: Codable {
     public var startedAt: Date?
     public var closedAt: Date?
     public var anonymous: Bool
+    public var iVoted: Bool
     public var options: [GetVotingOptionDTO]
     
-    public init(id: UUID, meetingId: UUID, question: String, description: String, isOpen: Bool, startedAt: Date? = nil, closedAt: Date? = nil, anonymous: Bool, options: [GetVotingOptionDTO]) {
+    public init(id: UUID, meetingId: UUID, question: String, description: String, isOpen: Bool, startedAt: Date? = nil, closedAt: Date? = nil, anonymous: Bool, iVoted: Bool, options: [GetVotingOptionDTO]) {
         self.id = id
         self.meetingId = meetingId
         self.question = question
@@ -20,6 +21,7 @@ public struct GetVotingDTO: Codable {
         self.startedAt = startedAt
         self.closedAt = closedAt
         self.anonymous = anonymous
+        self.iVoted = iVoted
         self.options = options
     }
 }
