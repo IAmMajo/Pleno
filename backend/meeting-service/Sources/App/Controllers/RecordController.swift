@@ -45,7 +45,7 @@ struct RecordController: RouteCollection {
         return try await meeting.$records.query(on: req.db)
             .with(\.$identity)
             .all()
-            .asyncMap { record in
+            .map { record in
                 try await record.toGetRecordDTO(db: req.db)
         }
     }

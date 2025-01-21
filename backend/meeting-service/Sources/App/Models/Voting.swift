@@ -4,18 +4,28 @@ import Vapor
 import Fluent
 
 extension Voting {
-    public func toGetVotingDTO() throws -> GetVotingDTO {
-        try .init(id: self.requireID(),
-                  meetingId: self.$meeting.id,
-                  question: self.question,
-                  description: self.description,
-                  isOpen: self.isOpen,
-                  startedAt: self.startedAt,
-                  closedAt: self.closedAt,
-                  anonymous: self.anonymous,
-                  options: self.votingOptions.map({ votingOption in
+    public func toGetVotingDTO(db: Database, userId: User.IDValue? = nil) async throws -> GetVotingDTO {
+        try await .init(id: self.requireID(),
+                        meetingId: self.$meeting.id,
+                        question: self.question,
+                        description: self.description,
+                        isOpen: self.isOpen,
+                        startedAt: self.startedAt,
+                        closedAt: self.closedAt,
+                        anonymous: self.anonymous,
+                        iVoted: userId == nil ? false : self.getMyVote(db: db, userId: userId!) != nil,
+                        options: self.$votingOptions.get(on: db).map({ votingOption in
             try votingOption.toGetVotingOptionDTO()
         }))
+    }
+    
+    func getMyVote(db: Database, userId: User.IDValue) async throws -> UInt8? {
+        let identityIds = try await IdentityHistory.byUserId(userId, db).map { identityHistory in
+            try identityHistory.identity.requireID()
+        }
+        return try await self.$votes.query(on: db)
+            .filter(\.$id.$identity.$id ~~ identityIds)
+            .first()?.index
     }
     
     public func toGetVotingResultsDTO(db: Database, userId: UUID? = nil) async throws -> GetVotingResultsDTO {
@@ -90,5 +100,13 @@ extension Voting {
         }
         
         return getVotingResultsDTO
+    }
+}
+
+extension [Voting] {
+    func toGetVotingDTOs(db: Database, userId: User.IDValue) async throws -> [GetVotingDTO] {
+        try await self.map { voting in
+            try await voting.toGetVotingDTO(db: db, userId: userId)
+        }
     }
 }
