@@ -10,8 +10,10 @@ public struct GetEventDetailDTO: Codable {
     public var longitude: Float
     public var participations: [GetEventParticipationDTO]
     public var userWithoutFeedback: [GetUserWithoutFeedbackDTO]
+    public var countRideInterested: Int
+    public var countEmptySeats: Int
     
-    public init(id: UUID, name: String, description: String? = nil, starts: Date, ends: Date, latitude: Float, longitude: Float, participations: [GetEventParticipationDTO], userWithoutFeedback: [GetUserWithoutFeedbackDTO]) {
+    public init(id: UUID, name: String, description: String? = nil, starts: Date, ends: Date, latitude: Float, longitude: Float, participations: [GetEventParticipationDTO], userWithoutFeedback: [GetUserWithoutFeedbackDTO], countRideInterested: Int, countEmptySeats: Int) {
         self.id = id
         self.name = name
         self.description = description
@@ -21,6 +23,8 @@ public struct GetEventDetailDTO: Codable {
         self.longitude = longitude
         self.participations = participations
         self.userWithoutFeedback = userWithoutFeedback
+        self.countRideInterested = countRideInterested
+        self.countEmptySeats = countEmptySeats
     }
 }
 
