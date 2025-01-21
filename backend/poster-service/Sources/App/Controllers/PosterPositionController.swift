@@ -346,8 +346,13 @@ struct PosterPositionController: RouteCollection, Sendable {
         }
         
         // Schon aufgehängt?
-        if position.posted_by != nil || position.posted_at != nil {
+        if  position.posted_at != nil && position.removed_at == nil {
             throw Abort(.badRequest, reason: "Diese PosterPosition ist bereits aufgehängt.")
+        }
+        // falls neu aufgehängt
+        if position.removed_at != nil || position.removed_by != nil{
+            position.removed_at = nil
+            position.$removed_by.id = nil
         }
         
         // posted_by: Identity des aktuellen Users
@@ -365,8 +370,8 @@ struct PosterPositionController: RouteCollection, Sendable {
             position.longitude = round(longitude * 1_000_000) / 1_000_000
         }
         
-        try await position.save(on: req.db)
-        
+        try await position.update(on: req.db)
+
         return HangPosterPositionResponseDTO(
             posterPosition: try position.requireID(),
             postedAt: position.posted_at!,
@@ -409,7 +414,8 @@ struct PosterPositionController: RouteCollection, Sendable {
         position.image = dto.image
         position.removed_at = Date()
         position.$removed_by.id = identity.id
-        try await position.save(on: req.db)
+        
+        try await position.update(on: req.db)
         
         return try TakeDownPosterPositionResponseDTO(
             posterPosition: position.requireID(),
