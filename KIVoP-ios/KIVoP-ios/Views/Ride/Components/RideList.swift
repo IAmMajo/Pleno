@@ -17,6 +17,12 @@ struct RideList: View {
                             .foregroundColor(.gray)
                     }
                     Spacer()
+                    if let openRequests = ride.openRequests, openRequests > 0 {
+                        Image(systemName: "\(openRequests).circle.fill")
+                            .aspectRatio(1, contentMode: .fit)
+                            .foregroundStyle(.orange)
+                            .padding(.trailing, 5)
+                    }
                     HStack{
                         Text("\(ride.allocatedSeats) / \(ride.emptySeats)")
                         Image(systemName: "car.fill" )
