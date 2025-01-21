@@ -356,12 +356,23 @@ struct PosterPositionController: RouteCollection, Sendable {
         position.image = dto.image
         position.posted_at = Date()
         position.$posted_by.id = identity.id
+        
+        if let latitude = dto.latitude{
+            position.latitude = round(latitude * 1_000_000) / 1_000_000
+        }
+        
+        if let longitude = dto.longitude{
+            position.longitude = round(longitude * 1_000_000) / 1_000_000
+        }
+        
         try await position.save(on: req.db)
         
         return HangPosterPositionResponseDTO(
             posterPosition: try position.requireID(),
             postedAt: position.posted_at!,
             postedBy: try identity.requireID(),
+            latitude: position.latitude,
+            longitude: position.longitude,
             image: position.image!
         )
     }
