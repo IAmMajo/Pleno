@@ -1,12 +1,6 @@
-//
-//  AttendanceCurrentViewModel.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 25.11.24.
-//
-
 import SwiftUI
 import MeetingServiceDTOs
+
 @MainActor
 class AttendanceCurrentViewModel: ObservableObject {
     @Published var statusMessage: String?
@@ -14,6 +8,7 @@ class AttendanceCurrentViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var participationCode: String = ""
     @Published var attendances: [GetAttendanceDTO] = []
+    @Published var attendance: GetAttendanceDTO?
     @Published var isLoading: Bool = true
     
     private let baseURL = "https://kivop.ipv64.net"
@@ -54,6 +49,7 @@ class AttendanceCurrentViewModel: ObservableObject {
                 
                 // JSON dekodieren
                 self.attendances = try JSONDecoder().decode([GetAttendanceDTO].self, from: data)
+                self.attendance = attendances.first(where: { $0.itsame })
                 
             } catch {
                 print("Fehler: \(error.localizedDescription)")

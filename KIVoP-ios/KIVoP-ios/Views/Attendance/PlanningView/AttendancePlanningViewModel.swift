@@ -1,17 +1,12 @@
-//
-//  AttendancePlanningViewModel.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 25.11.24.
-//
-
 import Foundation
 import MeetingServiceDTOs
+
 @MainActor
 class AttendancePlanningViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var errorMessage: String? = nil
     @Published var attendances: [GetAttendanceDTO] = []
+    @Published var attendance: GetAttendanceDTO?
     @Published var isLoading: Bool = true
     
     private let baseURL = "https://kivop.ipv64.net"
@@ -52,6 +47,7 @@ class AttendancePlanningViewModel: ObservableObject {
                 
                 // JSON dekodieren
                 self.attendances = try JSONDecoder().decode([GetAttendanceDTO].self, from: data)
+                self.attendance = attendances.first(where: { $0.itsame })
                 
             } catch {
                 print("Fehler: \(error.localizedDescription)")

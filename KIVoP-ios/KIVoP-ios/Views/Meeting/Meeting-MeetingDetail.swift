@@ -3,6 +3,7 @@ import MeetingServiceDTOs
 
 struct MeetingDetailView: View {
     var meeting: GetMeetingDTO
+    @State var attendance: GetAttendanceDTO?
     
     @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
     @StateObject private var recordManager = RecordManager() // RecordManager als StateObject
@@ -122,26 +123,25 @@ struct MeetingDetailView: View {
                             HStack{
                                 Text("Anwesenheit")
                                 Spacer()
-                                
                                 // Logik für die Symbolauswahl. Bei vergangenen Terminen gibt es kein Kalender Symbol. Wenn dort der Status noch nicht gesetzt ist, hat man am Meeting nicht teilgenommen.
                                 Image(systemName: {
-                                    switch meeting.myAttendanceStatus {
+                                    switch attendance?.status {
                                     case .accepted, .present:
                                         return "checkmark.circle"
                                     case .absent:
                                         return "xmark.circle"
                                     default:
-                                        return viewModel.selectedTab == 0 ? "xmark.circle" : "calendar"
+                                        return meeting.status == .completed ? "xmark" : "calendar"
                                     }
                                 }())
                                 .foregroundColor({
-                                    switch meeting.myAttendanceStatus {
+                                    switch attendance?.status {
                                     case .accepted, .present:
                                         return .blue
                                     case .absent:
                                         return .red
                                     default:
-                                        return viewModel.selectedTab == 0 ? .red : .orange
+                                        return meeting.status == .completed ? .red : .orange
                                     }
                                 }())
                                 .font(.system(size: 18))
@@ -165,8 +165,17 @@ struct MeetingDetailView: View {
             recordManager.getRecordsMeeting(meetingId: meeting.id)
             votingManager.getVotingsMeeting(meetingId: meeting.id)
             attendanceManager.fetchAttendances(meetingId: meeting.id)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                if let attendance = attendanceManager.attendances.first(where: { $0.itsame == true }) {
+                    self.attendance = attendance
+                }
+            }
         }
-
+        .refreshable {
+            recordManager.getRecordsMeeting(meetingId: meeting.id)
+            votingManager.getVotingsMeeting(meetingId: meeting.id)
+            attendanceManager.fetchAttendances(meetingId: meeting.id)
+        }
     }
 }
 
