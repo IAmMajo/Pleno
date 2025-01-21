@@ -1637,9 +1637,6 @@
     "Option %lld" : {
 
     },
-    "Option %u" : {
-
-    },
     "Optionen" : {
 
     },
@@ -1758,6 +1755,9 @@
           }
         }
       }
+    },
+    "PASSWORT WIEDERHOLEN" : {
+
     },
     "Passwort zurücksetzen" : {
 
