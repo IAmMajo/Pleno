@@ -1,10 +1,3 @@
-//
-//  QRCodeScannerViewController.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 03.12.24.
-//
-
 import UIKit
 import AVFoundation
 
