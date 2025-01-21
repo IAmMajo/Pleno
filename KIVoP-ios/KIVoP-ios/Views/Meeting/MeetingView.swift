@@ -12,8 +12,6 @@ struct MeetingView: View {
         meetings.filter { $0.status == .inSession }
     }
     
-    
-    
     var body: some View {
         NavigationStack {
             VStack {
@@ -68,16 +66,14 @@ struct UpcomingMeetingsView: View {
     var meetings: [GetMeetingDTO]
     
     var body: some View {
-        let sortedMeetings = meetings.filter { $0.start > Date() }
-                                     .sorted { $0.start < $1.start }
         
         Section(header: Text("Anstehende Sitzungen")) {
-            if sortedMeetings.isEmpty {
+            if meetings.isEmpty {
                 Text("Keine anstehenden Sitzungen.")
                     .foregroundColor(.gray)
                     .italic()
             } else {
-                ForEach(sortedMeetings, id: \.id) { meeting in
+                ForEach(meetings, id: \.id) { meeting in
                     NavigationLink(destination: MeetingDetailView(meeting: meeting)) {
                         VStack(alignment: .leading) {
                             Text(meeting.name)
@@ -98,16 +94,14 @@ struct PastMeetingsView: View {
     var meetings: [GetMeetingDTO]
     
     var body: some View {
-        let sortedMeetings = meetings.filter { $0.start < Date() }
-                                     .sorted { $0.start > $1.start }
         
         Section(header: Text("Vergangene Sitzungen")) {
-            if sortedMeetings.isEmpty {
+            if meetings.isEmpty {
                 Text("Keine vergangenen Sitzungen.")
                     .foregroundColor(.gray)
                     .italic()
             } else {
-                ForEach(sortedMeetings, id: \.id) { meeting in
+                ForEach(meetings, id: \.id) { meeting in
                     NavigationLink(destination: MeetingDetailView(meeting: meeting)) {
                         VStack(alignment: .leading) {
                             Text(meeting.name)

@@ -1,10 +1,3 @@
-//
-//  AttendanceCurrentView.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 02.11.24.
-//
-
 import SwiftUI
 
 struct AttendanceCurrentView: View {
@@ -20,49 +13,53 @@ struct AttendanceCurrentView: View {
                 
                 // Inhalt
                 VStack {
-                    Text("Teilnahme bestätigen")
-                        .padding(.top)
+                    
+                    // Ausblenden wenn am Meeting teilgenommen
+                    if !(viewModel.attendance?.status == .present) {
+                        Text("Teilnahme bestätigen")
+                            .padding(.top)
+                            .padding(.horizontal)
+
+                        // QR Code Button
+                        Button(action: {
+                            isShowingScanner = true
+                        }) {
+                            HStack {
+                                Image(systemName: "qrcode")
+                                Text("Code scannen")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
+                        .sheet(isPresented: $isShowingScanner) {
+                            QRCodeScannerView { code in
+                                self.viewModel.participationCode = code
+                                self.viewModel.joinMeeting() // Meeting beitreten
+                                self.isShowingScanner = false
+                            }
+                        }
                         .padding(.horizontal)
 
-                    // QR Code Button
-                    Button(action: {
-                        isShowingScanner = true
-                    }) {
-                        HStack {
-                            Image(systemName: "qrcode")
-                            Text("Code scannen")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                    }
-                    .sheet(isPresented: $isShowingScanner) {
-                        QRCodeScannerView { code in
-                            self.viewModel.participationCode = code
-                            self.viewModel.joinMeeting() // Meeting beitreten
-                            self.isShowingScanner = false
-                        }
-                    }
-                    .padding(.horizontal)
+                        Text("oder")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .padding(.top, 4)
+                            .padding(.horizontal)
 
-                    Text("oder")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                        .padding(.top, 4)
-                        .padding(.horizontal)
-
-                    // Textfeld für Teilnahmecode
-                    TextField("Teilnahmecode", text: $viewModel.participationCode)
-                        .multilineTextAlignment(.center)
-                        .padding(8)
-                        .background(RoundedRectangle(cornerRadius: 0).fill(Color.white))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.black, lineWidth: 2))
-                        .frame(width: 200)
-                        .onSubmit {
-                            viewModel.joinMeeting() // Meeting beitreten
-                        }
+                        // Textfeld für Teilnahmecode
+                        TextField("Teilnahmecode", text: $viewModel.participationCode)
+                            .multilineTextAlignment(.center)
+                            .padding(8)
+                            .background(RoundedRectangle(cornerRadius: 0).fill(Color.white))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.black, lineWidth: 2))
+                            .frame(width: 200)
+                            .onSubmit {
+                                viewModel.joinMeeting() // Meeting beitreten
+                            }
+                    }
 
                     // Antwort ob Beitritt zum Meeting erfolgreich ist.
                     if let message = viewModel.statusMessage {
@@ -93,6 +90,7 @@ struct AttendanceCurrentView: View {
                         }
                         Spacer()
                     }
+                    .padding(.top, 20)
                     .padding(.horizontal)
                     Spacer()
                     

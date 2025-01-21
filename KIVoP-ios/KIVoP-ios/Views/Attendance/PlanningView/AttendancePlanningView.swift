@@ -1,10 +1,3 @@
-//
-//  AttendancePlanningView.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 02.11.24.
-//
-
 import SwiftUI
 
 struct AttendancePlanningView: View {
@@ -33,8 +26,9 @@ struct AttendancePlanningView: View {
                                 Text("Ja")
                             }
                             .padding()
-                            .background(Color.blue)
                             .foregroundColor(.white)
+                            .background(viewModel.attendance?.status == .accepted ? Color.blue : Color.gray)
+                            .background(Color.gray.opacity(0.2))
                             .cornerRadius(10)
                         }
                         
@@ -47,8 +41,9 @@ struct AttendancePlanningView: View {
                                 Text("Nein")
                             }
                             .padding()
+                            .background(viewModel.attendance?.status == .absent ? Color.orange : Color.gray)
                             .background(Color.gray.opacity(0.2))
-                            .foregroundColor(.black)
+                            .foregroundColor(.white)
                             .cornerRadius(10)
                         }
                     }
