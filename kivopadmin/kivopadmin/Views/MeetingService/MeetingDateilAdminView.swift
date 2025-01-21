@@ -24,6 +24,16 @@ struct MeetingDetailAdminView: View {
         case end
     }
     
+    private var uniqueRecorders: String {
+        let uniqueNames = Set(localRecords.compactMap { $0.identity.name })
+        return uniqueNames.sorted().joined(separator: ", ") // Namen durch Komma trennen und sortieren
+    }
+    
+    private var recorderLabel: String {
+        let recorderCount = Set(localRecords.compactMap { $0.identity.name }).count
+        return recorderCount > 1 ? "Protokollanten" : "Protokollant" // Mehrzahl oder Einzahl je nach Anzahl
+    }
+    
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -113,8 +123,8 @@ struct MeetingDetailAdminView: View {
                                                 .foregroundColor(.gray)
                                             VStack(alignment: .leading) {
                                                 //Text(selectedUserName ?? "Kein Protokollant")
-                                                Text("Hier muss noch der  Protokollant eingetragen werden")
-                                                Text("Protokollant")
+                                                Text(uniqueRecorders)
+                                                Text(recorderLabel)
                                                     .font(.caption)
                                                     .foregroundColor(.gray)
                                             }
@@ -181,6 +191,10 @@ struct MeetingDetailAdminView: View {
                             } else {
                                 ForEach(recordManager.records, id: \.lang) { record in
                                     NavigationLink(destination: MarkdownEditorView(meetingId: record.meetingId, lang: record.lang)) {
+                                        HStack{
+                                            Text("Protokoll auf ")
+                                            Text(record.lang).bold()
+                                        }
                                     }
 
                                 }

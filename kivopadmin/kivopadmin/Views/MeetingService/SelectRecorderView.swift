@@ -14,8 +14,8 @@ struct RecorderSelectionSheet: View {
     @Binding var selectedUserName: String? // Speichert den Benutzernamen
     @Binding var localRecordsRecord: GetRecordDTO
 
-    @State private var searchText: String = ""
-    @State private var filteredUsers: [GetIdentityDTO] = []
+    @State private var searchText: String = "" // Das Suchfeld für die Benutzerliste
+    @State private var filteredUsers: [GetIdentityDTO] = [] // Gefilterte Benutzer
 
     @StateObject private var recordManager = RecordManager()
 
@@ -27,7 +27,10 @@ struct RecorderSelectionSheet: View {
                     informationSection
                 }
                 .navigationTitle("Benutzer auswählen")
-                .searchable(text: $searchText)
+                .searchable(text: $searchText) // Sucht beim Eintippen im Suchfeld
+                .onChange(of: searchText) { _ in
+                    updateFilteredUsers() // Filtert Benutzer bei Änderung des Suchtextes
+                }
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Speichern") {
@@ -39,7 +42,7 @@ struct RecorderSelectionSheet: View {
             }
         }
         .onAppear {
-            initializeFilteredUsers()
+            initializeFilteredUsers() // Initialisieren der gefilterten Benutzer
         }
     }
 
@@ -63,7 +66,7 @@ struct RecorderSelectionSheet: View {
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation {
-                selectUser(user)
+                selectUser(user) // Wählt den Benutzer aus
             }
         }
     }
@@ -86,7 +89,7 @@ struct RecorderSelectionSheet: View {
     }
 
     private func initializeFilteredUsers() {
-        filteredUsers = users
+        filteredUsers = users // Zuerst alle Benutzer setzen
         let selectedUserId = localRecordsRecord.identity.id
         if let preselectedUser = users.first(where: { $0.id == selectedUserId }) {
             selectedUser = selectedUserId
@@ -94,14 +97,12 @@ struct RecorderSelectionSheet: View {
         }
     }
 
-
-
     private func updateFilteredUsers() {
         if searchText.isEmpty {
-            filteredUsers = users
+            filteredUsers = users // Wenn das Suchfeld leer ist, zeige alle Benutzer
         } else {
             filteredUsers = users.filter { user in
-                user.name.localizedCaseInsensitiveContains(searchText)
+                user.name.localizedCaseInsensitiveContains(searchText) // Filtere nach Namen
             }
         }
     }
@@ -112,6 +113,7 @@ struct RecorderSelectionSheet: View {
         localRecordsRecord.identity = user
     }
 }
+
 
 struct RecorderSelectionPreSheet: View {
     @Environment(\.dismiss) private var dismiss

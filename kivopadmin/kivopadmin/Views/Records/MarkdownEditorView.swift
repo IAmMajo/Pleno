@@ -1,6 +1,7 @@
 import SwiftUI
 import MarkdownUI
 import MeetingServiceDTOs
+import Foundation
 
 struct MarkdownEditorView: View {
     @Environment(\.dismiss) private var dismiss
@@ -184,16 +185,19 @@ struct TranslationSheetView: View {
     var meetingId: UUID
     var lang1: String
     
+    //@State private var languages: [String] = []
+    let manager = LanguageManager()
+    
     @StateObject private var recordManager = RecordManager()
     
-    let languages = ["DE", "TR", "EN"] // Unterstützte Sprachen
-
+    //lazy var languages: [String] = Self.generateLanguages()
+    
     var body: some View {
         NavigationStack {
             Form {
                 Section(header: Text("Sprache auswählen")) {
                     Picker("Sprache", selection: $lang2) {
-                        ForEach(languages, id: \.self) { language in
+                        ForEach(manager.languagesEdit, id: \.self) { language in
                             Text(language)
                         }
                     }
@@ -231,5 +235,30 @@ struct TranslationSheetView: View {
             }
         }
     }
+//    private func loadLanguages() {
+//        // Hole die lokalisierten Sprachcodes aus dem Bundle
+//        if let bundleLocalizations = Bundle.main.localizations as? [String] {
+//            // Optional: Sortiere und entferne nicht relevante Lokalisierungen
+//            languages = bundleLocalizations.filter { $0 != "Base" }.sorted()
+//        }
+//        
+//    }
+    
+//    static func generateLanguages() -> [String] {
+//        // Hole alle verfügbaren Lokalisierungen
+//        let appLocalizations = Bundle.main.localizations
+//        
+//        // Filtere eindeutige Sprachcodes
+//        let allLocales = Locale.availableIdentifiers
+//        let uniqueLanguages = Set(
+//            allLocales.compactMap { identifier in
+//                Locale(identifier: identifier).language.languageCode.identifier
+//            }
+//        )
+//        
+//        // Unterstützte Sprachen mit der App-Lokalisierung abgleichen
+//        let supportedLanguages = appLocalizations.filter { uniqueLanguages.contains($0) }
+//        return supportedLanguages.map { $0.uppercased() }
+//    }
 }
 
