@@ -185,28 +185,25 @@ struct VotingSectionView: View {
    // var voting: GetVotingDTO
 
     var body: some View {
-        VStack {
-            
-
-            if votingManager.isLoading {
-                ProgressView("Lade Abstimmungen...")
-                    .progressViewStyle(CircularProgressViewStyle())
-            } else if let errorMessage = votingManager.errorMessage {
-                Text("Error: \(errorMessage)")
-                    .foregroundColor(.red)
-            } else if votingManager.votings.isEmpty {
-                Text("Keine Abstimmungen gefunden.")
-                    .foregroundColor(.secondary)
-            } else {
-                ForEach(votingManager.combinedData, id: \.voting.id) { combined in
-                    NavigationLink(destination: Votings_VotingResultView(voting: combined.voting/*, votingResults: combined.votingResult*/
-                    )) {
-                        Text("\(combined.voting.question)")
-                    }
+        if votingManager.isLoading {
+            ProgressView("Lade Abstimmungen...")
+                .progressViewStyle(CircularProgressViewStyle())
+        } else if let errorMessage = votingManager.errorMessage {
+            Text("Error: \(errorMessage)")
+                .foregroundColor(.red)
+        } else if votingManager.votings.isEmpty {
+            Text("Keine Abstimmungen gefunden.")
+                .foregroundColor(.secondary)
+        } else {
+            ForEach(votingManager.combinedData, id: \.voting.id) { combined in
+                NavigationLink(destination: Votings_VotingResultView(voting: combined.voting
+                )) {
+                    Text("\(combined.voting.question)")
                 }
             }
-            
         }
+            
+        
     }
 }
 

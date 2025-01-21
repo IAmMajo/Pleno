@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		23DADFFB2CF7A5DC004B15C1 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 23DADFFA2CF7A5DC004B15C1 /* MarkdownUI */; };
+		3AC099CE2D3E37B2004F9F72 /* PollServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = 3AC099CD2D3E37B2004F9F72 /* PollServiceDTOs */; };
 		AF04581B2CECCA540071EDF8 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581A2CECCA540071EDF8 /* AuthServiceDTOs */; };
 		AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581C2CECCA540071EDF8 /* MeetingServiceDTOs */; };
 		AF04581F2CECCA540071EDF8 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581E2CECCA540071EDF8 /* NotificationsServiceDTOs */; };
@@ -666,6 +667,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 23DADFF92CF7A5DC004B15C1 /* XCRemoteSwiftPackageReference "MarkdownUI" */;
 			productName = MarkdownUI;
+		};
+		3AC099CD2D3E37B2004F9F72 /* PollServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
+			productName = PollServiceDTOs;
 		};
 		AF04581A2CECCA540071EDF8 /* AuthServiceDTOs */ = {
 			isa = XCSwiftPackageProductDependency;
