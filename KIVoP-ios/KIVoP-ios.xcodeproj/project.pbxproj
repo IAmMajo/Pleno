@@ -17,6 +17,7 @@
 		AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */; };
 		F77C36702D2C2C1E0008DB5D /* RideServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = F77C366F2D2C2C1E0008DB5D /* RideServiceDTOs */; };
 		F77C36722D2C2C240008DB5D /* PosterServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = F77C36712D2C2C240008DB5D /* PosterServiceDTOs */; };
+		F7E508F62D3E4DE0003A3537 /* PollServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = F7E508F52D3E4DE0003A3537 /* PollServiceDTOs */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +41,11 @@
 		A81ABA922CD130F00026F492 /* KIVoP-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KIVoP-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A81ABAA22CD130F20026F492 /* KIVoP-iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "KIVoP-iosTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A81ABAAC2CD130F20026F492 /* KIVoP-iosUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "KIVoP-iosUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F7E508EF2D3E4DC1003A3537 /* CreatePollDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePollDTO.swift; sourceTree = "<group>"; };
+		F7E508F02D3E4DC1003A3537 /* GetIdentityDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetIdentityDTO.swift; sourceTree = "<group>"; };
+		F7E508F12D3E4DC1003A3537 /* GetPollDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetPollDTO.swift; sourceTree = "<group>"; };
+		F7E508F22D3E4DC1003A3537 /* GetPollResultsDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetPollResultsDTO.swift; sourceTree = "<group>"; };
+		F7E508F32D3E4DC1003A3537 /* GetPollVotingOptionDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetPollVotingOptionDTO.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -84,6 +90,7 @@
 				F77C36722D2C2C240008DB5D /* PosterServiceDTOs in Frameworks */,
 				AF04581F2CECCA540071EDF8 /* NotificationsServiceDTOs in Frameworks */,
 				23DADFFB2CF7A5DC004B15C1 /* MarkdownUI in Frameworks */,
+				F7E508F62D3E4DE0003A3537 /* PollServiceDTOs in Frameworks */,
 				AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */,
 				AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */,
 				AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */,
@@ -132,8 +139,22 @@
 		F77C366E2D2C2C1E0008DB5D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F7E508F42D3E4DC1003A3537 /* PollServiceDTOs */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F7E508F42D3E4DC1003A3537 /* PollServiceDTOs */ = {
+			isa = PBXGroup;
+			children = (
+				F7E508EF2D3E4DC1003A3537 /* CreatePollDTO.swift */,
+				F7E508F02D3E4DC1003A3537 /* GetIdentityDTO.swift */,
+				F7E508F12D3E4DC1003A3537 /* GetPollDTO.swift */,
+				F7E508F22D3E4DC1003A3537 /* GetPollResultsDTO.swift */,
+				F7E508F32D3E4DC1003A3537 /* GetPollVotingOptionDTO.swift */,
+			);
+			name = PollServiceDTOs;
+			path = ../DTOs/Sources/PollServiceDTOs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -166,6 +187,7 @@
 				23DADFFA2CF7A5DC004B15C1 /* MarkdownUI */,
 				F77C366F2D2C2C1E0008DB5D /* RideServiceDTOs */,
 				F77C36712D2C2C240008DB5D /* PosterServiceDTOs */,
+				F7E508F52D3E4DE0003A3537 /* PollServiceDTOs */,
 			);
 			productName = "KIVoP-ios";
 			productReference = A81ABA922CD130F00026F492 /* KIVoP-ios.app */;
@@ -458,7 +480,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"KIVoP-ios/Preview Content\"";
-				DEVELOPMENT_TEAM = G395PB833W;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "KIVoP-ios/Info.plist";
@@ -489,7 +511,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"KIVoP-ios/Preview Content\"";
-				DEVELOPMENT_TEAM = G395PB833W;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "KIVoP-ios/Info.plist";
@@ -682,6 +704,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
 			productName = PosterServiceDTOs;
+		};
+		F7E508F52D3E4DE0003A3537 /* PollServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
+			productName = PollServiceDTOs;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

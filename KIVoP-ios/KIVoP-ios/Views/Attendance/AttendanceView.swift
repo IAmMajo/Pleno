@@ -1,10 +1,3 @@
-//
-//  AttendanceView.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 02.11.24.
-//
-
 import SwiftUI
 
 struct AttendanceView: View {
