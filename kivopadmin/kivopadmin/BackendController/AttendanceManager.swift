@@ -131,6 +131,6 @@ extension AttendanceManager {
     
     /// Gibt ein Array aller teilnehmenden Personen zurück
     func allParticipants() -> [GetIdentityDTO] {
-        return attendances.map { $0.identity }
+        return attendances.filter { $0.status == .present }.map { $0.identity }
     }
 }
