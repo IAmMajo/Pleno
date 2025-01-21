@@ -186,7 +186,7 @@ struct TranslationSheetView: View {
     
     @StateObject private var recordManager = RecordManager()
     
-    let languages = ["DE", "EN", "FR", "ES"] // Unterstützte Sprachen
+    let languages = ["DE", "TR", "EN"] // Unterstützte Sprachen
 
     var body: some View {
         NavigationStack {

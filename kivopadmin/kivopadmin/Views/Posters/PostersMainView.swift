@@ -191,9 +191,6 @@ struct SammelpostenErstellenView: View {
             description: description,
             image: resizedImageData
         )
-
-        let imageName = "example.jpg"
-        let mimeType = "image/jpeg"
         
         //posterManager.createPoster(poster: newPoster)
         posterManager.createPoster(poster: newPoster)
