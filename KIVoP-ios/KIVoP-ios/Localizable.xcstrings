@@ -267,7 +267,10 @@
         }
       }
     },
-    "Abgehangen" : {
+    "Abgehängt" : {
+
+    },
+    "abgehängt am %@" : {
 
     },
     "Abgeschlossen" : {
@@ -409,7 +412,7 @@
     "Adresse bestätigen" : {
 
     },
-    "Adresse in der Nähe" : {
+    "ADRESSE IN DER NÄHE" : {
 
     },
     "Adresse suchen" : {
@@ -636,7 +639,10 @@
     "Archiviert" : {
 
     },
-    "Aufgehangen" : {
+    "Aufgehängt" : {
+
+    },
+    "aufgehängt am %@" : {
 
     },
     "Aufhängen\nbestätigen" : {
@@ -677,6 +683,9 @@
       }
     },
     "Beschreibung" : {
+
+    },
+    "BESCHREIBUNG" : {
 
     },
     "Beschreibung Auto" : {
@@ -998,6 +1007,15 @@
     "Fehler: %@" : {
 
     },
+    "Fetching address..." : {
+
+    },
+    "Filter" : {
+
+    },
+    "Fehler: %@" : {
+
+    },
     "Frage" : {
 
     },
@@ -1197,6 +1215,9 @@
 
     },
     "Keine vergangenen Sitzungen." : {
+
+    },
+    "Keins vorhanden" : {
 
     },
     "Key" : {
@@ -1575,10 +1596,10 @@
     "No Data" : {
 
     },
-    "No expiration date" : {
+    "No meetings available." : {
 
     },
-    "No meetings available." : {
+    "No poster data available." : {
 
     },
     "No records available." : {
@@ -2025,7 +2046,7 @@
     "Standort hinzufügen" : {
 
     },
-    "Standorte (3)" : {
+    "STANDORTE (%lld)" : {
 
     },
     "Start: %@" : {
@@ -2155,7 +2176,7 @@
     "Unknown Action" : {
 
     },
-    "Verantwortliche (2)" : {
+    "VERANTWORTLICHE (%lld)" : {
 
     },
     "Vereinsfarbe" : {

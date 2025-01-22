@@ -11,14 +11,14 @@ struct CircularProgressView: View {
     
    let value: Int
    let total: Int
-   let status: Status
+   let status: String
    
    var progress: Double {
       return Double(value) / Double(total)
    }
    
    var getColor: Color {
-      return status == .hung ? .blue : .green
+      return status == "hangs" ? .blue : .green
    }
    
    var body: some View {
@@ -49,6 +49,6 @@ struct CircularProgressView: View {
 }
 
 #Preview {
-   CircularProgressView(value: 2, total: 3, status: Status.hung)
+   CircularProgressView(value: 2, total: 3, status: "hangs")
       .frame(maxWidth: 45, maxHeight: 45)
 }
