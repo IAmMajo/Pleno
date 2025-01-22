@@ -3,8 +3,12 @@ import VaporToOpenAPI
 import Models
 
 func routes(_ app: Application) throws {
+    try app.register(collection: NotificationDeviceController())
+    try app.register(collection: NotificationController())
     try app.register(collection: EmailController())
+
     try app.register(collection: WebhookController())
+
     app.get("openapi.json") { req in
         app.routes.openAPI(
             info: .init(
@@ -30,6 +34,6 @@ func routes(_ app: Application) throws {
     
     app.stoplightDocumentation(
         "stoplight",
-        openAPIPath: "./openapi.json"
+        openAPIPath: "/notifications-service/openapi.json"
     )
 }

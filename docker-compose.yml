@@ -178,13 +178,27 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.notifications-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/notifications-service`) || PathPrefix(`/email`))
+      traefik.http.routers.notifications-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/notifications-service`) || PathPrefix(`/notification-devices`))
       traefik.http.routers.notifications-service.middlewares: notifications-service-replace-path-regex
       traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.regex: ^/notifications-service(:/(.*))?
       traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.replacement: /$$1
       traefik.http.routers.notifications-service.entrypoints: https
       traefik.http.routers.notifications-service.tls: true
       traefik.http.routers.notifications-service.tls.certresolver: myresolver
+
+  notifications-service-migration:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: notifications-service-migration
+  
+  notifications-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: notifications-service-migration
 
 #
 # Vapor: ride-service
