@@ -235,7 +235,7 @@ services:
     env_file: ./../.env
     labels:
       traefik.enable: true
-      traefik.http.routers.notifications-service.rule: PathPrefix(`/notifications-service`)
+      traefik.http.routers.notifications-service.rule: PathPrefix(`/notifications-service`) || PathPrefix(`/notification-devices`)
       traefik.http.routers.notifications-service.middlewares: notifications-service-replace-path-regex
       traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.regex: ^/notifications-service(:/(.*))?
       traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.replacement: /$$1

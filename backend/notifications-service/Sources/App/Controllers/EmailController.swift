@@ -17,20 +17,11 @@ struct EmailController: RouteCollection {
     @Sendable
     func send(req: Request) async throws -> HTTPStatus {
         let dto = try req.content.decode(SendEmailDTO.self)
-        let email = Environment.get("SMTP_EMAIL") ?? ""
-        if req.application.smtp.configuration.hostname.isEmpty || email.isEmpty {
-            throw Abort(.internalServerError, reason: "SMTP configuration is missing")
-        }
-        var templateData = dto.templateData ?? [:]
-        templateData["message"] = dto.message
-        let body = try await req.view.render(dto.template ?? "default", templateData).data
-        try await req.smtp.send(try Email(
-            from: EmailAddress(address: email, name: Environment.get("APP_NAME")),
-            to: [EmailAddress(address: dto.receiver)],
+        try await req.email.sendEmail(
+            receiver: dto.receiver,
             subject: dto.subject,
-            body: String(buffer: body),
-            isBodyHtml: true
-        ))
+            message: dto.message
+        )
         return .ok
     }
 }

@@ -3,6 +3,8 @@ import VaporToOpenAPI
 import Models
 
 func routes(_ app: Application) throws {
+    try app.register(collection: NotificationDeviceController())
+    try app.register(collection: NotificationController())
     try app.register(collection: EmailController())
 
     try app.register(collection: WebhookController())

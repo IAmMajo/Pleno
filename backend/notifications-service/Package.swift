@@ -23,6 +23,12 @@ let package = Package(
         .package(path: "../../DTOs"),
         // 📄 Generate OpenAPI documentation from Vapor routes
         .package(url: "https://github.com/dankinsoid/VaporToOpenAPI.git", from: "4.7.1"),
+        // 🔐 JWT
+        .package(url: "https://github.com/vapor/jwt.git", from: "4.0.0"),
+        // 📧 APNS
+        .package(url: "https://github.com/vapor/apns.git", from: "4.2.0"),
+        // 📧 Firebase Cloud Messaging
+        .package(url: "https://github.com/MihaelIsaev/FCM.git", from: "2.13.0"),
         // 📧 SMTP protocol support for the Vapor web framework
         .package(url: "https://github.com/Mikroservices/Smtp.git", from: "3.1.2")
     ],
@@ -37,10 +43,13 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "Models", package: "models"),
-                .product(name: "NotificationsServiceDTOs", package: "dtos"),
                 .product(name: "ConfigServiceDTOs", package: "dtos"),
+                .product(name: "NotificationsServiceDTOs", package: "dtos"),
                 .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI"),
-                .product(name: "Smtp", package: "Smtp"),
+                .product(name: "JWT", package: "jwt"),
+                .product(name: "VaporAPNS", package: "apns"),
+                .product(name: "FCM", package: "FCM"),
+                .product(name: "Smtp", package: "Smtp")
             ],
             swiftSettings: swiftSettings
         ),
