@@ -147,102 +147,116 @@ struct Posters_PositionView: View {
                      }
                   }
                   
-                     VStack (alignment: .leading, spacing: 6) {
-                        Text("VERANTWORTLICHE (\(position.responsibleUsers.count))")
-                           .font(.footnote)
-                           .foregroundStyle(Color(UIColor.secondaryLabel))
-                           .padding(.leading, 32)
-                        ZStack {
-                           VStack {
-                              ForEach (position.responsibleUsers, id: \.id) { user in
-                                 HStack {
-                                    UserProfileImageView(userId: user.id)
-                                    Text(user.name)
-                                    
-                                    if position.postedBy == user.name || position.removedBy == user.name {
-                                       Spacer()
-                                       VStack {
-                                          if position.postedBy  == user.name {
-                                             let date = position.postedAt ?? Date()
-                                             Text("aufgehängt am \(formatDate(date))")
-                                          }
-                                          if position.removedBy == user.name {
-                                             let date = position.removedAt ?? Date()
-                                             Spacer()
-                                             Text("abgehängt am \(formatDate(date))")
-                                          }
+                  VStack (alignment: .leading, spacing: 6) {
+                     Text("VERANTWORTLICHE (\(position.responsibleUsers.count))")
+                        .font(.footnote)
+                        .foregroundStyle(Color(UIColor.secondaryLabel))
+                        .padding(.leading, 32)
+                     ZStack {
+                        VStack {
+                           ForEach (position.responsibleUsers, id: \.id) { user in
+                              HStack {
+                                 UserProfileImageView(userId: user.id)
+                                 Text(user.name)
+                                 Spacer()
+                                 
+                                 if position.postedBy == user.name || position.removedBy == user.name {
+                                    VStack {
+                                       if position.postedBy  == user.name {
+                                          let date = position.postedAt ?? Date()
+                                          Text("aufgehängt am \(formatDate(date))")
                                        }
-                                       .font(.footnote)
-                                       .foregroundStyle(Color(UIColor.secondaryLabel))
+                                       if position.removedBy == user.name {
+                                          let date = position.removedAt ?? Date()
+                                          Spacer()
+                                          Text("abgehängt am \(formatDate(date))")
+                                       }
                                     }
-                                 }
-                                 if user.id != position.responsibleUsers.last?.id {
-                                    Divider()
-                                       .padding(.vertical, 2)
+                                    .font(.footnote)
+                                    .foregroundStyle(Color(UIColor.secondaryLabel))
                                  }
                               }
+                              if user.id != position.responsibleUsers.last?.id {
+                                 Divider()
+                                    .padding(.vertical, 2)
+                              }
                            }
-                           .padding(.horizontal) .padding(.vertical, 12)
-                           .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
-                        .cornerRadius(10)
-                        .padding(.horizontal)
+                        .padding(.horizontal) .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                      }
-                     .padding(.vertical)
+                     .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
+                     .cornerRadius(10)
+                     .padding(.horizontal)
+                  }
+                  .padding(.vertical)
                   
                   
-                  Form {
-                     Section {
-                        HStack(spacing: 0) {
-                           Text(address)
-                              .textSelection(.enabled)
+                  
+                  VStack (alignment: .leading, spacing: 6) {
+                     Text("ADRESSE IN DER NÄHE")
+                        .font(.footnote)
+                        .foregroundStyle(Color(UIColor.secondaryLabel))
+                        .padding(.leading, 32)
+                     ZStack {
+                        VStack {
+                           HStack(spacing: 0) {
+                              Text(address)
+                                 .textSelection(.enabled)
+                              
+                              Spacer()
+                              
+                              VStack {
+                                 Button(action: { showMapOptions = true }) {
+                                    Image(systemName: "square.and.arrow.up")
+                                 }
+                                 .buttonStyle(PlainButtonStyle())
+                                 .foregroundStyle(.blue)
+                                 .frame(width: 25, height: 25)
+                                 .padding(.top, 8)
+                                 
+                                 Spacer()
+                              }
+                           }
                            
-                           Spacer()
+                           Divider().padding(.vertical, 2)
                            
-                           VStack {
-                              Button(action: { showMapOptions = true }) {
-                                 Image(systemName: "square.and.arrow.up")
+                           HStack {
+                              Text("\(String(format: "%.6f", position.latitude))° N, \(String(format: "%.6f", position.longitude))° E")
+                                 .textSelection(.enabled)
+                              
+                              Spacer()
+                              
+                              Button(action: {
+                                 tappedCopyButton.toggle()
+                                 UIPasteboard.general.string = "\(String(format: "%.6f", position.latitude))° N, \(String(format: "%.6f", position.longitude))° E"
+                                 withAnimation(.snappy) {
+                                    copiedToClipboard = true
+                                 }
+                                 DispatchQueue.main.asyncAfter (deadline: .now() + 1.8) {
+                                    withAnimation(.snappy) {
+                                       copiedToClipboard = false
+                                    }
+                                 }
+                              }) {
+                                 Image(systemName: "document.on.document")
                               }
                               .buttonStyle(PlainButtonStyle())
                               .foregroundStyle(.blue)
                               .frame(width: 25, height: 25)
-                              .padding(.top, 8)
-                              
-                              Spacer()
+                              .sensoryFeedback(.success, trigger: tappedCopyButton)
                            }
                         }
-                        HStack {
-                           Text("\(String(format: "%.6f", position.latitude))° N, \(String(format: "%.6f", position.longitude))° E")
-                              .textSelection(.enabled)
-                           
-                           Spacer()
-                           
-                           Button(action: {
-                              tappedCopyButton.toggle()
-                              UIPasteboard.general.string = "\(String(format: "%.6f", position.latitude))° N, \(String(format: "%.6f", position.longitude))° E"
-                              withAnimation(.snappy) {
-                                 copiedToClipboard = true
-                              }
-                              DispatchQueue.main.asyncAfter (deadline: .now() + 1.8) {
-                                 withAnimation(.snappy) {
-                                    copiedToClipboard = false
-                                 }
-                              }
-                           }) {
-                              Image(systemName: "document.on.document")
-                           }
-                           .buttonStyle(PlainButtonStyle())
-                           .foregroundStyle(.blue)
-                           .frame(width: 25, height: 25)
-                           .sensoryFeedback(.success, trigger: tappedCopyButton)
-                        }
-                     } header: {
-                        Text("Adresse in der Nähe")
+                        .padding(.horizontal) .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        
                      }
+                     .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
+                     .cornerRadius(10)
+                     .padding(.horizontal)
                   }
-                  .scrollDisabled(true)
-                  .frame(height: 185)
+                  .padding(.vertical)
                   .overlay {
                      if copiedToClipboard {
                         Text ("In Zwischenablage kopiert") // Copied to Clipboard
@@ -256,6 +270,7 @@ struct Posters_PositionView: View {
                            .frame(maxHeight: .infinity, alignment: .bottom)
                      }
                   }
+   
                }
                .confirmationDialog("\(address)\n\(position.latitude), \(position.longitude)", isPresented: $showMapOptions, titleVisibility: .visible) {
                   Button("Öffnen mit Apple Maps") {

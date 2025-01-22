@@ -21,17 +21,15 @@ struct UserProfileImageView: View {
                   .frame(maxWidth: 45, maxHeight: 45)
                   .aspectRatio(1, contentMode: .fit)
                   .foregroundStyle(.gray.opacity(0.5))
-                  .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                  .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                   .padding(.trailing, 5)
             } else if isLoading {
                 ProgressView("Loading...")
-            } else if let errorMessage = errorMessage {
-                Text("Error: \(errorMessage)")
-                    .foregroundColor(.red)
+                  .frame(maxWidth: 45, maxHeight: 45)
             } else {
                Image(systemName: "person.crop.square.fill")
                   .resizable()
-                  .frame(maxWidth: 40, maxHeight: 40)
+                  .frame(maxWidth: 45, maxHeight: 45)
                   .aspectRatio(1, contentMode: .fit)
                   .foregroundStyle(.gray.opacity(0.5))
                   .padding(.trailing, 5)
