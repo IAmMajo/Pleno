@@ -1,4 +1,6 @@
 import APNS
+import APNSCore
+import FCM
 import Fluent
 import Models
 import NotificationsServiceDTOs
@@ -75,8 +77,22 @@ struct NotificationController: RouteCollection {
                     ).get()
                 }
             } catch {
-                req.logger.notice("Sending notification to a device failed, deleting device: \(error)")
-                try await device.delete(on: req.db)
+                let apnsError = error as? APNSError
+                if (
+                    apnsError?.reason == .badDeviceToken ||
+                    apnsError?.reason == .deviceTokenNotForTopic ||
+                    apnsError?.responseStatus == 410
+                ) {
+                    try await device.delete(on: req.db)
+                    continue;
+                }
+                let googleError = error as? GoogleError
+                let googleErrorCode = googleError?.fcmError?.errorCode
+                if (googleErrorCode == .invalid || googleErrorCode == .unregistered) {
+                    try await device.delete(on: req.db)
+                    continue;
+                }
+                req.logger.error("No notification was sent to a device because an error occured: \(error)")
             }
         }
         do {
