@@ -13,6 +13,7 @@ import PosterServiceDTOs
 
 struct CircleImageView: View {
    let position: PosterPositionResponseDTO
+   let isResponsible: Bool
    @Binding var currentCoordinates: CLLocationCoordinate2D?
    @State private var selectedImage: UIImage? = nil
    var onUpdate: (Data, CLLocationCoordinate2D) -> Void
@@ -49,20 +50,29 @@ struct CircleImageView: View {
                   .frame(width: 165, height: 165)
                   .overlay(
                      VStack {
-                        Image(systemName: "camera.fill")
-                           .foregroundStyle(.gray)
-                           .font(.system(size: 50))
-                           .padding(.bottom, 2)
-                        Text("Aufhängen\nbestätigen")
-                           .font(.callout)
-                           .fontWeight(.semibold)
-                           .foregroundStyle(.gray)
+                        if isResponsible {
+                           Image(systemName: "camera.fill")
+                              .foregroundStyle(.gray)
+                              .font(.system(size: 50))
+                              .padding(.bottom, 2)
+                           Text("Aufhängen\nbestätigen")
+                              .font(.callout)
+                              .fontWeight(.semibold)
+                              .foregroundStyle(.gray)
+                        }else {
+                           Image(systemName: "photo")
+                              .foregroundStyle(.gray)
+                              .font(.system(size: 75))
+                              .padding(.bottom, 2)
+                        }
                      }
                   )
                   .cornerRadius(500)
                   .shadow(radius: 5)
                   .onTapGesture {
-                     showAlert = true
+                     if isResponsible {
+                        showAlert = true
+                     }
                   }
                   .alert("Alles im Blick?", isPresented: $showAlert) {
                      Button("Verstanden") {

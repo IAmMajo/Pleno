@@ -10,6 +10,7 @@ import LocalAuthentication
 import MeetingServiceDTOs
 
 struct Votings_VotingResultView: View {
+   @Environment(\.colorScheme) var colorScheme
    @StateObject private var webSocketService = WebSocketService()
    @StateObject private var meetingViewModel = MeetingViewModel()
    
@@ -93,8 +94,9 @@ struct Votings_VotingResultView: View {
                       .cornerRadius(10)
                       .padding(.horizontal) .padding(.top)
                 } else {
-                   ResultList(resultData: getResultData(votingResults: votingResults), resultDataCount: votingResults.results.count)
-                      .offset(y: -25)
+//                   ResultList(resultData: getResultData(votingResults: votingResults), resultDataCount: votingResults.results.count)
+//                      .offset(y: -25)
+                   VotingResultList(results: votingResults, optionTextMap: optionTextMap)
 //                   List{
 //                      Section {
 //                         ForEach (votingResults.results, id: \.self) { result in
@@ -235,6 +237,50 @@ struct Votings_VotingResultView: View {
 //      return votingsView.getMeeting(meetingID: voting.meetingId).name
 //   }
 
+}
+
+struct VotingResultList: View {
+   @Environment(\.colorScheme) var colorScheme
+   let results: GetVotingResultsDTO
+   let optionTextMap: [UInt8: String]
+   
+   func getColor (index: UInt8) -> Color {
+      return colorMapping[index] ?? .gray
+   }
+   
+   var body: some View {
+      VStack (alignment: .leading, spacing: 6) {
+         Text("STIMMEN (\(results.totalCount))")
+            .font(.footnote)
+            .foregroundStyle(Color(UIColor.secondaryLabel))
+            .padding(.leading, 32)
+         ZStack {
+            VStack {
+               ForEach (results.results, id: \.id) { result in
+                  HStack {
+                     Image(systemName: results.myVote == result.index ? "checkmark.circle.fill" : "circle.fill")
+                        .foregroundStyle(getColor(index: result.index))
+                     Text(optionTextMap[result.index] ?? "")
+                     Spacer()
+                     Text("\(result.percentage, specifier: "%.2f")%")
+                        .opacity(0.6)
+                  }
+                  if result.id != results.results.last?.id {
+                     Divider()
+                        .padding(.vertical, 2)
+                  }
+               }
+            }
+            .padding(.horizontal) .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+         }
+         .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
+         .cornerRadius(10)
+         .padding(.horizontal)
+      }
+      .padding(.vertical)
+   }
+   
 }
 
 struct ResultData: Identifiable {

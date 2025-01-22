@@ -39,6 +39,7 @@ class ObservableArray<T: ObservableObject>: ObservableObject {
 struct VotingsView: View {
     @StateObject private var votingService = VotingService.shared
     @StateObject private var meetingViewModel = MeetingViewModel()
+//   @StateObject private var viewModel = VotingsViewModel()
 
     @StateObject private var votings: ObservableArray<VotingViewModel> = ObservableArray()
    @StateObject private var votingsOriginal: ObservableArray<VotingViewModel> = ObservableArray()
@@ -74,7 +75,7 @@ struct VotingsView: View {
                 if let voting = selectedVoting {
                     Votings_VoteView(voting: voting.votingDTO) {
                         Task {
-//                            await voting.refreshAfterVote()
+                            await voting.refreshAfterVote()
                            await loadVotings()
                         }
                         navigateToResultView = true
@@ -105,7 +106,7 @@ struct VotingsView: View {
 
     private func handleVotingSelection(_ voting: VotingViewModel) {
         selectedVoting = voting
-       if voting.votingDTO.isOpen && !voting.votingDTO.iVoted {
+       if voting.votingDTO.isOpen && !voting.votingDTO.iVoted && !VotingStateTracker.hasVoted(for: voting.votingDTO.id) {
            isShowingVoteSheet = true
        } else {
            navigateToResultView = true

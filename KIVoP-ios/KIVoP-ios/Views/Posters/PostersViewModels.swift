@@ -52,53 +52,6 @@ class PostersViewModel: ObservableObject {
         filterPosters()
     }
    
-//   private func filterPosters() {
-//       filteredPosters = posters.compactMap { poster in
-//           guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { return nil }
-//           
-//           // Find the position with the earliest `expiresAt`
-//           guard let earliestPosition = positions.min(by: { $0.expiresAt < $1.expiresAt }) else { return nil }
-//           
-//           // Additional fields
-////           let earliestPositionStatus = earliestPosition.status
-//           let tohangCount = positions.filter { $0.status == "toHang" }.count
-//           let expiredCount = positions.filter { $0.status == "overdue" }.count
-//          
-//          // Check if the poster is archived
-//          let isArchived = positions.allSatisfy { position in
-//             position.status == "takenDown" &&
-//             position.expiresAt <= Calendar.current.date(byAdding: .day, value: -3, to: Date())!
-//          }
-//          
-//           switch selectedTab {
-//           case 0:
-//               if !isArchived {
-//                   return (poster, earliestPosition, tohangCount, expiredCount)
-//               }
-//           case 1:
-//              if isArchived {
-//                   return (poster, earliestPosition, tohangCount, expiredCount)
-//               }
-//           default:
-//               break
-//           }
-//          return nil
-//       }
-//       .sorted {
-//          // Custom sorting: prioritize "hangs" and "overdue", then by `expiresAt`
-//          if $0.earliestPosition.status == "hangs" || $0.earliestPosition.status == "overdue" {
-//             if $1.earliestPosition.status == "hangs" || $1.earliestPosition.status == "overdue" {
-//                return $0.earliestPosition.expiresAt < $1.earliestPosition.expiresAt
-//             } else {
-//                return true
-//             }
-//          } else if $1.earliestPosition.status == "hangs" || $1.earliestPosition.status == "overdue" {
-//             return false
-//          } else {
-//             return $0.earliestPosition.expiresAt < $1.earliestPosition.expiresAt
-//          }
-//       }
-//   }
    private func filterPosters() {
        filteredPosters = posters.compactMap { poster in
            guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { return nil }

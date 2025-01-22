@@ -12,6 +12,7 @@ import MeetingServiceDTOs
 class VotingViewModel: ObservableObject, Identifiable {
    let id: UUID
    @Published var votingDTO: GetVotingDTO
+   @Published var groupedVotings: [(String, [VotingViewModel])] = []
    @Published var symbolColor: Color = .black
    @Published var statusSymbol: String = ""
    @Published var meeting: GetMeetingDTO?
@@ -47,14 +48,14 @@ class VotingViewModel: ObservableObject, Identifiable {
           self.symbolColor = .blue
           self.statusSymbol = "checkmark"
       }
-//      if VotingStateTracker.hasVoted(for: votingDTO.id) {
-//              DispatchQueue.main.async {
-//                  self.symbolColor = .blue
-//                  self.statusSymbol = "checkmark"
-//              }
-//          } else {
-//              print("No vote found for voting ID: \(self.id)")
-//          }
+      if VotingStateTracker.hasVoted(for: votingDTO.id) {
+              DispatchQueue.main.async {
+                  self.symbolColor = .blue
+                  self.statusSymbol = "checkmark"
+              }
+          } else {
+              print("No vote found for voting ID: \(self.id)")
+          }
    }
    
    private func loadMeeting() async {

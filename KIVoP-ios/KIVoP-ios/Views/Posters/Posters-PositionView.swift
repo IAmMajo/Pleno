@@ -25,6 +25,7 @@ struct Posters_PositionView: View {
    
    @State private var currentCoordinates: CLLocationCoordinate2D? = CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)
    
+   @State private var myId: UUID?
    @State private var address: String?
    @State private var isLoadingAddress = true
    
@@ -105,6 +106,7 @@ struct Posters_PositionView: View {
                   
                   CircleImageView(
                      position: position,
+                     isResponsible: isResponsible(),
                      currentCoordinates: $currentCoordinates,
                      onUpdate: { image, coordinates in
                         Task {
@@ -192,7 +194,6 @@ struct Posters_PositionView: View {
                   .padding(.vertical)
                   
                   
-                  
                   VStack (alignment: .leading, spacing: 6) {
                      Text("ADRESSE IN DER NÄHE")
                         .font(.footnote)
@@ -256,7 +257,6 @@ struct Posters_PositionView: View {
                      .cornerRadius(10)
                      .padding(.horizontal)
                   }
-                  .padding(.vertical)
                   .overlay {
                      if copiedToClipboard {
                         Text ("In Zwischenablage kopiert") // Copied to Clipboard
@@ -306,9 +306,10 @@ struct Posters_PositionView: View {
                }
             }
             .refreshable {
+               loadMyId()
                await viewModel.fetchPosition()
             }
-            if (position.status != "toHang") {
+            if (position.status != "toHang" && isResponsible()) {
                Button {
                   if (position.status != "takenDown") {
                      showTakeDownAlert = true
@@ -393,6 +394,7 @@ struct Posters_PositionView: View {
          
          //          fetchAddress(latitude: currentCoordinates!.latitude, longitude: currentCoordinates!.longitude)
          Task {
+            loadMyId()
             await viewModel.fetchPosition()
             if let position = viewModel.position {
                currentCoordinates = CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)
@@ -416,6 +418,26 @@ struct Posters_PositionView: View {
       """
       }
       return ""
+   }
+   
+   func isResponsible() -> Bool {
+      guard let myId = myId else { return false }
+      return viewModel.position?.responsibleUsers.contains(where: {
+         $0.id == myId
+      }) ?? false
+   }
+   
+   func loadMyId() {
+      MainPageAPI.fetchUserProfile { result in
+         DispatchQueue.main.async {
+            switch result {
+            case .success(let profile):
+               self.myId = profile.uid
+            case .failure(let error):
+               print("Fehler beim Laden des Profils (PositionView): \(error.localizedDescription)")
+            }
+         }
+      }
    }
 }
 
