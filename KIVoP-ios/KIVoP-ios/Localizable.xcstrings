@@ -267,7 +267,10 @@
         }
       }
     },
-    "Abgehangen" : {
+    "Abgehängt" : {
+
+    },
+    "abgehängt am %@" : {
 
     },
     "Abgeschlossen" : {
@@ -636,7 +639,10 @@
     "Archiviert" : {
 
     },
-    "Aufgehangen" : {
+    "Aufgehängt" : {
+
+    },
+    "aufgehängt am %@" : {
 
     },
     "Aufhängen\nbestätigen" : {
@@ -958,9 +964,6 @@
 
     },
     "Events" : {
-
-    },
-    "Expires At: %@" : {
 
     },
     "Fahrer" : {
@@ -1599,9 +1602,6 @@
     "No records available." : {
 
     },
-    "Non-To-Hang" : {
-
-    },
     "oder" : {
       "localizations" : {
         "de" : {
@@ -2121,9 +2121,6 @@
           }
         }
       }
-    },
-    "To-Hang Only" : {
-
     },
     "Umfrage beenden" : {
 

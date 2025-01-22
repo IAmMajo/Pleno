@@ -71,17 +71,6 @@ struct CircleImageView: View {
                   } message: {
                      Text("Achte beim Aufnehmen des Bildes darauf, dass das Plakat sowie der Hintergrund und die Umgebung gut zu erkennen sind.")
                   }
-//                  .fullScreenCover(isPresented: self.$showCamera) {
-//                     accessCameraView(
-//                        selectedImage: self.$selectedImage,
-//                        showCamera: self.$showCamera,
-//                        currentCoordinates: $currentCoordinates,
-//                        onPhotoPicked: {
-//                        print("onPhotoPicked called")
-//                            showPhotoAlert = true
-//                    })
-//                        .background(.black)
-//                  }
                   .fullScreenCover(isPresented: $showCamera) {
                      accessCameraView(
                         selectedImage: $selectedImage,
@@ -94,6 +83,7 @@ struct CircleImageView: View {
                            onUpdate(imageData, coordinates)
                         }
                      }
+                     .background(.black)
                   }
             }
          } else {
@@ -109,21 +99,9 @@ struct CircleImageView: View {
                      showImage = true
                   }
                   .navigationDestination(isPresented: $showImage) {
-   //                  FullImageView(image: "TestPositionImage") Image(uiImage: uiImage)
+                     FullImageView(uiImage: uiImage!)
                   }
             }
-//            Image("TestPositionImage")
-//               .resizable()
-//               .scaledToFill()
-//               .frame(width: 165, height: 165)
-//               .clipShape(Circle())
-//               .shadow(radius: 5)
-//               .onTapGesture {
-//                  showImage = true
-//               }
-//               .navigationDestination(isPresented: $showImage) {
-////                  FullImageView(image: "TestPositionImage") Image(uiImage: uiImage)
-//               }
          }
       }
       .onChange(of: currentCoordinates) { oldCoordinates, newCoordinates in

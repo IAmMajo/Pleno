@@ -14,8 +14,8 @@ import MeetingServiceDTOs
 @MainActor
 class PostersViewModel: ObservableObject {
     @Published var posters: [PosterResponseDTO] = []
-//   @Published var filteredPosters: [(poster: PosterResponseDTO, earliestPositionDate: Date/*, tohangCount: Int, expiredCount: Int*/)] = []
-   @Published var filteredPosters: [(poster: PosterResponseDTO, earliestPosition: PosterPositionResponseDTO, tohangCount: Int, expiredCount: Int)] = []
+//   @Published var filteredPosters: [(poster: PosterResponseDTO, earliestPosition: PosterPositionResponseDTO, tohangCount: Int, expiredCount: Int)] = []
+   @Published var filteredPosters: [FilteredPoster] = []
     @Published var selectedTab: Int = 0 {
         didSet {
             filterPosters()
@@ -52,6 +52,53 @@ class PostersViewModel: ObservableObject {
         filterPosters()
     }
    
+//   private func filterPosters() {
+//       filteredPosters = posters.compactMap { poster in
+//           guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { return nil }
+//           
+//           // Find the position with the earliest `expiresAt`
+//           guard let earliestPosition = positions.min(by: { $0.expiresAt < $1.expiresAt }) else { return nil }
+//           
+//           // Additional fields
+////           let earliestPositionStatus = earliestPosition.status
+//           let tohangCount = positions.filter { $0.status == "toHang" }.count
+//           let expiredCount = positions.filter { $0.status == "overdue" }.count
+//          
+//          // Check if the poster is archived
+//          let isArchived = positions.allSatisfy { position in
+//             position.status == "takenDown" &&
+//             position.expiresAt <= Calendar.current.date(byAdding: .day, value: -3, to: Date())!
+//          }
+//          
+//           switch selectedTab {
+//           case 0:
+//               if !isArchived {
+//                   return (poster, earliestPosition, tohangCount, expiredCount)
+//               }
+//           case 1:
+//              if isArchived {
+//                   return (poster, earliestPosition, tohangCount, expiredCount)
+//               }
+//           default:
+//               break
+//           }
+//          return nil
+//       }
+//       .sorted {
+//          // Custom sorting: prioritize "hangs" and "overdue", then by `expiresAt`
+//          if $0.earliestPosition.status == "hangs" || $0.earliestPosition.status == "overdue" {
+//             if $1.earliestPosition.status == "hangs" || $1.earliestPosition.status == "overdue" {
+//                return $0.earliestPosition.expiresAt < $1.earliestPosition.expiresAt
+//             } else {
+//                return true
+//             }
+//          } else if $1.earliestPosition.status == "hangs" || $1.earliestPosition.status == "overdue" {
+//             return false
+//          } else {
+//             return $0.earliestPosition.expiresAt < $1.earliestPosition.expiresAt
+//          }
+//       }
+//   }
    private func filterPosters() {
        filteredPosters = posters.compactMap { poster in
            guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { return nil }
@@ -59,26 +106,56 @@ class PostersViewModel: ObservableObject {
            // Find the position with the earliest `expiresAt`
            guard let earliestPosition = positions.min(by: { $0.expiresAt < $1.expiresAt }) else { return nil }
            
-           // Additional fields
-//           let earliestPositionStatus = earliestPosition.status
+           // Count the number of positions with specific statuses
            let tohangCount = positions.filter { $0.status == "toHang" }.count
            let expiredCount = positions.filter { $0.status == "overdue" }.count
            
+           // Check if the poster is archived
+           let isArchived = positions.allSatisfy { position in
+               position.status == "takenDown" &&
+               position.expiresAt <= Calendar.current.date(byAdding: .day, value: -3, to: Date())!
+           }
+           
            switch selectedTab {
            case 0:
-               if positions.contains(where: { $0.status != "archived" }) { // archived (platzhalter) wegmachen, anders kalkulieren
-                   return (poster, earliestPosition, tohangCount, expiredCount)
+               // Include only non-archived posters for the "Aktuell" tab
+               if !isArchived {
+                   return FilteredPoster(
+                       poster: poster,
+                       earliestPosition: earliestPosition,
+                       tohangCount: tohangCount,
+                       expiredCount: expiredCount
+                   )
                }
            case 1:
-               if !positions.contains(where: { $0.status != "archived" }) { // archived (platzhalter) wegmachen, anders
-                   return (poster, earliestPosition, tohangCount, expiredCount)
+               // Include only archived posters for the "Archiviert" tab
+               if isArchived {
+                   return FilteredPoster(
+                       poster: poster,
+                       earliestPosition: earliestPosition,
+                       tohangCount: tohangCount,
+                       expiredCount: expiredCount
+                   )
                }
            default:
                break
            }
-          return nil
+           return nil
        }
-       .sorted(by: { $0.earliestPosition.expiresAt < $1.earliestPosition.expiresAt })
+       .sorted {
+           // Custom sorting: prioritize "hangs" and "overdue", then by `expiresAt`
+           if $0.earliestPosition.status == "hangs" || $0.earliestPosition.status == "overdue" {
+               if $1.earliestPosition.status == "hangs" || $1.earliestPosition.status == "overdue" {
+                   return $0.earliestPosition.expiresAt < $1.earliestPosition.expiresAt
+               } else {
+                   return true
+               }
+           } else if $1.earliestPosition.status == "hangs" || $1.earliestPosition.status == "overdue" {
+               return false
+           } else {
+               return $0.earliestPosition.expiresAt < $1.earliestPosition.expiresAt
+           }
+       }
    }
 }
 
@@ -144,42 +221,19 @@ class PosterPositionViewModel: ObservableObject {
         isLoading = false
     }
    
-   func refreshPosition() async {
-       guard var position = position else { return }
-       do {
-           position = try await PosterService.shared.fetchPosterPositionAsync(
-               id: position.posterId ?? UUID(),
-               positionId: position.id
-           )
-       } catch {
-           print("Failed to refresh position: \(error)")
-       }
-   }
-   
-   func updatePosition(image: Data, latitude: Double, longitude: Double) async throws {
+   func hangPosition(image: Data) async throws {
        guard let position = position else { throw NSError(domain: "Position not found", code: 404, userInfo: nil) }
 
-       let updateDTO = UpdatePosterPositionDTO(
-           posterId: position.posterId,
-           latitude: latitude,
-           longitude: longitude,
-           image: image
-       )
-
-       self.position = try await PosterService.shared.updatePosition(
-           posterId: position.posterId ?? UUID(),
-           positionId: position.id,
-           dto: updateDTO
-       )
-   }
-   
-   func hangPosition() async throws {
-       guard let position = position else { throw NSError(domain: "Position not found", code: 404, userInfo: nil) }
-
-       let hangDTO = HangPosterPositionDTO(image: position.image ?? Data())
+       let hangDTO = HangPosterPositionDTO(image: image)
        _ = try await PosterService.shared.hangPosition(positionId: position.id, dto: hangDTO)
    }
    
+   func takeDownPosition(image: Data) async throws {
+       guard let position = position else { throw NSError(domain: "Position not found", code: 404, userInfo: nil) }
+
+       let takeDownDTO = TakeDownPosterPositionDTO(image: image)
+       _ = try await PosterService.shared.takeDownPosition(positionId: position.id, dto: takeDownDTO)
+   }
 
     private func fetchAddress(latitude: Double, longitude: Double) async {
         let geocoder = CLGeocoder()
@@ -220,67 +274,6 @@ let mockIdentity2: GetIdentityDTO = GetIdentityDTO(id: UUID(), name: "Franz")
 let mockUser1: ResponsibleUsersDTO = ResponsibleUsersDTO(id: UUID(), name: "Heinz-Peters")
 let mockUser2: ResponsibleUsersDTO = ResponsibleUsersDTO(id: UUID(), name: "Franz")
 
-//var mockPosters: [PosterResponseDTO] {
-//   return [
-//      PosterResponseDTO(
-//         id: UUID(),
-//         name: "Weihnachtsfeier",
-//         description: "Das ist das Plakat für unsere Weißnachtsfeier dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
-//         image: "bild1"),
-//      PosterResponseDTO(
-//         id: UUID(),
-//         name: "Zirkus",
-//         description: "Das ist das Plakat für unseren Zirkus dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
-//         image: "bild2"
-//      ),
-//      PosterResponseDTO(
-//         id: UUID(),
-//         name: "Frühlingsfest",
-//         description: "Das ist das Plakat für unser Frühlingsfest dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
-//         image: "bild3"
-//      ),
-//      PosterResponseDTO(
-//         id: UUID(),
-//         name: "Herbstfest",
-//         description: "Das ist das Plakat für unser Herbstfest dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
-//         image: "bild4"
-//      ),
-//   ]
-//}
-//
-//var mockPosters: [Poster] {
-//   return [
-//      Poster(
-//         id: UUID(),
-//         posterPositionIds: [mockPosterPosition1.id, mockPosterPosition5.id, mockPosterPosition3.id, mockPosterPosition6.id],
-//         name: "Weihnachtsfeier",
-//         description: "Das ist das Plakat für unsere Weißnachtsfeier dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
-//         imageBase64: "bild1"
-//      ),
-//      Poster(
-//         id: UUID(),
-//         posterPositionIds: [mockPosterPosition2.id, mockPosterPosition3.id],
-//         name: "Zirkus",
-//         description: "Das ist das Plakat für unseren Zirkus dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
-//         imageBase64: "bild2"
-//      ),
-//      Poster(
-//         id: UUID(),
-//         posterPositionIds: [mockPosterPosition4.id],
-//         name: "Frühlingsfest",
-//         description: "Das ist das Plakat für unser Frühlingsfest dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
-//         imageBase64: "bild3"
-//      ),
-//      Poster(
-//         id: UUID(),
-//         posterPositionIds: [mockPosterPosition3.id],
-//         name: "Herbstfest",
-//         description: "Das ist das Plakat für unser Herbstfest dieses Jahr und wir wollen versuchen so neue Mitglieder zu gewinnen.",
-//         imageBase64: "bild4"
-//      ),
-//   ]
-//}
-
 public enum Status: String, Codable {
    case hung
    case takenDown
@@ -297,67 +290,9 @@ let mockPosterPosition0 = PosterPositionResponseDTO(
    responsibleUsers: [mockUser1, mockUser2],
    status: "toHang")
 
-//let mockPosterPosition1: PosterPosition = PosterPosition( //poster1
-//   id: UUID(),
-//   responsibleUserIds: [mockIdentity1.id, mockIdentity2.id],
-//   latitude: 51.500603516488205,
-//   longitude: 6.545327532716446,
-//   status: Status.expired,
-//   imageBase64: "bild",
-//   expiresAt: Date.now,
-//   postedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-//)
-//let mockPosterPosition2: PosterPosition = PosterPosition(
-//   id: UUID(),
-//   responsibleUserIds: [mockIdentity1.id],
-//   latitude: 0,
-//   longitude: 0,
-//   status: Status.expiresInOneDay,
-//   imageBase64: "bild",
-//   expiresAt: Calendar.current.date(byAdding: .day, value: 1, to: Date())!,
-//   postedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-//)
-//let mockPosterPosition3: PosterPosition = PosterPosition( //poster1
-//   id: UUID(),
-//   responsibleUserIds: [mockIdentity1.id],
-//   latitude: 51.500903516488205,
-//   longitude: 6.545927532716446,
-//   status: Status.notDisplayed,
-//   imageBase64: "bild",
-//   expiresAt: Calendar.current.date(byAdding: .day, value: 16, to: Date())!,
-//   postedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-//)
-//let mockPosterPosition4: PosterPosition = PosterPosition(
-//   id: UUID(),
-//   responsibleUserIds: [mockIdentity1.id],
-//   latitude: 0,
-//   longitude: 0,
-//   status: Status.hung,
-//   imageBase64: "bild",
-//   expiresAt: Calendar.current.date(byAdding: .day, value: 30, to: Date())!,
-//   postedAt: Calendar.current.date(byAdding: .day, value: -2, to: Date())!
-//)
-//let mockPosterPosition5: PosterPosition = PosterPosition( //poster1
-//   id: UUID(),
-//   responsibleUserIds: [mockIdentity1.id],
-//   latitude: 51.500653516488205,
-//   longitude: 6.545387532716446,
-//   status: Status.expired,
-//   imageBase64: "bild",
-//   expiresAt: Date.now,
-//   postedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-//)
-//let mockPosterPosition6: PosterPosition = PosterPosition( //poster1
-//   id: UUID(),
-//   responsibleUserIds: [mockIdentity1.id],
-//   latitude: 51.500604516488205,
-//   longitude: 6.545322532716446,
-//   status: Status.takenDown,
-//   imageBase64: "bild",
-//   expiresAt: Calendar.current.date(byAdding: .day, value: 1, to: Date())!,
-//   postedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-//)
-//
-//var mockPosterPositions: [PosterPosition] {
-//   [mockPosterPosition2, mockPosterPosition4, mockPosterPosition1, mockPosterPosition5, mockPosterPosition3, mockPosterPosition6]
-//}
+//   let locations: [Location] = [
+//      Location(name: "Am Grabstein 6", coordinate: CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)),
+//      Location(name: "Hinter der Obergasse 27", coordinate: CLLocationCoordinate2D(latitude: 51.504906516488205, longitude: 6.525927532716446)),
+//      Location(name: "Baumhaus 5", coordinate: CLLocationCoordinate2D(latitude: 51.494653516488205, longitude: 6.525307532716446)),
+//      Location(name: "Katerstraße 3", coordinate: CLLocationCoordinate2D(latitude: 51.495553516488205, longitude: 6.565227532716446))
+//   ]

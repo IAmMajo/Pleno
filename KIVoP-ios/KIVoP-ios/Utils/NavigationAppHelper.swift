@@ -34,11 +34,16 @@ class NavigationAppHelper {
       mapItem.openInMaps()
    }
    
-   func openInGoogleMaps(coordinate: CLLocationCoordinate2D) {
-      let urlString = "comgooglemaps://?q=\(coordinate.latitude),\(coordinate.longitude)"
-      if let url = URL(string: urlString) {
-         UIApplication.shared.open(url)
-      }
+   func openInGoogleMaps(name: String?, coordinate: CLLocationCoordinate2D) {
+       var urlString = "comgooglemaps://?q=\(coordinate.latitude),\(coordinate.longitude)"
+       if let name = name, !name.isEmpty {
+           let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+           urlString += "&query=\(encodedName)"
+       }
+       
+       if let url = URL(string: urlString) {
+           UIApplication.shared.open(url)
+       }
    }
    
    func openInWaze(coordinate: CLLocationCoordinate2D) {

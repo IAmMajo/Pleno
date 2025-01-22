@@ -33,50 +33,24 @@ struct Posters_PosterDetailView: View {
       _viewModel = StateObject(wrappedValue: PosterDetailViewModel(posterId: posterId))
    }
    
-//   let locations: [Location] = [
-//      Location(name: "Am Grabstein 6", coordinate: CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)),
-//      Location(name: "Hinter der Obergasse 27", coordinate: CLLocationCoordinate2D(latitude: 51.504906516488205, longitude: 6.525927532716446)),
-//      Location(name: "Baumhaus 5", coordinate: CLLocationCoordinate2D(latitude: 51.494653516488205, longitude: 6.525307532716446)),
-//      Location(name: "Katerstraße 3", coordinate: CLLocationCoordinate2D(latitude: 51.495553516488205, longitude: 6.565227532716446))
-//   ]
    
-   func getDateColor(position: PosterPositionResponseDTO) -> Color {
+   func getDateStatusText(position: PosterPositionResponseDTO) -> (text: String, color: Color) {
       let status = position.status
       switch status {
       case "hangs":
          if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
-            return .orange
+            return (text: "morgen überfällig", color: .orange)
          } else {
-            return Color(UIColor.secondaryLabel)
-         }
-//      case "takenDown":
-//         return Color(UIColor.secondaryLabel)
-//      case "toHang":
-//         return Color(UIColor.secondaryLabel)
-      case "overdue":
-         return .red
-      default:
-         return Color(UIColor.secondaryLabel)
-      }
-   }
-   
-   func getDateStatusText(position: PosterPositionResponseDTO) -> String {
-      let status = position.status
-      switch status {
-      case "hangs":
-         if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
-            return "morgen überfällig"
-         } else {
-            return "hängt"
+            return (text: "hängt", color: .blue)
          }
       case "takenDown":
-         return "abgehangen"
+         return (text: "abgehängt", color: .green)
       case "toHang":
-         return "hängt nicht"
+         return (text: "hängt noch nicht", color: Color(UIColor.secondaryLabel))
       case "overdue":
-         return "überfällig"
+         return (text: "überfällig", color: .red)
       default:
-         return ""
+         return (text: "", color: Color(UIColor.secondaryLabel))
       }
    }
    
@@ -127,17 +101,8 @@ struct Posters_PosterDetailView: View {
       }
    }
    
-//   private func fetchAddress(latitude: Double, longitude: Double) {
-//      getAddressFromCoordinates(latitude: latitude, longitude: longitude) { fetchedAddress in
-//         DispatchQueue.main.async {
-//            self.address = fetchedAddress
-//            self.isLoadingAddress = false
-//         }
-//      }
-//   }
-   
    private func hangsTotalMap(positions: [PosterPositionResponseDTO]) -> [Int: Int] {
-       let hangsCount = positions.filter { $0.status == "hangs" }.count
+      let hangsCount = positions.filter { $0.status != "takenDown" && $0.status != "toHang" }.count
        let notTakenDownCount = positions.filter { $0.status != "takenDown" }.count
        return [hangsCount: notTakenDownCount]
    }
@@ -148,188 +113,205 @@ struct Posters_PosterDetailView: View {
       return [takenDownCount: positionsCount]
    }
    
-    var body: some View {
-       ScrollView {
-          if let poster = viewModel.poster {
-             VStack {
-                HStack {
-                   Text("Abhängedatum:")
-                      .fontWeight(.semibold)
-                      .padding(.trailing, -2)
-                   if let expirationPosition = viewModel.positions.min(by: { $0.expiresAt < $1.expiresAt }) {
-                      Text("\(DateTimeFormatter.formatDate(expirationPosition.expiresAt))")
-                         .fontWeight(.semibold)
-                         .foregroundStyle(getDateColor(position: expirationPosition))
-                   } else {
-                      Text("Keins vorhanden")
-                         .fontWeight(.semibold)
-                         .foregroundStyle(Color(UIColor.secondaryLabel))
-                   }
-                }.padding(.top, 5)
-                
-                if let uiImage = UIImage(data: poster.image) {
-                   Image(uiImage: uiImage)
-                      .resizable()
-                      .aspectRatio(contentMode: .fit)
-//                      .frame(maxWidth: 200, maxHeight: 200)
-                   .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                   .frame(maxWidth: 200, maxHeight: 200)
-                   .foregroundStyle(.gray.opacity(0.5))
-                   .padding(.top, 10) .padding(.bottom, 10)
-                   .onTapGesture {
-                      showImage = true
-                   }
-                   .navigationDestination(isPresented: $showImage) {
-                      FullImageView(uiImage: uiImage)
-                   }
-                }
-                
-                if !viewModel.positions.isEmpty {
-                   let hangsTotalMap = hangsTotalMap(positions: viewModel.positions)
-                   let takenDownTotalMap = takenDownTotalMap(positions: viewModel.positions)
-                   HStack{
-                      VStack{
-                         CircularProgressView(value: hangsTotalMap.keys.first ?? 0, total: hangsTotalMap.values.first ?? 0, status: "hangs")
-                            .frame(maxWidth: 45, maxHeight: 45)
-                            .padding(.bottom, 5)
-                         Text("Aufgehangen")
-                            .font(.subheadline)
-                            .foregroundStyle(Color(UIColor.label).opacity(0.6))
-                      }
-                      .padding(.leading, 35)
-                      
-                      Spacer()
-                      
-                      VStack{
-                         CircularProgressView(value: takenDownTotalMap.keys.first ?? 0, total: takenDownTotalMap.values.first ?? 0, status: "takenDown")
-                            .frame(maxWidth: 45, maxHeight: 45)
-                            .padding(.bottom, 5)
-                         Text("Abgehangen")
-                            .font(.subheadline)
-                            .foregroundStyle(Color(UIColor.label).opacity(0.6))
-                      }
-                      .padding(.trailing, 35)
-                   }
-                }
-                
-                VStack (alignment: .leading, spacing: 6) {
-                   Text("BESCHREIBUNG")
-                      .font(.footnote)
-                      .foregroundStyle(Color(UIColor.secondaryLabel))
-                      .padding(.leading, 32)
-                   ZStack {
-                      Text(poster.description ?? "")
-                         .padding(.horizontal) .padding(.vertical, 12)
-                         .frame(maxWidth: .infinity, alignment: .leading)
-                   }
-                   .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
-                   .cornerRadius(10)
-                   .padding(.horizontal)
-                }
-                .padding(.vertical)
-                
-                
-                Rectangle()
-                   .frame(height: 215)
-                   .overlay(
-                     VStack {
-                        MapPositionsView(locations: locations(positions: viewModel.positions))
-                     }
-                   )
-                   .cornerRadius(10)
-                   .padding(.horizontal)
-                
-                
-                VStack (alignment: .leading, spacing: 6) {
-                   Text("STANDORTE (\(viewModel.positions.count))")
-                      .font(.footnote)
-                      .foregroundStyle(Color(UIColor.secondaryLabel))
-                      .padding(.leading, 32)
-                   ZStack {
-                      VStack {
-                         ForEach (viewModel.positions, id: \.id) { position in
-                            HStack {
-                               VStack {
-                                  if let address = addresses[position.id] {
-                                     Text("\(address)")
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                  } else {
-                                     Text("Fetching address...")
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .onAppear {
-                                           fetchAddress(for: position)
-                                        }
-                                  }
-                                  
-                                  Text("\(DateTimeFormatter.formatDate(position.expiresAt))")
-                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                     .font(.callout)
-                                     .foregroundStyle(getDateColor(position: position))
-                                  
-                               }
-                               Spacer()
-                               Text(getDateStatusText(position: position))
-                                  .font(.caption)
-                                  .opacity(0.6)
-                            }
-                            .onTapGesture {
-                               selectedPosition = position
-                               isShowingPosition = true
-                            }
-                            if position.id != viewModel.positions.last?.id {
-                               Divider()
-                                  .padding(.vertical, 2)
-                            }
-                         }
-                      }
-                      .padding(.horizontal) .padding(.vertical, 12)
-                      .frame(maxWidth: .infinity, alignment: .leading)
-                   }
-                   .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
-                   .cornerRadius(10)
-                   .padding(.horizontal)
-                }
-                .padding(.vertical)
-             }
-          } else if viewModel.isLoading {
-             ProgressView("Loading...")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(UIColor.secondarySystemBackground))
-         } else if let error = viewModel.error {
-             Text("Error: \(error)")
-                 .foregroundColor(.red)
-         } else {
-             Text("No poster data available.")
-                 .foregroundColor(.secondary)
+   var body: some View {
+      
+      VStack {
+         if viewModel.isLoading {
+            ProgressView("Loading...")
+//               .frame(maxWidth: .infinity)
+//               .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
          }
-          
-       }
-       .refreshable {
-          await viewModel.fetchPoster()
-       }
-       .navigationBarTitleDisplayMode(.inline)
-       .navigationDestination(isPresented: $isShowingPosition) {
-          if let position = selectedPosition {
-             if let address = addresses[position.id] {
-                let adressName = String(address.split(separator: ", ").first ?? "")
-                if let poster = viewModel.poster {
-                   Posters_PositionView(posterId: poster.id, positionId: position.id)
-                      .navigationTitle(adressName)
-                }
-             }
-           }
-       }
-       .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
-       .onAppear {
-          Task {
-             await viewModel.fetchPoster()
-          }
-       }
-    }
+         ScrollView {
+            if let poster = viewModel.poster {
+               VStack {
+                  HStack {
+                     Text("Abhängedatum:")
+                        .fontWeight(.semibold)
+                        .padding(.trailing, -2)
+                     if let expirationPosition = viewModel.positions.min(by: { $0.expiresAt < $1.expiresAt }) {
+                        Text("\(DateTimeFormatter.formatDate(expirationPosition.expiresAt))")
+                           .fontWeight(.semibold)
+                           .foregroundStyle(DateColorHelper.getDateColor(position: expirationPosition))
+                     } else {
+                        Text("Keins vorhanden")
+                           .fontWeight(.semibold)
+                           .foregroundStyle(Color(UIColor.secondaryLabel))
+                     }
+                  }.padding(.top, 5)
+                  
+                  if let uiImage = UIImage(data: poster.image) {
+                     Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                     //                      .frame(maxWidth: 200, maxHeight: 200)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .frame(maxWidth: 200, maxHeight: 200)
+                        .foregroundStyle(.gray.opacity(0.5))
+                        .padding(.top, 10) .padding(.bottom, 10)
+                        .onTapGesture {
+                           showImage = true
+                        }
+                        .navigationDestination(isPresented: $showImage) {
+                           FullImageView(uiImage: uiImage)
+                        }
+                  }
+                  
+                  if !viewModel.positions.isEmpty {
+                     let hangsTotalMap = hangsTotalMap(positions: viewModel.positions)
+                     let takenDownTotalMap = takenDownTotalMap(positions: viewModel.positions)
+                     HStack{
+                        VStack{
+                           CircularProgressView(value: hangsTotalMap.keys.first ?? 0, total: hangsTotalMap.values.first ?? 0, status: "hangs")
+                              .frame(maxWidth: 45, maxHeight: 45)
+                              .padding(.bottom, 5)
+                           Text("Aufgehängt")
+                              .font(.subheadline)
+                              .foregroundStyle(Color(UIColor.label).opacity(0.6))
+                        }
+                        .padding(.leading, 35)
+                        
+                        Spacer()
+                        
+                        VStack{
+                           CircularProgressView(value: takenDownTotalMap.keys.first ?? 0, total: takenDownTotalMap.values.first ?? 0, status: "takenDown")
+                              .frame(maxWidth: 45, maxHeight: 45)
+                              .padding(.bottom, 5)
+                           Text("Abgehängt")
+                              .font(.subheadline)
+                              .foregroundStyle(Color(UIColor.label).opacity(0.6))
+                        }
+                        .padding(.trailing, 35)
+                     }
+                  }
+                  
+                  VStack (alignment: .leading, spacing: 6) {
+                     Text("BESCHREIBUNG")
+                        .font(.footnote)
+                        .foregroundStyle(Color(UIColor.secondaryLabel))
+                        .padding(.leading, 32)
+                     ZStack {
+                        Text(poster.description ?? "")
+                           .padding(.horizontal) .padding(.vertical, 12)
+                           .frame(maxWidth: .infinity, alignment: .leading)
+                     }
+                     .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
+                     .cornerRadius(10)
+                     .padding(.horizontal)
+                  }
+                  .padding(.vertical)
+                  
+                  
+                  Rectangle()
+                     .frame(height: 215)
+                     .overlay(
+                        VStack {
+                           MapPositionsView(locations: locations(positions: viewModel.positions))
+                        }
+                     )
+                     .cornerRadius(10)
+                     .padding(.horizontal)
+                  
+                  
+                  VStack (alignment: .leading, spacing: 6) {
+                     Text("STANDORTE (\(viewModel.positions.count))")
+                        .font(.footnote)
+                        .foregroundStyle(Color(UIColor.secondaryLabel))
+                        .padding(.leading, 32)
+                     ZStack {
+                        VStack {
+                           ForEach (viewModel.positions, id: \.id) { position in
+                              HStack {
+                                 VStack {
+                                    if let address = addresses[position.id] {
+                                       Text("\(address)")
+                                          .frame(maxWidth: .infinity, alignment: .leading)
+                                    } else {
+                                       Text("Fetching address...")
+                                          .frame(maxWidth: .infinity, alignment: .leading)
+                                          .onAppear {
+                                             fetchAddress(for: position)
+                                          }
+                                    }
+                                    
+                                    Text("\(DateTimeFormatter.formatDate(position.expiresAt))")
+                                       .frame(maxWidth: .infinity, alignment: .leading)
+                                       .font(.callout)
+                                       .foregroundStyle(DateColorHelper.getDateColor(position: position))
+                                    
+                                 }
+                                 Spacer()
+                                 Text(getDateStatusText(position: position).text)
+                                    .font(.caption)
+                                    .foregroundStyle(getDateStatusText(position: position).color)
+                              }
+                              .contentShape(Rectangle())
+                              .onTapGesture {
+                                 selectedPosition = position
+                                 isShowingPosition = true
+                              }
+                              if position.id != viewModel.positions.last?.id {
+                                 Divider()
+                                    .padding(.vertical, 2)
+                              }
+                           }
+                        }
+                        .padding(.horizontal) .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                     }
+                     .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
+                     .cornerRadius(10)
+                     .padding(.horizontal)
+                  }
+                  .padding(.vertical)
+               }
+            } else if viewModel.isLoading {
+//               ProgressView("Loading...")
+//                  .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                  .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
+            } else if let error = viewModel.error {
+               Text("Error: \(error)")
+                  .foregroundColor(.red)
+            } else {
+               Text("No poster data available.")
+                  .foregroundColor(.secondary)
+            }
+            
+         }
+         .refreshable {
+            await viewModel.fetchPoster()
+         }
+//         .overlay {
+//            if isLoading {
+//               ProgressView("Loading...")
+//            } else if let error = error {
+//               Text("Error: \(error)")
+//                  .foregroundColor(.red)
+//            }
+//         }
+         .navigationBarTitleDisplayMode(.inline)
+         .navigationDestination(isPresented: $isShowingPosition) {
+            if let position = selectedPosition {
+               if let address = addresses[position.id] {
+                  let adressName = String(address.split(separator: ", ").first ?? "")
+                  if let poster = viewModel.poster {
+                     Posters_PositionView(posterId: poster.id, positionId: position.id)
+                        .navigationTitle(adressName)
+                  }
+               }
+            }
+         }
+         .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
+         .onAppear {
+            Task {
+               await viewModel.fetchPoster()
+            }
+         }
+      }
+   }
 }
 
 #Preview {
-//   @StateObject private var postersViewModel = PostersViewModel()
-
-//   Posters_PosterDetailView(poster: mockPosters[0])
+   //   @StateObject private var postersViewModel = PostersViewModel()
+   
+   //   Posters_PosterDetailView(poster: mockPosters[0])
 }

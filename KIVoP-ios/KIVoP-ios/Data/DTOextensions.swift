@@ -87,3 +87,5 @@ extension PosterPositionResponseDTO: @retroactive @unchecked Sendable {}
 extension UpdatePosterPositionDTO: @retroactive @unchecked Sendable {}
 extension HangPosterPositionDTO: @retroactive @unchecked Sendable {}
 extension HangPosterPositionResponseDTO: @retroactive @unchecked Sendable {}
+extension TakeDownPosterPositionDTO: @retroactive @unchecked Sendable {}
+extension TakeDownPosterPositionResponseDTO: @retroactive @unchecked Sendable {}

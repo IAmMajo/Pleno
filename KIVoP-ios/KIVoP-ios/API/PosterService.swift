@@ -164,59 +164,6 @@ class PosterService: ObservableObject {
          }
       }.resume()
    }
-
-    func fetchImage(folder: String, imageURL: String, completion: @escaping (Result<Data, Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/images/\(folder)/\(imageURL)") else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
-            return
-        }
-
-        guard let request = createAuthorizedRequest(url: url, method: "GET") else {
-            completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
-            return
-        }
-
-        URLSession.shared.dataTask(with: request) { data, _, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
-                return
-            }
-
-            completion(.success(data))
-        }.resume()
-    }
-   
-//   func updatePosition(posterId: UUID, positionId: UUID, dto: UpdatePosterPositionDTO) async throws -> PosterPositionResponseDTO {
-//       guard let url = URL(string: "\(baseURL)/\(posterId)/positions/\(positionId)") else {
-//           throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
-//       }
-//
-//       guard var request = createAuthorizedRequest(url: url, method: "PATCH") else {
-//           throw NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)
-//       }
-//
-//       do {
-//           request.httpBody = try JSONEncoder().encode(dto)
-//       } catch {
-//           throw NSError(domain: "Failed to encode request body", code: 500, userInfo: nil)
-//       }
-//
-//       let (data, response) = try await URLSession.shared.data(for: request)
-//       guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-//           throw NSError(domain: "Failed to update position", code: 500, userInfo: nil)
-//       }
-//
-//       do {
-//           return try JSONDecoder().decode(PosterPositionResponseDTO.self, from: data)
-//       } catch {
-//           throw NSError(domain: "Failed to decode response", code: 500, userInfo: nil)
-//       }
-//   }
    
    func updatePosition(posterId: UUID, positionId: UUID, dto: UpdatePosterPositionDTO) async throws -> PosterPositionResponseDTO {
        guard let url = URL(string: "\(baseURL)/\(posterId)/positions/\(positionId)") else {
@@ -274,46 +221,73 @@ class PosterService: ObservableObject {
            throw NSError(domain: "Failed to decode response", code: 500, userInfo: nil)
        }
    }
+   
+   func takeDownPosition(positionId: UUID, dto: TakeDownPosterPositionDTO) async throws -> TakeDownPosterPositionResponseDTO {
+       guard let url = URL(string: "\(baseURL)/positions/\(positionId)/take-down") else {
+           throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+       }
 
-    func takeDownPosition(id: UUID, dto: TakeDownPosterPositionDTO, completion: @escaping (Result<TakeDownPosterPositionResponseDTO, Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/\(id)/positions/take-down") else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
-            return
-        }
+       guard var request = createAuthorizedRequest(url: url, method: "PUT") else {
+           throw NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)
+       }
 
-        guard var request = createAuthorizedRequest(url: url, method: "PUT", contentType: "multipart/form-data") else {
-            completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
-            return
-        }
+       do {
+           request.httpBody = try JSONEncoder().encode(dto)
+       } catch {
+           throw NSError(domain: "Failed to encode request body", code: 500, userInfo: nil)
+       }
 
-        do {
-            let encoder = JSONEncoder()
-            request.httpBody = try encoder.encode(dto)
-        } catch {
+       let (data, response) = try await URLSession.shared.data(for: request)
+       guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+           throw NSError(domain: "Failed to hang position", code: 500, userInfo: nil)
+       }
+
+       do {
+           return try JSONDecoder().decode(TakeDownPosterPositionResponseDTO.self, from: data)
+       } catch {
+           throw NSError(domain: "Failed to decode response", code: 500, userInfo: nil)
+       }
+   }
+   
+   func fetchProfileImage(userId: UUID, completion: @escaping (Result<Data, Error>) -> Void) {
+      let profileImageBaseURL = "https://kivop.ipv64.net/users/profile-image/user"
+      guard let url = URL(string: "\(profileImageBaseURL)/\(userId.uuidString)") else {
+         completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
+         return
+      }
+      
+      guard let request = createAuthorizedRequest(url: url, method: "GET") else {
+         completion(.failure(NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)))
+         return
+      }
+      
+      URLSession.shared.dataTask(with: request) { data, _, error in
+         if let error = error {
             completion(.failure(error))
             return
-        }
-
-        URLSession.shared.dataTask(with: request) { data, _, error in
-            if let error = error {
-                completion(.failure(error))
-                return
+         }
+         
+         guard let data = data else {
+            completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
+            return
+         }
+         
+         completion(.success(data))
+      }.resume()
+   }
+   
+   func fetchProfileImageAsync(userId: UUID) async throws -> Data {
+      try await withCheckedThrowingContinuation { continuation in
+         fetchProfileImage(userId: userId) { result in
+            switch result {
+            case .success(let data):
+               continuation.resume(returning: data)
+            case .failure(let error):
+               continuation.resume(throwing: error)
             }
-
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
-                return
-            }
-
-            do {
-                let decoder = JSONDecoder()
-                let response = try decoder.decode(TakeDownPosterPositionResponseDTO.self, from: data)
-                completion(.success(response))
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
-    }
+         }
+      }
+   }
 }
 
 extension PosterService {

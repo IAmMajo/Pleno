@@ -20,8 +20,8 @@ struct Posters_PositionView: View {
       _viewModel = StateObject(wrappedValue: PosterPositionViewModel(posterId: posterId, positionId: positionId))
    }
    
-   @State var name: String = "Am Grabstein 6"
-   @State var coordinate: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)
+//   @State var name: String = "Name"
+//   @State var coordinate: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)
    
    @State private var currentCoordinates: CLLocationCoordinate2D? = CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)
    
@@ -39,29 +39,10 @@ struct Posters_PositionView: View {
    @State private var copiedToClipboard: Bool = false
    @State private var tappedCopyButton: Bool = false
    @FocusState private var isFocused: Bool
-   @State private var text = "Sample text"
+//   @State private var text = "Sample text"
    @Environment(\.dismiss) private var dismiss
    @Environment(\.colorScheme) var colorScheme
    
-   func getDateColor(position: PosterPositionResponseDTO) -> Color {
-      let status = position.status
-      switch status {
-      case "hangs":
-         if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
-            return .orange
-         } else {
-            return Color(UIColor.secondaryLabel)
-         }
-//      case "takenDown":
-//         return Color(UIColor.secondaryLabel)
-//      case "toHang":
-//         return Color(UIColor.secondaryLabel)
-      case "overdue":
-         return .red
-      default:
-         return Color(UIColor.secondaryLabel)
-      }
-   }
    
    func getAddressFromCoordinates(latitude: Double, longitude: Double, completion: @escaping (String?) -> Void) {
       let geocoder = CLGeocoder()
@@ -72,7 +53,6 @@ struct Posters_PositionView: View {
             print("Geocoding error: \(error.localizedDescription)")
             completion(nil)
          } else if let placemark = placemarks?.first {
-            self.name = placemark.name ?? "Name"
             let postalCodeAndLocality = [
                placemark.postalCode,
                placemark.locality
@@ -98,13 +78,24 @@ struct Posters_PositionView: View {
       }
    }
    
+   func formatDate(_ date: Date) -> String {
+      let date = Date() // Current date
+      let formatter = DateFormatter()
+      formatter.dateFormat = "dd.MM.yy"
+      let formattedDate = formatter.string(from: date)
+      return formattedDate
+   }
+   
    var body: some View {
       VStack {
+         if viewModel.isLoading {
+            ProgressView()
+         }
          if let position = viewModel.position,
             let address = viewModel.address {
             ScrollView {
                VStack {
-                  MapView(name: name, coordinate: currentCoordinates!)
+                  MapView(name: String(address.split(separator: "\n").first ?? ""), coordinate: currentCoordinates!)
                      .frame(height: 250)
                      .onTapGesture {
                         //                      showMapOptions = true
@@ -118,12 +109,13 @@ struct Posters_PositionView: View {
                      onUpdate: { image, coordinates in
                         Task {
                            do {
-                              try await viewModel.updatePosition(image: image, latitude: coordinates.latitude, longitude: coordinates.longitude)
-                              
+                              try await viewModel.hangPosition(image: image)
+                              print("new coordinates: \(coordinates)")
                               await viewModel.fetchPosition()
                            } catch {
-                              print("Error updating position: \(error)")
+                              print("Error hanging position: \(error)")
                            }
+                           await viewModel.fetchPosition() //wegmachen evtl sobald server error behoben wurde?
                         }
                      }
                   )
@@ -138,7 +130,7 @@ struct Posters_PositionView: View {
                      
                      Text("\(DateTimeFormatter.formatDate(position.expiresAt))")
                         .fontWeight(.semibold)
-                        .foregroundStyle(getDateColor(position: position))
+                        .foregroundStyle(DateColorHelper.getDateColor(position: position))
                   }.padding(.top, 10)
                   
                   VStack{
@@ -155,39 +147,51 @@ struct Posters_PositionView: View {
                      }
                   }
                   
-                  VStack (alignment: .leading, spacing: 6) {
-                     Text("VERANTWORTLICHE (\(position.responsibleUsers.count))")
-                        .font(.footnote)
-                        .foregroundStyle(Color(UIColor.secondaryLabel))
-                        .padding(.leading, 32)
-                     ZStack {
-                        VStack {
-                           ForEach (position.responsibleUsers, id: \.id) { user in
-                              HStack {
-                                 Image(systemName: "person.crop.square.fill")
-                                    .resizable()
-                                    .frame(maxWidth: 40, maxHeight: 40)
-                                    .aspectRatio(1, contentMode: .fit)
-                                    .foregroundStyle(.gray.opacity(0.5))
-                                    .padding(.trailing, 5)
-                                 
-                                 Text(user.name)
-                              }
-                              if user.id != position.responsibleUsers.last?.id {
-                                 Divider()
-                                    .padding(.vertical, 2)
+                     VStack (alignment: .leading, spacing: 6) {
+                        Text("VERANTWORTLICHE (\(position.responsibleUsers.count))")
+                           .font(.footnote)
+                           .foregroundStyle(Color(UIColor.secondaryLabel))
+                           .padding(.leading, 32)
+                        ZStack {
+                           VStack {
+                              ForEach (position.responsibleUsers, id: \.id) { user in
+                                 HStack {
+                                    UserProfileImageView(userId: user.id)
+                                    Text(user.name)
+                                    
+                                    if position.postedBy == user.name || position.removedBy == user.name {
+                                       Spacer()
+                                       VStack {
+                                          if position.postedBy  == user.name {
+                                             let date = position.postedAt ?? Date()
+                                             Text("aufgehängt am \(formatDate(date))")
+                                          }
+                                          if position.removedBy == user.name {
+                                             let date = position.removedAt ?? Date()
+                                             Spacer()
+                                             Text("abgehängt am \(formatDate(date))")
+                                          }
+                                       }
+                                       .font(.footnote)
+                                       .foregroundStyle(Color(UIColor.secondaryLabel))
+                                    }
+                                 }
+                                 if user.id != position.responsibleUsers.last?.id {
+                                    Divider()
+                                       .padding(.vertical, 2)
+                                 }
                               }
                            }
+                           .padding(.horizontal) .padding(.vertical, 12)
+                           .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .padding(.horizontal) .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
                      }
-                     .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
-                     .cornerRadius(10)
-                     .padding(.horizontal)
-                  }
-                  .padding(.vertical)
-               
+                     .padding(.vertical)
+                  
+                  
                   Form {
                      Section {
                         HStack(spacing: 0) {
@@ -256,13 +260,15 @@ struct Posters_PositionView: View {
                .confirmationDialog("\(address)\n\(position.latitude), \(position.longitude)", isPresented: $showMapOptions, titleVisibility: .visible) {
                   Button("Öffnen mit Apple Maps") {
                      NavigationAppHelper.shared.openInAppleMaps(
-                        name: name,
+                        name: String(address.split(separator: "\n").first ?? ""),
                         coordinate: currentCoordinates!
                      )
                   }
                   if isGoogleMapsInstalled {
                      Button("Öffnen mit Google Maps") {
-                        NavigationAppHelper.shared.openInGoogleMaps(coordinate: currentCoordinates!)
+                        NavigationAppHelper.shared.openInGoogleMaps(
+                           name: String(address.split(separator: "\n").first ?? ""),
+                           coordinate: currentCoordinates!)
                      }
                   }
                   if isWazeInstalled {
@@ -317,6 +323,13 @@ struct Posters_PositionView: View {
                         primaryButton: .default(Text("Ja")) {
                            Task {
                               // Perform "Plakat abhängen" action here
+                              do {
+                                 try await viewModel.takeDownPosition(image: position.image ?? Data())
+                                 await viewModel.fetchPosition()
+                              } catch {
+                                 print("Error taking down position: \(error)")
+                              }
+                              await viewModel.fetchPosition() //wegmachen evtl sobald server error behoben wurde?
                            }
                         },
                         secondaryButton: .cancel(Text("Nein"))
@@ -328,6 +341,13 @@ struct Posters_PositionView: View {
                         primaryButton: .default(Text("Ja")) {
                            Task {
                               // Perform "Abhängen zurückziehen" action here
+                              do {
+                                 try await viewModel.hangPosition(image: position.image ?? Data()) //Koordinaten ergänzen
+                                 await viewModel.fetchPosition()
+                              } catch {
+                                 print("Error hanging position after taking it down: \(error)")
+                              }
+                              await viewModel.fetchPosition() //wegmachen evtl sobald server error behoben wurde?
                            }
                         },
                         secondaryButton: .cancel(Text("Nein"))
@@ -338,9 +358,9 @@ struct Posters_PositionView: View {
                }
             }
          } else if viewModel.isLoading {
-            ProgressView("Loading...")
-               .frame(maxWidth: .infinity, maxHeight: .infinity)
-               .background(Color(UIColor.secondarySystemBackground))
+//            ProgressView("Loading...")
+//               .frame(maxWidth: .infinity, maxHeight: .infinity)
+//               .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
         } else if let error = viewModel.error {
             Text("Error: \(error)")
                 .foregroundColor(.red)
