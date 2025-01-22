@@ -15,14 +15,14 @@ class VotingViewModel: ObservableObject, Identifiable {
    @Published var symbolColor: Color = .black
    @Published var statusSymbol: String = ""
    @Published var meeting: GetMeetingDTO?
-   let hasVoted: Bool
+//   let hasVoted: Bool
    
    @ObservedObject private var meetingViewModel: MeetingViewModel
    
    init(voting: GetVotingDTO, meetingViewModel: MeetingViewModel) {
       self.id = voting.id
       self.votingDTO = voting
-      self.hasVoted = VotingStateTracker.hasVoted(for: voting.id)
+//      self.hasVoted = VotingStateTracker.hasVoted(for: voting.id)
       self.meetingViewModel = meetingViewModel
       Task {
          await loadMeeting()
@@ -43,14 +43,18 @@ class VotingViewModel: ObservableObject, Identifiable {
    }
    
    func refreshAfterVote() async {
-      if VotingStateTracker.hasVoted(for: votingDTO.id) {
-              DispatchQueue.main.async {
-                  self.symbolColor = .blue
-                  self.statusSymbol = "checkmark"
-              }
-          } else {
-              print("No vote found for voting ID: \(self.id)")
-          }
+      DispatchQueue.main.async {
+          self.symbolColor = .blue
+          self.statusSymbol = "checkmark"
+      }
+//      if VotingStateTracker.hasVoted(for: votingDTO.id) {
+//              DispatchQueue.main.async {
+//                  self.symbolColor = .blue
+//                  self.statusSymbol = "checkmark"
+//              }
+//          } else {
+//              print("No vote found for voting ID: \(self.id)")
+//          }
    }
    
    private func loadMeeting() async {
@@ -75,7 +79,7 @@ class VotingViewModel: ObservableObject, Identifiable {
                }
             case .failure(_ /*let error*/):
                //                   print("Fehler beim Abrufen der Ergebnisse: \(error.localizedDescription)")
-               if self.hasVoted {
+               if self.votingDTO.iVoted {
                   self.symbolColor = .blue
                   self.statusSymbol = "checkmark"
                } else {
@@ -98,7 +102,7 @@ var mockVotings: [GetVotingDTO] {
          isOpen: true,
          startedAt: Date.now,
          closedAt: nil,
-         anonymous: false,
+         anonymous: false, iVoted: false,
          options: mockOptions1
       ),
       GetVotingDTO(
@@ -109,7 +113,7 @@ var mockVotings: [GetVotingDTO] {
          isOpen: false,
          startedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!,
          closedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!,
-         anonymous: false,
+         anonymous: false, iVoted: true,
          options: mockOptions2
       ),
       GetVotingDTO(
@@ -120,7 +124,7 @@ var mockVotings: [GetVotingDTO] {
          isOpen: false,
          startedAt: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!,
          closedAt: Calendar.current.date(byAdding: .minute, value: -5, to: Date())!,
-         anonymous: false,
+         anonymous: false, iVoted: false,
          options: mockOptions2
       ),
       GetVotingDTO(
@@ -131,7 +135,7 @@ var mockVotings: [GetVotingDTO] {
          isOpen: false,
          startedAt: Calendar.current.date(byAdding: .minute, value: -35, to: Date())!,
          closedAt: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!,
-         anonymous: false,
+         anonymous: false, iVoted: true,
          options: mockOptions2
       ),
    ]

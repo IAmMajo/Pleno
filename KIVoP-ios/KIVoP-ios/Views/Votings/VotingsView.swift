@@ -74,7 +74,8 @@ struct VotingsView: View {
                 if let voting = selectedVoting {
                     Votings_VoteView(voting: voting.votingDTO) {
                         Task {
-                            await voting.refreshAfterVote()
+//                            await voting.refreshAfterVote()
+                           await loadVotings()
                         }
                         navigateToResultView = true
                     }
@@ -104,11 +105,11 @@ struct VotingsView: View {
 
     private func handleVotingSelection(_ voting: VotingViewModel) {
         selectedVoting = voting
-        if voting.votingDTO.isOpen && !VotingStateTracker.hasVoted(for: voting.id) {
-            isShowingVoteSheet = true
-        } else {
-            navigateToResultView = true
-        }
+       if voting.votingDTO.isOpen && !voting.votingDTO.iVoted {
+           isShowingVoteSheet = true
+       } else {
+           navigateToResultView = true
+       }
     }
 
     private func loadVotings() async {
