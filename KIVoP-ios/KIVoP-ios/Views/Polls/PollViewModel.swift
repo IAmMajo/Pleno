@@ -20,7 +20,7 @@ class PollViewModel: ObservableObject, Identifiable {
    init(poll: Poll) {
       self.id = poll.id
       self.pollDTO = poll
-      self.hasVoted = VotingStateTracker.hasVoted(for: poll.id)
+      self.hasVoted = PollStateTracker.hasVotedForPoll(for: poll.id)
       Task {
          await loadStatus()
       }

@@ -100,7 +100,6 @@ struct Votings_VoteView: View {
                                       case .success:
                                          print("Vote cast successfully!")
                                          dismiss()
-                                         updateMyVote(selection: selection ?? nil)
                                          onNavigate()
 //                                         onNavigate(updateMyVote(selection: selection ?? nil))
                                       case .failure(let error):
@@ -127,15 +126,6 @@ struct Votings_VoteView: View {
 
          }
          .navigationBarTitleDisplayMode(.inline)
-   }
- 
-   func updateMyVote(selection: GetVotingOptionDTO?) {
-      
-      VotingStateTracker.saveVote(votingId: voting.id, voteIndex: selection?.index ?? 0)
-
-//      var results = votingResults
-//      results.myVote = selection?.index
-//      return results
    }
 }
 
