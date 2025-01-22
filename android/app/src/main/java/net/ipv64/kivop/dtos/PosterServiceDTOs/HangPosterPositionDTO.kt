@@ -4,6 +4,5 @@ import java.util.UUID
 import java.time.LocalDateTime
 
 data class HangPosterPositionDTO (
-    var posterPosition : UUID,
     var image : String,
 )

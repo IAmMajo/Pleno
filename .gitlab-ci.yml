@@ -141,7 +141,7 @@ build-backend-docker-image-config-service:
       changes:
         - backend/config-service/**/*
         - backend/models/**/*
-        - DTOs/**/*
+        # - DTOs/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -162,7 +162,7 @@ build-backend-docker-image-auth-service:
       changes:
         - backend/auth-service/**/*
         - backend/models/**/*
-        - DTOs/**/*
+        # - DTOs/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -183,7 +183,7 @@ build-backend-docker-image-meeting-service:
       changes:
         - backend/meeting-service/**/*
         - backend/models/**/*
-        - DTOs/**/*
+        # - DTOs/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -204,7 +204,7 @@ build-backend-docker-image-notifications-service:
       changes:
         - backend/notifications-service/**/*
         - backend/models/**/*
-        - DTOs/**/*
+        # - DTOs/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -225,7 +225,7 @@ build-backend-docker-image-poster-service:
       changes:
         - backend/poster-service/**/*
         - backend/models/**/*
-        - DTOs/**/*
+        # - DTOs/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -246,7 +246,7 @@ build-backend-docker-image-ride-service:
       changes:
         - backend/ride-service/**/*
         - backend/models/**/*
-        - DTOs/**/*
+        # - DTOs/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -267,7 +267,28 @@ build-backend-docker-image-ai-service:
       changes:
         - backend/ai-service/**/*
         - backend/models/**/*
-        - DTOs/**/*
+        # - DTOs/**/*
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: prepare
+    deployment_tier: production
+
+build-backend-docker-image-poll-service:
+  stage: build
+  script:
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose build poll-service
+  rules:
+    # - changes:
+    #     - backend/models/**/*
+    #     - DTOs/**/*
+    #   when: never
+    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/poll-service/**/*
+        - backend/models/**/*
+        # - DTOs/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -284,7 +305,7 @@ build-backend-docker-image-ai-service:
 #     - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
 #       changes:
 #         - backend/models/**/*
-#         - DTOs/**/*
+# #         - DTOs/**/*
 #   timeout: 2 hours
 #   environment:
 #     name: Production

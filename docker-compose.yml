@@ -47,6 +47,8 @@ services:
       POSTGRES_USER: vapor # only for development
       POSTGRES_PASSWORD: example # only for development
       # PostgreSQL-Credentials
+      POLL_SERVICE_POSTGRES_USERNAME: ${POLL_SERVICE_POSTGRES_USERNAME:?error}
+      POLL_SERVICE_POSTGRES_PASSWORD: ${POLL_SERVICE_POSTGRES_PASSWORD:?error}
       AI_SERVICE_POSTGRES_USERNAME: ${AI_SERVICE_POSTGRES_USERNAME:?error}
       AI_SERVICE_POSTGRES_PASSWORD: ${AI_SERVICE_POSTGRES_PASSWORD:?error}
       RIDE_SERVICE_POSTGRES_USERNAME: ${RIDE_SERVICE_POSTGRES_USERNAME:?error}
@@ -209,7 +211,7 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.ride-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/ride-service`) || PathPrefix(`/specialrides`) || PathPrefix(`/events`))
+      traefik.http.routers.ride-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/ride-service`) || PathPrefix(`/specialrides`) || PathPrefix(`/eventrides`) || PathPrefix(`/events`))
       traefik.http.routers.ride-service.middlewares: ride-service-replace-path-regex
       traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.regex: ^/ride-service(:/(.*))?
       traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.replacement: /$$1
@@ -307,6 +309,39 @@ services:
     volumes:
       - ./backend/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
       - tdums-data:/var/lib/postgresql/data
+
+#
+# Vapor: poll-service
+#
+  poll-service:
+    extends:
+      file: ./backend/docker-compose.yml
+      service: poll-service
+    container_name: kivop-poll-service
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.poll-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/poll-service`) || PathPrefix(`/polls`))
+      traefik.http.routers.poll-service.middlewares: poll-service-replace-path-regex
+      traefik.http.middlewares.poll-service-replace-path-regex.replacepathregex.regex: ^/poll-service(:/(.*))?
+      traefik.http.middlewares.poll-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.poll-service.entrypoints: https
+      traefik.http.routers.poll-service.tls: true
+      traefik.http.routers.poll-service.tls.certresolver: myresolver
+
+  poll-service-migration:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: poll-service-migration
+
+  poll-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: poll-service-migration
 
 #
 # Volumes

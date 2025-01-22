@@ -14,8 +14,8 @@ public final class PosterPosition: Model,@unchecked Sendable {
     @ID(key: .id)
     public var id: UUID?
     
-    @OptionalParent(key: "poster_id")
-    public var poster: Poster?
+    @Parent(key: "poster_id")
+    public var poster: Poster
     
     @Field(key: "latitude")
     public var latitude: Double
@@ -30,7 +30,7 @@ public final class PosterPosition: Model,@unchecked Sendable {
     public var posted_by: Identity?
     
     @Field(key: "expires_at")
-    public var expires_at: Date?
+    public var expires_at: Date
     
     @Field(key: "removed_at")
     public var removed_at: Date?
@@ -38,8 +38,8 @@ public final class PosterPosition: Model,@unchecked Sendable {
     @OptionalParent(key: "removed_by")
     public var removed_by: Identity?
     
-    @Field(key:"image_url")
-    public var image_url: String?
+    @Field(key:"image")
+    public var image: Data?
     
     @Children(for: \.$poster_position)
     public var responsibilities: [PosterPositionResponsibilities]
@@ -48,7 +48,7 @@ public final class PosterPosition: Model,@unchecked Sendable {
 
 public init(
     id: UUID? = nil,
-    posterId: UUID? = nil,
+    posterId: UUID,
     latitude: Double,
     longitude: Double,
     expiresAt: Date
@@ -58,7 +58,7 @@ public init(
     self.longitude = round(longitude * 1_000_000) / 1_000_000
     self.$poster.id = posterId
     self.expires_at = expiresAt
-    self.image_url = nil
+    self.image = nil
     self.posted_at = nil
     self.$posted_by.id = nil
     self.removed_at = nil

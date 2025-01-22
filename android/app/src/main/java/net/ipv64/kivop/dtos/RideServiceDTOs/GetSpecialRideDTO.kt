@@ -10,11 +10,6 @@ data class GetSpecialRideDTO (
     var ends : LocalDateTime,
     var emptySeats : UByte,
     var allocatedSeats : UByte,
-    var myState : UsersSpecialRideState,
+    var myState : UsersRideState,
+    var openRequests : Int?,
 )
-enum class UsersSpecialRideState {
-    nothing,
-    requested,
-    accepted,
-    driver,
-}

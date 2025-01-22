@@ -34,6 +34,8 @@ services:
       POSTGRES_USER: vapor # only for development
       POSTGRES_PASSWORD: example # only for development
       # PostgreSQL-Credentials
+      POLL_SERVICE_POSTGRES_USERNAME: ${POLL_SERVICE_POSTGRES_USERNAME:?error}
+      POLL_SERVICE_POSTGRES_PASSWORD: ${POLL_SERVICE_POSTGRES_PASSWORD:?error}
       AI_SERVICE_POSTGRES_USERNAME: ${AI_SERVICE_POSTGRES_USERNAME:?error}
       AI_SERVICE_POSTGRES_PASSWORD: ${AI_SERVICE_POSTGRES_PASSWORD:?error}
       RIDE_SERVICE_POSTGRES_USERNAME: ${RIDE_SERVICE_POSTGRES_USERNAME:?error}
@@ -293,8 +295,6 @@ services:
       traefik.http.routers.poster-service.middlewares: poster-service-replace-path-regex
       traefik.http.middlewares.poster-service-replace-path-regex.replacepathregex.regex: ^/poster-service(:/(.*))?
       traefik.http.middlewares.poster-service-replace-path-regex.replacepathregex.replacement: /$$1
-    volumes:
-      - images-data:/app/Storage/Images
 
   poster-service-migration:
     profiles:
@@ -345,7 +345,7 @@ services:
       DATABASE_PASSWORD: ${RIDE_SERVICE_POSTGRES_PASSWORD:?error}
     labels:
       traefik.enable: true
-      traefik.http.routers.ride-service.rule: PathPrefix(`/ride-service`) || PathPrefix(`/specialrides`) || PathPrefix(`/events`)
+      traefik.http.routers.ride-service.rule: PathPrefix(`/ride-service`) || PathPrefix(`/specialrides`) || PathPrefix(`/eventrides`) || PathPrefix(`/events`)
       traefik.http.routers.ride-service.middlewares: ride-service-replace-path-regex
       traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.regex: ^/ride-service(:/(.*))?
       traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.replacement: /$$1
@@ -474,6 +474,60 @@ services:
       - 5432:5432
 
 #
+# Vapor: poll-service
+#
+  poll-service:
+    image: kivop-poll-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/poll-service/Dockerfile
+    container_name: kivop-poll-service
+    depends_on:
+     - config-service
+    environment:
+      <<: *shared_environment
+      DATABASE_USERNAME: ${POLL_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${POLL_SERVICE_POSTGRES_PASSWORD:?error}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.poll-service.rule: PathPrefix(`/poll-service`) || PathPrefix(`/poll`)
+      traefik.http.routers.poll-service.middlewares: poll-service-replace-path-regex
+      traefik.http.middlewares.poll-service-replace-path-regex.replacepathregex.regex: ^/poll-service(:/(.*))?
+      traefik.http.middlewares.poll-service-replace-path-regex.replacepathregex.replacement: /$$1
+
+  poll-service-migration:
+    profiles:
+      - not-default
+    image: kivop-poll-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/poll-service/Dockerfile
+    container_name: kivop-poll-service-migration
+    environment:
+      <<: *shared_environment
+      DATABASE_USERNAME: ${POLL_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${POLL_SERVICE_POSTGRES_PASSWORD:?error}
+    depends_on:
+      - postgres
+    command: ["migrate", "--yes"]
+
+  poll-service-revert:
+    profiles:
+      - not-default
+    image: kivop-poll-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/poll-service/Dockerfile
+    container_name: kivop-poll-service-revert
+    environment:
+      <<: *shared_environment
+      DATABASE_USERNAME: ${POLL_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${POLL_SERVICE_POSTGRES_PASSWORD:?error}
+    depends_on:
+      - postgres
+    command: ["migrate", "--revert", "--yes"]
+
+#
 # Volumes
 #
 volumes:
@@ -481,8 +535,6 @@ volumes:
     name: "kivop-postgres-data"
   tdums-data:
     name: "tdums-postgres-data"
-  images-data:
-    name: "kivop-images-data"
 
 #
 # Networks

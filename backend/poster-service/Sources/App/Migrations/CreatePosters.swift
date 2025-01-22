@@ -15,7 +15,7 @@ struct CreatePosters: AsyncMigration {
             .id() // Automatisches UUID-Primärschlüsselfeld
             .field("name", .string, .required) // Name als Pflichtfeld
             .field("description", .string) // Optionales Beschreibungsfeld
-            .field("image_url", .string, .required) // Bild-URL als Pflichtfeld
+            .field("image", .data, .required) // Bild-URL als Pflichtfeld
             .create()
     }
 

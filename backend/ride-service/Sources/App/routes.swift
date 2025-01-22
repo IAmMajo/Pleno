@@ -10,6 +10,7 @@ func routes(_ app: Application) throws {
     
     try authProtected.register(collection: SpecialRideController())
     try authProtected.register(collection: EventController())
+    try authProtected.register(collection: EventRideController())
     
     try app.register(collection: WebhookController())
     

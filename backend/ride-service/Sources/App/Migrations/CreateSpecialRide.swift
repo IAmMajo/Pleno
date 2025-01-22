@@ -5,7 +5,7 @@ struct CreateSpecialRide: AsyncMigration {
     func prepare(on database: Database) async throws {
         try await database.schema(SpecialRide.schema)
             .id()
-            .field("user_id", .uuid, .required, .references(User.schema, "id"))
+            .field("user_id", .uuid, .required, .references(User.schema, "id", onDelete: .cascade))
             .field("name", .string, .required)
             .field("description", .string)
             .field("vehicle_description", .string)

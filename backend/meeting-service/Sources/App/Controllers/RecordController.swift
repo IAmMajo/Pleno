@@ -45,7 +45,7 @@ struct RecordController: RouteCollection {
         return try await meeting.$records.query(on: req.db)
             .with(\.$identity)
             .all()
-            .asyncMap { record in
+            .map { record in
                 try await record.toGetRecordDTO(db: req.db)
         }
     }
@@ -83,7 +83,7 @@ struct RecordController: RouteCollection {
         guard let record = try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard try isAdmin || (identityId == record.identity.requireID() && patchRecordDTO.identityId == nil ) else {
+        guard isAdmin || (identityId == record.$identity.id && patchRecordDTO.identityId == nil ) else {
             throw Abort(.forbidden)
         }
         guard record.status == .underway || (record.status == .submitted && isAdmin) else {
@@ -145,7 +145,7 @@ struct RecordController: RouteCollection {
         guard let record = try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard try identityId == record.identity.requireID() else {
+        guard identityId == record.$identity.id else {
             throw Abort(.forbidden, reason: "You are not allowed to submit this record.")
         }
         guard record.status == .underway else {
