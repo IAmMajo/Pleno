@@ -20,7 +20,8 @@ struct LocationsView: View {
     
     var body: some View {
         ZStack {
-            Map(coordinateRegion: $locationViewModel.mapLocation).ignoresSafeArea()
+            mapLayer
+                .ignoresSafeArea()
             if let selectedPosition = locationViewModel.selectedPosterPosition {
                 VStack {
                     
@@ -42,11 +43,32 @@ struct LocationsView: View {
                         
                     
                     Spacer()
+                    
+                    ZStack{
+                        ForEach(locationViewModel.posterPositionsWithAddresses, id: \.position.id){ position in
+                            if locationViewModel.selectedPosterPosition == position {
+                                LocationPreviewView(position: position).shadow(color: Color.black.opacity(0.32), radius: 20).padding().transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                            }
+                            
+                            
+                        }
+                    }
                 }
             }
         }
         .onAppear{
             locationViewModel.fetchPosterPositions(poster: poster)
         }
+    }
+    
+    private var mapLayer: some View {
+        Map(coordinateRegion: $locationViewModel.mapLocation, annotationItems: locationViewModel.posterPositionsWithAddresses, annotationContent: { position in
+            MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: position.position.latitude, longitude: position.position.longitude)){
+                LocationMapAnnotationView().scaleEffect(locationViewModel.selectedPosterPosition == position ? 1 : 0.6).shadow(radius: 10)
+                    .onTapGesture {
+                        locationViewModel.showNextLocation(location: position)
+                    }
+            }
+        })
     }
 }

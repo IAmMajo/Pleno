@@ -38,7 +38,21 @@ class LocationsViewModel: ObservableObject {
             showLocationsList.toggle()
         }
     }
-    
+    func nextButtonPressed(){
+        guard let currentIndex = posterPositionsWithAddresses.firstIndex(where: { $0 == selectedPosterPosition }) else {
+            return
+        }
+        
+        let nextIndex = currentIndex + 1
+        guard posterPositionsWithAddresses.indices.contains(nextIndex) else {
+            guard let firstPosition = posterPositionsWithAddresses.first else { return }
+            showNextLocation(location: firstPosition)
+            return
+        }
+        
+        let nextPosition = posterPositionsWithAddresses[nextIndex]
+        showNextLocation(location: nextPosition)
+    }
     func showNextLocation(location: PosterPositionWithAddress){
         withAnimation(.easeInOut){
             mapLocation = MKCoordinateRegion(
