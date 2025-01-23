@@ -128,9 +128,6 @@
     "%lld" : {
 
     },
-    "%lld Stimmen" : {
-
-    },
     "%lld/%lld" : {
       "localizations" : {
         "en" : {
@@ -140,6 +137,9 @@
           }
         }
       }
+    },
+    "%llu" : {
+
     },
     "%llu Stimmen (%@%%)" : {
       "localizations" : {
@@ -2055,7 +2055,7 @@
     "Startzeit" : {
 
     },
-    "STIMMEN (%llu)" : {
+    "Stimmen (%llu)" : {
 
     },
     "Suchen" : {

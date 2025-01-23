@@ -96,8 +96,8 @@ struct Polls_PollResultView: View {
                       .cornerRadius(10)
                       .padding(.horizontal) .padding(.top)
                 } else {
-                   PollResultList(resultData: getResultData(pollResults: pollResults), resultDataCount: pollResults.results.count)
-                      .offset(y: -25)
+//                   PollResultList(resultData: getResultData(pollResults: pollResults), resultDataCount: pollResults.results.count)
+//                      .offset(y: -25)
                 }
                 
                 if poll.isOpen {
@@ -152,30 +152,7 @@ struct Polls_PollResultView: View {
        .background(Color(UIColor.secondarySystemBackground))
     }
    
-   private func getResultData(pollResults: PollResults) -> [ResultData] {
-      var resultDatas: [ResultData] = []
-      
-      for result in pollResults.results {
-         var resultIdentities: [ResultData] = []
-         for identity in getIdentities(result: result) {
-            resultIdentities.append(ResultData(
-                  icon: "checkmark.circle.fill",
-                  color: getColor(index: result.index).opacity(0.5).mix(with: .gray, by: 0.3),
-                  name: identity.name,
-                  percentage: nil
-               ))
-         }
-         resultDatas.append(ResultData(
-            icon: pollResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill",
-            color: getColor(index: result.index),
-            name: optionTextMap[result.index] ?? "",
-            percentage: Double(result.count),
-            identities: resultIdentities
-         ))
-      }
-      return resultDatas
-   }
-   
+
    private func getIdentities(result: PollResult) -> [GetIdentityDTO] {
       if let identities = result.identities {
          return identities
@@ -247,29 +224,6 @@ struct Polls_PollResultView: View {
 
 }
 
-struct PollResultList: View {
-   let resultData: [ResultData]
-   let resultDataCount: Int
-   
-   var body: some View {
-      List(resultData, children: \.identities) { resultData in
-         HStack {
-            Image(systemName: resultData.icon)
-               .foregroundStyle(resultData.color)
-            Text(resultData.name)
-            Spacer()
-            if let percentage = resultData.percentage {
-               Text("\(Int(percentage)) Stimmen")
-                  .opacity(0.6)
-            }
-         }
-      }
-      .scrollDisabled(true)
-//      .frame(height: CGFloat((resultDataCount * 65) + (resultDataCount < 4 ? 200 : 0)), alignment: .top)
-      .frame(height: CGFloat((resultDataCount * 55) + (resultDataCount < 4 ? 200 : 0)), alignment: .top)
-      .scrollContentBackground(.hidden)
-   }
-}
 
 #Preview() {
    Polls_PollResultView(poll: mockPolls[0], onPollEnd:{ _ in})
