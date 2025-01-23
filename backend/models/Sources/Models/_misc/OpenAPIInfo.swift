@@ -1,7 +1,7 @@
 import Foundation
 
 public struct OpenAPIInfo {
-    public static let title: String = "KIVoP Meeting Service API"
+    public static let title: String = "KIVoP Service API"
     public static let summary: String? = nil
     public static let description: String? = """
 # Alle Services

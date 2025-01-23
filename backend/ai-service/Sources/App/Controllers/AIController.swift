@@ -35,15 +35,6 @@ struct AIController: RouteCollection {
             responseContentType: .init(rawValue: "text/markdown"),
             responseDescription: "Social Media Post"
         )
-        routes.post("internal", "translate-record", ":lang", ":lang2", use: translateRecord).openAPI(
-            summary: "Protokoll übersetzen",
-            description: "Übersetzt ein Sitzungsprotokoll in eine andere Sprache.",
-            body: .type(AISendMessageDTO.self),
-            contentType: .application(.json),
-            response: .type(AISendMessageDTO.self),
-            responseContentType: .application(.json),
-            responseDescription: "Übersetztes Protokoll"
-        )
     }
 
     @Sendable
@@ -64,18 +55,5 @@ struct AIController: RouteCollection {
             message: "Protokoll:\n\n\(dto.content)",
             maxCompletionTokens: 1000
         )
-    }
-    
-    @Sendable
-    func translateRecord(req: Request) async throws -> AISendMessageDTO {
-        let lang = req.parameters.get("lang")!
-        let lang2 = req.parameters.get("lang2")!
-        let dto = try req.content.decode(AISendMessageDTO.self)
-        let aiResponse = try await req.ai.getAIResponse(
-            promptName: "translate-record",
-            message: "\(lang) to \(lang2):\n\n\(dto.content)",
-            maxCompletionTokens: 10000
-        )
-        return .init(content: aiResponse)
     }
 }

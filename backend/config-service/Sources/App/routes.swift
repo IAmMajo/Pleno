@@ -4,8 +4,8 @@ import VaporToOpenAPI
 import Models
 
 func routes(_ app: Application) throws {
-    
     try app.register(collection: ConfigController())
+    try app.grouped("internal").register(collection: InternalController())
     
     app.get("openapi.json") { req in
         app.routes.openAPI(

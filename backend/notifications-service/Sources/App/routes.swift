@@ -8,6 +8,7 @@ func routes(_ app: Application) throws {
     try app.register(collection: EmailController())
 
     try app.register(collection: WebhookController())
+    try app.grouped("internal").register(collection: InternalController())
 
     app.get("openapi.json") { req in
         app.routes.openAPI(

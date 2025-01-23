@@ -8,12 +8,21 @@ import VaporToOpenAPI
 struct InternalController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let openAPITag = TagObject(name: "Intern", description: "Nur intern erreichbar.")
+        
+        routes.get("healthcheck", use: healthcheck)
+            .openAPI(tags: openAPITag, summary: "Healthcheck des Microservices", statusCode: .ok)
+        
         routes.group("adjust-identities") { route in
             route.put("prepare", ":oldId", ":newId", use: adjustIdentitiesPreparation)
                 .openAPI(tags: openAPITag, summary: "Identitäten in veränderlichen Anwesenheiten anpassen (Schritt 1)", path: .all(of: .type(Identity.IDValue.self), .type(Identity.IDValue.self)), response: .type([Attendance].self), responseContentType: .application(.json), statusCode: .ok)
             route.put(use: adjustIdentities)
                 .openAPI(tags: openAPITag, summary: "Identitäten in veränderlichen Anwesenheiten anpassen (Schritt 2)", body: .type([Attendance].self), contentType: .application(.json), statusCode: .noContent)
         }
+    }
+    
+    /// **GET** `/internal/healthcheck`
+    @Sendable func healthcheck(req: Request) -> HTTPResponseStatus {
+        .ok
     }
     
     /// **PUT** `/internal/adjust-identities/prepare/{oldId}/{newId}`
