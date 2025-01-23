@@ -568,7 +568,7 @@ class PosterManager: ObservableObject {
 
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                do{
+                do {
                     self?.isLoading = false
                     
                     if let error = error {
@@ -586,26 +586,21 @@ class PosterManager: ObservableObject {
                         return
                     }
                     
-                    // Debug JSON
-                    //print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-                    
+                    // Set up the JSONDecoder with dateDecodingStrategy for ISO8601 format
                     let decoder = JSONDecoder()
+                    decoder.dateDecodingStrategy = .iso8601  // Add this line to handle ISO 8601 date format
                     
-                    
-                    // Dekodiere die Daten
+                    // Decode the data into PosterPositionResponseDTO array
                     self?.posterPositions = try decoder.decode([PosterPositionResponseDTO].self, from: data)
 
-
-                }catch {
+                } catch {
                     self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
                     print("Decoding error: \(error)")
                 }
-
-
             }
         }.resume()
     }
-    
+
     func fetchPosterPositionsHangs(poster: PosterResponseDTO) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/positions?status=hangs") else {
             errorMessage = "Invalid URL."
@@ -625,7 +620,7 @@ class PosterManager: ObservableObject {
 
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                do{
+                do {
                     self?.isLoading = false
                     
                     if let error = error {
@@ -644,24 +639,28 @@ class PosterManager: ObservableObject {
                     }
                     
                     // Debug JSON
-                    //print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
+                    // print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
                     
                     let decoder = JSONDecoder()
                     
+                    // Passe den Decoder an, um Strings in Zahlen zu konvertieren oder andere Anpassungen vorzunehmen
+                    decoder.dateDecodingStrategy = .iso8601 // Beispiel für ISO 8601-Daten
+                    decoder.keyDecodingStrategy = .convertFromSnakeCase
                     
                     // Dekodiere die Daten
                     self?.posterPositionsHangs = try decoder.decode([PosterPositionResponseDTO].self, from: data)
-
-
-                }catch {
+                    
+                } catch DecodingError.typeMismatch(let type, let context) {
+                    self?.errorMessage = "Type mismatch error: \(type), context: \(context.debugDescription)"
+                    print("Type mismatch error: \(type), context: \(context)")
+                } catch {
                     self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
                     print("Decoding error: \(error)")
                 }
-
-
             }
         }.resume()
     }
+
     
     func fetchPosterPositionsToHang(poster: PosterResponseDTO) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/positions?status=tohang") else {
@@ -682,40 +681,43 @@ class PosterManager: ObservableObject {
 
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                do{
+                do {
                     self?.isLoading = false
-                    
+
                     if let error = error {
                         self?.errorMessage = "Network error: \(error.localizedDescription)"
                         return
                     }
-                    
+
                     guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
                         self?.errorMessage = "Invalid server response."
                         return
                     }
-                    
+
                     guard let data = data else {
                         self?.errorMessage = "No data received."
                         return
                     }
-                    
+
                     // Debug JSON
-                    //print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-                    
+                    // print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
+
                     let decoder = JSONDecoder()
                     
-                    
+                    // Passe den Decoder an, um Strings in Double oder andere Typkonflikte zu lösen
+                    decoder.dateDecodingStrategy = .iso8601 // Beispiel für ISO-8601-Datumsformat
+                    decoder.keyDecodingStrategy = .convertFromSnakeCase
+
                     // Dekodiere die Daten
                     self?.posterPositionsToHang = try decoder.decode([PosterPositionResponseDTO].self, from: data)
-
-
-                }catch {
+                    
+                } catch DecodingError.typeMismatch(let type, let context) {
+                    self?.errorMessage = "Type mismatch error: \(type), context: \(context.debugDescription)"
+                    print("Type mismatch error: \(type), context: \(context)")
+                } catch {
                     self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
                     print("Decoding error: \(error)")
                 }
-
-
             }
         }.resume()
     }
@@ -738,43 +740,47 @@ class PosterManager: ObservableObject {
 
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                do{
+                do {
                     self?.isLoading = false
-                    
+
                     if let error = error {
                         self?.errorMessage = "Network error: \(error.localizedDescription)"
                         return
                     }
-                    
+
                     guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
                         self?.errorMessage = "Invalid server response."
                         return
                     }
-                    
+
                     guard let data = data else {
                         self?.errorMessage = "No data received."
                         return
                     }
-                    
+
                     // Debug JSON
-                    //print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-                    
+                    // print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
+
                     let decoder = JSONDecoder()
                     
-                    
+                    // Passe den Decoder an, um mögliche Typkonflikte zu lösen
+                    decoder.dateDecodingStrategy = .iso8601 // Beispiel: ISO-8601-Datumsformat
+                    decoder.keyDecodingStrategy = .convertFromSnakeCase
+
                     // Dekodiere die Daten
                     self?.posterPositionsOverdue = try decoder.decode([PosterPositionResponseDTO].self, from: data)
 
-
-                }catch {
+                } catch DecodingError.typeMismatch(let type, let context) {
+                    self?.errorMessage = "Type mismatch error: \(type), context: \(context.debugDescription)"
+                    print("Type mismatch error: \(type), context: \(context)")
+                } catch {
                     self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
                     print("Decoding error: \(error)")
                 }
-
-
             }
         }.resume()
     }
+
     
     func fetchPosterPositionsTakendown(poster: PosterResponseDTO) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/positions?status=takendown") else {
@@ -795,43 +801,47 @@ class PosterManager: ObservableObject {
 
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                do{
+                do {
                     self?.isLoading = false
-                    
+
                     if let error = error {
                         self?.errorMessage = "Network error: \(error.localizedDescription)"
                         return
                     }
-                    
+
                     guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
                         self?.errorMessage = "Invalid server response."
                         return
                     }
-                    
+
                     guard let data = data else {
                         self?.errorMessage = "No data received."
                         return
                     }
-                    
+
                     // Debug JSON
-                    //print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-                    
+                    // print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
+
                     let decoder = JSONDecoder()
                     
-                    
+                    // Passe den Decoder an, um mögliche Typkonflikte zu lösen
+                    decoder.dateDecodingStrategy = .iso8601 // Beispiel: ISO-8601-Datumsformat
+                    decoder.keyDecodingStrategy = .convertFromSnakeCase
+
                     // Dekodiere die Daten
                     self?.posterPositionsTakendown = try decoder.decode([PosterPositionResponseDTO].self, from: data)
 
-
-                }catch {
+                } catch DecodingError.typeMismatch(let type, let context) {
+                    self?.errorMessage = "Type mismatch error: \(type), context: \(context.debugDescription)"
+                    print("Type mismatch error: \(type), context: \(context)")
+                } catch {
                     self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
                     print("Decoding error: \(error)")
                 }
-
-
             }
         }.resume()
     }
+
     func fetchSinglePosterPosition(posterId: UUID, positionId: UUID) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions/\(positionId)") else {
             errorMessage = "Invalid URL."
@@ -851,44 +861,47 @@ class PosterManager: ObservableObject {
 
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                do{
+                do {
                     self?.isLoading = false
-                    
+
                     if let error = error {
                         self?.errorMessage = "Network error: \(error.localizedDescription)"
                         return
                     }
-                    
+
                     guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
                         self?.errorMessage = "Invalid server response."
                         return
                     }
-                    
+
                     guard let data = data else {
                         self?.errorMessage = "No data received."
                         return
                     }
-                    
+
                     // Debug JSON
-                    //print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-                    
+                    // print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
+
                     let decoder = JSONDecoder()
                     
-                    
+                    // Passe den Decoder an, um mögliche Typkonflikte zu lösen
+                    decoder.dateDecodingStrategy = .iso8601 // Beispiel: ISO-8601-Datumsformat
+                    decoder.keyDecodingStrategy = .convertFromSnakeCase
+
                     // Dekodiere die Daten
                     self?.posterPosition = try decoder.decode(PosterPositionResponseDTO.self, from: data)
 
-
-                }catch {
-                    self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
+                } catch DecodingError.typeMismatch(let type, let context) {
+                    self?.errorMessage = "Type mismatch error: \(type), context: \(context.debugDescription)"
+                    print("Type mismatch error: \(type), context: \(context)")
+                } catch {
+                    self?.errorMessage = "Failed to decode position: \(error.localizedDescription)"
                     print("Decoding error: \(error)")
                 }
-
-
             }
         }.resume()
     }
-    
+
     func deleteSignlePosterPosition(posterId: UUID, positionId: UUID, completion: @escaping () -> Void) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions/\(positionId)") else {
             self.errorMessage = "Invalid URL."

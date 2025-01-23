@@ -111,6 +111,7 @@ struct EditVotingView: View {
                         startedAt: voting.startedAt,
                         closedAt: voting.closedAt,
                         anonymous: voting.anonymous,
+                        iVoted: voting.iVoted, // Hier muss nochmal drüber geschaut werden @amine
                         options: filteredOptions.enumerated().map { index, text in
                             GetVotingOptionDTO(index: UInt8(index + 1), text: text)
                         }
