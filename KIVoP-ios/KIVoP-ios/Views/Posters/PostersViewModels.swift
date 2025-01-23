@@ -174,10 +174,15 @@ class PosterPositionViewModel: ObservableObject {
         isLoading = false
     }
    
-   func hangPosition(image: Data) async throws {
+   func hangPosition(image: Data, latitude: Double?, longitude: Double?) async throws {
        guard let position = position else { throw NSError(domain: "Position not found", code: 404, userInfo: nil) }
 
-       let hangDTO = HangPosterPositionDTO(image: image)
+      let hangDTO: HangPosterPositionDTO
+      if latitude == nil && longitude == nil {
+         hangDTO = HangPosterPositionDTO(image: image)
+      } else {
+         hangDTO = HangPosterPositionDTO(image: image, latitude: latitude, longitude: longitude)
+      }
        _ = try await PosterService.shared.hangPosition(positionId: position.id, dto: hangDTO)
    }
    

@@ -111,8 +111,7 @@ struct Posters_PositionView: View {
                      onUpdate: { image, coordinates in
                         Task {
                            do {
-                              try await viewModel.hangPosition(image: image)
-                              print("new coordinates: \(coordinates)")
+                              try await viewModel.hangPosition(image: image, latitude: coordinates.latitude, longitude: coordinates.longitude)
                               await viewModel.fetchPosition()
                            } catch {
                               print("Error hanging position: \(error)")
@@ -358,7 +357,7 @@ struct Posters_PositionView: View {
                            Task {
                               // Perform "Abhängen zurückziehen" action here
                               do {
-                                 try await viewModel.hangPosition(image: position.image ?? Data()) //Koordinaten ergänzen
+                                 try await viewModel.hangPosition(image: position.image ?? Data(), latitude: nil, longitude: nil) //Koordinaten ergänzen
                                  await viewModel.fetchPosition()
                               } catch {
                                  print("Error hanging position after taking it down: \(error)")

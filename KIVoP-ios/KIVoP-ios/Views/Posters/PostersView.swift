@@ -24,6 +24,8 @@ struct FilteredPoster: Equatable {
 
 struct PostersView: View {
    @Environment(\.dismiss) var dismiss
+   @Environment(\.colorScheme) var colorScheme
+
    @StateObject private var viewModel = PostersViewModel()
    @State private var postersFiltered: [FilteredPoster] = []
    @State private var selectedPoster: PosterResponseDTO?
@@ -88,21 +90,76 @@ struct PostersView: View {
                                .foregroundStyle(DateColorHelper.getDateColor(position: item.earliestPosition))
                             
                          }
+                         
                          Spacer()
+                         
                          if (item.tohangCount != 0) {
-                            Image(systemName: "\(item.tohangCount).circle.fill")
-                               .resizable()
-                               .frame(maxWidth: 22, maxHeight: 22)
-                               .aspectRatio(1, contentMode: .fit)
-                               .foregroundStyle(.blue)
-                               .padding(.trailing, 5)
+                            if item.tohangCount > 99 {
+                               Capsule()
+                                  .fill(.blue)
+                                  .overlay(
+                                    Text("\(item.tohangCount)")
+                                       .font(.system(size: 12))
+                                       .frame(width: 22)
+                                       .fontWeight(.semibold)
+                                       .foregroundStyle(colorScheme == .dark ? .black : .white)
+                                       .padding(4)
+                                  )
+                                  .frame(width: 28, height: 22)
+                            } else if item.tohangCount > 50 {
+                               Capsule()
+                                  .fill(.blue)
+                                  .overlay(
+                                    Text("\(item.tohangCount)")
+                                       .font(.system(size: 12))
+                                       .frame(width: 20)
+                                       .fontWeight(.semibold)
+                                       .foregroundStyle(colorScheme == .dark ? .black : .white)
+                                       .padding(4)
+                                  )
+                                  .frame(width: 22, height: 22)
+                            } else {
+                               Image(systemName: "\(item.tohangCount).circle.fill")
+                                  .resizable()
+                                  .frame(maxWidth: 22, maxHeight: 22)
+                                  .aspectRatio(1, contentMode: .fit)
+                                  .foregroundStyle(.blue)
+                                  .padding(.trailing, 5)
+                            }
                          }
                          if(item.earliestPosition.status == "overdue"){
-                            Image(systemName: "\(item.expiredCount).circle.fill")
-                               .resizable()
-                               .frame(maxWidth: 22, maxHeight: 22)
-                               .aspectRatio(1, contentMode: .fit)
-                               .foregroundStyle(.red)
+                            if item.expiredCount > 99 {
+                               Capsule()
+                                  .fill(.red)
+                                  .overlay(
+                                    Text("\(item.expiredCount)")
+                                       .font(.system(size: 12))
+                                       .frame(width: 22)
+                                       .fontWeight(.semibold)
+                                       .foregroundStyle(colorScheme == .dark ? .black : .white)
+                                       .padding(4)
+                                  )
+                                  .frame(width: 28, height: 22)
+                            } else if item.expiredCount > 50 {
+                               Capsule()
+                                  .fill(.red)
+                                  .overlay(
+                                    Text("\(item.expiredCount)")
+                                       .font(.system(size: 12))
+                                       .frame(width: 20)
+                                       .fontWeight(.semibold)
+                                       .foregroundStyle(colorScheme == .dark ? .black : .white)
+                                       .padding(4)
+                                  )
+                                  .frame(width: 22, height: 22)
+                            } else {
+                               Image(systemName: "\(item.expiredCount).circle.fill")
+                                  .resizable()
+                                  .frame(maxWidth: 22, maxHeight: 22)
+                                  .aspectRatio(1, contentMode: .fit)
+                                  .foregroundStyle(.red)
+                                  .padding(.trailing, 5)
+                            }
                          }
                          
                          Spacer()
