@@ -166,6 +166,23 @@ class AttendancePlanningViewModel: ObservableObject {
                 }
                 return
             }
+            
+            // Zeitraum definieren, um bestehende Events zu prüfen
+            let calendar = Calendar.current
+            let startOfDay = calendar.startOfDay(for: eventDate)
+            let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)?.addingTimeInterval(-1) ?? startOfDay.addingTimeInterval(60 * 60)
+            let predicate = self.eventStore.predicateForEvents(withStart: startOfDay, end: endOfDay, calendars: nil)
+            let existingEvents = self.eventStore.events(matching: predicate)
+
+
+            // Prüfen, ob das Event mit Titel und Datum existiert
+            if existingEvents.contains(where: { $0.title == eventTitle }) {
+                DispatchQueue.main.async {
+                    self.alertMessage = "Dieser Termin existiert bereits in deinem Kalender."
+                    self.isShowingAlert = true
+                }
+                return
+            }
 
             let event = EKEvent(eventStore: self.eventStore)
             event.title = eventTitle
@@ -198,16 +215,13 @@ class AttendancePlanningViewModel: ObservableObject {
                 return
             }
 
-            // Zeitspanne definieren (z. B. +/- 1 Tag um das Datum)
-            let oneDayBefore = Calendar.current.date(byAdding: .day, value: -1, to: eventDate)!
-            let oneDayAfter = Calendar.current.date(byAdding: .day, value: 1, to: eventDate)!
-            
-            // Ereignisse im definierten Zeitraum abrufen
-            let predicate = self.eventStore.predicateForEvents(withStart: oneDayBefore, end: oneDayAfter, calendars: nil)
+            let calendar = Calendar.current
+            let startOfDay = calendar.startOfDay(for: eventDate)
+            let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)?.addingTimeInterval(-1) ?? startOfDay.addingTimeInterval(60 * 60)
+            let predicate = self.eventStore.predicateForEvents(withStart: startOfDay, end: endOfDay, calendars: nil)
             let events = self.eventStore.events(matching: predicate)
-
-            // Event mit Titel und Datum filtern
-            if let event = events.first(where: { $0.title == eventTitle && $0.startDate == eventDate }) {
+            
+            if let event = events.first(where: { $0.title == eventTitle }) {
                 do {
                     try self.eventStore.remove(event, span: .thisEvent)
                     DispatchQueue.main.async {
@@ -221,8 +235,12 @@ class AttendancePlanningViewModel: ObservableObject {
                     }
                 }
             } else {
-                // Es gab keinen Termin zum entfernen.
+                DispatchQueue.main.async {
+                    self.alertMessage = "Kein Termin \"\(eventTitle)\" wurde an diesem Tag gefunden."
+                    self.isShowingAlert = true
+                }
             }
         }
     }
+
 }
