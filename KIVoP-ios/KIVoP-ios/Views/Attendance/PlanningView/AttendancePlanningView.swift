@@ -145,9 +145,24 @@ struct AttendancePlanningView: View {
                     }
                 }
             }
+            .alert("Hinweis", isPresented: $viewModel.isShowingAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(viewModel.alertMessage)
+            }
             .navigationTitle(viewModel.meeting.name)
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        viewModel.addEventToCalendar(eventTitle: viewModel.meeting.name, eventDate: viewModel.meeting.start, duration: viewModel.meeting.duration)
+                    }) {
+                        Image(systemName: "calendar.badge.plus")
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
         }
     }
 }
