@@ -195,16 +195,17 @@ struct SpecialRideController: RouteCollection {
             riders.removeAll{ $0.accepted == false && $0.itsMe == false }
         }
         
-        let drivername = try await User.query(on: req.db)
+        guard let driver = try await User.query(on: req.db)
             .filter(\.$id == specialRide.$user.id)
             .with(\.$identity)
-            .first()
-            .map { user in
-                user.identity.name
-            }
+            .first() else {
+            throw Abort(.notFound)
+        }
+        let driverID = try driver.requireID()
         let specialRideDetailDTO = GetSpecialRideDetailDTO(
             id: ride_id,
-            driverName: drivername ?? "",
+            driverName: driver.identity.name,
+            driverID: driverID,
             isSelfDriver: specialRide.$user.id == req.jwtPayload.userID,
             name: specialRide.name,
             description: specialRide.description,
@@ -250,16 +251,17 @@ struct SpecialRideController: RouteCollection {
         
         // create response DTO
         let ride_id = try specialRide.requireID()
-        let drivername = try await User.query(on: req.db)
-            .filter(\.$id == req.jwtPayload.userID)
+        guard let driver = try await User.query(on: req.db)
+            .filter(\.$id == specialRide.$user.id)
             .with(\.$identity)
-            .first()
-            .map { user in
-                user.identity.name
-            }
+            .first() else {
+            throw Abort(.notFound)
+        }
+        let driverID = try driver.requireID()
         let specialRideDetailDTO = GetSpecialRideDetailDTO(
             id: ride_id,
-            driverName: drivername ?? "",
+            driverName: driver.identity.name,
+            driverID: driverID,
             isSelfDriver: true,
             name: specialRide.name,
             description: specialRide.description,
@@ -322,16 +324,17 @@ struct SpecialRideController: RouteCollection {
                 )
             }
         
-        let drivername = try await User.query(on: req.db)
-            .filter(\.$id == req.jwtPayload.userID)
+        guard let driver = try await User.query(on: req.db)
+            .filter(\.$id == specialRide.$user.id)
             .with(\.$identity)
-            .first()
-            .map { user in
-                user.identity.name
-            }
+            .first() else {
+            throw Abort(.notFound)
+        }
+        let driverID = try driver.requireID()
         let specialRideDetailDTO = GetSpecialRideDetailDTO(
             id: ride_id,
-            driverName: drivername ?? "",
+            driverName: driver.identity.name,
+            driverID: driverID,
             isSelfDriver: true,
             name: specialRide.name,
             description: specialRide.description,
