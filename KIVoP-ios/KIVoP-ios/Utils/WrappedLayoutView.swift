@@ -18,6 +18,16 @@ struct WrappedLayoutView: View {
       let rows = createRows()
       
       VStack(alignment: .center, spacing: 8) {
+//         ForEach(rows.indices, id: \.self) { rowIndex in
+//            HStack(spacing: 8) {
+//               ForEach(rows[rowIndex].indices, id: \.self) { columnIndex in
+//                  let globalIndex = rows[..<rowIndex].reduce(0) { $0 + rows[$1].count } + columnIndex
+//                  let item = rows[rowIndex][columnIndex]
+//                  self.item(for: item, color: colors[globalIndex % colors.count])
+//               }
+//            }
+//            .frame(maxWidth: .infinity, alignment: .center) // Align items in the center
+//         }
          ForEach(rows.indices, id: \.self) { rowIndex in
             HStack(spacing: 8) {
                ForEach(rows[rowIndex], id: \.self) { item in
@@ -28,6 +38,15 @@ struct WrappedLayoutView: View {
             }
             .frame(maxWidth: .infinity, alignment: .center) // Align items in the center
          }
+//         ForEach(rows.indices, id: \.self) { rowIndex in
+//            HStack(spacing: 8) {
+//               ForEach(rows[rowIndex].indices, id: \.self) { itemIndex in
+//                  let item = rows[rowIndex][itemIndex]
+//                  self.item(for: item, color: colorSequence[rowIndex * rows[rowIndex].count + itemIndex])
+//               }
+//            }
+//            .frame(maxWidth: .infinity, alignment: .center) // Align items in the center
+//         }
       }
       .fixedSize(horizontal: false, vertical: true) // Ensure the view wraps content size
    }

@@ -8,6 +8,7 @@
 import Foundation
 import MeetingServiceDTOs
 import PosterServiceDTOs
+import PollServiceDTOs
 
 // Extension der DTOs
 extension GetMeetingDTO: @retroactive Identifiable {}
@@ -70,17 +71,6 @@ extension GetVotingResultDTO: @retroactive Hashable {
 
 extension CreateVotingDTO: @retroactive @unchecked Sendable {}
 
-extension GetIdentityDTO: @retroactive Identifiable {}
-extension GetIdentityDTO: @retroactive Equatable {}
-extension GetIdentityDTO: @retroactive Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-    public static func == (lhs: GetIdentityDTO, rhs: GetIdentityDTO) -> Bool {
-        return lhs.id == rhs.id
-    }
-}
-
 extension PosterResponseDTO: @retroactive Identifiable {}
 extension PosterResponseDTO: @retroactive @unchecked Sendable {}
 extension PosterPositionResponseDTO: @retroactive @unchecked Sendable {}
@@ -89,3 +79,46 @@ extension HangPosterPositionDTO: @retroactive @unchecked Sendable {}
 extension HangPosterPositionResponseDTO: @retroactive @unchecked Sendable {}
 extension TakeDownPosterPositionDTO: @retroactive @unchecked Sendable {}
 extension TakeDownPosterPositionResponseDTO: @retroactive @unchecked Sendable {}
+
+extension GetPollDTO: @retroactive Identifiable {}
+extension GetPollDTO: @retroactive Equatable {}
+extension GetPollDTO: @retroactive Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    public static func == (lhs: GetPollDTO, rhs: GetPollDTO) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
+
+extension GetPollVotingOptionDTO: @retroactive Identifiable {
+   public var id: UInt8 {
+      self.index
+   }
+}
+extension GetPollVotingOptionDTO: @retroactive Equatable {}
+extension GetPollVotingOptionDTO: @retroactive Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(index)
+    }
+
+    public static func == (lhs: GetPollVotingOptionDTO, rhs: GetPollVotingOptionDTO) -> Bool {
+        return lhs.index == rhs.index
+    }
+}
+
+extension GetPollResultDTO: @retroactive Identifiable {
+   public var id: UInt8 {
+      self.index
+   }
+}
+extension GetPollResultDTO: @retroactive Equatable {}
+extension GetPollResultDTO: @retroactive Hashable {
+   public func hash(into hasher: inout Hasher) {
+      hasher.combine(index) // Use `index` as the hashable property
+   }
+   
+   public static func == (lhs: GetPollResultDTO, rhs: GetPollResultDTO) -> Bool {
+      return lhs.index == rhs.index // Compare instances based on `index`
+   }
+}

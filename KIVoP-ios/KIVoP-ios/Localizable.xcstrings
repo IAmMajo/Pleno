@@ -151,6 +151,16 @@
         }
       }
     },
+    "%llu Stimmen von %llu Personen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$llu Stimmen von %2$llu Personen"
+          }
+        }
+      }
+    },
     "%u / %u" : {
       "localizations" : {
         "en" : {
@@ -1351,9 +1361,6 @@
     "Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position" : {
 
     },
-    "Mehrfachauswahl" : {
-
-    },
     "Mehrfachauswahl erlauben" : {
 
     },
@@ -2128,9 +2135,6 @@
         }
       }
     },
-    "Umfrage beenden" : {
-
-    },
     "Umfrage Details" : {
 
     },
@@ -2138,6 +2142,9 @@
 
     },
     "Umfrage erstellen" : {
+
+    },
+    "Umfrage-Ergebnis" : {
 
     },
     "Umfragen" : {

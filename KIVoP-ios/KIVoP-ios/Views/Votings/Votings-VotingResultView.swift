@@ -297,7 +297,7 @@ struct VotingResultRow: View {
                ForEach(identities, id: \.id) { identity in
                   HStack {
                      Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(getColor(result.index).opacity(0.8).mix(with: .gray, by: 0.2))
+                        .foregroundStyle(getColor(result.index).opacity(0.55).mix(with: .gray, by: 0.1))
                      Text(identity.name)
                   }
                   if identity.id != identities.last?.id {
@@ -348,6 +348,17 @@ struct ImageToggleStyle: ToggleStyle {
             }
       }
    }
+}
+
+extension GetIdentityDTO: @retroactive Identifiable {}
+extension GetIdentityDTO: @retroactive Equatable {}
+extension GetIdentityDTO: @retroactive Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    public static func == (lhs: GetIdentityDTO, rhs: GetIdentityDTO) -> Bool {
+        return lhs.id == rhs.id
+    }
 }
 
 

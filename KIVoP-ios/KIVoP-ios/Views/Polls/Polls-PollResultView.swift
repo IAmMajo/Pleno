@@ -6,51 +6,35 @@
 //
 
 import SwiftUI
-import MeetingServiceDTOs
+import PollServiceDTOs
 
 struct Polls_PollResultView: View {
    @StateObject private var webSocketService = WebSocketService()
 
-   let poll: Poll
-   @State var pollResults: PollResults = mockPollResults
+   let poll: GetPollDTO
+   @State var pollResults: GetPollResultsDTO
    @State var meetingName = ""
    
    @State private var isLoading = false
    @State private var error: String?
    @State private var resultsLoaded: Bool = false
-   @State private var isLiveStatusAvailable: Bool = false
-   var onPollEnd: (Poll) -> Void
    @Environment(\.dismiss) var dismiss // Zugriff auf die Navigationsebene
    
    @State var optionTextMap: [UInt8: String] = [:]
    
-//   init(poll: Poll) {
-//      self.poll = poll
-//      self.pollResults = mockPollResults
-//      self.onPollEnd = { _ in
-//         
-//      }
-//   }
+   init(poll: GetPollDTO) {
+      self.poll = poll
+      self.pollResults = mockPollResults
+   }
    
     var body: some View {
        ScrollView {
-          if (isLiveStatusAvailable || /*resultsLoaded*/ true) {
+          if (true) {
              VStack {
                 ZStack {
-                   if isLiveStatusAvailable {
-//                      VotingLiveStatusView(votingId: voting.id) {
-//                         // Handle WebSocket error
-//                         Task {
-//                            self.isLiveStatusAvailable = false
-//                            await loadVotingResults(voting: voting)
-//                         }
-//                      }
-//                      .padding(.vertical) .padding(.top, -5)
-                   } else {
-                      PollPieChartView(optionTextMap: optionTextMap, pollResults: pollResults)
-                         .padding(.vertical)
-                         .padding(.horizontal)
-                   }
+                   PollPieChartView(optionTextMap: optionTextMap, pollResults: pollResults)
+                      .padding(.vertical)
+                      .padding(.horizontal)
                 }
                 .background(Color(UIColor.systemBackground))
                 .cornerRadius(10)
@@ -59,10 +43,10 @@ struct Polls_PollResultView: View {
                 HStack {
                    Image(systemName: "calendar.badge.clock")
                    let string = poll.isOpen ? "Schließt:" : "Geschlossen:"
-                   Text("\(string) \(DateTimeFormatter.formatDate(poll.expirationDate)), \(DateTimeFormatter.formatTime(poll.expirationDate)) Uhr")
+                   Text("\(string) \(DateTimeFormatter.formatDate(poll.closedAt)), \(DateTimeFormatter.formatTime(poll.closedAt)) Uhr")
                       .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .foregroundStyle(Color(UIColor.label).opacity(0.6))
+                .foregroundStyle(Color(UIColor.secondaryLabel))
                 .padding(.leading).padding(.bottom, 1)
                 
                 Text(poll.question)
@@ -82,42 +66,8 @@ struct Polls_PollResultView: View {
                    .padding(.horizontal)
                 }
                 
-                if isLiveStatusAvailable {
-                   ZStack {
-                      HStack {
-                         Image(systemName: "info.circle.fill")
-                            .padding(.top, 1)
-                         Text("Die Abstimmung läuft noch. Du hast bereits abgestimmt.")
-                      }
-                      .foregroundStyle(Color(UIColor.label).opacity(0.6))
-                      .padding()
-                      .frame(maxWidth: .infinity, alignment: .leading)
-                   }.background(Color(UIColor.systemBackground))
-                      .cornerRadius(10)
-                      .padding(.horizontal) .padding(.top)
-                } else {
-//                   PollResultList(resultData: getResultData(pollResults: pollResults), resultDataCount: pollResults.results.count)
-//                      .offset(y: -25)
-                }
-                
-                if poll.isOpen {
-                   Button {
-                      onPollEnd(poll)
-                      dismiss() // Ansicht schließen und zurück navigieren
-                   } label: {
-                      Text("Umfrage beenden")
-                         .foregroundStyle(Color(UIColor.systemBackground))
-                         .fontWeight(.semibold)
-                         .frame(maxWidth: .infinity)
-                   }
-                   .background(Color.blue)
-                   .cornerRadius(10)
-                   .padding()
-                   .buttonStyle(.bordered)
-                   .controlSize(.large)
-                   .offset(y: -25)
-                }
-                
+                PollResultList(results: pollResults, optionTextMap: optionTextMap)
+
              }
           } else if isLoading {
              ProgressView("Loading...")
@@ -131,29 +81,23 @@ struct Polls_PollResultView: View {
           }
        }
        .refreshable {
-//          self.isLiveStatusAvailable = await isLiveStatusAvailable(votingId: voting.id)
-          if !isLiveStatusAvailable {
-//             await loadVotingResults(voting: voting)
-          }
+         fetchPollResults()
        }
        .onAppear {
           Task {
              isLoading = true
-//             self.isLiveStatusAvailable = await isLiveStatusAvailable(votingId: voting.id)
-             if !isLiveStatusAvailable {
-//                await loadVotingResults(voting: voting)
-             }
+             fetchPollResults()
           }
           fillOptionTextMap(poll: poll)
           isLoading = false
        }
-       .navigationTitle(isLiveStatusAvailable ? "Live-Status" : "Abstimmungs-Ergebnis")
+       .navigationTitle("Umfrage-Ergebnis")
        .navigationBarTitleDisplayMode(.inline)
        .background(Color(UIColor.secondarySystemBackground))
     }
    
 
-   private func getIdentities(result: PollResult) -> [GetIdentityDTO] {
+   private func getIdentities(result: GetPollResultDTO) -> [GetIdentityDTO] {
       if let identities = result.identities {
          return identities
       } else {
@@ -161,60 +105,25 @@ struct Polls_PollResultView: View {
       }
    }
    
-   private func isLiveStatusAvailable(votingId: UUID) async -> Bool {
-      await withCheckedContinuation { continuation in
-         webSocketService.connect(to: votingId)
-         // Wait for the WebSocket to receive messages
-         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            if let liveStatus = webSocketService.liveStatus, !liveStatus.isEmpty {
-               webSocketService.disconnect()
-               continuation.resume(returning: true)
-            } else if webSocketService.votingResults != nil {
-               webSocketService.disconnect()
-               continuation.resume(returning: false)
-            } else if webSocketService.errorMessage != nil {
-               webSocketService.disconnect()
-               continuation.resume(returning: false)
-            } else {
-               webSocketService.disconnect()
-               continuation.resume(returning: false)
+   private func fetchPollResults() {
+      PollAPI.shared.fetchPollResultsById(pollId: poll.id) { result in
+         DispatchQueue.main.async {
+            switch result {
+            case .success(let resultsData):
+               self.pollResults = resultsData
+               resultsLoaded = true
+            case .failure(let error):
+               print("Fehler beim Abrufen der Ergebnisse: \(error.localizedDescription)")
             }
          }
       }
    }
-
-//   private func loadVotingResults(voting: GetVotingDTO) async {
-//      VotingService.shared.fetchVotingResults(votingId: voting.id) { result in
-//         DispatchQueue.main.async {
-//            switch result {
-//            case .success(let results):
-//               self.votingResults = results
-//               resultsLoaded = true
-//            case .failure(let error):
-//               print("Fehler beim Abrufen der Ergebnisse: \(error.localizedDescription)")
-//            }
-//         }
-//      }
-//   }
    
-//   private func loadMeetingName(voting: GetVotingDTO) async {
-//      do {
-//         let meeting = try await meetingViewModel.fetchMeeting(byId: voting.meetingId)
-//         meetingName = meeting.name
-//      } catch {
-//         print("Error fetching meeting: \(error.localizedDescription)")
-//      }
-//   }
-   
-   func getColor (index: UInt8) -> Color {
-      return colorMapping[index] ?? .gray
-   }
-   
-   func fillOptionTextMap(poll: Poll) {
+   func fillOptionTextMap(poll: GetPollDTO) {
       for option in poll.options {
          optionTextMap[option.index] = option.text
       }
-      optionTextMap[0] = "Enthaltung"
+      optionTextMap[0] = ""
    }
 
 // für Mock-Daten
@@ -224,18 +133,145 @@ struct Polls_PollResultView: View {
 
 }
 
-
-#Preview() {
-   Polls_PollResultView(poll: mockPolls[0], onPollEnd:{ _ in})
-      .toolbar {
-         ToolbarItem(placement: .navigationBarLeading) {
-            Button {
-            } label: {
-               HStack {
-                  Image(systemName: "chevron.backward")
-                  Text("Zurück")
+struct PollResultList: View {
+   @Environment(\.colorScheme) var colorScheme
+   @State private var isCount = false
+   let results: GetPollResultsDTO
+   let optionTextMap: [UInt8: String]
+   
+   func getColor(index: UInt8) -> Color {
+      return colorMapping[index] ?? .gray
+   }
+   
+   var body: some View {
+      VStack(alignment: .leading, spacing: 7) {
+         HStack {
+            Text("\(results.totalCount) Stimmen von \(results.identityCount) Personen")
+//            Text("Stimmen (\(results.totalCount))")
+               .foregroundStyle(Color(UIColor.secondaryLabel))
+               .padding(.leading, 32)
+            Spacer()
+            Toggle(isOn: $isCount) {
+            }
+            .toggleStyle(ImageToggleStyle())
+            .padding(.trailing, 32) .padding(.bottom, 1)
+         }
+         
+         VStack {
+            ForEach(results.results, id: \.index) { result in
+               PollResultRow(
+                  pollResults: results,
+                  result: result,
+                  optionText: optionTextMap[result.index] ?? "",
+                  getColor: getColor,
+                  isCount: $isCount
+               )
+               .padding(.vertical, 6)
+               
+               if result.id != results.results.last?.id {
+                  Divider()
+                     .padding(.vertical, 2)
                }
             }
          }
+         .padding(.horizontal)
+         .padding(.vertical, 12)
+         .background(Color(UIColor.systemBackground))
+         .cornerRadius(10)
+         .padding(.horizontal)
       }
+      .padding(.vertical)
+   }
+}
+
+struct PollResultRow: View {
+   @State private var isCollapsed: Bool = true
+   let pollResults: GetPollResultsDTO
+   let result: GetPollResultDTO
+   let optionText: String
+   let getColor: (UInt8) -> Color
+   @Binding var isCount: Bool
+   
+   var body: some View {
+      VStack {
+         HStack {
+            Image(systemName: pollResults.myVotes.contains(where: {$0 == result.index})  ? "checkmark.circle.fill" : "circle.fill")
+               .foregroundStyle(getColor(result.index))
+            Text(optionText)
+            Spacer()
+            if isCount {
+               Text("\(result.count)")
+                  .opacity(0.6)
+            } else {
+               Text("\(result.percentage, specifier: "%.2f")%")
+                  .opacity(0.6)
+            }
+            
+            if let identities = result.identities, !identities.isEmpty {
+               Image(systemName: isCollapsed ? "chevron.forward" : "chevron.down")
+                  .foregroundStyle(.blue)
+            }
+         }
+         .contentShape(Rectangle())
+         .onTapGesture {
+            if let identities = result.identities, !identities.isEmpty {
+               withAnimation(.easeInOut(duration: 0.3)) {
+                  isCollapsed.toggle()
+               }
+            }
+         }
+         
+         if !isCollapsed, let identities = result.identities {
+            VStack(alignment: .leading) {
+               Divider()
+                  .padding(.vertical, 4)
+               ForEach(identities, id: \.id) { identity in
+                  HStack {
+                     Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(getColor(result.index).opacity(0.55).mix(with: .gray, by: 0.1))
+                     Text(identity.name)
+                  }
+                  if identity.id != identities.last?.id {
+                     Divider()
+                        .padding(.top, 2) .padding(.bottom, 4)
+                  }
+               }
+            }
+            .padding(.leading, 25)
+            .transition(
+               .asymmetric(
+                  insertion: .opacity.animation(.easeIn(duration: 0.1)),
+                  removal: .opacity.animation(.easeOut(duration: 0.1))
+               )
+            )
+            .animation(.easeInOut(duration: 0.5), value: isCollapsed) // Controls the movement
+         }
+      }
+   }
+}
+
+extension GetIdentityDTO: @retroactive Identifiable {}
+extension GetIdentityDTO: @retroactive Equatable {}
+extension GetIdentityDTO: @retroactive Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    public static func == (lhs: GetIdentityDTO, rhs: GetIdentityDTO) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
+
+#Preview() {
+//   Polls_PollResultView(poll: mockPolls[0], onPollEnd:{ _ in})
+//      .toolbar {
+//         ToolbarItem(placement: .navigationBarLeading) {
+//            Button {
+//            } label: {
+//               HStack {
+//                  Image(systemName: "chevron.backward")
+//                  Text("Zurück")
+//               }
+//            }
+//         }
+//      }
 }
