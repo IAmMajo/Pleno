@@ -60,6 +60,7 @@ dto-swiftkotlin:
         - ./translate-dtos.sh
         - git add *
         - git status
+        - if [[ ! $(git status --porcelain) ]]; then exit 0; fi
         - git commit -m "${SWIFTKOTLIN_COMMIT_MESSAGE}"
         - git push -o ci.skip "https://gitlab-ci-token:${PROJECT_ACCESS_MAINTAINER_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:${CI_COMMIT_BRANCH}
     rules:
