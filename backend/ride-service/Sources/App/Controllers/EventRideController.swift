@@ -368,18 +368,20 @@ struct EventRideController: RouteCollection {
         }
         
         // create response DTO
-        let drivername = try await User.query(on: req.db)
+        guard let driver = try await User.query(on: req.db)
             .filter(\.$id == eventRide.participant.$user.id)
             .with(\.$identity)
-            .first()
-            .map { user in
-                user.identity.name
-            }
+            .first() else {
+            throw Abort(.notFound)
+        }
+        let driverID = try driver.requireID()
+        
         let eventRideDetailDTO = GetEventRideDetailDTO(
             id: rideID,
             eventID: eventRide.$event.id,
             eventName: eventRide.event.name,
-            driverName: drivername ?? "",
+            driverName: driver.identity.name,
+            driverID: driverID,
             isSelfDriver: eventRide.participant.$user.id == req.jwtPayload.userID,
             description: eventRide.description,
             vehicleDescription: eventRide.vehicleDescription,
@@ -439,18 +441,19 @@ struct EventRideController: RouteCollection {
         // create response
         let rideID = try eventRide.requireID()
         let eventName = try await getEventNameByID(eventID: eventRide.$event.id, db: req.db)
-        let drivername = try await User.query(on: req.db)
-            .filter(\.$id == req.jwtPayload.userID)
+        guard let driver = try await User.query(on: req.db)
+            .filter(\.$id == eventRide.participant.$user.id)
             .with(\.$identity)
-            .first()
-            .map { user in
-                user.identity.name
-            }
+            .first() else {
+            throw Abort(.notFound)
+        }
+        let driverID = try driver.requireID()
         let getEventRideDetailDTO = GetEventRideDetailDTO(
             id: rideID,
             eventID: eventRide.$event.id,
             eventName: eventName,
-            driverName: drivername ?? "",
+            driverName: driver.identity.name,
+            driverID: driverID,
             isSelfDriver: true,
             description: eventRide.description,
             vehicleDescription: eventRide.vehicleDescription,
@@ -518,18 +521,19 @@ struct EventRideController: RouteCollection {
                     itsMe: rider.interestedParty.participant.user.id == req.jwtPayload.userID,
                     accepted: rider.accepted)
             }
-        let drivername = try await User.query(on: req.db)
-            .filter(\.$id == req.jwtPayload.userID)
+        guard let driver = try await User.query(on: req.db)
+            .filter(\.$id == eventRide.participant.$user.id)
             .with(\.$identity)
-            .first()
-            .map { user in
-                user.identity.name
-            }
+            .first() else {
+            throw Abort(.notFound)
+        }
+        let driverID = try driver.requireID()
         let eventRideDetailDTO = GetEventRideDetailDTO(
             id: rideID,
             eventID: eventRide.$event.id,
             eventName: eventRide.event.name,
-            driverName: drivername ?? "",
+            driverName: driver.identity.name,
+            driverID: driverID,
             isSelfDriver: eventRide.participant.$user.id == req.jwtPayload.userID,
             description: eventRide.description,
             vehicleDescription: eventRide.vehicleDescription,
