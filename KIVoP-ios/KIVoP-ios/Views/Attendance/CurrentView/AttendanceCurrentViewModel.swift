@@ -118,4 +118,10 @@ class AttendanceCurrentViewModel: ObservableObject {
     var acceptedCount: Int {
         attendances.filter { $0.status == .accepted }.count
     }
+    
+    func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy - HH:mm 'Uhr'"
+        return formatter.string(from: date)
+    }
 }

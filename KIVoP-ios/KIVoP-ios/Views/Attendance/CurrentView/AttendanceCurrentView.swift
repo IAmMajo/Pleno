@@ -14,6 +14,15 @@ struct AttendanceCurrentView: View {
                 // Inhalt
                 VStack {
                     
+                    // Datum + Uhrzeit
+                    Text(viewModel.formattedDate(viewModel.meeting.start))
+                        .padding(5)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 30)
+                                .stroke(Color.black, lineWidth: 1)
+                        )
+                        .padding(.vertical)
+                    
                     // Ausblenden wenn am Meeting teilgenommen
                     if !(viewModel.attendance?.status == .present) {
                         Text("Teilnahme bestätigen")
@@ -99,10 +108,8 @@ struct AttendanceCurrentView: View {
                         Section(header: Text("Mitglieder")) {
                             ForEach(viewModel.attendances, id: \.identity.id) { attendance in
                                 HStack {
-                                    // Profilbild (Platzhalter)
-                                    Circle()
-                                        .fill(Color.gray)
-                                        .frame(width: 40, height: 40)
+                                    // Profilbild - View in Posters - Components - UserProfileImageView
+                                    ProfilePicture(profile: attendance.identity)
                                     
                                     // Name (der eigene Name wird fett gedruckt)
                                     VStack(alignment: .leading) {
@@ -145,7 +152,7 @@ struct AttendanceCurrentView: View {
                     }
                 }
             }
-            .navigationTitle(Text(viewModel.meeting.start, style: .date))
+            .navigationTitle(viewModel.meeting.name)
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
         }
