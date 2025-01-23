@@ -9,7 +9,7 @@ class EditRideViewModel: ObservableObject {
     @Published var ride: GetSpecialRideDTO = GetSpecialRideDTO(name: "", starts: Date(), ends: Date(), emptySeats: 0, allocatedSeats: 0, myState: .nothing)
     
     // For Ride that gets edited
-    @Published var rideDetail: GetSpecialRideDetailDTO = GetSpecialRideDetailDTO(driverName: "", isSelfDriver: false, name: "", starts: Date(), ends: Date(), startLatitude: 0, startLongitude: 0, destinationLatitude: 0, destinationLongitude: 0, emptySeats: 0, riders: [])
+    @Published var rideDetail: GetSpecialRideDetailDTO = GetSpecialRideDetailDTO(driverName: "", driverID: UUID(), isSelfDriver: false, name: "", starts: Date(), ends: Date(), startLatitude: 0, startLongitude: 0, destinationLatitude: 0, destinationLongitude: 0, emptySeats: 0, riders: [])
     
     @Published var showingLocation = false
     @Published var showingDstLocation = false
@@ -34,7 +34,7 @@ class EditRideViewModel: ObservableObject {
     @Published var emptySeats: Int? = nil // Event und Special
     
     init(rideDetail: GetSpecialRideDetailDTO? = nil){
-        self.rideDetail = rideDetail ?? GetSpecialRideDetailDTO(driverName: "", isSelfDriver: false, name: "", starts: Date(), ends: Date(), startLatitude: 0, startLongitude: 0, destinationLatitude: 0, destinationLongitude: 0, emptySeats: 0, riders: [])
+        self.rideDetail = rideDetail ?? GetSpecialRideDetailDTO(driverName: "", driverID: UUID(), isSelfDriver: false, name: "", starts: Date(), ends: Date(), startLatitude: 0, startLongitude: 0, destinationLatitude: 0, destinationLongitude: 0, emptySeats: 0, riders: [])
         
         if self.rideDetail.startLatitude != 0 && self.rideDetail.startLongitude != 0 {
               self.location = CLLocationCoordinate2D(

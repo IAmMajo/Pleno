@@ -1,7 +1,7 @@
 import SwiftUI
 import MeetingServiceDTOs
 
-struct ProfilePicture: View {
+struct ProfilePictureAttendance: View {
     let profile: GetIdentityDTO
     @State private var shortName: String = "??"
     @State private var profileImage: UIImage?

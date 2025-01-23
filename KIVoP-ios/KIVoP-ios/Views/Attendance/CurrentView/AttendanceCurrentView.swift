@@ -108,8 +108,8 @@ struct AttendanceCurrentView: View {
                         Section(header: Text("Mitglieder")) {
                             ForEach(viewModel.attendances, id: \.identity.id) { attendance in
                                 HStack {
-                                    // Profilbild - View in Posters - Components - UserProfileImageView
-                                    ProfilePicture(profile: attendance.identity)
+                                    // Profilbild
+                                    ProfilePictureAttendance(profile: attendance.identity)
                                     
                                     // Name (der eigene Name wird fett gedruckt)
                                     VStack(alignment: .leading) {
