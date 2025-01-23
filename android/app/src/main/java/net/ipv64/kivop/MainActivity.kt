@@ -66,6 +66,7 @@ import net.ipv64.kivop.pages.mainApp.ProtocolListPage
 import net.ipv64.kivop.pages.mainApp.UserPage
 import net.ipv64.kivop.pages.mainApp.VotePage
 import net.ipv64.kivop.pages.mainApp.VotingResultPage
+import net.ipv64.kivop.pages.mainApp.onBoardingCreateRide.CreateRidePage
 import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.StringProvider.getString
 import net.ipv64.kivop.ui.theme.Background_prime
@@ -153,6 +154,10 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         // Carpool
         composable(route = "${Screen.Carpool.rout}/{carpoolID}") { backStackEntry ->
           CarpoolPage(navController, backStackEntry.arguments?.getString("carpoolID").orEmpty())
+        }
+        // Create Carpool
+        composable(route = Screen.CreateCarpool.rout) {
+          CreateRidePage(navController = navController)
         }
         // Events
         composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
@@ -300,7 +305,13 @@ fun DrawerContent(
           item,
           selected = currentRoute == item.route,
           onClick = {
-            navController.navigate(item.route)
+            navController.navigate(item.route){
+              popUpTo(navController.graph.startDestinationId) {
+                saveState = true // Save state when navigating back
+              }
+              launchSingleTop = true
+              restoreState = true
+            }
             coroutineScope.launch { drawerState.close() }
           })
       SpacerBetweenElements(4.dp)
