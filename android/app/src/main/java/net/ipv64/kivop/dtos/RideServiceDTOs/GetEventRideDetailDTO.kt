@@ -9,6 +9,7 @@ data class GetEventRideDetailDTO (
     var eventID : UUID,
     var eventName : String,
     var driverName : String,
+    var driverID : UUID,
     var isSelfDriver : Boolean,
     var description : String?,
     var vehicleDescription : String?,
