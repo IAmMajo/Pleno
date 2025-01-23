@@ -6,6 +6,7 @@ class LocationsViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     @Published var showLocationsList: Bool = false
+    @Published var sheetPosition: PosterPositionWithAddress? = nil
     @Published var selectedPosterPosition: PosterPositionWithAddress? // Aktuell ausgewählte Position
     @Published var posterPositionsWithAddresses: [PosterPositionWithAddress] = [] {
         didSet {

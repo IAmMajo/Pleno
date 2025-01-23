@@ -21,7 +21,7 @@ struct LocationPreviewView: View {
             buttonsSection
         }
         .padding(20)
-        .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThinMaterial).offset(y: 65))
+        .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThinMaterial))
         .cornerRadius(10)
     
 
@@ -57,14 +57,14 @@ extension LocationPreviewView {
     private var buttonsSection: some View {
         VStack(spacing: 8){
             Button{
-                
+                locationViewModel.sheetPosition = position
             }label:{
-                Text("Learn more").font(.headline).frame(width: 125, height: 35)
+                Text("Details").font(.headline).frame(width: 125, height: 35)
             }.buttonStyle(.borderedProminent)
             Button{
                 locationViewModel.nextButtonPressed()
             }label:{
-                Text("Next").font(.headline).frame(width: 125, height: 35)
+                Text("Nächste").font(.headline).frame(width: 125, height: 35)
             }.buttonStyle(.bordered)
 
         }

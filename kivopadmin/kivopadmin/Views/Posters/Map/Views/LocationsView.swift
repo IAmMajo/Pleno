@@ -56,6 +56,9 @@ struct LocationsView: View {
                 }
             }
         }
+        .sheet(item: $locationViewModel.sheetPosition, onDismiss: nil) { position in
+            LocationDetailView(position: position)
+        }
         .onAppear{
             locationViewModel.fetchPosterPositions(poster: poster)
         }
