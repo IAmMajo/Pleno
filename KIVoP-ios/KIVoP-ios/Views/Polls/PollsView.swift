@@ -169,7 +169,7 @@ struct PollsView: View {
 
     private func handlePollSelection(_ poll: PollViewModel) {
         selectedPoll = poll
-       if poll.pollDTO.isOpen && !VotingStateTracker.hasVoted(for: poll.id) {
+       if poll.pollDTO.isOpen && !PollStateTracker.hasVotedForPoll(for: poll.id) {
             isShowingVoteSheet = true
         } else {
             navigateToResultView = true

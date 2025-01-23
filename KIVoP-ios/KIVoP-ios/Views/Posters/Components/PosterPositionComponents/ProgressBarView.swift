@@ -6,21 +6,23 @@
 //
 
 import SwiftUI
+import PosterServiceDTOs
 
 struct ProgressBarView: View {
-   let status: Status
+   let position: PosterPositionResponseDTO
    
    var value: CGFloat {
+      let status = position.status
       switch status {
-      case .hung:
+      case "hangs":
          return 190
-      case .takenDown:
+      case "takenDown":
          return 500
-      case .notDisplayed:
+      case "toHang":
          return 20
-      case .expiresInOneDay:
+      case "overdue":
          return 190
-      case .expired:
+      default:
          return 190
       }
    }
@@ -28,7 +30,7 @@ struct ProgressBarView: View {
     var body: some View {
        Rectangle()
            .fill(.gray.opacity(0.3))
-           .frame(width: .infinity, height: 15)
+           .frame(maxWidth: .infinity, maxHeight: 15)
            .overlay(
             HStack {
                RoundedRectangle(cornerRadius: 25)
@@ -42,5 +44,5 @@ struct ProgressBarView: View {
 }
 
 #Preview {
-   ProgressBarView(status: Status.hung)
+//   ProgressBarView(status: Status.hung)
 }

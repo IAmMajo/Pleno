@@ -16,6 +16,19 @@ class VotingService: ObservableObject {
    @Published var votings: [GetVotingDTO] = []
    @Published var meetings: [GetMeetingDTO] = []
    
+   private func createAuthorizedRequest(url: URL, method: String, contentType: String = "application/json") -> URLRequest? {
+      var request = URLRequest(url: url)
+      request.httpMethod = method
+      request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+      
+      if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+         request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+      } else {
+         return nil
+      }
+      return request
+   }
+   
     func fetchVotings(completion: @escaping (Result<[GetVotingDTO], Error>) -> Void) {
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/votings") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))

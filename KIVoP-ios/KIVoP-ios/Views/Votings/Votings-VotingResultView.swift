@@ -10,6 +10,7 @@ import LocalAuthentication
 import MeetingServiceDTOs
 
 struct Votings_VotingResultView: View {
+   @Environment(\.colorScheme) var colorScheme
    @StateObject private var webSocketService = WebSocketService()
    @StateObject private var meetingViewModel = MeetingViewModel()
    
@@ -59,7 +60,7 @@ struct Votings_VotingResultView: View {
 //                   Text("Sitzungsname")
                       .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .foregroundStyle(Color(UIColor.label).opacity(0.6))
+                .foregroundStyle(Color(UIColor.secondaryLabel))
                 .padding(.leading).padding(.bottom, 1)
                 
                 Text(voting.question)
@@ -93,19 +94,7 @@ struct Votings_VotingResultView: View {
                       .cornerRadius(10)
                       .padding(.horizontal) .padding(.top)
                 } else {
-                   ResultList(resultData: getResultData(votingResults: votingResults), resultDataCount: votingResults.results.count)
-                      .offset(y: -25)
-//                   List{
-//                      Section {
-//                         ForEach (votingResults.results, id: \.self) { result in
-//                            ...
-//                      } header: {
-//                         Spacer(minLength: 0).listRowInsets(EdgeInsets())
-//                      }
-//                   }
-//                   .frame(height: CGFloat((votingResults.results.count * 65) + (votingResults.results.count < 4 ? 200 : 0)), alignment: .top)
-//                   //             .scrollContentBackground(.hidden)
-//                   .environment(\.defaultMinListHeaderHeight, 10)
+                   VotingResultList(results: votingResults, optionTextMap: optionTextMap)
                 }
              }
           } else if isLoading {
@@ -142,29 +131,6 @@ struct Votings_VotingResultView: View {
        .background(Color(UIColor.secondarySystemBackground))
     }
    
-   private func getResultData(votingResults: GetVotingResultsDTO) -> [ResultData] {
-      var resultDatas: [ResultData] = []
-      
-      for result in votingResults.results {
-         var resultIdentities: [ResultData] = []
-         for identity in getIdentities(result: result) {
-            resultIdentities.append(ResultData(
-                  icon: "checkmark.circle.fill",
-                  color: getColor(index: result.index).opacity(0.5).mix(with: .gray, by: 0.3),
-                  name: identity.name,
-                  percentage: nil
-               ))
-         }
-         resultDatas.append(ResultData(
-            icon: votingResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill",
-            color: getColor(index: result.index),
-            name: optionTextMap[result.index] ?? "",
-            percentage: result.percentage,
-            identities: resultIdentities
-         ))
-      }
-      return resultDatas
-   }
    
    private func getIdentities(result: GetVotingResultDTO) -> [GetIdentityDTO] {
       if let identities = result.identities {
@@ -237,36 +203,153 @@ struct Votings_VotingResultView: View {
 
 }
 
-struct ResultData: Identifiable {
-   let id = UUID()
-   let icon: String
-   let color: Color
-   let name: String
-   let percentage: Double?
-   var identities: [ResultData]?
-}
-
-struct ResultList: View {
-   let resultData: [ResultData]
-   let resultDataCount: Int
+struct VotingResultList: View {
+   @Environment(\.colorScheme) var colorScheme
+   @State private var isCount = false
+   let results: GetVotingResultsDTO
+   let optionTextMap: [UInt8: String]
+   
+   func getColor(index: UInt8) -> Color {
+      return colorMapping[index] ?? .gray
+   }
    
    var body: some View {
-      List(resultData, children: \.identities) { resultData in
+      VStack(alignment: .leading, spacing: 7) {
          HStack {
-            Image(systemName: resultData.icon)
-               .foregroundStyle(resultData.color)
-            Text(resultData.name)
+            Text("Stimmen (\(results.totalCount))")
+               .foregroundStyle(Color(UIColor.secondaryLabel))
+               .padding(.leading, 32)
             Spacer()
-            if let percentage = resultData.percentage {
-               Text("\(percentage, specifier: "%.2f")%")
-                  .opacity(0.6)
+            Toggle(isOn: $isCount) {
+            }
+            .toggleStyle(ImageToggleStyle())
+            .padding(.trailing, 32) .padding(.bottom, 1)
+         }
+         
+         VStack {
+            ForEach(results.results, id: \.id) { result in
+               VotingResultRow(
+                  votingResults: results,
+                  result: result,
+                  optionText: optionTextMap[result.index] ?? "",
+                  getColor: getColor,
+                  isCount: $isCount
+               )
+               .padding(.vertical, 6)
+               
+               if result.id != results.results.last?.id {
+                  Divider()
+                     .padding(.vertical, 2)
+               }
             }
          }
+         .padding(.horizontal)
+         .padding(.vertical, 12)
+         .background(Color(UIColor.systemBackground))
+         .cornerRadius(10)
+         .padding(.horizontal)
       }
-      .frame(height: CGFloat((resultDataCount * 65) + (resultDataCount < 4 ? 200 : 0)), alignment: .top)
-      .scrollContentBackground(.hidden)
+      .padding(.vertical)
    }
 }
+
+struct VotingResultRow: View {
+   @State private var isCollapsed: Bool = true
+   let votingResults: GetVotingResultsDTO
+   let result: GetVotingResultDTO
+   let optionText: String
+   let getColor: (UInt8) -> Color
+   @Binding var isCount: Bool
+   
+   var body: some View {
+      VStack {
+         HStack {
+            Image(systemName: votingResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill")
+               .foregroundStyle(getColor(result.index))
+            Text(optionText)
+            Spacer()
+            if isCount {
+               Text("\(result.count)")
+                  .opacity(0.6)
+            } else {
+               Text("\(result.percentage, specifier: "%.2f")%")
+                  .opacity(0.6)
+            }
+            
+            if let identities = result.identities, !identities.isEmpty {
+               Image(systemName: isCollapsed ? "chevron.forward" : "chevron.down")
+                  .foregroundStyle(.blue)
+            }
+         }
+         .contentShape(Rectangle())
+         .onTapGesture {
+            if let identities = result.identities, !identities.isEmpty {
+               withAnimation(.easeInOut(duration: 0.3)) {
+                  isCollapsed.toggle()
+               }
+            }
+         }
+         
+         if !isCollapsed, let identities = result.identities {
+            VStack(alignment: .leading) {
+               Divider()
+                  .padding(.vertical, 4)
+               ForEach(identities, id: \.id) { identity in
+                  HStack {
+                     Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(getColor(result.index).opacity(0.8).mix(with: .gray, by: 0.2))
+                     Text(identity.name)
+                  }
+                  if identity.id != identities.last?.id {
+                     Divider()
+                        .padding(.top, 2) .padding(.bottom, 4)
+                  }
+               }
+            }
+            .padding(.leading, 25)
+            .transition(
+               .asymmetric(
+                  insertion: .opacity.animation(.easeIn(duration: 0.1)),
+                  removal: .opacity.animation(.easeOut(duration: 0.1))
+               )
+            )
+            .animation(.easeInOut(duration: 0.5), value: isCollapsed) // Controls the movement
+         }
+      }
+   }
+}
+
+struct ImageToggleStyle: ToggleStyle {
+   var percentImage = "percent"
+   var countImage = "numbers"
+   
+   func makeBody(configuration: Configuration) -> some View {
+      HStack {
+         RoundedRectangle(cornerRadius: 28)
+            .fill(configuration.isOn ? Color(.systemGray3).mix(with: .blue, by: 0.4) : Color(.systemGray3).mix(with: .blue, by: 0.4))
+            .overlay {
+               Circle()
+                  .fill(.white)
+                  .padding(3)
+                  .overlay {
+                     Image(systemName: configuration.isOn ? countImage : percentImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 12)
+                        .foregroundColor(configuration.isOn ? Color(.systemGray5).mix(with: .blue, by: 0.8) : Color(.systemGray4).mix(with: .blue, by: 0.5))
+                  }
+                  .offset(x: configuration.isOn ? 10 : -10)
+            }
+            .frame(width: 42, height: 26)
+            .onTapGesture {
+               withAnimation(.spring()) {
+                  configuration.isOn.toggle()
+               }
+            }
+      }
+   }
+}
+
 
 #Preview() {
    Votings_VotingResultView(voting: mockVotings[0])

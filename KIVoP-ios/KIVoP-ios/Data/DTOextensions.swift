@@ -7,6 +7,7 @@
 
 import Foundation
 import MeetingServiceDTOs
+import PosterServiceDTOs
 
 // Extension der DTOs
 extension GetMeetingDTO: @retroactive Identifiable {}
@@ -68,3 +69,23 @@ extension GetVotingResultDTO: @retroactive Hashable {
 }
 
 extension CreateVotingDTO: @retroactive @unchecked Sendable {}
+
+extension GetIdentityDTO: @retroactive Identifiable {}
+extension GetIdentityDTO: @retroactive Equatable {}
+extension GetIdentityDTO: @retroactive Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    public static func == (lhs: GetIdentityDTO, rhs: GetIdentityDTO) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
+
+extension PosterResponseDTO: @retroactive Identifiable {}
+extension PosterResponseDTO: @retroactive @unchecked Sendable {}
+extension PosterPositionResponseDTO: @retroactive @unchecked Sendable {}
+extension UpdatePosterPositionDTO: @retroactive @unchecked Sendable {}
+extension HangPosterPositionDTO: @retroactive @unchecked Sendable {}
+extension HangPosterPositionResponseDTO: @retroactive @unchecked Sendable {}
+extension TakeDownPosterPositionDTO: @retroactive @unchecked Sendable {}
+extension TakeDownPosterPositionResponseDTO: @retroactive @unchecked Sendable {}

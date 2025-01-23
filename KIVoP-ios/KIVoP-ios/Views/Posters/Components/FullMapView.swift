@@ -61,7 +61,7 @@ struct FullMapView: View {
             }
             if isGoogleMapsInstalled {
                Button("Öffnen mit Google Maps") {
-                  NavigationAppHelper.shared.openInGoogleMaps(coordinate: coordinate)
+                  NavigationAppHelper.shared.openInGoogleMaps(name: name, coordinate: coordinate)
                }
             }
             if isWazeInstalled {

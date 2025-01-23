@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		23DADFFB2CF7A5DC004B15C1 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 23DADFFA2CF7A5DC004B15C1 /* MarkdownUI */; };
-		3AC099CE2D3E37B2004F9F72 /* PollServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = 3AC099CD2D3E37B2004F9F72 /* PollServiceDTOs */; };
 		AF04581B2CECCA540071EDF8 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581A2CECCA540071EDF8 /* AuthServiceDTOs */; };
 		AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581C2CECCA540071EDF8 /* MeetingServiceDTOs */; };
 		AF04581F2CECCA540071EDF8 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581E2CECCA540071EDF8 /* NotificationsServiceDTOs */; };
@@ -16,9 +15,9 @@
 		AF0EDF172CEFA8F100582C70 /* ConfigServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF162CEFA8F100582C70 /* ConfigServiceDTOs */; };
 		AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF182CEFA8F100582C70 /* MeetingServiceDTOs */; };
 		AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF0EDF1A2CEFA8F100582C70 /* NotificationsServiceDTOs */; };
+		B5B3FF522D3E5A1F00B12DF2 /* PollServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = B5B3FF512D3E5A1F00B12DF2 /* PollServiceDTOs */; };
 		F77C36702D2C2C1E0008DB5D /* RideServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = F77C366F2D2C2C1E0008DB5D /* RideServiceDTOs */; };
 		F77C36722D2C2C240008DB5D /* PosterServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = F77C36712D2C2C240008DB5D /* PosterServiceDTOs */; };
-		F7E508F62D3E4DE0003A3537 /* PollServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = F7E508F52D3E4DE0003A3537 /* PollServiceDTOs */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,7 +90,7 @@
 				F77C36722D2C2C240008DB5D /* PosterServiceDTOs in Frameworks */,
 				AF04581F2CECCA540071EDF8 /* NotificationsServiceDTOs in Frameworks */,
 				23DADFFB2CF7A5DC004B15C1 /* MarkdownUI in Frameworks */,
-				F7E508F62D3E4DE0003A3537 /* PollServiceDTOs in Frameworks */,
+				B5B3FF522D3E5A1F00B12DF2 /* PollServiceDTOs in Frameworks */,
 				AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */,
 				AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */,
 				AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */,
@@ -188,7 +187,7 @@
 				23DADFFA2CF7A5DC004B15C1 /* MarkdownUI */,
 				F77C366F2D2C2C1E0008DB5D /* RideServiceDTOs */,
 				F77C36712D2C2C240008DB5D /* PosterServiceDTOs */,
-				F7E508F52D3E4DE0003A3537 /* PollServiceDTOs */,
+				B5B3FF512D3E5A1F00B12DF2 /* PollServiceDTOs */,
 			);
 			productName = "KIVoP-ios";
 			productReference = A81ABA922CD130F00026F492 /* KIVoP-ios.app */;
@@ -481,10 +480,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"KIVoP-ios/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = G395PB833W;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "KIVoP-ios/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Pleno;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Kamera wird für das Scannen von QR-Codes benötigt";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -512,10 +512,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"KIVoP-ios/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = G395PB833W;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "KIVoP-ios/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Pleno;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Kamera wird für das Scannen von QR-Codes benötigt";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -668,11 +669,6 @@
 			package = 23DADFF92CF7A5DC004B15C1 /* XCRemoteSwiftPackageReference "MarkdownUI" */;
 			productName = MarkdownUI;
 		};
-		3AC099CD2D3E37B2004F9F72 /* PollServiceDTOs */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
-			productName = PollServiceDTOs;
-		};
 		AF04581A2CECCA540071EDF8 /* AuthServiceDTOs */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AuthServiceDTOs;
@@ -701,6 +697,11 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = NotificationsServiceDTOs;
 		};
+		B5B3FF512D3E5A1F00B12DF2 /* PollServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
+			productName = PollServiceDTOs;
+		};
 		F77C366F2D2C2C1E0008DB5D /* RideServiceDTOs */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
@@ -710,11 +711,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
 			productName = PosterServiceDTOs;
-		};
-		F7E508F52D3E4DE0003A3537 /* PollServiceDTOs */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
-			productName = PollServiceDTOs;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

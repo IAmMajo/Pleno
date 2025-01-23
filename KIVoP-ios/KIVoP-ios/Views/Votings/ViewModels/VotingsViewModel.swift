@@ -1,92 +1,90 @@
 //
-//  VotingViewModel.swift
+//  VotingsViewModel.swift
 //  KIVoP-ios
 //
-//  Created by Hanna Steffen on 28.11.24.
+//  Created by Hanna Steffen on 22.01.25.
 //
 
-import SwiftUI
+import Foundation
+import Combine
+import MapKit
 import MeetingServiceDTOs
+import SwiftUICore
 
 @MainActor
-class VotingViewModel: ObservableObject, Identifiable {
-   let id: UUID
-   @Published var votingDTO: GetVotingDTO
-   @Published var symbolColor: Color = .black
-   @Published var statusSymbol: String = ""
-   @Published var meeting: GetMeetingDTO?
-   let hasVoted: Bool
+class VotingsViewModel: ObservableObject {
+   @ObservedObject private var meetingViewModel = MeetingViewModel()
+   @Published var votings: [GetVotingDTO] = []
+   // Ein Array aus Tupeln (meetingName, [(VotingsOfMeeting, ListSymbols)])
+   @Published var groupedVotings: [(
+      meetingName: String,
+      votings: [(
+         voting: GetVotingDTO,
+         symbol: (status: String, color: Color)
+      )]
+   )] = []
    
-   @ObservedObject private var meetingViewModel: MeetingViewModel
-   
-   init(voting: GetVotingDTO, meetingViewModel: MeetingViewModel) {
-      self.id = voting.id
-      self.votingDTO = voting
-      self.hasVoted = VotingStateTracker.hasVoted(for: voting.id)
-      self.meetingViewModel = meetingViewModel
-      Task {
-         await loadMeeting()
-         await loadStatus()
-      }
-   }
-   
-   func update(votingDTO: GetVotingDTO) {
-      if self.votingDTO != votingDTO {
-         self.votingDTO = votingDTO
-      } else if !votingDTO.isOpen {
-         self.votingDTO = votingDTO
-         Task {
-            await loadMeeting()
-            await loadStatus()
+   private var meetingVotingsMap: [GetMeetingDTO: [GetVotingDTO]] = [:]
+
+    init() {
+        Task {
+            await fetchVotings()
+        }
+    }
+
+    func fetchVotings() async {
+        do {
+           let fetchedVotings = try await VotingService.shared.fetchVotings()
+            self.votings = fetchedVotings
+           await fetchMeetings()
+        } catch {
+            print("Error fetching Votings: \(error)")
+        }
+    }
+
+   private func fetchMeetings() async {
+      for voting in votings {
+         do {
+            let meeting = try await meetingViewModel.fetchMeeting(byId: voting.meetingId)
+            meetingVotingsMap[meeting] = votings.filter { $0.meetingId == meeting.id && $0.startedAt != nil}
+         } catch {
+            print("Error fetching meeting: \(error.localizedDescription)")
          }
       }
+      groupeVotings()
    }
    
-   func refreshAfterVote() async {
-      if VotingStateTracker.hasVoted(for: votingDTO.id) {
-              DispatchQueue.main.async {
-                  self.symbolColor = .blue
-                  self.statusSymbol = "checkmark"
-              }
-          } else {
-              print("No vote found for voting ID: \(self.id)")
-          }
-   }
-   
-   private func loadMeeting() async {
-      do {
-         self.meeting = try await meetingViewModel.fetchMeeting(byId: votingDTO.meetingId)
-      } catch {
-         print("Error fetching meeting: \(error.localizedDescription)")
-      }
-   }
-   
-   func loadStatus() async {
-      VotingService.shared.fetchVotingResults(votingId: votingDTO.id) { results in
-         DispatchQueue.main.async {
-            switch results {
-            case .success(let results):
-               if results.myVote != nil {
-                  self.symbolColor = .blue
-                  self.statusSymbol = "checkmark"
-               } else {
-                  self.symbolColor = self.votingDTO.isOpen ? .orange : .black
-                  self.statusSymbol = self.votingDTO.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
-               }
-            case .failure(_ /*let error*/):
-               //                   print("Fehler beim Abrufen der Ergebnisse: \(error.localizedDescription)")
-               if self.hasVoted {
-                  self.symbolColor = .blue
-                  self.statusSymbol = "checkmark"
-               } else {
-                  self.symbolColor = self.votingDTO.isOpen ? .orange : .black
-                  self.statusSymbol = self.votingDTO.isOpen ? "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90" : ""
-               }
+   func groupeVotings() {
+      groupedVotings = meetingVotingsMap
+         .sorted { $0.key.start > $1.key.start } // Sort meetings by start date
+         .map { meeting, votings in
+            let sortedVotings = votings
+               .sorted { ($0.startedAt ?? Date.distantPast) > ($1.startedAt ?? Date.distantPast) } // Sort votings by startedAt
+            
+            let votingWithSymbols = sortedVotings.map { voting in
+               (voting: voting, symbol: getSymbol(voting: voting))
             }
+            
+            let meetingName = meeting.status == .inSession ? "Aktuelle Sitzung (\(meeting.name))" : meeting.name
+            
+            return (meetingName: meetingName, votings: votingWithSymbols)
          }
+   }
+   
+   func getSymbol(voting: GetVotingDTO) -> (status: String, color: Color) {
+      if voting.iVoted {
+         return ("checkmark", .blue)
+      } else if voting.isOpen {
+         return ("exclamationmark.arrow.trianglehead.counterclockwise.rotate.90", .orange)
+      } else {
+         return ("", .black)
       }
    }
+   
 }
+
+
+
 
 var mockVotings: [GetVotingDTO] {
    return [
@@ -98,7 +96,7 @@ var mockVotings: [GetVotingDTO] {
          isOpen: true,
          startedAt: Date.now,
          closedAt: nil,
-         anonymous: false,
+         anonymous: false, iVoted: false,
          options: mockOptions1
       ),
       GetVotingDTO(
@@ -109,7 +107,7 @@ var mockVotings: [GetVotingDTO] {
          isOpen: false,
          startedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!,
          closedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!,
-         anonymous: false,
+         anonymous: false, iVoted: true,
          options: mockOptions2
       ),
       GetVotingDTO(
@@ -120,7 +118,7 @@ var mockVotings: [GetVotingDTO] {
          isOpen: false,
          startedAt: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!,
          closedAt: Calendar.current.date(byAdding: .minute, value: -5, to: Date())!,
-         anonymous: false,
+         anonymous: false, iVoted: false,
          options: mockOptions2
       ),
       GetVotingDTO(
@@ -131,7 +129,7 @@ var mockVotings: [GetVotingDTO] {
          isOpen: false,
          startedAt: Calendar.current.date(byAdding: .minute, value: -35, to: Date())!,
          closedAt: Calendar.current.date(byAdding: .minute, value: -15, to: Date())!,
-         anonymous: false,
+         anonymous: false, iVoted: true,
          options: mockOptions2
       ),
    ]

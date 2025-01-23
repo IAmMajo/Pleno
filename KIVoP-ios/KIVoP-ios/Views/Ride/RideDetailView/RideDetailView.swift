@@ -77,7 +77,7 @@ struct RideDetailView: View {
                            }
                            if isGoogleMapsInstalled {
                               Button("Öffnen mit Google Maps") {
-                                  NavigationAppHelper.shared.openInGoogleMaps(coordinate: setKoords!)
+                                 NavigationAppHelper.shared.openInGoogleMaps(name: setAddress, coordinate: setKoords!)
                               }
                            }
                            if isWazeInstalled {
@@ -138,7 +138,7 @@ struct RideDetailView: View {
                                        }
                                        if isGoogleMapsInstalled {
                                           Button("Öffnen mit Google Maps") {
-                                              NavigationAppHelper.shared.openInGoogleMaps(coordinate: setKoords!)
+                                             NavigationAppHelper.shared.openInGoogleMaps(name: setAddress, coordinate: setKoords!)
                                           }
                                        }
                                        if isWazeInstalled {
@@ -192,7 +192,7 @@ struct RideDetailView: View {
                                                    }
                                                    if isGoogleMapsInstalled {
                                                       Button("Öffnen mit Google Maps") {
-                                                          NavigationAppHelper.shared.openInGoogleMaps(coordinate: setKoords!)
+                                                         NavigationAppHelper.shared.openInGoogleMaps(name: setAddress, coordinate: setKoords!)
                                                       }
                                                    }
                                                    if isWazeInstalled {
