@@ -7,6 +7,7 @@ import Foundation
 data class GetSpecialRideDetailDTO (
     var id : UUID?,
     var driverName : String,
+    var driverID : UUID,
     var isSelfDriver : Boolean,
     var name : String,
     var description : String?,
