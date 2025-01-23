@@ -14,6 +14,7 @@ func routes(_ app: Application) throws {
     try posters.register(collection: PosterController())
     try posters.register(collection: PosterPositionController())
     try app.register(collection: WebhookController())
+    try app.grouped("internal").register(collection: InternalController())
     
     app.get("openapi.json") { req in
         app.routes.openAPI(

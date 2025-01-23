@@ -13,6 +13,7 @@ func routes(_ app: Application) throws {
     try authProtected.register(collection: EventRideController())
     
     try app.register(collection: WebhookController())
+    try app.grouped("internal").register(collection: InternalController())
     
     app.get("openapi.json") { req in
         app.routes.openAPI(
