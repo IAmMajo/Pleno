@@ -145,7 +145,7 @@ struct MainPage: View {
                                     .foregroundColor(Color.primary)
                             }
                         }
-                        NavigationLink(destination: PollListView()) {
+                        NavigationLink(destination: PollsView()) {
                            HStack {
                               Image(systemName: "bubble.left.and.bubble.right.fill")
                                    .foregroundColor(.accentColor)
