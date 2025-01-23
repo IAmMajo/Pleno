@@ -93,6 +93,7 @@ class AttendancePlanningViewModel: ObservableObject {
     }
 
     public func markAttendanceAsAbsent() {
+        removeEvent(eventTitle: meeting.name, eventDate: meeting.start)
         isLoading = true
         Task {
             do {
@@ -118,7 +119,6 @@ class AttendancePlanningViewModel: ObservableObject {
                     return
                 }
                 fetchAttendances()
-                removeEvent(eventTitle: meeting.name, eventDate: meeting.start)
             }
         }
     }
@@ -235,10 +235,7 @@ class AttendancePlanningViewModel: ObservableObject {
                     }
                 }
             } else {
-                DispatchQueue.main.async {
-                    self.alertMessage = "Kein Termin \"\(eventTitle)\" wurde an diesem Tag gefunden."
-                    self.isShowingAlert = true
-                }
+                // Wenn kein Eintrag vorhanden ist, kommt keine Meldung.
             }
         }
     }
