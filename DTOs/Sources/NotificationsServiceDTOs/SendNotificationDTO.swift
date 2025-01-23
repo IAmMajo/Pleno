@@ -1,3 +1,5 @@
+import Foundation
+
 public struct SendNotificationDTO: Codable {
     public var userID: UUID
     public var subject: String
