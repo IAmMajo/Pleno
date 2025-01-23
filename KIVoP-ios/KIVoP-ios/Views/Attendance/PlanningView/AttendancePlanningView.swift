@@ -11,6 +11,14 @@ struct AttendancePlanningView: View {
                     .edgesIgnoringSafeArea(.all)
                 // Inhalt
                 VStack {
+                    // Datum + Uhrzeit
+                    Text(viewModel.formattedDate(viewModel.meeting.start))
+                        .padding(5)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 30)
+                                .stroke(Color.black, lineWidth: 1)
+                        )
+                        .padding(.vertical)
                     // Titel für Teilnahme-Umfrage
                     Text("Kannst du an diesem Termin?")
                         .font(.title2)
@@ -93,10 +101,8 @@ struct AttendancePlanningView: View {
                         Section(header: Text("Mitglieder")) {
                             ForEach(viewModel.attendances, id: \.identity.id) { attendance in
                                 HStack {
-                                    // Profilbild (Platzhalter)
-                                    Circle()
-                                        .fill(Color.gray)
-                                        .frame(width: 40, height: 40)
+                                    // Profilbild - View in Posters - Components - UserProfileImageView
+                                    ProfilePicture(profile: attendance.identity)
                                     
                                     // Name (der eigene Name wird fett gedruckt)
                                     Text(attendance.identity.name)
@@ -139,9 +145,24 @@ struct AttendancePlanningView: View {
                     }
                 }
             }
-            .navigationTitle(Text(viewModel.meeting.start, style: .date))
+            .alert("Hinweis", isPresented: $viewModel.isShowingAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(viewModel.alertMessage)
+            }
+            .navigationTitle(viewModel.meeting.name)
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        viewModel.addEventToCalendar(eventTitle: viewModel.meeting.name, eventDate: viewModel.meeting.start, duration: viewModel.meeting.duration)
+                    }) {
+                        Image(systemName: "calendar.badge.plus")
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
         }
     }
 }

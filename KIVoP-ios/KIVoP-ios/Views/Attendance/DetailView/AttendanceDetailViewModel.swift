@@ -61,4 +61,10 @@ class AttendanceDetailViewModel: ObservableObject {
     var absentCount: Int {
         attendances.filter { $0.status != .present }.count
     }
+    
+    func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy - HH:mm 'Uhr'"
+        return formatter.string(from: date)
+    }
 }
