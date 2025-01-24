@@ -1,9 +1,12 @@
 package com.example.kivopandriod.components
 
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,6 +18,7 @@ import net.ipv64.kivop.models.alertSecondaryButtonStyle
 import net.ipv64.kivop.models.primaryButtonStyle
 import net.ipv64.kivop.models.secondaryButtonStyle
 import net.ipv64.kivop.ui.theme.Background_prime
+import net.ipv64.kivop.ui.theme.TextStyles
 import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_tertiary
 import net.ipv64.kivop.ui.theme.textContentStyle
@@ -36,7 +40,7 @@ fun CallToConfirmation(
       containerColor = Background_prime,
       shape = RoundedCornerShape(8.dp),
       // properties = androidx.compose.ui.window.DialogProperties(),
-      modifier = Modifier.wrapContentSize().padding(horizontal = 25.dp, vertical = 20.dp),
+      modifier = Modifier.wrapContentSize().padding(horizontal = 0.dp, vertical = 20.dp),
       onDismissRequest = onDismissRequest,
       confirmButton = {
         // Button-One
@@ -57,18 +61,14 @@ fun CallToConfirmation(
       title = {
         Text(
             text = dialogTitle,
-            fontFamily = textHeadingStyle.fontFamily,
-            fontWeight = textHeadingStyle.fontWeight,
-            fontSize = textHeadingStyle.fontSize,
+            style = TextStyles.headingStyle,
             color = Text_prime,
         )
       },
       text = {
         Text(
             text = dialogText,
-            fontFamily = textContentStyle.fontFamily,
-            fontWeight = textContentStyle.fontWeight,
-            fontSize = textContentStyle.fontSize,
+            style = TextStyles.contentStyle,
             color = Text_tertiary,
         )
       },
@@ -78,12 +78,15 @@ fun CallToConfirmation(
 @Preview
 @Composable
 fun Screen() {
-  CallToConfirmation(
+  Surface(modifier = Modifier.fillMaxWidth().fillMaxHeight()){
+    CallToConfirmation(
       onDismissRequest = {},
       onConfirmation = {},
       dialogTitle = "TestTitel",
       dialogText = "Sind Sie sicher, dass Sie Ihr Ergebnis abschicken möchten?",
       buttonOneText = "confirm",
       buttonTextDismiss = "back",
-      alert = true)
+      alert = false)
+
+  }
 }

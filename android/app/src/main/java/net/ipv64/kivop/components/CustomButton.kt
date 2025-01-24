@@ -18,27 +18,44 @@ import androidx.compose.ui.unit.dp
 import net.ipv64.kivop.models.ButtonStyle
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
+import net.ipv64.kivop.ui.theme.TextStyles
+import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay.fontColor
 
 @Composable
 // ToDo - ButtonStyle ergänzen
 fun CustomButton(
     modifier: Modifier,
+    buttonStyle: ButtonStyle? = null,
     text: String = "Button",
     color: Color = Color.Gray,
     fontColor: Color = Color.Black,
     onClick: () -> Unit = {},
+    enabled: Boolean = true
     // ToDo - Icon-Option ergänzen?
 ) {
-  Box(
+  if (buttonStyle != null) {
+    Box(
       contentAlignment = Alignment.Center,
       modifier =
-          modifier
-              .fillMaxWidth()
-              .height(44.dp)
-              .background(color = color, shape = RoundedCornerShape(100.dp))
-              .clickable(onClick = onClick)) {
-        Text(text, color = fontColor)
-      }
+      modifier
+        .fillMaxWidth()
+        .height(44.dp)
+        .background(color = buttonStyle.backgroundColor, shape = RoundedCornerShape(100.dp))
+        .clickable(enabled = enabled,onClick = onClick)) {
+      Text(text, color = buttonStyle.contentColor, style = TextStyles.largeContentStyle)
+    }
+  }else{
+    Box(
+      contentAlignment = Alignment.Center,
+      modifier =
+      modifier
+        .fillMaxWidth()
+        .height(44.dp)
+        .background(color = color, shape = RoundedCornerShape(100.dp))
+        .clickable(enabled = enabled,onClick = onClick)) {
+      Text(text, color = fontColor, style = TextStyles.largeContentStyle)
+    }
+  }
 }
 
 @Composable
@@ -47,10 +64,12 @@ fun CustomPopupButton(
     buttonStyle: ButtonStyle?,
     // isEnabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    enabled: Boolean = true,
 ) {
   if (buttonStyle == null) {
     Button(
+      enabled = enabled,
         onClick = onClick,
         shape = RoundedCornerShape(100.dp),
         colors =
@@ -59,11 +78,13 @@ fun CustomPopupButton(
         modifier = modifier.height(35.dp).clip(shape = RoundedCornerShape(20.dp)),
     ) {
       Text(
-          text = text,
+        text = text,
+        style = TextStyles.largeContentStyle,
       )
     }
   } else {
     Button(
+      enabled = enabled,
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         colors =
@@ -73,7 +94,8 @@ fun CustomPopupButton(
         modifier = modifier.height(35.dp).clip(shape = RoundedCornerShape(20.dp)),
     ) {
       Text(
-          text = text,
+        text = text,
+        style = TextStyles.largeContentStyle,
       )
     }
   }

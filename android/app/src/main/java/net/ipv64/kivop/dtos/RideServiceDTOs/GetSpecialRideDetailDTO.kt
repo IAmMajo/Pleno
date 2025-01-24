@@ -3,7 +3,7 @@ package net.ipv64.kivop.dtos.RideServiceDTOs
 import java.util.UUID
 import java.time.LocalDateTime
 
-import Foundation 
+//import Foundation 
 data class GetSpecialRideDetailDTO (
     var id : UUID?,
     var driverName : String,
