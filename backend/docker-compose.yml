@@ -31,7 +31,7 @@ services:
     container_name: kivop-postgres
     restart: unless-stopped
     healthcheck:
-      test: pg_isready -d kivop
+      test: pg_isready -U vapor -d kivop
       interval: 2m
       timeout: 10s
       retries: 3
@@ -398,70 +398,70 @@ services:
 #
 # Vapor: tdums-service
 #
-  tdums-service:
-    image: tdums-service:latest
-    build:
-      context: ./..
-      dockerfile: backend/tdums-service/Dockerfile
-    container_name: tdums-service
-    depends_on:
-     - tdums-postgres
-    environment:
-      DATABASE_HOST: tdums-postgres
-      DATABASE_USERNAME: vapor
-      DATABASE_PASSWORD: example
-      DATABASE_NAME: kivop
-    env_file: ./../.env
-    labels:
-      traefik.enable: true
-      traefik.http.routers.tdums-service.rule: PathPrefix(`/tdums`)
+  # tdums-service:
+  #   image: tdums-service:latest
+  #   build:
+  #     context: ./..
+  #     dockerfile: backend/tdums-service/Dockerfile
+  #   container_name: tdums-service
+  #   depends_on:
+  #    - tdums-postgres
+  #   environment:
+  #     DATABASE_HOST: tdums-postgres
+  #     DATABASE_USERNAME: vapor
+  #     DATABASE_PASSWORD: example
+  #     DATABASE_NAME: kivop
+  #   env_file: ./../.env
+  #   labels:
+  #     traefik.enable: true
+  #     traefik.http.routers.tdums-service.rule: PathPrefix(`/tdums`)
 
-  tdums-service-migration:
-    profiles:
-      - not-default
-    image: tdums-service:latest
-    build:
-      context: ./..
-      dockerfile: backend/tdums-service/Dockerfile
-    container_name: tdums-service-migration
-    environment:
-      DATABASE_HOST: tdums-postgres
-      DATABASE_USERNAME: vapor
-      DATABASE_PASSWORD: example
-      DATABASE_NAME: kivop
-    depends_on:
-      - tdums-postgres
-    command: ["migrate", "--yes"]
+  # tdums-service-migration:
+  #   profiles:
+  #     - not-default
+  #   image: tdums-service:latest
+  #   build:
+  #     context: ./..
+  #     dockerfile: backend/tdums-service/Dockerfile
+  #   container_name: tdums-service-migration
+  #   environment:
+  #     DATABASE_HOST: tdums-postgres
+  #     DATABASE_USERNAME: vapor
+  #     DATABASE_PASSWORD: example
+  #     DATABASE_NAME: kivop
+  #   depends_on:
+  #     - tdums-postgres
+  #   command: ["migrate", "--yes"]
 
-  tdums-service-revert:
-    profiles:
-      - not-default
-    image: tdums-service:latest
-    build:
-      context: ./..
-      dockerfile: backend/tdums-service/Dockerfile
-    container_name: tdums-service-revert
-    environment:
-      DATABASE_HOST: tdums-postgres
-      DATABASE_USERNAME: vapor
-      DATABASE_PASSWORD: example
-      DATABASE_NAME: kivop
-    depends_on:
-      - tdums-postgres
-    command: ["migrate", "--revert", "--yes"]
+  # tdums-service-revert:
+  #   profiles:
+  #     - not-default
+  #   image: tdums-service:latest
+  #   build:
+  #     context: ./..
+  #     dockerfile: backend/tdums-service/Dockerfile
+  #   container_name: tdums-service-revert
+  #   environment:
+  #     DATABASE_HOST: tdums-postgres
+  #     DATABASE_USERNAME: vapor
+  #     DATABASE_PASSWORD: example
+  #     DATABASE_NAME: kivop
+  #   depends_on:
+  #     - tdums-postgres
+  #   command: ["migrate", "--revert", "--yes"]
 
-  tdums-postgres:
-    image: postgres:17.0-bookworm
-    container_name: tdums-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: vapor # only for development
-      POSTGRES_PASSWORD: example # only for development
-    volumes:
-      - ./init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
-      - tdums-data:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
+  # tdums-postgres:
+  #   image: postgres:17.0-bookworm
+  #   container_name: tdums-postgres
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: vapor # only for development
+  #     POSTGRES_PASSWORD: example # only for development
+  #   volumes:
+  #     - ./init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
+  #     - tdums-data:/var/lib/postgresql/data
+  #   ports:
+  #     - 5432:5432
 
 #
 # Volumes

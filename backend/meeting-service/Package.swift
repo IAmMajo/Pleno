@@ -37,6 +37,7 @@ let package = Package(
                 .product(name: "Models", package: "models"),
                 .product(name: "MeetingServiceDTOs", package: "dtos"),
                 .product(name: "ConfigServiceDTOs", package: "dtos"),
+                .product(name: "AIServiceDTOs", package: "dtos"),
                 .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
             ],
             resources: [
