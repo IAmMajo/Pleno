@@ -1,18 +1,18 @@
 import Foundation
 
 public struct UserProfileDTO: Codable {
-    public var uid: UUID?
-    public var email: String?
-    public var name: String?
-    public var profileImage: Data?
-    public var isAdmin: Bool?
-    public var isActive: Bool?
-    public var emailVerification: VerificationStatus?
-    public var createdAt: Date?
-    public var isNotificationsActive: Bool?
-    public var isPushNotificationsActive: Bool?
+    public var uid: UUID
+    public var email: String
+    public var name: String
+    public var profileImage: Data
+    public var isAdmin: Bool
+    public var isActive: Bool
+    public var emailVerification: VerificationStatus
+    public var createdAt: Date
+    public var isNotificationsActive: Bool
+    public var isPushNotificationsActive: Bool
     
-    public init(uid: UUID, email: String? = nil, name: String? = nil, profileImage: Data? = nil, isAdmin: Bool, isActive: Bool, emailVerification: VerificationStatus? = nil , createdAt: Date? = nil, isNotificationsActive: Bool, isPushNotificationsActive: Bool) {
+    public init(uid: UUID, email: String, name: String, profileImage: Data, isAdmin: Bool, isActive: Bool, emailVerification: VerificationStatus, createdAt: Date, isNotificationsActive: Bool, isPushNotificationsActive: Bool) {
         self.uid = uid
         self.email = email
         self.name = name
