@@ -8,16 +8,19 @@ class LocationsViewModel: ObservableObject {
     @Published var showLocationsList: Bool = false
     @Published var sheetPosition: PosterPositionWithAddress? = nil
     @Published var selectedPosterPosition: PosterPositionWithAddress? // Aktuell ausgewählte Position
-    @Published var posterPositionsWithAddresses: [PosterPositionWithAddress] = [] //{
-//        didSet {
-//            // Wenn die Liste aktualisiert wird, die erste Position setzen (falls vorhanden)
-//            if let firstPosition = posterPositionsWithAddresses.first {
-//                updateMapLocation(location: firstPosition)
-//            } else {
-//                errorMessage = "Keine Posterpositionen verfügbar."
-//            }
-//        }
-//    }
+    @Published var selectedFilter: String? = nil {
+        didSet {
+            applyFilter()
+        }
+    }
+
+    @Published var posterPositionsWithAddresses: [PosterPositionWithAddress] = [] {
+        didSet {
+            applyFilter()
+        }
+    }
+
+    @Published var filteredPositions: [PosterPositionWithAddress] = []
 
     @Published var mapLocation: MKCoordinateRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
@@ -84,6 +87,26 @@ class LocationsViewModel: ObservableObject {
         let selectedPosition = posterPositionsWithAddresses[index]
         updateMapLocation(location: selectedPosition) // Karte und Auswahl aktualisieren
     }
+    
+    func filterPositions() -> [PosterPositionWithAddress] {
+        guard let selectedFilter = selectedFilter else {
+            // Wenn kein Filter gesetzt ist, alle Positionen zurückgeben
+            return posterPositionsWithAddresses
+        }
+        
+        return posterPositionsWithAddresses.filter { $0.position.status == selectedFilter }
+    }
+    
+    private func applyFilter() {
+        guard let selectedFilter = selectedFilter else {
+            // Wenn kein Filter gesetzt ist, alle Positionen zurückgeben
+            filteredPositions = posterPositionsWithAddresses
+            return
+        }
+        // Positionen filtern basierend auf dem Status
+        filteredPositions = posterPositionsWithAddresses.filter { $0.position.status == selectedFilter }
+    }
+
 
     func getAddressFromCoordinates(latitude: Double, longitude: Double, completion: @escaping (String?) -> Void) {
         let geocoder = CLGeocoder()

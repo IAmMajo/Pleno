@@ -34,7 +34,7 @@ struct LocationsListView: View {
     
     var body: some View {
         List {
-            ForEach(locationViewModel.posterPositionsWithAddresses.sorted { lhs, rhs in
+            ForEach(locationViewModel.filteredPositions.sorted { lhs, rhs in
                 let statusOrder = ["toHang", "hangs", "overdue", "takenDown"]
                 let lhsIndex = statusOrder.firstIndex(of: lhs.position.status.lowercased()) ?? Int.max
                 let rhsIndex = statusOrder.firstIndex(of: rhs.position.status.lowercased()) ?? Int.max
