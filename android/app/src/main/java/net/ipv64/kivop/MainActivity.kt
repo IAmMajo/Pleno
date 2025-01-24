@@ -56,8 +56,8 @@ import net.ipv64.kivop.pages.SplashActivity
 import net.ipv64.kivop.pages.mainApp.AlreadyVoted
 import net.ipv64.kivop.pages.mainApp.AttendancesCoordinationPage
 import net.ipv64.kivop.pages.mainApp.AttendancesListPage
-import net.ipv64.kivop.pages.mainApp.CarpoolPage
-import net.ipv64.kivop.pages.mainApp.CarpoolingList
+import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolPage
+import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolingList
 import net.ipv64.kivop.pages.mainApp.EventsPage
 import net.ipv64.kivop.pages.mainApp.HomePage
 import net.ipv64.kivop.pages.mainApp.MeetingsListPage
@@ -66,7 +66,7 @@ import net.ipv64.kivop.pages.mainApp.ProtocolListPage
 import net.ipv64.kivop.pages.mainApp.UserPage
 import net.ipv64.kivop.pages.mainApp.VotePage
 import net.ipv64.kivop.pages.mainApp.VotingResultPage
-import net.ipv64.kivop.pages.mainApp.onBoardingCreateRide.CreateRidePage
+import net.ipv64.kivop.pages.mainApp.Carpool.onBoardingCreateRide.CreateRidePage
 import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.StringProvider.getString
 import net.ipv64.kivop.ui.theme.Background_prime
@@ -155,6 +155,7 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         composable(route = "${Screen.Carpool.rout}/{carpoolID}") { backStackEntry ->
           CarpoolPage(navController, backStackEntry.arguments?.getString("carpoolID").orEmpty())
         }
+    
         // Create Carpool
         composable(route = Screen.CreateCarpool.rout) {
           CreateRidePage(navController = navController)
@@ -163,10 +164,7 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
         // Poster
         composable(route = Screen.Poster.rout) { PosterPage(navController = navController) }
-        //        // Abstimmungen Listen Page
-        //        composable(route = Screen.Votings.rout) { VotingsListPage(navController =
-        // navController) }
-        // Abstimmung Resultat Page
+
         composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
           AttendancesCoordinationPage(
               navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
