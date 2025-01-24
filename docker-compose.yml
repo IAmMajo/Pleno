@@ -87,19 +87,12 @@ services:
       traefik.http.routers.config-service.tls: true
       traefik.http.routers.config-service.tls.certresolver: myresolver
 
-  config-service-migration:
-    profiles:
-      - not-default
-    extends:
-      file: ./backend/docker-compose.yml
-      service: config-service-migration
-
   config-service-revert:
     profiles:
       - not-default
     extends:
       file: ./backend/docker-compose.yml
-      service: config-service-migration
+      service: config-service-revert
 
 #
 # Vapor: auth-service
@@ -120,19 +113,12 @@ services:
       traefik.http.routers.auth-service.tls: true
       traefik.http.routers.auth-service.tls.certresolver: myresolver
 
-  auth-service-migration:
-    profiles:
-      - not-default
-    extends:
-      file: ./backend/docker-compose.yml
-      service: auth-service-migration
-
   auth-service-revert:
     profiles:
       - not-default
     extends:
       file: ./backend/docker-compose.yml
-      service: auth-service-migration
+      service: auth-service-revert
 
 #
 # Vapor: meeting-service
@@ -153,19 +139,12 @@ services:
       traefik.http.routers.meeting-service.tls: true
       traefik.http.routers.meeting-service.tls.certresolver: myresolver
 
-  meeting-service-migration:
-    profiles:
-      - not-default
-    extends:
-      file: ./backend/docker-compose.yml
-      service: meeting-service-migration
-
   meeting-service-revert:
     profiles:
       - not-default
     extends:
       file: ./backend/docker-compose.yml
-      service: meeting-service-migration
+      service: meeting-service-revert
 
 #
 # Vapor: notifications-service
@@ -185,20 +164,13 @@ services:
       traefik.http.routers.notifications-service.entrypoints: https
       traefik.http.routers.notifications-service.tls: true
       traefik.http.routers.notifications-service.tls.certresolver: myresolver
-
-  notifications-service-migration:
-    profiles:
-      - not-default
-    extends:
-      file: ./backend/docker-compose.yml
-      service: notifications-service-migration
   
   notifications-service-revert:
     profiles:
       - not-default
     extends:
       file: ./backend/docker-compose.yml
-      service: notifications-service-migration
+      service: notifications-service-revert
 
 #
 # Vapor: ride-service
@@ -218,13 +190,6 @@ services:
       traefik.http.routers.ride-service.entrypoints: https
       traefik.http.routers.ride-service.tls: true
       traefik.http.routers.ride-service.tls.certresolver: myresolver
-
-  ride-service-migration:
-    profiles:
-      - not-default
-    extends:
-      file: ./backend/docker-compose.yml
-      service: ride-service-migration
 
   ride-service-revert:
     profiles:
@@ -251,19 +216,12 @@ services:
       traefik.http.routers.poster-service.tls: true
       traefik.http.routers.poster-service.tls.certresolver: myresolver
 
-  poster-service-migration:
-    profiles:
-      - not-default
-    extends:
-      file: ./backend/docker-compose.yml
-      service: poster-service-migration
-
   poster-service-revert:
     profiles:
       - not-default
     extends:
       file: ./backend/docker-compose.yml
-      service: poster-service-migration
+      service: poster-service-revert
 #
 # Vapor: ai-service
 #
@@ -329,19 +287,12 @@ services:
       traefik.http.routers.poll-service.tls: true
       traefik.http.routers.poll-service.tls.certresolver: myresolver
 
-  poll-service-migration:
-    profiles:
-      - not-default
-    extends:
-      file: ./backend/docker-compose.yml
-      service: poll-service-migration
-
   poll-service-revert:
     profiles:
       - not-default
     extends:
       file: ./backend/docker-compose.yml
-      service: poll-service-migration
+      service: poll-service-revert
 
 #
 # Volumes
