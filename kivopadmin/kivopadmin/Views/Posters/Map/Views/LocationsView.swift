@@ -17,18 +17,19 @@ struct LocationsView: View {
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
     var poster: PosterResponseDTO
+    let maxWidth: CGFloat = 700
     
     var body: some View {
         ZStack {
             mapLayer
                 .ignoresSafeArea()
-            if let selectedPosition = locationViewModel.selectedPosterPosition {
+            //if let selectedPosition = locationViewModel.selectedPosterPosition {
                 VStack {
                     
                     // Zeige die Adresse oder lade sie asynchron
                     VStack{
                         Button(action: locationViewModel.toggleLocationsList){
-                            Text(selectedPosition.address).foregroundColor(.primary).frame(height: 55).frame(maxWidth: .infinity)
+                            Text(locationViewModel.selectedPosterPosition?.address ?? "Wählen Sie eine Position aus").foregroundColor(.primary).frame(height: 55).frame(maxWidth: .infinity)
                                 .overlay(alignment: .leading){
                                     Image(systemName: "arrow.down").font(.headline).foregroundColor(.primary).padding().rotationEffect(Angle(degrees: locationViewModel.showLocationsList ? 180 : 0))
                             }
@@ -40,6 +41,7 @@ struct LocationsView: View {
                         
                     }.background(.thickMaterial).cornerRadius(10).shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 15)
                     .padding()
+                    .frame(maxWidth: maxWidth)
                         
                     
                     Spacer()
@@ -47,14 +49,19 @@ struct LocationsView: View {
                     ZStack{
                         ForEach(locationViewModel.posterPositionsWithAddresses, id: \.position.id){ position in
                             if locationViewModel.selectedPosterPosition == position {
-                                LocationPreviewView(position: position).shadow(color: Color.black.opacity(0.32), radius: 20).padding().transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                                LocationPreviewView(position: position)
+                                    .shadow(color: Color.black.opacity(0.32), radius: 20)
+                                    .padding()
+                                    .frame(maxWidth: maxWidth)
+                                    .frame(maxWidth: .infinity)
+                                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                             }
                             
                             
                         }
                     }
                 }
-            }
+            //}
         }
         .sheet(item: $locationViewModel.sheetPosition, onDismiss: nil) { position in
             LocationDetailView(position: position)

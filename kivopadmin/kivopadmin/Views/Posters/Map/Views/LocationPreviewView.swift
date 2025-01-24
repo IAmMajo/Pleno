@@ -13,16 +13,25 @@ struct LocationPreviewView: View {
     let position: PosterPositionWithAddress
     
     var body: some View {
-        HStack(alignment: .bottom, spacing: 0){
-            VStack(alignment: .leading, spacing: 16.0){
-                imageSection
-                titleSection
+        ZStack{
+            HStack(alignment: .bottom, spacing: 0){
+                VStack(alignment: .leading, spacing: 16.0){
+                    imageSection
+                    titleSection
+                }
+                buttonsSection
             }
-            buttonsSection
+            .padding(20)
+            .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThinMaterial))
+            .cornerRadius(10)
+            HStack{
+                backButton.offset(x: -35, y: -75)
+                Spacer()
+            }
         }
-        .padding(20)
-        .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThinMaterial))
-        .cornerRadius(10)
+
+        
+
     
 
     }
@@ -69,6 +78,13 @@ extension LocationPreviewView {
 
         }
 
+    }
+    private var backButton: some View {
+        Button {
+            locationViewModel.selectedPosterPosition = nil
+        } label: {
+            Image(systemName: "xmark").font(.headline).padding(16).foregroundColor(.primary).background(.thinMaterial).cornerRadius(10).shadow(radius: 4).padding()
+        }
     }
 }
 

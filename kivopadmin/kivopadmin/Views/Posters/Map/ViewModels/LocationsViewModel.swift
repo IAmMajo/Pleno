@@ -8,16 +8,16 @@ class LocationsViewModel: ObservableObject {
     @Published var showLocationsList: Bool = false
     @Published var sheetPosition: PosterPositionWithAddress? = nil
     @Published var selectedPosterPosition: PosterPositionWithAddress? // Aktuell ausgewählte Position
-    @Published var posterPositionsWithAddresses: [PosterPositionWithAddress] = [] {
-        didSet {
-            // Wenn die Liste aktualisiert wird, die erste Position setzen (falls vorhanden)
-            if let firstPosition = posterPositionsWithAddresses.first {
-                updateMapLocation(location: firstPosition)
-            } else {
-                errorMessage = "Keine Posterpositionen verfügbar."
-            }
-        }
-    }
+    @Published var posterPositionsWithAddresses: [PosterPositionWithAddress] = [] //{
+//        didSet {
+//            // Wenn die Liste aktualisiert wird, die erste Position setzen (falls vorhanden)
+//            if let firstPosition = posterPositionsWithAddresses.first {
+//                updateMapLocation(location: firstPosition)
+//            } else {
+//                errorMessage = "Keine Posterpositionen verfügbar."
+//            }
+//        }
+//    }
 
     @Published var mapLocation: MKCoordinateRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
@@ -128,10 +128,20 @@ class LocationsViewModel: ObservableObject {
         }
         
         dispatchGroup.notify(queue: .main) { [weak self] in
+            // Sortiere die Liste nach dem Status der Positionen
+            let statusOrder = ["toHang", "hangs", "overdue", "takenDown"]
+            positionsWithAddresses.sort { lhs, rhs in
+                let lhsIndex = statusOrder.firstIndex(of: lhs.position.status.lowercased()) ?? Int.max
+                let rhsIndex = statusOrder.firstIndex(of: rhs.position.status.lowercased()) ?? Int.max
+                return lhsIndex < rhsIndex
+            }
+            
+            // Die sortierte Liste zuweisen
             self?.posterPositionsWithAddresses = positionsWithAddresses
-            print("Alle Adressen wurden erfolgreich generiert.")
+            print("Alle Adressen wurden erfolgreich generiert und sortiert.")
         }
     }
+
 
     func fetchPosterPositions(poster: PosterResponseDTO) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/positions") else {
@@ -174,6 +184,7 @@ class LocationsViewModel: ObservableObject {
                     let decoder = JSONDecoder()
                     decoder.dateDecodingStrategy = .iso8601
                     let positions = try decoder.decode([PosterPositionResponseDTO].self, from: data)
+
                     
                     self?.generateAddresses(for: positions) // Adressen generieren
                     

@@ -33,39 +33,52 @@ struct LocationsListView: View {
 
     
     var body: some View {
-        List{
-            ForEach(locationViewModel.posterPositionsWithAddresses, id: \.position.id){ position in
-                Button{
+        List {
+            ForEach(locationViewModel.posterPositionsWithAddresses.sorted { lhs, rhs in
+                let statusOrder = ["toHang", "hangs", "overdue", "takenDown"]
+                let lhsIndex = statusOrder.firstIndex(of: lhs.position.status.lowercased()) ?? Int.max
+                let rhsIndex = statusOrder.firstIndex(of: rhs.position.status.lowercased()) ?? Int.max
+                return lhsIndex < rhsIndex
+            }, id: \.position.id) { position in
+                Button {
                     locationViewModel.showNextLocation(location: position)
                 } label: {
                     listRowView(position: position)
-                }.padding(.vertical, 5).listRowBackground(Color.clear)
-                
+                }
+                .padding(.vertical, 5)
+                .listRowBackground(Color.clear)
             }
-        }.listStyle(PlainListStyle())
+        }
+        .listStyle(PlainListStyle())
+
     }
 }
 
 extension LocationsListView {
     
-    private func listRowView(position: PosterPositionWithAddress) -> some View{
-        HStack{
-            if let imageData = position.position.image, // Unwrap optional Data
-               let uiImage = UIImage(data: imageData) { // Erzeuge ein UIImage aus Data
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFit()
-                    .cornerRadius(10)
-                    .frame(maxWidth: 45, maxHeight: 45)
+    private func listRowView(position: PosterPositionWithAddress) -> some View {
+        HStack {
+            Group {
+                if let imageData = position.position.image, // Unwrap optional Data
+                   let uiImage = UIImage(data: imageData) { // Erzeuge ein UIImage aus Data
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .cornerRadius(10)
+                } else {
+                    Color.clear // Platzhalter für leere Bilder
+                }
             }
+            .frame(width: 45, height: 45) // Feste Breite und Höhe für das Bild
+
             Text(position.address)
             Spacer()
             Text(getDateStatusText(position: position.position).text)
                .font(.caption)
                .foregroundStyle(getDateStatusText(position: position.position).color)
-
         }
     }
+
     
 
 }
