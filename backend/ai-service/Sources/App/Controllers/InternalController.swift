@@ -9,9 +9,14 @@ struct InternalController: RouteCollection {
         let openAPITag = TagObject(name: "Intern", description: "Nur intern erreichbar.")
         
         routes.get("healthcheck", use: healthcheck)
-            .openAPI(tags: openAPITag, summary: "Healthcheck des Microservices", statusCode: .ok)
-
+            .openAPI(
+                tags: openAPITag,
+                summary: "Healthcheck des Microservices",
+                statusCode: .ok
+            )
+        
         routes.post("translate-record", ":lang", ":lang2", use: translateRecord).openAPI(
+            tags: openAPITag,
             summary: "Protokoll übersetzen",
             description: "Übersetzt ein Sitzungsprotokoll in eine andere Sprache.",
             body: .type(AISendMessageDTO.self),
