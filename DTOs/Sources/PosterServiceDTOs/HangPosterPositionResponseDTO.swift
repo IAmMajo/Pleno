@@ -4,12 +4,16 @@ public struct HangPosterPositionResponseDTO: Codable {
     public var posterPosition: UUID
     public var postedAt: Date
     public var postedBy: UUID
-    public var imageUrl: String
-    
-    public init(posterPosition: UUID, postedAt: Date, postedBy: UUID, imageUrl: String) {
+    public var latitude: Double?
+    public var longitude: Double?
+    public var image: Data
+
+    public init(posterPosition: UUID, postedAt: Date, postedBy: UUID, latitude: Double? = nil, longitude: Double? = nil, image: Data) {
         self.posterPosition = posterPosition
         self.postedAt = postedAt
         self.postedBy = postedBy
-        self.imageUrl = imageUrl
+        self.longitude = longitude
+        self.latitude = latitude
+        self.image = image
     }
 }

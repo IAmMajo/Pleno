@@ -12,5 +12,6 @@ data class GetVotingDTO (
     var startedAt : LocalDateTime?,
     var closedAt : LocalDateTime?,
     var anonymous : Boolean,
+    var iVoted : Boolean,
     var options : List<GetVotingOptionDTO>,
 )

@@ -9,7 +9,10 @@ xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     <uses-permission android:name="android.permission.CAMERA"></uses-permission>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
 <application
+    android:usesCleartextTraffic="true"
     android:enableOnBackInvokedCallback="true"
     android:name=".MyApplication"
     android:allowBackup="true"
@@ -21,6 +24,9 @@ xmlns:tools="http://schemas.android.com/tools">
     android:supportsRtl="true"
     android:theme="@style/Theme.KIVoPAndriod"
     tools:targetApi="33">
+    <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="YOUR_API_KEY_HERE"/>
     <activity
         android:name=".pages.SplashActivity"
         android:exported="true"

@@ -106,7 +106,7 @@ fun LoggedUserAttendacneCard(
         }else{
           Label(
             backgroundColor = Signal_red
-          ) { Text("Abgesagt", color = Text_prime_light) } 
+          ) { Text("Abgesagt", color = Text_prime_light) }
         }
       } else if (user.status == AttendanceStatus.accepted) {
         Label(
@@ -120,7 +120,7 @@ fun LoggedUserAttendacneCard(
       }
     }
     //------------------------------------------------------------------------------
-    
+
     SpacerBetweenElements()
     if (meetingStatus == MeetingStatus.scheduled) {
       if (user.status == AttendanceStatus.present) {

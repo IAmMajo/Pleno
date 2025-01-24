@@ -5,7 +5,7 @@ plugins {
 
 android {
   namespace = "net.ipv64.kivop"
-  compileSdk = 34
+  compileSdk = 35
 
   defaultConfig {
     applicationId = "net.ipv64.kivop"
@@ -16,6 +16,8 @@ android {
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables { useSupportLibrary = true }
+    println("OPENCAGE_API_KEY = ${project.findProperty("OPENCAGE_API_KEY")}")
+    buildConfigField("String", "OPENCAGE_API_KEY", "\"${project.findProperty("OPENCAGE_API_KEY")?: "default_value_here"}\"")
   }
 
   buildTypes {
@@ -44,6 +46,8 @@ dependencies {
   implementation(libs.androidx.ui.tooling.preview)
   implementation(libs.androidx.material3)
   implementation(libs.androidx.navigation.runtime.ktx)
+  implementation(libs.play.services.maps)
+  implementation(libs.play.services.location)
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
@@ -67,4 +71,6 @@ dependencies {
   // Tav Compose
   implementation(libs.accompanist.pager)
   implementation(libs.accompanist.pager.indicators)
+  implementation("org.osmdroid:osmdroid-android:6.1.16")
+  implementation("tech.utsmankece:osm-androd-compose:0.0.3") //TODO: bugged Look for alternative - not getting updated
 }

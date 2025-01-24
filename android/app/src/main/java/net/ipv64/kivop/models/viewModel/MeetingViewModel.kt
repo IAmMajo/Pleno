@@ -24,11 +24,11 @@ import net.ipv64.kivop.services.api.putPlanAttendance
 class MeetingViewModel(private val meetingId: String): ViewModel() {
   var meeting by mutableStateOf<GetMeetingDTO?>(null)
   var protocols by mutableStateOf<List<GetRecordDTO>>(emptyList())
-  
+
   var attendance by mutableStateOf<List<GetAttendanceDTO>>(emptyList())
   var votings by mutableStateOf<List<GetVotingDTO>>(emptyList())
   var you by mutableStateOf<GetAttendanceDTO?>(null)
-  
+
   var responseItems by mutableStateOf<List<attendancesList>>(emptyList())
   var pendingList by mutableStateOf<List<attendancesList>>(emptyList())
   var presentList by mutableStateOf<List<attendancesList>>(emptyList())
@@ -37,19 +37,19 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
   var acceptedList by mutableStateOf<List<attendancesList>>(emptyList())
   var acceptedListcound: Int? = null;
   var maxMembernumber by mutableStateOf(0)
-  var isPendingVisible by mutableStateOf(true) 
-  var isPresentVisible by  mutableStateOf(true) 
-  var isAbsentVisible by  mutableStateOf(true) 
-  var isAcceptedVisible by mutableStateOf(true) 
-  var isAttendanceVisible by mutableStateOf(false) 
-  
+  var isPendingVisible by mutableStateOf(true)
+  var isPresentVisible by  mutableStateOf(true)
+  var isAbsentVisible by  mutableStateOf(true)
+  var isAcceptedVisible by mutableStateOf(true)
+  var isAttendanceVisible by mutableStateOf(false)
+
   fun fetchMeeting() {
     viewModelScope.launch {
       val response = getMeetingByID(meetingId)
       response.let { meeting = it }
     }
   }
-  
+
   fun fetchProtocol() {
     viewModelScope.launch {
       val response = getProtocolsApi(meetingId)
@@ -57,7 +57,7 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
       response.let { protocols = it }
     }
   }
-  
+
   fun fetchVotings() {
     viewModelScope.launch {
       val response = getVotings(meetingId)
@@ -86,7 +86,7 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
       }
     }
   }
-  
+
   suspend fun planAttendance(status: PlanAttendance) {
     if(putPlanAttendance(meetingId, status)){
       var updatedStatus = AttendanceStatus.valueOf(status.name)
@@ -113,7 +113,7 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
     }
   }
 
-  
+
   init {
     fetchMeeting()
     fetchAttendance()

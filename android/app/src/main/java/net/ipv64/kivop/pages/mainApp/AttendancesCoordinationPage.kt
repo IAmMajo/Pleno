@@ -153,14 +153,14 @@ fun AttendancesCoordinationPage(
           }
           SpacerBetweenElements()
         }
-        item { 
+        item {
           Text(text = "Agenda")
           SpacerBetweenElements()
           meetingViewModel.meeting?.let { AgendaCard(name = meetingViewModel.meeting!!.name, content = it.description) }
           SpacerBetweenElements()
         }
 
-       
+
         item{
           //      TODO: FINISH THIS
           Text(text = "Votings")
@@ -192,13 +192,13 @@ fun AttendancesCoordinationPage(
                 Log.d("test", e.message.toString())
                 Log.d("test", voting.question)
               }
-              IconTextField(votingData.title, ImageVector.vectorResource(R.drawable.ic_pie_chart), onClick ={
+              IconTextField(text = votingData.title, icon = ImageVector.vectorResource(R.drawable.ic_pie_chart), onClick ={
                 navController.navigate("abstimmung/${voting.id}")
-                
+
               }
               )
               {
-               
+
               }
             }
           }
@@ -208,10 +208,10 @@ fun AttendancesCoordinationPage(
         item {
           Text(text = "Protokoll")
           SpacerBetweenElements()
-          meetingViewModel.protocols.forEach { protocol -> 
+          meetingViewModel.protocols.forEach { protocol ->
             meetingViewModel.meeting?.let {
               ListenItem(
-                itemListData = it, 
+                itemListData = it,
                 onClick = {
                   navController.navigate("protokolle/${it.id}/${protocol.lang}")
                 },
@@ -221,12 +221,12 @@ fun AttendancesCoordinationPage(
             SpacerBetweenElements()
           }
         }
-        
-        
+
+
       }
     }
   }
-  
+
 }
           
         

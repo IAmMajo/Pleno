@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -60,12 +61,13 @@ fun IconTextField(
       .background(Background_secondary, shape = RoundedCornerShape(8.dp))
       .clickable(onClick = onClick)
       .padding(10.dp),
-  ){
+  ) {
     Row(
       modifier =
       Modifier.fillMaxWidth(),
 
-      verticalAlignment = Alignment.CenterVertically) {
+      verticalAlignment = Alignment.CenterVertically
+    ) {
       IconBoxClickable(
         icon = icon,
         height = 50.dp,
@@ -98,7 +100,8 @@ fun IconTextField(
             Row(
               modifier = Modifier.fillMaxWidth(),
               verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.Start) {
+              horizontalArrangement = Arrangement.Start
+            ) {
               Box(modifier = Modifier.weight(1f)) {
                 if (newText.isEmpty()) {
                   Text(
@@ -106,7 +109,8 @@ fun IconTextField(
                     color = Text_prime.copy(0.7f),
                     style = MaterialTheme.typography.headlineMedium,
                     maxLines = 1,
-                    modifier = Modifier.fillMaxWidth())
+                    modifier = Modifier.fillMaxWidth()
+                  )
                 }
                 Box(modifier = Modifier.fillMaxWidth().zIndex(2f)) { innerTextField() }
               }
@@ -126,9 +130,13 @@ fun IconTextField(
     }
   }
 }
+  
+
 
 @Preview
 @Composable
 fun PreviewIconTextField() {
-  IconTextField()
+  IconTextField(
+    subText = "test asdas da asd ad ad ada as dasdas asdasdasd"
+  )
 }

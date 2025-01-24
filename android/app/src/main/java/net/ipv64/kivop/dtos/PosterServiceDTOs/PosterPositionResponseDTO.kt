@@ -8,12 +8,16 @@ data class PosterPositionResponseDTO (
     var posterId : UUID?,
     var latitude : Double,
     var longitude : Double,
-    var postedBy : UUID?,
+    var postedBy : String?,
     var postedAt : LocalDateTime?,
     var expiresAt : LocalDateTime,
-    var removedBy : UUID?,
+    var removedBy : String?,
     var removedAt : LocalDateTime?,
-    var imageUrl : String?,
-    var responsibleUsers : List<UUID>,
+    var image : String?,
+    var responsibleUsers : List<ResponsibleUsersDTO>,
     var status : String,
+)
+data class ResponsibleUsersDTO (
+    var id : UUID,
+    var name : String,
 )

@@ -13,7 +13,7 @@ val Text_prime = Color(0xff373434)
 val Text_secondary = Color(0xFF43578A)
 val Text_tertiary = Color(0xFF404445)
 // Text colors light
-val Text_prime_light = Color(0xFFF7FBFC)
+val Text_prime_light = Color(0xFFF7FBFC) // = Background_prime
 val Text_secondary_light = Color(0xFFE4EAEC)
 
 // Background colors
@@ -26,4 +26,6 @@ val Checkbox_background = Color(0xFFD4D7DB)
 // signal colors
 val Signal_blue = Color(0xFF1061DA) // das ist Tertiary - TODO: austauschen
 val Signal_red = Color(0xFFDA1043)
+val Signal_red_20 = Color(0x33da1043)
 val Signal_neutral = Color(0xFF686D74)
+val Signal_neutral_20 = Color(0x33686d74)
