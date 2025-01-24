@@ -2,6 +2,7 @@ import Fluent
 import Vapor
 import Models
 import MeetingServiceDTOs
+import AIServiceDTOs
 import SwiftOpenAPI
 
 struct RecordController: RouteCollection {
@@ -194,7 +195,7 @@ struct RecordController: RouteCollection {
         }
         let identityId = try await Identity.byUserId(userId, req.db).requireID()
         guard isAdmin else {
-            throw Abort(.forbidden, reason: "You are not allowed to approve this record.")
+            throw Abort(.forbidden, reason: "You are not allowed to translate this record.")
         }
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
@@ -212,10 +213,14 @@ struct RecordController: RouteCollection {
             throw Abort(.conflict, reason: "Cannot create a new, translated record, since there is already one for the language '\(lang2)'.")
         }
         
-        let translatedRecord = Record(id: try .init(meeting: meeting, lang: lang2), identityId: identityId, status: .underway, content: record.content)
+        guard let aiServiceResponse: AISendMessageDTO = try? await req.client.post("http://ai-service/internal/translate-record/\(lang)/\(lang2)", content: AISendMessageDTO(content: record.content)).content.decode(AISendMessageDTO.self) else {
+            throw Abort(.serviceUnavailable, reason: "Failed to contact the AI service.")
+        }
+        
+        let translatedRecord = Record(id: try .init(meeting: meeting, lang: lang2), identityId: identityId, status: .underway, content: aiServiceResponse.content)
         
         try await translatedRecord.create(on: req.db)
-        try await record.$identity.load(on: req.db)
-        return try await record.toGetRecordDTO(db: req.db)
+        try await translatedRecord.$identity.load(on: req.db)
+        return try await translatedRecord.toGetRecordDTO(db: req.db)
     }
 }
