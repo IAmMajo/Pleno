@@ -59,12 +59,27 @@ struct PosterController: RouteCollection, Sendable {
     func boot(routes: RoutesBuilder) throws {
         let openAPITagPoster = TagObject(name: "Poster")
         
+        // GET /posters/summary
         routes.get("summary", use: getPostersSummary)
             .openAPI(
                 tags: openAPITagPoster,
-                summary: "Anzahl der verschiedenen PosterPositionen Staten abfragen",
+                summary: "Anzahl der verschiedenen PosterPosition-Status aller Poster abfragen",
                 description: """
-                            Diese Route gibt die Staten hangs, toHang, overdue und takenDown als numerische Werte zurück.
+                            Diese Route gibt die Anzahl der Status _hangs_, _toHang_, _overdue_ und _takenDown_ als numerische Werte zurück.
+                            """,
+                body: nil,
+                response: .type(PosterSummaryResponseDTO.self),
+                responseContentType: .application(.json),
+                auth: .bearer()
+            )
+        
+        // GET /posters/{id}/summary
+        routes.get(":id", "summary", use: getPosterSummary)
+            .openAPI(
+                tags: openAPITagPoster,
+                summary: "Anzahl der verschiedenen PosterPosition-Status eines Posters abfragen",
+                description: """
+                            Diese Route gibt die Anzahl der Status _hangs_, _toHang_, _overdue_ und _takenDown_ als numerische Werte zurück.
                             """,
                 body: nil,
                 response: .type(PosterSummaryResponseDTO.self),
@@ -287,41 +302,64 @@ struct PosterController: RouteCollection, Sendable {
         }
     }
     
-    /// Überblicks-Statistiken über PosterPositionen zurückgeben.
+    /// Überblicks-Statistiken über alle PosterPositionen zurückgeben.
     @Sendable
     func getPostersSummary(_ req: Request) async throws -> PosterSummaryResponseDTO {
-        let currentDate = Date()
+        try await calculatePosterSummary(for: PosterPosition.query(on: req.db))
+    }
+    
+    /// Überblicks-Statistiken über PosterPositionen eines Poster zurückgeben.
+    @Sendable
+    func getPosterSummary(_ req: Request) async throws -> PosterSummaryResponseDTO {
+        guard let poster = try await Poster.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        return try await calculatePosterSummary(for: poster.$positions.query(on: req.db))
+    }
+    
+    /// Überblicks-Statistiken über PosterPositionen zurückgeben.
+    @Sendable
+    func calculatePosterSummary(for queryBuilder: QueryBuilder<PosterPosition>) async throws -> PosterSummaryResponseDTO {
+        let currentDate = Date.now
         
         // 1. "hangs": posted_by != nil && removed_by == nil
-        let hangsCount = try await PosterPosition.query(on: req.db)
+        let hangsCount = try await queryBuilder
             .filter(\.$posted_by.$id != nil)
             .filter(\.$removed_by.$id == nil)
             .count()
         
         // 2. "toHang": posted_by == nil && expires_at > currentDate
-        let toHangCount = try await PosterPosition.query(on: req.db)
+        let toHangCount = try await queryBuilder
             .filter(\.$posted_by.$id == nil)
             .filter(\.$expires_at > currentDate)
             .count()
         
         // 3. "overdue": posted_by != nil && removed_by == nil && expires_at <= currentDate
-        let overdueCount = try await PosterPosition.query(on: req.db)
+        let overdueCount = try await queryBuilder
             .filter(\.$posted_by.$id != nil)
             .filter(\.$removed_by.$id == nil)
             .filter(\.$expires_at <= currentDate)
             .count()
         
         // 4. "takenDown": removed_by != nil
-        let takenDownCount = try await PosterPosition.query(on: req.db)
+        let takenDownCount = try await queryBuilder
             .filter(\.$removed_by.$id != nil)
             .count()
+        
+        // 5. nextTakeDownDate
+        let nextTakeDownDate: Date? = try await queryBuilder
+            .filter(\.$posted_by.$id != nil)
+            .filter(\.$removed_by.$id == nil)
+            .sort(\.$expires_at)
+            .first()?.expires_at
         
         // Zusammenbauen des DTO
         return PosterSummaryResponseDTO(
             hangs: hangsCount,
             toHang: toHangCount,
             overdue: overdueCount,
-            takenDown: takenDownCount
+            takenDown: takenDownCount,
+            nextTakeDown: nextTakeDownDate
         )
     }
     

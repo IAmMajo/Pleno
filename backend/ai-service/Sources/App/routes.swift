@@ -4,7 +4,7 @@ import VaporToOpenAPI
 import Models
 
 func routes(_ app: Application) throws {
-    try app.register(collection: AIController())
+    try app.grouped("ai").register(collection: AIController())
 
     try app.register(collection: WebhookController())
     try app.grouped("internal").register(collection: InternalController())

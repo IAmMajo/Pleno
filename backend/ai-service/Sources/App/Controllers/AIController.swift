@@ -4,8 +4,10 @@ import VaporToOpenAPI
 
 struct AIController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let ai = routes.grouped("ai")
-        ai.post("extend-record", use: extendRecord).openAPI(
+        let openAPITag = TagObject(name: "AI")
+        
+        routes.post("extend-record", use: extendRecord).openAPI(
+            tags: openAPITag,
             summary: "Protokoll erweitern",
             description:
                 "Konvertiert ein stichpunktartiges Sitzungsprotokoll in einen zusammenhängenden, gut formulierten " +
@@ -20,7 +22,8 @@ struct AIController: RouteCollection {
             responseContentType: .init(rawValue: "text/markdown"),
             responseDescription: "Erweitertes Protokoll"
         )
-        ai.post("generate-social-media-post", use: generateSocialMediaPost).openAPI(
+        routes.post("generate-social-media-post", use: generateSocialMediaPost).openAPI(
+            tags: openAPITag,
             summary: "Social Media Post generieren",
             description:
                 "Konvertiert ein Sitzungsprotokoll in einen kurzen, ansprechenden Social-Media-Beitrag.\n\nDie " +
