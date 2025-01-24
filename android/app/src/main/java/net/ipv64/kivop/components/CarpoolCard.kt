@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -22,7 +24,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter.ofPattern
 import java.util.UUID
 import net.ipv64.kivop.R
-import net.ipv64.kivop.models.GetSpecialRideDTO
+import net.ipv64.kivop.dtos.RideServiceDTOs.GetSpecialRideDTO
+import net.ipv64.kivop.dtos.RideServiceDTOs.UsersSpecialRideState
 import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
@@ -44,22 +47,45 @@ fun CarpoolCard(carpool: GetSpecialRideDTO, onClick: () -> Unit = {}) {
                 text = carpool.starts.format(ofPattern("dd.MM.yyyy")),
                 style = MaterialTheme.typography.bodyMedium)
           }
-          Box(
+          Row(
+            modifier = Modifier.align(alignment = Alignment.BottomEnd),
+          ) {
+            Box(
               modifier =
-                  Modifier.background(Primary.copy(0.2f), shape = RoundedCornerShape(4.dp))
-                      .padding(horizontal = 4.dp)
-                      .align(alignment = Alignment.BottomEnd)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                  Text(
-                      text = "${carpool.allocatedSeats}/${carpool.emptySeats} Plätze",
-                      color = Primary,
-                      style = MaterialTheme.typography.labelMedium)
-                  Icon(
-                      painter = painterResource(R.drawable.ic_person_24),
-                      contentDescription = "seats",
-                      tint = Primary)
-                }
+              Modifier
+                .height(20.dp)
+                .background(Primary.copy(0.2f), shape = RoundedCornerShape(4.dp))
+                .padding(horizontal = 4.dp)
+            ){
+              Row(
+                modifier = Modifier.fillMaxHeight(),
+                verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                  text = carpool.myState.toString(),
+                  color = Primary,
+                  style = MaterialTheme.typography.labelMedium)
               }
+            }
+            SpacerBetweenElements(4.dp)
+            Box(
+              modifier =
+              Modifier
+                .height(20.dp)
+                .background(Primary.copy(0.2f), shape = RoundedCornerShape(4.dp))
+                .padding(horizontal = 4.dp)
+            ){
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                  text = "${carpool.allocatedSeats}/${carpool.emptySeats} Plätze",
+                  color = Primary,
+                  style = MaterialTheme.typography.labelMedium)
+                Icon(
+                  painter = painterResource(R.drawable.ic_person_24),
+                  contentDescription = "seats",
+                  tint = Primary)
+              }
+            }
+          }
         }
       }
 }
@@ -71,37 +97,14 @@ fun previewCarpoolCard() {
     CarpoolCard(
         carpool =
             GetSpecialRideDTO(
-                id = UUID.randomUUID(),
-                name = "Geschäftsessen",
-                starts = LocalDateTime.now(),
-                ends = LocalDateTime.now(),
-                emptySeats = 4,
-                allocatedSeats = 1,
-                isSelfDriver = true,
-                isSelfAccepted = true))
-    SpacerBetweenElements()
-    CarpoolCard(
-        carpool =
-            GetSpecialRideDTO(
-                id = UUID.randomUUID(),
-                name = "Geschäftsessen",
-                starts = LocalDateTime.now(),
-                ends = LocalDateTime.now(),
-                emptySeats = 4,
-                allocatedSeats = 1,
-                isSelfDriver = true,
-                isSelfAccepted = true))
-    SpacerBetweenElements()
-    CarpoolCard(
-        carpool =
-            GetSpecialRideDTO(
-                id = UUID.randomUUID(),
-                name = "Geschäftsessen",
-                starts = LocalDateTime.now(),
-                ends = LocalDateTime.now(),
-                emptySeats = 4,
-                allocatedSeats = 1,
-                isSelfDriver = true,
-                isSelfAccepted = true))
+              id = UUID.randomUUID(),
+              name = "Geschäftsessen",
+              starts = LocalDateTime.now(),
+              ends = LocalDateTime.now(),
+              emptySeats = 3u,
+              allocatedSeats = 2u,
+              myState = UsersSpecialRideState.driver,
+            )
+    )
   }
 }

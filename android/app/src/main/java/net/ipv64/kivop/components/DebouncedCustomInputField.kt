@@ -48,14 +48,16 @@ fun DebouncedTextFieldCustomInputField(
     onDebouncedChange(value) // Call function after user stops typing
   }
   Column(modifier = modifier.fillMaxWidth()) {
-    Text(
+    if (label.isNotEmpty()){
+      Text(
         text = label,
         style = TextStyles.contentStyle,
         color = labelColor,
         modifier = Modifier.fillMaxWidth())
+      SpacerBetweenElements(4.dp)
+    }
     val visualTransformation =
       (if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None).also {
-        SpacerBetweenElements(4.dp)
         OutlinedTextField(
             visualTransformation = it,
             value = value,
