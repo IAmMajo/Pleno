@@ -1,19 +1,27 @@
-//
-//  settings.swift
-//  config-service
-//
-//  Created by Dennis Sept on 02.11.24.
-//
-
 import Fluent
 import Models
 
 struct CreateSetting: AsyncMigration {
     func prepare(on database: Database) async throws {
+       
+        let datatype = try await database.enum("datatype")
+            .case("Integer")
+            .case("String")
+            .case("languageCode")
+            .case("Float")
+            .case ("Boolean")
+            .case ("Date")
+            .case ("DateTime")
+            .case ("Time")
+            .case ("Binary")
+            .case ("Text")
+            .case ("JSON")
+            .create()
+        
         try await database.schema("settings")
             .id()
             .field("key", .string, .required)
-            .field("datatype", .string, .required)
+            .field("datatype", datatype, .required)
             .field("value", .string, .required)
             .field("description", .string)
             .create()
@@ -21,14 +29,8 @@ struct CreateSetting: AsyncMigration {
         // Initialdaten einfügen
         let settings = [
             Setting(
-                            key: "registration_enabled" ,
-                            datatype : Setting.DataType(rawValue: "Boolean")!,
-                            value: "true",
-                            description: "Die Einstellung aktiviert oder deaktiviert die neue Registrierung von Usern"
-                    ),
-            Setting(
                             key: "poster_deletion_interval",
-                            datatype: Setting.DataType(rawValue: "Integer")!,
+                            datatype: .integer,
                             value: "30",
                             description: "Das Intervall in Tagen, nach dem Poster automatisch gelöscht werden, falls sie bereits abgehangen wurden"
                     ),
@@ -44,6 +46,18 @@ struct CreateSetting: AsyncMigration {
                             value: "14",
                             description: "Das Intervall in Tagen, nachdem die zu abhängenden Poster angezeigt werden"
                     ),
+            Setting(
+                            key: "isRegistrationEnabled",
+                            datatype: .boolean,
+                            value: "false",
+                            description: "Enables or disables user registrations"
+                    ),
+            Setting(
+                            key: "languageCode",
+                            datatype: .languageCode,
+                            value: "de",
+                            description: "The language code used to define the default language of the application. For example: 'de' for German, 'en' for English"
+                    ),
             
             
         ]
@@ -54,6 +68,8 @@ struct CreateSetting: AsyncMigration {
         
     }
     func revert(on database: Database) async throws {
-        try await database.schema("settings").delete() 
+        try await database.schema("settings").delete()
+        try await database.enum("datatype").delete()
+
     }
 }

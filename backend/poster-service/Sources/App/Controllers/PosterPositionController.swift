@@ -19,7 +19,7 @@ struct PosterPositionController: RouteCollection, Sendable {
         let openAPITagPosterPosition = TagObject(name: "Poster Position")
         
         let positions = routes.grouped("positions")
-        
+       
         // PUT /posters/positions/:positionid/hang
         positions.on(.PUT, ":positionid", "hang", body: .collect(maxSize: "7000kb"), use: hangPosterPosition).openAPI(
             tags: openAPITagPosterPosition,
@@ -225,7 +225,7 @@ struct PosterPositionController: RouteCollection, Sendable {
         
         return try position.toPosterPositionResponseDTO()
     }
-    
+   
     /// Gibt alle Positionen zu einem Poster zurück.
     @Sendable
     func getPostersPositions(_ req: Request) async throws -> [PosterPositionResponseDTO] {

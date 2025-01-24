@@ -296,8 +296,7 @@ struct ConfigController: RouteCollection{
                     _ = try await req.client.send(webhookRequest)
                 } catch {
                     req.logger.error("Fehler beim Senden der Webhook-Benachrichtigung an \(webhookURL): \(error.localizedDescription)")
-                    // Fehler beim Senden der Webhook-Benachrichtigung werden geloggt, aber nicht geworfen.
-                    // So wird vermieden, dass das eigentliche Update fehlschlägt.
+                    
                 }
             }
         }
