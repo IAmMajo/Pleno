@@ -72,6 +72,7 @@ class PollAPI {
     // MARK: - Fetch Poll by ID
     func fetchPollById(pollId: UUID, completion: @escaping (Result<GetPollDTO, Error>) -> Void) {
         guard let url = URL(string: "https://kivop.ipv64.net/polls/\(pollId)") else {
+            print("❌ Fehler: Ungültige URL")
             completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
             return
         }
@@ -79,29 +80,59 @@ class PollAPI {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
+        print("📡 Anfrage senden an: \(url)")
+
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
+                print("❌ Netzwerkfehler: \(error.localizedDescription)")
                 completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("❌ Fehler: Keine HTTP-Response erhalten")
+                completion(.failure(NSError(domain: "Invalid Response", code: 500, userInfo: nil)))
+                return
+            }
+
+            print("🔍 HTTP-Statuscode: \(httpResponse.statusCode)")
+
+            guard (200...299).contains(httpResponse.statusCode) else {
+                print("❌ Fehler: Unerwarteter Statuscode \(httpResponse.statusCode)")
+                completion(.failure(NSError(domain: "HTTP Error", code: httpResponse.statusCode, userInfo: nil)))
                 return
             }
 
             guard let data = data else {
+                print("❌ Fehler: Keine Daten empfangen")
                 completion(.failure(NSError(domain: "No data received", code: 500, userInfo: nil)))
                 return
             }
 
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("📥 Empfangene JSON-Daten: \(jsonString)")
+            } else {
+                print("❌ Fehler: Daten konnten nicht in String umgewandelt werden")
+            }
+
             do {
-                let poll = try JSONDecoder().decode(GetPollDTO.self, from: data)
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let poll = try decoder.decode(GetPollDTO.self, from: data)
+                print("✅ Erfolgreich dekodiert: \(poll)")
                 completion(.success(poll))
             } catch {
+                print("❌ Allgemeiner Dekodierungsfehler: \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }.resume()
     }
+
 
     func fetchPollResultsById(pollId: UUID, completion: @escaping (Result<GetPollResultsDTO, Error>) -> Void) {
         guard let url = URL(string: "https://kivop.ipv64.net/polls/\(pollId)/results") else {

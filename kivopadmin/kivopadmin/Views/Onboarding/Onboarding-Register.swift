@@ -6,7 +6,7 @@ struct Onboarding_Register: View {
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
-    
+
     @State private var passwordValidationMessage: String = ""
     @State private var confirmPasswordMessage: String = ""
     
@@ -27,7 +27,7 @@ struct Onboarding_Register: View {
                     .fontWeight(.bold)
                     .padding(.bottom, 40)
                     .padding(.top, 40)
-                
+
                 profileImageSection()
 
                 inputField(title: "Name", text: $name)
@@ -35,74 +35,27 @@ struct Onboarding_Register: View {
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
-                
-                // Passwort-Eingabefeld mit Live-Feedback
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("PASSWORT")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .padding(.horizontal, 5)
 
-                    ZStack(alignment: .trailing) {
-                        SecureField("Neues Passwort", text: $password)
-                            .onChange(of: password) {
-                                    validatePassword()
-                                }
-                            .padding()
-                            .background(Color(UIColor.systemBackground))
-                            .cornerRadius(10)
-                        
-                        Text(passwordValidationMessage)
-                            .font(.caption)
-                            .foregroundColor(passwordValidationMessage == "✔︎" ? .green : .red)
-                            .padding(.trailing, 10)
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 10)
-
-                // Passwort-Wiederholung mit Live-Feedback
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("PASSWORT WIEDERHOLEN")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .padding(.horizontal, 5)
-
-                    ZStack(alignment: .trailing) {
-                        SecureField("Passwort wiederholen", text: $confirmPassword)
-                            .onChange(of: confirmPassword) { oldValue, newValue in
-                                    print("Altes Passwort: \(oldValue), Neues Passwort: \(newValue)")
-                                    validateConfirmPassword()
-                                }
-                            .padding()
-                            .background(Color(UIColor.systemBackground))
-                            .cornerRadius(10)
-
-                        Text(confirmPasswordMessage)
-                            .font(.caption)
-                            .foregroundColor(confirmPasswordMessage == "✔︎" ? .green : .red)
-                            .padding(.trailing, 10)
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 20)
+                passwordField()
+                confirmPasswordField()
 
                 Spacer()
 
-                // Registrieren Button
                 Button(action: {
                     showPrivacyPolicy.toggle()
                 }) {
                     if isLoading {
                         ProgressView()
-                            .frame(maxWidth: .infinity, maxHeight: 44)
+                            .frame(height: 44)
+                            .frame(maxWidth: .infinity)
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     } else {
                         Text("Registrieren")
                             .foregroundColor(.white)
-                            .frame(maxWidth: .infinity, maxHeight: 44)
+                            .frame(height: 44)
+                            .frame(maxWidth: .infinity)
                             .background(Color.blue)
                             .cornerRadius(10)
                             .fontWeight(.bold)
@@ -110,12 +63,13 @@ struct Onboarding_Register: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 10)
-                .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty || passwordValidationMessage != "✔︎" || confirmPasswordMessage != "✔︎")
-                
+                .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty || !passwordValidationMessage.isEmpty || !confirmPasswordMessage.isEmpty)
+
                 NavigationLink(destination: Onboarding_Login(isLoggedIn: $isLoggedIn)) {
                     Text("Zurück zum Login")
                         .foregroundColor(.blue)
-                        .frame(maxWidth: .infinity, maxHeight: 44)
+                        .frame(height: 44)
+                        .frame(maxWidth: .infinity)
                         .background(Color(UIColor.systemGray5))
                         .cornerRadius(10)
                         .fontWeight(.bold)
@@ -137,41 +91,93 @@ struct Onboarding_Register: View {
                     }
                 )
             }
+            .navigationDestination(isPresented: $navigateToWaitingView) {
+                Onboarding_Wait(email: $email)
+            }
         }
     }
-    
-    // Live-Validierung des Passworts
+
+    private func passwordField() -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text("PASSWORT")
+                .font(.caption)
+                .foregroundColor(.gray)
+                .padding(.horizontal, 5)
+
+            SecureField("Neues Passwort", text: $password)
+                .onChange(of: password) {
+                    validatePassword()
+                }
+                .padding()
+                .background(Color(UIColor.systemBackground))
+                .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(password.isEmpty ? Color.clear : (passwordValidationMessage.isEmpty ? Color.green : Color.red), lineWidth: 2)
+                )
+
+            if !password.isEmpty && !passwordValidationMessage.isEmpty {
+                Text(passwordValidationMessage)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding(.horizontal, 5)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 10)
+    }
+
+    private func confirmPasswordField() -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text("PASSWORT WIEDERHOLEN")
+                .font(.caption)
+                .foregroundColor(.gray)
+                .padding(.horizontal, 5)
+
+            SecureField("Passwort wiederholen", text: $confirmPassword)
+                .onChange(of: confirmPassword) {
+                    validateConfirmPassword()
+                }
+                .padding()
+                .background(Color(UIColor.systemBackground))
+                .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(confirmPassword.isEmpty ? Color.clear : (confirmPasswordMessage.isEmpty ? Color.green : Color.red), lineWidth: 2)
+                )
+
+            if !confirmPassword.isEmpty && !confirmPasswordMessage.isEmpty {
+                Text(confirmPasswordMessage)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding(.horizontal, 5)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 10)
+    }
+
     private func validatePassword() {
         let passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$"
         let predicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
-        
-        if password.isEmpty {
+
+        if predicate.evaluate(with: password) {
             passwordValidationMessage = ""
-        } else if predicate.evaluate(with: password) {
-            passwordValidationMessage = "✔︎"
         } else {
-            passwordValidationMessage = "Passwort zu schwach"
+            passwordValidationMessage = "Mind. 8 Zeichen, 1 Zahl, 1 Sonderzeichen."
         }
     }
-    
-    // Live-Validierung der Passwort-Bestätigung
+
     private func validateConfirmPassword() {
-        if confirmPassword.isEmpty {
+        if confirmPassword == password {
             confirmPasswordMessage = ""
-        } else if confirmPassword == password {
-            confirmPasswordMessage = "✔︎"
         } else {
-            confirmPasswordMessage = "Nicht identisch"
+            confirmPasswordMessage = "Passwörter stimmen nicht überein."
         }
     }
-    
+
     private func registerUser() {
         isLoading = true
-
-        guard passwordValidationMessage == "✔︎", confirmPasswordMessage == "✔︎" else {
-            isLoading = false
-            return
-        }
 
         let registrationDTO = UserRegistrationDTO(
             name: name,
@@ -237,6 +243,7 @@ struct Onboarding_Register: View {
         }
     }
 }
+
 
 
 

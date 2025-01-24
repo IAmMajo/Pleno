@@ -51,7 +51,7 @@ struct CreatePollView: View {
 
                 Section(header: Text("Optionen")) {
                     Toggle("Mehrfachauswahl erlauben", isOn: $allowsMultipleSelections)
-                    Toggle("Anonymisierung aktivieren", isOn: $isAnonymous)
+                    Toggle("Anonyme Umfrage", isOn: $isAnonymous)
                 }
 
                 Section(header: Text("Abschlusszeit")) {
