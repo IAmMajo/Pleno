@@ -18,12 +18,12 @@ public func configure(_ app: Application) async throws {
         database: Environment.get("DATABASE_NAME") ?? "kivop",
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
-    // Migrationen
-    
+
+    // migrations
     app.migrations.add(CreateService())
     app.migrations.add(CreateSetting())
     app.migrations.add(CreateServiceSetting())
-    // Migrationen ausführen
+    try await app.autoMigrate()
     
     try routes(app)
    

@@ -36,11 +36,13 @@ public func configure(_ app: Application) async throws {
         }
     }
 
+    // migrations
     app.migrations.add(CreateIdentity())
     app.migrations.add(CreateUser())
     app.migrations.add(CreateIdentityHistory())
     app.migrations.add(CreateEmailVerification())
     app.migrations.add(CreatePasswordResetToken())
+    try await app.autoMigrate()
     
     app.jwt.signers.use(.hs256(key: "Ganzgeheimespasswort"))
     

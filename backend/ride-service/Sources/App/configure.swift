@@ -43,6 +43,8 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateSpecialRide())
     app.migrations.add(CreateSpecialRideRequest())
     
+    try await app.autoMigrate()
+    
     app.jwt.signers.use(.hs256(key: "Ganzgeheimespasswort"))
     
     // register routes

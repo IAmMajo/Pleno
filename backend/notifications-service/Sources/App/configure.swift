@@ -41,7 +41,9 @@ public func configure(_ app: Application) async throws {
         }
     }
     
+    // migrations
     app.migrations.add(CreateNotificationDevice())
+    try await app.autoMigrate()
     
     app.jwt.signers.use(.hs256(key: "Ganzgeheimespasswort"))
     

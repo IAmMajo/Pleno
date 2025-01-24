@@ -36,7 +36,7 @@ public func configure(_ app: Application) async throws {
         }
     }
 
-//    app.migrations.add(CreateTodo())
+    // migrations
     app.migrations.add(CreatePlace())
     app.migrations.add(CreateLocation())
     app.migrations.add(CreateMeeting())
@@ -45,6 +45,8 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateVoting())
     app.migrations.add(CreateVotingOption())
     app.migrations.add(CreateVote())
+    try await app.autoMigrate()
+    
     // register routes
     try routes(app)
 }
