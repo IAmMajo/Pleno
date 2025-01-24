@@ -12,7 +12,7 @@ import net.ipv64.kivop.dtos.RideServiceDTOs.CreateSpecialRideDTO
 import net.ipv64.kivop.dtos.RideServiceDTOs.GetRiderDTO
 import net.ipv64.kivop.dtos.RideServiceDTOs.GetSpecialRideDTO
 import net.ipv64.kivop.dtos.RideServiceDTOs.GetSpecialRideDetailDTO
-import net.ipv64.kivop.dtos.RideServiceDTOs.UsersSpecialRideState
+import net.ipv64.kivop.dtos.RideServiceDTOs.UsersRideState
 import net.ipv64.kivop.models.PlanAttendance
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
@@ -43,16 +43,17 @@ suspend fun getCarpoolingListApi(): List<GetSpecialRideDTO> =
             val meetingsArray = Gson().fromJson(responseBody, JsonArray::class.java)
             meetingsArray.map { element ->
               val meeting = element.asJsonObject
-              val id = meeting.get("id").asString.let { UUID.fromString(it) }
+              val id = meeting.get("id")?.asString.let { UUID.fromString(it) }
               val name = meeting.get("name").asString
               val starts = meeting.get("starts").asString.let { stringToLocalDateTime(it) }
               val ends = meeting.get("ends").asString.let { stringToLocalDateTime(it) }
               val emptySeats = meeting.get("emptySeats").asInt.toUByte()
               val allocatedSeats = meeting.get("allocatedSeats").asInt.toUByte()
-              val myState = meeting.get("myState").asString.let { UsersSpecialRideState.valueOf(it) }
+              val myState = meeting.get("myState").asString.let { UsersRideState.valueOf(it) }
+              val openRequests = meeting.get("openRequests")?.asInt 
 
               GetSpecialRideDTO(
-                  id, name, starts, ends, emptySeats, allocatedSeats, myState)
+                  id, name, starts, ends, emptySeats, allocatedSeats, myState, openRequests)
             }
           } else {
             println("Fehler: Leere Antwort erhalten.")
@@ -90,6 +91,7 @@ suspend fun getCarpoolApi(id: String): GetSpecialRideDetailDTO? =
             GetSpecialRideDetailDTO(
               id = jsonObject.get("id").asString.let { UUID.fromString(it) },
               driverName = jsonObject.get("driverName").asString,
+              driverID = jsonObject.get("id").asString.let { UUID.fromString(it) },
               isSelfDriver = jsonObject.get("isSelfDriver").asBoolean,
               name = jsonObject.get("name").asString,
               description = jsonObject.get("description")?.asString,

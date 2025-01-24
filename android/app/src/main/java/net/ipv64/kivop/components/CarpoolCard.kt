@@ -25,7 +25,7 @@ import java.time.format.DateTimeFormatter.ofPattern
 import java.util.UUID
 import net.ipv64.kivop.R
 import net.ipv64.kivop.dtos.RideServiceDTOs.GetSpecialRideDTO
-import net.ipv64.kivop.dtos.RideServiceDTOs.UsersSpecialRideState
+import net.ipv64.kivop.dtos.RideServiceDTOs.UsersRideState
 import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
@@ -50,6 +50,25 @@ fun CarpoolCard(carpool: GetSpecialRideDTO, onClick: () -> Unit = {}) {
           Row(
             modifier = Modifier.align(alignment = Alignment.BottomEnd),
           ) {
+            if (carpool.openRequests != null && carpool.myState == UsersRideState.driver) {
+              Box(
+                modifier =
+                Modifier
+                  .height(20.dp)
+                  .background(Primary.copy(0.2f), shape = RoundedCornerShape(4.dp))
+                  .padding(horizontal = 4.dp)
+              ){
+                Row(
+                  modifier = Modifier.fillMaxHeight(),
+                  verticalAlignment = Alignment.CenterVertically) {
+                  Text(
+                    text = carpool.openRequests.toString(),
+                    color = Primary,
+                    style = MaterialTheme.typography.labelMedium)
+                }
+              }
+              SpacerBetweenElements(4.dp)
+            }
             Box(
               modifier =
               Modifier
@@ -103,7 +122,8 @@ fun previewCarpoolCard() {
               ends = LocalDateTime.now(),
               emptySeats = 3u,
               allocatedSeats = 2u,
-              myState = UsersSpecialRideState.driver,
+              myState = UsersRideState.driver,
+              openRequests = 3,
             )
     )
   }

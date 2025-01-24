@@ -18,6 +18,8 @@ import net.ipv64.kivop.components.CarpoolCard
 import net.ipv64.kivop.components.CustomButton
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
+import net.ipv64.kivop.models.ButtonStyle
+import net.ipv64.kivop.models.primaryButtonStyle
 import net.ipv64.kivop.models.viewModel.CarpoolingListViewModel
 
 @Composable
@@ -49,6 +51,7 @@ fun CarpoolingList(
     CustomButton(
       modifier = Modifier,
       text = "Erstellen",
+      buttonStyle = primaryButtonStyle,
       onClick = { navController.navigate("createCarpool") }
     )
   }
