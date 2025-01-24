@@ -216,6 +216,17 @@ struct UserController: RouteCollection {
                 user.profileImage = newProfileImage
             }
             
+            if let newIsNotificationsActive = update.isNotificationsActive {
+                user.isNotificationsActive = newIsNotificationsActive
+            }
+            
+            if let newIsPushNotificationsActive = update.isPushNotificationsActive {
+                guard user.isNotificationsActive == true else {
+                    throw Abort(.forbidden, reason: "Notifications are disabled.")
+                }
+                user.isPushNotificationsActive = newIsPushNotificationsActive
+            }
+            
             if updatedIdentity.hasChanges {
                 try await updatedIdentity.create(on: db)
                 let identityID = try updatedIdentity.requireID()
@@ -286,7 +297,9 @@ struct UserController: RouteCollection {
             isAdmin: user.isAdmin,
             isActive: user.isActive,
             emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue),
-            createdAt: user.createdAt
+            createdAt: user.createdAt,
+            isNotificationsActive: user.isNotificationsActive,
+            isPushNotificationsActive: user.isPushNotificationsActive
         )
         return response
     }
@@ -334,6 +347,9 @@ struct UserController: RouteCollection {
             user.isActive = true
         }
         
+        user.isNotificationsActive = true
+        user.isPushNotificationsActive = false
+        
         // save user in database
         try await user.save(on: req.db)
         
@@ -353,7 +369,9 @@ struct UserController: RouteCollection {
             profileImage: user.profileImage,
             isAdmin: user.isAdmin,
             isActive: user.isActive,
-            createdAt: user.createdAt
+            createdAt: user.createdAt,
+            isNotificationsActive: user.isNotificationsActive,
+            isPushNotificationsActive: user.isPushNotificationsActive
         )
         
         let verificationCode = String(format: "%06d", Int.random(in: 0...999999))
@@ -483,7 +501,9 @@ struct UserController: RouteCollection {
                 isAdmin: user.isAdmin,
                 isActive: user.isActive,
                 emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue),
-                createdAt: user.createdAt
+                createdAt: user.createdAt,
+                isNotificationsActive: user.isNotificationsActive,
+                isPushNotificationsActive: user.isPushNotificationsActive
             )
             userProfiles.append(profileDTO)
         }
@@ -522,7 +542,9 @@ struct UserController: RouteCollection {
             isAdmin: user.isAdmin,
             isActive: user.isActive,
             emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue),
-            createdAt: user.createdAt
+            createdAt: user.createdAt,
+            isNotificationsActive: user.isNotificationsActive,
+            isPushNotificationsActive: user.isPushNotificationsActive
         )
     }
     
