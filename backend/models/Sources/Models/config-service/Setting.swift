@@ -1,9 +1,3 @@
-//
-//  settings.swift
-//  config-service
-//
-//  Created by Dennis Sept on 30.10.24.
-//
 import Fluent
 import Foundation
 
@@ -43,6 +37,7 @@ public final class Setting: Model, @unchecked Sendable {
     public enum DataType: String, Codable, CaseIterable, Sendable {
         case integer = "Integer"
         case string = "String"
+        case languageCode = "languageCode"
         case float = "Float"
         case boolean = "Boolean"
         case date = "Date"
