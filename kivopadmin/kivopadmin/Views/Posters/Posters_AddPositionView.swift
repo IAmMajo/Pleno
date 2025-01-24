@@ -338,9 +338,9 @@ struct Posters_AddPositionView: View {
         .sheet(item: $selectedPosterPosition) { position in
             PosterDetailsView(position: position) // Deine View für Details
         }
-        .sheet(isPresented: $showUserSelectionSheet) {
-            UserSelectionSheet(users: userManager.users, selectedUsers: $selectedUsers)
-        }
+//        .sheet(isPresented: $showUserSelectionSheet) {
+//            UserSelectionSheet(users: userManager.users, selectedUsers: $selectedUsers, s)
+//        }
         .onAppear {
             // Benutzer laden, wenn die View erscheint
             userManager.fetchUsers()
@@ -448,78 +448,6 @@ struct PosterDetailsView: View {
             // Weitere Detailinformationen anzeigen
         }
         .padding()
-    }
-}
-
-struct UserSelectionSheet: View {
-    var users: [UserProfileDTO]
-    @Binding var selectedUsers: [UUID]
-    @State private var searchText: String = ""
-    
-    @ObservedObject var userManager = UserManager()
-
-    var body: some View {
-        NavigationStack {
-            List {
-                ForEach(filteredUsers, id: \.email) { user in
-                    HStack {
-                        Text(user.name ?? "Unbekannter Name") // Fallback, falls name nil ist
-                        Spacer()
-                        if let uid = user.uid, selectedUsers.contains(uid) {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(.blue)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        toggleSelection(for: user)
-                    }
-                }
-            }
-            .navigationTitle("Benutzer auswählen")
-            .searchable(text: $searchText)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Fertig") {
-                        print(userManager.users)
-                        dismiss()
-                    }
-                }
-            }
-        }
-        .onAppear(){
-            userManager.fetchUsers()
-        }
-    }
-
-    private var filteredUsers: [UserProfileDTO] {
-        if searchText.isEmpty {
-            return userManager.users
-        } else {
-            return userManager.users.filter { user in
-                if let name = user.name {
-                    return name.localizedCaseInsensitiveContains(searchText)
-                }
-                return false
-            }
-        }
-    }
-
-    private func toggleSelection(for user: UserProfileDTO) {
-        if let uid = user.uid {
-            if let index = selectedUsers.firstIndex(of: uid) {
-                selectedUsers.remove(at: index)
-            } else {
-                selectedUsers.append(uid)
-            }
-        }
-    }
-
-    private func dismiss() {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first?.rootViewController {
-            rootVC.dismiss(animated: true, completion: nil)
-        }
     }
 }
 

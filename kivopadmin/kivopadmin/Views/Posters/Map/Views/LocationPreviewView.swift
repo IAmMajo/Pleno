@@ -22,7 +22,7 @@ struct LocationPreviewView: View {
                 buttonsSection
             }
             .padding(20)
-            .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThinMaterial))
+            .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThickMaterial))
             .cornerRadius(10)
             HStack{
                 backButton.offset(x: -35, y: -75)

@@ -19,9 +19,12 @@ struct LocationsView: View {
     @State private var isSearchActive = false
     @State private var searchText = ""
     @State private var showMenu = false
+    @State private var expiresAt: Date = Date()
+    @State private var selectedUsers: [UUID] = []
+    @State private var showUserSelectionSheet = false
     private var filterOptions = ["toHang", "hangs", "overdue", "takenDown"]
 
-
+    @ObservedObject var userManager = UserManager()
 
     var poster: PosterResponseDTO
     let maxWidth: CGFloat = 700
@@ -34,90 +37,104 @@ struct LocationsView: View {
         ZStack {
             mapLayer
                 .ignoresSafeArea()
-            //if let selectedPosition = locationViewModel.selectedPosterPosition {
-                VStack {
-                    HStack(alignment: .top){
-                        VStack{
-                            filterButton
-                            if showMenu{
-                                filterMenu
-                            }
+            if locationViewModel.isEditing{
+                editingView
+            }
+            VStack {
+                HStack(alignment: .top){
+                    VStack{
+                        filterButton
+                        if showMenu{
+                            filterMenu
                         }
+                    }
 
-                        // Zeige die Adresse oder lade sie asynchron
-                        VStack{
+                    // Zeige die Adresse oder lade sie asynchron
+                    VStack{
 
-                            if isSearchActive {  // Wenn die Suche aktiv ist, zeigt das Textfeld an
-                                ZStack{
-                                    TextField("Suche Adresse", text: $searchText, onCommit: {
-                                        performSearch()
-                                    })
-                                    .padding()
-                                    .background(.thickMaterial).cornerRadius(10).shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 15)// Undurchsichtiger Hintergrund
-                                    .foregroundColor(.primary)
-                                    .padding()
-                                    HStack {
-                                        Spacer()
-                                        Button(action: performSearch) {
-                                            Image(systemName: "magnifyingglass")
-                                                .padding()
-                                        }.padding(.trailing, 20)
-                                    }
-                                }.frame(maxWidth: maxWidth)
-
-                            } else {
-                                VStack{
-                                    Button(action: locationViewModel.toggleLocationsList){
-                                        Text(locationViewModel.selectedPosterPosition?.address ?? "Wählen Sie eine Position aus").foregroundColor(.primary).frame(height: 55).frame(maxWidth: .infinity)
-                                            .overlay(alignment: .leading){
-                                                Image(systemName: "arrow.down").font(.headline).foregroundColor(.primary).padding().rotationEffect(Angle(degrees: locationViewModel.showLocationsList ? 180 : 0))
-                                        }
-                                    }
-
-                                    if locationViewModel.showLocationsList{
-                                        LocationsListView()
-                                    }
-
-                                    
-                                }.background(.thickMaterial).cornerRadius(10).shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 15)
+                        if isSearchActive {  // Wenn die Suche aktiv ist, zeigt das Textfeld an
+                            ZStack{
+                                TextField("Suche Adresse", text: $searchText, onCommit: {
+                                    performSearch()
+                                })
                                 .padding()
-                                .frame(maxWidth: maxWidth)
-                            }
-                        }
+                                .background(.thickMaterial).cornerRadius(10).shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 15)// Undurchsichtiger Hintergrund
+                                .foregroundColor(.primary)
+                                .padding()
+                                HStack {
+                                    Spacer()
+                                    Button(action: performSearch) {
+                                        Image(systemName: "magnifyingglass")
+                                            .padding()
+                                    }.padding(.trailing, 20)
+                                }
+                            }.frame(maxWidth: maxWidth)
 
-                        searchButton
+                        } else {
+                            VStack{
+                                Button(action: {
+                                    locationViewModel.toggleLocationsList()
+                                    withAnimation {
+                                        locationViewModel.isEditing = false
+                                    }
+                                }){
+                                    Text(locationViewModel.selectedPosterPosition?.address ?? "Wählen Sie eine Position aus").foregroundColor(.primary).frame(height: 55).frame(maxWidth: .infinity)
+                                        .overlay(alignment: .leading){
+                                            Image(systemName: "arrow.down").font(.headline).foregroundColor(.primary).padding().rotationEffect(Angle(degrees: locationViewModel.showLocationsList ? 180 : 0))
+                                    }
+                                }
+
+                                if locationViewModel.showLocationsList{
+                                    LocationsListView()
+                                }
+
+                                
+                            }.background(.thickMaterial).cornerRadius(10).shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 15)
+                            .padding()
+                            .frame(maxWidth: maxWidth)
+                        }
                     }
 
-                        
-                    
-                    Spacer()
-                    
+                    searchButton
 
-                    HStack{
-                        ForEach(locationViewModel.posterPositionsWithAddresses, id: \.position.id){ position in
-                            if locationViewModel.selectedPosterPosition == position {
-                                LocationPreviewView(position: position)
-                                    .shadow(color: Color.black.opacity(0.32), radius: 20)
-                                    .padding()
-                                    .frame(maxWidth: maxWidth)
-                                    .frame(maxWidth: .infinity)
-                                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                            }
-                            
-                            
-                        }
-                        
-                    }
+                    editButton
 
                     
                 }
-            //}
+
+                    
+                
+                Spacer()
+                
+
+                HStack{
+                    ForEach(locationViewModel.posterPositionsWithAddresses, id: \.position.id){ position in
+                        if locationViewModel.selectedPosterPosition == position {
+                            LocationPreviewView(position: position)
+                                .shadow(color: Color.black.opacity(0.32), radius: 20)
+                                .padding()
+                                .frame(maxWidth: maxWidth)
+                                .frame(maxWidth: .infinity)
+                                .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                        }
+                        
+                        
+                    }
+                    
+                }
+
+                
+            }
         }
         .sheet(item: $locationViewModel.sheetPosition, onDismiss: nil) { position in
             LocationDetailView(position: position)
         }
+        .sheet(isPresented: $showUserSelectionSheet) {
+            UserSelectionSheet(users: userManager.users, selectedUsers: $selectedUsers)
+        }
         .onAppear{
             locationViewModel.fetchPosterPositions(poster: poster)
+            userManager.fetchUsers()
         }
     }
     
@@ -126,6 +143,9 @@ struct LocationsView: View {
             MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: position.position.latitude, longitude: position.position.longitude)){
                 LocationMapAnnotationView(position: position).scaleEffect(locationViewModel.selectedPosterPosition == position ? 1 : 0.6).shadow(radius: 10)
                     .onTapGesture {
+                        withAnimation {
+                            locationViewModel.isEditing = false
+                        }
                         locationViewModel.showNextLocation(location: position)
                     }
             }
@@ -174,8 +194,6 @@ struct LocationsView: View {
                             } else {
                                 locationViewModel.selectedFilter = option
                             }
-                            
-                            showMenu = false  // Menü schließen nach Auswahl
                         }
                     }) {
                         let icon = getFilterIcon(for: option)
@@ -191,6 +209,25 @@ struct LocationsView: View {
         .cornerRadius(10)
         .shadow(radius: 4)
         
+    }
+    private var editButton: some View {
+        Button {
+
+            withAnimation {
+                locationViewModel.showLocationsList = false
+                locationViewModel.selectedPosterPosition = nil
+                locationViewModel.isEditing.toggle()  // Sichtbarkeit des Menüs umschalten
+                    
+            }
+            
+        } label: {
+            if locationViewModel.isEditing {
+                Image(systemName: "xmark.circle.fill").font(.headline).padding(16).foregroundColor(.red).background(.thickMaterial).cornerRadius(10).shadow(radius: 4).padding()
+            } else {
+                Image(systemName: "plus").font(.headline).padding(16).foregroundColor(.primary).background(.thickMaterial).cornerRadius(10).shadow(radius: 4).padding()
+            }
+            
+        }
     }
     
     func getFilterIcon(for status: String) -> (symbol: String, color: Color) {
@@ -226,25 +263,106 @@ struct LocationsView: View {
                 let coordinate = firstResult.placemark.coordinate
                 locationViewModel.mapLocation = MKCoordinateRegion(
                     center: coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                    span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001)
                 )
             }
         }
     }
-}
+    private var editingView: some View {
+        ZStack{
+            VStack {
+                Spacer()
+                ZStack {
+                    Rectangle()
+                        .frame(width: 1, height: 30)
+                        .foregroundColor(.blue)
+                    Rectangle()
+                        .frame(width: 30, height: 1)
+                        .foregroundColor(.blue)
+                }
+                Spacer()
+            }
+            VStack{
+                Spacer()
+                HStack(alignment: .bottom){
+                    VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Ablaufdatum")
+                                .font(.caption)
+                                .foregroundColor(.primary)
+                            DatePicker("Datum", selection: $expiresAt, displayedComponents: .date)
+                                .datePickerStyle(.compact)
+                                .labelsHidden()
+                                .cornerRadius(10)
+                        }
 
-struct tileView: View {
-    var title: String
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Benutzer auswählen")
+                                .font(.caption)
+                                .foregroundColor(.primary)
+                            Button(action: {
+                                showUserSelectionSheet.toggle()
+                            }) {
+                                Text("Benutzer auswählen")
+                                    .font(.headline).frame(width: 200, height: 45)
+                            }.buttonStyle(.bordered)
+                        }
+                        Button(action: addLocation) {
+                            Text("Standort hinzufügen")
+                                .font(.headline).frame(width: 200, height: 45)
+                        }.buttonStyle(.borderedProminent)
+                    }
+                    .padding(8)
+                    .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThickMaterial))
+                    .cornerRadius(8)
+                    .padding()
+                    Spacer()
+                }
+            }
 
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.blue.opacity(0.2)) // Farbe der Kachel
-                .frame(height: 100) // Höhe der Kachel
+            if locationViewModel.selectedUserNames != [] {
+                HStack{
+                    Spacer()
+                    VStack{
+                        Spacer()
+                        VStack(alignment: .trailing) {
+                            ForEach(locationViewModel.selectedUserNames, id: \.self) { name in
+                                Text(name) // Zeige jeden Namen an
+                                    .font(.body)
+                            }
+                        }
+                        .padding(8)
+                        .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThickMaterial))
+                        .cornerRadius(8)
+                        .padding()
+                    }
+                }
+            }
 
-            Text(title)
-                .font(.headline)
+            
+            
+
+
+
         }
-        .shadow(radius: 4) // Optional: Schatten
+    }
+    private func addLocation() {
+        let currentLocation = mapRegion.center
+        
+        // Create a new CreatePosterPositionDTO object
+        let newPosterPosition = CreatePosterPositionDTO(
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
+            responsibleUsers: selectedUsers,
+            expiresAt: expiresAt
+        )
+        locationViewModel.createPosterPosition(posterPosition: newPosterPosition, posterId: poster.id)
+        // Add the new object to the list
+        //createPosterPositions.append(newPosterPosition)
+        
+        locationViewModel.fetchPosterPositions(poster: poster)
+        // Debugging output
+        print("Added new poster position: \(newPosterPosition)")
     }
 }
+
