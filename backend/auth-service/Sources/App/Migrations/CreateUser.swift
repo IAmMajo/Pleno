@@ -14,6 +14,8 @@ struct CreateUser: AsyncMigration {
             .field("created_at", .datetime)
             .field("updated_at", .datetime)
             .field("last_login", .datetime)
+            .field("is_notifications_active", .bool, .required)
+            .field("is_push_notifications_active", .bool, .required)
             .unique(on: "email")
             .create()
     }
