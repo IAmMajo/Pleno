@@ -21,4 +21,7 @@
     <string name="btn_change_password">Passwort ändern</string>"
     <string name="btn_logout">Abmelden</string>
     <string name="btn_cancel_change_user">Abbrechen</string>
+
+    <!-- Create Ride Page -->
+    <string name="info_ride_text">Erstelle eine neue Fahrgemeinschaft</string>
 </resources>

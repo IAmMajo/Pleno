@@ -21,4 +21,7 @@
     <string name="btn_change_password">Change password</string>"
     <string name="btn_logout">Logout</string>
     <string name="btn_cancel_change_user">Cancel</string>
+
+    <!-- Create Ride Page -->
+    <string name="info_ride_text">Organize a new carpool</string>
 </resources>
