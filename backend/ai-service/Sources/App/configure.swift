@@ -34,6 +34,7 @@ public func configure(_ app: Application) async throws {
             app.logger.error("Fehler beim Laden der Einstellungen: \(error.localizedDescription)")
         }
     }
+    try await app.autoMigrate()
     // register routes
     try routes(app)
 }

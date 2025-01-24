@@ -35,9 +35,11 @@ public func configure(_ app: Application) async throws {
         }
     }
     
+    // migrations
     app.migrations.add(CreatePoll())
     app.migrations.add(CreatePollVotingOption())
     app.migrations.add(CreatePollVote())
+    try await app.autoMigrate()
     
     // register routes
     try routes(app)

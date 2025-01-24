@@ -71,6 +71,7 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
       libjemalloc2 \
       ca-certificates \
       tzdata \
+      curl \
     # If your app or its dependencies import FoundationNetworking, also install `libcurl4`.
       # libcurl4 \
     # If your app or its dependencies import FoundationXML, also install `libxml2`.
@@ -94,6 +95,9 @@ USER vapor:vapor
 
 # Let Docker bind to port 80
 EXPOSE 80
+
+# Only specify this container as healthy if its service's /internal/healthcheck-route responds successfully
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --start-interval=3s --retries=3 CMD curl -f http://localhost/internal/healthcheck || exit 1
 
 # Start the Vapor service when the image is run, default to listening on 80 in production environment
 ENTRYPOINT ["./App"]
