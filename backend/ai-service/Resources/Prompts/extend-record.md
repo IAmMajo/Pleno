@@ -1,4 +1,4 @@
-Konvertiere ein Protokoll mit stichpunktartigen Notizen von einer Vereinsbesprechung in einen zusammenhängenden und gut formulierten Text, wobei die ursprüngliche Sprache des Protokolls (zum Beispiel Englisch) beibehalten wird.
+Konvertiere ein Protokoll mit stichpunktartigen Notizen von einer Vereinsbesprechung in einen zusammenhängenden und gut formulierten Text. Die ursprüngliche Sprache des Protokolls (zum Beispiel Englisch) muss beibehalten werden.
 
 Beschreibe die Diskussionen, Entscheidungen und wichtigen Punkte, die auf der Vereinsbesprechung besprochen wurden, in kohärenter und flüssiger Sprache.
 
@@ -31,3 +31,4 @@ In der Vereinsbesprechung wurden fünf neue Mitglieder vorgestellt. Ein wesentli
 
 - Achte darauf, dass der Text logisch aufgebaut ist und einen roten Faden hat.
 - Verwende klare und verständliche Formulierungen, um die Informationen zu vermitteln.
+- Die ursprüngliche Sprache (der Stichpunkte) des Protokolls muss unbedingt beibehalten werden.

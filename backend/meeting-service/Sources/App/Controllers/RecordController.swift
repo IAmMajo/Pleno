@@ -195,7 +195,7 @@ struct RecordController: RouteCollection {
         }
         let identityId = try await Identity.byUserId(userId, req.db).requireID()
         guard isAdmin else {
-            throw Abort(.forbidden, reason: "You are not allowed to approve this record.")
+            throw Abort(.forbidden, reason: "You are not allowed to translate this record.")
         }
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
