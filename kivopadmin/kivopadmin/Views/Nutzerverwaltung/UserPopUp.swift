@@ -139,7 +139,7 @@ struct UserPopupView: View {
                     Button("Abbrechen") {
                         isPresented = false
                     }
-                    .foregroundColor(.red)
+                    .foregroundColor(.blue)
                 }
             }
             .onAppear {
