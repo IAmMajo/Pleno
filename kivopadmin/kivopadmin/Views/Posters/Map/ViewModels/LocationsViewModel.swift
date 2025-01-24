@@ -48,13 +48,13 @@ class LocationsViewModel: ObservableObject {
         }
         
         let nextIndex = currentIndex + 1
-        guard posterPositionsWithAddresses.indices.contains(nextIndex) else {
-            guard let firstPosition = posterPositionsWithAddresses.first else { return }
+        guard filteredPositions.indices.contains(nextIndex) else {
+            guard let firstPosition = filteredPositions.first else { return }
             showNextLocation(location: firstPosition)
             return
         }
         
-        let nextPosition = posterPositionsWithAddresses[nextIndex]
+        let nextPosition = filteredPositions[nextIndex]
         showNextLocation(location: nextPosition)
     }
     func showNextLocation(location: PosterPositionWithAddress){
@@ -80,22 +80,14 @@ class LocationsViewModel: ObservableObject {
 
     func selectPosterPosition(at index: Int) {
         // Sicherstellen, dass der Index gültig ist
-        guard index >= 0 && index < posterPositionsWithAddresses.count else {
+        guard index >= 0 && index < filteredPositions.count else {
             errorMessage = "Ungültiger Index."
             return
         }
-        let selectedPosition = posterPositionsWithAddresses[index]
+        let selectedPosition = filteredPositions[index]
         updateMapLocation(location: selectedPosition) // Karte und Auswahl aktualisieren
     }
-    
-    func filterPositions() -> [PosterPositionWithAddress] {
-        guard let selectedFilter = selectedFilter else {
-            // Wenn kein Filter gesetzt ist, alle Positionen zurückgeben
-            return posterPositionsWithAddresses
-        }
-        
-        return posterPositionsWithAddresses.filter { $0.position.status == selectedFilter }
-    }
+
     
     private func applyFilter() {
         guard let selectedFilter = selectedFilter else {
