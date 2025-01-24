@@ -30,7 +30,7 @@ struct RideView: View {
                             } else if viewModel.selectedTab == 1 {
                                 RideList(rides: group.value, viewModel: viewModel)
                             } else {
-                                //MyRidesList(rides: group.value)
+                                MyRidesList(rides: group.value, viewModel: viewModel)
                             }
                         }
                     }

@@ -112,7 +112,7 @@ class RideViewModel: ObservableObject {
         case 1:
             return rides // Sonstige Fahrten (Fahrten die keinem Event zugehören)
         case 2:
-            return [] // Meine Fahrten
+            return rides.filter { $0.myState != .nothing } // Alle Fahrten, (Event Fahrten und Sonstige) bei denen mein Status nicht .nothing ist
         default:
             return []
         }
