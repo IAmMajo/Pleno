@@ -9,8 +9,10 @@ public struct UserProfileDTO: Codable {
     public var isActive: Bool?
     public var emailVerification: VerificationStatus?
     public var createdAt: Date?
+    public var isNotificationsActive: Bool?
+    public var isPushNotificationsActive: Bool?
     
-    public init(uid: UUID, email: String? = nil, name: String? = nil, profileImage: Data? = nil, isAdmin: Bool, isActive: Bool, emailVerification: VerificationStatus? = nil , createdAt: Date? = nil) {
+    public init(uid: UUID, email: String? = nil, name: String? = nil, profileImage: Data? = nil, isAdmin: Bool, isActive: Bool, emailVerification: VerificationStatus? = nil , createdAt: Date? = nil, isNotificationsActive: Bool, isPushNotificationsActive: Bool) {
         self.uid = uid
         self.email = email
         self.name = name
@@ -19,6 +21,8 @@ public struct UserProfileDTO: Codable {
         self.isActive = isActive
         self.emailVerification = emailVerification
         self.createdAt = createdAt
+        self.isNotificationsActive = isNotificationsActive
+        self.isPushNotificationsActive = isPushNotificationsActive
     }
 }
 
