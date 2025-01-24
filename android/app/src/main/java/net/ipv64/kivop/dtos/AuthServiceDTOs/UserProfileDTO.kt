@@ -12,6 +12,8 @@ data class UserProfileDTO (
     var isActive : Boolean?,
     var emailVerification : VerificationStatus?,
     var createdAt : LocalDateTime?,
+    var isNotificationsActive : Boolean?,
+    var isPushNotificationsActive : Boolean?,
 )
 enum class VerificationStatus {
     failed,
