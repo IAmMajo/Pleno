@@ -38,6 +38,19 @@ struct RideDecision: View {
                     secondaryButton: .cancel()
                 )
             }
+        } else if (viewModel.ride.allocatedSeats == viewModel.ride.emptySeats) {
+            Button(action: {
+                
+            }){
+                Text("Fahrgemeinschaft ist bereits voll.")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.red)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .padding(.horizontal)
+            .buttonStyle(PlainButtonStyle())
         } else {
             if (viewModel.rider?.accepted == false){
                 // Anfrage löschen

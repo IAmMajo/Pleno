@@ -14,7 +14,20 @@ struct NewRideView: View {
             VStack {
                 if let selectedOption = viewModel.selectedOption {
                     if selectedOption == "EventFahrt" {
-                        CreateEventRideView(viewModel: viewModel, selectedOption: $viewModel.selectedOption)
+                        // Feature in arbeit
+                        AnyView(
+                            VStack(spacing: 20) {
+                                Text("Wir arbeiten noch an dieser Funktion.")
+                                    .font(.headline)
+                                    .multilineTextAlignment(.center)
+                                Text("Freuen Sie sich schon bald auf Event gebundene Fahrgemeinschaften.")
+                                    .font(.subheadline)
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(.gray)
+                            }
+                            .padding()
+                        )
+                        // CreateEventRideView(viewModel: viewModel, selectedOption: $viewModel.selectedOption)
                     } else if selectedOption == "SonderFahrt" {
                         CreateSpecialRideView(viewModel: viewModel, selectedOption: $viewModel.selectedOption)
                     }
@@ -32,45 +45,52 @@ struct NewRideView: View {
             }
             .toolbar {
                 // Speichern Button
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        if viewModel.isFormValid {
-                            selectingSaveAlert = .save
-                        } else {
-                            selectingSaveAlert = .error
+                // TODO: wieder einbauen wenn Eventfahrten drin sind
+                if viewModel.selectedOption != "EventFahrt" {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            if viewModel.isFormValid {
+                                selectingSaveAlert = .save
+                            } else {
+                                selectingSaveAlert = .error
+                            }
+                            showingSaveAlert.toggle()
+                        }) {
+                            Text("Speichern")
+                                .font(.body)
                         }
-                        showingSaveAlert.toggle()
-                    }) {
-                        Text("Speichern")
-                            .font(.body)
-                    }
-                    .alert(isPresented: $showingSaveAlert) {
-                        switch selectingSaveAlert {
-                        case .save:
-                            Alert(
-                                title: Text("Möchtest du wirklich speichern?"),
-                                message: Text("Deine Fahrt wird dann veröffentlicht und andere können dieser beitreten."),
-                                primaryButton: .default(Text("Ja"), action: {
-                                    viewModel.saveRide()
-                                    rideViewModel.selectedTab = 2
-                                    dismiss()
-                                }),
-                                secondaryButton: .cancel()
-                            )
-                        case .error:
-                            Alert(
-                                title: Text("Fehler"),
-                                message: Text("Bitte füllen Sie alle Felder aus. Das Startdatum muss außerdem in der Zukunft liegen."),
-                                dismissButton: .default(Text("OK"))
-                            )
+                        .alert(isPresented: $showingSaveAlert) {
+                            switch selectingSaveAlert {
+                            case .save:
+                                Alert(
+                                    title: Text("Möchtest du wirklich speichern?"),
+                                    message: Text("Deine Fahrt wird dann veröffentlicht und andere können dieser beitreten."),
+                                    primaryButton: .default(Text("Ja"), action: {
+                                        viewModel.saveRide()
+                                        rideViewModel.selectedTab = 2
+                                        dismiss()
+                                    }),
+                                    secondaryButton: .cancel()
+                                )
+                            case .error:
+                                Alert(
+                                    title: Text("Fehler"),
+                                    message: Text("Bitte füllen Sie alle Felder aus. Das Startdatum muss außerdem in der Zukunft liegen."),
+                                    dismissButton: .default(Text("OK"))
+                                )
+                            }
                         }
                     }
                 }
-                
                 // Zurück Button
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
-                        showingBackAlert.toggle()
+                        // TODO: wieder scharf machen wenn EventFahrten da sind
+                        if viewModel.selectedOption == "EventFahrt" {
+                            dismiss()
+                        } else {
+                            showingBackAlert.toggle()
+                        }
                     }) {
                         HStack {
                             Image(systemName: "chevron.left")

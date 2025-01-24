@@ -5,6 +5,7 @@ struct RideDetailView: View {
     @StateObject var viewModel: RideDetailViewModel
     @ObservedObject var rideViewModel: RideViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var shouldShowDriversProfilePicture = false
     
     // Vars um Standort zu kopieren
     @State private var shareLocation = false
@@ -98,9 +99,10 @@ struct RideDetailView: View {
                         
                         Section(header: Text("Fahrer")){
                             HStack{
-                                Circle()
-                                    .fill(Color.gray)
-                                    .frame(width: 40, height: 40)
+                                // Leichte Verzögerung damit Daten geladen sind
+                                if shouldShowDriversProfilePicture {
+                                    ProfilePictureRide(name: viewModel.rideDetail.driverName, id: viewModel.rideDetail.driverID)
+                                }
                                 VStack{
                                     Text(viewModel.rideDetail.driverName)
                                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -110,6 +112,7 @@ struct RideDetailView: View {
                                         .foregroundColor(.gray)
                                         .onAppear {
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                                shouldShowDriversProfilePicture = true
                                                 viewModel.getAddressFromCoordinates(latitude: viewModel.rideDetail.startLatitude, longitude: viewModel.rideDetail.startLongitude) { address in
                                                     if let address = address {
                                                         viewModel.driverAddress = address
@@ -161,6 +164,8 @@ struct RideDetailView: View {
                                 // Mitgenommen
                                 ForEach(viewModel.acceptedRiders, id: \.id) { rider in
                                     HStack {
+                                        // Profilbild
+                                        ProfilePictureRide(name: rider.username, id: rider.id)
                                         VStack{
                                             Text(rider.username)
                                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -239,6 +244,8 @@ struct RideDetailView: View {
                             Section(header: Text("Anfragen zum Mitnehmen (\(viewModel.requestedRiders.count))")){
                                 ForEach(viewModel.requestedRiders, id: \.id) { rider in
                                     HStack {
+                                        // Profilbild
+                                        ProfilePictureRide(name: rider.username, id: rider.id)
                                         VStack{
                                             Text(rider.username)
                                                 .frame(maxWidth: .infinity, alignment: .leading)

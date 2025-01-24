@@ -37,6 +37,7 @@ class RideDetailViewModel: ObservableObject {
         self.rideDetail = GetSpecialRideDetailDTO(
             id: nil,
             driverName: "",
+            driverID: UUID(),
             isSelfDriver: false,
             name: "",
             description: nil,

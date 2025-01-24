@@ -979,6 +979,9 @@
     "Fahrer" : {
 
     },
+    "Fahrgemeinschaft ist bereits voll." : {
+
+    },
     "Fahrgemeinschaften" : {
 
     },
@@ -1033,6 +1036,9 @@
 
     },
     "Freigeben" : {
+
+    },
+    "Freuen Sie sich schon bald auf Event gebundene Fahrgemeinschaften." : {
 
     },
     "Galerie" : {
@@ -2370,6 +2376,9 @@
           }
         }
       }
+    },
+    "Wir arbeiten noch an dieser Funktion." : {
+
     },
     "Wir hosten die Inhalte unserer Website bei folgendem Anbieter:\n\n**Hetzner**\n\nAnbieter ist die Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen (nachfolgend Hetzner).\n\nDetails entnehmen Sie der Datenschutzerklärung von Hetzner:\nhttps://www.hetzner.com/de/legal/privacy-policy/.\n\nDie Verwendung von Hetzner erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Wir haben ein berechtigtes Interesse an einer möglichst zuverlässigen Darstellung unserer Website. Sofern eine entsprechende Einwilligung abgefragt wurde, erfolgt die Verarbeitung ausschließlich auf Grundlage von Art.6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG, soweit die Einwilligung die Speicherung von Cookies oder den Zugriff auf Informationen im Endgerät des Nutzers (z. B. Device-Fingerprinting) im Sinne des TDDDG umfasst. Die Einwilligung ist jederzeit widerrufbar.\n\n**Auftragsverarbeitung**\nWir haben einen Vertrag über Auftragsverarbeitung (AVV) zur Nutzung des oben genannten Dienstes geschlossen. Hierbei handelt es sich um einen datenschutzrechtlich vorgeschriebenen Vertrag, der gewährleistet, dass dieser die personenbezogenen Daten unserer Websitebesucher nur nach unseren Weisungen und unter Einhaltung der DSGVO verarbeitet." : {
 
