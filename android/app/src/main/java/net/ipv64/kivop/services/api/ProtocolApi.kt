@@ -109,8 +109,7 @@ suspend fun getProtocolApi(id: String, lang: String): GetRecordDTO? =
         val responseBody = response.body?.string()
         if (responseBody != null) {
           val protocol = Gson().fromJson(responseBody, JsonObject::class.java)
-          val meetingId = protocol.get("id").asString.let { UUID.fromString(it) }
-          val meetingID = protocol.get("meetingId").asString.let { UUID.fromString(it) }
+          val meetingId = protocol.get("meetingId").asString.let { UUID.fromString(it) }
           val lang = protocol.get("lang").asString
           val content = protocol.get("content").asString
           val attendancesAppendix = protocol.get("attendancesAppendix").asString
@@ -122,7 +121,7 @@ suspend fun getProtocolApi(id: String, lang: String): GetRecordDTO? =
                 chair.get("id").asString.let { UUID.fromString(it) },
                 chair.get("name").asString)
             }
-          Log.i("Protokoll", "Protokoll erhalten: $meetingID , $lang , $identity , $status , $content , $attendancesAppendix , $votingResultsAppendix")
+          Log.i("Protokoll", "Protokoll erhalten: $meetingId , $lang , $identity , $status , $content , $attendancesAppendix , $votingResultsAppendix")
 
           GetRecordDTO(
             meetingId,
