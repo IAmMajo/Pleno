@@ -83,6 +83,9 @@ services:
       file: ./backend/docker-compose.yml
       service: config-service
     container_name: kivop-config-service
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     labels:
       traefik.enable: true
@@ -100,6 +103,9 @@ services:
     extends:
       file: ./backend/docker-compose.yml
       service: config-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 #
 # Vapor: auth-service
@@ -109,6 +115,11 @@ services:
       file: ./backend/docker-compose.yml
       service: auth-service
     container_name: kivop-auth-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
     restart: unless-stopped
     labels:
       traefik.enable: true
@@ -126,6 +137,9 @@ services:
     extends:
       file: ./backend/docker-compose.yml
       service: auth-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 #
 # Vapor: meeting-service
@@ -135,6 +149,15 @@ services:
       file: ./backend/docker-compose.yml
       service: meeting-service
     container_name: kivop-meeting-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      ai-service:
+        condition: service_healthy
     restart: unless-stopped
     labels:
       traefik.enable: true
@@ -152,6 +175,9 @@ services:
     extends:
       file: ./backend/docker-compose.yml
       service: meeting-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 #
 # Vapor: notifications-service
@@ -161,6 +187,13 @@ services:
       file: ./backend/docker-compose.yml
       service: notifications-service
     container_name: kivop-notifications-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     restart: unless-stopped
     labels:
       traefik.enable: true
@@ -178,6 +211,9 @@ services:
     extends:
       file: ./backend/docker-compose.yml
       service: notifications-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 #
 # Vapor: ride-service
@@ -187,6 +223,13 @@ services:
       file: ./backend/docker-compose.yml
       service: ride-service
     container_name: kivop-ride-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     restart: unless-stopped
     labels:
       traefik.enable: true
@@ -204,6 +247,9 @@ services:
     extends:
       file: ./backend/docker-compose.yml
       service: ride-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 #
 # Vapor: poster-service
 #
@@ -212,6 +258,13 @@ services:
       file: ./backend/docker-compose.yml
       service: poster-service
     container_name: kivop-poster-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     restart: unless-stopped
     labels:
       traefik.enable: true
@@ -229,6 +282,9 @@ services:
     extends:
       file: ./backend/docker-compose.yml
       service: poster-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 #
 # Vapor: ai-service
 #
@@ -237,6 +293,11 @@ services:
       file: ./backend/docker-compose.yml
       service: ai-service
     container_name: kivop-ai-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
     restart: unless-stopped
     labels:
       traefik.enable: true
@@ -247,6 +308,42 @@ services:
       traefik.http.routers.ai-service.entrypoints: https
       traefik.http.routers.ai-service.tls: true
       traefik.http.routers.ai-service.tls.certresolver: myresolver
+
+#
+# Vapor: poll-service
+#
+  poll-service:
+    extends:
+      file: ./backend/docker-compose.yml
+      service: poll-service
+    container_name: kivop-poll-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.poll-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/poll-service`) || PathPrefix(`/polls`))
+      traefik.http.routers.poll-service.middlewares: poll-service-replace-path-regex
+      traefik.http.middlewares.poll-service-replace-path-regex.replacepathregex.regex: ^/poll-service(:/(.*))?
+      traefik.http.middlewares.poll-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.poll-service.entrypoints: https
+      traefik.http.routers.poll-service.tls: true
+      traefik.http.routers.poll-service.tls.certresolver: myresolver
+
+  poll-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: poll-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 #
 # Vapor: tdums-service // NICHT IP-RELEVANT (abgesprochen)
@@ -274,32 +371,6 @@ services:
     volumes:
       - ./backend/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
       - tdums-data:/var/lib/postgresql/data
-
-#
-# Vapor: poll-service
-#
-  poll-service:
-    extends:
-      file: ./backend/docker-compose.yml
-      service: poll-service
-    container_name: kivop-poll-service
-    restart: unless-stopped
-    labels:
-      traefik.enable: true
-      traefik.http.routers.poll-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/poll-service`) || PathPrefix(`/polls`))
-      traefik.http.routers.poll-service.middlewares: poll-service-replace-path-regex
-      traefik.http.middlewares.poll-service-replace-path-regex.replacepathregex.regex: ^/poll-service(:/(.*))?
-      traefik.http.middlewares.poll-service-replace-path-regex.replacepathregex.replacement: /$$1
-      traefik.http.routers.poll-service.entrypoints: https
-      traefik.http.routers.poll-service.tls: true
-      traefik.http.routers.poll-service.tls.certresolver: myresolver
-
-  poll-service-revert:
-    profiles:
-      - not-default
-    extends:
-      file: ./backend/docker-compose.yml
-      service: poll-service-revert
 
 #
 # Volumes
