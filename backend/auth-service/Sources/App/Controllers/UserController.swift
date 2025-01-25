@@ -296,8 +296,8 @@ struct UserController: RouteCollection {
             profileImage: user.profileImage,
             isAdmin: user.isAdmin,
             isActive: user.isActive,
-            emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue),
-            createdAt: user.createdAt,
+            emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue)!,
+            createdAt: user.createdAt!,
             isNotificationsActive: user.isNotificationsActive,
             isPushNotificationsActive: user.isPushNotificationsActive
         )
@@ -362,18 +362,6 @@ struct UserController: RouteCollection {
         // save history entry
         try await history.save(on: req.db)
         
-        var registeredUser = UserProfileDTO(
-            uid: user.id!,
-            email: user.email,
-            name: identity.name,
-            profileImage: user.profileImage,
-            isAdmin: user.isAdmin,
-            isActive: user.isActive,
-            createdAt: user.createdAt,
-            isNotificationsActive: user.isNotificationsActive,
-            isPushNotificationsActive: user.isPushNotificationsActive
-        )
-        
         let verificationCode = String(format: "%06d", Int.random(in: 0...999999))
             
         let emailVerification = EmailVerification(
@@ -386,7 +374,18 @@ struct UserController: RouteCollection {
         
         try await emailVerification.save(on: req.db)
         
-        registeredUser.emailVerification = VerificationStatus(rawValue: emailVerification.status.rawValue)
+        let registeredUser = UserProfileDTO(
+            uid: user.id!,
+            email: user.email,
+            name: identity.name,
+            profileImage: user.profileImage,
+            isAdmin: user.isAdmin,
+            isActive: user.isActive,
+            emailVerification: VerificationStatus(rawValue: emailVerification.status.rawValue)!,
+            createdAt: user.createdAt!,
+            isNotificationsActive: user.isNotificationsActive,
+            isPushNotificationsActive: user.isPushNotificationsActive
+        )
         
         let emailString = try emailVerification.requireID()
         
@@ -500,8 +499,8 @@ struct UserController: RouteCollection {
                 profileImage: user.profileImage,
                 isAdmin: user.isAdmin,
                 isActive: user.isActive,
-                emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue),
-                createdAt: user.createdAt,
+                emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue)!,
+                createdAt: user.createdAt!,
                 isNotificationsActive: user.isNotificationsActive,
                 isPushNotificationsActive: user.isPushNotificationsActive
             )
@@ -541,8 +540,8 @@ struct UserController: RouteCollection {
             profileImage: user.profileImage,
             isAdmin: user.isAdmin,
             isActive: user.isActive,
-            emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue),
-            createdAt: user.createdAt,
+            emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue)!,
+            createdAt: user.createdAt!,
             isNotificationsActive: user.isNotificationsActive,
             isPushNotificationsActive: user.isPushNotificationsActive
         )
