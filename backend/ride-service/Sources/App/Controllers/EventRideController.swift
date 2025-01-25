@@ -16,6 +16,7 @@ struct EventRideController: RouteCollection {
             .openAPI(
                 tags: openAPITag,
                 summary: "Alle Eventfahrten abfragen.",
+                query: .type(EventRideFilter.self),
                 response: .type([GetEventRideDTO].self),
                 responseContentType: .application(.json),
                 statusCode: .ok,
@@ -264,7 +265,29 @@ struct EventRideController: RouteCollection {
     
     @Sendable
     func getAllEventRides(req: Request) async throws -> [GetEventRideDTO] {
-        let eventRides = try await EventRide.query(on: req.db).all()
+        // decode query params
+        let filter = try req.query.decode(EventRideFilter.self)
+        
+        // query event rides with optional filters
+        var eventRides: [EventRide]
+        if filter.byUserEvents != nil && filter.byUserEvents == true {
+            // filter for users events
+            eventRides = try await EventRide.query(on: req.db)
+                .join(PlenoEvent.self, on: \EventRide.$event.$id == \PlenoEvent.$id)
+                .join(EventParticipant.self, on: \PlenoEvent.$id == \EventParticipant.$event.$id)
+                .filter(EventParticipant.self, \.$user.$id == req.jwtPayload.userID)
+                .filter(EventParticipant.self, \.$participates == true)
+                .all()
+        } else if let filterEventID = filter.byEventID {
+            // filter for eventID
+            eventRides = try await EventRide.query(on: req.db)
+                .filter(\.$event.$id == filterEventID)
+                .all()
+        } else {
+            // no filters
+            eventRides = try await EventRide.query(on: req.db).all()
+        }
+        
         var responseRides: [GetEventRideDTO] = []
         
         for eventRide in eventRides {
