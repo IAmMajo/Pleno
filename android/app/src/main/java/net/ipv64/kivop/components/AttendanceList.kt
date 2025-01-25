@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,15 +28,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.ipv64.kivop.R
-import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
+import net.ipv64.kivop.models.attendancesList
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Text_prime
 
-data class ResponseItem(val name: String, val status: AttendanceStatus?)
 
+@Composable
 @OptIn(ExperimentalFoundationApi::class)
-fun LazyListScope.AttendanceCoordinationList(
-    responses: List<ResponseItem>,
+fun AttendanceCoordinationList(
+    responses: List<attendancesList>,
     title: String,
     isVisible: Boolean,
     maxMembernumber: Int,
@@ -45,24 +44,23 @@ fun LazyListScope.AttendanceCoordinationList(
     background: Color = Color(color = 0xFF686D74)
 ) {
   // stickyHeader
-  stickyHeader {
+  Column {
     LabelMax(onClick = { onVisibilityToggle(!isVisible) }, backgroundColor = background) {
       AttendanceSeparatorContent(
-          text = title, maxMembernumber = maxMembernumber, statusMembernumber = responses.size)
+        text = title, maxMembernumber = maxMembernumber, statusMembernumber = responses.size
+      )
     }
-  }
-
-  // Item with AnimatedVisibility
-  item {
+    // Item with AnimatedVisibility
     AnimatedVisibility(visible = isVisible, enter = expandVertically(), exit = shrinkVertically()) {
       Column { responses.forEach { item -> AttendanceItemRow(item = item) } }
     }
   }
 }
 
+
 // Composable für eine einzelne Zeile in der Rückmeldungs-Liste
 @Composable
-fun AttendanceItemRow(item: ResponseItem) {
+fun AttendanceItemRow(item: attendancesList) {
   Row(
       modifier = Modifier.fillMaxWidth().padding(6.dp),
       verticalAlignment = Alignment.CenterVertically) {
@@ -85,7 +83,8 @@ fun AttendanceItemRow(item: ResponseItem) {
             color = Text_prime,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium)
+            fontWeight = FontWeight.Medium
+        )
       }
 }
 
