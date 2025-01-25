@@ -179,11 +179,12 @@ struct MainPage_ProfilView: View {
                 case .success(let profile):
                     self.name = profile.name ?? ""
                     self.shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
-                    if let imageData = profile.profileImage {
-                        self.profileImage = UIImage(data: imageData)
-                    } else {
-                        self.profileImage = nil
-                    }
+                   self.profileImage = UIImage(data: profile.profileImage)
+//                    if let imageData = profile.profileImage { // Amin
+//                        self.profileImage = UIImage(data: imageData)
+//                    } else {
+//                        self.profileImage = nil
+//                    }
                 case .failure(let error):
                     self.errorMessage = "Fehler: \(error.localizedDescription)"
                 }
