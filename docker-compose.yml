@@ -43,6 +43,13 @@ services:
     image: postgres:17.0-bookworm
     container_name: kivop-postgres
     restart: unless-stopped
+    healthcheck:
+      test: pg_isready -U vapor -d kivop
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+      start_interval: 3s
     environment:
       POSTGRES_USER: vapor # only for development
       POSTGRES_PASSWORD: example # only for development
