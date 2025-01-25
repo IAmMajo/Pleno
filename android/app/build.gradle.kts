@@ -77,5 +77,5 @@ dependencies {
   implementation("org.osmdroid:osmdroid-android:6.1.16")
   implementation(
       "tech.utsmankece:osm-androd-compose:0.0.3") // TODO: bugged Look for alternative - not getting
-                                                  // updated
+  // updated
 }

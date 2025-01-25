@@ -59,9 +59,8 @@ fun CreateRide00Page(pagerState: PagerState) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
               Text(
-                  text =
-                      "Erstelle eine neue Fahrgemeinschaft", // todo: replace text with:
-                                                             // getString(R.string.info_ride_text)
+                  text = "Erstelle eine neue Fahrgemeinschaft", // todo: replace text with:
+                  // getString(R.string.info_ride_text)
                   style = TextStyles.headingStyle,
                   color = Text_prime_light,
                   textAlign = TextAlign.Center,
