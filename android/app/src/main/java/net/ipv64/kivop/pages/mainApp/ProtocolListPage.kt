@@ -2,39 +2,44 @@ package net.ipv64.kivop.pages.mainApp
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
-import net.ipv64.kivop.components.Markdown
-import net.ipv64.kivop.models.viewModel.ProtocolViewModel
-import net.ipv64.kivop.models.viewModel.ProtocolViewModelFactory
+import net.ipv64.kivop.components.ListenItem
+import net.ipv64.kivop.components.SpacerTopBar
+import net.ipv64.kivop.models.viewModel.MeetingsViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProtocolListPage(navController: NavController, meetingId: String, protocolLang: String) {
-  val protocolViewModel: ProtocolViewModel = viewModel(factory = ProtocolViewModelFactory(meetingId,protocolLang))
-  protocolViewModel.protocol
-
-  Column(modifier = Modifier.fillMaxSize()) {
-    protocolViewModel.protocol?.votingResultsAppendix?.let {
-      Markdown(
-        markdown = it
-      )
-    }
-  }
+fun ProtocolListPage(navController: NavController, meetingsViewModel: MeetingsViewModel) {
   BackHandler {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
+  val meetings = meetingsViewModel.meetings
  
-  Text(text = "ProtocolListPage")
+  Column {
+    SpacerTopBar()
 
- 
-  
+    LazyColumn(
+      modifier = Modifier.fillMaxHeight(),
+      verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+      items(meetings) { meeting ->
+        if (meeting != null) {
+          ListenItem(
+            itemListData = meeting,
+            onClick = { navController.navigate("anwesenheit/${meeting.id}") },
+            isProtokoll = true
+          )
+        }
+      }
+    }
+  }
 }

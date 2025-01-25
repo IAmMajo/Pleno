@@ -133,12 +133,24 @@ fun ListenItem(
                   modifier = Modifier.size(44.dp))
             }
         Spacer(modifier = Modifier.width(8.dp))
-        Text(
+        if (!isProtokoll) {
+          Text(
             text = itemListData.name,
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp,
             color = Text_prime,
-            modifier = Modifier.weight(1f))
+            modifier = Modifier.weight(1f)
+          )
+        }
+        else{
+          Text(
+            text = "Protokoll: "+itemListData.name,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 18.sp,
+            color = Text_prime,
+            modifier = Modifier.weight(1f)
+          )
+        }
         if (!isProtokoll) {
           Label(backgroundColor = iconColor) {
             Text(
