@@ -8,6 +8,7 @@ class RideViewModel: ObservableObject {
     @Published var selectedTab: Int = 0
     @Published var isLoading: Bool = false
     @Published var rides: [GetSpecialRideDTO] = []
+    @Published var events: [GetEventDTO] = []
     private let baseURL = "https://kivop.ipv64.net"
     
     init() {
@@ -22,7 +23,7 @@ class RideViewModel: ObservableObject {
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
     }
     
-    func fetchRides() {
+    func fetchRides(){
         fetchSpecialRides()
     }
     
@@ -68,6 +69,56 @@ class RideViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     self?.rides = []
                     self?.rides = decodedRides // Array mit den Sonderfahrten speichern
+                }
+            } catch {
+                print("JSON Decode Error: \(error.localizedDescription)")
+            }
+        }.resume()
+    }
+    
+    // Fetch Events für die Auswahl im Array
+    func fetchEvents() {
+        guard let url = URL(string: "\(baseURL)/events") else {
+            print("Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        // Füge JWT Token zu den Headern hinzu
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            print("Unauthorized: No token found")
+            return
+        }
+        
+        // Führe den Netzwerkaufruf aus
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            if let error = error {
+                print("Network error: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received from server")
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            
+            do {
+                // Decodieren der Antwort in ein Array von GetSpecialRideDTO
+                let decodedEvents = try decoder.decode([GetEventDTO].self, from: data)
+                print(decodedEvents)
+                
+                // Sicherstellen, dass die Updates im Main-Thread ausgeführt werden
+                DispatchQueue.main.async {
+                    self?.events = []
+                    self?.events = decodedEvents // Array mit den Sonderfahrten speichern
                 }
             } catch {
                 print("JSON Decode Error: \(error.localizedDescription)")

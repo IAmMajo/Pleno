@@ -44,11 +44,13 @@ struct RideView: View {
                 .onAppear {
                    Task {
                        viewModel.fetchSpecialRides()
+                       viewModel.fetchEvents()
                    }
                 }
                 .refreshable {
                     Task {
                         viewModel.fetchSpecialRides()
+                        viewModel.fetchEvents()
                     }
                 }
             }
@@ -59,7 +61,12 @@ struct RideView: View {
             .toolbar {
                 // Neue Fahrt anbieten
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: NewRideView(viewModel: EditRideViewModel(), rideViewModel: viewModel)) {
+                    NavigationLink(destination: {
+                        let editRideViewModel = EditRideViewModel()
+                        editRideViewModel.events = viewModel.events
+
+                        return NewRideView(viewModel: editRideViewModel, rideViewModel: viewModel)
+                    }()) {
                         Text("Neue Fahrt anbieten")
                             .font(.body)
                     }
