@@ -4,6 +4,12 @@ struct Onboarding: View {
     @State private var currentIndex = 0
     @State private var ClubLogo: String = "VL"
     @State private var navigateToLogin = false
+    @State private var hasCheckedOnboarding = false
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    var isManualNavigation: Bool = false // Neuer Parameter
+
+
+
 
     var body: some View {
         NavigationStack {
@@ -124,8 +130,8 @@ struct Onboarding: View {
                             if currentIndex < 1 {
                                 currentIndex += 1
                             } else {
-                                // Flag in UserDefaults setzen und zu Login weiterleiten
-                                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                                // Flag um zu Login weiterleiten
+                                hasSeenOnboarding = true
                                 navigateToLogin = true
                             }
                         }
@@ -176,11 +182,13 @@ struct Onboarding: View {
             }
         }
         .onAppear {
-            // Wenn der Benutzer das Onboarding bereits gesehen hat, direkt zur Login-Ansicht weiterleiten
-            if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+            // Nur automatisch zur LoginView navigieren, wenn dies nicht manuell aufgerufen wurde
+            if hasSeenOnboarding && !isManualNavigation {
                 navigateToLogin = true
             }
         }
+
+
         .navigationBarBackButtonHidden(true)
     }
 }
