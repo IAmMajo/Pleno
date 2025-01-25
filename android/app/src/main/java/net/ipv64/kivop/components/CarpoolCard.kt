@@ -48,62 +48,56 @@ fun CarpoolCard(carpool: GetSpecialRideDTO, onClick: () -> Unit = {}) {
                 style = MaterialTheme.typography.bodyMedium)
           }
           Row(
-            modifier = Modifier.align(alignment = Alignment.BottomEnd),
+              modifier = Modifier.align(alignment = Alignment.BottomEnd),
           ) {
             if (carpool.openRequests != null && carpool.myState == UsersRideState.driver) {
               Box(
-                modifier =
-                Modifier
-                  .height(20.dp)
-                  .background(Primary.copy(0.2f), shape = RoundedCornerShape(4.dp))
-                  .padding(horizontal = 4.dp)
-              ){
-                Row(
-                  modifier = Modifier.fillMaxHeight(),
-                  verticalAlignment = Alignment.CenterVertically) {
-                  Text(
-                    text = carpool.openRequests.toString(),
-                    color = Primary,
-                    style = MaterialTheme.typography.labelMedium)
-                }
-              }
+                  modifier =
+                      Modifier.height(20.dp)
+                          .background(Primary.copy(0.2f), shape = RoundedCornerShape(4.dp))
+                          .padding(horizontal = 4.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxHeight(),
+                        verticalAlignment = Alignment.CenterVertically) {
+                          Text(
+                              text = carpool.openRequests.toString(),
+                              color = Primary,
+                              style = MaterialTheme.typography.labelMedium)
+                        }
+                  }
               SpacerBetweenElements(4.dp)
             }
             Box(
-              modifier =
-              Modifier
-                .height(20.dp)
-                .background(Primary.copy(0.2f), shape = RoundedCornerShape(4.dp))
-                .padding(horizontal = 4.dp)
-            ){
-              Row(
-                modifier = Modifier.fillMaxHeight(),
-                verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                  text = carpool.myState.toString(),
-                  color = Primary,
-                  style = MaterialTheme.typography.labelMedium)
-              }
-            }
+                modifier =
+                    Modifier.height(20.dp)
+                        .background(Primary.copy(0.2f), shape = RoundedCornerShape(4.dp))
+                        .padding(horizontal = 4.dp)) {
+                  Row(
+                      modifier = Modifier.fillMaxHeight(),
+                      verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = carpool.myState.toString(),
+                            color = Primary,
+                            style = MaterialTheme.typography.labelMedium)
+                      }
+                }
             SpacerBetweenElements(4.dp)
             Box(
-              modifier =
-              Modifier
-                .height(20.dp)
-                .background(Primary.copy(0.2f), shape = RoundedCornerShape(4.dp))
-                .padding(horizontal = 4.dp)
-            ){
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                  text = "${carpool.allocatedSeats}/${carpool.emptySeats} Plätze",
-                  color = Primary,
-                  style = MaterialTheme.typography.labelMedium)
-                Icon(
-                  painter = painterResource(R.drawable.ic_person_24),
-                  contentDescription = "seats",
-                  tint = Primary)
-              }
-            }
+                modifier =
+                    Modifier.height(20.dp)
+                        .background(Primary.copy(0.2f), shape = RoundedCornerShape(4.dp))
+                        .padding(horizontal = 4.dp)) {
+                  Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "${carpool.allocatedSeats}/${carpool.emptySeats} Plätze",
+                        color = Primary,
+                        style = MaterialTheme.typography.labelMedium)
+                    Icon(
+                        painter = painterResource(R.drawable.ic_person_24),
+                        contentDescription = "seats",
+                        tint = Primary)
+                  }
+                }
           }
         }
       }
@@ -116,15 +110,14 @@ fun previewCarpoolCard() {
     CarpoolCard(
         carpool =
             GetSpecialRideDTO(
-              id = UUID.randomUUID(),
-              name = "Geschäftsessen",
-              starts = LocalDateTime.now(),
-              ends = LocalDateTime.now(),
-              emptySeats = 3u,
-              allocatedSeats = 2u,
-              myState = UsersRideState.driver,
-              openRequests = 3,
-            )
-    )
+                id = UUID.randomUUID(),
+                name = "Geschäftsessen",
+                starts = LocalDateTime.now(),
+                ends = LocalDateTime.now(),
+                emptySeats = 3u,
+                allocatedSeats = 2u,
+                myState = UsersRideState.driver,
+                openRequests = 3,
+            ))
   }
 }

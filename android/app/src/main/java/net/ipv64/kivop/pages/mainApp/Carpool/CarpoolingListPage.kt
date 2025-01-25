@@ -18,7 +18,6 @@ import net.ipv64.kivop.components.CarpoolCard
 import net.ipv64.kivop.components.CustomButton
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
-import net.ipv64.kivop.models.ButtonStyle
 import net.ipv64.kivop.models.primaryButtonStyle
 import net.ipv64.kivop.models.viewModel.CarpoolingListViewModel
 
@@ -28,14 +27,12 @@ fun CarpoolingList(
     carpoolingListViewModel: CarpoolingListViewModel = viewModel()
 ) {
   val carpoolingList = carpoolingListViewModel.CarpoolingList
-  
+
   BackHandler {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
-  LaunchedEffect(Unit) { 
-    carpoolingListViewModel.fetchCarpoolingList()
-  }
+  LaunchedEffect(Unit) { carpoolingListViewModel.fetchCarpoolingList() }
   Column(modifier = Modifier.padding(18.dp)) {
     SpacerTopBar()
     LazyColumn() {
@@ -49,10 +46,9 @@ fun CarpoolingList(
     }
     Spacer(modifier = Modifier.weight(1f))
     CustomButton(
-      modifier = Modifier,
-      text = "Erstellen",
-      buttonStyle = primaryButtonStyle,
-      onClick = { navController.navigate("createCarpool") }
-    )
+        modifier = Modifier,
+        text = "Erstellen",
+        buttonStyle = primaryButtonStyle,
+        onClick = { navController.navigate("createCarpool") })
   }
 }

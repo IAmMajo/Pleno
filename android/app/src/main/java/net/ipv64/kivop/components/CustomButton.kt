@@ -35,26 +35,26 @@ fun CustomButton(
 ) {
   if (buttonStyle != null) {
     Box(
-      contentAlignment = Alignment.Center,
-      modifier =
-      modifier
-        .fillMaxWidth()
-        .height(44.dp)
-        .background(color = buttonStyle.backgroundColor, shape = RoundedCornerShape(100.dp))
-        .clickable(enabled = enabled,onClick = onClick)) {
-      Text(text, color = buttonStyle.contentColor, style = TextStyles.largeContentStyle)
-    }
-  }else{
+        contentAlignment = Alignment.Center,
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(44.dp)
+                .background(color = buttonStyle.backgroundColor, shape = RoundedCornerShape(100.dp))
+                .clickable(enabled = enabled, onClick = onClick)) {
+          Text(text, color = buttonStyle.contentColor, style = TextStyles.largeContentStyle)
+        }
+  } else {
     Box(
-      contentAlignment = Alignment.Center,
-      modifier =
-      modifier
-        .fillMaxWidth()
-        .height(44.dp)
-        .background(color = color, shape = RoundedCornerShape(100.dp))
-        .clickable(enabled = enabled,onClick = onClick)) {
-      Text(text, color = fontColor, style = TextStyles.largeContentStyle)
-    }
+        contentAlignment = Alignment.Center,
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(44.dp)
+                .background(color = color, shape = RoundedCornerShape(100.dp))
+                .clickable(enabled = enabled, onClick = onClick)) {
+          Text(text, color = fontColor, style = TextStyles.largeContentStyle)
+        }
   }
 }
 
@@ -69,7 +69,7 @@ fun CustomPopupButton(
 ) {
   if (buttonStyle == null) {
     Button(
-      enabled = enabled,
+        enabled = enabled,
         onClick = onClick,
         shape = RoundedCornerShape(100.dp),
         colors =
@@ -78,13 +78,13 @@ fun CustomPopupButton(
         modifier = modifier.height(35.dp).clip(shape = RoundedCornerShape(20.dp)),
     ) {
       Text(
-        text = text,
-        style = TextStyles.largeContentStyle,
+          text = text,
+          style = TextStyles.largeContentStyle,
       )
     }
   } else {
     Button(
-      enabled = enabled,
+        enabled = enabled,
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         colors =
@@ -94,8 +94,8 @@ fun CustomPopupButton(
         modifier = modifier.height(35.dp).clip(shape = RoundedCornerShape(20.dp)),
     ) {
       Text(
-        text = text,
-        style = TextStyles.largeContentStyle,
+          text = text,
+          style = TextStyles.largeContentStyle,
       )
     }
   }

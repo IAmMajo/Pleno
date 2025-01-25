@@ -32,7 +32,6 @@ import net.ipv64.kivop.models.attendancesList
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Text_prime
 
-
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
 fun AttendanceCoordinationList(
@@ -47,8 +46,7 @@ fun AttendanceCoordinationList(
   Column {
     LabelMax(onClick = { onVisibilityToggle(!isVisible) }, backgroundColor = background) {
       AttendanceSeparatorContent(
-        text = title, maxMembernumber = maxMembernumber, statusMembernumber = responses.size
-      )
+          text = title, maxMembernumber = maxMembernumber, statusMembernumber = responses.size)
     }
     // Item with AnimatedVisibility
     AnimatedVisibility(visible = isVisible, enter = expandVertically(), exit = shrinkVertically()) {
@@ -56,7 +54,6 @@ fun AttendanceCoordinationList(
     }
   }
 }
-
 
 // Composable für eine einzelne Zeile in der Rückmeldungs-Liste
 @Composable
@@ -83,8 +80,7 @@ fun AttendanceItemRow(item: attendancesList) {
             color = Text_prime,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium
-        )
+            fontWeight = FontWeight.Medium)
       }
 }
 

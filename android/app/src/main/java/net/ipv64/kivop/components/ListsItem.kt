@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.format.DateTimeFormatter
 import net.ipv64.kivop.R
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
@@ -37,7 +38,6 @@ import net.ipv64.kivop.ui.theme.Signal_neutral
 import net.ipv64.kivop.ui.theme.Signal_red
 import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_secondary
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun ListenItem(
@@ -135,21 +135,18 @@ fun ListenItem(
         Spacer(modifier = Modifier.width(8.dp))
         if (!isProtokoll) {
           Text(
-            text = itemListData.name,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp,
-            color = Text_prime,
-            modifier = Modifier.weight(1f)
-          )
-        }
-        else{
+              text = itemListData.name,
+              fontWeight = FontWeight.SemiBold,
+              fontSize = 18.sp,
+              color = Text_prime,
+              modifier = Modifier.weight(1f))
+        } else {
           Text(
-            text = "Protokoll: "+itemListData.name,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp,
-            color = Text_prime,
-            modifier = Modifier.weight(1f)
-          )
+              text = "Protokoll: " + itemListData.name,
+              fontWeight = FontWeight.SemiBold,
+              fontSize = 18.sp,
+              color = Text_prime,
+              modifier = Modifier.weight(1f))
         }
         if (!isProtokoll) {
           Label(backgroundColor = iconColor) {

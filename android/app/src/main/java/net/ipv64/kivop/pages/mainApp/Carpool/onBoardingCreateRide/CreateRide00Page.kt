@@ -29,61 +29,43 @@ import net.ipv64.kivop.ui.theme.TextStyles
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
 @Composable
-fun CreateRide00Page(pagerState: PagerState){
+fun CreateRide00Page(pagerState: PagerState) {
   val coroutineScope = rememberCoroutineScope()
   // Auto-navigation after 5 seconds
   LaunchedEffect(Unit) {
     delay(5000)
-    coroutineScope.launch {
-      pagerState.animateScrollToPage(1)
-    }
+    coroutineScope.launch { pagerState.animateScrollToPage(1) }
   }
   Column(
-    modifier = Modifier
-      .fillMaxWidth()
-      .fillMaxHeight()
-      .clickable {
-        coroutineScope.launch {
-          pagerState.animateScrollToPage(1)
-        }
+      modifier =
+          Modifier.fillMaxWidth().fillMaxHeight().clickable {
+            coroutineScope.launch { pagerState.animateScrollToPage(1) }
+          }) {
+        Column(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .weight(1f)
+                    .zIndex(1f)
+                    .background(Background_prime)
+                    .customRoundedBottom(Background_prime, heightPercent = 40, widthPercent = 30),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {
+              Box(modifier = Modifier.height(100.dp).aspectRatio(1.444f).background(Color.Red)) {
+                // todo: add img
+              }
+            }
+        Column(
+            modifier = Modifier.fillMaxWidth().weight(1f).background(Primary),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {
+              Text(
+                  text =
+                      "Erstelle eine neue Fahrgemeinschaft", // todo: replace text with:
+                                                             // getString(R.string.info_ride_text)
+                  style = TextStyles.headingStyle,
+                  color = Text_prime_light,
+                  textAlign = TextAlign.Center,
+              )
+            }
       }
-  ) {
-    Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(1f)
-        .zIndex(1f)
-        .background(Background_prime)
-        .customRoundedBottom(
-          Background_prime,
-          heightPercent = 40,
-          widthPercent = 30
-        ),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center
-    ){
-      Box(
-        modifier = Modifier
-          .height(100.dp)
-          .aspectRatio(1.444f)
-          .background(Color.Red)
-      ){
-        //todo: add img
-      }
-    }
-    Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(1f)
-        .background(Primary),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center
-    ){
-      Text(
-        text = "Erstelle eine neue Fahrgemeinschaft", //todo: replace text with: getString(R.string.info_ride_text)
-        style = TextStyles.headingStyle,
-        color = Text_prime_light,
-        textAlign = TextAlign.Center,)
-    }
-  }
 }

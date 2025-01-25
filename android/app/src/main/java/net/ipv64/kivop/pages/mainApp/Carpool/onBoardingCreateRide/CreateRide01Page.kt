@@ -30,94 +30,78 @@ import net.ipv64.kivop.ui.theme.TextStyles
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
 @Composable
-fun CreateRide01Page(pagerState: PagerState, createSpecialRideViewModel: CreateSpecialRideViewModel = viewModel()) {
+fun CreateRide01Page(
+    pagerState: PagerState,
+    createSpecialRideViewModel: CreateSpecialRideViewModel = viewModel()
+) {
   Column(
-    modifier = Modifier
-      .fillMaxWidth()
-      .fillMaxHeight()
-      .background(Primary),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center
-  ) {
-    SpacerTopBar()
-    Text(
-      text = "Über die Fahrt", //TODO: replace text with getString
-      style = TextStyles.headingStyle,
-      color = Text_prime_light)
-    Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(4f)
-        .background(Primary)
-        .padding(18.dp),
+      modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Primary),
       horizontalAlignment = Alignment.CenterHorizontally,
-    ){
-      
-      CustomInputField(
-        modifier = Modifier,
-        label = "Titel",
-        labelColor = Text_prime_light,
-        placeholder = "Vereinsfahrt",
-        backgroundColor = Background_prime,
-        value = createSpecialRideViewModel.name,
-        onValueChange = { createSpecialRideViewModel.name = it },
-      )
-      SpacerBetweenElements()
-      val maxChars = 128
-      CustomInputField(
-        modifier = Modifier,
-        label = "Beschreibung",
-        labelColor = Text_prime_light,
-        placeholder = "Beschreibe deine Fahrt...",
-        backgroundColor = Background_prime,
-        value = createSpecialRideViewModel.description,
-        onValueChange = 
-        { 
-          if (it.length <= maxChars){
-            createSpecialRideViewModel.description = it
-          }
-        },
-        singleLine = false,
-        lines = 3,
-        maxChars = maxChars
-      )
-    }
-    Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(1f)
-        .background(Background_prime)
-        .customRoundedTop(
-          Background_prime,
-          heightPercent = 40,
-          widthPercent = 30
-        )
-        .padding(18.dp),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Bottom
-    ){
-      val coroutineScope = rememberCoroutineScope()
-      val context = LocalContext.current
-      Button(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = 
-        { 
-          if (createSpecialRideViewModel.name != ""){
-            coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage+1) }
-          } else{
-            Toast.makeText(context, "Bitte geben Sie ein Titel an.", Toast.LENGTH_SHORT).show()
-          }
-        },
-        colors = ButtonDefaults.buttonColors(
-          containerColor = Primary,
-          contentColor = Background_prime
-        )
-      ) { 
+      verticalArrangement = Arrangement.Center) {
+        SpacerTopBar()
         Text(
-          text = "Weiter",
-          style = TextStyles.contentStyle,
-          color = Text_prime_light)
+            text = "Über die Fahrt", // TODO: replace text with getString
+            style = TextStyles.headingStyle,
+            color = Text_prime_light)
+        Column(
+            modifier = Modifier.fillMaxWidth().weight(4f).background(Primary).padding(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+          CustomInputField(
+              modifier = Modifier,
+              label = "Titel",
+              labelColor = Text_prime_light,
+              placeholder = "Vereinsfahrt",
+              backgroundColor = Background_prime,
+              value = createSpecialRideViewModel.name,
+              onValueChange = { createSpecialRideViewModel.name = it },
+          )
+          SpacerBetweenElements()
+          val maxChars = 128
+          CustomInputField(
+              modifier = Modifier,
+              label = "Beschreibung",
+              labelColor = Text_prime_light,
+              placeholder = "Beschreibe deine Fahrt...",
+              backgroundColor = Background_prime,
+              value = createSpecialRideViewModel.description,
+              onValueChange = {
+                if (it.length <= maxChars) {
+                  createSpecialRideViewModel.description = it
+                }
+              },
+              singleLine = false,
+              lines = 3,
+              maxChars = maxChars)
+        }
+        Column(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .weight(1f)
+                    .background(Background_prime)
+                    .customRoundedTop(Background_prime, heightPercent = 40, widthPercent = 30)
+                    .padding(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom) {
+              val coroutineScope = rememberCoroutineScope()
+              val context = LocalContext.current
+              Button(
+                  modifier = Modifier.fillMaxWidth(),
+                  onClick = {
+                    if (createSpecialRideViewModel.name != "") {
+                      coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                      }
+                    } else {
+                      Toast.makeText(context, "Bitte geben Sie ein Titel an.", Toast.LENGTH_SHORT)
+                          .show()
+                    }
+                  },
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = Primary, contentColor = Background_prime)) {
+                    Text(text = "Weiter", style = TextStyles.contentStyle, color = Text_prime_light)
+                  }
+            }
       }
-    }
-  }
 }

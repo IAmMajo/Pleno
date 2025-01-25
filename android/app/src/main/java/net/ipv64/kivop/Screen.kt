@@ -16,7 +16,7 @@ sealed class Screen(val rout: String) {
   object Carpool : Screen("carpool")
 
   object CarpoolRiders : Screen("carpoolRiders")
-  
+
   object CreateCarpool : Screen("createCarpool")
 
   object Events : Screen("events")

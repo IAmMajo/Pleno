@@ -1,4 +1,3 @@
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,133 +51,112 @@ fun AgendaCard(
                   shape = RoundedCornerShape(8.dp) // todo: get dp from stylesheet
                   )
               .padding(16.dp)) {
-
-    if (content.length > maxLength) {
-      shortenedContent =  content.take(maxLength) + "..."
-      ExpandableBox(
-        contentFoldedIn = {
-        Column() {
-          Row(modifier = Modifier.fillMaxWidth())
-          {
-            Text(
-              text = name,
-              color = fontColor,
-              style = MaterialTheme.typography.labelLarge,
-              fontWeight = FontWeight.SemiBold,
-              fontSize = 19.sp
-            )
-          }
-          Spacer(modifier = Modifier.height(8.dp))
-          Row(modifier = Modifier.fillMaxWidth())
-          {
-            Text(
-              text = shortenedContent,
-              color = fontColor,
-              fontWeight = FontWeight.Medium,
-              fontSize = 14.sp,
-              lineHeight = 20.sp,
-              letterSpacing = 0.25.sp
-            )
-          }
-          Spacer(modifier = Modifier.height(6.dp))
-          Row(
-            modifier = Modifier.fillMaxWidth().height(25.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.End
-          ) {
-            Icon(
-              painter = painterResource(id = R.drawable.ic_chevron_down_24),
-              contentDescription = null,
-              tint = Text_prime,
-              modifier = Modifier.size(30.dp)
-            )
-          }
-        }
-      },
-        contentFoldedOut = {
+        if (content.length > maxLength) {
+          shortenedContent = content.take(maxLength) + "..."
+          ExpandableBox(
+              contentFoldedIn = {
+                Column() {
+                  Row(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = name,
+                        color = fontColor,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 19.sp)
+                  }
+                  Spacer(modifier = Modifier.height(8.dp))
+                  Row(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = shortenedContent,
+                        color = fontColor,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        letterSpacing = 0.25.sp)
+                  }
+                  Spacer(modifier = Modifier.height(6.dp))
+                  Row(
+                      modifier = Modifier.fillMaxWidth().height(25.dp),
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.End) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_chevron_down_24),
+                            contentDescription = null,
+                            tint = Text_prime,
+                            modifier = Modifier.size(30.dp))
+                      }
+                }
+              },
+              contentFoldedOut = {
+                Column() {
+                  Row(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = name,
+                        color = fontColor,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 19.sp)
+                  }
+                  Spacer(modifier = Modifier.height(8.dp))
+                  Row(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = content,
+                        color = fontColor,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        letterSpacing = 0.25.sp)
+                  }
+                  Spacer(modifier = Modifier.height(6.dp))
+                  Row(
+                      modifier = Modifier.fillMaxWidth().height(25.dp),
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.End) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_chevron_up_24),
+                            contentDescription = null,
+                            tint = Text_prime,
+                            modifier = Modifier.size(30.dp))
+                      }
+                }
+              })
+        } else {
           Column() {
-            Row(modifier = Modifier.fillMaxWidth())
-            {
+            Row(modifier = Modifier.fillMaxWidth()) {
               Text(
-                text = name,
-                color = fontColor,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 19.sp
-              )
+                  text = name,
+                  color = fontColor,
+                  style = MaterialTheme.typography.labelLarge,
+                  fontWeight = FontWeight.SemiBold,
+                  fontSize = 19.sp)
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth())
-            {
+            Row(modifier = Modifier.fillMaxWidth()) {
               Text(
-                text = content,
-                color = fontColor,
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
-                lineHeight = 20.sp,
-                letterSpacing = 0.25.sp
-              )
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-            Row(
-              modifier = Modifier.fillMaxWidth().height(25.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.End
-            ) {
-              Icon(
-                painter = painterResource(id = R.drawable.ic_chevron_up_24),
-                contentDescription = null,
-                tint = Text_prime,
-                modifier = Modifier.size(30.dp)
-              )
+                  text = content,
+                  color = fontColor,
+                  fontWeight = FontWeight.Medium,
+                  fontSize = 14.sp,
+                  lineHeight = 20.sp,
+                  letterSpacing = 0.25.sp)
             }
           }
-        })
-    } else {
-      Column() {
-        Row(modifier = Modifier.fillMaxWidth())
-        {
-          Text(
-            text = name,
-            color = fontColor,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 19.sp
-          )
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(modifier = Modifier.fillMaxWidth())
-        {
-          Text(
-            text = content,
-            color = fontColor,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.25.sp
-          )
-        }
-      }
-    }
-    
-    
 
-    
-    
-    
-//        AndroidView(
-//            factory = { context ->
-//              TextView(context).apply { setTextColor(fontColor.toArgb()) }
-//            }) { textView ->
-//              markwon.setMarkdown(textView, markdown)
-//            }
+        //        AndroidView(
+        //            factory = { context ->
+        //              TextView(context).apply { setTextColor(fontColor.toArgb()) }
+        //            }) { textView ->
+        //              markwon.setMarkdown(textView, markdown)
+        //            }
       }
 }
+
 @Preview
 @Composable
 fun AgendaCardPreview() {
   AgendaCard(
       name = "Test Sitzung",
-      content = "## Agendaedölfm oläksdmglöksdfmgpölkdfamgffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffkläfnmdokähnfdlägmfdngfdnaghjkmafdokgnsdfajgfdangm ofkgoipndfsgp okfdoignafpdgiofd ngadfkhofadgjfdgsdfjhbojafdnjafdg+df+nhpfd igpsodfmgofdkgpadf"
-  )
+      content =
+          "## Agendaedölfm oläksdmglöksdfmgpölkdfamgffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffkläfnmdokähnfdlägmfdngfdnaghjkmafdokgnsdfajgfdangm ofkgoipndfsgp okfdoignafpdgiofd ngadfkhofadgjfdgsdfjhbojafdnjafdg+df+nhpfd igpsodfmgofdkgpadf")
 }

@@ -31,119 +31,105 @@ import net.ipv64.kivop.ui.theme.TextStyles
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
 @Composable
-fun CreateRide02Page(pagerState: PagerState, createSpecialRideViewModel: CreateSpecialRideViewModel = viewModel()) {
+fun CreateRide02Page(
+    pagerState: PagerState,
+    createSpecialRideViewModel: CreateSpecialRideViewModel = viewModel()
+) {
   val context = LocalContext.current
   Column(
-    modifier = Modifier
-      .fillMaxWidth()
-      .fillMaxHeight()
-      .background(Primary),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center
-  ) {
-    SpacerTopBar()
-    Text(
-      text = "Über dein Auto", //TODO: replace text with getString
-      style = TextStyles.headingStyle,
-      color = Text_prime_light)
-    Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(4f)
-        .background(Primary)
-        .padding(18.dp),
-      horizontalAlignment = Alignment.CenterHorizontally
-    ){
-
-      CustomInputField(
-        modifier = Modifier,
-        label = "Beschreibe dein Auto",
-        labelColor = Text_prime_light,
-        placeholder = "Beschreibe dein Auto...",
-        backgroundColor = Background_prime,
-        value = createSpecialRideViewModel.vehicleDescription,
-        onValueChange = { createSpecialRideViewModel.vehicleDescription = it },
-        singleLine = false,
-        lines = 3
-      )
-      SpacerBetweenElements()
-      CustomInputField(
-        modifier = Modifier,
-        label = "Freie Sitze",
-        labelColor = Text_prime_light,
-        placeholder = "Wieviele Sitze stehen zu verfügung?",
-        backgroundColor = Background_prime,
-        value = if(createSpecialRideViewModel.emptySeats != null) createSpecialRideViewModel.emptySeats.toString() else "",
-        onValueChange = 
-        { text ->
-          if (text.all { it.isDigit() }){
-            val number = text.toIntOrNull()
-            if (number != null && number in 0..255) {
-              createSpecialRideViewModel.emptySeats = number.toUByte()
-            }else if (number == null){
-              createSpecialRideViewModel.emptySeats = null
-            }else{
-              
-              Toast.makeText(context, "Bitte geben Sie eine Zahl zwischen 0 und 255 ein.", Toast.LENGTH_SHORT).show()
-            }
-          }
-        },
-          
-        isNumberOnly = true
-      )
-    }
-    Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(1f)
-        .background(Background_prime)
-        .customRoundedTop(
-          Background_prime,
-          heightPercent = 40,
-          widthPercent = 30
-        )
-        .padding(18.dp),
+      modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Primary),
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Bottom
-    ){
-      val coroutineScope = rememberCoroutineScope()
-      Button(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage-1) }},
-        colors = ButtonDefaults.buttonColors(
-          containerColor = Color.Transparent,
-          contentColor = Primary
-        )
-      ) {
-        if (createSpecialRideViewModel.done){
-          Text(
-            text = "Zurück",
-            style = TextStyles.contentStyle,
-            color = Primary)
-          }
-        }
-      Button(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = 
-        { 
-          if (createSpecialRideViewModel.emptySeats != null){
-          coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage+1) }
-        } else{
-          Toast.makeText(context, "Bitte geben Sie die freien Sitze an.", Toast.LENGTH_SHORT).show()
-        }
-     },
-        colors = ButtonDefaults.buttonColors(
-          containerColor = Primary,
-          contentColor = Background_prime
-        )
-      ) {
+      verticalArrangement = Arrangement.Center) {
+        SpacerTopBar()
         Text(
-          text = "Weiter",
-          style = TextStyles.contentStyle,
-          color = Text_prime_light)
+            text = "Über dein Auto", // TODO: replace text with getString
+            style = TextStyles.headingStyle,
+            color = Text_prime_light)
+        Column(
+            modifier = Modifier.fillMaxWidth().weight(4f).background(Primary).padding(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              CustomInputField(
+                  modifier = Modifier,
+                  label = "Beschreibe dein Auto",
+                  labelColor = Text_prime_light,
+                  placeholder = "Beschreibe dein Auto...",
+                  backgroundColor = Background_prime,
+                  value = createSpecialRideViewModel.vehicleDescription,
+                  onValueChange = { createSpecialRideViewModel.vehicleDescription = it },
+                  singleLine = false,
+                  lines = 3)
+              SpacerBetweenElements()
+              CustomInputField(
+                  modifier = Modifier,
+                  label = "Freie Sitze",
+                  labelColor = Text_prime_light,
+                  placeholder = "Wieviele Sitze stehen zu verfügung?",
+                  backgroundColor = Background_prime,
+                  value =
+                      if (createSpecialRideViewModel.emptySeats != null)
+                          createSpecialRideViewModel.emptySeats.toString()
+                      else "",
+                  onValueChange = { text ->
+                    if (text.all { it.isDigit() }) {
+                      val number = text.toIntOrNull()
+                      if (number != null && number in 0..255) {
+                        createSpecialRideViewModel.emptySeats = number.toUByte()
+                      } else if (number == null) {
+                        createSpecialRideViewModel.emptySeats = null
+                      } else {
+
+                        Toast.makeText(
+                                context,
+                                "Bitte geben Sie eine Zahl zwischen 0 und 255 ein.",
+                                Toast.LENGTH_SHORT)
+                            .show()
+                      }
+                    }
+                  },
+                  isNumberOnly = true)
+            }
+        Column(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .weight(1f)
+                    .background(Background_prime)
+                    .customRoundedTop(Background_prime, heightPercent = 40, widthPercent = 30)
+                    .padding(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom) {
+              val coroutineScope = rememberCoroutineScope()
+              Button(
+                  modifier = Modifier.fillMaxWidth(),
+                  onClick = {
+                    coroutineScope.launch {
+                      pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                    }
+                  },
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = Color.Transparent, contentColor = Primary)) {
+                    if (createSpecialRideViewModel.done) {
+                      Text(text = "Zurück", style = TextStyles.contentStyle, color = Primary)
+                    }
+                  }
+              Button(
+                  modifier = Modifier.fillMaxWidth(),
+                  onClick = {
+                    if (createSpecialRideViewModel.emptySeats != null) {
+                      coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                      }
+                    } else {
+                      Toast.makeText(
+                              context, "Bitte geben Sie die freien Sitze an.", Toast.LENGTH_SHORT)
+                          .show()
+                    }
+                  },
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = Primary, contentColor = Background_prime)) {
+                    Text(text = "Weiter", style = TextStyles.contentStyle, color = Text_prime_light)
+                  }
+            }
       }
-    }
-  }
 }
-
-

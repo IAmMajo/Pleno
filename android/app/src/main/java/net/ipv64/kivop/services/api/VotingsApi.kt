@@ -203,7 +203,7 @@ suspend fun GetVotingByID(ID: UUID): GetVotingDTO? =
                 startedAt,
                 closedAt,
                 anonymous,
-              iVoted,
+                iVoted,
                 options)
           } else {
             println("Fehler: Leere Antwort erhalten.")

@@ -1,6 +1,5 @@
 package net.ipv64.kivop.pages.mainApp
 
-
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
@@ -19,15 +18,12 @@ import net.ipv64.kivop.models.viewModel.ProtocolViewModelFactory
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProtocolEditPage(navController: NavController, meetingId: String, protocolLang: String) {
-  val protocolViewModel: ProtocolViewModel = viewModel(factory = ProtocolViewModelFactory(meetingId,protocolLang))
+  val protocolViewModel: ProtocolViewModel =
+      viewModel(factory = ProtocolViewModelFactory(meetingId, protocolLang))
   protocolViewModel.protocol
 
   Column(modifier = Modifier.fillMaxSize()) {
-    protocolViewModel.protocol?.votingResultsAppendix?.let {
-      Markdown(
-        markdown = it
-      )
-    }
+    protocolViewModel.protocol?.votingResultsAppendix?.let { Markdown(markdown = it) }
   }
   BackHandler {
     isBackPressed = navController.popBackStack()
@@ -35,7 +31,4 @@ fun ProtocolEditPage(navController: NavController, meetingId: String, protocolLa
   }
 
   Text(text = "ProtocolListPage")
-
-
-
 }

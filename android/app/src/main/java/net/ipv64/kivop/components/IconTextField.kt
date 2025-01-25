@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -44,84 +43,77 @@ import net.ipv64.kivop.ui.theme.Text_prime
 
 @Composable
 fun IconTextField(
-  text: String = "Max Musterman",
-  subText: String? = null,
-  textStyle: TextStyle = TextStyles.subHeadingStyle,
-  icon: ImageVector = Icons.Default.Notifications,
-  edit: Boolean = false,
-  newText: String = "",
-  onClick: () -> Unit = {},
-  onValueChange: (String) -> Unit = {}
+    text: String = "Max Musterman",
+    subText: String? = null,
+    textStyle: TextStyle = TextStyles.subHeadingStyle,
+    icon: ImageVector = Icons.Default.Notifications,
+    edit: Boolean = false,
+    newText: String = "",
+    onClick: () -> Unit = {},
+    onValueChange: (String) -> Unit = {}
 ) {
   val focusManager: FocusManager = LocalFocusManager.current
   Column(
-    modifier = Modifier
-      .fillMaxWidth()
-      .customShadow()
-      .background(Background_secondary, shape = RoundedCornerShape(8.dp))
-      .clickable(onClick = onClick)
-      .padding(10.dp),
-  ) {
-    Row(
       modifier =
-      Modifier.fillMaxWidth(),
-
-      verticalAlignment = Alignment.CenterVertically
-    ) {
+          Modifier.fillMaxWidth()
+              .customShadow()
+              .background(Background_secondary, shape = RoundedCornerShape(8.dp))
+              .clickable(onClick = onClick)
+              .padding(10.dp),
+  ) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
       IconBoxClickable(
-        icon = icon,
-        height = 50.dp,
-        backgroundColor = Tertiary.copy(0.2f),
-        tint = Tertiary,
-        onClick = {})
+          icon = icon,
+          height = 50.dp,
+          backgroundColor = Tertiary.copy(0.2f),
+          tint = Tertiary,
+          onClick = {})
       Spacer(Modifier.size(12.dp))
       if (!edit) {
         Text(text = text, color = Text_prime, style = textStyle)
       } else {
         BasicTextField(
-          modifier = Modifier.fillMaxWidth().height(50.dp).focusRequester(FocusRequester()),
-          textStyle = textStyle.copy(color = Text_prime),
-          singleLine = true,
-          value = newText,
-          onValueChange = {
-            // Transform first letter to be always uppercase
-            val transformedText =
-              if (it.isNotEmpty()) {
-                it.replaceFirstChar { char -> char.uppercase() }
-              } else {
-                it
-              }
-            onValueChange(transformedText)
-          },
-          keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-          // Clear Focus when done writing
-          keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-          decorationBox = { innerTextField ->
-            Row(
-              modifier = Modifier.fillMaxWidth(),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.Start
-            ) {
-              Box(modifier = Modifier.weight(1f)) {
-                if (newText.isEmpty()) {
-                  Text(
-                    text = text,
-                    color = Text_prime.copy(0.7f),
-                    style = MaterialTheme.typography.headlineMedium,
-                    maxLines = 1,
-                    modifier = Modifier.fillMaxWidth()
-                  )
-                }
-                Box(modifier = Modifier.fillMaxWidth().zIndex(2f)) { innerTextField() }
-              }
-              Icon(
-                modifier = Modifier.height(25.dp).aspectRatio(1f),
-                imageVector = Icons.Default.Edit,
-                contentDescription = null,
-                tint = Text_prime.copy(0.3f),
-              )
-            }
-          })
+            modifier = Modifier.fillMaxWidth().height(50.dp).focusRequester(FocusRequester()),
+            textStyle = textStyle.copy(color = Text_prime),
+            singleLine = true,
+            value = newText,
+            onValueChange = {
+              // Transform first letter to be always uppercase
+              val transformedText =
+                  if (it.isNotEmpty()) {
+                    it.replaceFirstChar { char -> char.uppercase() }
+                  } else {
+                    it
+                  }
+              onValueChange(transformedText)
+            },
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+            // Clear Focus when done writing
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            decorationBox = { innerTextField ->
+              Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.Start) {
+                    Box(modifier = Modifier.weight(1f)) {
+                      if (newText.isEmpty()) {
+                        Text(
+                            text = text,
+                            color = Text_prime.copy(0.7f),
+                            style = MaterialTheme.typography.headlineMedium,
+                            maxLines = 1,
+                            modifier = Modifier.fillMaxWidth())
+                      }
+                      Box(modifier = Modifier.fillMaxWidth().zIndex(2f)) { innerTextField() }
+                    }
+                    Icon(
+                        modifier = Modifier.height(25.dp).aspectRatio(1f),
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null,
+                        tint = Text_prime.copy(0.3f),
+                    )
+                  }
+            })
       }
     }
     if (!subText.isNullOrEmpty()) {
@@ -130,13 +122,9 @@ fun IconTextField(
     }
   }
 }
-  
-
 
 @Preview
 @Composable
 fun PreviewIconTextField() {
-  IconTextField(
-    subText = "test asdas da asd ad ad ada as dasdas asdasdasd"
-  )
+  IconTextField(subText = "test asdas da asd ad ad ada as dasdas asdasdasd")
 }

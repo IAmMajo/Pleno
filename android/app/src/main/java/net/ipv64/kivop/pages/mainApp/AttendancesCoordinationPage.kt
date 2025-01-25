@@ -55,24 +55,23 @@ import net.ipv64.kivop.ui.theme.Tertiary
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AttendancesCoordinationPage(
-  navController: NavController,
-  meetingId: String,
-  meetingViewModel: MeetingViewModel = viewModel(factory = MeetingViewModelFactory(meetingId))
+    navController: NavController,
+    meetingId: String,
+    meetingViewModel: MeetingViewModel = viewModel(factory = MeetingViewModelFactory(meetingId))
 ) {
   BackHandler {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
 
-
   val screenHeightDp = GetScreenHeight()
   var columnHeightDp by remember { mutableStateOf(0.dp) }
   val density = LocalDensity.current
 
-  val contentHeightDp by remember(screenHeightDp, columnHeightDp) {
-    derivedStateOf { screenHeightDp - columnHeightDp }
-  }
-
+  val contentHeightDp by
+      remember(screenHeightDp, columnHeightDp) {
+        derivedStateOf { screenHeightDp - columnHeightDp }
+      }
 
   var isDelayedVisible by remember { mutableStateOf(false) }
 
@@ -84,160 +83,125 @@ fun AttendancesCoordinationPage(
     }
   }
 
-
   // UI anzeigen
-// Layout
+  // Layout
   Column(modifier = Modifier.fillMaxSize().background(Tertiary)) {
     // Oberer Bereich
     Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        // .padding(start = 18.dp, end = 18.dp)
-        .onGloballyPositioned { coordinates ->
-          val newHeightDp = with(density) { coordinates.size.height.toDp() }
-          if (newHeightDp != columnHeightDp) {
-            columnHeightDp = newHeightDp
-          }
+        modifier =
+            Modifier.fillMaxWidth()
+                // .padding(start = 18.dp, end = 18.dp)
+                .onGloballyPositioned { coordinates ->
+                  val newHeightDp = with(density) { coordinates.size.height.toDp() }
+                  if (newHeightDp != columnHeightDp) {
+                    columnHeightDp = newHeightDp
+                  }
+                }) {
+          SpacerTopBar()
+          meetingViewModel.meeting?.let { SitzungsCard(it) }
         }
-    ) {
-      SpacerTopBar()
-      meetingViewModel.meeting?.let { SitzungsCard(it) }
-    }
 
     var scope = rememberCoroutineScope()
 
-
     // Hauptinhalt
-    val offsetY by animateDpAsState(
-      targetValue = if (isDelayedVisible) 0.dp else contentHeightDp,
-      animationSpec = tween(durationMillis = 500)
-    )
+    val offsetY by
+        animateDpAsState(
+            targetValue = if (isDelayedVisible) 0.dp else contentHeightDp,
+            animationSpec = tween(durationMillis = 500))
 
     Column(
-      modifier = Modifier
-        .offset(y = offsetY)
-        .fillMaxHeight()
-        .clip(RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp))
-        .background(Background_prime)
-        .padding(top = 18.dp, start = 18.dp, end = 18.dp),
+        modifier =
+            Modifier.offset(y = offsetY)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp))
+                .background(Background_prime)
+                .padding(top = 18.dp, start = 18.dp, end = 18.dp),
     ) {
-
-
       LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxWidth()
-      ) {
-        item {
-          meetingViewModel.you?.let {
-            LoggedUserAttendacneCard(
-              it,
-              meetingViewModel.meeting?.status,
-              acceptClick = {
-                scope.launch {
-                  meetingViewModel.planAttendance(PlanAttendance.present)
-                }
-              },
-              declineClick = {
-                scope.launch {
-                  meetingViewModel.planAttendance(PlanAttendance.absent)
-                }
-              },
-              maxMembernumber = meetingViewModel.maxMembernumber,
-              acceptedORpresentListcound = if (meetingViewModel.meeting?.status == MeetingStatus.scheduled) {
-                meetingViewModel.acceptedListcound
-              } else {
-                meetingViewModel.presentListcount
-              },
-              meetingViewModel = meetingViewModel
-            )
-          }
-          SpacerBetweenElements()
-        }
-        item {
-          Text(text = "Agenda")
-          SpacerBetweenElements()
-          meetingViewModel.meeting?.let { AgendaCard(name = meetingViewModel.meeting!!.name, content = it.description) }
-          SpacerBetweenElements()
-        }
-
-
-        item{
-          //      TODO: FINISH THIS
-          Text(text = "Votings")
-          SpacerBetweenElements()
-          Column( verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            meetingViewModel.votings.forEach { voting ->
-              var votingData =
-                ItemListData(
-                  title = voting.question,
-                  id = voting.id.toString(),
-                  date = null,
-                  time = null,
-                  meetingStatus = "",
-                  timeRend = false,
-                  iconRend = false
-                )
-              try {
-                votingData =
-                  ItemListData(
-                    title = voting.question,
-                    id = voting.id.toString(),
-                    date = voting.startedAt!!.toLocalDate(),
-                    time = null,
-                    meetingStatus = "",
-                    timeRend = false,
-                    iconRend = false
-                  )
-              } catch (e: Exception) {
-                Log.d("test", e.message.toString())
-                Log.d("test", voting.question)
+          verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+            item {
+              meetingViewModel.you?.let {
+                LoggedUserAttendacneCard(
+                    it,
+                    meetingViewModel.meeting?.status,
+                    acceptClick = {
+                      scope.launch { meetingViewModel.planAttendance(PlanAttendance.present) }
+                    },
+                    declineClick = {
+                      scope.launch { meetingViewModel.planAttendance(PlanAttendance.absent) }
+                    },
+                    maxMembernumber = meetingViewModel.maxMembernumber,
+                    acceptedORpresentListcound =
+                        if (meetingViewModel.meeting?.status == MeetingStatus.scheduled) {
+                          meetingViewModel.acceptedListcound
+                        } else {
+                          meetingViewModel.presentListcount
+                        },
+                    meetingViewModel = meetingViewModel)
               }
-              IconTextField(text = votingData.title, icon = ImageVector.vectorResource(R.drawable.ic_pie_chart), onClick ={
-                navController.navigate("abstimmung/${voting.id}")
-
+              SpacerBetweenElements()
+            }
+            item {
+              Text(text = "Agenda")
+              SpacerBetweenElements()
+              meetingViewModel.meeting?.let {
+                AgendaCard(name = meetingViewModel.meeting!!.name, content = it.description)
               }
-              )
-              {
+              SpacerBetweenElements()
+            }
 
+            item {
+              //      TODO: FINISH THIS
+              Text(text = "Votings")
+              SpacerBetweenElements()
+              Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                meetingViewModel.votings.forEach { voting ->
+                  var votingData =
+                      ItemListData(
+                          title = voting.question,
+                          id = voting.id.toString(),
+                          date = null,
+                          time = null,
+                          meetingStatus = "",
+                          timeRend = false,
+                          iconRend = false)
+                  try {
+                    votingData =
+                        ItemListData(
+                            title = voting.question,
+                            id = voting.id.toString(),
+                            date = voting.startedAt!!.toLocalDate(),
+                            time = null,
+                            meetingStatus = "",
+                            timeRend = false,
+                            iconRend = false)
+                  } catch (e: Exception) {
+                    Log.d("test", e.message.toString())
+                    Log.d("test", voting.question)
+                  }
+                  IconTextField(
+                      text = votingData.title,
+                      icon = ImageVector.vectorResource(R.drawable.ic_pie_chart),
+                      onClick = { navController.navigate("abstimmung/${voting.id}") }) {}
+                }
+              }
+              SpacerBetweenElements()
+            }
+
+            item {
+              Text(text = "Protokoll")
+              SpacerBetweenElements()
+              meetingViewModel.protocols.forEach { protocol ->
+                meetingViewModel.meeting?.let {
+                  ListenItem(
+                      itemListData = it,
+                      onClick = { navController.navigate("protokolle/${it.id}/${protocol.lang}") },
+                      isProtokoll = true)
+                }
+                SpacerBetweenElements()
               }
             }
           }
-          SpacerBetweenElements()
-        }
-
-        item {
-          Text(text = "Protokoll")
-          SpacerBetweenElements()
-          meetingViewModel.protocols.forEach { protocol ->
-            meetingViewModel.meeting?.let {
-              ListenItem(
-                itemListData = it,
-                onClick = {
-                  navController.navigate("protokolle/${it.id}/${protocol.lang}")
-                },
-                isProtokoll = true
-              )
-            }
-            SpacerBetweenElements()
-          }
-        }
-
-
-      }
     }
   }
-
 }
-          
-        
-
-
-
- 
-
-
-
-
-
-  
-

@@ -12,4 +12,3 @@ fun GetScreenHeight(): Dp {
   val density = LocalDensity.current
   return with(density) { configuration.screenHeightDp.dp }
 }
-

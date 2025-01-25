@@ -19,40 +19,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 
 @Composable
-fun ExpandableBox(contentFoldedIn: @Composable () -> Unit,contentFoldedOut: @Composable () -> Unit) {
-
+fun ExpandableBox(
+    contentFoldedIn: @Composable () -> Unit,
+    contentFoldedOut: @Composable () -> Unit
+) {
 
   var expanded by remember { mutableStateOf(false) }
   Surface(
-    modifier = Modifier.fillMaxWidth(),
-    color = Color.Transparent,
-    onClick = { expanded = !expanded },
+      modifier = Modifier.fillMaxWidth(),
+      color = Color.Transparent,
+      onClick = { expanded = !expanded },
   ) {
     AnimatedContent(
-      targetState = expanded,
-      transitionSpec = {
-        fadeIn(animationSpec = tween(150, 150)) togetherWith
-          fadeOut(animationSpec = tween(150)) using
-          SizeTransform { initialSize, targetSize ->
-            keyframes {
-              // Expand horizontally first.
-              IntSize(targetSize.width, initialSize.height) at 800
-              durationMillis = 300
-            }
+        targetState = expanded,
+        transitionSpec = {
+          fadeIn(animationSpec = tween(150, 150)) togetherWith
+              fadeOut(animationSpec = tween(150)) using
+              SizeTransform { initialSize, targetSize ->
+                keyframes {
+                  // Expand horizontally first.
+                  IntSize(targetSize.width, initialSize.height) at 800
+                  durationMillis = 300
+                }
+              }
+        },
+        label = "size transform") { targetExpanded ->
+          if (targetExpanded) {
+
+            contentFoldedOut()
+          } else {
+
+            contentFoldedIn()
           }
-      }, label = "size transform"
-    ) { targetExpanded ->
-      if (targetExpanded) {
-
-        contentFoldedOut()
-        
-      }
-      else {
-
-        contentFoldedIn()
-        
-      }
-    }
-   
+        }
   }
 }

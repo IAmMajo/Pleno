@@ -17,28 +17,28 @@ import io.noties.markwon.Markwon
 
 @Composable
 fun Markdown(
-  modifier: Modifier = Modifier,
-  markdown: String = "",
-  backgroundColor: Color = Color.Gray,
-  fontColor: Color = Color.Black
+    modifier: Modifier = Modifier,
+    markdown: String = "",
+    backgroundColor: Color = Color.Gray,
+    fontColor: Color = Color.Black
 ) {
   val context = LocalContext.current
   val markwon = Markwon.create(context)
 
   Box(
-    modifier =
-    modifier
-      .wrapContentHeight()
-      .background(
-        color = backgroundColor,
-        shape = RoundedCornerShape(16.dp) // todo: get dp from stylesheet
-      )
-      .padding(16.dp)) {
-    AndroidView(
-      factory = { context ->
-        TextView(context).apply { setTextColor(fontColor.toArgb()) }
-      }) { textView ->
-      markwon.setMarkdown(textView, markdown)
-    }
-  }
+      modifier =
+          modifier
+              .wrapContentHeight()
+              .background(
+                  color = backgroundColor,
+                  shape = RoundedCornerShape(16.dp) // todo: get dp from stylesheet
+                  )
+              .padding(16.dp)) {
+        AndroidView(
+            factory = { context ->
+              TextView(context).apply { setTextColor(fontColor.toArgb()) }
+            }) { textView ->
+              markwon.setMarkdown(textView, markdown)
+            }
+      }
 }

@@ -1,6 +1,5 @@
 package net.ipv64.kivop.services.api
 
-
 import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,31 +27,31 @@ object OpenCageGeocoder {
       return Pair(geometry.getDouble("lat"), geometry.getDouble("lng"))
     }
   }
-  
+
   suspend fun getAddressFromLatLngApi(lat: Double, lng: Double): Address? =
-    withContext(Dispatchers.IO) {
-      val url = "https://api.opencagedata.com/geocode/v1/json?q=$lat+$lng&key=$API_KEY"
-      val request = Request.Builder().url(url).build()
+      withContext(Dispatchers.IO) {
+        val url = "https://api.opencagedata.com/geocode/v1/json?q=$lat+$lng&key=$API_KEY"
+        val request = Request.Builder().url(url).build()
 
-      okHttpClient.newCall(request).execute().use { response ->
-        if (!response.isSuccessful) return@withContext null
+        okHttpClient.newCall(request).execute().use { response ->
+          if (!response.isSuccessful) return@withContext null
 
-        response.body?.string()?.let { responseBody ->
-          val jsonObject = JsonParser.parseString(responseBody).asJsonObject
-          val results = jsonObject.getAsJsonArray("results")
+          response.body?.string()?.let { responseBody ->
+            val jsonObject = JsonParser.parseString(responseBody).asJsonObject
+            val results = jsonObject.getAsJsonArray("results")
 
-          if (results.size() > 0) {
-            val components = results[0].asJsonObject.getAsJsonObject("components")
-            val road = components.get("road")?.asString
-            val houseNumber = components.get("house_number")?.asString
-            val city = components.get("city")?.asString
-            val postcode = components.get("postcode")?.asString
-            return@withContext Address(road, houseNumber, city, postcode)
-          } else {
-            return@withContext null
+            if (results.size() > 0) {
+              val components = results[0].asJsonObject.getAsJsonObject("components")
+              val road = components.get("road")?.asString
+              val houseNumber = components.get("house_number")?.asString
+              val city = components.get("city")?.asString
+              val postcode = components.get("postcode")?.asString
+              return@withContext Address(road, houseNumber, city, postcode)
+            } else {
+              return@withContext null
+            }
           }
+          return@withContext null
         }
-        return@withContext null
       }
-    }
 }

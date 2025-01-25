@@ -23,23 +23,20 @@ fun ProtocolListPage(navController: NavController, meetingsViewModel: MeetingsVi
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
   val meetings = meetingsViewModel.meetings
- 
+
   Column {
     SpacerTopBar()
 
     LazyColumn(
-      modifier = Modifier.fillMaxHeight(),
-      verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-      items(meetings) { meeting ->
-        if (meeting != null) {
-          ListenItem(
-            itemListData = meeting,
-            onClick = { navController.navigate("anwesenheit/${meeting.id}") },
-            isProtokoll = true
-          )
+        modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          items(meetings) { meeting ->
+            if (meeting != null) {
+              ListenItem(
+                  itemListData = meeting,
+                  onClick = { navController.navigate("anwesenheit/${meeting.id}") },
+                  isProtokoll = true)
+            }
+          }
         }
-      }
-    }
   }
 }

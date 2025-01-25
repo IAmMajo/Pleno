@@ -1,39 +1,23 @@
 package net.ipv64.kivop.components
 
-
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-
-
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.utsman.osmandcompose.CameraProperty
 import com.utsman.osmandcompose.CameraState
@@ -42,28 +26,23 @@ import com.utsman.osmandcompose.Marker
 import com.utsman.osmandcompose.MarkerState
 import com.utsman.osmandcompose.OpenStreetMap
 import com.utsman.osmandcompose.ZoomButtonVisibility
-import com.utsman.osmandcompose.rememberCameraState
-import com.utsman.osmandcompose.rememberMarkerState
 import kotlinx.coroutines.delay
 import net.ipv64.kivop.R
 import net.ipv64.kivop.services.calculateZoomLevel
-import net.ipv64.kivop.services.cameraStateSaver
-import net.ipv64.kivop.services.getCurrentLocation
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
 
-//TODO: bugged Look for alternative - not getting updated
+// TODO: bugged Look for alternative - not getting updated
 @Composable
 fun OsmdroidMapView(
-  startLocation: GeoPoint?,
-  destinationLocation: GeoPoint?,
-  currentLocation: GeoPoint? = null
+    startLocation: GeoPoint?,
+    destinationLocation: GeoPoint?,
+    currentLocation: GeoPoint? = null
 ) {
   val context = LocalContext.current
 
-  val startMarker = remember { MarkerState(startLocation ?: GeoPoint(0.1, 0.1))}
-  val destinationMarker = remember{ MarkerState(destinationLocation ?: GeoPoint(0.1, 0.1))}
+  val startMarker = remember { MarkerState(startLocation ?: GeoPoint(0.1, 0.1)) }
+  val destinationMarker = remember { MarkerState(destinationLocation ?: GeoPoint(0.1, 0.1)) }
 
   val zoomLevelState = remember { mutableDoubleStateOf(18.0) }
 
@@ -104,7 +83,7 @@ fun OsmdroidMapView(
       destinationMarker.geoPoint = GeoPoint(0.0, 0.0)
     }
   }
-  
+
   // Adjust the camera when both markers are present
   LaunchedEffect(startLocation, destinationLocation) {
     if (startLocation != null && destinationLocation != null) {
@@ -113,12 +92,12 @@ fun OsmdroidMapView(
       val distance = startLocation.distanceToAsDouble(destinationLocation)
       val newZoom = calculateZoomLevel(distance)
 
-      if (newZoom != zoomLevelState.value) {  // Prevent unnecessary recompositions
+      if (newZoom != zoomLevelState.value) { // Prevent unnecessary recompositions
         zoomLevelState.value = newZoom
-        val midpoint = GeoPoint(
-          (startLocation.latitude + destinationLocation.latitude) / 2,
-          (startLocation.longitude + destinationLocation.longitude) / 2
-        )
+        val midpoint =
+            GeoPoint(
+                (startLocation.latitude + destinationLocation.latitude) / 2,
+                (startLocation.longitude + destinationLocation.longitude) / 2)
 
         cameraState.animateTo(midpoint, newZoom)
         delay(2000)
@@ -128,43 +107,33 @@ fun OsmdroidMapView(
   }
 
   // Map properties (e.g., to disable gestures and zoom buttons)
-  val mapProperties = DefaultMapProperties.copy(
-    isTilesScaledToDpi = false,
-    tileSources = TileSourceFactory.DEFAULT_TILE_SOURCE,
-    isEnableRotationGesture = false,
-    zoomButtonVisibility = ZoomButtonVisibility.NEVER
-  )
+  val mapProperties =
+      DefaultMapProperties.copy(
+          isTilesScaledToDpi = false,
+          tileSources = TileSourceFactory.DEFAULT_TILE_SOURCE,
+          isEnableRotationGesture = false,
+          zoomButtonVisibility = ZoomButtonVisibility.NEVER)
 
   Box(
-    modifier = Modifier.width(500.dp).aspectRatio(1.5f).clip(RoundedCornerShape(8.dp)).background(Color.White)
-  ) {
-    OpenStreetMap(
-      modifier = Modifier.fillMaxSize().clipToBounds(),
-      cameraState = cameraState,
-      properties = mapProperties
-    ) {
-      val startIcon = ContextCompat.getDrawable(context, R.drawable.ic_place)
-      val destinationIcon = ContextCompat.getDrawable(context, R.drawable.ic_flag)
+      modifier =
+          Modifier.width(500.dp)
+              .aspectRatio(1.5f)
+              .clip(RoundedCornerShape(8.dp))
+              .background(Color.White)) {
+        OpenStreetMap(
+            modifier = Modifier.fillMaxSize().clipToBounds(),
+            cameraState = cameraState,
+            properties = mapProperties) {
+              val startIcon = ContextCompat.getDrawable(context, R.drawable.ic_place)
+              val destinationIcon = ContextCompat.getDrawable(context, R.drawable.ic_flag)
 
-      // Place start marker if location is provided
-      startLocation?.let {
-        Marker(
-          title = "Start",
-          icon = startIcon,
-          state = startMarker
-        )
-      }
+              // Place start marker if location is provided
+              startLocation?.let { Marker(title = "Start", icon = startIcon, state = startMarker) }
 
-      // Place destination marker if location is provided
-      destinationLocation?.let {
-        Marker(
-          title = "Destination",
-          icon = destinationIcon,
-          state = destinationMarker
-        )
+              // Place destination marker if location is provided
+              destinationLocation?.let {
+                Marker(title = "Destination", icon = destinationIcon, state = destinationMarker)
+              }
+            }
       }
-    }
-  }
 }
-
-

@@ -17,7 +17,10 @@ android {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables { useSupportLibrary = true }
     println("OPENCAGE_API_KEY = ${project.findProperty("OPENCAGE_API_KEY")}")
-    buildConfigField("String", "OPENCAGE_API_KEY", "\"${project.findProperty("OPENCAGE_API_KEY")?: "default_value_here"}\"")
+    buildConfigField(
+        "String",
+        "OPENCAGE_API_KEY",
+        "\"${project.findProperty("OPENCAGE_API_KEY")?: "default_value_here"}\"")
   }
 
   buildTypes {
@@ -72,5 +75,7 @@ dependencies {
   implementation(libs.accompanist.pager)
   implementation(libs.accompanist.pager.indicators)
   implementation("org.osmdroid:osmdroid-android:6.1.16")
-  implementation("tech.utsmankece:osm-androd-compose:0.0.3") //TODO: bugged Look for alternative - not getting updated
+  implementation(
+      "tech.utsmankece:osm-androd-compose:0.0.3") // TODO: bugged Look for alternative - not getting
+                                                  // updated
 }

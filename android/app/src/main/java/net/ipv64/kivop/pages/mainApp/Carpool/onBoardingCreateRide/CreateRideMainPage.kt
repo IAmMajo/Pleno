@@ -16,17 +16,19 @@ import net.ipv64.kivop.models.viewModel.CreateSpecialRideViewModel
 import net.ipv64.kivop.models.viewModel.MapViewModel
 import net.ipv64.kivop.services.checkAndRequestPermissions
 
-
 @Composable
 fun CreateRidePage(navController: NavController) {
-  if (ContextCompat.checkSelfPermission(LocalContext.current, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-    ContextCompat.checkSelfPermission(LocalContext.current, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+  if (ContextCompat.checkSelfPermission(
+      LocalContext.current, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+      PackageManager.PERMISSION_GRANTED ||
+      ContextCompat.checkSelfPermission(
+          LocalContext.current, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+          PackageManager.PERMISSION_GRANTED) {
     val createSpecialRideViewModel: CreateSpecialRideViewModel = viewModel()
     val mapViewModel: MapViewModel = viewModel()
     mapViewModel.fetchCurrentLocation(LocalContext.current)
     var pagerState =
-      rememberPagerState(
-        initialPage = 0, initialPageOffsetFraction = 0F, pageCount = { 5 })
+        rememberPagerState(initialPage = 0, initialPageOffsetFraction = 0F, pageCount = { 5 })
     Box(modifier = Modifier.fillMaxSize()) {
       HorizontalPager(state = pagerState, modifier = Modifier, userScrollEnabled = false) { page ->
         when (page) {
@@ -38,13 +40,17 @@ fun CreateRidePage(navController: NavController) {
         }
       }
     }
-  }else{
+  } else {
     // If permissions are not granted, request them
     checkAndRequestPermissions(LocalContext.current as Activity)
 
     // After permission request, check if permissions are denied (go back if declined)
-    if (ContextCompat.checkSelfPermission(LocalContext.current, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED &&
-      ContextCompat.checkSelfPermission(LocalContext.current, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED) {
+    if (ContextCompat.checkSelfPermission(
+        LocalContext.current, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+        PackageManager.PERMISSION_DENIED &&
+        ContextCompat.checkSelfPermission(
+            LocalContext.current, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+            PackageManager.PERMISSION_DENIED) {
       // If permission is denied, go back to the previous screen
       navController.popBackStack()
     }

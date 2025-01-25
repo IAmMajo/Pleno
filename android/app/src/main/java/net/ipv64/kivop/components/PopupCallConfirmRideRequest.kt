@@ -41,46 +41,44 @@ fun CallToConfirmRideRequest(
   var buttonOneStyle = if (enabled) primaryButtonStyle else neutralButtonStyle
   var buttonTwoStyle = secondaryButtonStyle
   Dialog(
-    onDismissRequest = { onDismissRequest() },
-  ){
+      onDismissRequest = { onDismissRequest() },
+  ) {
     Box(
-      modifier = Modifier
-        .wrapContentSize()
-        .padding(horizontal = 0.dp, vertical = 20.dp)
-        .background(Background_prime,shape = RoundedCornerShape(8.dp))
-        .padding(22.dp),
-    ){
+        modifier =
+            Modifier.wrapContentSize()
+                .padding(horizontal = 0.dp, vertical = 20.dp)
+                .background(Background_prime, shape = RoundedCornerShape(8.dp))
+                .padding(22.dp),
+    ) {
       Column() {
         Text(
-          text = dialogTitle,
-          style = TextStyles.headingStyle,
-          color = Text_prime,
+            text = dialogTitle,
+            style = TextStyles.headingStyle,
+            color = Text_prime,
         )
         SpacerBetweenElements(12.dp)
         Text(
-          text = dialogText,
-          style = TextStyles.contentStyle,
-          color = Text_tertiary,
+            text = dialogText,
+            style = TextStyles.contentStyle,
+            color = Text_tertiary,
         )
         SpacerBetweenElements(12.dp)
         composable()
         SpacerBetweenElements(12.dp)
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.End
-        ){
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
           CustomPopupButton(
-            text = buttonTextDismiss,
-            buttonStyle = buttonTwoStyle,
-            onClick = onDismissRequest,
-            modifier = Modifier,)
+              text = buttonTextDismiss,
+              buttonStyle = buttonTwoStyle,
+              onClick = onDismissRequest,
+              modifier = Modifier,
+          )
           SpacerBetweenElements(12.dp)
           CustomPopupButton(
-            text = buttonOneText,
-            buttonStyle = buttonOneStyle,
-            onClick = onConfirmation,
-            modifier = Modifier,
-            enabled = enabled)
+              text = buttonOneText,
+              buttonStyle = buttonOneStyle,
+              onClick = onConfirmation,
+              modifier = Modifier,
+              enabled = enabled)
         }
       }
     }
@@ -90,17 +88,14 @@ fun CallToConfirmRideRequest(
 @Preview
 @Composable
 fun PreviewPopup() {
-  Surface(modifier = Modifier.fillMaxWidth().fillMaxHeight()){
+  Surface(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
     CallToConfirmRideRequest(
-      onDismissRequest = {},
-      onConfirmation = {},
-      dialogTitle = "TestTitel",
-      dialogText = "Sind Sie sicher, dass Sie Ihr Ergebnis abschicken möchten?",
-      buttonOneText = "confirm",
-      buttonTextDismiss = "back",
-      composable = {
-        Text("test")
-      }
-    )
+        onDismissRequest = {},
+        onConfirmation = {},
+        dialogTitle = "TestTitel",
+        dialogText = "Sind Sie sicher, dass Sie Ihr Ergebnis abschicken möchten?",
+        buttonOneText = "confirm",
+        buttonTextDismiss = "back",
+        composable = { Text("test") })
   }
 }

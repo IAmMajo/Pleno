@@ -21,8 +21,6 @@ import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.TextStyles
 import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_tertiary
-import net.ipv64.kivop.ui.theme.textContentStyle
-import net.ipv64.kivop.ui.theme.textHeadingStyle
 
 @Composable
 fun CallToConfirmation(
@@ -78,15 +76,14 @@ fun CallToConfirmation(
 @Preview
 @Composable
 fun Screen() {
-  Surface(modifier = Modifier.fillMaxWidth().fillMaxHeight()){
+  Surface(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
     CallToConfirmation(
-      onDismissRequest = {},
-      onConfirmation = {},
-      dialogTitle = "TestTitel",
-      dialogText = "Sind Sie sicher, dass Sie Ihr Ergebnis abschicken möchten?",
-      buttonOneText = "confirm",
-      buttonTextDismiss = "back",
-      alert = false)
-
+        onDismissRequest = {},
+        onConfirmation = {},
+        dialogTitle = "TestTitel",
+        dialogText = "Sind Sie sicher, dass Sie Ihr Ergebnis abschicken möchten?",
+        buttonOneText = "confirm",
+        buttonTextDismiss = "back",
+        alert = false)
   }
 }

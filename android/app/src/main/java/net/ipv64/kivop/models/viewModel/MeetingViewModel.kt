@@ -21,7 +21,7 @@ import net.ipv64.kivop.services.api.getMeetingByID
 import net.ipv64.kivop.services.api.getProtocolsApi
 import net.ipv64.kivop.services.api.putPlanAttendance
 
-class MeetingViewModel(private val meetingId: String): ViewModel() {
+class MeetingViewModel(private val meetingId: String) : ViewModel() {
   var meeting by mutableStateOf<GetMeetingDTO?>(null)
   var protocols by mutableStateOf<List<GetRecordDTO>>(emptyList())
 
@@ -32,14 +32,16 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
   var responseItems by mutableStateOf<List<attendancesList>>(emptyList())
   var pendingList by mutableStateOf<List<attendancesList>>(emptyList())
   var presentList by mutableStateOf<List<attendancesList>>(emptyList())
-  var presentListcount: Int? = null;
+  var presentListcount: Int? = null
+
   var absentList by mutableStateOf<List<attendancesList>>(emptyList())
   var acceptedList by mutableStateOf<List<attendancesList>>(emptyList())
-  var acceptedListcound: Int? = null;
+  var acceptedListcound: Int? = null
+
   var maxMembernumber by mutableStateOf(0)
   var isPendingVisible by mutableStateOf(true)
-  var isPresentVisible by  mutableStateOf(true)
-  var isAbsentVisible by  mutableStateOf(true)
+  var isPresentVisible by mutableStateOf(true)
+  var isAbsentVisible by mutableStateOf(true)
   var isAcceptedVisible by mutableStateOf(true)
   var isAttendanceVisible by mutableStateOf(false)
 
@@ -71,9 +73,8 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
       response.let { attendance = it }
       try {
         you = response.find { it.itsame }
-        responseItems = response.map {
-          attendancesList(name = it.identity.name, status = it.status)
-        }
+        responseItems =
+            response.map { attendancesList(name = it.identity.name, status = it.status) }
         pendingList = responseItems.filter { it.status == null }
         presentList = responseItems.filter { it.status == AttendanceStatus.present }
         presentListcount = presentList.size
@@ -81,19 +82,19 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
         acceptedList = responseItems.filter { it.status == AttendanceStatus.accepted }
         acceptedListcound = acceptedList.size
         maxMembernumber = response.size
-      }catch (e: Exception){
+      } catch (e: Exception) {
         you = null
       }
     }
   }
 
   suspend fun planAttendance(status: PlanAttendance) {
-    if(putPlanAttendance(meetingId, status)){
+    if (putPlanAttendance(meetingId, status)) {
       var updatedStatus = AttendanceStatus.valueOf(status.name)
-      if (status == PlanAttendance.present){
+      if (status == PlanAttendance.present) {
         updatedStatus = AttendanceStatus.accepted
         you = you?.copy(status = updatedStatus)
-      }else{
+      } else {
         you = you?.copy(status = updatedStatus)
       }
       you?.let { user ->
@@ -112,7 +113,6 @@ class MeetingViewModel(private val meetingId: String): ViewModel() {
       }
     }
   }
-
 
   init {
     fetchMeeting()
