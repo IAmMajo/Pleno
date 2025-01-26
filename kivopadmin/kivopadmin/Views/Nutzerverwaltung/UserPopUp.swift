@@ -76,7 +76,7 @@ struct UserPopupView: View {
                 HStack {
                     Text("E-Mail:")
                     Spacer()
-                    Text(user.email ?? "Keine E-Mail").foregroundColor(.gray)
+                    Text(user.email).foregroundColor(.gray)
                 }
                 Divider()
 
@@ -158,13 +158,14 @@ struct UserPopupView: View {
 
     private func loadInitialData() {
         debugPrint("🔄 Benutzerprofil wird geladen...")
-        editedName = user.name ?? ""
-        tempIsAdmin = user.isAdmin ?? false
+        editedName = user.name
+        tempIsAdmin = user.isAdmin
         profileImageData = user.profileImage // Lokale Kopie des Profilbilds
     }
 
     private func saveChanges() {
-        guard let userId = user.uid?.uuidString else {
+        let userId = user.uid.uuidString
+        guard !userId.isEmpty else {
             debugPrint("❌ Fehler: Benutzer-ID ungültig.")
             showError = true
             return
@@ -196,9 +197,9 @@ struct UserPopupView: View {
 
 
         // Admin-Status aktualisieren
-        if tempIsAdmin != (user.isAdmin ?? false) {
+        if tempIsAdmin != (user.isAdmin) {
             dispatchGroup.enter()
-            MainPageAPI.updateAdminStatus(userId: userId, isAdmin: tempIsAdmin, isActive: user.isActive ?? true) { result in
+            MainPageAPI.updateAdminStatus(userId: userId, isAdmin: tempIsAdmin, isActive: user.isActive) { result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
@@ -223,7 +224,8 @@ struct UserPopupView: View {
     }
 
     private func deleteAccount() {
-        guard let userId = user.uid?.uuidString else {
+        let userId = user.uid.uuidString
+        guard !userId.isEmpty else {
             debugPrint("❌ Fehler: Benutzer-ID ungültig.")
             showError = true
             return
@@ -246,7 +248,8 @@ struct UserPopupView: View {
     }
 
     private func deleteProfilePicture() {
-        guard let userId = user.uid?.uuidString else {
+        let userId = user.uid.uuidString
+        guard !userId.isEmpty else {
             debugPrint("❌ Fehler: Benutzer-ID ungültig.")
             showError = true
             return
