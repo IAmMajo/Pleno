@@ -191,8 +191,7 @@ struct MainPage: View {
                     self.errorMessage = nil
                     self.name = profile.name
                     self.shortName = MainPageAPI.calculateShortName(from: profile.name)
-//                    if let image = UIImage(data: profile.profileImage) {
-                   if let image = UIImage(data: profile.profileImage ?? Data()) { //Hanna
+                    if let imageData = profile.profileImage, let image = UIImage(data: imageData) {
                         self.profileImage = image
                     } else {
                         self.profileImage = nil
