@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -50,15 +51,17 @@ fun IconTextField(
     edit: Boolean = false,
     newText: String = "",
     onClick: () -> Unit = {},
-    onValueChange: (String) -> Unit = {}
+    onValueChange: (String) -> Unit = {},
+    isClickable: Boolean = true
 ) {
   val focusManager: FocusManager = LocalFocusManager.current
   Column(
       modifier =
           Modifier.fillMaxWidth()
               .customShadow()
-              .background(Background_secondary, shape = RoundedCornerShape(8.dp))
-              .clickable(onClick = onClick)
+              .clip(shape = RoundedCornerShape(8.dp))
+              .background(Background_secondary)
+              .clickable(onClick = onClick, enabled = isClickable)
               .padding(10.dp),
   ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
