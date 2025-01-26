@@ -144,7 +144,12 @@ struct MainPage_ProfilView_ProfilPicture: View {
                     print("Profilbild erfolgreich aktualisiert.")
                     self.selectedImage = updatedImage
                 case .failure(let error):
-                    self.errorMessage = "Fehler beim Aktualisieren des Profilbilds: \(error.localizedDescription)"
+                    if let nsError = error as NSError?, nsError.code == 423 {
+                        errorMessage = nsError.localizedDescription
+                    } else {
+                        errorMessage = "Fehler beim Aktualisieren des Profilbilds: \(error.localizedDescription)"
+                    }
+
                 }
             }
         }
@@ -168,8 +173,11 @@ struct MainPage_ProfilView_ProfilPicture: View {
                 case .success:
                     print("Profilbild erfolgreich gelöscht.")
                 case .failure(let error):
-                    self.errorMessage = "Fehler beim Löschen des Profilbilds: \(error.localizedDescription)"
-                    print("[DEBUG] Fehler: \(error.localizedDescription)")
+                    if let nsError = error as NSError?, nsError.code == 423 {
+                        errorMessage = nsError.localizedDescription
+                    } else {
+                        self.errorMessage = "Fehler beim Löschen des Profilbilds: \(error.localizedDescription)"
+                    }
                 }
             }
         }
