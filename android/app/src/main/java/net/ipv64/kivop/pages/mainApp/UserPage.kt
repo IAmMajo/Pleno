@@ -17,7 +17,6 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -41,7 +40,6 @@ import net.ipv64.kivop.components.ImgPicker
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.handleLogout
-import net.ipv64.kivop.models.ButtonStyle
 import net.ipv64.kivop.models.alertButtonStyle
 import net.ipv64.kivop.models.primaryButtonStyle
 import net.ipv64.kivop.models.viewModel.UserViewModel
@@ -51,7 +49,6 @@ import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Signal_blue
-import net.ipv64.kivop.ui.theme.Signal_red
 import net.ipv64.kivop.ui.theme.TextStyles
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
@@ -104,29 +101,29 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
     ) {
       if (user != null) {
         ImgPicker(
-          img = user.profileImage.takeIf { !editMode },
-          userName = user.name ?: "User",
-          edit = editMode,
-          onImagePicked = {
-              uri -> newImgByteArray = uri?.let { uriToBase64String(navController.context, it) }
-          }
-        )
-//        if (editMode) {
-//          ImgPicker(
-//            img = user.profileImage.takeIf { !editMode },
-//            userName = user.name ?: "User",
-//            edit = true,
-//            onImagePicked = { 
-//              uri -> newImgByteArray = uri?.let { uriToBase64String(navController.context, it) }
-//            } // Capture selected image
-//          )
-//        } else {
-//          if (user.profileImage != null) {
-//            ImgPicker(user.profileImage, edit = false, onImagePicked = {})
-//          } else {
-//            ImgPicker(userName = user.name, edit = false, onImagePicked = {})
-//          }
-//        }
+            img = user.profileImage.takeIf { !editMode },
+            userName = user.name ?: "User",
+            edit = editMode,
+            onImagePicked = { uri ->
+              newImgByteArray = uri?.let { uriToBase64String(navController.context, it) }
+            })
+        //        if (editMode) {
+        //          ImgPicker(
+        //            img = user.profileImage.takeIf { !editMode },
+        //            userName = user.name ?: "User",
+        //            edit = true,
+        //            onImagePicked = {
+        //              uri -> newImgByteArray = uri?.let { uriToBase64String(navController.context,
+        // it) }
+        //            } // Capture selected image
+        //          )
+        //        } else {
+        //          if (user.profileImage != null) {
+        //            ImgPicker(user.profileImage, edit = false, onImagePicked = {})
+        //          } else {
+        //            ImgPicker(userName = user.name, edit = false, onImagePicked = {})
+        //          }
+        //        }
       }
     }
     Column(
@@ -140,7 +137,10 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
                             topStart = 22.dp, topEnd = 22.dp)) // todo: Rounded Corner anpassen
                 .padding(top = 18.dp)
                 .padding(horizontal = 18.dp)) {
-          Text(text = getString(R.string.user_info), style = TextStyles.subHeadingStyle,)
+          Text(
+              text = getString(R.string.user_info),
+              style = TextStyles.subHeadingStyle,
+          )
           SpacerBetweenElements()
           var name by remember { mutableStateOf<String>("") }
           IconTextField(
@@ -149,14 +149,14 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
               edit = editMode,
               newText = name,
               textStyle = TextStyles.largeContentStyle,
-              onValueChange = { name = it }, 
+              onValueChange = { name = it },
               isClickable = false)
           SpacerBetweenElements()
           IconTextField(
-            icon = Icons.Outlined.Email,
-            text = user?.email ?: "",
-            textStyle = TextStyles.largeContentStyle,
-            isClickable = false)
+              icon = Icons.Outlined.Email,
+              text = user?.email ?: "",
+              textStyle = TextStyles.largeContentStyle,
+              isClickable = false)
           Spacer(modifier = Modifier.weight(1f))
           if (editMode) {
             Button(
@@ -200,7 +200,7 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
                 modifier = Modifier.fillMaxWidth(),
                 text = getString(R.string.btn_del_user),
                 buttonStyle = alertButtonStyle,
-                onClick = {}) 
+                onClick = {})
           }
           SpacerBetweenElements()
         }

@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -65,11 +64,7 @@ fun IconTextField(
               .padding(10.dp),
   ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-      IconBox(
-          icon = icon,
-          height = 50.dp,
-          backgroundColor = Tertiary.copy(0.2f),
-          tint = Tertiary)
+      IconBox(icon = icon, height = 50.dp, backgroundColor = Tertiary.copy(0.2f), tint = Tertiary)
       Spacer(Modifier.size(12.dp))
       if (!edit) {
         Text(text = text, color = Text_prime, style = textStyle)

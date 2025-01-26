@@ -118,9 +118,18 @@ suspend fun getUserProfile(): UserProfileDTO? =
                 profileObject.get("createdAt")?.asString.let { stringToLocalDateTime(it) }
             val isNotificationsActive = profileObject.get("isNotificationsActive").asBoolean
             val isPushNotificationsActive = profileObject.get("isPushNotificationsActive").asBoolean
-            
+
             UserProfileDTO(
-                uid, email, name, profileImage, isAdmin, isActive, emailVerification, createdAt,isNotificationsActive, isPushNotificationsActive)
+                uid,
+                email,
+                name,
+                profileImage,
+                isAdmin,
+                isActive,
+                emailVerification,
+                createdAt,
+                isNotificationsActive,
+                isPushNotificationsActive)
           } else {
             println("Fehler: Leere Antwort erhalten.")
             null

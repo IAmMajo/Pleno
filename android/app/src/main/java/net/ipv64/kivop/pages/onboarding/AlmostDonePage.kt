@@ -63,16 +63,16 @@ fun AlmostDonePage(navController: NavController, initState: Int) {
                     navigateToMainActivity(navController.context)
                   } else if (response == "Email not verified") {
                     Toast.makeText(
-                      navController.context,
-                      getString(R.string.missing_email_verification),
-                      Toast.LENGTH_SHORT)
-                      .show()
+                            navController.context,
+                            getString(R.string.missing_email_verification),
+                            Toast.LENGTH_SHORT)
+                        .show()
                   } else {
                     Toast.makeText(
-                      navController.context,
-                      getString(R.string.missing_admin_verification),
-                      Toast.LENGTH_SHORT)
-                      .show()
+                            navController.context,
+                            getString(R.string.missing_admin_verification),
+                            Toast.LENGTH_SHORT)
+                        .show()
                     state = 2
                   }
                 }

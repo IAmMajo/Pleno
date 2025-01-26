@@ -14,7 +14,7 @@ import net.ipv64.kivop.services.api.patchUserProfile
 class UserViewModel : ViewModel() {
   private var user by mutableStateOf<UserProfileDTO?>(null)
     private set
-  
+
   fun fetchUser() {
     viewModelScope.launch {
       val response = getUserProfile() // Call the API service to get user profile
@@ -26,22 +26,30 @@ class UserViewModel : ViewModel() {
     return this.user
   }
 
-  fun updateUser(email: String? = null, name: String? = null, profileImage: String? = null, isNotificationsActive: Boolean? = null, isPushNotificationsActive: Boolean? = null) {
+  fun updateUser(
+      email: String? = null,
+      name: String? = null,
+      profileImage: String? = null,
+      isNotificationsActive: Boolean? = null,
+      isPushNotificationsActive: Boolean? = null
+  ) {
     user?.let {
       val updatedUser =
           it.copy(
-            email = email ?: it.email,
-            name = if (name?.isNotEmpty() == true) name else it.name,
-            profileImage = profileImage ?: it.profileImage,
-            isNotificationsActive = isNotificationsActive ?: it.isNotificationsActive,
-            isPushNotificationsActive = isPushNotificationsActive ?: it.isPushNotificationsActive
-          )
+              email = email ?: it.email,
+              name = if (name?.isNotEmpty() == true) name else it.name,
+              profileImage = profileImage ?: it.profileImage,
+              isNotificationsActive = isNotificationsActive ?: it.isNotificationsActive,
+              isPushNotificationsActive = isPushNotificationsActive ?: it.isPushNotificationsActive)
       if (updatedUser != it) {
         viewModelScope.launch {
           val response =
               patchUserProfile(
                   UserProfileUpdateDTO(
-                      name = if (name.isNullOrEmpty()) null else name, profileImage,isNotificationsActive,isPushNotificationsActive),
+                      name = if (name.isNullOrEmpty()) null else name,
+                      profileImage,
+                      isNotificationsActive,
+                      isPushNotificationsActive),
               )
           if (response?.isSuccessful == true) {
             user = updatedUser
