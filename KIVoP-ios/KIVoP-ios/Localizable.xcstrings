@@ -1102,6 +1102,9 @@
         }
       }
     },
+    "Mitglied 1" : {
+
+    },
     "Mitglieder" : {
       "localizations" : {
         "de" : {
@@ -1436,9 +1439,6 @@
       }
     },
     "Passwort zurücksetzen" : {
-
-    },
-    "Person 1" : {
 
     },
     "Plakat %@" : {

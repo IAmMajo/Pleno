@@ -11,7 +11,7 @@ import RideServiceDTOs
 
 struct EventVotingView: View {
     
-//    @State private var address = "Kamp-Lintfort, Germany"
+    @State private var address = "Datteln, Deutschland"
     var eventID: UUID
     @State private var details: GetEventDetailDTO?
     let baseURL = "https://kivop.ipv64.net"
@@ -42,21 +42,21 @@ struct EventVotingView: View {
                                                     .frame(height: 150)
                                                     .cornerRadius(12)
                         
-                        // Address Box
-                        //                        VStack {
-                        //                            Text("Adresse")
-                        //                                .font(.subheadline)
-                        //                                .foregroundColor(.gray)
-                        //                                .padding(.bottom, 5)
-                        //
-                        //                            Text(address)
-                        //                                .font(.body)
-                        //                                .multilineTextAlignment(.leading)
-                        //                                .padding()
-                        //                                .frame(maxWidth: .infinity, alignment: .leading)
-                        //                                .background(Color(UIColor.systemGray6))
-                        //                                .cornerRadius(8)
-                        //                        }
+                         //Address Box
+                                                VStack {
+                                                    Text("Adresse")
+                                                        .font(.subheadline)
+                                                        .foregroundColor(.gray)
+                                                        .padding(.bottom, 5)
+                        
+                                                    Text(address)
+                                                        .font(.body)
+                                                        .multilineTextAlignment(.leading)
+                                                        .padding()
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                        .background(Color(UIColor.systemGray6))
+                                                        .cornerRadius(8)
+                                                }
                             .frame(width: 150)
                             }
                     }
@@ -161,7 +161,7 @@ struct EventVotingView: View {
                         Button(action: {
                             print("Mitglied gedrückt")
                         }) {
-                            Text("Person 1")
+                            Text("Mitglied 1")
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding()
                                 .background(Color(UIColor.systemGray6))

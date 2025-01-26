@@ -80,9 +80,6 @@ struct EventView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
                             }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.gray)
                         }
                     }
                 }

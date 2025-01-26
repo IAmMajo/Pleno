@@ -99,6 +99,15 @@ struct MainPage: View {
                         } else {
                             Text("No meetings available.")
                         }
+                        
+                        NavigationLink(destination: EventView()) {
+                            HStack {
+                               Image(systemName: "star")
+                                    .foregroundColor(.accentColor)
+                                Text("Events")
+                                    .foregroundColor(Color.primary)
+                            }
+                        }
                     }
 
                     Section {
@@ -137,15 +146,6 @@ struct MainPage: View {
                                    .foregroundColor(Color.primary)
                            }
                        }
-                        
-                        NavigationLink(destination: EventView()) {
-                            HStack {
-                               Image(systemName: "text.rectangle.page.fill")
-                                    .foregroundColor(.accentColor)
-                                Text("Events")
-                                    .foregroundColor(Color.primary)
-                            }
-                        }
                     }
                 }
                 .listStyle(InsetGroupedListStyle())
