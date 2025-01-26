@@ -118,7 +118,8 @@ struct MainPage_ProfilView_ProfilPicture: View {
                 self.isLoading = false
                 switch result {
                 case .success(let profile):
-                    if let image = UIImage(data: profile.profileImage) {
+//                    if let image = UIImage(data: profile.profileImage) {
+                       if let image = UIImage(data: profile.profileImage ?? Data()) { // Hanna
                         self.selectedImage = image
                     } else {
                         self.selectedImage = nil

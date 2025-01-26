@@ -127,7 +127,7 @@ struct PostersView: View {
                                   .padding(.trailing, 5)
                             }
                          }
-                         if(item.earliestPosition.status == "overdue"){
+                         if(item.expiredCount > 0){
                             if item.expiredCount > 99 {
                                Capsule()
                                   .fill(.red)

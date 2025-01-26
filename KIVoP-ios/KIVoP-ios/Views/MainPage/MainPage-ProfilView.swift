@@ -179,7 +179,8 @@ struct MainPage_ProfilView: View {
                 case .success(let profile):
                     self.name = profile.name
                     self.shortName = MainPageAPI.calculateShortName(from: profile.name)
-                    if let image = UIImage(data: profile.profileImage) {
+//                    if let image = UIImage(data: profile.profileImage) {
+                       if let image = UIImage(data: profile.profileImage ?? Data()) { // Hanna
                         self.profileImage = image
                     } else {
                         self.profileImage = nil
