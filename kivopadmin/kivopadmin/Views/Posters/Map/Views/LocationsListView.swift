@@ -1,9 +1,3 @@
-//
-//  LocationsListView.swift
-//  kivopadmin
-//
-//  Created by Adrian on 22.01.25.
-//
 
 import SwiftUI
 import PosterServiceDTOs
@@ -34,12 +28,7 @@ struct LocationsListView: View {
     
     var body: some View {
         List {
-            ForEach(locationViewModel.filteredPositions.sorted { lhs, rhs in
-                let statusOrder = ["toHang", "hangs", "overdue", "takenDown"]
-                let lhsIndex = statusOrder.firstIndex(of: lhs.position.status.lowercased()) ?? Int.max
-                let rhsIndex = statusOrder.firstIndex(of: rhs.position.status.lowercased()) ?? Int.max
-                return lhsIndex < rhsIndex
-            }, id: \.position.id) { position in
+            ForEach(locationViewModel.filteredPositions, id: \.position.id) { position in
                 Button {
                     locationViewModel.showNextLocation(location: position)
                 } label: {

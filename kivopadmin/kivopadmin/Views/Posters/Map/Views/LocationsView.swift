@@ -1,10 +1,3 @@
-//
-//  LocationsView.swift
-//  kivopadmin
-//
-//  Created by Adrian on 22.01.25.
-//
-
 import SwiftUI
 import PosterServiceDTOs
 import MapKit
@@ -127,7 +120,7 @@ struct LocationsView: View {
             }
         }
         .sheet(item: $locationViewModel.sheetPosition, onDismiss: nil) { position in
-            LocationDetailView(position: position)
+            LocationDetailView(position: position, users: userManager.users, poster: poster)
         }
         .sheet(isPresented: $showUserSelectionSheet) {
             UserSelectionSheet(users: userManager.users, selectedUsers: $selectedUsers)
@@ -347,7 +340,7 @@ struct LocationsView: View {
         }
     }
     private func addLocation() {
-        let currentLocation = mapRegion.center
+        let currentLocation = locationViewModel.mapLocation.center
         
         // Create a new CreatePosterPositionDTO object
         let newPosterPosition = CreatePosterPositionDTO(
@@ -360,9 +353,11 @@ struct LocationsView: View {
         // Add the new object to the list
         //createPosterPositions.append(newPosterPosition)
         
-        locationViewModel.fetchPosterPositions(poster: poster)
-        // Debugging output
-        print("Added new poster position: \(newPosterPosition)")
+        
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            locationViewModel.fetchPosterPositions(poster: poster)
+        }
     }
 }
 

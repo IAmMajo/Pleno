@@ -1,9 +1,3 @@
-//
-//  LocationPreviewView.swift
-//  kivopadmin
-//
-//  Created by Adrian on 23.01.25.
-//
 
 import SwiftUI
 import PosterServiceDTOs

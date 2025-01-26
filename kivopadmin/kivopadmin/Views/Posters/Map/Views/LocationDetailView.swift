@@ -1,17 +1,15 @@
-//
-//  LocationDetailView.swift
-//  kivopadmin
-//
-//  Created by Adrian on 23.01.25.
-//
 
 import SwiftUI
 import PosterServiceDTOs
+import AuthServiceDTOs
 
 struct LocationDetailView: View {
     @EnvironmentObject private var locationViewModel: LocationsViewModel
     
     let position: PosterPositionWithAddress
+    var users: [UserProfileDTO]
+    var poster: PosterResponseDTO
+    @State private var showDeleteConfirmation = false
     
     func getDateStatusText(position: PosterPositionResponseDTO) -> (text: String, color: Color) {
        let status = position.status
@@ -23,7 +21,7 @@ struct LocationDetailView: View {
              return (text: "hängt", color: .blue)
           }
        case "takenDown":
-          return (text: "abgehängt", color: .green)
+          return (text: "abgehangen", color: .green)
        case "toHang":
           return (text: "hängt noch nicht", color: Color(UIColor.secondaryLabel))
        case "overdue":
@@ -34,19 +32,24 @@ struct LocationDetailView: View {
     }
     
     var body: some View {
-        ScrollView{
-            VStack{
-                imageSection.shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
-                
-                VStack(alignment: .leading, spacing: 16){
-                    titleSection
+        NavigationStack{
+            ScrollView{
+                VStack{
+                    imageSection.shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
+                    
+                    VStack(alignment: .leading, spacing: 16){
+                        titleSection
+                        bodySection
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    deleteSection
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
             }
+            .ignoresSafeArea()
+            .background(.ultraThinMaterial)
         }
-        .ignoresSafeArea()
-        .background(.ultraThinMaterial)
+
     }
 }
 
@@ -70,11 +73,70 @@ extension LocationDetailView {
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 8){
             Text(position.address).font(.largeTitle).fontWeight(.semibold)
-            Text(getDateStatusText(position: position.position).text)
-               .font(.caption)
-               .foregroundStyle(getDateStatusText(position: position.position).color)
         }
     }
+    
+    private var bodySection: some View {
+        VStack(alignment: .leading, spacing: 8){
+            Text(getDateStatusText(position: position.position).text)
+               .font(.headline)
+               .foregroundStyle(getDateStatusText(position: position.position).color)
+            ProgressBarView(position: position.position)
+            Divider()
+            HStack{
+                if position.position.responsibleUsers.count == 1 {
+                    Text("Verantwortliche Person").font(.headline)
+                } else if position.position.responsibleUsers.count > 1 {
+                    Text("Verantwortliche Personen").font(.headline)
+                }
+                NavigationLink(destination: EditResponsibleUsers(poster: poster,selectedUsers: position.position.responsibleUsers.map { $0.id }, posterPosition: position.position)){
+                    Text("Ändern")
+                }
+            }
+
+            ForEach(position.position.responsibleUsers, id: \.id) { user in
+                Text(user.name)
+                    .font(.body)
+                    .foregroundColor(.primary)
+
+                .padding(8)
+                .background(RoundedRectangle(cornerRadius: 8).fill(Color.gray.opacity(0.1)))
+            }
+        }
+
+    }
+    private var deleteSection: some View {
+        Button {
+            // Zeige den Bestätigungsdialog an
+            showDeleteConfirmation = true
+        } label: {
+            Text("Löschen")
+                .font(.headline)
+                .frame(maxWidth: .infinity) // Volle Breite und feste Höhe
+                .foregroundColor(.red)
+                .multilineTextAlignment(.center)
+        }
+        .padding()
+        .buttonStyle(.bordered)
+        .alert("Plakatposition löschen?", isPresented: $showDeleteConfirmation) {
+            Button("Abbrechen", role: .cancel) {
+                // Benutzer hat das Löschen abgebrochen
+            }
+            Button("Löschen", role: .destructive) {
+                // Benutzer hat bestätigt, die Position zu löschen
+                locationViewModel.deleteSignlePosterPosition(
+                    positionId: position.position.id
+                ) {
+                    locationViewModel.fetchPosterPositions(poster: poster)
+                    locationViewModel.sheetPosition = nil // Ansicht schließen
+                    
+                }
+            }
+        } message: {
+            Text("Diese Aktion kann nicht rückgängig gemacht werden.")
+        }
+    }
+    
     
     private var backButton: some View {
         Button {
@@ -85,3 +147,5 @@ extension LocationDetailView {
     }
 
 }
+
+

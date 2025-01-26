@@ -280,5 +280,117 @@ class LocationsViewModel: ObservableObject {
                 self?.errorMessage = nil // Erfolgreich
             }
         }.resume()
+        
+
+    }
+    func patchPosterPosition(posterPositionId: UUID, posterPosition: CreatePosterPositionDTO, posterId: UUID) {
+        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions/\(posterPositionId)") else {
+            self.errorMessage = "Invalid URL."
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // Authentifizierung hinzufügen
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            self.errorMessage = "Unauthorized: Token not found."
+            return
+        }
+
+        // JSON-Daten in den Body der Anfrage schreiben
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601 // Sicherstellen, dass das Datum im richtigen Format kodiert wird
+
+        do {
+            let jsonData = try encoder.encode(posterPosition)
+            request.httpBody = jsonData
+
+            // JSON-Daten loggen
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("JSON Payload: \(jsonString)")
+            }
+        } catch {
+            self.errorMessage = "Failed to encode poster position: \(error.localizedDescription)"
+            return
+        }
+
+        isLoading = true
+
+        // Netzwerkaufruf starten
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+
+                if let error = error {
+                    self?.errorMessage = "Network error: \(error.localizedDescription)"
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    self?.errorMessage = "Unexpected response format."
+                    return
+                }
+
+                if !(200...299).contains(httpResponse.statusCode) {
+                    self?.errorMessage = "Server error: \(httpResponse.statusCode) - \(HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode))"
+                    if let data = data, let responseText = String(data: data, encoding: .utf8) {
+                        print("Server Response: \(responseText)")
+                    }
+                    return
+                }
+
+                // Erfolg: Daten verarbeiten
+                if let data = data {
+                    print("Success: \(String(data: data, encoding: .utf8) ?? "No response data")")
+                }
+
+                self?.errorMessage = nil // Erfolgreich
+            }
+        }.resume()
+        
+
+    }
+    
+    func deleteSignlePosterPosition(positionId: UUID, completion: @escaping () -> Void) {
+        guard let url = URL(string: "https://kivop.ipv64.net/posters/positions/\(positionId)") else {
+            self.errorMessage = "Invalid URL."
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            self.errorMessage = "Unauthorized: Token not found."
+            return
+        }
+
+        isLoading = true
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+
+                if let error = error {
+                    self?.errorMessage = "Network error: \(error.localizedDescription)"
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                    self?.errorMessage = "Server error or unexpected response."
+                    return
+                }
+
+                // Erfolgsfall: Completion aufrufen
+                completion()
+            }
+        }.resume()
     }
 }
