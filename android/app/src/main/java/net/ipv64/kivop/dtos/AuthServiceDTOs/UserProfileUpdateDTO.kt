@@ -6,4 +6,6 @@ import java.time.LocalDateTime
 data class UserProfileUpdateDTO (
     var name : String?,
     var profileImage : String?,
+    var isNotificationsActive : Boolean?,
+    var isPushNotificationsActive : Boolean?,
 )

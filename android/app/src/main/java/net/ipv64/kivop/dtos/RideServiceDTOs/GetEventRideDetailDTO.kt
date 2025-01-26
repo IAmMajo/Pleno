@@ -3,12 +3,12 @@ package net.ipv64.kivop.dtos.RideServiceDTOs
 import java.util.UUID
 import java.time.LocalDateTime
 
-import Foundation 
 data class GetEventRideDetailDTO (
     var id : UUID,
     var eventID : UUID,
     var eventName : String,
     var driverName : String,
+    var driverID : UUID,
     var isSelfDriver : Boolean,
     var description : String?,
     var vehicleDescription : String?,
