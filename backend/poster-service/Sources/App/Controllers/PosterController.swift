@@ -321,30 +321,36 @@ struct PosterController: RouteCollection, Sendable {
     @Sendable
     func calculatePosterSummary(for queryBuilder: QueryBuilder<PosterPosition>) async throws -> PosterSummaryResponseDTO {
         let currentDate = Date.now
+        let posters = try await queryBuilder
+            .with(\.$responsibilities) { responsibilities in
+                responsibilities.with(\.$user) { user in
+                    user.with(\.$identity)
+                }
+            }
+            .with(\.$posted_by)
+            .with(\.$removed_by)
+            .all()
+            .toPosterPositionResponseDTOArray()
         
-        // 1. "hangs": posted_by != nil && removed_by == nil
-        let hangsCount = try await queryBuilder
-            .filter(\.$posted_by.$id != nil)
-            .filter(\.$removed_by.$id == nil)
-            .count()
+        // 1. "hangs"
+        let hangsCount = posters.count { position in
+            position.status == "hangs"
+        }
         
-        // 2. "toHang": posted_by == nil && expires_at > currentDate
-        let toHangCount = try await queryBuilder
-            .filter(\.$posted_by.$id == nil)
-            .filter(\.$expires_at > currentDate)
-            .count()
+        // 2. "toHang"
+        let toHangCount = posters.count { position in
+            position.status == "toHang"
+        }
         
-        // 3. "overdue": posted_by != nil && removed_by == nil && expires_at <= currentDate
-        let overdueCount = try await queryBuilder
-            .filter(\.$posted_by.$id != nil)
-            .filter(\.$removed_by.$id == nil)
-            .filter(\.$expires_at <= currentDate)
-            .count()
+        // 3. "overdue"
+        let overdueCount = posters.count { position in
+            position.status == "overdue"
+        }
         
-        // 4. "takenDown": removed_by != nil
-        let takenDownCount = try await queryBuilder
-            .filter(\.$removed_by.$id != nil)
-            .count()
+        // 4. "takenDown"
+        let takenDownCount = posters.count { position in
+            position.status == "takenDown"
+        }
         
         // 5. nextTakeDownDate
         let nextTakeDownDate: Date? = try await queryBuilder
