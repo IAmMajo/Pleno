@@ -133,16 +133,20 @@ struct MeetingRow: View {
                 
                 Spacer()
                 
-                HStack(spacing: 8) {
-                    ForEach(meetingWithRecords.records, id: \.lang) { record in
-                        Text(record.lang)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .padding(4)
-                            .background(Color.blue.opacity(0.2))
-                            .cornerRadius(4)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(meetingWithRecords.records, id: \.lang) { record in
+                            Text(getLanguage(langCode: record.lang))
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .padding(4)
+                                .background(Color.blue.opacity(0.2))
+                                .cornerRadius(4)
+                        }
                     }
+                    .padding(.horizontal) // Optionales Padding für mehr Abstand an den Seiten
                 }
+
                 
                 Image(systemName: expandedMeetingID == meetingWithRecords.meeting.id ? "chevron.up" : "chevron.down")
                     .foregroundColor(.blue)
@@ -156,6 +160,43 @@ struct MeetingRow: View {
 
     }
 
+    private func getLanguage(langCode: String) -> String {
+        let languages: [(name: String, code: String)] = [
+            ("Arabisch", "ar"),
+            ("Chinesisch", "zh"),
+            ("Dänisch", "da"),
+            ("Deutsch", "de"),
+            ("Englisch", "en"),
+            ("Französisch", "fr"),
+            ("Griechisch", "el"),
+            ("Hindi", "hi"),
+            ("Italienisch", "it"),
+            ("Japanisch", "ja"),
+            ("Koreanisch", "ko"),
+            ("Niederländisch", "nl"),
+            ("Norwegisch", "no"),
+            ("Polnisch", "pl"),
+            ("Portugiesisch", "pt"),
+            ("Rumänisch", "ro"), // Hinzugefügt
+            ("Russisch", "ru"),
+            ("Schwedisch", "sv"),
+            ("Spanisch", "es"),
+            ("Thai", "th"), // Hinzugefügt
+            ("Türkisch", "tr"),
+            ("Ungarisch", "hu")
+        ]
+
+
+        // Suche nach dem Kürzel und gib den Namen zurück
+        if let language = languages.first(where: { $0.code == langCode }) {
+            return language.name
+        }
+
+        // Standardwert, falls das Kürzel nicht gefunden wird
+        return langCode
+    }
+
+    
     private var DropdownView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 4) {
@@ -163,7 +204,7 @@ struct MeetingRow: View {
                     NavigationLink(destination: MarkdownEditorView(meetingId: meetingWithRecords.meeting.id, lang: record.lang)) {
                         HStack {
                             Text("Protokoll öffnen in")
-                            Text(record.lang)
+                            Text(getLanguage(langCode: record.lang))
                                 .padding(4)
                                 .background(Color.blue.opacity(0.2))
                                 .cornerRadius(4)

@@ -180,7 +180,7 @@ struct MarkdownEditorView: View {
 
 struct TranslationSheetView: View {
     @Environment(\.dismiss) var dismiss // Zum Schließen des Sheets
-    @State private var lang2: String = "DE" // Standardmäßig ausgewählte Sprache
+    @State private var lang2: String = "EN" // Standardmäßig ausgewählte Sprache
     
     var meetingId: UUID
     var lang1: String
@@ -190,6 +190,36 @@ struct TranslationSheetView: View {
     
     @StateObject private var recordManager = RecordManager()
     
+    private var languages: [(name: String, code: String)] {
+        let languages: [(name: String, code: String)] = [
+            ("Arabisch", "ar"),
+            ("Chinesisch", "zh"),
+            ("Dänisch", "da"),
+            ("Deutsch", "de"),
+            ("Englisch", "en"),
+            ("Französisch", "fr"),
+            ("Griechisch", "el"),
+            ("Hindi", "hi"),
+            ("Italienisch", "it"),
+            ("Japanisch", "ja"),
+            ("Koreanisch", "ko"),
+            ("Niederländisch", "nl"),
+            ("Norwegisch", "no"),
+            ("Polnisch", "pl"),
+            ("Portugiesisch", "pt"),
+            ("Rumänisch", "ro"), // Hinzugefügt
+            ("Russisch", "ru"),
+            ("Schwedisch", "sv"),
+            ("Spanisch", "es"),
+            ("Thai", "th"), // Hinzugefügt
+            ("Türkisch", "tr"),
+            ("Ungarisch", "hu")
+        ]
+        return languages
+    }
+
+
+    
     //lazy var languages: [String] = Self.generateLanguages()
     
     var body: some View {
@@ -197,8 +227,8 @@ struct TranslationSheetView: View {
             Form {
                 Section(header: Text("Sprache auswählen")) {
                     Picker("Sprache", selection: $lang2) {
-                        ForEach(manager.languagesEdit, id: \.self) { language in
-                            Text(language)
+                        ForEach(languages, id: \.code) { language in
+                            Text(language.name).tag(language.code) // Hier wird das Kürzel gespeichert
                         }
                     }
                     .pickerStyle(.wheel)

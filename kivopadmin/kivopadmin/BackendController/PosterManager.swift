@@ -94,83 +94,7 @@ class PosterManager: ObservableObject {
         }.resume()
     }
     
-//    func createPoster(poster: CreatePosterDTO, image: Data, imageName: String, mimeType: String) {
-//        guard let url = URL(string: "https://kivop.ipv64.net/posters") else {
-//            errorMessage = "Invalid URL."
-//            return
-//        }
-//
-//        let boundary = "Boundary-\(UUID().uuidString)"
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "POST"
-//        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-//
-//        // Authentifizierung hinzufügen
-//        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-//            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-//        } else {
-//            self.errorMessage = "Unauthorized: Token not found."
-//            return
-//        }
-//
-//        var body = Data()
-//
-//        // Text-Felder hinzufügen
-//        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-//        body.append("Content-Disposition: form-data; name=\"name\"\r\n\r\n".data(using: .utf8)!)
-//        body.append("\(poster.name)\r\n".data(using: .utf8)!)
-//
-//        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-//        body.append("Content-Disposition: form-data; name=\"description\"\r\n\r\n".data(using: .utf8)!)
-//        body.append("\(poster.description)\r\n".data(using: .utf8)!)
-//
-//        // Bild hinzufügen
-//        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-//        body.append("Content-Disposition: form-data; name=\"image\"; filename=\"\(imageName)\"\r\n".data(using: .utf8)!)
-//        body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
-//        body.append(image)
-//        body.append("\r\n".data(using: .utf8)!)
-//
-//        // Abschluss hinzufügen
-//        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-//
-//        request.httpBody = body
-//        
-//
-//        isLoading = true
-//
-//        // Netzwerkaufruf starten
-//        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-//            DispatchQueue.main.async {
-//                self?.isLoading = false
-//
-//                if let error = error {
-//                    self?.errorMessage = "Network error: \(error.localizedDescription)"
-//                    return
-//                }
-//
-//                guard let httpResponse = response as? HTTPURLResponse else {
-//                    self?.errorMessage = "Unexpected response format."
-//                    return
-//                }
-//
-//                if !(200...299).contains(httpResponse.statusCode) {
-//                    self?.errorMessage = "Server error: \(httpResponse.statusCode) - \(HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode))"
-//                    if let data = data, let responseText = String(data: data, encoding: .utf8) {
-//                        print("Server Response: \(responseText)")
-//                    }
-//                    return
-//                }
-//
-//                // Erfolg: Daten verarbeiten
-//                if let data = data {
-//                    print("Success: \(String(data: data, encoding: .utf8) ?? "No response data")")
-//                }
-//
-//                self?.errorMessage = nil // Erfolgreich
-//            }
-//        }.resume()
-//    }
+
     
     func createPoster(poster: CreatePosterDTO) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters") else {
@@ -178,10 +102,9 @@ class PosterManager: ObservableObject {
             return
         }
 
-        let boundary = "Boundary-\(UUID().uuidString)"
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         // Authentifizierung hinzufügen
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
@@ -191,32 +114,14 @@ class PosterManager: ObservableObject {
             return
         }
 
-        // Multipart-Body erstellen
-        var body = Data()
-        
-        // Name hinzufügen
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"name\"\r\n\r\n".data(using: .utf8)!)
-        body.append("\(poster.name)\r\n".data(using: .utf8)!)
-        
-        // Beschreibung (optional) hinzufügen
-        if let description = poster.description {
-            body.append("--\(boundary)\r\n".data(using: .utf8)!)
-            body.append("Content-Disposition: form-data; name=\"description\"\r\n\r\n".data(using: .utf8)!)
-            body.append("\(description)\r\n".data(using: .utf8)!)
+        // JSON-Body direkt aus dem Poster-Objekt erstellen
+        do {
+            let jsonData = try JSONEncoder().encode(poster) // Poster als JSON kodieren
+            request.httpBody = jsonData
+        } catch {
+            self.errorMessage = "Failed to encode Poster: \(error.localizedDescription)"
+            return
         }
-        
-        // Bild hinzufügen
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
-        body.append(poster.image) // Direktes Anhängen der nicht-optionalen Bilddaten
-        body.append("\r\n".data(using: .utf8)!)
-        
-        // Abschluss-Boundary
-        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-
-        request.httpBody = body
 
         isLoading = true
 
@@ -252,6 +157,69 @@ class PosterManager: ObservableObject {
             }
         }.resume()
     }
+    
+    func patchPoster(poster: CreatePosterDTO, posterId: UUID) {
+        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)") else {
+            errorMessage = "Invalid URL."
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // Authentifizierung hinzufügen
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            self.errorMessage = "Unauthorized: Token not found."
+            return
+        }
+
+        // JSON-Body direkt aus dem Poster-Objekt erstellen
+        do {
+            let jsonData = try JSONEncoder().encode(poster) // Poster als JSON kodieren
+            request.httpBody = jsonData
+        } catch {
+            self.errorMessage = "Failed to encode Poster: \(error.localizedDescription)"
+            return
+        }
+
+        isLoading = true
+
+        // Netzwerkaufruf starten
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+
+                if let error = error {
+                    self?.errorMessage = "Network error: \(error.localizedDescription)"
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    self?.errorMessage = "Unexpected response format."
+                    return
+                }
+
+                if !(200...299).contains(httpResponse.statusCode) {
+                    self?.errorMessage = "Server error: \(httpResponse.statusCode) - \(HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode))"
+                    if let data = data, let responseText = String(data: data, encoding: .utf8) {
+                        print("Server Response: \(responseText)")
+                    }
+                    return
+                }
+
+                // Erfolg: Daten verarbeiten
+                if let data = data {
+                    print("Success: \(String(data: data, encoding: .utf8) ?? "No response data")")
+                }
+
+                self?.errorMessage = nil // Erfolgreich
+            }
+        }.resume()
+    }
+
 
 
 
@@ -383,7 +351,7 @@ class PosterManager: ObservableObject {
     
     func deletePoster(posterId: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
         // Erstellen der URL mit der Meeting-ID
-        guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(posterId)") else {
+        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
             return
         }
