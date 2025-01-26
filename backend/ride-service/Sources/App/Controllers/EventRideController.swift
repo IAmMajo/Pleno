@@ -529,7 +529,16 @@ struct EventRideController: RouteCollection {
             throw Abort(.badRequest, reason: "Invalid request body! Expected PatchEventRideDTO.")
         }
         
-        // TODO check if accepted rider is > new emptySeats
+        // check if new emptySeats < allocated seats
+        let allocatedSeats = try await EventRideRequest.query(on: req.db)
+            .filter(\.$ride.$id == rideID)
+            .filter(\.$accepted == true)
+            .count()
+        if let newEmptySeats = patchEventRideDTO.emptySeats {
+            if newEmptySeats < allocatedSeats {
+                throw Abort(.badRequest, reason: "The new number of emptySeats is smaller than the allocated seats.")
+            }
+        }
         
         // patch ride
         eventRide.patchWithDTO(dto: patchEventRideDTO)
