@@ -465,7 +465,7 @@ struct EventRideController: RouteCollection {
         let rideID = try eventRide.requireID()
         let eventName = try await getEventNameByID(eventID: eventRide.$event.id, db: req.db)
         guard let driver = try await User.query(on: req.db)
-            .filter(\.$id == eventRide.participant.$user.id)
+            .filter(\.$id == participant.$user.id)
             .with(\.$identity)
             .first() else {
             throw Abort(.notFound)
