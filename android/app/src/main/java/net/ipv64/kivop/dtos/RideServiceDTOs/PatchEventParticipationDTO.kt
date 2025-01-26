@@ -4,5 +4,5 @@ import java.util.UUID
 import java.time.LocalDateTime
 
 data class PatchEventParticipationDTO (
-    var participates : Boolean?,
+    var participates : Boolean,
 )

@@ -13,4 +13,6 @@ data class GetEventDetailDTO (
     var longitude : Float,
     var participations : List<GetEventParticipationDTO>,
     var userWithoutFeedback : List<GetUserWithoutFeedbackDTO>,
+    var countRideInterested : Int,
+    var countEmptySeats : Int,
 )

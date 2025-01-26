@@ -13,7 +13,7 @@ data class PosterPositionResponseDTO (
     var expiresAt : LocalDateTime,
     var removedBy : String?,
     var removedAt : LocalDateTime?,
-    var imageUrl : String?,
+    var image : String?,
     var responsibleUsers : List<ResponsibleUsersDTO>,
     var status : String,
 )

@@ -10,7 +10,7 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.services.api.getMeetingsApi
 
 class MeetingsViewModel : ViewModel() {
-  private var meetings by mutableStateOf<List<GetMeetingDTO?>>(emptyList())
+  var meetings by mutableStateOf<List<GetMeetingDTO?>>(emptyList())
 
   fun loadMeetings(): List<GetMeetingDTO?> {
     return meetings

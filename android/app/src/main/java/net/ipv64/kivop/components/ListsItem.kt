@@ -42,7 +42,7 @@ import net.ipv64.kivop.ui.theme.Text_secondary
 @Composable
 fun ListenItem(
     itemListData: GetMeetingDTO,
-    onClick: () -> Unit = {},
+    onClick: (() -> Unit)? = {},
     isProtokoll: Boolean = false
 ) {
   val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
@@ -114,7 +114,7 @@ fun ListenItem(
               .clip(RoundedCornerShape(8.dp))
               .background(Background_secondary)
               .padding(8.dp)
-              .clickable(onClick = onClick),
+              .clickable(onClick = onClick!!),
   ) {
     Column(modifier = Modifier) {
       Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -133,12 +133,21 @@ fun ListenItem(
                   modifier = Modifier.size(44.dp))
             }
         Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = itemListData.name,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp,
-            color = Text_prime,
-            modifier = Modifier.weight(1f))
+        if (!isProtokoll) {
+          Text(
+              text = itemListData.name,
+              fontWeight = FontWeight.SemiBold,
+              fontSize = 18.sp,
+              color = Text_prime,
+              modifier = Modifier.weight(1f))
+        } else {
+          Text(
+              text = "Protokoll: " + itemListData.name,
+              fontWeight = FontWeight.SemiBold,
+              fontSize = 18.sp,
+              color = Text_prime,
+              modifier = Modifier.weight(1f))
+        }
         if (!isProtokoll) {
           Label(backgroundColor = iconColor) {
             Text(

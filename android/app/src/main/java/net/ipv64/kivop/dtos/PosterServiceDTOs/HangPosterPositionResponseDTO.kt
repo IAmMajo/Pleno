@@ -7,5 +7,7 @@ data class HangPosterPositionResponseDTO (
     var posterPosition : UUID,
     var postedAt : LocalDateTime,
     var postedBy : UUID,
-    var imageUrl : String,
+    var latitude : Double?,
+    var longitude : Double?,
+    var image : String,
 )

@@ -15,4 +15,3 @@ public struct CreateVotingDTO: Codable {
         self.options = options
     }
 }
-
