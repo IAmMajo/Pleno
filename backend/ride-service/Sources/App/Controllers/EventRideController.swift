@@ -273,6 +273,7 @@ struct EventRideController: RouteCollection {
         if filter.byUserEvents != nil && filter.byUserEvents == true {
             // filter for users events
             eventRides = try await EventRide.query(on: req.db)
+                .with(\.$participant)
                 .join(PlenoEvent.self, on: \EventRide.$event.$id == \PlenoEvent.$id)
                 .join(EventParticipant.self, on: \PlenoEvent.$id == \EventParticipant.$event.$id)
                 .filter(EventParticipant.self, \.$user.$id == req.jwtPayload.userID)
@@ -281,11 +282,14 @@ struct EventRideController: RouteCollection {
         } else if let filterEventID = filter.byEventID {
             // filter for eventID
             eventRides = try await EventRide.query(on: req.db)
+                .with(\.$participant)
                 .filter(\.$event.$id == filterEventID)
                 .all()
         } else {
             // no filters
-            eventRides = try await EventRide.query(on: req.db).all()
+            eventRides = try await EventRide.query(on: req.db)
+                .with(\.$participant)
+                .all()
         }
         
         var responseRides: [GetEventRideDTO] = []
@@ -330,12 +334,23 @@ struct EventRideController: RouteCollection {
                 }
                 
                 let eventName = try await getEventNameByID(eventID: eventRide.$event.id, db: req.db)
+                guard let driver = try await User.query(on: req.db)
+                    .filter(\.$id == eventRide.participant.$user.id)
+                    .with(\.$identity)
+                    .first() else {
+                    throw Abort(.notFound)
+                }
+                let driverID = try driver.requireID()
                 responseRides.append(
                     GetEventRideDTO(
                         id: rideID,
                         eventID: eventRide.$event.id,
                         eventName: eventName,
+                        driverName: driver.identity.name,
+                        driverID: driverID,
                         starts: eventRide.starts,
+                        latitude: eventRide.latitude,
+                        longitude: eventRide.longitude,
                         emptySeats: eventRide.emptySeats,
                         allocatedSeats: UInt8(allocatedSeats),
                         myState: usersState,
