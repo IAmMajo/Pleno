@@ -137,6 +137,15 @@ struct MainPage: View {
                                    .foregroundColor(Color.primary)
                            }
                        }
+                        
+                        NavigationLink(destination: EventView()) {
+                            HStack {
+                               Image(systemName: "text.rectangle.page.fill")
+                                    .foregroundColor(.accentColor)
+                                Text("Events")
+                                    .foregroundColor(Color.primary)
+                            }
+                        }
                     }
                 }
                 .listStyle(InsetGroupedListStyle())
