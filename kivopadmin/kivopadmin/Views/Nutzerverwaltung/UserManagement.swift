@@ -83,7 +83,7 @@ struct NutzerverwaltungView: View {
                                             selectUser(user)
                                         }
                                 }
-                                Text(user.name ?? "Unbekannt")
+                                Text(user.name)
                                     .font(.caption)
                                     .foregroundColor(.primary)
                             }
@@ -128,7 +128,7 @@ struct NutzerverwaltungView: View {
 
     // Benutzer auswählen
     private func selectUser(_ user: UserProfileDTO) {
-        print("🔍 Benutzer ausgewählt: \(user.name ?? "Unbekannt")")
+        print("🔍 Benutzer ausgewählt: \(user.name)")
         guard loadingUserID != user.uid else {
             print("🔄 Benutzer wird bereits geladen...")
             return
@@ -138,13 +138,13 @@ struct NutzerverwaltungView: View {
         selectedUser = nil // Vorherige Daten zurücksetzen
         isUserPopupPresented = false // Sicherstellen, dass das Pop-up geschlossen ist
 
-        MainPageAPI.fetchUserByID(userID: user.uid!) { result in
+        MainPageAPI.fetchUserByID(userID: user.uid) { result in
             DispatchQueue.main.async {
                 self.loadingUserID = nil // Ladevorgang abgeschlossen
                 switch result {
                 case .success(let fetchedUser):
                     self.selectedUser = fetchedUser // Benutzer setzen
-                    print("✅ Benutzer erfolgreich geladen: \(fetchedUser.name ?? "Unbekannt")")
+                    print("✅ Benutzer erfolgreich geladen: \(fetchedUser.name)")
                     self.isUserPopupPresented = true // Popup öffnen
                 case .failure(let error):
                     print("❌ Fehler beim Laden des Benutzers: \(error.localizedDescription)")

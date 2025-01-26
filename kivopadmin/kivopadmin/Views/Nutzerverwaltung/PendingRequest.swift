@@ -22,13 +22,13 @@ struct PendingRequestsNavigationView: View {
                         .padding()
                 } else {
                     List {
-                        ForEach(requests, id: \.uid?.uuidString) { request in
+                        ForEach(requests, id: \.uid.uuidString) { request in
                             NavigationLink(
                                 destination: PendingRequestPopup(
-                                    user: request.name ?? "Unbekannt",
-                                    email: request.email ?? "Keine E-Mail",
+                                    user: request.name,
+                                    email: request.email,
                                     createdAt: request.createdAt,
-                                    userId: request.uid?.uuidString ?? "",
+                                    userId: request.uid.uuidString,
                                     profileImage: request.profileImage,
                                     onListUpdate: {
                                         fetchPendingRequests()
@@ -42,7 +42,7 @@ struct PendingRequestsNavigationView: View {
                                         .clipShape(Circle())
                                     
                                     VStack(alignment: .leading) {
-                                        Text(request.name ?? "Unbekannt")
+                                        Text(request.name)
                                             .font(.system(size: 18))
                                             .foregroundColor(Color.primary)
                                         Text("Erstellt am: \(DateFormatterHelper.formattedDate(from: request.createdAt))")
@@ -82,7 +82,7 @@ struct PendingRequestsNavigationView: View {
             Circle()
                 .fill(Color.gray.opacity(0.3))
                 .overlay(
-                    Text(getInitials(from: request.name ?? "Unbekannt"))
+                    Text(getInitials(from: request.name))
                         .foregroundColor(.white)
                         .font(.headline)
                         .bold()

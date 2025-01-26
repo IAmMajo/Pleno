@@ -17,7 +17,7 @@ struct UserEditView: View {
                     .fill(Color.gray)
                     .frame(width: 110, height: 110)
                     .overlay(
-                        Text(user.name?.prefix(2) ?? "NN") // Sicherstellen, dass kein nil verwendet wird
+                        Text(user.name.prefix(2)) // Sicherstellen, dass kein nil verwendet wird
                             .font(.system(size: 50, weight: .bold))
                             .foregroundColor(.white)
                     )
