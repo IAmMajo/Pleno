@@ -169,7 +169,7 @@ class OnboardingAPI {
                 return
             }
             
-            completion(.success(profile.isAdmin ?? false))
+            completion(.success(profile.isAdmin))
         }.resume()
     }
     
