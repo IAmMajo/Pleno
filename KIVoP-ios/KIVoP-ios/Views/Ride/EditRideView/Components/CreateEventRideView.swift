@@ -32,7 +32,18 @@ struct CreateEventRideView: View {
                     Section(header: Text("Details zum Event")) {
                         Text(eventDetails.name)
                         Text(eventDetails.description ?? "Es gibt keine Beschreibung zu diesem Event.")
-                        DatePicker("Startzeit", selection: .constant(eventDetails.starts), displayedComponents: [.date, .hourAndMinute])
+                        HStack{
+                            Text("Startzeit")
+                            Spacer()
+                            Text(DateFormatter.dateFormatter.string(from: eventDetails.starts))
+                                .padding(8)
+                                .background(Color.gray.opacity(0.2))
+                                .cornerRadius(5)
+                            Text(DateFormatter.hourFormatter.string(from: eventDetails.starts))
+                                .padding(8)
+                                .background(Color.gray.opacity(0.2))
+                                .cornerRadius(5)
+                        }
                         Text(viewModel.dstAddress)
                             .onAppear{
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -187,4 +198,18 @@ struct CreateEventRideView: View {
             .navigationTitle("Neue Event Fahrt")
         }
     }
+}
+
+extension DateFormatter {
+    static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy"
+        return formatter
+    }()
+    
+    static let hourFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
 }

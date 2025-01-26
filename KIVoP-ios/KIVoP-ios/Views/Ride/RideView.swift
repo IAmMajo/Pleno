@@ -1,4 +1,5 @@
 import SwiftUI
+import RideServiceDTOs
 
 struct RideView: View {
     @StateObject private var viewModel = RideViewModel()
@@ -8,11 +9,10 @@ struct RideView: View {
     
     var body: some View {
         NavigationStack {
-            // Inhalt
             VStack {
-                // Fahrgemeinschaften
+                // Liste für gruppierte Daten
                 List {
-                    // TabView Event Fahrten, Sonstige, meine Fahrten
+                    // Picker für die Tabs (Events, Sonderfahrten, Meine Fahrten)
                     Picker("", selection: $viewModel.selectedTab) {
                         Text("Events").tag(0)
                         Text("Sonderfahrten").tag(1)
@@ -20,16 +20,16 @@ struct RideView: View {
                     }
                     .pickerStyle(.segmented)
                     .listRowBackground(Color.clear)
-                    
-                    ForEach(viewModel.groupedRides, id: \.key) { group in
+                    ForEach(viewModel.groupedData, id: \.key) { group in
                         Section(header: Text(group.key)
                             .padding(.leading, -5)
                         ) {
-                            if viewModel.selectedTab == 0 {
-                                //EventList(events: group.value)
-                            } else if viewModel.selectedTab == 1 {
-                                RideList(rides: group.value, viewModel: viewModel)
-                            } else {
+                            // Überprüfe, welche Liste angezeigt wird, basierend auf dem ausgewählten Tab
+                            if viewModel.selectedTab == 0 { // Events
+                                EventList(events: group.value as! [GetEventDTO])
+                            } else if viewModel.selectedTab == 1 { // Sonderfahrten
+                                RideList(rides: group.value as! [GetSpecialRideDTO], viewModel: viewModel)
+                            } else { // Meine Fahrten
                                 MyRidesList(rides: group.value, viewModel: viewModel)
                             }
                         }
@@ -43,14 +43,12 @@ struct RideView: View {
                 }
                 .onAppear {
                    Task {
-                       viewModel.fetchSpecialRides()
-                       viewModel.fetchEvents()
+                       viewModel.fetchRides()
                    }
                 }
                 .refreshable {
                     Task {
-                        viewModel.fetchSpecialRides()
-                        viewModel.fetchEvents()
+                        viewModel.fetchRides()
                     }
                 }
             }
@@ -64,7 +62,6 @@ struct RideView: View {
                     NavigationLink(destination: {
                         let editRideViewModel = EditRideViewModel()
                         editRideViewModel.events = viewModel.events
-
                         return NewRideView(viewModel: editRideViewModel, rideViewModel: viewModel)
                     }()) {
                         Text("Neue Fahrt anbieten")
