@@ -14,10 +14,7 @@ class UserManager: ObservableObject {
                 switch result {
                 case .success(let fetchedUsers):
                     self?.users = fetchedUsers.filter { user in
-                        if let isActive = user.isActive {
-                            return isActive
-                        }
-                        return false // Wenn isActive nil ist, wird der Benutzer ausgeschlossen
+                        return user.isActive
                     }
                 case .failure(let error):
                     print("Fehler beim Abrufen der Benutzer: \(error.localizedDescription)")

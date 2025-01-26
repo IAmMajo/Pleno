@@ -127,9 +127,11 @@ struct LocationsView: View {
         }
         .onAppear{
             locationViewModel.fetchPosterPositions(poster: poster)
+            locationViewModel.fetchPosterSummary(poster: poster)
             userManager.fetchUsers()
         }
     }
+
     
     private var mapLayer: some View {
         Map(coordinateRegion: $locationViewModel.mapLocation, annotationItems: locationViewModel.filteredPositions, annotationContent: { position in
@@ -174,27 +176,34 @@ struct LocationsView: View {
         
         VStack(spacing: 20) {
             ForEach(filterOptions, id: \.self) { option in
-                ZStack{
-                    if option == locationViewModel.selectedFilter{
-                        RoundedRectangle(cornerRadius: 8) // Abgerundete Ecken
-                            .fill(Color.gray.opacity(0.2)) // Farbe und Transparenz
-                            .frame(width: 30, height: 30)
-                    }
-                    Button(action: {
-                        withAnimation {
-                            if option == locationViewModel.selectedFilter{
-                                locationViewModel.selectedFilter = nil
-                            } else {
-                                locationViewModel.selectedFilter = option
-                            }
+                HStack{
+                    ZStack{
+                        if option == locationViewModel.selectedFilter{
+                            RoundedRectangle(cornerRadius: 8) // Abgerundete Ecken
+                                .fill(Color.gray.opacity(0.2)) // Farbe und Transparenz
+                                .frame(width: 30, height: 30)
                         }
-                    }) {
-                        let icon = getFilterIcon(for: option)
-                        Image(systemName: icon.symbol)
-                            .foregroundColor(icon.color)
+                        Button(action: {
+                            withAnimation {
+                                if option == locationViewModel.selectedFilter{
+                                    locationViewModel.selectedFilter = nil
+                                } else {
+                                    locationViewModel.selectedFilter = option
+                                }
+                            }
+                        }) {
+                            let icon = getFilterIcon(for: option)
+                            Image(systemName: icon.symbol)
+                                .foregroundColor(icon.color)
+                        }
+                        .buttonStyle(.plain)
+                        
+                       
                     }
-                    .buttonStyle(.plain)
+                    //Text(getSummaryCount(for: option))
+
                 }
+
             }
         }
         .padding()
@@ -235,6 +244,21 @@ struct LocationsView: View {
             return ("checkmark.circle", .green)
         default:
             return ("questionmark.circle", .gray) // Fallback für unbekannte Status
+        }
+    }
+    
+    func getSummaryCount(for status: String) -> String {
+        switch status {
+        case "toHang":
+            return "\(locationViewModel.summary?.toHang ?? 0)" // Defaultwert 0, wenn nil
+        case "hangs":
+            return "\(locationViewModel.summary?.hangs ?? 0)" // Defaultwert 0, wenn nil
+        case "overdue":
+            return "\(locationViewModel.summary?.overdue ?? 0)" // Defaultwert 0, wenn nil
+        case "takenDown":
+            return "\(locationViewModel.summary?.takenDown ?? 0)" // Defaultwert 0, wenn nil
+        default:
+            return "?"
         }
     }
 

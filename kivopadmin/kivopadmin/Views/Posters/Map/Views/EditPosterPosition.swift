@@ -22,13 +22,13 @@ struct EditPosterPosition: View {
                 Spacer()
                 DatePicker("", selection: $date)
                     .datePickerStyle(CompactDatePickerStyle())
-            }
+            }.padding()
             List {
                 ForEach(filteredUsers, id: \.email) { user in
                     HStack {
-                        Text(user.name ?? "Unbekannter Name") // Fallback, falls name nil ist
+                        Text(user.name) // Fallback, falls name nil ist
                         Spacer()
-                        if let uid = user.uid, selectedUsers.contains(uid) {
+                        if selectedUsers.contains(user.uid) {
                             Image(systemName: "checkmark")
                                 .foregroundColor(.blue)
                         }
@@ -64,23 +64,20 @@ struct EditPosterPosition: View {
             return userManager.users
         } else {
             return userManager.users.filter { user in
-                if let name = user.name {
-                    return name.localizedCaseInsensitiveContains(searchText)
-                }
+                return user.name.localizedCaseInsensitiveContains(searchText)
                 return false
             }
         }
     }
 
     private func toggleSelection(for user: UserProfileDTO) {
-        if let uid = user.uid {
-            if let index = selectedUsers.firstIndex(of: uid) {
-                // Benutzer abwählen
-                selectedUsers.remove(at: index)
-            } else {
-                // Benutzer auswählen
-                selectedUsers.append(uid)
-            }
+        let uid = user.uid
+        if let index = selectedUsers.firstIndex(of: uid) {
+            // Benutzer abwählen
+            selectedUsers.remove(at: index)
+        } else {
+            // Benutzer auswählen
+            selectedUsers.append(uid)
         }
     }
     
