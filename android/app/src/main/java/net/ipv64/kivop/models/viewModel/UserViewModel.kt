@@ -26,20 +26,23 @@ class UserViewModel : ViewModel() {
     return this.user
   }
 
-  fun updateUser(email: String? = null, name: String? = null, profileImage: String? = null) {
+  fun updateUser(email: String? = null, name: String? = null, profileImage: String? = null, isNotificationsActive: Boolean? = null, isPushNotificationsActive: Boolean? = null) {
     user?.let {
       val updatedUser =
           it.copy(
-              email = email ?: it.email,
-              name = if (name?.isNotEmpty() == true) name else it.name,
-              profileImage = profileImage ?: it.profileImage)
+            email = email ?: it.email,
+            name = if (name?.isNotEmpty() == true) name else it.name,
+            profileImage = profileImage ?: it.profileImage,
+            isNotificationsActive = isNotificationsActive ?: it.isNotificationsActive,
+            isPushNotificationsActive = isPushNotificationsActive ?: it.isPushNotificationsActive
+          )
       if (updatedUser != it) {
-
         viewModelScope.launch {
           val response =
               patchUserProfile(
                   UserProfileUpdateDTO(
-                      name = if (name.isNullOrEmpty()) null else name, profileImage))
+                      name = if (name.isNullOrEmpty()) null else name, profileImage,isNotificationsActive,isPushNotificationsActive),
+              )
           if (response?.isSuccessful == true) {
             user = updatedUser
           }
