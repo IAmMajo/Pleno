@@ -42,13 +42,15 @@ fun ImgPicker(
     img: String? = null,
     size: Dp = 150.dp,
     userName: String = "Max",
-    edit: Boolean = true
-): Uri? {
+    edit: Boolean = true,
+    onImagePicked: (Uri?) -> Unit
+) {
   var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
   val pickMedia =
       rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
           selectedImageUri = uri
+          onImagePicked(uri)
         } else {
           Log.d("PhotoPicker", "No media selected")
         }
@@ -104,5 +106,4 @@ fun ImgPicker(
           }
     }
   }
-  return selectedImageUri
 }

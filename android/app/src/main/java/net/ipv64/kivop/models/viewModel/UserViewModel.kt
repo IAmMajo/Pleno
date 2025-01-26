@@ -14,7 +14,7 @@ import net.ipv64.kivop.services.api.patchUserProfile
 class UserViewModel : ViewModel() {
   private var user by mutableStateOf<UserProfileDTO?>(null)
     private set
-
+  
   fun fetchUser() {
     viewModelScope.launch {
       val response = getUserProfile() // Call the API service to get user profile

@@ -76,7 +76,7 @@ fun IconTextField(
       } else {
         BasicTextField(
             modifier = Modifier.fillMaxWidth().height(50.dp).focusRequester(FocusRequester()),
-            textStyle = textStyle.copy(color = Text_prime),
+            textStyle = textStyle,
             singleLine = true,
             value = newText,
             onValueChange = {
@@ -102,7 +102,7 @@ fun IconTextField(
                         Text(
                             text = text,
                             color = Text_prime.copy(0.7f),
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = textStyle,
                             maxLines = 1,
                             modifier = Modifier.fillMaxWidth())
                       }
