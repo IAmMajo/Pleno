@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		23C6EEDA2D453F0000F723BF /* RideServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = 23C6EED92D453F0000F723BF /* RideServiceDTOs */; };
 		23DADFFB2CF7A5DC004B15C1 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 23DADFFA2CF7A5DC004B15C1 /* MarkdownUI */; };
 		AF04581B2CECCA540071EDF8 /* AuthServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581A2CECCA540071EDF8 /* AuthServiceDTOs */; };
 		AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */ = {isa = PBXBuildFile; productRef = AF04581C2CECCA540071EDF8 /* MeetingServiceDTOs */; };
@@ -92,6 +93,7 @@
 				23DADFFB2CF7A5DC004B15C1 /* MarkdownUI in Frameworks */,
 				B5B3FF522D3E5A1F00B12DF2 /* PollServiceDTOs in Frameworks */,
 				AF0EDF1B2CEFA8F100582C70 /* NotificationsServiceDTOs in Frameworks */,
+				23C6EEDA2D453F0000F723BF /* RideServiceDTOs in Frameworks */,
 				AF04581D2CECCA540071EDF8 /* MeetingServiceDTOs in Frameworks */,
 				AF0EDF192CEFA8F100582C70 /* MeetingServiceDTOs in Frameworks */,
 				AF04581B2CECCA540071EDF8 /* AuthServiceDTOs in Frameworks */,
@@ -668,6 +670,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		23C6EED92D453F0000F723BF /* RideServiceDTOs */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF0EDF132CEFA8F100582C70 /* XCLocalSwiftPackageReference "../DTOs" */;
+			productName = RideServiceDTOs;
+		};
 		23DADFFA2CF7A5DC004B15C1 /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 23DADFF92CF7A5DC004B15C1 /* XCRemoteSwiftPackageReference "MarkdownUI" */;

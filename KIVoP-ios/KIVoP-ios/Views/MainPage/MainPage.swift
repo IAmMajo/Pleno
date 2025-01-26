@@ -99,6 +99,15 @@ struct MainPage: View {
                         } else {
                             Text("No meetings available.")
                         }
+                        
+                        NavigationLink(destination: EventView()) {
+                            HStack {
+                               Image(systemName: "star")
+                                    .foregroundColor(.accentColor)
+                                Text("Events")
+                                    .foregroundColor(Color.primary)
+                            }
+                        }
                     }
 
                     Section {

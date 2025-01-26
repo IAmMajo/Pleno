@@ -428,6 +428,9 @@
     "Adresse suchen" : {
 
     },
+    "Adresse suchen" : {
+
+    },
     "AKTIONEN" : {
       "localizations" : {
         "de" : {
@@ -474,6 +477,9 @@
       }
     },
     "Aktuell sind keine Sitzungen im Gange." : {
+
+    },
+    "Aktuelle" : {
 
     },
     "Aktuelle Sitzung" : {
@@ -1702,6 +1708,9 @@
         }
       }
     },
+    "Ort" : {
+
+    },
     "Passwort" : {
       "localizations" : {
         "de" : {
@@ -2283,6 +2292,9 @@
       }
     },
     "Vergangen" : {
+
+    },
+    "Vergangene" : {
 
     },
     "Vergangene Sitzungen" : {
