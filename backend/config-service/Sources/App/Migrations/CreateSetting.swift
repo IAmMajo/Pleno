@@ -53,7 +53,7 @@ struct CreateSetting: AsyncMigration {
                             description: "Enables or disables user registrations"
                     ),
             Setting(
-                            key: "languageCode",
+                            key: "defaultLanguage",
                             datatype: .languageCode,
                             value: "de",
                             description: "The language code used to define the default language of the application. For example: 'de' for German, 'en' for English"

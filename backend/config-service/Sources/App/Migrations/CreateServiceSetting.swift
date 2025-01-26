@@ -42,10 +42,10 @@ struct CreateServiceSetting: AsyncMigration {
                 throw Abort(.internalServerError, reason: "Einstellung 'isRegistrationDisabled' konnte nicht geladen werden.")
         }
 
-        guard let languageCode = try await Setting.query(on: database)
-            .filter(\.$key == "languageCode")
+        guard let defaultLanguage = try await Setting.query(on: database)
+            .filter(\.$key == "defaultLanguage")
             .first() else {
-                throw Abort(.internalServerError, reason: "Einstellung 'languagecode' konnte nicht geladen werden.")
+                throw Abort(.internalServerError, reason: "Einstellung 'defaultLanguage' konnte nicht geladen werden.")
         }
 
         guard let posterReminderSetting = try await Setting.query(on: database)
@@ -70,7 +70,7 @@ struct CreateServiceSetting: AsyncMigration {
         // Initiale Zuordnungen erstellen
         let serviceSettings = [
             ServiceSetting(serviceID: try authService.requireID(), settingID: try isRegistrationEnabled.requireID()),
-            ServiceSetting(serviceID: try meetingService.requireID(), settingID: try languageCode.requireID()),
+            ServiceSetting(serviceID: try meetingService.requireID(), settingID: try defaultLanguage.requireID()),
             ServiceSetting(serviceID: try posterService.requireID(), settingID: try posterDeletionIntervalSetting.requireID()),
             ServiceSetting(serviceID: try posterService.requireID(), settingID: try posterToBeTakenDownSetting.requireID()),
             ServiceSetting(serviceID: try posterService.requireID(), settingID: try posterReminderSetting.requireID()),
