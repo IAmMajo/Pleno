@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PosterServiceDTOs
+import CoreLocation
 
 struct PosterDetailView: View {
     @StateObject private var posterManager = PosterManager() // MeetingManager als StateObject
@@ -63,10 +64,10 @@ struct PosterDetailView: View {
 
        .onAppear {
            posterManager.fetchPosterPositions(poster: poster)
-           posterManager.fetchPosterPositionsToHang(poster: poster)
-           posterManager.fetchPosterPositionsTakendown(poster: poster)
-           posterManager.fetchPosterPositionsOverdue(poster: poster)
-           posterManager.fetchPosterPositionsHangs(poster: poster)
+//           posterManager.fetchPosterPositionsToHang(poster: poster)
+//           posterManager.fetchPosterPositionsTakendown(poster: poster)
+//           posterManager.fetchPosterPositionsOverdue(poster: poster)
+//           posterManager.fetchPosterPositionsHangs(poster: poster)
        }
        .toolbar {
            // Sammelposten hinzufügen
@@ -227,13 +228,13 @@ struct MidView: View {
         case .all:
             return posterManager.posterPositions
         case .toHang:
-            return posterManager.posterPositionsToHang
+            return posterManager.posterPositions.filter { $0.status == "toHang" }
         case .takendown:
-            return posterManager.posterPositionsTakendown
+            return posterManager.posterPositions.filter { $0.status == "takenDown" }
         case .overdue:
-            return posterManager.posterPositionsOverdue
+            return posterManager.posterPositions.filter { $0.status == "overdue" }
         case .hangs:
-            return posterManager.posterPositionsHangs
+            return posterManager.posterPositions.filter { $0.status == "hangs" }
         }
     }
     // Toggle-Auswahl für Positionen
@@ -251,6 +252,10 @@ struct MidView: View {
         //posterManager.deletePosterPosition(posterId: poster.id, positionIds: <#T##[UUID]#>, completion: <#T##() -> Void#>)
         selectedPositions.removeAll() // Nach dem Löschen die Auswahl zurücksetzen
     }
+    
+
+
+
 }
 
 

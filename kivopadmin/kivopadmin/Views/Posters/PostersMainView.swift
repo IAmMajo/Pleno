@@ -15,6 +15,7 @@ struct PostersMainView: View {
    @State private var searchText = ""
    
    let numberOfPostersToHang = [1, 0, 4]
+    
    
 //   Calendar.current.isDateInTomorrow(yourDate)
    
@@ -92,15 +93,16 @@ struct PostersMainView: View {
 
 struct PosterRowView: View {
     let poster: PosterResponseDTO
+    @StateObject private var locationViewModel = LocationsViewModel()
     
     var body: some View {
-        NavigationLink(destination: PosterDetailView(poster: poster)) {
+        NavigationLink(destination: LocationsView(poster: poster).environmentObject(locationViewModel)) {
             HStack(spacing: 5) {
                 if let uiImage = UIImage(data: poster.image) {
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFit()
-                        .frame(height: 200) // Höhe einstellen
+                        .frame(height: 100) // Höhe einstellen
                 }
                 
                 Text(poster.name)

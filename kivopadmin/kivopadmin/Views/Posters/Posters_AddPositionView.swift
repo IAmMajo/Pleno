@@ -17,7 +17,10 @@ struct CustomMapView: UIViewRepresentable {
     var onRegionChange: (MKCoordinateRegion) -> Void
     var posterPositions: [PosterPositionResponseDTO]
     var poster: PosterResponseDTO
+    var onMarkerSelected: (PosterPositionResponseDTO) -> Void  // Closure, das den ausgewählten Marker verarbeitet
 
+    
+    
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: CustomMapView
 
@@ -32,36 +35,45 @@ struct CustomMapView: UIViewRepresentable {
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
             let identifier = "CustomAnnotation"
 
-            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
 
             if annotationView == nil {
-                annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                annotationView = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
                 annotationView?.canShowCallout = true
             } else {
                 annotationView?.annotation = annotation
             }
 
-            // Erstelle ein UIImageView mit abgerundeten Ecken
-            if let posterImage = UIImage(data: parent.poster.image) {
-                let imageView = UIImageView(image: posterImage)
-                imageView.contentMode = .scaleAspectFit // Behalte das Seitenverhältnis bei
-                imageView.frame = CGRect(x: 0, y: 0, width: 50, height: 50) // Quadratische Größe
-                imageView.layer.cornerRadius = 10 // Die Hälfte der Breite/Höhe für einen perfekten Kreis
-                imageView.layer.masksToBounds = true // Zuschneiden aktivieren
-
-                // Konvertiere UIImageView zu einem UIImage für die Annotation
-                let renderer = UIGraphicsImageRenderer(size: imageView.bounds.size)
-                let roundedImage = renderer.image { _ in
-                    imageView.drawHierarchy(in: imageView.bounds, afterScreenUpdates: true)
+            if let position = parent.posterPositions.first(where: { $0.latitude == annotation.coordinate.latitude && $0.longitude == annotation.coordinate.longitude }) {
+                var color: UIColor = .gray
+                switch position.status {
+                case "toHang":
+                    color = .blue
+                case "overdue":
+                    color = .green
+                case "hangs":
+                    color = .red
+                case "takenDown":
+                    color = .yellow
+                default:
+                    color = .gray
                 }
-
-                annotationView?.image = roundedImage
-            } else {
-                annotationView?.image = UIImage(systemName: "pin.fill") // Fallback-Bild
             }
 
             return annotationView
         }
+
+        func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+            guard let annotation = view.annotation else { return }
+            // Hier rufen wir den Closure auf, um das Sheet zu öffnen
+            print("Marker angeklickt")
+            
+            if let selectedPosition = parent.posterPositions.first(where: { $0.latitude == annotation.coordinate.latitude && $0.longitude == annotation.coordinate.longitude }) {
+                parent.onMarkerSelected(selectedPosition)
+                print("Marker angeklickt")
+            }
+        }
+        
     }
 
     func makeCoordinator() -> Coordinator {
@@ -83,16 +95,20 @@ struct CustomMapView: UIViewRepresentable {
     func updateUIView(_ uiView: MKMapView, context: Context) {
         uiView.setRegion(region, animated: true)
         uiView.removeAnnotations(uiView.annotations)
+        
+        
 
         for position in createPosterPositions {
             let annotation = MKPointAnnotation()
             annotation.coordinate = CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)
             uiView.addAnnotation(annotation)
+            
         }
         for position in posterPositions {
             let annotation = MKPointAnnotation()
             annotation.coordinate = CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)
             uiView.addAnnotation(annotation)
+
         }
     }
 }
@@ -112,6 +128,11 @@ struct Posters_AddPositionView: View {
     @State private var showUserSelectionSheet = false
     @State private var selectedUsers: [UUID] = []
     @State private var searchText: String = ""
+    @State private var selectedPosterPosition: PosterPositionResponseDTO? = nil // State für das ausgewählte Poster
+    
+    @State var isEditing: Bool = false
+    
+    @State private var positionColor: Color = .blue
 
     var poster: PosterResponseDTO
     
@@ -121,21 +142,6 @@ struct Posters_AddPositionView: View {
     var body: some View {
         HStack {
             VStack{
-//                // List of Poster Positions
-//                List(0..<createPosterPositions.count, id: \.self) { index in
-//                    let posterLocation = createPosterPositions[index]
-//                    Button(action: {
-//                        zoomToLocation(latitude: posterLocation.latitude, longitude: posterLocation.longitude)
-//                    }) {
-//                        VStack(alignment: .leading) {
-//                            Text("Lat: \(posterLocation.latitude), Lon: \(posterLocation.longitude)")
-//                                .font(.body)
-//                            Text("Läuft ab: \(DateTimeFormatter.formatDate(posterLocation.expiresAt))")
-//                                .font(.caption)
-//                                .foregroundColor(.gray)
-//                        }
-//                    }
-//                }
                 
                 if posterManager.isLoading {
                     ProgressView("Loading...")
@@ -164,13 +170,32 @@ struct Posters_AddPositionView: View {
 
                 
                 ZStack {
-                    CustomMapView(
-                        region: $mapRegion,
-                        createPosterPositions: createPosterPositions,
-                        onRegionChange: { newRegion in mapRegion = newRegion },
-                        posterPositions: posterManager.posterPositions,
-                        poster: poster
-                    )
+                    Map(
+//                        region: $mapRegion,
+//                        createPosterPositions: createPosterPositions,
+//                        onRegionChange: { newRegion in mapRegion = newRegion },
+//                        posterPositions: posterManager.posterPositions,
+//                        poster: poster,
+//                        onMarkerSelected: { selectedPosition in
+//                            selectedPosterPosition = selectedPosition // Update den Wert beim Marker-Klick
+//                        }
+                    ){
+                        ForEach(posterManager.posterPositions, id: \.id) { position in
+                            let positionColor: Color = {
+                                switch position.status {
+                                case "toHang": return .orange
+                                case "overdue": return .red
+                                case "hangs": return .green
+                                case "takenDown": return .gray
+                                default: return .blue
+                                }
+                            }()
+
+                            Marker("", systemImage: "car", coordinate: CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude))
+                                .tint(positionColor)
+                        }
+                        
+                    }
                     .ignoresSafeArea()
                         .frame(maxHeight: .infinity)
                     VStack {
@@ -189,6 +214,22 @@ struct Posters_AddPositionView: View {
                             }
                         }
                         HStack {
+                            Button(action: {
+                                isEditing.toggle()  // Hier wird der Zustand von `isEditing` umgeschaltet
+                            }) {
+                                HStack {
+                                    Image(systemName: "pencil")  // Das Symbol für den Button
+                                    Text("Bearbeiten")  // Der Text des Buttons
+                                        .font(.headline)  // Optional: Du kannst die Schriftart anpassen
+                                }
+                                .padding()  // Padding für den Button
+                                .background(Color.blue)  // Hintergrundfarbe des Buttons
+                                .foregroundColor(.white)  // Textfarbe des Buttons
+                                .cornerRadius(10)  // Abgerundete Ecken
+                                .shadow(radius: 5)  // Optional: Ein Schatten für den Button
+                            }
+
+                            .padding()
                             Spacer()
                             Button(action: centerOnUserLocation) {
                                 HStack {
@@ -204,59 +245,65 @@ struct Posters_AddPositionView: View {
                         }
                         Spacer()
                     }
-                    VStack {
-                        Spacer()
-                        ZStack {
-                            Rectangle()
-                                .frame(width: 1, height: 30)
-                                .foregroundColor(.blue)
-                            Rectangle()
-                                .frame(width: 30, height: 1)
-                                .foregroundColor(.blue)
+                    if isEditing{
+                        VStack {
+                            Spacer()
+                            ZStack {
+                                Rectangle()
+                                    .frame(width: 1, height: 30)
+                                    .foregroundColor(.blue)
+                                Rectangle()
+                                    .frame(width: 30, height: 1)
+                                    .foregroundColor(.blue)
+                            }
+                            Spacer()
                         }
-                        Spacer()
                     }
+
 
                     VStack {
                         Spacer()
                         HStack {
-                            VStack(alignment: .leading, spacing: 8) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Ablaufdatum")
-                                        .font(.caption)
-                                        .foregroundColor(.white)
-                                    DatePicker("Datum", selection: $expiresAt, displayedComponents: .date)
-                                        .datePickerStyle(.compact)
-                                        .labelsHidden()
-                                        .background(Color.white)
-                                        .cornerRadius(8)
-                                }
 
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Benutzer auswählen")
-                                        .font(.caption)
-                                        .foregroundColor(.white)
-                                    Button(action: {
-                                        showUserSelectionSheet.toggle()
-                                    }) {
-                                        Text("Benutzer auswählen")
-                                            .padding()
+                            if isEditing{
+                                VStack(alignment: .leading, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Ablaufdatum")
+                                            .font(.caption)
+                                            .foregroundColor(.white)
+                                        DatePicker("Datum", selection: $expiresAt, displayedComponents: .date)
+                                            .datePickerStyle(.compact)
+                                            .labelsHidden()
                                             .background(Color.white)
                                             .cornerRadius(8)
                                     }
+
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Benutzer auswählen")
+                                            .font(.caption)
+                                            .foregroundColor(.white)
+                                        Button(action: {
+                                            showUserSelectionSheet.toggle()
+                                        }) {
+                                            Text("Benutzer auswählen")
+                                                .padding()
+                                                .background(Color.white)
+                                                .cornerRadius(8)
+                                        }
+                                    }
+                                    Button(action: addLocation) {
+                                        Text("Standort hinzufügen")
+                                            .padding()
+                                            .background(Color.blue)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(8)
+                                    }
                                 }
+                                .padding(8)
+                                .background(Color.black.opacity(0.6))
+                                .cornerRadius(8)
                             }
-                            .padding(8)
-                            .background(Color.black.opacity(0.6))
-                            .cornerRadius(8)
-                            Spacer()
-                            Button(action: addLocation) {
-                                Text("Standort hinzufügen")
-                                    .padding()
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(8)
-                            }
+
                             Spacer()
                             VStack {
                                 Button(action: zoomIn) {
@@ -288,9 +335,12 @@ struct Posters_AddPositionView: View {
                 }
             }
         }
-        .sheet(isPresented: $showUserSelectionSheet) {
-            UserSelectionSheet(users: userManager.users, selectedUsers: $selectedUsers)
+        .sheet(item: $selectedPosterPosition) { position in
+            PosterDetailsView(position: position) // Deine View für Details
         }
+//        .sheet(isPresented: $showUserSelectionSheet) {
+//            UserSelectionSheet(users: userManager.users, selectedUsers: $selectedUsers, s)
+//        }
         .onAppear {
             // Benutzer laden, wenn die View erscheint
             userManager.fetchUsers()
@@ -386,75 +436,18 @@ struct Posters_AddPositionView: View {
 //
 //
 
-struct UserSelectionSheet: View {
-    var users: [UserProfileDTO]
-    @Binding var selectedUsers: [UUID]
-    @State private var searchText: String = ""
-    
-    @ObservedObject var userManager = UserManager()
+struct PosterDetailsView: View {
+    var position: PosterPositionResponseDTO
 
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(filteredUsers, id: \.email) { user in
-                    HStack {
-                        Text(user.name ?? "Unbekannter Name") // Fallback, falls name nil ist
-                        Spacer()
-                        if let uid = user.uid, selectedUsers.contains(uid) {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(.blue)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        toggleSelection(for: user)
-                    }
-                }
-            }
-            .navigationTitle("Benutzer auswählen")
-            .searchable(text: $searchText)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Fertig") {
-                        print(userManager.users)
-                        dismiss()
-                    }
-                }
-            }
+        VStack {
+            Text("Details für den Marker")
+                .font(.headline)
+            Text("Latitude: \(position.latitude), Longitude: \(position.longitude)")
+            Text("Status: \(position.status)")
+            // Weitere Detailinformationen anzeigen
         }
-        .onAppear(){
-            userManager.fetchUsers()
-        }
-    }
-
-    private var filteredUsers: [UserProfileDTO] {
-        if searchText.isEmpty {
-            return userManager.users
-        } else {
-            return userManager.users.filter { user in
-                if let name = user.name {
-                    return name.localizedCaseInsensitiveContains(searchText)
-                }
-                return false
-            }
-        }
-    }
-
-    private func toggleSelection(for user: UserProfileDTO) {
-        if let uid = user.uid {
-            if let index = selectedUsers.firstIndex(of: uid) {
-                selectedUsers.remove(at: index)
-            } else {
-                selectedUsers.append(uid)
-            }
-        }
-    }
-
-    private func dismiss() {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first?.rootViewController {
-            rootVC.dismiss(animated: true, completion: nil)
-        }
+        .padding()
     }
 }
 
@@ -462,3 +455,5 @@ struct UserSelectionSheet: View {
 //#Preview {
 //    Posters_AddPositionView()
 //}
+
+extension PosterPositionResponseDTO: Identifiable {}
