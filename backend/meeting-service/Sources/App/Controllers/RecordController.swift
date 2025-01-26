@@ -121,7 +121,10 @@ struct RecordController: RouteCollection {
         guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty else {
             throw Abort(.badRequest)
         }
-        guard lang != "de" else {
+        guard let defaultLanguage = await SettingsManager.shared.getSetting(forKey: "defaultLanguage") else {
+            throw Abort(.internalServerError, reason: "Could not determine default language.")
+        }
+        guard lang != defaultLanguage else {
             throw Abort(.badRequest, reason: "The record for the club's default language cannot be deleted.")
         }
         guard let record =  try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {

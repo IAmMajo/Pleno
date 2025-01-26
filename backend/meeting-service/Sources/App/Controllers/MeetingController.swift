@@ -185,6 +185,10 @@ struct MeetingController: RouteCollection {
             throw Abort(.unauthorized)
         }
         let identityId = try await Identity.byUserId(userId, req.db).requireID()
+        guard let defaultLanguage = await SettingsManager.shared.getSetting(forKey: "defaultLanguage") else {
+            throw Abort(.internalServerError, reason: "Could not determine default language.")
+        }
+        
         meeting.status = .inSession
         meeting.start = .now
         meeting.$chair.id = identityId
@@ -193,7 +197,7 @@ struct MeetingController: RouteCollection {
         try await req.db.transaction { db in
             try await meeting.update(on: db)
             
-            let record = Record(id: try .init(meeting: meeting, lang: "de"), identityId: identityId, status: .underway)
+            let record = Record(id: try .init(meeting: meeting, lang: defaultLanguage), identityId: identityId, status: .underway)
             try await record.create(on: db)
             
             if let attendance = try await Attendance.find(.init(meeting: meeting, identityId: identityId), on: db) {
