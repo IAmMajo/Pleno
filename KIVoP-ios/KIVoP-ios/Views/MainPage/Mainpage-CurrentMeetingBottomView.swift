@@ -7,20 +7,29 @@ struct CurrentMeetingBottomView: View {
     
     @StateObject private var attendanceManager = AttendanceManager() // RecordManager als StateObject
     
+    @State private var attendanceData: [UUID: [GetAttendanceDTO]] = [:]
+    @State private var loadingStates: [UUID: Bool] = [:]
+    @State private var errorMessages: [UUID: String] = [:]
+    
     var body: some View {
         Group {
             if let currentMeeting = meetingManager.currentMeeting {
                 VStack {
-                    ScrollView(.horizontal) {
-                        HStack {
-                            filteredMeetingsView
+                    if meetingManager.meetings.filter { $0.status == .inSession }.count > 1 {
+                        ScrollView(.horizontal) {
+                            HStack {
+                                filteredMeetingsView
+                            }
+                            .scrollTargetLayout()
                         }
-                        .scrollTargetLayout()
+                        .scrollTargetBehavior(.viewAligned)
+                        .scrollPosition(id: $activeMeetingID) // Verwende nur die ID für die Scroll-Position
+                        .scrollIndicators(.never)
+                        pagingControl
+                    } else {
+                        // Zeige das einzelne Meeting ohne ScrollView an
+                        filteredMeetingsView
                     }
-                    .scrollTargetBehavior(.viewAligned)
-                    .scrollPosition(id: $activeMeetingID) // Verwende nur die ID für die Scroll-Position
-                    .scrollIndicators(.never)
-                    pagingControl
                 }
                 .onAppear {
                     // Setze die erste Sitzung mit Status 'inSession' als aktive Sitzung
@@ -52,37 +61,40 @@ struct CurrentMeetingBottomView: View {
             Text(meeting.name)
                 .font(.headline)
                 .foregroundColor(.white)
-            
+
             HStack {
                 Image(systemName: "calendar")
                     .foregroundColor(.white)
                 Text(DateTimeFormatter.formatDate(meeting.start)) // Beispiel: Datum
                     .foregroundColor(.white)
-                
+
                 Spacer()
-                
-                HStack(spacing: 4) { // kleiner Abstand zwischen dem Symbol und der Personenanzahl
-                    if attendanceManager.isLoading {
+
+                HStack(spacing: 4) {
+                    if loadingStates[meeting.id] == true {
                         Text("Loading...")
-                    } else if let errorMessage = attendanceManager.errorMessage {
+                    } else if let errorMessage = errorMessages[meeting.id] {
                         Text("Error: \(errorMessage)")
+                    } else if let attendances = attendanceData[meeting.id] {
+                        Text("\(attendances.filter { $0.status == .present }.count)")
+                            .foregroundStyle(.white)
                     } else {
-                        Text("\(attendanceManager.numberOfParticipants())")
+                        Text("No Data")
                             .foregroundStyle(.white)
                     }
                     Image(systemName: "person.3.fill").foregroundStyle(.white) // Symbol für eine Gruppe von Personen
                 }
             }
-            
+
             HStack {
                 Image(systemName: "clock")
                     .foregroundColor(.white)
                 Text(DateTimeFormatter.formatTime(meeting.start)) // Beispiel: Uhrzeit
                     .foregroundColor(.white)
-                
+
                 Spacer()
             }
-            
+
             NavigationLink(destination: MeetingDetailView(meeting: meeting)) {
                 Text("Zur aktuellen Sitzung")
                     .font(.footnote)
@@ -100,10 +112,13 @@ struct CurrentMeetingBottomView: View {
         .cornerRadius(15)
         .padding(.horizontal, 12)
         .padding(.bottom, 20)
-        .onAppear(){
-            attendanceManager.fetchAttendances(meetingId: meeting.id)
+        .onAppear {
+            if attendanceData[meeting.id] == nil { // Nur laden, wenn noch keine Daten vorhanden sind
+                fetchAttendances(for: meeting.id)
+            }
         }
     }
+
 
     private var pagingControl: some View {
         HStack {
@@ -119,4 +134,25 @@ struct CurrentMeetingBottomView: View {
             }
         }
     }
+    
+    private func fetchAttendances(for meetingId: UUID) {
+        loadingStates[meetingId] = true
+        errorMessages[meetingId] = nil
+
+        Task {
+            do {
+                let attendances = try await attendanceManager.fetchAttendances2(meetingId: meetingId)
+                DispatchQueue.main.async {
+                    self.attendanceData[meetingId] = attendances
+                    self.loadingStates[meetingId] = false
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.errorMessages[meetingId] = error.localizedDescription
+                    self.loadingStates[meetingId] = false
+                }
+            }
+        }
+    }
+
 }

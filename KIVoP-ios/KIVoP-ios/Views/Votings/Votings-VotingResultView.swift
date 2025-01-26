@@ -10,10 +10,9 @@ import LocalAuthentication
 import MeetingServiceDTOs
 
 struct Votings_VotingResultView: View {
+   @Environment(\.colorScheme) var colorScheme
    @StateObject private var webSocketService = WebSocketService()
    @StateObject private var meetingViewModel = MeetingViewModel()
-
-   let votingsView: VotingsView
    
    let voting: GetVotingDTO
    @State var votingResults: GetVotingResultsDTO
@@ -25,6 +24,11 @@ struct Votings_VotingResultView: View {
    @State private var isLiveStatusAvailable: Bool = false
    
    @State var optionTextMap: [UInt8: String] = [:]
+   
+   init(voting: GetVotingDTO) {
+      self.voting = voting
+      self.votingResults = mockVotingResults
+   }
    
     var body: some View {
        ScrollView {
@@ -43,6 +47,7 @@ struct Votings_VotingResultView: View {
                    } else {
                       PieChartView(optionTextMap: optionTextMap, votingResults: votingResults)
                          .padding(.vertical)
+                         .padding(.horizontal)
                    }
                 }
                 .background(Color(UIColor.systemBackground))
@@ -55,7 +60,7 @@ struct Votings_VotingResultView: View {
 //                   Text("Sitzungsname")
                       .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .foregroundStyle(Color(UIColor.label).opacity(0.6))
+                .foregroundStyle(Color(UIColor.secondaryLabel))
                 .padding(.leading).padding(.bottom, 1)
                 
                 Text(voting.question)
@@ -64,15 +69,17 @@ struct Votings_VotingResultView: View {
                    .frame(maxWidth: .infinity, alignment: .leading)
                    .padding(.leading).padding(.trailing)
                    
-                
-                ZStack {
-                   Text(voting.description)
-                      .padding()
-                      .frame(maxWidth: .infinity, alignment: .leading)
-                }.background(Color(UIColor.systemBackground))
+                if !voting.description.isEmpty {
+                   ZStack {
+                      Text(voting.description)
+                         .padding()
+                         .frame(maxWidth: .infinity, alignment: .leading)
+                   }
+                   .background(Color(UIColor.systemBackground))
                    .cornerRadius(10)
                    .padding(.horizontal)
-      
+                }
+                
                 if isLiveStatusAvailable {
                    ZStack {
                       HStack {
@@ -87,25 +94,7 @@ struct Votings_VotingResultView: View {
                       .cornerRadius(10)
                       .padding(.horizontal) .padding(.top)
                 } else {
-                   List{
-                      Section {
-                         ForEach (votingResults.results, id: \.self) { result in
-                            HStack {
-                               Image(systemName: votingResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill")
-                                  .foregroundStyle(getColor(index: result.index))
-                               Text(optionTextMap[result.index] ?? "")
-                               Spacer()
-                               Text("\(result.percentage, specifier: "%.2f")%")
-                                  .opacity(0.6)
-                            }
-                         }
-                      } header: {
-                         Spacer(minLength: 0).listRowInsets(EdgeInsets())
-                      }
-                   }
-                   .frame(height: CGFloat((votingResults.results.count * 65) + (votingResults.results.count < 4 ? 200 : 0)), alignment: .top)
-                   //             .scrollContentBackground(.hidden)
-                   .environment(\.defaultMinListHeaderHeight, 10)
+                   VotingResultList(results: votingResults, optionTextMap: optionTextMap)
                 }
              }
           } else if isLoading {
@@ -141,6 +130,15 @@ struct Votings_VotingResultView: View {
        .navigationBarTitleDisplayMode(.inline)
        .background(Color(UIColor.secondarySystemBackground))
     }
+   
+   
+   private func getIdentities(result: GetVotingResultDTO) -> [GetIdentityDTO] {
+      if let identities = result.identities {
+         return identities
+      } else {
+         return []
+      }
+   }
    
    private func isLiveStatusAvailable(votingId: UUID) async -> Bool {
       await withCheckedContinuation { continuation in
@@ -197,19 +195,175 @@ struct Votings_VotingResultView: View {
       }
       optionTextMap[0] = "Enthaltung"
    }
-   
+
+// für Mock-Daten
 //   func getMeetingName(voting: GetVotingDTO) -> String {
 //      return votingsView.getMeeting(meetingID: voting.meetingId).name
 //   }
 
 }
 
-#Preview() {
-   var votingsView: VotingsView = .init()
+struct VotingResultList: View {
+   @Environment(\.colorScheme) var colorScheme
+   @State private var isCount = false
+   let results: GetVotingResultsDTO
+   let optionTextMap: [UInt8: String]
    
-   Votings_VotingResultView(votingsView: VotingsView(), voting: votingsView.mockVotings[0], votingResults: votingsView.mockVotingResults)
-//      .navigationTitle("lol")
-//      .navigationBarTitleDisplayMode(.inline)
+   func getColor(index: UInt8) -> Color {
+      return colorMapping[index] ?? .gray
+   }
+   
+   var body: some View {
+      VStack(alignment: .leading, spacing: 7) {
+         HStack {
+            Text("Stimmen (\(results.totalCount))")
+               .foregroundStyle(Color(UIColor.secondaryLabel))
+               .padding(.leading, 32)
+            Spacer()
+            Toggle(isOn: $isCount) {
+            }
+            .toggleStyle(ImageToggleStyle())
+            .padding(.trailing, 32) .padding(.bottom, 1)
+         }
+         
+         VStack {
+            ForEach(results.results, id: \.id) { result in
+               VotingResultRow(
+                  votingResults: results,
+                  result: result,
+                  optionText: optionTextMap[result.index] ?? "",
+                  getColor: getColor,
+                  isCount: $isCount
+               )
+               .padding(.vertical, 6)
+               
+               if result.id != results.results.last?.id {
+                  Divider()
+                     .padding(.vertical, 2)
+               }
+            }
+         }
+         .padding(.horizontal)
+         .padding(.vertical, 12)
+         .background(Color(UIColor.systemBackground))
+         .cornerRadius(10)
+         .padding(.horizontal)
+      }
+      .padding(.vertical)
+   }
+}
+
+struct VotingResultRow: View {
+   @State private var isCollapsed: Bool = true
+   let votingResults: GetVotingResultsDTO
+   let result: GetVotingResultDTO
+   let optionText: String
+   let getColor: (UInt8) -> Color
+   @Binding var isCount: Bool
+   
+   var body: some View {
+      VStack {
+         HStack {
+            Image(systemName: votingResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill")
+               .foregroundStyle(getColor(result.index))
+            Text(optionText)
+            Spacer()
+            if isCount {
+               Text("\(result.count)")
+                  .opacity(0.6)
+            } else {
+               Text("\(result.percentage, specifier: "%.2f")%")
+                  .opacity(0.6)
+            }
+            
+            if let identities = result.identities, !identities.isEmpty {
+               Image(systemName: isCollapsed ? "chevron.forward" : "chevron.down")
+                  .foregroundStyle(.blue)
+            }
+         }
+         .contentShape(Rectangle())
+         .onTapGesture {
+            if let identities = result.identities, !identities.isEmpty {
+               withAnimation(.easeInOut(duration: 0.3)) {
+                  isCollapsed.toggle()
+               }
+            }
+         }
+         
+         if !isCollapsed, let identities = result.identities {
+            VStack(alignment: .leading) {
+               Divider()
+                  .padding(.vertical, 4)
+               ForEach(identities, id: \.id) { identity in
+                  HStack {
+                     Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(getColor(result.index).opacity(0.55).mix(with: .gray, by: 0.1))
+                     Text(identity.name)
+                  }
+                  if identity.id != identities.last?.id {
+                     Divider()
+                        .padding(.top, 2) .padding(.bottom, 4)
+                  }
+               }
+            }
+            .padding(.leading, 25)
+            .transition(
+               .asymmetric(
+                  insertion: .opacity.animation(.easeIn(duration: 0.1)),
+                  removal: .opacity.animation(.easeOut(duration: 0.1))
+               )
+            )
+            .animation(.easeInOut(duration: 0.5), value: isCollapsed) // Controls the movement
+         }
+      }
+   }
+}
+
+struct ImageToggleStyle: ToggleStyle {
+   var percentImage = "percent"
+   var countImage = "numbers"
+   
+   func makeBody(configuration: Configuration) -> some View {
+      HStack {
+         RoundedRectangle(cornerRadius: 28)
+            .fill(configuration.isOn ? Color(.systemGray3).mix(with: .blue, by: 0.4) : Color(.systemGray3).mix(with: .blue, by: 0.4))
+            .overlay {
+               Circle()
+                  .fill(.white)
+                  .padding(3)
+                  .overlay {
+                     Image(systemName: configuration.isOn ? countImage : percentImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 12)
+                        .foregroundColor(configuration.isOn ? Color(.systemGray5).mix(with: .blue, by: 0.8) : Color(.systemGray4).mix(with: .blue, by: 0.5))
+                  }
+                  .offset(x: configuration.isOn ? 10 : -10)
+            }
+            .frame(width: 42, height: 26)
+            .onTapGesture {
+               withAnimation(.spring()) {
+                  configuration.isOn.toggle()
+               }
+            }
+      }
+   }
+}
+
+extension GetIdentityDTO: @retroactive Identifiable {}
+extension GetIdentityDTO: @retroactive Equatable {}
+extension GetIdentityDTO: @retroactive Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    public static func == (lhs: GetIdentityDTO, rhs: GetIdentityDTO) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
+
+
+#Preview() {
+   Votings_VotingResultView(voting: mockVotings[0])
       .toolbar {
          ToolbarItem(placement: .navigationBarLeading) {
             Button {

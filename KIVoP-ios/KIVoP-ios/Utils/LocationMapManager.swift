@@ -2,7 +2,7 @@ import CoreLocation
 
 class LocationMapManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
-
+    
     // Veröffentliche die aktuelle Position, damit SwiftUI auf Änderungen reagieren kann
     @Published var currentLocation: CLLocation?
 
@@ -18,7 +18,7 @@ class LocationMapManager: NSObject, ObservableObject, CLLocationManagerDelegate 
         locationManager.startUpdatingLocation()
     }
 
-    func locationManager( manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
             DispatchQueue.main.async {
                 self.currentLocation = location
@@ -31,7 +31,7 @@ class LocationMapManager: NSObject, ObservableObject, CLLocationManagerDelegate 
         print("Standortaktualisierungen gestoppt.")
     }
 
-    func locationManager( manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch status {
         case .authorizedWhenInUse, .authorizedAlways:
             manager.startUpdatingLocation()

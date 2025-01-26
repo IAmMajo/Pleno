@@ -1,10 +1,3 @@
-//
-//  AttendanceDetailView.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 02.11.24.
-//
-
 import SwiftUI
 
 struct AttendanceDetailView: View {
@@ -18,6 +11,15 @@ struct AttendanceDetailView: View {
                     .edgesIgnoringSafeArea(.all)
                 // Inhalt
                 VStack {
+                    
+                    // Datum + Uhrzeit
+                    Text(viewModel.formattedDate(viewModel.meeting.start))
+                        .padding(5)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 30)
+                                .stroke(Color.black, lineWidth: 1)
+                        )
+                        .padding(.vertical)
                     // Teilnahme Status Icons
                     HStack {
                         Spacer()
@@ -45,10 +47,8 @@ struct AttendanceDetailView: View {
                         Section(header: Text("Mitglieder")) {
                             ForEach(viewModel.attendances, id: \.identity.id) { attendance in
                                 HStack {
-                                    // Profilbild (Platzhalter)
-                                    Circle()
-                                        .fill(Color.gray)
-                                        .frame(width: 40, height: 40)
+                                    // Profilbild
+                                    ProfilePictureAttendance(profile: attendance.identity)
                                     
                                     // Name (der eigene Name wird fett gedruckt)
                                     VStack(alignment: .leading) {
@@ -91,7 +91,8 @@ struct AttendanceDetailView: View {
                     }
                 }
             }
-            .navigationTitle(Text(viewModel.meeting.start, style: .date))
+            .navigationTitle(viewModel.meeting.name)
+            .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
         }
     }

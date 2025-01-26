@@ -1,10 +1,3 @@
-//
-//  AttendanceView.swift
-//  KIVoP-ios
-//
-//  Created by Henrik Peltzer on 02.11.24.
-//
-
 import SwiftUI
 
 struct AttendanceView: View {
@@ -134,6 +127,7 @@ struct AttendanceView: View {
                 }
             }
             .navigationTitle("Anwesenheit")
+            .navigationBarTitleDisplayMode(.large)
             .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
         }
     }

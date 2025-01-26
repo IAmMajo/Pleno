@@ -99,7 +99,7 @@ struct MainPage_ProfilView_Name: View {
                 isLoading = false
                 switch result {
                 case .success(let profile):
-                    self.name = profile.name ?? ""
+                    self.name = profile.name
                 case .failure(let error):
                     self.errorMessage = "Fehler: \(error.localizedDescription)"
                 }
@@ -127,7 +127,12 @@ struct MainPage_ProfilView_Name: View {
                         presentationMode.wrappedValue.dismiss()
                     }
                 case .failure(let error):
-                    errorMessage = "Fehler beim Aktualisieren: \(error.localizedDescription)"
+                    if let nsError = error as NSError?, nsError.code == 423 {
+                        errorMessage = nsError.localizedDescription
+                    } else {
+                        errorMessage = "Ein Fehler ist aufgetreten: \(error.localizedDescription)"
+                    }
+
                 }
             }
         }

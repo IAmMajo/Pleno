@@ -7,9 +7,10 @@ public struct GetSpecialRideDTO: Codable {
     public var ends: Date
     public var emptySeats: UInt8
     public var allocatedSeats: UInt8
-    public var myState: UsersSpecialRideState
+    public var myState: UsersRideState
+    public var openRequests: Int?
     
-    public init(id: UUID? = nil, name: String, starts: Date, ends: Date, emptySeats: UInt8, allocatedSeats: UInt8, myState: UsersSpecialRideState) {
+    public init(id: UUID? = nil, name: String, starts: Date, ends: Date, emptySeats: UInt8, allocatedSeats: UInt8, myState: UsersRideState, openRequests: Int? = nil) {
         self.id = id
         self.name = name
         self.starts = starts
@@ -17,12 +18,6 @@ public struct GetSpecialRideDTO: Codable {
         self.emptySeats = emptySeats
         self.allocatedSeats = allocatedSeats
         self.myState = myState
+        self.openRequests = openRequests
     }
-}
-
-public enum UsersSpecialRideState: String, Codable, CaseIterable {
-    case nothing
-    case requested
-    case accepted
-    case driver
 }

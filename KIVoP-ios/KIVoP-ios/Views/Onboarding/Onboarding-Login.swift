@@ -98,9 +98,7 @@ struct Onboarding_Login: View {
                 .padding(.horizontal, 24)
 
                 // Back Button
-                Button(action: {
-                    dismiss() // Zur vorherigen Ansicht zurückkehren
-                }) {
+                NavigationLink(destination: Onboarding(isManualNavigation: true)) { // Setze isManualNavigation auf true
                     Text("Zurück")
                         .foregroundColor(.gray)
                         .font(.footnote)

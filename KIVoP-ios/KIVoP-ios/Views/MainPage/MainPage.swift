@@ -146,6 +146,22 @@ struct MainPage: View {
                                    .foregroundColor(Color.primary)
                            }
                        }
+                        NavigationLink(destination: RideView()) {
+                            HStack {
+                               Image(systemName: "car.fill")
+                                    .foregroundColor(.accentColor)
+                                Text("Fahrgemeinschaften")
+                                    .foregroundColor(Color.primary)
+                            }
+                        }
+                        NavigationLink(destination: PollsView()) {
+                           HStack {
+                              Image(systemName: "bubble.left.and.bubble.right.fill")
+                                   .foregroundColor(.accentColor)
+                               Text("Umfragen")
+                                   .foregroundColor(Color.primary)
+                           }
+                       }
                     }
                 }
                 .listStyle(InsetGroupedListStyle())
@@ -182,8 +198,8 @@ struct MainPage: View {
                 case .success(let profile):
                     self.isLoading = false
                     self.errorMessage = nil
-                    self.name = profile.name ?? ""
-                    self.shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
+                    self.name = profile.name
+                    self.shortName = MainPageAPI.calculateShortName(from: profile.name)
                     if let imageData = profile.profileImage, let image = UIImage(data: imageData) {
                         self.profileImage = image
                     } else {

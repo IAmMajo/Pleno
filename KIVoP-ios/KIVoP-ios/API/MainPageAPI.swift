@@ -182,17 +182,23 @@ struct MainPageAPI {
 
             if let httpResponse = response as? HTTPURLResponse {
                 print("Status Code: \(httpResponse.statusCode)")
-                if httpResponse.statusCode != 200 {
+                switch httpResponse.statusCode {
+                case 200:
+                    completion(.success(()))
+                case 423:
+                    // Fehler 423 korrekt behandeln
+                    let lockedError = NSError(domain: "", code: 423, userInfo: [NSLocalizedDescriptionKey: "Während eines Meetings lassen sich Username und Profilbild nicht ändern."])
+                    completion(.failure(lockedError))
+                default:
                     completion(.failure(APIError.invalidResponse))
-                    return
                 }
+                return
             }
 
-            completion(.success(()))
+            completion(.failure(APIError.invalidResponse))
         }.resume()
     }
-    
-    // MARK: - Profilbild aktualisieren
+
     // MARK: - Profilbild aktualisieren
     static func updateUserProfileImage(profileImage: UIImage?, completion: @escaping (Result<Void, Error>) -> Void) {
         print("[DEBUG] Profilbild-Update gestartet.")
@@ -262,10 +268,15 @@ struct MainPageAPI {
                 print("[DEBUG] Antwort-Body: \(responseBody)")
             }
             
-            if httpResponse.statusCode == 200 {
+            switch httpResponse.statusCode {
+            case 200:
                 print("[DEBUG] Profilbild-Update erfolgreich.")
                 completion(.success(()))
-            } else {
+            case 423:
+                print("[DEBUG] Fehler: Benutzername/Profilbild kann während eines Meetings nicht geändert werden.")
+                let lockedError = NSError(domain: "", code: 423, userInfo: [NSLocalizedDescriptionKey: "Während eines Meetings lassen sich Username und Profilbild nicht ändern."])
+                completion(.failure(lockedError))
+            default:
                 print("[DEBUG] Fehler: Unerwarteter Statuscode \(httpResponse.statusCode).")
                 completion(.failure(APIError.invalidResponse))
             }
@@ -361,10 +372,17 @@ struct MainPageAPI {
     // MARK: - Helferfunktionen
     static func calculateShortName(from fullName: String) -> String {
         let nameParts = fullName.split(separator: " ")
+        
+        if nameParts.count == 1 {
+            // Falls nur ein Name vorhanden ist, verwende die ersten zwei Buchstaben
+            return String(nameParts.first!.prefix(2)).uppercased()
+        }
+
         guard let firstInitial = nameParts.first?.prefix(1),
               let lastInitial = nameParts.last?.prefix(1) else {
             return "??"
         }
+        
         return "\(firstInitial)\(lastInitial)".uppercased()
     }
     

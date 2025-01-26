@@ -123,7 +123,7 @@ struct MainPage_ProfilView_ProfilPicture: View {
                     } else {
                         self.selectedImage = nil
                     }
-                    self.shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
+                    self.shortName = MainPageAPI.calculateShortName(from: profile.name)
                 case .failure(let error):
                     self.errorMessage = "Fehler beim Laden des Profilbilds: \(error.localizedDescription)"
                 }
@@ -144,7 +144,12 @@ struct MainPage_ProfilView_ProfilPicture: View {
                     print("Profilbild erfolgreich aktualisiert.")
                     self.selectedImage = updatedImage
                 case .failure(let error):
-                    self.errorMessage = "Fehler beim Aktualisieren des Profilbilds: \(error.localizedDescription)"
+                    if let nsError = error as NSError?, nsError.code == 423 {
+                        errorMessage = nsError.localizedDescription
+                    } else {
+                        errorMessage = "Fehler beim Aktualisieren des Profilbilds: \(error.localizedDescription)"
+                    }
+
                 }
             }
         }
@@ -154,11 +159,24 @@ struct MainPage_ProfilView_ProfilPicture: View {
     func deleteProfileImage() {
         // Profilbild lokal entfernen
         selectedImage = nil
-        shortName = MainPageAPI.calculateShortName(from: "Anonym") // Fallback für die Anzeige
+        shortName = MainPageAPI.calculateShortName(from: "") // Vorläufiger Fallback-Name
 
         // Indikator setzen
         isUpdating = true
         errorMessage = nil
+
+        // Profil erneut abrufen, um den aktuellen Benutzernamen zu erhalten
+        MainPageAPI.fetchUserProfile { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let profile):
+                    self.shortName = MainPageAPI.calculateShortName(from: profile.name)
+                case .failure(let error):
+                    debugPrint("❌ Fehler beim Laden des Benutzernamens: \(error.localizedDescription)")
+                    self.shortName = MainPageAPI.calculateShortName(from: "Anonym")
+                }
+            }
+        }
 
         // Leeres Bild-Datenobjekt senden
         MainPageAPI.updateUserProfileImage(profileImage: UIImage()) { result in
@@ -168,12 +186,16 @@ struct MainPage_ProfilView_ProfilPicture: View {
                 case .success:
                     print("Profilbild erfolgreich gelöscht.")
                 case .failure(let error):
-                    self.errorMessage = "Fehler beim Löschen des Profilbilds: \(error.localizedDescription)"
-                    print("[DEBUG] Fehler: \(error.localizedDescription)")
+                    if let nsError = error as NSError?, nsError.code == 423 {
+                        self.errorMessage = nsError.localizedDescription
+                    } else {
+                        self.errorMessage = "Fehler beim Löschen des Profilbilds: \(error.localizedDescription)"
+                    }
                 }
             }
         }
     }
+
 
 
     // MARK: - ImagePicker
