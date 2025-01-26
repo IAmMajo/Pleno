@@ -3,7 +3,7 @@ import AuthServiceDTOs
 import MeetingServiceDTOs
 import PosterServiceDTOs
 
-struct EditResponsibleUsers: View {
+struct EditPosterPosition: View {
     @EnvironmentObject private var locationViewModel: LocationsViewModel
     @Environment(\.dismiss) var dismiss
     var poster: PosterResponseDTO
@@ -13,9 +13,16 @@ struct EditResponsibleUsers: View {
     @ObservedObject var userManager = UserManager()
     
     var posterPosition: PosterPositionResponseDTO
-
+    @Binding var date: Date
     var body: some View {
         NavigationStack {
+            HStack{
+                Text("Ablaufdatum")
+                    .font(.headline)
+                Spacer()
+                DatePicker("", selection: $date)
+                    .datePickerStyle(CompactDatePickerStyle())
+            }
             List {
                 ForEach(filteredUsers, id: \.email) { user in
                     HStack {
@@ -44,6 +51,7 @@ struct EditResponsibleUsers: View {
             }
         }
         .onAppear {
+            date = posterPosition.expiresAt
             userManager.fetchUsers()
         }
         .onDisappear {
@@ -83,7 +91,7 @@ struct EditResponsibleUsers: View {
             latitude: posterPosition.latitude,
             longitude: posterPosition.longitude,
             responsibleUsers: selectedUsers,
-            expiresAt: posterPosition.expiresAt
+            expiresAt: date
         )
         locationViewModel.patchPosterPosition(posterPositionId: posterPosition.id, posterPosition: patchUserPosterPosition, posterId: poster.id)
         // Add the new object to the list

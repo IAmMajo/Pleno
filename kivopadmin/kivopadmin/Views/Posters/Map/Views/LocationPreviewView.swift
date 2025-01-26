@@ -6,11 +6,31 @@ struct LocationPreviewView: View {
     @EnvironmentObject private var locationViewModel: LocationsViewModel
     let position: PosterPositionWithAddress
     
+    func getDateStatusText(position: PosterPositionResponseDTO) -> (text: String, color: Color) {
+        let status = position.status
+        switch status {
+        case "hangs":
+            if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
+                return (text: "morgen überfällig", color: .orange)
+            } else {
+                return (text: "hängt", color: .blue)
+            }
+        case "takenDown":
+            return (text: "abgehangen", color: .green)
+        case "toHang":
+            return (text: "hängt noch nicht", color: Color(UIColor.secondaryLabel))
+        case "overdue":
+            return (text: "überfällig", color: .red)
+        default:
+            return (text: "", color: Color(UIColor.secondaryLabel))
+        }
+    }
+    
     var body: some View {
         ZStack{
-            HStack(alignment: .bottom, spacing: 0){
+            HStack(){
+                imageSection
                 VStack(alignment: .leading, spacing: 16.0){
-                    imageSection
                     titleSection
                 }
                 buttonsSection
@@ -24,36 +44,38 @@ struct LocationPreviewView: View {
             }
         }
 
-        
-
-    
-
     }
 }
 
 
 extension LocationPreviewView {
     private var imageSection: some View {
-        ZStack{
+        Group {
             if let imageData = position.position.image, // Unwrap optional Data
                let uiImage = UIImage(data: imageData) { // Erzeuge ein UIImage aus Data
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFit()
                     .cornerRadius(10)
-                    .frame(maxWidth: 45, maxHeight: 45)
+                    .frame(maxWidth: 100, maxHeight: 100)
+            } else {
+                ZStack {} // Leere View, wenn kein Bild verfügbar
             }
         }
-        .padding(6)
-        .background(Color.white)
-        .cornerRadius(10)
     }
+
     
     private var titleSection: some View {
-        VStack{
+        VStack(alignment: .leading){
             Text(position.address).font(.title2).fontWeight(.bold)
-            Text(position.position.status).font(.subheadline)
+            Text(getDateStatusText(position: position.position).text)
+               .font(.headline)
+               .foregroundStyle(getDateStatusText(position: position.position).color)
+            if position.position.status != "takenDown" {
+                Text("Ablaufdatum: \(DateTimeFormatter.formatDate(position.position.expiresAt))")
+            }
         }
+        .padding(.leading)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     

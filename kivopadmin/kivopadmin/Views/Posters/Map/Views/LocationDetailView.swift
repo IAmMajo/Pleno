@@ -9,48 +9,63 @@ struct LocationDetailView: View {
     let position: PosterPositionWithAddress
     var users: [UserProfileDTO]
     var poster: PosterResponseDTO
+    @State private var date: Date = Date()
     @State private var showDeleteConfirmation = false
     
     func getDateStatusText(position: PosterPositionResponseDTO) -> (text: String, color: Color) {
-       let status = position.status
-       switch status {
-       case "hangs":
-          if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
-             return (text: "morgen überfällig", color: .orange)
-          } else {
-             return (text: "hängt", color: .blue)
-          }
-       case "takenDown":
-          return (text: "abgehangen", color: .green)
-       case "toHang":
-          return (text: "hängt noch nicht", color: Color(UIColor.secondaryLabel))
-       case "overdue":
-          return (text: "überfällig", color: .red)
-       default:
-          return (text: "", color: Color(UIColor.secondaryLabel))
-       }
+        let status = position.status
+        switch status {
+        case "hangs":
+            if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
+                return (text: "morgen überfällig", color: .orange)
+            } else {
+                return (text: "hängt", color: .blue)
+            }
+        case "takenDown":
+            return (text: "abgehangen", color: .green)
+        case "toHang":
+            return (text: "hängt noch nicht", color: Color(UIColor.secondaryLabel))
+        case "overdue":
+            return (text: "überfällig", color: .red)
+        default:
+            return (text: "", color: Color(UIColor.secondaryLabel))
+        }
     }
     
     var body: some View {
-        NavigationStack{
-            ScrollView{
-                VStack{
-                    imageSection.shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
-                    
-                    VStack(alignment: .leading, spacing: 16){
-                        titleSection
-                        bodySection
+        NavigationStack {
+            ScrollViewReader { proxy in // Hinzufügen des ScrollViewReaders
+                ScrollView {
+                    VStack {
+                        imageSection
+                            .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
+
+                        VStack(alignment: .leading, spacing: 16) {
+                            titleSection
+                            bodySection
+                                .id("bodySection") // Einen Ankerpunkt für den ScrollViewReader definieren
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        deleteSection
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    deleteSection
+                }
+                .ignoresSafeArea()
+                .background(.ultraThinMaterial)
+                .onAppear {
+                    // Automatisch zum definierten Bereich scrollen
+                    withAnimation {
+                        proxy.scrollTo("bodySection", anchor: .top)
+                    }
                 }
             }
-            .ignoresSafeArea()
-            .background(.ultraThinMaterial)
         }
-
+        .onAppear {
+            date = position.position.expiresAt
+        }
     }
+
+
 }
 
 
@@ -82,26 +97,37 @@ extension LocationDetailView {
                .font(.headline)
                .foregroundStyle(getDateStatusText(position: position.position).color)
             ProgressBarView(position: position.position)
+            NavigationLink(destination: EditPosterPosition(poster: poster,selectedUsers: position.position.responsibleUsers.map { $0.id }, posterPosition: position.position, date: $date)){
+                Text("Plakatposition bearbeiten")
+            }.padding(.vertical)
             Divider()
             HStack{
+                Text("Ablaufdatum:").font(.headline)
+                Spacer()
+                Text(DateTimeFormatter.formatDate(position.position.expiresAt)).font(.headline)
+            }.padding(.vertical, 10)
+            
+            Divider()
+            VStack(alignment: .leading){
+
                 if position.position.responsibleUsers.count == 1 {
                     Text("Verantwortliche Person").font(.headline)
                 } else if position.position.responsibleUsers.count > 1 {
                     Text("Verantwortliche Personen").font(.headline)
                 }
-                NavigationLink(destination: EditResponsibleUsers(poster: poster,selectedUsers: position.position.responsibleUsers.map { $0.id }, posterPosition: position.position)){
-                    Text("Ändern")
+
+                
+
+                ForEach(position.position.responsibleUsers, id: \.id) { user in
+                    Text(user.name)
+                        .font(.body)
+                        .foregroundColor(.primary)
+
+                    .padding(8)
+                    .background(RoundedRectangle(cornerRadius: 8).fill(Color.gray.opacity(0.1)))
                 }
-            }
+            }.padding(.vertical, 10)
 
-            ForEach(position.position.responsibleUsers, id: \.id) { user in
-                Text(user.name)
-                    .font(.body)
-                    .foregroundColor(.primary)
-
-                .padding(8)
-                .background(RoundedRectangle(cornerRadius: 8).fill(Color.gray.opacity(0.1)))
-            }
         }
 
     }
