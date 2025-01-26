@@ -65,12 +65,11 @@ fun IconTextField(
               .padding(10.dp),
   ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-      IconBoxClickable(
+      IconBox(
           icon = icon,
           height = 50.dp,
           backgroundColor = Tertiary.copy(0.2f),
-          tint = Tertiary,
-          onClick = {})
+          tint = Tertiary)
       Spacer(Modifier.size(12.dp))
       if (!edit) {
         Text(text = text, color = Text_prime, style = textStyle)

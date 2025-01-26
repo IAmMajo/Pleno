@@ -131,9 +131,13 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
               text = user?.name ?: "",
               edit = editMode,
               newText = name,
-              onValueChange = { name = it })
+              onValueChange = { name = it }, 
+              isClickable = false)
           SpacerBetweenElements()
-          IconTextField(icon = Icons.Outlined.Email, text = user?.email ?: "")
+          IconTextField(
+            icon = Icons.Outlined.Email,
+            text = user?.email ?: "",
+            isClickable = false)
           Spacer(modifier = Modifier.weight(1f))
           if (editMode) {
             Button(
