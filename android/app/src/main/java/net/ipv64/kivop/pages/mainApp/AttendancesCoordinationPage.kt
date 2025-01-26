@@ -182,7 +182,7 @@ fun AttendancesCoordinationPage(
                   IconTextField(
                       text = votingData.title,
                       icon = ImageVector.vectorResource(R.drawable.ic_pie_chart),
-                      onClick = { navController.navigate("abstimmung/${voting.id}") }) {}
+                      onClick = { navController.navigate("abstimmung/${voting.id}") }) 
                 }
               }
               SpacerBetweenElements()

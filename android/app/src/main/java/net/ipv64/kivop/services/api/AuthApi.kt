@@ -105,19 +105,22 @@ suspend fun getUserProfile(): UserProfileDTO? =
           if (responseBody != null) {
             val profileObject = Gson().fromJson(responseBody, JsonObject::class.java)
             val uid = profileObject.get("uid")?.asString.let { UUID.fromString(it) }
-            val email = profileObject.get("email")?.asString
-            val name = profileObject.get("name")?.asString
+            val email = profileObject.get("email").asString
+            val name = profileObject.get("name").asString
             val profileImage = profileObject.get("profileImage")?.asString
-            val isAdmin = profileObject.get("isAdmin")?.asBoolean
-            val isActive = profileObject.get("isActive")?.asBoolean
+            val isAdmin = profileObject.get("isAdmin").asBoolean
+            val isActive = profileObject.get("isActive").asBoolean
             val emailVerification =
-                profileObject.get("emailVerification")?.asString?.let {
+                profileObject.get("emailVerification").asString.let {
                   VerificationStatus.valueOf(it)
                 }
             val createdAt =
                 profileObject.get("createdAt")?.asString.let { stringToLocalDateTime(it) }
+            val isNotificationsActive = profileObject.get("isNotificationsActive").asBoolean
+            val isPushNotificationsActive = profileObject.get("isPushNotificationsActive").asBoolean
+            
             UserProfileDTO(
-                uid, email, name, profileImage, isAdmin, isActive, emailVerification, createdAt)
+                uid, email, name, profileImage, isAdmin, isActive, emailVerification, createdAt,isNotificationsActive, isPushNotificationsActive)
           } else {
             println("Fehler: Leere Antwort erhalten.")
             null

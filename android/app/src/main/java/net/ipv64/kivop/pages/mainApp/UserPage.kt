@@ -34,12 +34,16 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.R
+import net.ipv64.kivop.components.CustomButton
 import net.ipv64.kivop.components.IconBoxClickable
 import net.ipv64.kivop.components.IconTextField
 import net.ipv64.kivop.components.ImgPicker
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.handleLogout
+import net.ipv64.kivop.models.ButtonStyle
+import net.ipv64.kivop.models.alertButtonStyle
+import net.ipv64.kivop.models.primaryButtonStyle
 import net.ipv64.kivop.models.viewModel.UserViewModel
 import net.ipv64.kivop.services.StringProvider.getString
 import net.ipv64.kivop.services.uriToBase64String
@@ -48,6 +52,7 @@ import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Signal_blue
 import net.ipv64.kivop.ui.theme.Signal_red
+import net.ipv64.kivop.ui.theme.TextStyles
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,7 +64,7 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
   }
   var editMode by remember { mutableStateOf(false) }
   val user = userViewModel.getProfile()
-  var newImgByteArray: String? = null
+  var newImgByteArray by remember { mutableStateOf<String?>(null) }
   val topBarModifier =
       Modifier.zIndex(1f).padding(vertical = 12.dp, horizontal = 14.dp).height(48.dp)
 
@@ -98,18 +103,30 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
         // verticalArrangement = Arrangement.Center,
     ) {
       if (user != null) {
-        if (editMode) {
-          newImgByteArray =
-              user.name
-                  ?.let { name -> ImgPicker(user.profileImage, userName = name) }
-                  ?.let { uriToBase64String(navController.context, it) }
-        } else {
-          if (user.profileImage != null) {
-            ImgPicker(user.profileImage, edit = false)
-          } else {
-            user.name?.let { name -> ImgPicker(userName = name, edit = false) }
+        ImgPicker(
+          img = user.profileImage.takeIf { !editMode },
+          userName = user.name ?: "User",
+          edit = editMode,
+          onImagePicked = {
+              uri -> newImgByteArray = uri?.let { uriToBase64String(navController.context, it) }
           }
-        }
+        )
+//        if (editMode) {
+//          ImgPicker(
+//            img = user.profileImage.takeIf { !editMode },
+//            userName = user.name ?: "User",
+//            edit = true,
+//            onImagePicked = { 
+//              uri -> newImgByteArray = uri?.let { uriToBase64String(navController.context, it) }
+//            } // Capture selected image
+//          )
+//        } else {
+//          if (user.profileImage != null) {
+//            ImgPicker(user.profileImage, edit = false, onImagePicked = {})
+//          } else {
+//            ImgPicker(userName = user.name, edit = false, onImagePicked = {})
+//          }
+//        }
       }
     }
     Column(
@@ -123,7 +140,7 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
                             topStart = 22.dp, topEnd = 22.dp)) // todo: Rounded Corner anpassen
                 .padding(top = 18.dp)
                 .padding(horizontal = 18.dp)) {
-          Text(text = getString(R.string.user_info), style = MaterialTheme.typography.labelLarge)
+          Text(text = getString(R.string.user_info), style = TextStyles.subHeadingStyle,)
           SpacerBetweenElements()
           var name by remember { mutableStateOf<String>("") }
           IconTextField(
@@ -131,9 +148,15 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
               text = user?.name ?: "",
               edit = editMode,
               newText = name,
-              onValueChange = { name = it })
+              textStyle = TextStyles.largeContentStyle,
+              onValueChange = { name = it }, 
+              isClickable = false)
           SpacerBetweenElements()
-          IconTextField(icon = Icons.Outlined.Email, text = user?.email ?: "")
+          IconTextField(
+            icon = Icons.Outlined.Email,
+            text = user?.email ?: "",
+            textStyle = TextStyles.largeContentStyle,
+            isClickable = false)
           Spacer(modifier = Modifier.weight(1f))
           if (editMode) {
             Button(
@@ -161,30 +184,23 @@ fun UserPage(navController: NavController, userViewModel: UserViewModel) {
                   Text(text = getString(R.string.btn_save_change_user))
                 }
           } else {
-            Button(
+            CustomButton(
                 modifier = Modifier.fillMaxWidth(),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = Signal_blue, contentColor = Text_prime_light),
-                onClick = {}) {
-                  Text(text = getString(R.string.btn_change_password))
-                }
-            Button(
+                text = getString(R.string.btn_change_password),
+                buttonStyle = primaryButtonStyle,
+                onClick = {})
+            SpacerBetweenElements(8.dp)
+            CustomButton(
                 modifier = Modifier.fillMaxWidth(),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = Signal_blue, contentColor = Text_prime_light),
-                onClick = { handleLogout(navController.context) }) {
-                  Text(text = getString(R.string.btn_logout))
-                }
-            Button(
+                text = getString(R.string.btn_logout),
+                buttonStyle = primaryButtonStyle,
+                onClick = { handleLogout(navController.context) })
+            SpacerBetweenElements(8.dp)
+            CustomButton(
                 modifier = Modifier.fillMaxWidth(),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = Signal_red, contentColor = Text_prime_light),
-                onClick = {}) {
-                  Text(text = getString(R.string.btn_del_user))
-                }
+                text = getString(R.string.btn_del_user),
+                buttonStyle = alertButtonStyle,
+                onClick = {}) 
           }
           SpacerBetweenElements()
         }

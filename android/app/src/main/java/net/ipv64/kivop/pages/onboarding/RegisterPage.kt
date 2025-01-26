@@ -59,7 +59,11 @@ fun RegisterPage(navController: NavController) {
           style = MaterialTheme.typography.headlineLarge,
       )
       Spacer(modifier = Modifier.height(16.dp))
-      imgByteArray = ImgPicker(size = 120.dp)?.let { uriToBase64String(navController.context, it) }
+      ImgPicker(size = 120.dp, onImagePicked = { uri ->
+        if (uri != null) {
+          uriToBase64String(navController.context,uri)
+        }
+      })
       // Todo: Fix CustomInputField.kt
       CustomInputField(
           label = "Name",
