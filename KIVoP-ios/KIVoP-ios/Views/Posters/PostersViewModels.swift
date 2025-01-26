@@ -56,13 +56,22 @@ class PostersViewModel: ObservableObject {
        filteredPosters = posters.compactMap { poster in
            guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { return nil }
            
-           // Find the position with the earliest `expiresAt`
-           guard let earliestPosition = positions.min(by: { $0.expiresAt < $1.expiresAt }) else { return nil }
-           
            // Count the number of positions with specific statuses
            let tohangCount = positions.filter { $0.status == "toHang" }.count
            let expiredCount = positions.filter { $0.status == "overdue" }.count
-           
+          
+          // Find the position with the earliest `expiresAt`
+//          guard let earliestPosition = positions.min(by: { $0.expiresAt < $1.expiresAt }) else { return nil }
+          let earliestPositionDTO: PosterPositionResponseDTO?
+          // Reinitialization of earliestPosition to earliest expired position
+          if expiredCount > 0 {
+             let expiredPosition = positions.filter { $0.status == "overdue" }
+             earliestPositionDTO = expiredPosition.min(by: { $0.expiresAt < $1.expiresAt })
+          } else {
+             earliestPositionDTO = positions.min(by: { $0.expiresAt < $1.expiresAt })
+          }
+          guard let earliestPosition = earliestPositionDTO else { return nil }
+          
            // Check if the poster is archived
            let isArchived = positions.allSatisfy { position in
                position.status == "takenDown" &&
