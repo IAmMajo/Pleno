@@ -26,7 +26,7 @@ struct RideView: View {
                         ) {
                             // Überprüfe, welche Liste angezeigt wird, basierend auf dem ausgewählten Tab
                             if viewModel.selectedTab == 0 { // Events
-                                EventList(events: group.value as! [GetEventDTO])
+                                EventList(events: group.value as! [EventWithAggregatedData], viewModel: viewModel)
                             } else if viewModel.selectedTab == 1 { // Sonderfahrten
                                 RideList(rides: group.value as! [GetSpecialRideDTO], viewModel: viewModel)
                             } else { // Meine Fahrten
@@ -61,7 +61,8 @@ struct RideView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: {
                         let editRideViewModel = EditRideViewModel()
-                        editRideViewModel.events = viewModel.events
+                        // Extrahiere nur die GetEventDTO-Objekte aus EventWithAggregatedData
+                        editRideViewModel.events = viewModel.events.map { $0.event }
                         return NewRideView(viewModel: editRideViewModel, rideViewModel: viewModel)
                     }()) {
                         Text("Neue Fahrt anbieten")

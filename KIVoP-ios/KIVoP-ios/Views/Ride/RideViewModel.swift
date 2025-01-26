@@ -9,7 +9,7 @@ class RideViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var rides: [GetSpecialRideDTO] = []
     @Published var eventRides: [GetEventRideDTO] = []
-    @Published var events: [GetEventDTO] = []
+    @Published var events: [EventWithAggregatedData] = []
     private let baseURL = "https://kivop.ipv64.net"
     
     init() {
@@ -27,7 +27,6 @@ class RideViewModel: ObservableObject {
     func fetchRides(){
         fetchSpecialRides()
         fetchEvents()
-        fetchEventRides()
     }
     
     func fetchSpecialRides() {
@@ -116,11 +115,14 @@ class RideViewModel: ObservableObject {
             do {
                 // Decodieren der Antwort in ein Array von GetSpecialRideDTO
                 let decodedEvents = try decoder.decode([GetEventDTO].self, from: data)
-                
-                // Sicherstellen, dass die Updates im Main-Thread ausgeführt werden
                 DispatchQueue.main.async {
-                    self?.events = []
-                    self?.events = decodedEvents // Array mit den Sonderfahrten speichern
+                    self?.fetchEventRides {
+                        // Berechne und füge die aggregierten Daten hinzu
+                        self?.events = decodedEvents.map { event in
+                            let aggregatedData = self?.aggregatedData(for: event) ?? (.nothing, 0, 0, nil)
+                            return EventWithAggregatedData(event: event, allOpenRequests: aggregatedData.allOpenRequests, allAllocatedSeats: aggregatedData.allAllocatedSeats, allEmptySeats: aggregatedData.allEmptySeats, myState: aggregatedData.myState)
+                        }
+                    }
                 }
             } catch {
                 print("JSON Decode Error: \(error.localizedDescription)")
@@ -129,7 +131,7 @@ class RideViewModel: ObservableObject {
     }
     
     // Fetch alle EventRides für die Auswahl im Array
-    func fetchEventRides() {
+    func fetchEventRides(completion: @escaping () -> Void) {
         guard let url = URL(string: "\(baseURL)/eventrides") else {
             print("Invalid URL")
             return
@@ -165,11 +167,10 @@ class RideViewModel: ObservableObject {
             do {
                 // Decodieren der Antwort in ein Array von GetSpecialRideDTO
                 let decodedEventRides = try decoder.decode([GetEventRideDTO].self, from: data)
-                
-                // Sicherstellen, dass die Updates im Main-Thread ausgeführt werden
                 DispatchQueue.main.async {
                     self?.eventRides = []
-                    self?.eventRides = decodedEventRides // Array mit den Sonderfahrten speichern
+                    self?.eventRides = decodedEventRides
+                    completion()
                 }
             } catch {
                 print("JSON Decode Error: \(error.localizedDescription)")
@@ -189,8 +190,8 @@ class RideViewModel: ObservableObject {
         
         // Gruppierung nach Monat und Jahr
         for item in filtered {
-            if let event = item as? GetEventDTO {
-                let key = dateFormatter.string(from: event.starts)
+            if let event = item as? EventWithAggregatedData {
+                let key = dateFormatter.string(from: event.event.starts)
                 grouped[key, default: []].append(event)
             } else if let ride = item as? GetSpecialRideDTO {
                 let key = dateFormatter.string(from: ride.starts)
@@ -198,32 +199,22 @@ class RideViewModel: ObservableObject {
             } else if let eventRide = item as? GetEventRideDTO {
                 let key = dateFormatter.string(from: eventRide.starts)
                 grouped[key, default: []].append(eventRide)
+            } else {
+                print("Unrecognized item type: \(item)")
             }
         }
         
         // Sortierung innerhalb der Gruppen
         for (key, items) in grouped {
             grouped[key] = items.sorted { lhs, rhs in
-                if let eventL = lhs as? GetEventDTO, let eventR = rhs as? GetEventDTO {
-                    return eventL.starts < eventR.starts
+                if let eventL = lhs as? EventWithAggregatedData, let eventR = rhs as? EventWithAggregatedData {
+                    return eventL.event.starts < eventR.event.starts
                 }
                 if let rideL = lhs as? GetSpecialRideDTO, let rideR = rhs as? GetSpecialRideDTO {
                     return rideL.starts < rideR.starts
                 }
                 if let eventRideL = lhs as? GetEventRideDTO, let eventRideR = rhs as? GetEventRideDTO {
                     return eventRideL.starts < eventRideR.starts
-                }
-                if let eventL = lhs as? GetEventDTO, let eventRideR = rhs as? GetEventRideDTO {
-                    return eventL.starts < eventRideR.starts
-                }
-                if let rideL = lhs as? GetSpecialRideDTO, let eventRideR = rhs as? GetEventRideDTO {
-                    return rideL.starts < eventRideR.starts
-                }
-                if let eventRideL = lhs as? GetEventRideDTO, let eventR = rhs as? GetEventDTO {
-                    return eventRideL.starts < eventR.starts
-                }
-                if let eventRideL = lhs as? GetEventRideDTO, let rideR = rhs as? GetSpecialRideDTO {
-                    return eventRideL.starts < rideR.starts
                 }
                 return false
             }
@@ -239,6 +230,7 @@ class RideViewModel: ObservableObject {
         }
     }
 
+
     var filteredData: [Any] {
         switch selectedTab {
         case 0:
@@ -253,5 +245,35 @@ class RideViewModel: ObservableObject {
             return []
         }
     }
+    
+    // Berechnung der aggregierten Daten
+    func aggregatedData(for event: GetEventDTO) -> (myState: UsersRideState, allEmptySeats: UInt8, allAllocatedSeats: UInt8, allOpenRequests: UInt8?) {
+        let relevantEventRides = eventRides.filter { $0.eventID == event.id }
+        
+        let allEmptySeats = relevantEventRides.reduce(0) { $0 + $1.emptySeats }
+        let allAllocatedSeats = relevantEventRides.reduce(0) { $0 + $1.allocatedSeats }
+        
+        let allOpenRequests = relevantEventRides.reduce(0) { $0 + ($1.openRequests ?? 0) }
+        let allOpenRequestsUInt8: UInt8? = allOpenRequests > 0 ? UInt8(allOpenRequests) : nil
+        
+        let myState: UsersRideState
+        if relevantEventRides.contains(where: { $0.myState == .driver }) {
+            myState = .driver
+        } else if relevantEventRides.contains(where: { $0.myState == .accepted }) {
+            myState = .accepted
+        } else if relevantEventRides.contains(where: { $0.myState == .requested }) {
+            myState = .requested
+        } else {
+            myState = .nothing
+        }
+        return (myState, allEmptySeats, allAllocatedSeats, allOpenRequestsUInt8)
+    }
+}
 
+struct EventWithAggregatedData {
+    var event: GetEventDTO
+    var allOpenRequests: UInt8?
+    var allAllocatedSeats: UInt8
+    var allEmptySeats: UInt8
+    var myState: UsersRideState
 }
