@@ -118,12 +118,12 @@ struct MainPage_ProfilView_ProfilPicture: View {
                 self.isLoading = false
                 switch result {
                 case .success(let profile):
-                    if let imageData = profile.profileImage, let image = UIImage(data: imageData) {
+                    if let image = UIImage(data: profile.profileImage) {
                         self.selectedImage = image
                     } else {
                         self.selectedImage = nil
                     }
-                    self.shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
+                    self.shortName = MainPageAPI.calculateShortName(from: profile.name)
                 case .failure(let error):
                     self.errorMessage = "Fehler beim Laden des Profilbilds: \(error.localizedDescription)"
                 }

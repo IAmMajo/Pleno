@@ -189,9 +189,9 @@ struct MainPage: View {
                 case .success(let profile):
                     self.isLoading = false
                     self.errorMessage = nil
-                    self.name = profile.name ?? ""
-                    self.shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
-                    if let imageData = profile.profileImage, let image = UIImage(data: imageData) {
+                    self.name = profile.name
+                    self.shortName = MainPageAPI.calculateShortName(from: profile.name)
+                    if let image = UIImage(data: profile.profileImage) {
                         self.profileImage = image
                     } else {
                         self.profileImage = nil
