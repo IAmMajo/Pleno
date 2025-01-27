@@ -50,6 +50,21 @@ struct PosterPositionController: RouteCollection, Sendable {
             auth: .bearer()
         )
         
+        // PUT /posters/positions/:positionid/report-damage
+        positions.on(.PUT, ":positionid", "report-damage", body: .collect(maxSize: "7000kb"), use: reportDamagedPosterPosition).openAPI(
+            tags: openAPITagPosterPosition,
+            summary: "Meldet eine Poster-Position als beschädigt",
+            description: """
+                         Markiert eine bestimmte Poster-Position als beschädigt.
+                         """,
+            path: .type(PosterPosition.IDValue.self),
+            body: .type(ReportDamagedPosterPositionDTO.self),
+            contentType: .application(.json),
+            response: .type(PosterPositionResponseDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+        )
+        
         let adminRoutes = positions.grouped(adminMiddleware)
         
         // DELETE /posters/positions/:positionid (admin)
@@ -346,9 +361,10 @@ struct PosterPositionController: RouteCollection, Sendable {
         }
         
         // Schon aufgehängt?
-        if  position.posted_at != nil && position.removed_at == nil {
+        guard position.posted_at == nil || position.removed_at != nil else {
             throw Abort(.badRequest, reason: "Diese PosterPosition ist bereits aufgehängt.")
         }
+        
         // falls neu aufgehängt
         if position.removed_at != nil || position.removed_by != nil{
             position.removed_at = nil
@@ -369,6 +385,8 @@ struct PosterPositionController: RouteCollection, Sendable {
         if let longitude = dto.longitude{
             position.longitude = round(longitude * 1_000_000) / 1_000_000
         }
+        
+        position.damaged = false
         
         try await position.update(on: req.db)
 
@@ -405,7 +423,7 @@ struct PosterPositionController: RouteCollection, Sendable {
             throw Abort(.forbidden, reason: "Sie sind nicht verantwortlich für diese PosterPosition.")
         }
         
-        if position.removed_by != nil || position.removed_at != nil {
+        guard position.removed_by == nil && position.removed_at == nil else {
             throw Abort(.badRequest, reason: "Diese PosterPosition ist bereits abgehängt worden.")
         }
         
@@ -423,6 +441,36 @@ struct PosterPositionController: RouteCollection, Sendable {
             removedBy: try identity.requireID(),
             image: position.image!
         )
+    }
+    
+    /// Markiert eine Poster-Position als beschädigt.
+    @Sendable
+    func reportDamagedPosterPosition(_ req: Request) async throws -> PosterPositionResponseDTO {
+        guard let posterPosition = try await PosterPosition.find(req.parameters.get("id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        guard let reportDamagedPosterPositionDTO = try? req.content.decode(ReportDamagedPosterPositionDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected ReportDamagedPosterPositionDTO.")
+        }
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
+        guard posterPosition.status == .hangs else {
+            throw Abort(.badRequest, reason: "Only PosterPositions with a status of 'hangs' can be reported as damaged.")
+        }
+        
+        posterPosition.image = reportDamagedPosterPositionDTO.image
+        
+        try await posterPosition.update(on: req.db)
+        
+        try await posterPosition.$responsibilities.load(on: req.db)
+        for responsibility in posterPosition.responsibilities {
+            try await responsibility.$user.load(on: req.db)
+            try await responsibility.user.$identity.load(on: req.db)
+        }
+        try await posterPosition.$posted_by.load(on: req.db)
+        
+        return try posterPosition.toPosterPositionResponseDTO()
     }
     
     /// Löscht eine einzelne PosterPosition und deren zugehörige Daten.

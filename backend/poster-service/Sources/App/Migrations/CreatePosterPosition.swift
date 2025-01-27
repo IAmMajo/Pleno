@@ -14,7 +14,8 @@ struct CreatePosterPositions: AsyncMigration {
             .field("expires_at", .datetime , .required )
             .field("removed_at", .datetime)
             .field("removed_by", .uuid,  .references(Identity.schema , .id)) 
-            .field("image", .data )
+            .field("image", .data)
+            .field("damaged", .bool)
             .create()
     }
     

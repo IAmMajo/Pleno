@@ -31,17 +31,20 @@ extension PosterPosition {
         )
         
     }
-    var status: String {
-        if let _ = self.removed_at {
-            return "takenDown"
+    var status: PosterPositionStatus {
+        if self.removed_at != nil {
+            return .takenDown
         }
         if self.posted_at == nil {
-            return "toHang"
+            return .toHang
         }
         if self.expires_at < .now {
-            return "overdue"
+            return .overdue
         }
-        return "hangs"
+        if self.damaged {
+            return .damaged
+        }
+        return .hangs
     }
 }
 
