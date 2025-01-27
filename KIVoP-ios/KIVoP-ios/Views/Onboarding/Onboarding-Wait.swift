@@ -28,17 +28,22 @@ struct Onboarding_Wait: View {
                     }
                     
                     // Vereinslogo Placeholder
-                    Circle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: 150, height: 150)
-                        .overlay(
-                            Text("Vereinslogo")
-                                .foregroundColor(.gray)
-                        )
-                        .padding(.vertical, 20)
+//                    Circle()
+//                        .fill(Color.gray.opacity(0.3))
+//                        .frame(width: 150, height: 150)
+//                        .overlay(
+//                            Text("Vereinslogo")
+//                                .foregroundColor(.gray)
+//                        )
+//                        .padding(.vertical, 20)
+                    Image("cdu_datteln")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 150)
+                        .cornerRadius(100)
                     
                     // Vereinsname
-                    Text(clubName)
+                    Text("clubName")
                         .font(.system(size: 16))
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)

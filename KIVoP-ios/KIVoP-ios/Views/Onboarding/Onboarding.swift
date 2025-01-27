@@ -17,11 +17,16 @@ struct Onboarding: View {
                 Spacer()
                 
                 // Vereinslogo placeholder
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 120, height: 120)
-                    .overlay(Text(ClubLogo).foregroundColor(.gray))
-                    .padding(.bottom, 10)
+//                Circle()
+//                    .fill(Color.gray.opacity(0.3))
+//                    .frame(width: 120, height: 120)
+//                    .overlay(Text(ClubLogo).foregroundColor(.gray))
+//                    .padding(.bottom, 10)
+                Image("cdu_datteln")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 150)
+                    .padding(.bottom, 20)
                 
                 if currentIndex == 0 {
                     // Erster Onboarding-Bildschirm
@@ -39,10 +44,10 @@ struct Onboarding: View {
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(.blue) +
-                            Text("zu einer verbesserten ")
+                            Text("zu einer verbesserten")
                                 .font(.title3)
                                 .fontWeight(.regular) +
-                            Text("Vereinsplanung")
+                            Text(" Vereinsplanung")
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(.blue)

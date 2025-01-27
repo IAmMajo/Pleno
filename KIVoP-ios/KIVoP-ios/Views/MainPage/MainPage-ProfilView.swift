@@ -25,12 +25,17 @@ struct MainPage_ProfilView: View {
 
                 // Vereinslogo und Name
                 VStack {
-                    Circle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 80, height: 80)
-                        .overlay(Text(clubShortName).font(.title).foregroundColor(.white))
-
-                    Text(clubName)
+//                    Circle()
+//                        .fill(Color.gray.opacity(0.2))
+//                        .frame(width: 80, height: 80)
+//                        .overlay(Text(clubShortName).font(.title).foregroundColor(.white))
+                    Image("cdu_datteln")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 80)
+                        .cornerRadius(100)
+                    
+                    Text("clubName")
                         .font(.subheadline)
                         .bold()
                         .multilineTextAlignment(.center)
