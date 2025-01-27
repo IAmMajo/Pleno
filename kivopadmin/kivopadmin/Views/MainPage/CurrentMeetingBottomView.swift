@@ -2,9 +2,8 @@ import SwiftUI
 import MeetingServiceDTOs
 
 struct CurrentMeetingBottomView: View {
-    @StateObject private var meetingManager = MeetingManager()
     @State private var activeMeetingID: UUID? // UUID statt GetMeetingDTO, um Hashable zu sein
-    
+    @EnvironmentObject private var meetingManager : MeetingManager
     @StateObject private var attendanceManager = AttendanceManager() // RecordManager als StateObject
     
     @State private var attendanceData: [UUID: [GetAttendanceDTO]] = [:]

@@ -2,7 +2,7 @@ import MeetingServiceDTOs
 import SwiftUI
 
 struct MeetingAdminView: View {
-    @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
+    @EnvironmentObject private var meetingManager : MeetingManager
     
     @State private var selectedStatus: FilterType = .scheduled
     @State private var searchText: String = ""
@@ -93,8 +93,11 @@ struct MeetingAdminView: View {
                     }
                 }
             }
+            .refreshable {
+                meetingManager.fetchAllMeetings()
+            }
             .sheet(isPresented: $showCreateMeeting) {
-                CreateMeetingView()
+                CreateMeetingView().environmentObject(meetingManager)
             }
         }
     }

@@ -46,10 +46,7 @@ struct SelectPlaceMapView: UIViewRepresentable {
 }
 
 struct SelectPlaceView: View {
-    @State private var mapRegion = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
-        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-    )
+    @Binding var mapRegion: MKCoordinateRegion
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var locationMapManager = LocationMapManager()
     
@@ -139,7 +136,7 @@ struct SelectPlaceView: View {
 //                                        .clipShape(Circle())
 //                                        .shadow(radius: 10)
 //                                }
-//                                
+//
 //                                Button(action: zoomOut) {
 //                                    Image(systemName: "minus.magnifyingglass")
 //                                        .resizable()
@@ -231,8 +228,3 @@ struct SelectPlaceView: View {
 }
 
 
-
-
-#Preview {
-    SelectPlaceView()
-}

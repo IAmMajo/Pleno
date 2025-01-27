@@ -111,6 +111,16 @@ struct MeetingDetailAdminView: View {
                                 }
                             }
                             //if selectedUserName != nil {
+                            if recordManager.isLoading {
+                                ProgressView("Lade Protokolle...")
+                                    .progressViewStyle(CircularProgressViewStyle())
+                            } else if let errorMessage = recordManager.errorMessage {
+                                Text("Error: \(errorMessage)")
+                                    .foregroundColor(.red)
+                            } else if recordManager.records.isEmpty {
+                                Text("Keine Protokolle verfügbar")
+                                    .foregroundColor(.secondary)
+                            } else {
                                 Button(action: {
                                     showRecorderSelectionSheet.toggle()
                                 }) {
@@ -133,6 +143,11 @@ struct MeetingDetailAdminView: View {
                                         Text("Ändern").foregroundStyle(.blue)
                                     }
                                 }.buttonStyle(PlainButtonStyle())
+                                .onAppear(){
+                                    localRecords = recordManager.records
+                                }
+                            }
+
 
 
                             //}
@@ -267,16 +282,19 @@ struct MeetingDetailAdminView: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        // Bearbeitungsbutton
-                        NavigationLink(destination: EditMeetingView(meeting: meeting)) {
-                            Text("Bearbeiten")
-                                .foregroundColor(.blue)
+                if meeting.status == .scheduled {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        HStack {
+                            // Bearbeitungsbutton
+                            NavigationLink(destination: EditMeetingView(meeting: meeting)) {
+                                Text("Bearbeiten")
+                                    .foregroundColor(.blue)
+                            }
+                            Text(DateTimeFormatter.formatDate(meeting.start))
                         }
-                        Text(DateTimeFormatter.formatDate(meeting.start))
                     }
                 }
+
             }
             .alert(isPresented: $showConfirmationAlert) {
                 Alert(
@@ -368,8 +386,6 @@ struct MeetingDetailAdminView: View {
             
             // 4. Abrufen der Benutzer
             userManager.fetchUsers()
-            try? await Task.sleep(nanoseconds: 250_000_000)
-            localRecords = recordManager.records
         }
     }
 

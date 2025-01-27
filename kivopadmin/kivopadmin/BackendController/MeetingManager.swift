@@ -310,7 +310,7 @@ class MeetingManager: ObservableObject {
         
         
     }
-    func startMeeting(meetingId: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
+    func startMeeting(meetingId: UUID, completion: @escaping (Result<Data, Error>) -> Void) {
         // Erstellen der URL mit der Meeting-ID
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/begin") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
@@ -318,7 +318,7 @@ class MeetingManager: ObservableObject {
         }
         
         var request = URLRequest(url: url)
-        request.httpMethod = "PUT"  // Setze HTTP-Methode auf DELETE
+        request.httpMethod = "PUT"  // Setze HTTP-Methode auf PUT
         
         // Füge den Bearer-Token hinzu, wenn vorhanden
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
@@ -337,18 +337,29 @@ class MeetingManager: ObservableObject {
             }
             
             // Überprüfe den Statuscode der Antwort
-            if let response = response as? HTTPURLResponse, response.statusCode == 200 {
-                // Erfolgreiches Löschen
-                completion(.success(()))
-            } else {
-                // Fehler beim Löschen
-                let error = NSError(domain: "Delete Error", code: 4, userInfo: [NSLocalizedDescriptionKey: "Failed to start meeting."])
-                completion(.failure(error))
+            if let response = response as? HTTPURLResponse {
+                if response.statusCode == 200 {
+                    // Erfolgreiche Antwort, übergibt den Body (falls vorhanden)
+                    if let data = data {
+                        completion(.success(data))
+                    } else {
+                        // Falls kein Body vorhanden ist, leere Daten zurückgeben
+                        completion(.success(Data()))
+                    }
+                } else {
+                    // Fehlerhafte Antwort mit Statuscode
+                    let errorMessage = HTTPURLResponse.localizedString(forStatusCode: response.statusCode)
+                    let error = NSError(
+                        domain: "HTTP Error",
+                        code: response.statusCode,
+                        userInfo: [NSLocalizedDescriptionKey: "Failed to start meeting: \(errorMessage)"]
+                    )
+                    completion(.failure(error))
+                }
             }
         }.resume()
-        
-        
     }
+
 
     func endMeeting(meetingId: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
         // Erstellen der URL mit der Meeting-ID
