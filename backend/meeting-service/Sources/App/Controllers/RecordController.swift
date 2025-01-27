@@ -39,6 +39,9 @@ struct RecordController: RouteCollection {
     
     /// **GET** `/meetings/{id}/records`
     @Sendable func getAllRecords(req: Request) async throws -> [GetRecordDTO] {
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -47,12 +50,15 @@ struct RecordController: RouteCollection {
             .with(\.$identity)
             .all()
             .map { record in
-                try await record.toGetRecordDTO(db: req.db)
+                try await record.toGetRecordDTO(db: req.db, userId: userId)
         }
     }
     
     /// **GET** `/meetings/{id}/records/{lang}`
     @Sendable func getSingleRecord(req: Request) async throws -> GetRecordDTO {
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -63,7 +69,7 @@ struct RecordController: RouteCollection {
             throw Abort(.notFound)
         }
         try await record.$identity.load(on: req.db)
-        return try await record.toGetRecordDTO(db: req.db)
+        return try await record.toGetRecordDTO(db: req.db, userId: userId)
     }
     
     /// **PATCH** `/meetings/{id}/records/{lang}`
@@ -110,7 +116,7 @@ struct RecordController: RouteCollection {
         
         try await record.update(on: req.db)
         try await record.$identity.load(on: req.db)
-        return try await record.toGetRecordDTO(db: req.db)
+        return try await record.toGetRecordDTO(db: req.db, userId: userId)
     }
     
     /// **DELETE** `/meetings/{id}/records/{lang}`
@@ -160,12 +166,12 @@ struct RecordController: RouteCollection {
         
         try await record.update(on: req.db)
         try await record.$identity.load(on: req.db)
-        return try await record.toGetRecordDTO(db: req.db)
+        return try await record.toGetRecordDTO(db: req.db, userId: userId)
     }
     
     /// **PUT** `/meetings/{id}/records/{lang}/approve`
     @Sendable func approveRecord(req: Request) async throws -> GetRecordDTO {
-        guard let isAdmin = req.jwtPayload?.isAdmin else {
+        guard let userId = req.jwtPayload?.userID, let isAdmin = req.jwtPayload?.isAdmin else {
             throw Abort(.unauthorized)
         }
         guard isAdmin else {
@@ -188,7 +194,7 @@ struct RecordController: RouteCollection {
         
         try await record.update(on: req.db)
         try await record.$identity.load(on: req.db)
-        return try await record.toGetRecordDTO(db: req.db)
+        return try await record.toGetRecordDTO(db: req.db, userId: userId)
     }
     
     /// **PUT** `/meetings/{id}/records/{lang}/translate/{lang2}`
@@ -224,6 +230,6 @@ struct RecordController: RouteCollection {
         
         try await translatedRecord.create(on: req.db)
         try await translatedRecord.$identity.load(on: req.db)
-        return try await translatedRecord.toGetRecordDTO(db: req.db)
+        return try await translatedRecord.toGetRecordDTO(db: req.db, userId: userId)
     }
 }
