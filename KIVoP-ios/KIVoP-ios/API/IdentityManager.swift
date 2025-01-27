@@ -76,6 +76,7 @@ class IdentityManager: ObservableObject {
                     //self?.identity = decodedIdentity.id
                     self?.errorMessage = nil
                     if let id = decodedIdentity.first?.id {
+                        print("----------------------------------------------")
                         print(id)
                         self?.identity = id
                     } else {
