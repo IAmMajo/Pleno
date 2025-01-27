@@ -33,7 +33,7 @@ struct MainPage_ProfilView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(height: 80)
-                        .cornerRadius(100)
+                        .clipShape(.circle)
                     
                     Text("CDU Datteln")
                         .font(.subheadline)

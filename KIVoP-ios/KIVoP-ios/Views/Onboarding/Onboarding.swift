@@ -26,6 +26,7 @@ struct Onboarding: View {
                     .resizable()
                     .scaledToFit()
                     .frame(height: 150)
+                    .clipShape(.circle)
                     .padding(.bottom, 20)
                 
                 if currentIndex == 0 {
