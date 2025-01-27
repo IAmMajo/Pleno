@@ -320,7 +320,6 @@ struct PosterController: RouteCollection, Sendable {
     /// Überblicks-Statistiken über PosterPositionen zurückgeben.
     @Sendable
     func calculatePosterSummary(for queryBuilder: QueryBuilder<PosterPosition>) async throws -> PosterSummaryResponseDTO {
-        let currentDate = Date.now
         let posters = try await queryBuilder
             .with(\.$responsibilities) { responsibilities in
                 responsibilities.with(\.$user) { user in
@@ -334,25 +333,30 @@ struct PosterController: RouteCollection, Sendable {
         
         // 1. "hangs"
         let hangsCount = posters.count { position in
-            position.status == "hangs"
+            position.status == .hangs
         }
         
         // 2. "toHang"
         let toHangCount = posters.count { position in
-            position.status == "toHang"
+            position.status == .toHang
         }
         
         // 3. "overdue"
         let overdueCount = posters.count { position in
-            position.status == "overdue"
+            position.status == .overdue
         }
         
         // 4. "takenDown"
         let takenDownCount = posters.count { position in
-            position.status == "takenDown"
+            position.status == .takenDown
         }
         
-        // 5. nextTakeDownDate
+        // 5. "damaged"
+        let damagedCount = posters.count { position in
+            position.status == .damaged
+        }
+        
+        // 6. nextTakeDownDate
         let nextTakeDownDate: Date? = try await queryBuilder
             .filter(\.$posted_by.$id != nil)
             .filter(\.$removed_by.$id == nil)
@@ -365,6 +369,7 @@ struct PosterController: RouteCollection, Sendable {
             toHang: toHangCount,
             overdue: overdueCount,
             takenDown: takenDownCount,
+            damaged: damagedCount,
             nextTakeDown: nextTakeDownDate
         )
     }

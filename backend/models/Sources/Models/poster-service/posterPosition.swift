@@ -41,6 +41,9 @@ public final class PosterPosition: Model,@unchecked Sendable {
     @Field(key:"image")
     public var image: Data?
     
+    @Field(key:"damaged")
+    public var damaged: Bool
+    
     @Children(for: \.$poster_position)
     public var responsibilities: [PosterPositionResponsibilities]
     
@@ -63,6 +66,7 @@ public init(
     self.$posted_by.id = nil
     self.removed_at = nil
     self.$removed_by.id = nil
+    self.damaged = false
 }
 
 }
