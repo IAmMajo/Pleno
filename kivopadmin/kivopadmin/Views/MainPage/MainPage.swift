@@ -2,7 +2,7 @@ import SwiftUI
 import AuthServiceDTOs
 
 enum Pages: Hashable {
-    case vereinseinstellungen, nutzerverwaltung, abstimmungen, sitzungen, protokolle, plakatpositionen, events, umfragen
+    case vereinseinstellungen, nutzerverwaltung, abstimmungen, sitzungen, protokolle, plakatpositionen, umfragen//, events
 }
 
 struct MainPage: View {
@@ -32,7 +32,7 @@ struct MainPage: View {
                     VotingListView()
                 }
                 Tab("Sitzungen", systemImage: "calendar.badge.clock", value: .sitzungen) {
-                    MeetingAdminView()
+                    MeetingAdminView().environmentObject(meetingManager)
                 }
                 Tab("Protokolle", systemImage: "doc.text", value: .protokolle) {
                     RecordsMainView()
@@ -40,9 +40,9 @@ struct MainPage: View {
                 Tab("Plakatpositionen", systemImage: "mappin.and.ellipse", value: .plakatpositionen) {
                     PostersMainView()
                 }
-                Tab("Events", systemImage: "star", value: .events) {
-                    EventsMainView()
-                }
+//                Tab("Events", systemImage: "star", value: .events) {
+//                    EventsMainView()
+//                }
                 Tab("Umfragen", systemImage: "bubble.left.and.bubble.right.fill", value: .umfragen) {
                     PollListView()
                 }
@@ -50,7 +50,7 @@ struct MainPage: View {
 
             }.tabViewStyle(.sidebarAdaptable)
             .tabViewSidebarBottomBar{
-                CurrentMeetingBottomView()
+                CurrentMeetingBottomView().environmentObject(meetingManager)
                     .padding(.vertical, 70).refreshable{
                         meetingManager.fetchAllMeetings()
                     }

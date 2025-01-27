@@ -16,7 +16,7 @@ struct CreateMeetingView: View {
     @State private var isAddingNewLocation = false
 
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var meetingManager = MeetingManager() // MeetingManager verwenden
+    @EnvironmentObject private var meetingManager : MeetingManager
     @StateObject private var locationManager = LocationManager() // MeetingManager verwenden
 
     var body: some View {
@@ -112,6 +112,9 @@ struct CreateMeetingView: View {
         }
         .onAppear(){
             locationManager.fetchLocations()
+        }
+        .onDisappear(){
+            meetingManager.fetchAllMeetings()
         }
     }
 

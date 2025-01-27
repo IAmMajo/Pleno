@@ -23,7 +23,7 @@ struct EventsMainView: View {
             .pickerStyle(SegmentedPickerStyle()) // Optional: Stil ändern
             List {
                 ForEach(eventViewModel.events, id: \.id) { event in
-                    NavigationLink(destination: EmptyView()){
+                    NavigationLink(destination: EventDetailView(eventId: event.id).environmentObject(eventViewModel)){
                         VStack(alignment: .leading) {
                             Text(event.name)
                                 .font(.headline)
