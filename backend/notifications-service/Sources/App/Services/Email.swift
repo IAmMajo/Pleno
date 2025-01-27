@@ -19,6 +19,7 @@ struct Email {
             throw Abort(.internalServerError, reason: "SMTP configuration is missing")
         }
         var templateData = templateData ?? [:]
+        templateData["subject"] = subject
         templateData["message"] = message
         let body = try await view.render(template ?? "default", templateData).data
         try await smtp.send(try Smtp.Email(

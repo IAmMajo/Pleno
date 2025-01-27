@@ -11,7 +11,9 @@ import VaporToOpenAPI
 
 struct NotificationController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let notification = routes.grouped("internal", "notification")
+        let notification = routes.grouped("internal", "notification").groupedOpenAPI(
+            tags: .init(name: "Intern", description: "Nur intern erreichbar.")
+        )
         notification.post(use: send).openAPI(
             summary: "Benachrichtigung senden",
             description: "Sendet eine Benachrichtigung an alle registrierten Geräte eines Users",
@@ -25,6 +27,17 @@ struct NotificationController: RouteCollection {
         let dto = try req.content.decode(SendNotificationDTO.self)
         guard let user = try await User.find(dto.userID, on: req.db) else {
             throw Abort(.notFound, reason: "User not found")
+        }
+        if (!user.isNotificationsActive) {
+            return .ok
+        }
+        if (!user.isPushNotificationsActive) {
+            try await req.email.sendEmail(
+                receiver: user.email,
+                subject: dto.subject,
+                message: dto.message
+            )
+            return .ok
         }
         let devices = try await NotificationDevice
             .query(on: req.db)
@@ -43,6 +56,7 @@ struct NotificationController: RouteCollection {
                 "Not sending notification to Android devices because Firebase Cloud Messaging configuration is missing"
             )
         }
+        var pushNotificationSent = false
         for device in devices {
             do {
                 if (device.platform == .ios && !ignoreIOS) {
@@ -60,6 +74,7 @@ struct NotificationController: RouteCollection {
                         ),
                         deviceToken: device.token
                     )
+                    pushNotificationSent = true
                 } else if device.platform == .android && !ignoreAndroid {
                     let _ = try await req.fcm.send(
                         .init(
@@ -75,6 +90,7 @@ struct NotificationController: RouteCollection {
                         ),
                         on: req.eventLoop
                     ).get()
+                    pushNotificationSent = true
                 }
             } catch {
                 let apnsError = error as? APNSError
@@ -95,15 +111,15 @@ struct NotificationController: RouteCollection {
                 req.logger.error("No notification was sent to a device because an error occured: \(error)")
             }
         }
-        do {
-            try await req.email.sendEmail(
-                receiver: user.email,
-                subject: dto.subject,
-                message: dto.message
-            )
-        } catch {
-            req.logger.error("No email was sent because an error occurred: \(error)")
+        if (pushNotificationSent) {
+            return .ok
         }
+        try await req.email.sendEmail(
+            receiver: user.email,
+            subject: dto.subject,
+            message: dto.message,
+            template: "push-notification-failed"
+        )
         return .ok
     }
 }
