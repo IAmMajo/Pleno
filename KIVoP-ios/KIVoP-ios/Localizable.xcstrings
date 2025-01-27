@@ -1027,6 +1027,9 @@
     "Fahrt löschen" : {
 
     },
+    "Fahrten" : {
+
+    },
     "Fast fertig" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1205,6 +1208,9 @@
       }
     },
     "Jetzt teilnehmen" : {
+
+    },
+    "Jetzt zusagen!" : {
 
     },
     "Kamera" : {
@@ -2005,9 +2011,6 @@
           }
         }
       }
-    },
-    "Ride: %@" : {
-
     },
     "Schließen" : {
 

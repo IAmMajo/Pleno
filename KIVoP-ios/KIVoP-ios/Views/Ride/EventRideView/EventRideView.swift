@@ -51,28 +51,6 @@ struct EventRideView: View {
                                             )
                                             setAddress = viewModel.address
                                         }
-                                        .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $showMapOptions) {
-                                           Button("Öffnen mit Apple Maps") {
-                                              NavigationAppHelper.shared.openInAppleMaps(
-                                                name: setAddress,
-                                                coordinate: setKoords!
-                                              )
-                                           }
-                                           if isGoogleMapsInstalled {
-                                              Button("Öffnen mit Google Maps") {
-                                                 NavigationAppHelper.shared.openInGoogleMaps(name: setAddress, coordinate: setKoords!)
-                                              }
-                                           }
-                                           if isWazeInstalled {
-                                              Button("Öffnen mit Waze") {
-                                                 NavigationAppHelper.shared.openInWaze(coordinate: setKoords!)
-                                              }
-                                           }
-                                           Button("Teilen...") {
-                                              shareLocation = true
-                                           }
-                                           Button("Abbrechen", role: .cancel) {}
-                                        }
                                     Divider()
                                         .background(Color.gray)
                                         .padding(.bottom, 10)
@@ -94,7 +72,7 @@ struct EventRideView: View {
                             Button(action: {
                                 viewModel.participateEvent()
                             }){
-                                Text("Jetzt teilnehmen")
+                                Text("Jetzt zusagen!")
                                     .frame(maxWidth: .infinity)
                                     .padding()
                                     .background(Color.blue)
@@ -104,9 +82,57 @@ struct EventRideView: View {
                             .padding(.horizontal)
                             .buttonStyle(PlainButtonStyle())
                         } else {
-                            Section(header: Text("Fahrer")){
+                            Section(header: Text("Fahrten")){
                                 ForEach( viewModel.eventRides, id: \.id ) { ride in
-                                    Text("Ride: \(ride.driverName)")
+                                    NavigationLink(destination: EventRideDetailView(viewModel: EventRideDetailViewModel(eventRide: ride))) {
+                                        HStack {
+                                            ProfilePictureRide(name: ride.driverName, id: ride.driverID)
+                                            VStack{
+                                                Text(ride.driverName)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                                Text(viewModel.driverAddress[ride.driverID] ?? "Lädt Adresse...")
+                                                    .font(.subheadline)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                                    .foregroundColor(.gray)
+                                            }
+                                            Spacer()
+                                            if let openRequests = ride.openRequests, openRequests > 0 {
+                                                Image(systemName: "\(openRequests).circle.fill")
+                                                    .aspectRatio(1, contentMode: .fit)
+                                                    .foregroundStyle(.orange)
+                                                    .padding(.trailing, 5)
+                                            }
+                                            HStack{
+                                                Text("\(ride.allocatedSeats) / \(ride.emptySeats)")
+                                                Image(systemName: "car.fill" )
+                                            }
+                                            .foregroundColor(
+                                                {
+                                                    switch ride.myState {
+                                                    case .driver:
+                                                        return Color.blue
+                                                    case .nothing:
+                                                        return Color.gray
+                                                    case .requested:
+                                                        return Color.orange
+                                                    case .accepted:
+                                                        return Color.green
+                                                    }
+                                                }()
+                                            )
+                                            .font(.system(size: 15))
+                                            Image(systemName: "square.and.arrow.up")
+                                                .foregroundColor(.blue)
+                                                .onTapGesture {
+                                                    showMapOptions = true
+                                                    setKoords = CLLocationCoordinate2D(
+                                                        latitude: CLLocationDegrees(ride.latitude),
+                                                        longitude: CLLocationDegrees(ride.longitude)
+                                                    )
+                                                    setAddress = viewModel.driverAddress[ride.driverID]
+                                                }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -136,6 +162,28 @@ struct EventRideView: View {
             ShareSheet(activityItems: [formattedShareText()])
                .presentationDetents([.medium, .large])
                .presentationDragIndicator(.hidden)
+        }
+        .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $showMapOptions) {
+           Button("Öffnen mit Apple Maps") {
+              NavigationAppHelper.shared.openInAppleMaps(
+                name: setAddress,
+                coordinate: setKoords!
+              )
+           }
+           if isGoogleMapsInstalled {
+              Button("Öffnen mit Google Maps") {
+                 NavigationAppHelper.shared.openInGoogleMaps(name: setAddress, coordinate: setKoords!)
+              }
+           }
+           if isWazeInstalled {
+              Button("Öffnen mit Waze") {
+                 NavigationAppHelper.shared.openInWaze(coordinate: setKoords!)
+              }
+           }
+           Button("Teilen...") {
+              shareLocation = true
+           }
+           Button("Abbrechen", role: .cancel) {}
         }
         .navigationTitle(viewModel.event.name)
         .navigationBarTitleDisplayMode(.inline)

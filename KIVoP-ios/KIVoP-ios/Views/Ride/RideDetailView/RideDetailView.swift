@@ -69,28 +69,6 @@ struct RideDetailView: View {
                             )
                             setAddress = viewModel.destinationAddress
                         }
-                        .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $showMapOptions) {
-                           Button("Öffnen mit Apple Maps") {
-                              NavigationAppHelper.shared.openInAppleMaps(
-                                name: setAddress,
-                                coordinate: setKoords!
-                              )
-                           }
-                           if isGoogleMapsInstalled {
-                              Button("Öffnen mit Google Maps") {
-                                 NavigationAppHelper.shared.openInGoogleMaps(name: setAddress, coordinate: setKoords!)
-                              }
-                           }
-                           if isWazeInstalled {
-                              Button("Öffnen mit Waze") {
-                                 NavigationAppHelper.shared.openInWaze(coordinate: setKoords!)
-                              }
-                           }
-                           Button("Teilen...") {
-                              shareLocation = true
-                           }
-                           Button("Abbrechen", role: .cancel) {}
-                        }
                     Text("\(viewModel.rideDetail.destinationLatitude), \(viewModel.rideDetail.destinationLongitude)")
                         .font(.subheadline)
                         .foregroundColor(.gray)
@@ -132,28 +110,6 @@ struct RideDetailView: View {
                                         )
                                         setAddress = viewModel.driverAddress
                                     }
-                                    .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $showMapOptions) {
-                                       Button("Öffnen mit Apple Maps") {
-                                          NavigationAppHelper.shared.openInAppleMaps(
-                                            name: setAddress,
-                                            coordinate: setKoords!
-                                          )
-                                       }
-                                       if isGoogleMapsInstalled {
-                                          Button("Öffnen mit Google Maps") {
-                                             NavigationAppHelper.shared.openInGoogleMaps(name: setAddress, coordinate: setKoords!)
-                                          }
-                                       }
-                                       if isWazeInstalled {
-                                          Button("Öffnen mit Waze") {
-                                             NavigationAppHelper.shared.openInWaze(coordinate: setKoords!)
-                                          }
-                                       }
-                                       Button("Teilen...") {
-                                          shareLocation = true
-                                       }
-                                       Button("Abbrechen", role: .cancel) {}
-                                    }
                             }
                         }
                         
@@ -187,28 +143,6 @@ struct RideDetailView: View {
                                                         longitude: CLLocationDegrees(rider.longitude)
                                                     )
                                                     setAddress = viewModel.riderAddresses[rider.id]
-                                                }
-                                                .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $showMapOptions) {
-                                                   Button("Öffnen mit Apple Maps") {
-                                                      NavigationAppHelper.shared.openInAppleMaps(
-                                                        name: setAddress,
-                                                        coordinate: setKoords!
-                                                      )
-                                                   }
-                                                   if isGoogleMapsInstalled {
-                                                      Button("Öffnen mit Google Maps") {
-                                                         NavigationAppHelper.shared.openInGoogleMaps(name: setAddress, coordinate: setKoords!)
-                                                      }
-                                                   }
-                                                   if isWazeInstalled {
-                                                      Button("Öffnen mit Waze") {
-                                                         NavigationAppHelper.shared.openInWaze(coordinate: setKoords!)
-                                                      }
-                                                   }
-                                                   Button("Teilen...") {
-                                                       shareLocation.toggle()
-                                                   }
-                                                   Button("Abbrechen", role: .cancel) {}
                                                 }
                                             Image(systemName: "trash")
                                                 .foregroundColor(.red)
@@ -317,6 +251,28 @@ struct RideDetailView: View {
             ShareSheet(activityItems: [formattedShareText()])
                .presentationDetents([.medium, .large])
                .presentationDragIndicator(.hidden)
+        }
+        .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $showMapOptions) {
+           Button("Öffnen mit Apple Maps") {
+              NavigationAppHelper.shared.openInAppleMaps(
+                name: setAddress,
+                coordinate: setKoords!
+              )
+           }
+           if isGoogleMapsInstalled {
+              Button("Öffnen mit Google Maps") {
+                 NavigationAppHelper.shared.openInGoogleMaps(name: setAddress, coordinate: setKoords!)
+              }
+           }
+           if isWazeInstalled {
+              Button("Öffnen mit Waze") {
+                 NavigationAppHelper.shared.openInWaze(coordinate: setKoords!)
+              }
+           }
+           Button("Teilen...") {
+              shareLocation = true
+           }
+           Button("Abbrechen", role: .cancel) {}
         }
         .navigationTitle(viewModel.rideDetail.name)
         .navigationBarTitleDisplayMode(.inline)

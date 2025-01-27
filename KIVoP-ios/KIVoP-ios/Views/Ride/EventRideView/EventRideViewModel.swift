@@ -9,6 +9,7 @@ class EventRideViewModel: ObservableObject {
     @Published var isLoading: Bool = false // Standardmäßig nicht ladend
     
     @Published var address: String = ""
+    @Published var driverAddress: [UUID: String] = [:]
     
     private let baseURL = "https://kivop.ipv64.net"
     
@@ -134,6 +135,14 @@ class EventRideViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     self.eventRides = decodedEventRides
                     self.isLoading = false // Ladevorgang erfolgreich beendet
+                    for ride in self.eventRides {
+                        self.getAddressFromCoordinates(latitude: ride.latitude, longitude: ride.longitude) { address in
+                            if let address = address {
+                                // Speichere die Adresse im Dictionary mit der Rider ID als Schlüssel
+                                self.driverAddress[ride.driverID] = address
+                            }
+                        }
+                    }
                 }
             } catch {
                 DispatchQueue.main.async {
