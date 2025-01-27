@@ -8,8 +8,9 @@ public struct GetRecordDTO: Codable {
     public var content: String
     public var attendancesAppendix: String
     public var votingResultsAppendix: String?
+    public var iAmTheRecorder: Bool
     
-    public init(meetingId: UUID, lang: String, identity: GetIdentityDTO, status: RecordStatus, content: String, attendancesAppendix: String, votingResultsAppendix: String? = nil) {
+    public init(meetingId: UUID, lang: String, identity: GetIdentityDTO, status: RecordStatus, content: String, attendancesAppendix: String, votingResultsAppendix: String? = nil, iAmTheRecorder: Bool = false) {
         self.meetingId = meetingId
         self.lang = lang
         self.identity = identity
@@ -17,6 +18,7 @@ public struct GetRecordDTO: Codable {
         self.content = content
         self.attendancesAppendix = attendancesAppendix
         self.votingResultsAppendix = votingResultsAppendix
+        self.iAmTheRecorder = iAmTheRecorder
     }
 }
 
