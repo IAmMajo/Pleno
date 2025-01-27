@@ -74,13 +74,16 @@ struct CreateVotingView: View {
                 
                 // Optionen
                 Section(header: Text("Optionen")) {
-                    ForEach($options.indices, id: \ .self) { index in
+                    ForEach($options.indices, id: \.self) { index in
                         HStack {
                             TextField("Option \(index + 1)", text: $options[index])
+                                .onChange(of: options[index]) { _, newValue in
+                                    handleOptionChange(index: index, newValue: newValue)
+                                }
                             
-                            if options.count > 1 {
+                            if options.count > 1 && index != 0 {
                                 Button(action: {
-                                    options.remove(at: index)
+                                    removeOption(at: index)
                                 }) {
                                     Image(systemName: "trash")
                                         .foregroundColor(.red)
@@ -88,10 +91,12 @@ struct CreateVotingView: View {
                             }
                         }
                     }
-                    Button(action: { options.append("") }) {
-                        Label("Option hinzufügen", systemImage: "plus")
-                    }
                 }
+
+
+
+
+
             }
             .navigationTitle("Neue Abstimmung")
             .navigationBarItems(
@@ -162,4 +167,29 @@ struct CreateVotingView: View {
         print("Formular gültig: \(isValid)")
         return isValid
     }
+    
+    private func handleOptionChange(index: Int, newValue: String) {
+        let trimmedValue = newValue.trimmingCharacters(in: .whitespaces)
+
+        // Stelle sicher, dass ein leeres Feld existiert, wenn das aktuelle Feld befüllt wird
+        if !trimmedValue.isEmpty && index == options.count - 1 {
+            options.append("")
+        }
+
+        // Entferne alle leeren Felder außer das letzte, um die UI sauber zu halten
+        if options.count > 1 {
+            options = options.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty || options.last == "" }
+        }
+    }
+
+    private func removeOption(at index: Int) {
+        // Stelle sicher, dass mindestens ein Eingabefeld bleibt
+        if options.count > 1 {
+            options.remove(at: index)
+        }
+    }
+
+
+
+
 }

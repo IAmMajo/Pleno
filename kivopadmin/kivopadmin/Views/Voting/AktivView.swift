@@ -117,23 +117,27 @@ struct AktivView: View {
     }
 
     private var votingDetailsView: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .center, spacing: 10) {
             Text(voting.question)
                 .font(.title2)
                 .fontWeight(.bold)
-                .multilineTextAlignment(.leading)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
 
             if !voting.description.isEmpty {
                 Text(voting.description)
                     .font(.body)
                     .foregroundColor(.gray)
-                    .multilineTextAlignment(.leading)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
         }
+        .frame(maxWidth: .infinity) // Sorgt dafür, dass VStack selbst zentriert wird
         .padding()
         .cornerRadius(10)
         .padding([.leading, .trailing])
     }
+
 
     private var closeVotingButton: some View {
         Button(action: closeVoting) {
@@ -145,7 +149,7 @@ struct AktivView: View {
                     .foregroundColor(.white)
                     .cornerRadius(8)
             } else {
-                Text("Umfrage beenden")
+                Text("Abstimmung beenden")
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.orange)

@@ -68,8 +68,8 @@ struct PieChartView: View {
             angularInset: 4
          )
          .cornerRadius(6)
-//         .foregroundStyle(colorMapping[option.index] ?? .black)
-         .foregroundStyle(by: .value("Option", optionTextMap[result.index] ?? "Enthaltung"))
+         .foregroundStyle(colorMapping[result.index] ?? .gray)
+        // .foregroundStyle(by: .value("Option", optionTextMap[result.index] ?? "Enthaltung"))
       }
       .scaledToFit()
       // Später eigene Legende bauen, um mehr als 7 Farben zu haben? Optionen Limit?
