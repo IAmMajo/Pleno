@@ -124,28 +124,31 @@ struct MarkdownEditorView: View {
                     }
                 }
             }
+            .refreshable {
+                identityManager.getMyIdentity()
+                Task {
+                    await recordManager.getRecordMeetingLang(meetingId: meetingId, lang: lang)
+                    
+                    try? await Task.sleep(nanoseconds: 250_000_000)
+                    if let record = recordManager.record {
+                        markdownText = record.content
+                        if record.status == .approved {
+                            approved = true
+                        }
+                        if identityManager.identity == record.identity.id {
+                            if record.status == .underway {
+                                amIRecorder = true
+                                print("Ich bin protokollant")
+                            }
+
+                        }
+                    }
+                    isLoading = false
+                }
+            }
         }
         .onAppear {
-            identityManager.getMyIdentity()
-            Task {
-                await recordManager.getRecordMeetingLang(meetingId: meetingId, lang: lang)
-                
-                try? await Task.sleep(nanoseconds: 250_000_000)
-                if let record = recordManager.record {
-                    markdownText = record.content
-                    if record.status == .approved {
-                        approved = true
-                    }
-                    if identityManager.identity == record.identity.id {
-                        if record.status == .underway {
-                            amIRecorder = true
-                            print("Ich bin protokollant")
-                        }
 
-                    }
-                }
-                isLoading = false
-            }
         }
 
     }

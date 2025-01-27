@@ -21,13 +21,13 @@ struct UserProfileImageView: View {
                   .frame(maxWidth: 45, maxHeight: 45)
                   .aspectRatio(1, contentMode: .fit)
                   .foregroundStyle(.gray.opacity(0.5))
-                  .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                  .clipShape(Circle() /*RoundedRectangle(cornerRadius: 6, style: .continuous)*/)
                   .padding(.trailing, 5)
             } else if isLoading {
                 ProgressView("Loading...")
                   .frame(maxWidth: 45, maxHeight: 45)
             } else {
-               Image(systemName: "person.crop.square.fill")
+               Image(systemName: "person.crop.circle.fill")
                   .resizable()
                   .frame(maxWidth: 45, maxHeight: 45)
                   .aspectRatio(1, contentMode: .fit)

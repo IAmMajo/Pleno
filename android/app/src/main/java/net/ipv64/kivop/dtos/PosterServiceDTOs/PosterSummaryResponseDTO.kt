@@ -4,8 +4,9 @@ import java.util.UUID
 import java.time.LocalDateTime
 
 data class PosterSummaryResponseDTO (
-    var hangs : Int?,
-    var toHang : Int?,
-    var overdue : Int?,
-    var takenDown : Int?,
+    var hangs : Int,
+    var toHang : Int,
+    var overdue : Int,
+    var takenDown : Int,
+    var nextTakeDown : LocalDateTime?,
 )

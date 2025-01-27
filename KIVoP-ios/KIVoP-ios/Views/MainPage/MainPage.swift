@@ -99,6 +99,15 @@ struct MainPage: View {
                         } else {
                             Text("No meetings available.")
                         }
+                        
+//                        NavigationLink(destination: EventView()) {
+//                            HStack {
+//                               Image(systemName: "star")
+//                                    .foregroundColor(.accentColor)
+//                                Text("Events")
+//                                    .foregroundColor(Color.primary)
+//                            }
+//                        }
                     }
 
                     Section {
@@ -189,8 +198,8 @@ struct MainPage: View {
                 case .success(let profile):
                     self.isLoading = false
                     self.errorMessage = nil
-                    self.name = profile.name ?? ""
-                    self.shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
+                    self.name = profile.name
+                    self.shortName = MainPageAPI.calculateShortName(from: profile.name)
                     if let imageData = profile.profileImage, let image = UIImage(data: imageData) {
                         self.profileImage = image
                     } else {

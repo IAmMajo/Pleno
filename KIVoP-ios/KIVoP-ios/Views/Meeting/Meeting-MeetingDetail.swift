@@ -11,6 +11,18 @@ struct MeetingDetailView: View {
     @StateObject private var attendanceManager = AttendanceManager() // RecordManager als StateObject
     @StateObject private var viewModel = AttendanceViewModel()
     
+    @State var localRecords: [GetRecordDTO] = []
+    
+    private var uniqueRecorders: String {
+        var uniqueNames = Set(localRecords.compactMap { $0.identity.name })
+        return uniqueNames.sorted().joined(separator: ", ") // Namen durch Komma trennen und sortieren
+    }
+    
+    private var recorderLabel: String {
+        var recorderCount = Set(localRecords.compactMap { $0.identity.name }).count
+        return recorderCount > 1 ? "Protokollanten" : "Protokollant" // Mehrzahl oder Einzahl je nach Anzahl
+    }
+    
     var body: some View {
         NavigationStack {
             VStack (alignment: .leading){
@@ -92,18 +104,24 @@ struct MeetingDetailView: View {
                             Text("Keine Protokollanten gefunden.")
                                 .foregroundColor(.secondary)
                         } else {
+                            
                             HStack {
-                                Image(systemName: "person.circle")
+                                Image(systemName: "doc.text")
                                     .resizable()
                                     .frame(width: 30, height: 30)
                                     .foregroundColor(.gray)
                                 VStack(alignment: .leading) {
-                                    Text(recordManager.records.first?.identity.name ?? "") 
-                                    Text("Protokollant")
+                                    //Text(selectedUserName ?? "Kein Protokollant")
+                                    Text(uniqueRecorders)
+                                    Text(recorderLabel)
                                         .font(.caption)
                                         .foregroundColor(.gray)
                                 }
                             }
+                            .onAppear(){
+                                localRecords = recordManager.records
+                            }
+                            
                         }
 
                     }
@@ -170,6 +188,7 @@ struct MeetingDetailView: View {
                     self.attendance = attendance
                 }
             }
+
         }
         .refreshable {
             recordManager.getRecordsMeeting(meetingId: meeting.id)
@@ -195,10 +214,10 @@ struct VotingSectionView: View {
             Text("Keine Abstimmungen gefunden.")
                 .foregroundColor(.secondary)
         } else {
-            ForEach(votingManager.combinedData, id: \.voting.id) { combined in
-                NavigationLink(destination: Votings_VotingResultView(voting: combined.voting
+            ForEach(votingManager.votings, id: \.id) { voting in
+                NavigationLink(destination: Votings_VotingResultView(voting: voting
                 )) {
-                    Text("\(combined.voting.question)")
+                    Text("\(voting.question)")
                 }
             }
         }
