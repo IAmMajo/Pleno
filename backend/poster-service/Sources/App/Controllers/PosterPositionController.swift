@@ -452,9 +452,6 @@ struct PosterPositionController: RouteCollection, Sendable {
         guard let reportDamagedPosterPositionDTO = try? req.content.decode(ReportDamagedPosterPositionDTO.self) else {
             throw Abort(.badRequest, reason: "Invalid request body! Expected ReportDamagedPosterPositionDTO.")
         }
-        guard let userId = req.jwtPayload?.userID else {
-            throw Abort(.unauthorized)
-        }
         guard posterPosition.status == .hangs else {
             throw Abort(.badRequest, reason: "Only PosterPositions with a status of 'hangs' can be reported as damaged.")
         }
