@@ -4,8 +4,11 @@ import MeetingServiceDTOs
 import Fluent
 
 extension Record {
-    public func toGetRecordDTO(db: Database) async throws -> GetRecordDTO {
+    public func toGetRecordDTO(db: Database, userId: User.IDValue) async throws -> GetRecordDTO {
         let lang = try self.requireID().lang
+        let identityIds = try await IdentityHistory.byUserId(userId, db).map { identityHistory in
+            try identityHistory.identity.requireID()
+        }
         let attendances = try await self.$id.$meeting.get(on: db).$attendances.query(on: db)
             .filter(\.$status == .present)
             .with(\.$id.$identity)
@@ -40,14 +43,17 @@ extension Record {
                 return "- \(votingOptionText): \(getVotingResultDTO.count)/\(getVotingResultsDTO.totalCount) (\(getVotingResultDTO.percentage)%)"
             }).joined(separator: "\n"))
             """
-            }).joined(separator: "\n\n")
+        }).joined(separator: "\n\n")
         
-        return try await .init(meetingId: self.requireID().$meeting.id,
-                               lang: self.requireID().lang,
-                               identity: self.$identity.get(on: db).toGetIdentityDTO(),
-                               status: self.status.convert(),
-                               content: self.content,
-                               attendancesAppendix: "# \(LocalizableManager.shared.translate(key: "Attendees", into: lang))\n\(attendances)",
-                               votingResultsAppendix: "# \(LocalizableManager.shared.translate(key: "Votings", into: lang))\n\(votingSummaries.isEmpty ? "/" : votingSummaries)")
+        return try await .init(
+            meetingId: self.requireID().$meeting.id,
+            lang: self.requireID().lang,
+            identity: self.$identity.get(on: db).toGetIdentityDTO(),
+            status: self.status.convert(),
+            content: self.content,
+            attendancesAppendix: "# \(LocalizableManager.shared.translate(key: "Attendees", into: lang))\n\(attendances)",
+            votingResultsAppendix: "# \(LocalizableManager.shared.translate(key: "Votings", into: lang))\n\(votingSummaries.isEmpty ? "/" : votingSummaries)",
+            iAmTheRecorder: identityIds.contains(self.$identity.id)
+        )
     }
 }
