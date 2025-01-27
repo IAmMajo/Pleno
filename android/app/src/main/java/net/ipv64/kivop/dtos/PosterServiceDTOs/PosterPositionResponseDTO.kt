@@ -15,9 +15,16 @@ data class PosterPositionResponseDTO (
     var removedAt : LocalDateTime?,
     var image : String?,
     var responsibleUsers : List<ResponsibleUsersDTO>,
-    var status : String,
+    var status : PosterPositionStatus,
 )
 data class ResponsibleUsersDTO (
     var id : UUID,
     var name : String,
 )
+enum class PosterPositionStatus {
+    toHang,
+    hangs,
+    overdue,
+    damaged,
+    takenDown,
+}
