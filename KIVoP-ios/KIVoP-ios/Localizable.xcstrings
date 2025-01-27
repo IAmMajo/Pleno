@@ -171,6 +171,12 @@
         }
       }
     },
+    "0" : {
+
+    },
+    "1" : {
+
+    },
     "1. Datenschutz auf einen Blick" : {
 
     },
@@ -423,9 +429,6 @@
 
     },
     "ADRESSE IN DER NÄHE" : {
-
-    },
-    "Adresse suchen" : {
 
     },
     "Adresse suchen" : {
@@ -988,10 +991,16 @@
     "Fahrer" : {
 
     },
+    "Fahrgemeinschaft" : {
+
+    },
     "Fahrgemeinschaft ist bereits voll." : {
 
     },
     "Fahrgemeinschaften" : {
+
+    },
+    "Fahrgemeinschaften ansehen" : {
 
     },
     "Fahrt löschen" : {
@@ -1421,6 +1430,9 @@
 
     },
     "Mitfahrt löschen" : {
+
+    },
+    "Mitglied 1" : {
 
     },
     "Mitglieder" : {
@@ -2391,6 +2403,9 @@
           }
         }
       }
+    },
+    "Willst du an dem Event teilnehmen?" : {
+
     },
     "Wir arbeiten noch an dieser Funktion." : {
 
