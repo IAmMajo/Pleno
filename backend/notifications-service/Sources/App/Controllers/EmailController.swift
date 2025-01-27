@@ -5,7 +5,9 @@ import VaporToOpenAPI
 
 struct EmailController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let email = routes.grouped("internal", "email")
+        let email = routes.grouped("internal", "email").groupedOpenAPI(
+            tags: .init(name: "Intern", description: "Nur intern erreichbar.")
+        )
         email.post(use: send).openAPI(
             summary: "E-Mail senden",
             description: "Sendet eine E-Mail an einen Empfänger",
@@ -20,7 +22,9 @@ struct EmailController: RouteCollection {
         try await req.email.sendEmail(
             receiver: dto.receiver,
             subject: dto.subject,
-            message: dto.message
+            message: dto.message,
+            template: dto.template,
+            templateData: dto.templateData
         )
         return .ok
     }
