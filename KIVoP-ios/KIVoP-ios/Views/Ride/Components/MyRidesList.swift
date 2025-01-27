@@ -61,7 +61,7 @@ struct MyRidesList: View {
         NavigationLink(destination: EventRideDetailView(viewModel: EventRideDetailViewModel(eventRide: eventRide))) {
             HStack {
                 VStack(alignment: .leading) {
-                    Text(eventRide.eventName)
+                    Text("*\(eventRide.eventName)")
                         .font(.headline)
                     Text(DateTimeFormatter.formatDate(eventRide.starts))
                         .font(.subheadline)

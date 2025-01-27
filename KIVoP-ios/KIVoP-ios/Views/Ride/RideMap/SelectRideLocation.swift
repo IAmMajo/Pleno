@@ -4,8 +4,6 @@ import MapKit
 import PosterServiceDTOs
 import AuthServiceDTOs
 
-
-
 struct SelectRideLocation: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion
     var onRegionChange: (MKCoordinateRegion) -> Void
