@@ -8,7 +8,7 @@ struct MainPage_ProfilView: View {
     @State private var profileImage: UIImage? = nil
 
     // Vereinsinformationen (gehardcoded)
-    private let clubName: String = "Name des Vereins der manchmal auch sehr lange werden kann e.V."
+    private let clubName: String = "CDU Datteln"
     private let clubShortName: String = "VL"
 
     // UI-Zustände
@@ -35,7 +35,7 @@ struct MainPage_ProfilView: View {
                         .frame(height: 80)
                         .cornerRadius(100)
                     
-                    Text("clubName")
+                    Text("CDU Datteln")
                         .font(.subheadline)
                         .bold()
                         .multilineTextAlignment(.center)

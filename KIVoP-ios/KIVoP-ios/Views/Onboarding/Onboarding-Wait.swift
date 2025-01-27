@@ -3,7 +3,7 @@ import AuthServiceDTOs
 
 struct Onboarding_Wait: View {
     @Binding var email: String // Email wird übergeben
-    @State private var clubName: String = "Name des Vereins der manchmal auch sehr lange werden kann e.V."
+    @State private var clubName: String = "CDU Datteln"
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
     @State private var navigateToMainPage: Bool = false
@@ -43,7 +43,7 @@ struct Onboarding_Wait: View {
                         .cornerRadius(100)
                     
                     // Vereinsname
-                    Text("clubName")
+                    Text("CDU Datteln")
                         .font(.system(size: 16))
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
