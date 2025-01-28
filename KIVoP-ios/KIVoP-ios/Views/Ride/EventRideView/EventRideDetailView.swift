@@ -288,12 +288,12 @@ struct EventRideDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar{
             if viewModel.eventRideDetail.isSelfDriver {
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    NavigationLink(destination: EditSpecialRideView(viewModel: EditRideViewModel(rideDetail: viewModel.rideDetail))) {
-//                        Text("Bearbeiten")
-//                            .font(.body)
-//                    }
-//                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: EditEventRideView(viewModel: EditRideViewModel(eventRideDetail: viewModel.eventRideDetail))) {
+                        Text("Bearbeiten")
+                            .font(.body)
+                    }
+                }
             }
         }
     }

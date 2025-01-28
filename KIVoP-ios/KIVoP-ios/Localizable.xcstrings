@@ -867,7 +867,7 @@
         }
       }
     },
-    "Du bietest eine Fahrgemeinschaft an. Daher kannst du nicht an einer anderen Fahrt teilnehmen!" : {
+    "Du bietest eine andere Fahrgemeinschaft an. Daher kannst du nicht an einer anderen Fahrt teilnehmen!" : {
 
     },
     "Du bist bereits Fahrer bei diesem Event, und kannst keine weitere Fahrgemeinschaft anlegen." : {
@@ -1034,9 +1034,6 @@
 
     },
     "Fahrgemeinschaft" : {
-
-    },
-    "Fahrgemeinschaft ist bereits voll." : {
 
     },
     "Fahrgemeinschaften" : {

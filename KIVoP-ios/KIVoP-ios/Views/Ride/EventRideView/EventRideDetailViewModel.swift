@@ -235,10 +235,8 @@ class EventRideDetailViewModel: ObservableObject {
                     // Decodieren der Antwort
                     let decodedEventRides = try decoder.decode([GetEventRideDTO].self, from: data)
                     if let _ = decodedEventRides.first(where: { $0.myState == .driver }) {
-                        print("Driver")
                         self.alreadyAccepted = "driver"
                     } else if let _ = decodedEventRides.first(where: { $0.myState == .accepted }) {
-                        print("Accepted")
                         self.alreadyAccepted = "accepted"
                     }
                 } catch {
