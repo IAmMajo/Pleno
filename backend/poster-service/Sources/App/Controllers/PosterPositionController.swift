@@ -446,7 +446,7 @@ struct PosterPositionController: RouteCollection, Sendable {
     /// Markiert eine Poster-Position als beschädigt.
     @Sendable
     func reportDamagedPosterPosition(_ req: Request) async throws -> PosterPositionResponseDTO {
-        guard let posterPosition = try await PosterPosition.find(req.parameters.get("id"), on: req.db) else {
+        guard let posterPosition = try await PosterPosition.find(req.parameters.get("positionid"), on: req.db) else {
             throw Abort(.notFound)
         }
         guard let reportDamagedPosterPositionDTO = try? req.content.decode(ReportDamagedPosterPositionDTO.self) else {
