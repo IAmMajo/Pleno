@@ -58,8 +58,13 @@ struct EditSpecialRideView: View {
                         HStack {
                             // Picker für die Auswahl der freien Sitze
                             Picker("", selection: $viewModel.rideDetail.emptySeats) {
-                                ForEach(0..<100) { number in
-                                    Text("\(number)").tag(UInt8(number))
+                                
+                                let acceptedRiders = viewModel.rideDetail.riders.filter { $0.accepted }
+                                
+                                ForEach(acceptedRiders.count..<min(100, 256), id: \.self) { number in
+                                    if number >= viewModel.eventRideDetail.riders.count && number <= 100 {
+                                        Text("\(number)").tag(UInt8(number))
+                                    }
                                 }
                             }
                             .padding(.top, -10)
