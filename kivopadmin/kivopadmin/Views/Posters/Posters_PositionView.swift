@@ -15,22 +15,8 @@ struct Posters_PositionView: View {
     let poster: PosterResponseDTO
     var posterManager: PosterManager
    
-   func getDateColor(status: String) -> Color {
-      switch status {
-      case "hung":
-         return .black.opacity(0.75)
-      case "takenDown":
-         return .black.opacity(0.75)
-      case "notDisplayed":
-         return .black.opacity(0.75)
-      case "expiresInOneDay":
-         return .orange
-      case "expired":
-         return .red
-      default: return .black
-      }
-   
-   }
+
+
    
     var body: some View {
        ScrollView {
@@ -44,9 +30,9 @@ struct Posters_PositionView: View {
                       .fontWeight(.semibold)
                       .padding(.trailing, -2)
                    
-                   Text("\(DateTimeFormatter.formatDate(posterPosition.expiresAt))")
-                      .fontWeight(.semibold)
-                      .foregroundStyle(getDateColor(status: posterPosition.status))
+//                   Text("\(DateTimeFormatter.formatDate(posterPosition.expiresAt))")
+//                      .fontWeight(.semibold)
+//                      .foregroundStyle(getDateColor(status: posterPosition.status))
                 }.padding(.top, 10)
             
                  ResponsibleUsersList(users: posterPosition.responsibleUsers)

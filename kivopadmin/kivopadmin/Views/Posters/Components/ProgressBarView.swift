@@ -15,13 +15,13 @@ struct ProgressBarView: View {
     var value: CGFloat {
         let status = position.status
         switch status {
-        case "hangs":
+        case .hangs:
             return 190
-        case "takenDown":
+        case .takenDown:
             return 500
-        case "toHang":
+        case .toHang:
             return 20
-        case "overdue":
+        case .overdue:
             return 190
         default:
             return 190
@@ -31,13 +31,13 @@ struct ProgressBarView: View {
     var progressBarColor: Color {
         let status = position.status
         switch status {
-        case "hangs":
+        case .hangs:
             return .blue
-        case "takenDown":
+        case .takenDown:
             return .green
-        case "toHang":
+        case .toHang:
             return Color(UIColor.secondaryLabel)
-        case "overdue":
+        case .overdue:
             return .red
         default:
             return Color(UIColor.secondaryLabel)

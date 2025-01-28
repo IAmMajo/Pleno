@@ -11,11 +11,12 @@ class LocationsViewModel: ObservableObject {
     @Published var showLocationsList: Bool = false
     @Published var sheetPosition: PosterPositionWithAddress? = nil
     @Published var selectedPosterPosition: PosterPositionWithAddress? // Aktuell ausgewählte Position
-    @Published var selectedFilter: String? = nil {
+    @Published var selectedFilter: PosterPositionStatus? = nil {
         didSet {
             applyFilter()
         }
     }
+
 
     @Published var posterPositionsWithAddresses: [PosterPositionWithAddress] = [] {
         didSet {
@@ -147,13 +148,7 @@ class LocationsViewModel: ObservableObject {
         
         dispatchGroup.notify(queue: .main) { [weak self] in
             // Sortiere die Liste nach dem Status der Positionen
-            let statusOrder = ["toHang", "hangs", "overdue", "takenDown"]
-            positionsWithAddresses.sort { lhs, rhs in
-                let lhsIndex = statusOrder.firstIndex(of: lhs.position.status.lowercased()) ?? Int.max
-                let rhsIndex = statusOrder.firstIndex(of: rhs.position.status.lowercased()) ?? Int.max
-                return lhsIndex < rhsIndex
-            }
-            
+
             // Die sortierte Liste zuweisen
             self?.posterPositionsWithAddresses = positionsWithAddresses
             print("Alle Adressen wurden erfolgreich generiert und sortiert.")

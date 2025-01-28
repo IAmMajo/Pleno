@@ -15,7 +15,7 @@ struct LocationsView: View {
     @State private var expiresAt: Date = Date()
     @State private var selectedUsers: [UUID] = []
     @State private var showUserSelectionSheet = false
-    private var filterOptions = ["toHang", "hangs", "overdue", "takenDown"]
+    private var filterOptions: [PosterPositionStatus] = [.toHang, .hangs, .overdue, .takenDown]
 
     @ObservedObject var userManager = UserManager()
 
@@ -232,35 +232,37 @@ struct LocationsView: View {
         }
     }
     
-    func getFilterIcon(for status: String) -> (symbol: String, color: Color) {
+    func getFilterIcon(for status: PosterPositionStatus) -> (symbol: String, color: Color) {
         switch status {
-        case "toHang":
+        case .toHang:
             return ("xmark.circle", Color(UIColor.secondaryLabel))
-        case "hangs":
+        case .hangs:
             return ("photo.on.rectangle.angled", .blue)
-        case "overdue":
+        case .overdue:
             return ("exclamationmark.triangle", .red)
-        case "takenDown":
+        case .takenDown:
             return ("checkmark.circle", .green)
         default:
             return ("questionmark.circle", .gray) // Fallback für unbekannte Status
         }
     }
+
     
-    func getSummaryCount(for status: String) -> String {
+    func getSummaryCount(for status: PosterPositionStatus) -> String {
         switch status {
-        case "toHang":
+        case .toHang:
             return "\(locationViewModel.summary?.toHang ?? 0)" // Defaultwert 0, wenn nil
-        case "hangs":
+        case .hangs:
             return "\(locationViewModel.summary?.hangs ?? 0)" // Defaultwert 0, wenn nil
-        case "overdue":
+        case .overdue:
             return "\(locationViewModel.summary?.overdue ?? 0)" // Defaultwert 0, wenn nil
-        case "takenDown":
+        case .takenDown:
             return "\(locationViewModel.summary?.takenDown ?? 0)" // Defaultwert 0, wenn nil
         default:
             return "?"
         }
     }
+
 
     
     
