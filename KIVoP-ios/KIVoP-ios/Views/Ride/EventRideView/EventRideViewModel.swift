@@ -2,11 +2,18 @@ import Foundation
 import CoreLocation
 import RideServiceDTOs
 
+@MainActor
 class EventRideViewModel: ObservableObject {
     @Published var event: GetEventDTO
     @Published var eventDetails: GetEventDetailDTO?
     @Published var eventRides: [GetEventRideDTO] = []
-    @Published var isLoading: Bool = false // Standardmäßig nicht ladend
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String? = nil
+    @Published var showLocationRequest: Bool = false // sheet um die Location festzulegen vor einer Anfrage
+    @Published var requestLat: Float = 0
+    @Published var requestLong: Float = 0
+    @Published var requestedLocation: CLLocationCoordinate2D? // Location für die Anfrage
+    @Published var requestedAdress: String = "" // Adresse für die Anzeige beim Auswählen der Location für einen Mitfahrer
     
     @Published var address: String = ""
     @Published var driverAddress: [UUID: String] = [:]
@@ -35,7 +42,6 @@ class EventRideViewModel: ObservableObject {
             return
         }
         
-        // Setze den Ladevorgang auf true
         DispatchQueue.main.async {
             self.isLoading = true
         }
@@ -47,7 +53,7 @@ class EventRideViewModel: ObservableObject {
             // Behandle Fehler
             if let error = error {
                 DispatchQueue.main.async {
-                    self.isLoading = false // Ladevorgang beendet, auch bei Fehlern
+                    self.isLoading = false
                 }
                 print("Network error: \(error.localizedDescription)")
                 return
@@ -55,7 +61,7 @@ class EventRideViewModel: ObservableObject {
             
             guard let data = data else {
                 DispatchQueue.main.async {
-                    self.isLoading = false // Ladevorgang beendet, keine Daten
+                    self.isLoading = false
                 }
                 print("No data received from server")
                 return
@@ -70,11 +76,11 @@ class EventRideViewModel: ObservableObject {
                 let decodedEventDetails = try decoder.decode(GetEventDetailDTO.self, from: data)
                 DispatchQueue.main.async {
                     self.eventDetails = decodedEventDetails
-                    self.isLoading = false // Ladevorgang erfolgreich beendet
+                    self.isLoading = false
                 }
             } catch {
                 DispatchQueue.main.async {
-                    self.isLoading = false // Ladevorgang beendet, aber mit JSON-Fehler
+                    self.isLoading = false
                 }
                 print("JSON Decode Error: \(error.localizedDescription)")
             }
@@ -218,6 +224,66 @@ class EventRideViewModel: ObservableObject {
                 }
             }
         }.resume()
+    }
+    
+    // Interesse zu einer Mitfahrtgelegenheit stellen (notwendig um an einer Fahrt teilzunehmen)
+    func requestInterestEventRide() {
+        Task {
+            do {
+                self.isLoading = true
+                
+                guard let url = URL(string: "\(baseURL)/eventrides/interested") else {
+                    throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+                }
+                
+                var request = URLRequest(url: url)
+                request.httpMethod = "POST" // Setze die HTTP-Methode auf POST
+                request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+                
+                // Authorization Header hinzufügen
+                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                } else {
+                    errorMessage = "Unauthorized: Token not found."
+                    self.isLoading = false
+                    return
+                }
+                
+                let requestDTO = CreateInterestedPartyDTO(
+                    eventID: event.id,
+                    latitude: requestLat,
+                    longitude: requestLong
+                )
+                
+                // Konvertiere den Body in JSON
+                let jsonData = try JSONEncoder().encode(requestDTO)
+                request.httpBody = jsonData
+                
+                // Führe die Anfrage aus
+                let (data, response) = try await URLSession.shared.data(for: request)
+                
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
+                    throw NSError(domain: "Failed to request ride", code: 500, userInfo: nil)
+                }
+                
+                do {
+                    let decoder = JSONDecoder()
+                    let _ = try decoder.decode(GetInterestedPartyDTO.self, from: data)
+                    
+                    // Rider zur Liste hinzufügen
+                    DispatchQueue.main.async {
+                        self.isLoading = false
+                    }
+                }
+                
+            } catch {
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    // Fehlerbehandlung hier
+                    print("Fehler beim absenden des Interesse: \(error.localizedDescription)")
+                }
+            }
+        }
     }
     
     func getAddressFromCoordinates(latitude: Float, longitude: Float, completion: @escaping (String?) -> Void) {

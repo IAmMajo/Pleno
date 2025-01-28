@@ -181,7 +181,6 @@ class RideViewModel: ObservableObject {
     // Gruppierung der Daten (Event oder Ride) nach Monat und Jahr
     var groupedData: [Dictionary<String, [Any]>.Element] {
         let filtered = filteredData
-        print(filtered)
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMMM - yyyy"  // Format: "Januar - 2025"

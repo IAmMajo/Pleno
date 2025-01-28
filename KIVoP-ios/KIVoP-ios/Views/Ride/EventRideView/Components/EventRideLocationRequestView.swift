@@ -1,8 +1,9 @@
 import SwiftUI
 import MapKit
+import CoreLocation
 
-struct LocationRequestView: View {
-    @ObservedObject var viewModel: RideDetailViewModel
+struct EventRideLocationRequestView: View {
+    @ObservedObject var viewModel: EventRideViewModel
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -61,12 +62,12 @@ struct LocationRequestView: View {
                         // Bestätigen-Aktion
                         viewModel.requestLat = Float(viewModel.requestedLocation!.latitude)
                         viewModel.requestLong = Float(viewModel.requestedLocation!.longitude)
-                        viewModel.requestRide()
+                        viewModel.requestInterestEventRide()
                         dismiss()
                     }
                 )
                 .onAppear(){
-                    viewModel.requestedLocation = viewModel.startLocation
+                    viewModel.requestedLocation = CLLocationCoordinate2D(latitude: CLLocationDegrees(viewModel.eventDetails!.latitude), longitude: CLLocationDegrees(viewModel.eventDetails!.longitude))
                 }
             }
         }

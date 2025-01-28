@@ -41,10 +41,14 @@ struct RideDetailView: View {
                         Text("Du hast bereits angefragt mitgenommen zu werden.")
                             .font(.headline)
                             .frame(maxWidth: 250, alignment: .center)
+                            .multilineTextAlignment(.center)
                     }
                     
                     // Fahrtbeschreibung
+                    Text("Beschreibung zur Fahrt: ")
+                        .font(.headline)
                     Text(viewModel.rideDetail.description ?? "Keine Beschreibung zur Fahrt vorhanden")
+                        .multilineTextAlignment(.center)
 
                     // Ort
                     RideLocationView(selectedLocation: $viewModel.location)
@@ -228,7 +232,7 @@ struct RideDetailView: View {
                         }
                     }
                     .listStyle(.insetGrouped)
-                    RideDecision(viewModel: viewModel, rideViewModel: rideViewModel)
+                    SpecialRideDecision(viewModel: viewModel, rideViewModel: rideViewModel)
                 }
             }
             .overlay {
@@ -288,7 +292,7 @@ struct RideDetailView: View {
         }
         // .sheet() für die Location Request
         .sheet(isPresented: $viewModel.showLocationRequest) {
-            LocationRequestView(viewModel: viewModel)
+            SpecialRideLocationRequestView(viewModel: viewModel)
         }
     }
 }

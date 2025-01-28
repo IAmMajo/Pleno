@@ -117,6 +117,7 @@ class RideDetailViewModel: ObservableObject {
         }
     }
     
+    // Fahrer löscht die Fahrt
     func deleteRide() {
         Task {
             do {
@@ -166,6 +167,7 @@ class RideDetailViewModel: ObservableObject {
         }
     }
     
+    // Mitfahrer fragt einen Platz an
     func requestRide() {
         Task {
             do {
@@ -233,31 +235,32 @@ class RideDetailViewModel: ObservableObject {
         }
     }
     
-    // Löschen der Anfrage, und der Mitnahme für Fahrer und Mitfahrer
+    // Löschen der Anfrage durch den Mitfahrer
     func deleteRideRequestedSeat(rider: GetRiderDTO) {
-        // Erstelle die URL mit der requestID
-        guard let url = URL(string: "https://kivop.ipv64.net/specialrides/requests/\(rider.id)") else {
-            print("Ungültige URL")
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE" // Setze die HTTP-Methode auf DELETE
-        
-        // Authorization Header hinzufügen
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            errorMessage = "Unauthorized: Token not found."
-            self.isLoading = false
-            return
-        }
-        
-        // Führe die Anfrage aus
         Task {
             do {
                 self.isLoading = true
                 
+                // Erstelle die URL mit der requestID
+                guard let url = URL(string: "https://kivop.ipv64.net/specialrides/requests/\(rider.id)") else {
+                    print("Ungültige URL")
+                    self.isLoading = false
+                    return
+                }
+                
+                var request = URLRequest(url: url)
+                request.httpMethod = "DELETE" // Setze die HTTP-Methode auf DELETE
+                
+                // Authorization Header hinzufügen
+                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                } else {
+                    errorMessage = "Unauthorized: Token not found."
+                    self.isLoading = false
+                    return
+                }
+                
+                // Führe die Anfrage aus
                 let (_, response) = try await URLSession.shared.data(for: request)
                 
                 // Überprüfe die Antwort auf den Statuscode 204 (No Content)
@@ -267,6 +270,8 @@ class RideDetailViewModel: ObservableObject {
                 
                 DispatchQueue.main.async {
                     // Erfolgreiches Löschen der Anfrage
+                    self.requestedRiders.removeAll(where: { $0.id == rider.id })
+                    self.acceptedRiders.removeAll(where: { $0.id == rider.id })
                     self.isLoading = false
                 }
                 
@@ -279,47 +284,51 @@ class RideDetailViewModel: ObservableObject {
             }
         }
     }
-      
+
+    
+    // Fahrer akzeptiert einen Request
     func acceptRequestedRider(rider: GetRiderDTO) {
-        // Erstelle die URL mit der riderId
-        guard let url = URL(string: "https://kivop.ipv64.net/specialrides/requests/\(rider.id)") else {
-            print("Ungültige URL")
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "PATCH" // Setze die HTTP-Methode auf PATCH
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Authorization Header hinzufügen
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            errorMessage = "Unauthorized: Token not found."
-            self.isLoading = false
-            return
-        }
-        
-        // Der Body für den Request
-        let body: [String: Any] = [
-            "longitude": rider.longitude,
-            "latitude": rider.latitude,
-            "accepted": true
-        ]
-        
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
-            request.httpBody = jsonData
-        } catch {
-            print("Fehler beim Erstellen des JSON-Bodys: \(error.localizedDescription)")
-            return
-        }
-        
-        // Führe die Anfrage aus
         Task {
             do {
-                self.isLoading = true
+                self.isLoading = true // Ladezustand aktivieren
                 
+                // Erstelle die URL mit der riderId
+                guard let url = URL(string: "https://kivop.ipv64.net/specialrides/requests/\(rider.id)") else {
+                    print("Ungültige URL")
+                    self.isLoading = false
+                    return
+                }
+                
+                var request = URLRequest(url: url)
+                request.httpMethod = "PATCH" // Setze die HTTP-Methode auf PATCH
+                request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+                
+                // Authorization Header hinzufügen
+                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                } else {
+                    errorMessage = "Unauthorized: Token not found."
+                    self.isLoading = false
+                    return
+                }
+                
+                // Der Body für den Request
+                let body: [String: Any] = [
+                    "longitude": rider.longitude,
+                    "latitude": rider.latitude,
+                    "accepted": true
+                ]
+                
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
+                    request.httpBody = jsonData
+                } catch {
+                    print("Fehler beim Erstellen des JSON-Bodys: \(error.localizedDescription)")
+                    self.isLoading = false
+                    return
+                }
+                
+                // Führe die Anfrage aus
                 let (data, response) = try await URLSession.shared.data(for: request)
                 
                 // Überprüfe die Antwort auf den Statuscode 200 (OK)
@@ -327,28 +336,23 @@ class RideDetailViewModel: ObservableObject {
                     throw NSError(domain: "Failed to accept requested rider", code: 500, userInfo: nil)
                 }
                 
-                do {
-                    let decoder = JSONDecoder()
-                    let updatedRider = try decoder.decode(GetRiderDTO.self, from: data)
-                    
-                    DispatchQueue.main.async {
-                        // Erfolgreiche Annahme der Anfrage
-                        self.isLoading = false
-                        // Aktualisiere den Rider in der Liste der angefragten Mitfahrer
-                        if let index = self.requestedRiders.firstIndex(where: { $0.id == rider.id }) {
-                            self.acceptedRiders.append(updatedRider)
-                            self.requestedRiders.remove(at: index)
-                        }
-                    }
-                    
-                } catch {
-                    print("Fehler beim Dekodieren der Antwort: \(error.localizedDescription)")
-                    self.isLoading = false
-                }
+                // JSON-Dekodierung
+                let decoder = JSONDecoder()
+                let updatedRider = try decoder.decode(GetRiderDTO.self, from: data)
                 
+                // Erfolgreiche Bearbeitung
+                DispatchQueue.main.async {
+                    self.isLoading = false // Ladezustand deaktivieren
+                    
+                    // Rider aktualisieren und verschieben
+                    if let index = self.requestedRiders.firstIndex(where: { $0.id == rider.id }) {
+                        self.acceptedRiders.append(updatedRider)
+                        self.requestedRiders.remove(at: index)
+                    }
+                }
             } catch {
                 DispatchQueue.main.async {
-                    self.isLoading = false
+                    self.isLoading = false // Ladezustand deaktivieren
                     // Fehlerbehandlung
                     print("Fehler beim Akzeptieren des angefragten Mitfahrers: \(error.localizedDescription)")
                 }
@@ -356,6 +360,8 @@ class RideDetailViewModel: ObservableObject {
         }
     }
 
+
+    // Fahrer entfernt den Mitfahrer wieder - Dieser ist wieder requested
     func removeFromPassengers(rider: GetRiderDTO) {
         // Erstelle die URL mit der riderId
         guard let url = URL(string: "https://kivop.ipv64.net/specialrides/requests/\(rider.id)") else {

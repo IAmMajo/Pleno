@@ -95,7 +95,6 @@ struct CreateEventRideView: View {
                                 .padding(.top, -11)
                                 .padding(.bottom, -11)
                                 .padding(.leading, -20)
-                                .disabled(true)
                         }
                         VStack{
                             if(viewModel.address != ""){

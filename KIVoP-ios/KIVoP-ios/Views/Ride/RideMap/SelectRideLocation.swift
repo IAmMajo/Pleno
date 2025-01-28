@@ -46,7 +46,7 @@ struct SelectRideLocation: UIViewRepresentable {
 struct RideLocationView: View {
     @State private var mapRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
-        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+        span: MKCoordinateSpan(latitudeDelta: 0.007, longitudeDelta: 0.007)
     )
     
     @Binding var selectedLocation: CLLocationCoordinate2D?
@@ -61,8 +61,28 @@ struct RideLocationView: View {
                         mapRegion = newRegion
                     }
                 })
+                .disabled(true)
                 .ignoresSafeArea()
-                    .frame(maxHeight: .infinity)
+                .frame(maxHeight: .infinity)
+                
+                Circle()
+                    .fill(Color.white)
+                    .shadow(radius: 5)
+                    .overlay(
+                        Image(systemName: "mappin.circle")
+                            .resizable()
+                            .scaledToFit()
+                            .clipShape(RoundedRectangle(cornerRadius: 3))
+                            .frame(width: 24, height: 24)
+                    )
+                    .frame(width: 39, height: 39)
+                    .overlay(alignment: .bottom) {
+                        IndicatorShape()
+                            .fill(Color.white)
+                            .frame(width: 20, height: 15)
+                            .offset(y: 8)
+                    }
+                    .offset(y: -(65 / 2))
             }
         }
         .onChange(of: selectedLocation) { oldValue, newValue in

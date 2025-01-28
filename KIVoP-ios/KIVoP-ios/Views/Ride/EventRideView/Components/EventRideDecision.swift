@@ -1,14 +1,13 @@
 import SwiftUI
 
-struct RideDecision: View {
-    @ObservedObject var viewModel: RideDetailViewModel
-    @ObservedObject var rideViewModel: RideViewModel
+struct EventRideDecision: View {
+    @ObservedObject var viewModel: EventRideDetailViewModel
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         // Logik für Button
         // Als Fahrer - Fahrt löschen, Als Mitfahrer - Mitfahrt stornieren, sonst - Mitfahren beantragen
-        if (viewModel.rideDetail.isSelfDriver){
+        if (viewModel.eventRideDetail.isSelfDriver){
             Button(action: {
                 viewModel.showDeleteRideAlert = true
             }) {
@@ -30,7 +29,6 @@ struct RideDecision: View {
                         // Aktion zum Löschen der Fahrt
                         viewModel.deleteRide()
                         viewModel.showDeleteRideAlert = false
-                        rideViewModel.fetchRides()
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             dismiss()
                         }
@@ -38,9 +36,9 @@ struct RideDecision: View {
                     secondaryButton: .cancel()
                 )
             }
-        } else if (viewModel.ride.allocatedSeats == viewModel.ride.emptySeats) {
+        } else if (viewModel.eventRide.allocatedSeats == viewModel.eventRide.emptySeats) {
             Button(action: {
-                
+                // Fahrt bereits voll, nichts passiert
             }){
                 Text("Fahrgemeinschaft ist bereits voll.")
                     .frame(maxWidth: .infinity)
@@ -74,7 +72,6 @@ struct RideDecision: View {
                         primaryButton: .destructive(Text("Löschen")) {
                             // Aktion zum Löschen der Fahrt
                             viewModel.deleteRideRequestedSeat(rider: viewModel.rider!)
-                            viewModel.fetchRideDetails()
                             viewModel.showDeleteRideRequest = false
                         },
                         secondaryButton: .cancel()
@@ -102,7 +99,6 @@ struct RideDecision: View {
                         primaryButton: .destructive(Text("Freigeben")) {
                             // Aktion zum Löschen der Fahrt
                             viewModel.deleteRideRequestedSeat(rider: viewModel.rider!)
-                            viewModel.fetchRideDetails()
                             viewModel.showRiderDeleteRequest = false
                         },
                         secondaryButton: .cancel()
@@ -111,7 +107,7 @@ struct RideDecision: View {
             } else {
                 // Anfrage stellen
                 Button(action: {
-                    viewModel.showLocationRequest = true
+                    viewModel.requestEventRide()
                 }) {
                     Text("Mitfahrt anfragen")
                         .frame(maxWidth: .infinity)

@@ -71,6 +71,7 @@ struct EventRideView: View {
                                 .padding(.horizontal)
                             Button(action: {
                                 viewModel.participateEvent()
+                                viewModel.showLocationRequest = true
                             }){
                                 Text("Jetzt zusagen!")
                                     .frame(maxWidth: .infinity)
@@ -82,58 +83,62 @@ struct EventRideView: View {
                             .padding(.horizontal)
                             .buttonStyle(PlainButtonStyle())
                         } else {
-                            Section(header: Text("Fahrten")){
-                                ForEach( viewModel.eventRides, id: \.id ) { ride in
-                                    NavigationLink(destination: EventRideDetailView(viewModel: EventRideDetailViewModel(eventRide: ride))) {
-                                        HStack {
-                                            ProfilePictureRide(name: ride.driverName, id: ride.driverID)
-                                            VStack{
-                                                Text(ride.driverName)
-                                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                                Text(viewModel.driverAddress[ride.driverID] ?? "Lädt Adresse...")
-                                                    .font(.subheadline)
-                                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                                    .foregroundColor(.gray)
-                                            }
-                                            Spacer()
-                                            if let openRequests = ride.openRequests, openRequests > 0 {
-                                                Image(systemName: "\(openRequests).circle.fill")
-                                                    .aspectRatio(1, contentMode: .fit)
-                                                    .foregroundStyle(.orange)
-                                                    .padding(.trailing, 5)
-                                            }
-                                            HStack{
-                                                Text("\(ride.allocatedSeats) / \(ride.emptySeats)")
-                                                Image(systemName: "car.fill" )
-                                            }
-                                            .foregroundColor(
-                                                {
-                                                    switch ride.myState {
-                                                    case .driver:
-                                                        return Color.blue
-                                                    case .nothing:
-                                                        return Color.gray
-                                                    case .requested:
-                                                        return Color.orange
-                                                    case .accepted:
-                                                        return Color.green
-                                                    }
-                                                }()
-                                            )
-                                            .font(.system(size: 15))
-                                            Image(systemName: "square.and.arrow.up")
-                                                .foregroundColor(.blue)
-                                                .onTapGesture {
-                                                    showMapOptions = true
-                                                    setKoords = CLLocationCoordinate2D(
-                                                        latitude: CLLocationDegrees(ride.latitude),
-                                                        longitude: CLLocationDegrees(ride.longitude)
-                                                    )
-                                                    setAddress = viewModel.driverAddress[ride.driverID]
+                            if !viewModel.eventRides.isEmpty {
+                                Section(header: Text("Fahrten")){
+                                    ForEach( viewModel.eventRides, id: \.id ) { ride in
+                                        NavigationLink(destination: EventRideDetailView(viewModel: EventRideDetailViewModel(eventRide: ride))) {
+                                            HStack {
+                                                ProfilePictureRide(name: ride.driverName, id: ride.driverID)
+                                                VStack{
+                                                    Text(ride.driverName)
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                    Text(viewModel.driverAddress[ride.driverID] ?? "Lädt Adresse...")
+                                                        .font(.subheadline)
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                        .foregroundColor(.gray)
                                                 }
+                                                Spacer()
+                                                if let openRequests = ride.openRequests, openRequests > 0 {
+                                                    Image(systemName: "\(openRequests).circle.fill")
+                                                        .aspectRatio(1, contentMode: .fit)
+                                                        .foregroundStyle(.orange)
+                                                        .padding(.trailing, 5)
+                                                }
+                                                HStack{
+                                                    Text("\(ride.allocatedSeats) / \(ride.emptySeats)")
+                                                    Image(systemName: "car.fill" )
+                                                }
+                                                .foregroundColor(
+                                                    {
+                                                        switch ride.myState {
+                                                        case .driver:
+                                                            return Color.blue
+                                                        case .nothing:
+                                                            return Color.gray
+                                                        case .requested:
+                                                            return Color.orange
+                                                        case .accepted:
+                                                            return Color.green
+                                                        }
+                                                    }()
+                                                )
+                                                .font(.system(size: 15))
+                                                Image(systemName: "square.and.arrow.up")
+                                                    .foregroundColor(.blue)
+                                                    .onTapGesture {
+                                                        showMapOptions = true
+                                                        setKoords = CLLocationCoordinate2D(
+                                                            latitude: CLLocationDegrees(ride.latitude),
+                                                            longitude: CLLocationDegrees(ride.longitude)
+                                                        )
+                                                        setAddress = viewModel.driverAddress[ride.driverID]
+                                                    }
+                                            }
                                         }
                                     }
                                 }
+                            } else {
+                                Text("Es wurden noch keine Fahrgemeinschaften zu diesem Event angelegt.")
                             }
                         }
                     }
@@ -187,5 +192,10 @@ struct EventRideView: View {
         }
         .navigationTitle(viewModel.event.name)
         .navigationBarTitleDisplayMode(.inline)
+        
+        // .sheet() für die Location Request (Wenn ich der Fahrt Zusage muss ich meine Location setzen)
+        .sheet(isPresented: $viewModel.showLocationRequest) {
+            EventRideLocationRequestView(viewModel: viewModel)
+        }
     }
 }
