@@ -11,6 +11,7 @@ data class GetRecordDTO (
     var content : String,
     var attendancesAppendix : String,
     var votingResultsAppendix : String?,
+    var iAmTheRecorder : Boolean,
 )
 enum class RecordStatus {
     underway,
