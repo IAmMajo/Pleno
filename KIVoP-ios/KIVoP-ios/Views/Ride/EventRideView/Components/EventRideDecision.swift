@@ -106,18 +106,46 @@ struct EventRideDecision: View {
                 }
             } else {
                 // Anfrage stellen
-                Button(action: {
-                    viewModel.requestEventRide()
-                }) {
-                    Text("Mitfahrt anfragen")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                if viewModel.alreadyAccepted == "accepted"{
+                    Button(action: {
+                        
+                    }) {
+                        Text("Du wirst schon von jemandem mitgenommen.")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding(.horizontal)
+                    .buttonStyle(PlainButtonStyle())
+                } else if viewModel.alreadyAccepted == "driver" {
+                    Button(action: {
+                        
+                    }) {
+                        Text("Du bietest eine andere Fahrgemeinschaft an. Daher kannst du nicht an einer anderen Fahrt teilnehmen!")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding(.horizontal)
+                    .buttonStyle(PlainButtonStyle())
+                } else {
+                    Button(action: {
+                        viewModel.requestEventRide()
+                    }) {
+                        Text("Mitfahrt anfragen")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding(.horizontal)
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .padding(.horizontal)
-                .buttonStyle(PlainButtonStyle())
             }
         }
     }

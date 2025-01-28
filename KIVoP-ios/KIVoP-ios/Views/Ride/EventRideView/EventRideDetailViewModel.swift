@@ -10,6 +10,7 @@ class EventRideDetailViewModel: ObservableObject {
     @Published var eventDetails: GetEventDetailDTO
     @Published var requestedRiders: [GetRiderDTO] = []
     @Published var acceptedRiders: [GetRiderDTO] = []
+    @Published var alreadyAccepted: String = "" // Wenn myState .accepted oder .driver bei einem EventRide von dem Event, dann kann man keinen Request stellen
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     @Published var showDeleteRideAlert: Bool = false // Fahrer der seine Fahrt löschen will
@@ -179,6 +180,75 @@ class EventRideDetailViewModel: ObservableObject {
                 }
             }
         }
+    }
+    
+    // Prüfen ob ich schon wo .accepted bin
+    func fetchEventRides() {
+        guard let url = URL(string: "\(baseURL)/eventrides?byEventID=\(eventRide.eventID)") else {
+            print("Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        // Füge JWT Token zu den Headern hinzu
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            print("Unauthorized: No token found")
+            return
+        }
+        
+        // Setze den Ladevorgang auf true
+        DispatchQueue.main.async {
+            self.isLoading = true
+        }
+        
+        // Führe den Netzwerkaufruf aus
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self = self else { return }
+            
+            // Behandle Fehler
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.isLoading = false // Ladevorgang beendet, auch bei Fehlern
+                }
+                print("Network error: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    self.isLoading = false // Ladevorgang beendet, keine Daten
+                }
+                print("No data received from server")
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+     
+            DispatchQueue.main.async {
+                do {
+                    // Decodieren der Antwort
+                    let decodedEventRides = try decoder.decode([GetEventRideDTO].self, from: data)
+                    if let _ = decodedEventRides.first(where: { $0.myState == .driver }) {
+                        print("Driver")
+                        self.alreadyAccepted = "driver"
+                    } else if let _ = decodedEventRides.first(where: { $0.myState == .accepted }) {
+                        print("Accepted")
+                        self.alreadyAccepted = "accepted"
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        self.isLoading = false // Ladevorgang beendet, aber mit JSON-Fehler
+                    }
+                    print("JSON Decode Error: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
     }
     
     // Fahrer löscht die Fahrt

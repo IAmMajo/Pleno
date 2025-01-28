@@ -246,12 +246,14 @@ struct EventRideDetailView: View {
                Task {
                    viewModel.fetchEventRideDetails()
                    viewModel.fetchEventDetails()
+                   viewModel.fetchEventRides()
                }
             }
             .refreshable {
                 Task {
                     viewModel.fetchEventRideDetails()
                     viewModel.fetchEventDetails()
+                    viewModel.fetchEventRides()
                 }
             }
         }
