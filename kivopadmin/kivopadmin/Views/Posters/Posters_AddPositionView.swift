@@ -47,13 +47,13 @@ struct CustomMapView: UIViewRepresentable {
             if let position = parent.posterPositions.first(where: { $0.latitude == annotation.coordinate.latitude && $0.longitude == annotation.coordinate.longitude }) {
                 var color: UIColor = .gray
                 switch position.status {
-                case "toHang":
+                case .toHang:
                     color = .blue
-                case "overdue":
+                case .overdue:
                     color = .green
-                case "hangs":
+                case .hangs:
                     color = .red
-                case "takenDown":
+                case .takenDown:
                     color = .yellow
                 default:
                     color = .gray
@@ -183,10 +183,10 @@ struct Posters_AddPositionView: View {
                         ForEach(posterManager.posterPositions, id: \.id) { position in
                             let positionColor: Color = {
                                 switch position.status {
-                                case "toHang": return .orange
-                                case "overdue": return .red
-                                case "hangs": return .green
-                                case "takenDown": return .gray
+                                case .toHang: return .orange
+                                case .overdue: return .red
+                                case .hangs: return .green
+                                case .takenDown: return .gray
                                 default: return .blue
                                 }
                             }()

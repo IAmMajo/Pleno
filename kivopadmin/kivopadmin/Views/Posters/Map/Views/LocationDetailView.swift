@@ -15,17 +15,17 @@ struct LocationDetailView: View {
     func getDateStatusText(position: PosterPositionResponseDTO) -> (text: String, color: Color) {
         let status = position.status
         switch status {
-        case "hangs":
+        case .hangs:
             if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
                 return (text: "morgen überfällig", color: .orange)
             } else {
                 return (text: "hängt", color: .blue)
             }
-        case "takenDown":
+        case .takenDown:
             return (text: "abgehangen", color: .green)
-        case "toHang":
+        case .toHang:
             return (text: "hängt noch nicht", color: Color(UIColor.secondaryLabel))
-        case "overdue":
+        case .overdue:
             return (text: "überfällig", color: .red)
         default:
             return (text: "", color: Color(UIColor.secondaryLabel))

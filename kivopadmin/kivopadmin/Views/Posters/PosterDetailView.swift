@@ -228,15 +228,16 @@ struct MidView: View {
         case .all:
             return posterManager.posterPositions
         case .toHang:
-            return posterManager.posterPositions.filter { $0.status == "toHang" }
+            return posterManager.posterPositions.filter { $0.status == .toHang }
         case .takendown:
-            return posterManager.posterPositions.filter { $0.status == "takenDown" }
+            return posterManager.posterPositions.filter { $0.status == .takenDown }
         case .overdue:
-            return posterManager.posterPositions.filter { $0.status == "overdue" }
+            return posterManager.posterPositions.filter { $0.status == .overdue }
         case .hangs:
-            return posterManager.posterPositions.filter { $0.status == "hangs" }
+            return posterManager.posterPositions.filter { $0.status == .hangs }
         }
     }
+
     // Toggle-Auswahl für Positionen
     private func toggleSelection(for positionId: String) {
         if selectedPositions.contains(positionId) {

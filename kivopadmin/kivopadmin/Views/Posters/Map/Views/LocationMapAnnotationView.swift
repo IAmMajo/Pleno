@@ -1,5 +1,6 @@
 
 import SwiftUI
+import PosterServiceDTOs
 
 struct LocationMapAnnotationView: View {
     var position: PosterPositionWithAddress
@@ -27,18 +28,19 @@ struct LocationMapAnnotationView: View {
         
     }
     
-    func getFilterColor(for status: String) -> Color {
+    func getFilterColor(for status: PosterPositionStatus) -> Color {
         switch status {
-        case "toHang":
+        case .toHang:
             return Color(UIColor.secondaryLabel)
-        case "hangs":
+        case .hangs:
             return .blue
-        case "overdue":
+        case .overdue:
             return .red
-        case "takenDown":
+        case .takenDown:
             return .green
-        default:
-            return .gray // Fallback für unbekannte Status
+        case .damaged:
+            return .orange // Farbe für den neuen Status "damaged"
         }
     }
+
 }
