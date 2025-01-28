@@ -457,6 +457,7 @@ struct PosterPositionController: RouteCollection, Sendable {
         }
         
         posterPosition.image = reportDamagedPosterPositionDTO.image
+        posterPosition.damaged = true
         
         try await posterPosition.update(on: req.db)
         
