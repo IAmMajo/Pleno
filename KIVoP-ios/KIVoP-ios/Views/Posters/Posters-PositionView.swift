@@ -37,6 +37,9 @@ struct Posters_PositionView: View {
    @State private var shareLocation = false
    @State private var showTakeDownAlert = false
    @State private var showUndoTakeDownAlert = false
+   @State private var showReportDamageAlert = false
+   @State private var showCamera = false
+   @State private var selectedImage: UIImage? = nil
    @State private var copiedToClipboard: Bool = false
    @State private var tappedCopyButton: Bool = false
    @FocusState private var isFocused: Bool
@@ -141,7 +144,7 @@ struct Posters_PositionView: View {
                      
                      ProgressBarView(position: position)
                         .padding(.leading) .padding(.trailing)
-                     if position.status == "toHang" {
+                     if position.status == .toHang {
                         Text("Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position")
                            .font(.system(size: 10))
                            .foregroundStyle(.secondary)
@@ -303,25 +306,72 @@ struct Posters_PositionView: View {
                      .presentationDetents([.medium, .large])
                      .presentationDragIndicator(.hidden)
                }
+               
+               if (position.status == .hangs || position.status == .overdue) {
+                  HStack {
+                     Image(systemName: "exclamationmark.circle")
+                     Text("Beschädigung melden")
+                     Spacer()
+                  }
+                  .foregroundStyle(Color.red)
+                  .padding()
+                  .onTapGesture {
+                     showReportDamageAlert = true
+                  }
+                  .alert(isPresented: $showReportDamageAlert) {
+                     return Alert(
+                        title: Text("Beschädigung melden?"),
+                        message: Text("Bestätige mit einem Bild, dass das Plakat beschädigt wurde, oder es nicht mehr an der vorgesehenen Stelle hängt."),
+                        primaryButton: .default(Text("Verstanden")) {
+                           self.showCamera.toggle()
+                        },
+                        secondaryButton: .cancel(Text("Abbrechen"))
+                     )
+                  }
+                  .fullScreenCover(isPresented: $showCamera) {
+                     accessCameraView(
+                        isDamageReport: true,
+                        selectedImage: $selectedImage,
+                        showCamera: $showCamera,
+                        currentCoordinates: $currentCoordinates
+                     ) {
+                        if let image = selectedImage,
+                           let imageData = image.jpegData(compressionQuality: 0.8)
+                        {
+                           Task {
+                              do {
+                                 try await viewModel.reportDamagedPosition(image: imageData)
+                                 await viewModel.fetchPosition()
+                              } catch {
+                                 print("Error reporting damaged position: \(error)")
+                              }
+                              await viewModel.fetchPosition() //wegmachen evtl sobald server error behoben wurde?
+                           }
+                        }
+                     }
+                     .background(.black)
+                  }
+               }
+               
             }
             .refreshable {
                loadMyId()
                await viewModel.fetchPosition()
             }
-            if (position.status != "toHang" && isResponsible()) {
+            if (position.status != .toHang && isResponsible()) {
                Button {
-                  if (position.status != "takenDown") {
+                  if (position.status != .takenDown) {
                      showTakeDownAlert = true
                   } else {
                      showUndoTakeDownAlert = true
                   }
                } label: {
-                  Text(position.status != "takenDown" ? "Abhängen bestätigen" : "Abhängen zurückziehen")
-                     .foregroundStyle(position.status != "takenDown" ? Color(UIColor.systemBackground) : Color.red)
+                  Text(position.status != .takenDown ? "Abhängen bestätigen" : "Abhängen zurückziehen")
+                     .foregroundStyle(position.status != .takenDown ? Color(UIColor.systemBackground) : Color.red)
                      .fontWeight(.semibold)
                      .frame(maxWidth: .infinity)
                }
-               .background(position.status != "takenDown" ? Color.red : Color.gray.opacity(0.2))
+               .background(position.status != .takenDown ? Color.red : Color.gray.opacity(0.2))
                .cornerRadius(10)
                .padding(.leading) .padding(.trailing)
                .padding(.top, 5)
