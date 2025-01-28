@@ -27,8 +27,8 @@ struct ProgressInfoView: View {
          return (text: "hängt noch nicht", value: 170, color: .gray)
       case .overdue:
          return (text: "hängt (überfällig)", value: 175, color: .red)
-      default:
-         return (text: "", value: 100, .gray)
+      case .damaged:
+         return (text: "ist beschädigt, oder fehlt", value: 230, color: .yellow)
       }
    }
    

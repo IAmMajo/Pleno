@@ -83,6 +83,7 @@ struct CircleImageView: View {
                   }
                   .fullScreenCover(isPresented: $showCamera) {
                      accessCameraView(
+                        isDamageReport: false,
                         selectedImage: $selectedImage,
                         showCamera: $showCamera,
                         currentCoordinates: $currentCoordinates
@@ -139,6 +140,7 @@ struct CircleImageView: View {
 }
 
 struct accessCameraView: UIViewControllerRepresentable {
+   let isDamageReport: Bool
    @Binding var selectedImage: UIImage?
    @Binding var showCamera: Bool
    @Binding var currentCoordinates: CLLocationCoordinate2D?
@@ -191,7 +193,7 @@ class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerContro
       // Present the alert over the camera
       let alertController = UIAlertController(
          title: "Passt alles?",
-         message: "Achtung, du kannst das Bild später nicht mehr ändern. Ist das Plakat und seine Umgebung gut zu erkennen und das Bild nicht verwackelt?",
+         message: self.picker.isDamageReport ? "Ist das beschädigte, oder fehlende Plakat und seine Umgebung gut zu erkennen und das Bild nicht verwackelt?" : "Achtung, du kannst das Bild später nicht mehr ändern. Ist das Plakat und seine Umgebung gut zu erkennen und das Bild nicht verwackelt?",
          preferredStyle: .alert
       )
       
@@ -203,8 +205,9 @@ class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerContro
       }))
       
       alertController.addAction(UIAlertAction(title: "Erneut aufnehmen", style: .cancel, handler: { _ in
-         self.picker.updateLocationForCameraReset()
-         
+         if !self.picker.isDamageReport {
+            self.picker.updateLocationForCameraReset()
+         }
          picker.dismiss(animated: true) { // dismiss camera
             self.picker.$showCamera.wrappedValue = false
             self.picker.$showCamera.wrappedValue = true // open camera

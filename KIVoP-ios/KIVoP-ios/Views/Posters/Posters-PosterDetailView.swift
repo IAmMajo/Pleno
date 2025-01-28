@@ -49,8 +49,8 @@ struct Posters_PosterDetailView: View {
          return (text: "hängt noch nicht", color: Color(UIColor.secondaryLabel))
       case .overdue:
          return (text: "überfällig", color: .red)
-      default:
-         return (text: "", color: Color(UIColor.secondaryLabel))
+      case .damaged:
+         return (text: "beschädigt", color: .yellow)
       }
    }
    

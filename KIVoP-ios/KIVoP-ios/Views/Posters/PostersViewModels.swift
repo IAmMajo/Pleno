@@ -201,6 +201,13 @@ class PosterPositionViewModel: ObservableObject {
        let takeDownDTO = TakeDownPosterPositionDTO(image: image)
        _ = try await PosterService.shared.takeDownPosition(positionId: position.id, dto: takeDownDTO)
    }
+   
+   func reportDamagedPosition(image: Data) async throws {
+      guard let position = position else { throw NSError(domain: "Position not found", code: 404, userInfo: nil) }
+      
+      let damagedDTO = ReportDamagedPosterPositionDTO(image: image)
+      _ = try await PosterService.shared.reportDamagedPosition(positionId: position.id, dto: damagedDTO)
+   }
 
     private func fetchAddress(latitude: Double, longitude: Double) async {
         let geocoder = CLGeocoder()

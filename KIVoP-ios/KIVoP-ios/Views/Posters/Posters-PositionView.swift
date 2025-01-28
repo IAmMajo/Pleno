@@ -37,6 +37,9 @@ struct Posters_PositionView: View {
    @State private var shareLocation = false
    @State private var showTakeDownAlert = false
    @State private var showUndoTakeDownAlert = false
+   @State private var showReportDamageAlert = false
+   @State private var showCamera = false
+   @State private var selectedImage: UIImage? = nil
    @State private var copiedToClipboard: Bool = false
    @State private var tappedCopyButton: Bool = false
    @FocusState private var isFocused: Bool
@@ -303,6 +306,53 @@ struct Posters_PositionView: View {
                      .presentationDetents([.medium, .large])
                      .presentationDragIndicator(.hidden)
                }
+               
+               if (position.status == .hangs || position.status == .overdue) {
+                  HStack {
+                     Image(systemName: "exclamationmark.circle")
+                     Text("Beschädigung melden")
+                     Spacer()
+                  }
+                  .foregroundStyle(Color.red)
+                  .padding()
+                  .onTapGesture {
+                     showReportDamageAlert = true
+                  }
+                  .alert(isPresented: $showReportDamageAlert) {
+                     return Alert(
+                        title: Text("Beschädigung melden?"),
+                        message: Text("Bestätige mit einem Bild, dass das Plakat beschädigt wurde, oder es nicht mehr an der vorgesehenen Stelle hängt."),
+                        primaryButton: .default(Text("Verstanden")) {
+                           self.showCamera.toggle()
+                        },
+                        secondaryButton: .cancel(Text("Abbrechen"))
+                     )
+                  }
+                  .fullScreenCover(isPresented: $showCamera) {
+                     accessCameraView(
+                        isDamageReport: true,
+                        selectedImage: $selectedImage,
+                        showCamera: $showCamera,
+                        currentCoordinates: $currentCoordinates
+                     ) {
+                        if let image = selectedImage,
+                           let imageData = image.jpegData(compressionQuality: 0.8)
+                        {
+                           Task {
+                              do {
+                                 try await viewModel.reportDamagedPosition(image: imageData)
+                                 await viewModel.fetchPosition()
+                              } catch {
+                                 print("Error reporting damaged position: \(error)")
+                              }
+                              await viewModel.fetchPosition() //wegmachen evtl sobald server error behoben wurde?
+                           }
+                        }
+                     }
+                     .background(.black)
+                  }
+               }
+               
             }
             .refreshable {
                loadMyId()
