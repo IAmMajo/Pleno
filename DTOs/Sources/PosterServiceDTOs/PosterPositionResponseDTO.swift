@@ -12,9 +12,9 @@ public struct PosterPositionResponseDTO: Codable {
     public var removedAt: Date?
     public var image: Data?
     public var responsibleUsers: [ResponsibleUsersDTO]
-    public var status: String
+    public var status: PosterPositionStatus
 
-    public init(id: UUID, posterId: UUID? = nil, latitude: Double, longitude: Double, postedBy: String? = nil, postedAt: Date? = nil, expiresAt: Date, removedBy: String? = nil, removedAt: Date? = nil, image: Data? = nil, responsibleUsers: [ResponsibleUsersDTO], status: String) {
+    public init(id: UUID, posterId: UUID? = nil, latitude: Double, longitude: Double, postedBy: String? = nil, postedAt: Date? = nil, expiresAt: Date, removedBy: String? = nil, removedAt: Date? = nil, image: Data? = nil, responsibleUsers: [ResponsibleUsersDTO], status: PosterPositionStatus) {
         self.id = id
         self.posterId = posterId
         self.latitude = latitude 
@@ -38,4 +38,12 @@ public struct ResponsibleUsersDTO: Codable {
         self.id = id
         self.name = name
     }
+}
+
+public enum PosterPositionStatus: String, Codable, CaseIterable {
+    case toHang
+    case hangs
+    case overdue
+    case damaged
+    case takenDown
 }
