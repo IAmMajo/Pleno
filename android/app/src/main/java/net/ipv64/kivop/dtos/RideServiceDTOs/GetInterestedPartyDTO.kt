@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 
 data class GetInterestedPartyDTO (
     var id : UUID,
+    var eventID : UUID,
     var eventName : String,
     var latitude : Float,
     var longitude : Float,

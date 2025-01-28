@@ -14,13 +14,13 @@ struct DateColorHelper {
   static func getDateColor(position: PosterPositionResponseDTO) -> Color {
       let status = position.status
       switch status {
-      case "hangs":
+      case .hangs:
          if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
             return .orange
          } else {
             return Color(UIColor.secondaryLabel)
          }
-      case "overdue":
+      case .overdue:
          return .red
       default:
          return Color(UIColor.secondaryLabel)

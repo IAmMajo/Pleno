@@ -165,36 +165,6 @@ class PosterService: ObservableObject {
       }.resume()
    }
    
-   func updatePosition(posterId: UUID, positionId: UUID, dto: UpdatePosterPositionDTO) async throws -> PosterPositionResponseDTO {
-       guard let url = URL(string: "\(baseURL)/\(posterId)/positions/\(positionId)") else {
-           throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
-       }
-
-       guard var request = createAuthorizedRequest(url: url, method: "PATCH") else {
-           throw NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)
-       }
-
-       do {
-           request.httpBody = try JSONEncoder().encode(dto)
-       } catch {
-           throw NSError(domain: "Failed to encode request body", code: 500, userInfo: nil)
-       }
-
-       request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-       let (data, response) = try await URLSession.shared.data(for: request)
-       guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-           print("Response: \(response), Data: \(String(data: data, encoding: .utf8) ?? "No Response Body")")
-           throw NSError(domain: "Failed to update position", code: 500, userInfo: nil)
-       }
-
-       do {
-           return try JSONDecoder().decode(PosterPositionResponseDTO.self, from: data)
-       } catch {
-           throw NSError(domain: "Failed to decode response", code: 500, userInfo: nil)
-       }
-   }
-   
    func hangPosition(positionId: UUID, dto: HangPosterPositionDTO) async throws -> HangPosterPositionResponseDTO {
        guard let url = URL(string: "\(baseURL)/positions/\(positionId)/hang") else {
            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -247,6 +217,40 @@ class PosterService: ObservableObject {
        } catch {
            throw NSError(domain: "Failed to decode response", code: 500, userInfo: nil)
        }
+   }
+   
+   func reportDamagedPosition(positionId: UUID, dto: ReportDamagedPosterPositionDTO) async throws -> PosterPositionResponseDTO {
+      guard let url = URL(string: "\(baseURL)/positions/\(positionId)/report-damage") else {
+         throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+      }
+      
+      guard var request = createAuthorizedRequest(url: url, method: "PUT") else {
+         throw NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)
+      }
+      
+      do {
+         request.httpBody = try JSONEncoder().encode(dto)
+      } catch {
+         throw NSError(domain: "Failed to encode request body", code: 500, userInfo: nil)
+      }
+      
+      let (data, response) = try await URLSession.shared.data(for: request)
+      
+      // Ensure the response is an HTTPURLResponse
+      guard let httpResponse = response as? HTTPURLResponse else {
+         throw NSError(domain: "Invalid Response", code: 500, userInfo: nil)
+      }
+      
+      // Check the status code
+      guard httpResponse.statusCode == 200 else {
+         throw NSError(domain: "Failed to report damage", code: httpResponse.statusCode, userInfo: nil)
+      }
+      
+      do {
+         return try JSONDecoder().decode(PosterPositionResponseDTO.self, from: data)
+      } catch {
+         throw NSError(domain: "Failed to decode response", code: 500, userInfo: nil)
+      }
    }
    
    func fetchProfileImage(userId: UUID, completion: @escaping (Result<Data, Error>) -> Void) {

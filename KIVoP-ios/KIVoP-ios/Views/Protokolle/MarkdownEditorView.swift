@@ -53,25 +53,52 @@ struct MarkdownEditorView: View {
                                 }
                             }
                         } else {
-                            VStack(spacing: 20) {
-                                 // Animiertes Symbol (z. B. ein sich drehender Kreis)
-                                Circle()
-                                    .fill(Color.blue)
-                                    .frame(width: 20, height: 20) // Größe des Kreises
-                                    .scaleEffect(isAnimating ? 1.2 : 0.8) // Skalierung der Animation
-                                    .animation(
-                                        Animation.easeInOut(duration: 1.5)
-                                            .repeatForever(autoreverses: true),
-                                        value: isAnimating
-                                    )
+                            ScrollView{
+                                VStack(spacing: 20) {
+                                    
+                                     // Animiertes Symbol (z. B. ein sich drehender Kreis)
+                                    Circle()
+                                        .fill(Color.blue)
+                                        .frame(width: 20, height: 20) // Größe des Kreises
+                                        .scaleEffect(isAnimating ? 1.2 : 0.8) // Skalierung der Animation
+                                        .animation(
+                                            Animation.easeInOut(duration: 1.5)
+                                                .repeatForever(autoreverses: true),
+                                            value: isAnimating
+                                        )
 
-                                 // Text
-                                 Text("Das Protokoll wurde noch nicht veröffentlicht.")
-                                     .font(.headline)
-                                     .foregroundColor(.gray)
-                             }       .onAppear {
-                                 isAnimating = true // Animation starten, wenn die View erscheint
-                             }
+                                     // Text
+                                     Text("Das Protokoll wurde noch nicht veröffentlicht.")
+                                         .font(.headline)
+                                         .foregroundColor(.gray)
+                                 }.onAppear {
+                                     isAnimating = true // Animation starten, wenn die View erscheint
+                                 }
+                                 .offset(y: 200)
+                            }.refreshable {
+                                identityManager.getMyIdentity()
+                                Task {
+                                    await recordManager.getRecordMeetingLang(meetingId: meetingId, lang: lang)
+                                    
+                                    try? await Task.sleep(nanoseconds: 250_000_000)
+
+                                    if let record = recordManager.record {
+                                        markdownText = record.content
+                                        if record.status == .approved {
+                                            approved = true
+                                        }
+                                        if identityManager.identity == record.identity.id {
+                                            if record.status == .underway {
+                                                amIRecorder = true
+                                                print("Ich bin protokollant")
+                                            }
+
+                                        }
+                                    }
+                                    isLoading = false
+                                }
+                            }
+
                         }
                     }
 
@@ -130,6 +157,7 @@ struct MarkdownEditorView: View {
                     await recordManager.getRecordMeetingLang(meetingId: meetingId, lang: lang)
                     
                     try? await Task.sleep(nanoseconds: 250_000_000)
+
                     if let record = recordManager.record {
                         markdownText = record.content
                         if record.status == .approved {
@@ -148,7 +176,27 @@ struct MarkdownEditorView: View {
             }
         }
         .onAppear {
+            identityManager.getMyIdentity()
+            Task {
+                await recordManager.getRecordMeetingLang(meetingId: meetingId, lang: lang)
+                
+                try? await Task.sleep(nanoseconds: 250_000_000)
 
+                if let record = recordManager.record {
+                    markdownText = record.content
+                    if record.status == .approved {
+                        approved = true
+                    }
+                    if identityManager.identity == record.identity.id {
+                        if record.status == .underway {
+                            amIRecorder = true
+                            print("Ich bin protokollant")
+                        }
+
+                    }
+                }
+                isLoading = false
+            }
         }
 
     }

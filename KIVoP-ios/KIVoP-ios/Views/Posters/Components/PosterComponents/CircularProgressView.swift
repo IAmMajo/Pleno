@@ -6,19 +6,20 @@
 //
 
 import SwiftUI
+import PosterServiceDTOs
 
 struct CircularProgressView: View {
     
    let value: Int
    let total: Int
-   let status: String
+   let status: PosterPositionStatus
    
    var progress: Double {
       return Double(value) / Double(total)
    }
    
    var getColor: Color {
-      return status == "hangs" ? .blue : .green
+      return status == .hangs ? .blue : .green
    }
    
    var body: some View {
@@ -49,6 +50,6 @@ struct CircularProgressView: View {
 }
 
 #Preview {
-   CircularProgressView(value: 2, total: 3, status: "hangs")
+   CircularProgressView(value: 2, total: 3, status: .hangs)
       .frame(maxWidth: 45, maxHeight: 45)
 }

@@ -14,13 +14,13 @@ struct ProgressBarView: View {
    var value: CGFloat {
       let status = position.status
       switch status {
-      case "hangs":
+      case .hangs:
          return 190
-      case "takenDown":
+      case .takenDown:
          return 500
-      case "toHang":
+      case .toHang:
          return 20
-      case "overdue":
+      case .overdue:
          return 190
       default:
          return 190
