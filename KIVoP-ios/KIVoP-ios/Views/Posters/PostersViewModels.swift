@@ -57,15 +57,15 @@ class PostersViewModel: ObservableObject {
            guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { return nil }
            
            // Count the number of positions with specific statuses
-           let tohangCount = positions.filter { $0.status == "toHang" }.count
-           let expiredCount = positions.filter { $0.status == "overdue" }.count
+          let tohangCount = positions.filter { $0.status == .toHang }.count
+          let expiredCount = positions.filter { $0.status == .overdue }.count
           
           // Find the position with the earliest `expiresAt`
 //          guard let earliestPosition = positions.min(by: { $0.expiresAt < $1.expiresAt }) else { return nil }
           let earliestPositionDTO: PosterPositionResponseDTO?
           // Reinitialization of earliestPosition to earliest expired position
           if expiredCount > 0 {
-             let expiredPosition = positions.filter { $0.status == "overdue" }
+             let expiredPosition = positions.filter { $0.status == .overdue }
              earliestPositionDTO = expiredPosition.min(by: { $0.expiresAt < $1.expiresAt })
           } else {
              earliestPositionDTO = positions.min(by: { $0.expiresAt < $1.expiresAt })
@@ -74,7 +74,7 @@ class PostersViewModel: ObservableObject {
           
            // Check if the poster is archived
            let isArchived = positions.allSatisfy { position in
-               position.status == "takenDown" &&
+              position.status == .takenDown &&
                position.expiresAt <= Calendar.current.date(byAdding: .day, value: -3, to: Date())!
            }
            
@@ -105,14 +105,14 @@ class PostersViewModel: ObservableObject {
            return nil
        }
        .sorted {
-           // Custom sorting: prioritize "hangs" and "overdue", then by `expiresAt`
-           if $0.earliestPosition.status == "hangs" || $0.earliestPosition.status == "overdue" {
-               if $1.earliestPosition.status == "hangs" || $1.earliestPosition.status == "overdue" {
+           // Custom sorting: prioritize .hangs and .overdue, then by `expiresAt`
+          if $0.earliestPosition.status == .hangs || $0.earliestPosition.status == .overdue {
+             if $1.earliestPosition.status == .hangs || $1.earliestPosition.status == .overdue {
                    return $0.earliestPosition.expiresAt < $1.earliestPosition.expiresAt
                } else {
                    return true
                }
-           } else if $1.earliestPosition.status == "hangs" || $1.earliestPosition.status == "overdue" {
+          } else if $1.earliestPosition.status == .hangs || $1.earliestPosition.status == .overdue {
                return false
            } else {
                return $0.earliestPosition.expiresAt < $1.earliestPosition.expiresAt
@@ -255,7 +255,7 @@ let mockPosterPosition0 = PosterPositionResponseDTO(
    longitude: 6.545327532716446,
    expiresAt: Date.now,
    responsibleUsers: [mockUser1, mockUser2],
-   status: "toHang")
+   status: .toHang)
 
 //   let locations: [Location] = [
 //      Location(name: "Am Grabstein 6", coordinate: CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)),

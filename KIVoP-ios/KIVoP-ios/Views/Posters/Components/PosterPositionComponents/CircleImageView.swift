@@ -29,7 +29,7 @@ struct CircleImageView: View {
    
    var body: some View {
       VStack {
-         if position.status == "toHang" {
+         if position.status == .toHang {
             if let selectedImage{
                Image(uiImage: selectedImage)
                   .resizable()

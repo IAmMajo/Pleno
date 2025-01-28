@@ -141,7 +141,7 @@ struct Posters_PositionView: View {
                      
                      ProgressBarView(position: position)
                         .padding(.leading) .padding(.trailing)
-                     if position.status == "toHang" {
+                     if position.status == .toHang {
                         Text("Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position")
                            .font(.system(size: 10))
                            .foregroundStyle(.secondary)
@@ -308,20 +308,20 @@ struct Posters_PositionView: View {
                loadMyId()
                await viewModel.fetchPosition()
             }
-            if (position.status != "toHang" && isResponsible()) {
+            if (position.status != .toHang && isResponsible()) {
                Button {
-                  if (position.status != "takenDown") {
+                  if (position.status != .takenDown) {
                      showTakeDownAlert = true
                   } else {
                      showUndoTakeDownAlert = true
                   }
                } label: {
-                  Text(position.status != "takenDown" ? "Abhängen bestätigen" : "Abhängen zurückziehen")
-                     .foregroundStyle(position.status != "takenDown" ? Color(UIColor.systemBackground) : Color.red)
+                  Text(position.status != .takenDown ? "Abhängen bestätigen" : "Abhängen zurückziehen")
+                     .foregroundStyle(position.status != .takenDown ? Color(UIColor.systemBackground) : Color.red)
                      .fontWeight(.semibold)
                      .frame(maxWidth: .infinity)
                }
-               .background(position.status != "takenDown" ? Color.red : Color.gray.opacity(0.2))
+               .background(position.status != .takenDown ? Color.red : Color.gray.opacity(0.2))
                .cornerRadius(10)
                .padding(.leading) .padding(.trailing)
                .padding(.top, 5)

@@ -37,17 +37,17 @@ struct Posters_PosterDetailView: View {
    func getDateStatusText(position: PosterPositionResponseDTO) -> (text: String, color: Color) {
       let status = position.status
       switch status {
-      case "hangs":
+      case .hangs:
          if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
             return (text: "morgen überfällig", color: .orange)
          } else {
             return (text: "hängt", color: .blue)
          }
-      case "takenDown":
+      case .takenDown:
          return (text: "abgehängt", color: .green)
-      case "toHang":
+      case .toHang:
          return (text: "hängt noch nicht", color: Color(UIColor.secondaryLabel))
-      case "overdue":
+      case .overdue:
          return (text: "überfällig", color: .red)
       default:
          return (text: "", color: Color(UIColor.secondaryLabel))
@@ -102,13 +102,13 @@ struct Posters_PosterDetailView: View {
    }
    
    private func hangsTotalMap(positions: [PosterPositionResponseDTO]) -> [Int: Int] {
-      let hangsCount = positions.filter { $0.status != "takenDown" && $0.status != "toHang" }.count
-       let notTakenDownCount = positions.filter { $0.status != "takenDown" }.count
+      let hangsCount = positions.filter { $0.status != .takenDown && $0.status != .toHang }.count
+      let notTakenDownCount = positions.filter { $0.status != .takenDown }.count
        return [hangsCount: notTakenDownCount]
    }
    
    private func takenDownTotalMap(positions: [PosterPositionResponseDTO]) -> [Int: Int] {
-       let takenDownCount = positions.filter { $0.status == "takenDown" }.count
+      let takenDownCount = positions.filter { $0.status == .takenDown }.count
       let positionsCount = positions.count
       return [takenDownCount: positionsCount]
    }
@@ -161,7 +161,7 @@ struct Posters_PosterDetailView: View {
                      let takenDownTotalMap = takenDownTotalMap(positions: viewModel.positions)
                      HStack{
                         VStack{
-                           CircularProgressView(value: hangsTotalMap.keys.first ?? 0, total: hangsTotalMap.values.first ?? 0, status: "hangs")
+                           CircularProgressView(value: hangsTotalMap.keys.first ?? 0, total: hangsTotalMap.values.first ?? 0, status: .hangs)
                               .frame(maxWidth: 45, maxHeight: 45)
                               .padding(.bottom, 5)
                            Text("Aufgehängt")
@@ -173,7 +173,7 @@ struct Posters_PosterDetailView: View {
                         Spacer()
                         
                         VStack{
-                           CircularProgressView(value: takenDownTotalMap.keys.first ?? 0, total: takenDownTotalMap.values.first ?? 0, status: "takenDown")
+                           CircularProgressView(value: takenDownTotalMap.keys.first ?? 0, total: takenDownTotalMap.values.first ?? 0, status: .takenDown)
                               .frame(maxWidth: 45, maxHeight: 45)
                               .padding(.bottom, 5)
                            Text("Abgehängt")
