@@ -23,6 +23,7 @@ class EditRideViewModel: ObservableObject {
     @Published var events: [GetEventDTO] = []
     @Published var eventDetails: GetEventDetailDTO?
     @Published var selectedEventId: UUID?
+    @Published var eventRide: GetEventRideDTO?
     
     // Alert switches
     @Published var showSaveAlert: Bool = false
@@ -116,7 +117,6 @@ class EditRideViewModel: ObservableObject {
             destinationLongitude: Float(dstLocation!.longitude),
             emptySeats: UInt8(emptySeats ?? 0)
         )
-        
         createSpecialRide(specialRide)
     }
     
@@ -194,6 +194,71 @@ class EditRideViewModel: ObservableObject {
                 }
             } catch {
                 print("JSON Decode Error: \(error.localizedDescription)")
+            }
+        }.resume()
+    }
+    
+    // Alle Event Fahrten bekommen
+    func fetchEventRides() {
+        guard let eventID = selectedEventId,
+            let url = URL(string: "\(baseURL)/eventrides?byEventID=\(eventID)") else {
+            print("Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        // Füge JWT Token zu den Headern hinzu
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            print("Unauthorized: No token found")
+            return
+        }
+        
+        // Setze den Ladevorgang auf true
+        DispatchQueue.main.async {
+            self.isLoading = true
+        }
+        
+        // Führe den Netzwerkaufruf aus
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self = self else { return }
+            
+            // Behandle Fehler
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.isLoading = false // Ladevorgang beendet, auch bei Fehlern
+                }
+                print("Network error: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    self.isLoading = false // Ladevorgang beendet, keine Daten
+                }
+                print("No data received from server")
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+     
+            DispatchQueue.main.async {
+                do {
+                    // Decodieren der Antwort
+                    let decodedEventRides = try decoder.decode([GetEventRideDTO].self, from: data)
+                    self.eventRide = decodedEventRides.first { $0.myState == .driver }
+                    self.isLoading = false // Ladevorgang erfolgreich beendet
+                } catch {
+                    DispatchQueue.main.async {
+                        self.isLoading = false // Ladevorgang beendet, aber mit JSON-Fehler
+                    }
+                    print("JSON Decode Error: \(error.localizedDescription)")
+                }
             }
         }.resume()
     }
