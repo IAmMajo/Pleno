@@ -103,6 +103,16 @@ struct EventRideController: RouteCollection {
                 auth: AuthMiddleware.schemeObject
             )
         
+        // GET /eventrides/interested
+        eventRideRoutes.get("interested", use: getInterestedParties)
+            .openAPI(
+                tags: openAPITag,
+                summary: "Alle Interessen an Mitnahmen zu Events abfragen.",
+                response: .type([GetInterestedPartyDTO].self),
+                responseContentType: .application(.json),
+                statusCode: .ok,
+                auth: AuthMiddleware.schemeObject
+            )
         // POST /eventrides/interested
         eventRideRoutes.post("interested", use: newInterestedParty)
             .openAPI(
@@ -144,6 +154,29 @@ struct EventRideController: RouteCollection {
      *   Interested Party
      *
      */
+    
+    @Sendable
+    func getInterestedParties(req: Request) async throws -> [GetInterestedPartyDTO] {
+        let parties = try await EventRideInterestedParty.query(on: req.db)
+            .join(EventParticipant.self, on: \EventRideInterestedParty.$participant.$id == \EventParticipant.$id)
+            .join(PlenoEvent.self, on: \EventParticipant.$event.$id == \PlenoEvent.$id)
+            .filter(EventParticipant.self, \.$user.$id == req.jwtPayload.userID)
+            .all()
+            .map{ party in
+                let participant = try party.joined(EventParticipant.self)
+                let plenoEvent = try participant.joined(PlenoEvent.self)
+                let partyID = try party.requireID()
+                let eventID = try plenoEvent.requireID()
+                return GetInterestedPartyDTO(
+                    id: partyID,
+                    eventID: eventID,
+                    eventName: plenoEvent.name,
+                    latitude: party.latitude,
+                    longitude: party.longitude)
+            }
+        
+        return parties
+    }
     
     @Sendable
     func newInterestedParty(req: Request) async throws -> Response {
@@ -188,6 +221,7 @@ struct EventRideController: RouteCollection {
         let partyID = try party.requireID()
         let getInteresedPartyDTO = GetInterestedPartyDTO(
             id: partyID,
+            eventID: createInterestedPartyDTO.eventID,
             eventName: eventName,
             latitude: party.latitude,
             longitude: party.longitude
@@ -228,6 +262,7 @@ struct EventRideController: RouteCollection {
         let partyID = try party.requireID()
         let getInteresedPartyDTO = GetInterestedPartyDTO(
             id: partyID,
+            eventID: participant.$event.id,
             eventName: eventName,
             latitude: party.latitude,
             longitude: party.longitude
