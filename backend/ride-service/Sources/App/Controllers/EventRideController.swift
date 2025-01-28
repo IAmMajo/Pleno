@@ -647,8 +647,18 @@ struct EventRideController: RouteCollection {
             throw Abort(.notFound, reason: "No interested party found!")
         }
         
-        // check if current user already requested to this ride
+        // check if current user has an accepted request
         let partyID = try party.requireID()
+        let countAcceptedRequests = try await EventRideRequest.query(on: req.db)
+            .filter(\.$interestedParty.$id == partyID)
+            .filter(\.$accepted == true)
+            .count()
+        
+        if countAcceptedRequests != 0 {
+            throw Abort(.badRequest, reason: "You have already a ride!")
+        }
+        
+        // check if current user already requested to this ride
         let count = try await EventRideRequest.query(on: req.db)
             .filter(\.$ride.$id == rideID)
             .filter(\.$interestedParty.$id == partyID)
