@@ -19,7 +19,7 @@ struct PosterPositionController: RouteCollection, Sendable {
         let openAPITagPosterPosition = TagObject(name: "Poster Position")
         
         let positions = routes.grouped("positions")
-       
+        
         // PUT /posters/positions/:positionid/hang
         positions.on(.PUT, ":positionid", "hang", body: .collect(maxSize: "7000kb"), use: hangPosterPosition).openAPI(
             tags: openAPITagPosterPosition,
@@ -240,7 +240,7 @@ struct PosterPositionController: RouteCollection, Sendable {
         
         return try position.toPosterPositionResponseDTO()
     }
-   
+    
     /// Gibt alle Positionen zu einem Poster zurück.
     @Sendable
     func getPostersPositions(_ req: Request) async throws -> [PosterPositionResponseDTO] {
@@ -361,12 +361,12 @@ struct PosterPositionController: RouteCollection, Sendable {
         }
         
         // Schon aufgehängt?
-        guard position.posted_at == nil || position.removed_at != nil else {
+        guard position.posted_at == nil || position.removed_at != nil || position.damaged else {
             throw Abort(.badRequest, reason: "Diese PosterPosition ist bereits aufgehängt.")
         }
         
         // falls neu aufgehängt
-        if position.removed_at != nil || position.removed_by != nil{
+        if position.removed_at != nil || position.removed_by != nil {
             position.removed_at = nil
             position.$removed_by.id = nil
         }
@@ -389,7 +389,7 @@ struct PosterPositionController: RouteCollection, Sendable {
         position.damaged = false
         
         try await position.update(on: req.db)
-
+        
         return HangPosterPositionResponseDTO(
             posterPosition: try position.requireID(),
             postedAt: position.posted_at!,
