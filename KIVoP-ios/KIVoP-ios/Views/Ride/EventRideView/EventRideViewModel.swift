@@ -71,18 +71,18 @@ class EventRideViewModel: ObservableObject {
             decoder.dateDecodingStrategy = .iso8601
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             
-            do {
-                // Decodieren der Antwort
-                let decodedEventDetails = try decoder.decode(GetEventDetailDTO.self, from: data)
-                DispatchQueue.main.async {
+            DispatchQueue.main.async {
+                do {
+                    // Decodieren der Antwort
+                    let decodedEventDetails = try decoder.decode(GetEventDetailDTO.self, from: data)
                     self.eventDetails = decodedEventDetails
                     self.isLoading = false
+                } catch {
+                    DispatchQueue.main.async {
+                        self.isLoading = false
+                    }
+                    print("JSON Decode Error: \(error.localizedDescription)")
                 }
-            } catch {
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                }
-                print("JSON Decode Error: \(error.localizedDescription)")
             }
         }.resume()
     }
@@ -134,12 +134,12 @@ class EventRideViewModel: ObservableObject {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             decoder.keyDecodingStrategy = .convertFromSnakeCase
-            
-            do {
-                // Decodieren der Antwort
-                let decodedEventRides = try decoder.decode([GetEventRideDTO].self, from: data)
-                DispatchQueue.main.async {
-                    self.eventRides = decodedEventRides
+     
+            DispatchQueue.main.async {
+                do {
+                    // Decodieren der Antwort
+                    let decodedEventRides = try decoder.decode([GetEventRideDTO].self, from: data)
+                    self.eventRides = decodedEventRides.filter { $0.emptySeats - $0.allocatedSeats > 0 }
                     self.isLoading = false // Ladevorgang erfolgreich beendet
                     for ride in self.eventRides {
                         self.getAddressFromCoordinates(latitude: ride.latitude, longitude: ride.longitude) { address in
@@ -149,12 +149,12 @@ class EventRideViewModel: ObservableObject {
                             }
                         }
                     }
+                } catch {
+                    DispatchQueue.main.async {
+                        self.isLoading = false // Ladevorgang beendet, aber mit JSON-Fehler
+                    }
+                    print("JSON Decode Error: \(error.localizedDescription)")
                 }
-            } catch {
-                DispatchQueue.main.async {
-                    self.isLoading = false // Ladevorgang beendet, aber mit JSON-Fehler
-                }
-                print("JSON Decode Error: \(error.localizedDescription)")
             }
         }.resume()
     }

@@ -164,7 +164,7 @@ struct CreateEventRideView: View {
                             // Picker für die Auswahl der freien Sitze
                             Picker("",selection: $viewModel.emptySeats) {
                                 Text("Freie Plätze").tag(nil as Int?).foregroundColor(.gray)
-                                ForEach(1..<100) { number in
+                                ForEach(0..<100) { number in
                                     Text("\(number)").tag(number as Int?)
                                 }
                             }

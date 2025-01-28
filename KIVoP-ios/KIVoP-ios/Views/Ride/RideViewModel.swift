@@ -235,7 +235,7 @@ class RideViewModel: ObservableObject {
         case 0:
             return events
         case 1:
-            return rides
+            return rides.filter { $0.emptySeats - $0.allocatedSeats > 0 }
         case 2:
             let filteredRides = rides.filter { $0.myState != .nothing }
             let filteredEventRides = eventRides.filter { $0.myState != .nothing }
