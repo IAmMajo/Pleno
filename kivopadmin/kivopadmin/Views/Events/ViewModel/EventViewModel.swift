@@ -253,4 +253,42 @@ class EventViewModel: ObservableObject {
             }
         }.resume()
     }
+    func deleteEvent(eventId: UUID, completion: @escaping () -> Void) {
+        guard let url = URL(string: "https://kivop.ipv64.net/events/\(eventId)") else {
+            self.errorMessage = "Invalid URL."
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            self.errorMessage = "Unauthorized: Token not found."
+            return
+        }
+
+        isLoading = true
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+
+                if let error = error {
+                    self?.errorMessage = "Network error: \(error.localizedDescription)"
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                    self?.errorMessage = "Server error or unexpected response."
+                    return
+                }
+
+                // Erfolgsfall: Completion aufrufen
+                completion()
+            }
+        }.resume()
+    }
 }
