@@ -731,6 +731,9 @@
     "Bestätigung" : {
 
     },
+    "Bevor du einer Eventfahrt beitreten kannst, musst du deinen Standort festlegen. Dieser kann später noch über das Symbol oben rechts geändert werden." : {
+
+    },
     "Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt." : {
 
     },
@@ -1168,7 +1171,10 @@
     "Heinz-Peters" : {
 
     },
-    "Hiermit betsätigst du, dass du von dieser Adresse abgeholt werden möchtest und an dieser Fahrgemeinschaft teilnimmst" : {
+    "Hiermit bestätigst du, dass du von dieser Adresse abgeholt werden möchtest und an dieser Fahrgemeinschaft teilnimmst" : {
+
+    },
+    "Hiermit bestätigst du, dass du von dieser Adresse abgeholt werden möchtest." : {
 
     },
     "Hinweis" : {
@@ -1187,6 +1193,9 @@
 
     },
     "Informationen zur Fahrt" : {
+
+    },
+    "Interesse entfernen" : {
 
     },
     "Ja" : {
@@ -1227,6 +1236,9 @@
           }
         }
       }
+    },
+    "Jetzt Abholort angeben." : {
+
     },
     "Jetzt teilnehmen" : {
 

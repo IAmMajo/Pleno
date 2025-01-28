@@ -71,9 +71,24 @@ struct EventRideView: View {
                                 .padding(.horizontal)
                             Button(action: {
                                 viewModel.participateEvent()
-                                viewModel.showLocationRequest = true
                             }){
                                 Text("Jetzt zusagen!")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                            .padding(.horizontal)
+                            .buttonStyle(PlainButtonStyle())
+                        } else if viewModel.interestedEvent == nil && !viewModel.eventRides.contains(where: { $0.myState == .driver }) {
+                            Text("Bevor du einer Eventfahrt beitreten kannst, musst du deinen Standort festlegen. Dieser kann später noch über das Symbol oben rechts geändert werden.")
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                            Button(action: {
+                                viewModel.showLocationRequest = true
+                            }){
+                                Text("Jetzt Abholort angeben.")
                                     .frame(maxWidth: .infinity)
                                     .padding()
                                     .background(Color.blue)
@@ -153,12 +168,14 @@ struct EventRideView: View {
                     Task {
                         viewModel.fetchEventDetails()
                         viewModel.fetchEventRides()
+                        viewModel.fetchParticipation()
                     }
                 }
                 .refreshable {
                     Task {
                         viewModel.fetchEventDetails()
                         viewModel.fetchEventRides()
+                        viewModel.fetchParticipation()
                     }
                 }
             }
@@ -192,9 +209,26 @@ struct EventRideView: View {
         }
         .navigationTitle(viewModel.event.name)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if !viewModel.eventRides.contains(where: { $0.myState == .driver }) {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Image(systemName: "location.circle.fill")
+                        .foregroundColor(.blue)
+                        .onTapGesture {
+                            if viewModel.interestedEvent != nil {
+                                viewModel.editInterestEvent = true
+                            }
+                            viewModel.showLocationRequest = true
+                        }
+                }
+            }
+        }
         
         // .sheet() für die Location Request (Wenn ich der Fahrt Zusage muss ich meine Location setzen)
-        .sheet(isPresented: $viewModel.showLocationRequest) {
+        .sheet(isPresented: $viewModel.showLocationRequest, onDismiss: {
+            viewModel.fetchParticipation()
+            viewModel.editInterestEvent = false
+        }) {
             EventRideLocationRequestView(viewModel: viewModel)
         }
     }

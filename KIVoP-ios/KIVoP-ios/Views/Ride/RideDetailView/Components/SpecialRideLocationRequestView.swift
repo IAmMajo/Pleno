@@ -19,7 +19,7 @@ struct SpecialRideLocationRequestView: View {
                         .padding()
                     
                     SelectRideLocationView(selectedLocation: $viewModel.requestedLocation)
-                        .frame(width: 350, height: 450)
+                        .frame(width: 350, height: 400)
                         .cornerRadius(10)
 
                     List {
@@ -36,7 +36,7 @@ struct SpecialRideLocationRequestView: View {
                     }
                     .scrollDisabled(true)
                     
-                    Text("Hiermit betsätigst du, dass du von dieser Adresse abgeholt werden möchtest und an dieser Fahrgemeinschaft teilnimmst")
+                    Text("Hiermit bestätigst du, dass du von dieser Adresse abgeholt werden möchtest und an dieser Fahrgemeinschaft teilnimmst")
                         .font(.footnote)
                         .foregroundColor(.gray)
                 }

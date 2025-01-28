@@ -49,7 +49,7 @@ struct EventRideDetailView: View {
                     }
                     
                     Section(header: Text("Informationen zur Fahrt").font(.headline)){
-                        Text(viewModel.eventRideDetail.description ?? "Keine Informationen zur Fahrt vorhanden")
+                        Text(viewModel.eventRideDetail.description ?? "Keine Beschreibung zur Fahrt vorhanden")
                             .multilineTextAlignment(.center)
                     }
 
