@@ -8,6 +8,7 @@ import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterPositionResponseDTO
+import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterPositionStatus
 import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterResponseDTO
 import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterSummaryResponseDTO
 import net.ipv64.kivop.dtos.PosterServiceDTOs.ResponsibleUsersDTO
@@ -148,6 +149,7 @@ suspend fun getPosterSummaryByIDApi(id: String): PosterSummaryResponseDTO? =
           val toHang = poster.get("toHang").asInt
           val overdue = poster.get("overdue").asInt
           val takenDown = poster.get("takenDown").asInt
+          val damaged = poster.get("damaged").asInt
           val nextTakeDown = poster.get("nextTakeDown")?.asString?.let { stringToLocalDateTime(it) }
           
           PosterSummaryResponseDTO(
@@ -155,6 +157,7 @@ suspend fun getPosterSummaryByIDApi(id: String): PosterSummaryResponseDTO? =
             toHang,
             overdue,
             takenDown,
+            damaged,
             nextTakeDown
             )
         } else {
@@ -216,7 +219,7 @@ suspend fun getPosterLocationsByIDApi(posterID: String): List<PosterPositionResp
                     name = responsibleUsersObject.get("name").asString
                   )
               }
-            val status = posterPosition.get("status").asString
+            val status = posterPosition.get("status").asString.let { PosterPositionStatus.valueOf(it) }
             
             PosterPositionResponseDTO(
               id,
@@ -290,7 +293,7 @@ suspend fun getPosterLocationByIDApi(posterId: String, locationId: String): Post
                 name = responsibleUsersObject.get("name").asString
               )
             }
-          val status = posterLocation.get("status").asString
+          val status = posterLocation.get("status").asString.let { PosterPositionStatus.valueOf(it) }
 
           PosterPositionResponseDTO(
             id,

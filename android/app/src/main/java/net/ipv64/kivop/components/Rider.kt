@@ -110,6 +110,7 @@ fun RiderPreview() {
   RiderCard(
       GetRiderDTO(
           id = UUID.randomUUID(),
+          userID = UUID.randomUUID(),
           username = "hans",
           latitude = 3.000F,
           longitude = 3.000F,

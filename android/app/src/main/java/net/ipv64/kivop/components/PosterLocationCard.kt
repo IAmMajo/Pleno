@@ -36,7 +36,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.ipv64.kivop.R
 import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterPositionResponseDTO
+import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterPositionStatus
 import net.ipv64.kivop.dtos.PosterServiceDTOs.ResponsibleUsersDTO
+import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Primary_20
@@ -66,6 +68,7 @@ fun PosterLocationCard(
   Box(
     modifier = Modifier
       .fillMaxWidth()
+      .customShadow()
       .clip(RoundedCornerShape(8.dp))
       .clickable { onClick() }
       .background(Background_secondary)
@@ -134,7 +137,7 @@ fun PosterLocationCardPreview() {
         size = 3,
         init = { ResponsibleUsersDTO(UUID.randomUUID(), "Test") }
       ),
-      status = "Offen",
+      status = PosterPositionStatus.toHang,
     ),
     address = "Teststraße 1, test",
     onClick = {}
