@@ -32,7 +32,7 @@ struct Posters_PositionView: View {
    @State private var isGoogleMapsInstalled = false
    @State private var isWazeInstalled = false
    
-   @State private var isFullMapView: Bool = false
+   @State private var isShowingFullMapSheet: Bool = false
    @State private var showMapOptions: Bool = false
    @State private var shareLocation = false
    @State private var showTakeDownAlert = false
@@ -102,10 +102,11 @@ struct Posters_PositionView: View {
                   MapView(name: String(address.split(separator: "\n").first ?? ""), coordinate: currentCoordinates!)
                      .frame(height: 250)
                      .onTapGesture {
-                        //                      showMapOptions = true
-                        isFullMapView = true
+                        isShowingFullMapSheet = true
                      }
-                     .navigationDestination(isPresented: $isFullMapView) { FullMapView(address: address, name: String(address.split(separator: "\n").first ?? ""), coordinate: currentCoordinates ?? CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude))}
+                     .sheet(isPresented: $isShowingFullMapSheet) {
+                        FullMapSheet(address: address, name: String(address.split(separator: "\n").first ?? ""), coordinate: currentCoordinates ?? CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude))
+                     }
                   
                   CircleImageView(
                      position: position,
@@ -307,7 +308,7 @@ struct Posters_PositionView: View {
                      .presentationDragIndicator(.hidden)
                }
                
-               if (position.status == .hangs || position.status == .overdue) {
+               if (position.status == .hangs) {
                   HStack {
                      Image(systemName: "exclamationmark.circle")
                      Text("Beschädigung melden")

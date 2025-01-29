@@ -19,6 +19,7 @@ struct Posters_PosterDetailView: View {
    
    @State private var showImage: Bool =  false
    @State private var isShowingPosition: Bool = false
+   @State private var isShowingFullMapSheet: Bool = false
    
    @State private var isLoading = false
    @State private var error: String?
@@ -61,6 +62,20 @@ struct Posters_PosterDetailView: View {
          return Location(
             name: adressName,
             coordinate: CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)
+         )
+      }
+   }
+   
+   func locationsPositions(positions: [PosterPositionResponseDTO]) -> [(location: Location, position: PosterPositionResponseDTO)] {
+      positions.compactMap { position in
+//         guard let address = addresses[position.id] else { return nil }
+         let address = addresses[position.id] ?? "Kein Name"
+         let adressName = String(address.split(separator: ", ").first ?? "")
+         return (
+            location: Location(
+               name: adressName,
+               coordinate: CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)),
+            position: position
          )
       }
    }
@@ -205,7 +220,13 @@ struct Posters_PosterDetailView: View {
                      .frame(height: 215)
                      .overlay(
                         VStack {
-                           MapPositionsView(locations: locations(positions: viewModel.positions))
+                           MapPositionsView(locationsPositions: locationsPositions(positions: viewModel.positions))
+                              .onTapGesture {
+                                 isShowingFullMapSheet = true
+                              }
+                              .sheet(isPresented: $isShowingFullMapSheet) {
+                                 FullMapPositionsSheet(locationsPositions: locationsPositions(positions: viewModel.positions), poster: poster)
+                              }
                         }
                      )
                      .cornerRadius(10)

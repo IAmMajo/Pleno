@@ -301,6 +301,9 @@
     "Abhängedatum:" : {
 
     },
+    "Abhängedatum: %@" : {
+
+    },
     "Abhängen bestätigen" : {
 
     },
@@ -574,6 +577,9 @@
     "Alle nicht gespeicherten Änderungen gehen verloren!" : {
 
     },
+    "Alle Positionen" : {
+
+    },
     "Alles im Blick?" : {
 
     },
@@ -700,6 +706,12 @@
           }
         }
       }
+    },
+    "behoben" : {
+
+    },
+    "Beschädigung" : {
+
     },
     "Beschädigung melden" : {
 
@@ -837,6 +849,9 @@
 
     },
     "Deine gesamten Änderungen gehen verloren!" : {
+
+    },
+    "Details" : {
 
     },
     "Details der Fahrt" : {
