@@ -113,43 +113,45 @@ struct CircleImageView: View {
                      FullImageView(uiImage: uiImage!)
                   }
                   .overlay(alignment: .bottom) {
-                     VStack(spacing: 2) {
-                        Text("Beschädigung")
-                        HStack {
-                           Text("behoben")
-                           Image(systemName: "camera.fill")
-                        }
-                     }
-                     .frame(width: 165, height: 35)
-                     .padding(8) .padding(.bottom, 15)
-                     .foregroundStyle(.white)
-                     .background(.black.opacity(0.5))
-                     .onTapGesture {
-                        if isResponsible {
-                           showAlert = true
-                        }
-                     }
-                     .alert("Alles im Blick?", isPresented: $showAlert) {
-                        Button("Verstanden") {
-                           handleLocationAndShowCamera()
-                        }
-                     } message: {
-                        Text("Achte beim Aufnehmen des Bildes darauf, dass das Plakat sowie der Hintergrund und die Umgebung gut zu erkennen sind.")
-                     }
-                     .fullScreenCover(isPresented: $showCamera) {
-                        accessCameraView(
-                           isDamageReport: false,
-                           selectedImage: $selectedImage,
-                           showCamera: $showCamera,
-                           currentCoordinates: $currentCoordinates
-                        ) {
-                           if let image = selectedImage,
-                              let imageData = image.jpegData(compressionQuality: 0.8),
-                              let coordinates = currentCoordinates {
-                              onUpdate(imageData, coordinates)
+                     if isResponsible {
+                        VStack(spacing: 2) {
+                           Text("Beschädigung")
+                           HStack {
+                              Text("behoben")
+                              Image(systemName: "camera.fill")
                            }
                         }
-                        .background(.black)
+                        .frame(width: 165, height: 35)
+                        .padding(8) .padding(.bottom, 15)
+                        .foregroundStyle(.white)
+                        .background(.black.opacity(0.5))
+                        .onTapGesture {
+                           if isResponsible {
+                              showAlert = true
+                           }
+                        }
+                        .alert("Alles im Blick?", isPresented: $showAlert) {
+                           Button("Verstanden") {
+                              handleLocationAndShowCamera()
+                           }
+                        } message: {
+                           Text("Achte beim Aufnehmen des Bildes darauf, dass das Plakat sowie der Hintergrund und die Umgebung gut zu erkennen sind.")
+                        }
+                        .fullScreenCover(isPresented: $showCamera) {
+                           accessCameraView(
+                              isDamageReport: false,
+                              selectedImage: $selectedImage,
+                              showCamera: $showCamera,
+                              currentCoordinates: $currentCoordinates
+                           ) {
+                              if let image = selectedImage,
+                                 let imageData = image.jpegData(compressionQuality: 0.8),
+                                 let coordinates = currentCoordinates {
+                                 onUpdate(imageData, coordinates)
+                              }
+                           }
+                           .background(.black)
+                        }
                      }
                   }
                   .mask(Circle())
