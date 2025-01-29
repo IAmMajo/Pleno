@@ -10,120 +10,117 @@ struct NutzerverwaltungView: View {
     @State private var loadingUserID: UUID? = nil // ID des aktuell geladenen Benutzers
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            // Title
-            Text("Nutzerverwaltung")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding(.leading, 30)
-                .padding(.top, 20)
-
-            // Beitrittsverwaltung Section
-            VStack(alignment: .leading, spacing: 10) {
-                Text("BEITRITTSVERWALTUNG")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .padding(.horizontal, 30)
-
-                // Ausstehend row
-                HStack {
-                    Text("Ausstehend")
-                        .foregroundColor(.primary)
-
-                    Spacer()
-
-                    Text("\(pendingRequestsCount)") // Dynamische Anzeige
-                        .foregroundColor(.orange)
-
-                    Image(systemName: "chevron.right")
+        NavigationView {
+            VStack(alignment: .center, spacing: 20) {
+                // Beitrittsverwaltung Section
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("BEITRITTSVERWALTUNG")
+                        .font(.caption)
                         .foregroundColor(.gray)
-                }
-                .padding(.horizontal, 30)
-                .onTapGesture {
-                    isPendingRequestPopupPresented = true
-                }
-                .sheet(isPresented: $isPendingRequestPopupPresented, onDismiss: {
-                    fetchAllData() // Daten aktualisieren nach Verlassen der Beitrittsverwaltung
-                }) {
-                    PendingRequestsNavigationView(isPresented: $isPendingRequestPopupPresented, onListUpdate: {
-                        fetchPendingRequestsCount() // Anzahl der ausstehenden Anfragen live aktualisieren
-                    })
-                }
-            }
+                        .padding(.horizontal, 30)
 
-            // Nutzerübersicht Section
-            VStack(alignment: .leading, spacing: 10) {
-                Text("NUTZERÜBERSICHT")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .padding(.horizontal, 30)
+                    HStack {
+                        Text("Ausstehend")
+                            .foregroundColor(.primary)
 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 15) {
-                        ForEach(users.filter { $0.isActive == true }, id: \.uid) { user in
-                            VStack {
-                                if let imageData = user.profileImage, let uiImage = UIImage(data: imageData) {
-                                    Image(uiImage: uiImage)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 50, height: 50)
-                                        .clipShape(Circle())
-                                        .onTapGesture {
-                                            selectUser(user)
-                                        }
-                                } else {
-                                    Circle()
-                                        .fill(Color.gray)
-                                        .frame(width: 50, height: 50)
-                                        .overlay(
-                                            Text(MainPageAPI.calculateInitials(from: user.name))
-                                                .foregroundColor(.white)
-                                        )
-                                        .onTapGesture {
-                                            selectUser(user)
-                                        }
-                                }
-                                Text(user.name)
-                                    .font(.caption)
-                                    .foregroundColor(.primary)
-                            }
-                        }
+                        Spacer()
+
+                        Text("\(pendingRequestsCount)") // Dynamische Anzeige
+                            .foregroundColor(.orange)
+
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.gray)
                     }
                     .padding(.horizontal, 30)
+                    .onTapGesture {
+                        isPendingRequestPopupPresented = true
+                    }
+                    .sheet(isPresented: $isPendingRequestPopupPresented, onDismiss: {
+                        fetchAllData() // Daten aktualisieren nach Verlassen der Beitrittsverwaltung
+                    }) {
+                        PendingRequestsNavigationView(isPresented: $isPendingRequestPopupPresented, onListUpdate: {
+                            fetchPendingRequestsCount() // Anzahl der ausstehenden Anfragen live aktualisieren
+                        })
+                    }
+                }
+
+                // Nutzerübersicht Section
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("NUTZERÜBERSICHT")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                        .padding(.horizontal, 30)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 15) {
+                            ForEach(users.filter { $0.isActive == true }, id: \ .uid) { user in
+                                VStack {
+                                    if let imageData = user.profileImage, let uiImage = UIImage(data: imageData) {
+                                        Image(uiImage: uiImage)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 50, height: 50)
+                                            .clipShape(Circle())
+                                            .onTapGesture {
+                                                selectUser(user)
+                                            }
+                                    } else {
+                                        Circle()
+                                            .fill(Color.gray)
+                                            .frame(width: 50, height: 50)
+                                            .overlay(
+                                                Text(MainPageAPI.calculateInitials(from: user.name))
+                                                    .foregroundColor(.white)
+                                            )
+                                            .onTapGesture {
+                                                selectUser(user)
+                                            }
+                                    }
+                                    Text(user.name)
+                                        .font(.caption)
+                                        .foregroundColor(.primary)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 30)
+                    }
+                }
+
+                Spacer()
+            }
+            .navigationTitle("Nutzerverwaltung")
+            /*.toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { /* Aktion hier einfügen */ }) {
+                        Label("Aktion", systemImage: "plus")
+                    }
+                }
+            }*/
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(UIColor.systemBackground))
+            .sheet(isPresented: Binding(
+                get: { selectedUser != nil },
+                set: { if !$0 { selectedUser = nil } }
+            )) {
+                if let user = selectedUser {
+                    UserPopupView(
+                        user: .constant(user),
+                        isPresented: Binding(
+                            get: { selectedUser != nil },
+                            set: { if !$0 { selectedUser = nil } }
+                        ),
+                        onSave: fetchAllUsers, // Nutzerliste neu laden
+                        onDelete: fetchAllUsers
+                    )
+                } else {
+                    ProgressView("Benutzer wird geladen...")
                 }
             }
-
-            Spacer()
-        }
-        .sheet(isPresented: Binding(
-            get: { selectedUser != nil },
-            set: { if !$0 { selectedUser = nil } } // Wenn das Popup geschlossen wird, setze selectedUser auf nil
-        )) {
-            if let user = selectedUser {
-                UserPopupView(
-                    user: .constant(user),
-                    isPresented: Binding(
-                        get: { selectedUser != nil },
-                        set: { if !$0 { selectedUser = nil } }
-                    ),
-                    onSave: fetchAllUsers, // Nutzerliste neu laden
-                    onDelete: fetchAllUsers
-                )
-            } else {
-                ProgressView("Benutzer wird geladen...")
+            .onAppear {
+                fetchAllData() // Alle relevanten Daten beim Start laden
             }
         }
-
-
-
-
-
-
-
-        .onAppear {
-            fetchAllData() // Alle relevanten Daten beim Start laden
-        }
-        .background(Color(UIColor.systemBackground))
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     // Benutzer auswählen
@@ -152,8 +149,6 @@ struct NutzerverwaltungView: View {
             }
         }
     }
-
-
 
     // Funktion: Alle Daten abrufen
     private func fetchAllData() {
@@ -194,9 +189,4 @@ struct NutzerverwaltungView: View {
             }
         }
     }
-}
-
-
-#Preview {
-    NutzerverwaltungView()
 }

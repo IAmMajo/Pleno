@@ -23,7 +23,7 @@ struct MainPage: View {
 
             TabView(selection: $page){
                 Tab("Vereinseinstellungen", systemImage: "gearshape.fill", value: .vereinseinstellungen){
-                    Text("Vereinseinstellungen")
+                    ClubsettingsMainView()
                 }
                 Tab("Nutzerverwaltung", systemImage: "person.3.fill", value: .nutzerverwaltung){
                     NutzerverwaltungView()
@@ -109,8 +109,8 @@ struct MainPage: View {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let profile):
-                    name = profile.name ?? "Admin"
-                    shortName = MainPageAPI.calculateShortName(from: profile.name ?? "A")
+                    name = profile.name
+                    shortName = MainPageAPI.calculateShortName(from: profile.name)
                 case .failure(let error):
                     errorMessage = "Fehler beim Laden des Profils: \(error.localizedDescription)"
                 }
@@ -139,11 +139,4 @@ struct MainPage: View {
 
 
 
-// Beispielansicht für Konfiguration der Funktionen
-struct FunktionenView: View {
-    var body: some View {
-        Text("Konfiguration der Funktionen")
-            .font(.largeTitle)
-    }
-}
 

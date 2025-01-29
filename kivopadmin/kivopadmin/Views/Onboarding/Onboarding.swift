@@ -31,7 +31,7 @@ struct Onboarding: View {
                             Text("Mit ")
                                 .font(.title3)
                                 .fontWeight(.regular) +
-                            Text("KIVoP ")
+                            Text("Pleno ")
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(.blue) +
