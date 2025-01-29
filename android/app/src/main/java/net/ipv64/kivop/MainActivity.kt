@@ -283,32 +283,37 @@ fun DrawerContent(
     Spacer(modifier = Modifier.height(4.dp))
     val drawerItems =
         listOf(
-            drawerItem(
-                modifier = Modifier,
-                icon = Icons.Rounded.Home,
-                title = getString(R.string.meetings),
-                route = Screen.Meetings.rout),
-            drawerItem(
-                modifier = Modifier,
-                icon = Icons.Rounded.Home,
-                title = getString(R.string.protocol),
-                route = Screen.Protocol.rout),
-            drawerItem(
-                modifier = Modifier,
-                icon = Icons.Rounded.Home,
-                title = getString(R.string.carpooling),
-                route = Screen.CarpoolingList.rout),
-            drawerItem(
-                modifier = Modifier,
-                icon = Icons.Rounded.Home,
-                title = getString(R.string.events),
-                route = Screen.Events.rout),
-            drawerItem(
-                modifier = Modifier,
-                icon = Icons.Rounded.Home,
-                title = getString(R.string.poster),
-                route = Screen.Poster.rout),
-        )
+          drawerItem(
+            modifier = Modifier,
+            icon = R.drawable.ic_groups,
+            title = getString(R.string.meetings),
+            route = Screen.Meetings.rout),
+          drawerItem(
+            modifier = Modifier,
+            icon = R.drawable.inbox_20dp,
+            title = getString(R.string.protocol),
+            route = Screen.Protocol.rout),
+          drawerItem(
+            modifier = Modifier,
+            icon = R.drawable.directions_car_20dp,
+            title = getString(R.string.carpooling),
+            route = Screen.CarpoolingList.rout),
+          drawerItem(
+            modifier = Modifier,
+            icon = R.drawable.event_today_20dp,
+            title = getString(R.string.events),
+            route = Screen.Events.rout),
+          drawerItem(
+            modifier = Modifier,
+            icon = R.drawable.planner_banner_ad_pt_20dp,
+            title = getString(R.string.poster),
+            route = Screen.Poster.rout),
+          drawerItem(
+            modifier = Modifier,
+            icon = R.drawable.chart_outlined_20,
+            title = getString(R.string.poll),
+            route = Screen.Poll.rout),
+          )
     drawerItems.forEach { item ->
       DrawerItem(
           item,
