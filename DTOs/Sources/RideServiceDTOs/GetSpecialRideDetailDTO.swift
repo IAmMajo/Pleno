@@ -1,7 +1,7 @@
 import Foundation
 
 public struct GetSpecialRideDetailDTO: Codable {
-    public var id: UUID?
+    public var id: UUID
     public var driverName: String
     public var driverID: UUID
     public var isSelfDriver: Bool
@@ -17,7 +17,7 @@ public struct GetSpecialRideDetailDTO: Codable {
     public var emptySeats: UInt8
     public var riders: [GetRiderDTO]
     
-    public init(id: UUID? = nil, driverName: String, driverID: UUID, isSelfDriver: Bool, name: String, description: String? = nil, vehicleDescription: String? = nil, starts: Date, ends: Date, startLatitude: Float, startLongitude: Float, destinationLatitude: Float, destinationLongitude: Float, emptySeats: UInt8, riders: [GetRiderDTO]) {
+    public init(id: UUID, driverName: String, driverID: UUID, isSelfDriver: Bool, name: String, description: String? = nil, vehicleDescription: String? = nil, starts: Date, ends: Date, startLatitude: Float, startLongitude: Float, destinationLatitude: Float, destinationLongitude: Float, emptySeats: UInt8, riders: [GetRiderDTO]) {
         self.id = id
         self.driverName = driverName
         self.driverID = driverID
