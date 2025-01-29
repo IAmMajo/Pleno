@@ -2,9 +2,10 @@ package net.ipv64.kivop.pages.mainApp
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -14,6 +15,7 @@ import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.ListenItem
 import net.ipv64.kivop.components.SpacerTopBar
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
 import net.ipv64.kivop.models.viewModel.MeetingsViewModel
 
 @Composable
@@ -28,15 +30,19 @@ fun ProtocolListPage(navController: NavController, meetingsViewModel: MeetingsVi
     SpacerTopBar()
 
     LazyColumn(
-        modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        modifier = Modifier.fillMaxHeight()) {
           items(meetings) { meeting ->
-            if (meeting != null) {
+            if (meeting != null && meeting.status != MeetingStatus.scheduled) {
               ListenItem(
                   itemListData = meeting,
-                  onClick = { navController.navigate("anwesenheit/${meeting.id}") },
-                  isProtokoll = true)
+                  onClick = { navController.navigate("protokolleDetail/${meeting.id}") },
+                  isProtokoll = true
+              )
+              Spacer(modifier = Modifier.height(12.dp))
             }
+           
           }
+        
         }
   }
 }

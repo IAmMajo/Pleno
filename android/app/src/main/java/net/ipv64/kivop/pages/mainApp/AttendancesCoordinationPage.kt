@@ -151,57 +151,65 @@ fun AttendancesCoordinationPage(
             }
 
             item {
-              //      TODO: FINISH THIS
-              Text(text = "Votings")
-              SpacerBetweenElements()
-              Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                meetingViewModel.votings.forEach { voting ->
-                  var votingData =
+              if (meetingViewModel.votings.isNotEmpty()) {
+                Text(text = "Votings")
+                SpacerBetweenElements()
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                  meetingViewModel.votings.forEach { voting ->
+                    var votingData =
                       ItemListData(
+                        title = voting.question,
+                        id = voting.id.toString(),
+                        date = null,
+                        time = null,
+                        meetingStatus = "",
+                        timeRend = false,
+                        iconRend = false
+                      )
+                    try {
+                      votingData =
+                        ItemListData(
                           title = voting.question,
                           id = voting.id.toString(),
-                          date = null,
+                          date = voting.startedAt!!.toLocalDate(),
                           time = null,
                           meetingStatus = "",
                           timeRend = false,
-                          iconRend = false)
-                  try {
-                    votingData =
-                        ItemListData(
-                            title = voting.question,
-                            id = voting.id.toString(),
-                            date = voting.startedAt!!.toLocalDate(),
-                            time = null,
-                            meetingStatus = "",
-                            timeRend = false,
-                            iconRend = false)
-                  } catch (e: Exception) {
-                    Log.d("test", e.message.toString())
-                    Log.d("test", voting.question)
-                  }
-                  IconTextField(
+                          iconRend = false
+                        )
+                    } catch (e: Exception) {
+                      Log.d("test", e.message.toString())
+                      Log.d("test", voting.question)
+                    }
+                    IconTextField(
                       text = votingData.title,
                       icon = ImageVector.vectorResource(R.drawable.ic_pie_chart),
                       onClick = { navController.navigate("abstimmung/${voting.id}") }) {}
+                  }
                 }
+                SpacerBetweenElements()
               }
-              SpacerBetweenElements()
+              
             }
 
             item {
-              Text(text = "Protokoll")
-              SpacerBetweenElements()
-              meetingViewModel.protocols.forEach { protocol ->
+              if (meetingViewModel.meeting?.status != MeetingStatus.scheduled) {
+                Text(text = "Protokoll")
+                SpacerBetweenElements()
+                Log.d("Deteil", "${meetingViewModel.protocols}")
                 meetingViewModel.meeting?.let {
                   ListenItem(
-                      itemListData = it,
-                      onClick = { navController.navigate("protokolle/${it.id}/${protocol.lang}") },
-                      isProtokoll = true)
+                    itemListData = it,
+                    onClick = { navController.navigate("protokolleDetail/${it.id}") },
+                    isProtokoll = true
+                  )
                 }
                 SpacerBetweenElements()
               }
             }
+              
+            }
           }
-    }
+    
   }
 }
