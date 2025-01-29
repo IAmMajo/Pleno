@@ -8,5 +8,6 @@ data class PosterSummaryResponseDTO (
     var toHang : Int,
     var overdue : Int,
     var takenDown : Int,
+    var damaged : Int,
     var nextTakeDown : LocalDateTime?,
 )
