@@ -21,10 +21,10 @@ struct PosterPositionWithAddress: Equatable, Identifiable {
 extension PosterPositionWithAddress {
     var color: Color {
         switch position.status {
-        case "toHang": return .orange
-        case "overdue": return .red
-        case "hangs": return .green
-        case "takenDown": return .gray
+        case .toHang: return .orange
+        case .overdue: return .red
+        case .hangs: return .green
+        case .takenDown: return .gray
         default: return .blue
         }
     }
