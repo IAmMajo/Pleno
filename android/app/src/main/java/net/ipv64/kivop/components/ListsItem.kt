@@ -26,7 +26,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.time.format.DateTimeFormatter
 import net.ipv64.kivop.R
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
@@ -38,6 +37,7 @@ import net.ipv64.kivop.ui.theme.Signal_neutral
 import net.ipv64.kivop.ui.theme.Signal_red
 import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_secondary
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun ListenItem(
@@ -112,9 +112,9 @@ fun ListenItem(
           Modifier.fillMaxWidth()
               .customShadow(cornersRadius = 8.dp, shadowBlurRadius = 2.dp)
               .clip(RoundedCornerShape(8.dp))
+              .clickable(onClick = onClick!!)
               .background(Background_secondary)
-              .padding(8.dp)
-              .clickable(onClick = onClick!!),
+              .padding(8.dp),
   ) {
     Column(modifier = Modifier) {
       Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
