@@ -165,6 +165,54 @@ class PosterService: ObservableObject {
       }.resume()
    }
    
+   func fetchPostersSummary() async throws -> PosterSummaryResponseDTO {
+      guard let url = URL(string: "\(baseURL)/summary") else {
+         throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+      }
+      
+      guard let request = createAuthorizedRequest(url: url, method: "GET") else {
+         throw NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)
+      }
+      
+      let (data, response) = try await URLSession.shared.data(for: request)
+      
+      guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+         throw NSError(domain: "Failed to fetch posters summary", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: nil)
+      }
+      
+      do {
+         let decoder = JSONDecoder()
+         decoder.dateDecodingStrategy = .iso8601
+         return try decoder.decode(PosterSummaryResponseDTO.self, from: data)
+      } catch {
+         throw NSError(domain: "Failed to decode posters summary", code: 500, userInfo: nil)
+      }
+   }
+   
+   func fetchPosterSummary(for posterId: UUID) async throws -> PosterSummaryResponseDTO {
+      guard let url = URL(string: "\(baseURL)/\(posterId)/summary") else {
+         throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+      }
+      
+      guard let request = createAuthorizedRequest(url: url, method: "GET") else {
+         throw NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)
+      }
+      
+      let (data, response) = try await URLSession.shared.data(for: request)
+      
+      guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+         throw NSError(domain: "Failed to fetch poster summary", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: nil)
+      }
+      
+      do {
+         let decoder = JSONDecoder()
+         decoder.dateDecodingStrategy = .iso8601
+         return try decoder.decode(PosterSummaryResponseDTO.self, from: data)
+      } catch {
+         throw NSError(domain: "Failed to decode poster summary", code: 500, userInfo: nil)
+      }
+   }
+   
    func hangPosition(positionId: UUID, dto: HangPosterPositionDTO) async throws -> HangPosterPositionResponseDTO {
        guard let url = URL(string: "\(baseURL)/positions/\(positionId)/hang") else {
            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
