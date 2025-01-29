@@ -178,11 +178,13 @@ struct SpecialRideController: RouteCollection {
             .map{ rider in
                 let rider_id = try rider.requireID()
                 let identity = try rider.joined(Identity.self)
-                let username = identity.name
-                
+                let user = try rider.joined(User.self)
+                let userID = try user.requireID()
+
                 return GetRiderDTO(
                     id: rider_id,
-                    username: username,
+                    userID: userID,
+                    username: identity.name,
                     latitude: rider.latitude,
                     longitude: rider.longitude,
                     itsMe: rider.$user.id == req.jwtPayload.userID,
@@ -312,11 +314,13 @@ struct SpecialRideController: RouteCollection {
             .map{ rider in
                 let rider_id = try rider.requireID()
                 let identity = try rider.joined(Identity.self)
-                let username = identity.name
+                let user = try rider.joined(User.self)
+                let userID = try user.requireID()
                 
                 return GetRiderDTO(
                     id: rider_id,
-                    username: username,
+                    userID: userID,
+                    username: identity.name,
                     latitude: rider.latitude,
                     longitude: rider.longitude,
                     itsMe: rider.$user.id == req.jwtPayload.userID,
@@ -442,6 +446,7 @@ struct SpecialRideController: RouteCollection {
         // build response dto
         let getRiderDTO = GetRiderDTO(
             id: rider_id,
+            userID: req.jwtPayload.userID,
             username: username ?? "",
             latitude: request.latitude,
             longitude: request.longitude,
@@ -532,6 +537,7 @@ struct SpecialRideController: RouteCollection {
         // build response dto
         let getRiderDTO = GetRiderDTO(
             id: rider_id,
+            userID: specialRideRequest.$user.id,
             username: username ?? "",
             latitude: specialRideRequest.latitude,
             longitude: specialRideRequest.longitude,

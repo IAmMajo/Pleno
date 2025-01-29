@@ -425,9 +425,11 @@ struct EventRideController: RouteCollection {
             .all()
             .map { rider in
                 let riderID = try rider.requireID()
+                let userID = try rider.interestedParty.participant.user.requireID()
                 
                 return GetRiderDTO(
                     id: riderID,
+                    userID: userID,
                     username: rider.interestedParty.participant.user.identity.name,
                     latitude: rider.interestedParty.latitude,
                     longitude: rider.interestedParty.longitude,
@@ -594,9 +596,11 @@ struct EventRideController: RouteCollection {
             .all()
             .map { rider in
                 let riderID = try rider.requireID()
+                let userID = try rider.interestedParty.participant.user.requireID()
                 
                 return GetRiderDTO(
                     id: riderID,
+                    userID: userID,
                     username: rider.interestedParty.participant.user.identity.name,
                     latitude: rider.interestedParty.latitude,
                     longitude: rider.interestedParty.longitude,
@@ -739,6 +743,7 @@ struct EventRideController: RouteCollection {
             }
         let getRiderDTO = GetRiderDTO(
             id: rider_id,
+            userID: req.jwtPayload.userID,
             username: username ?? "",
             latitude: party.latitude,
             longitude: party.longitude,
@@ -856,8 +861,11 @@ struct EventRideController: RouteCollection {
             .first() else {
             throw Abort(.notFound)
         }
+        let userID = try request.interestedParty.participant.user.requireID()
+        
         let getRiderDTO = GetRiderDTO(
             id: rider_id,
+            userID: userID,
             username: username ?? "",
             latitude: party.latitude,
             longitude: party.longitude,
