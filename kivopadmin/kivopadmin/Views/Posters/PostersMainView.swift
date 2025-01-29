@@ -123,7 +123,8 @@ extension PostersMainView {
     private func listView() -> some View {
         List {
             ForEach(posterManager.posters, id: \.id) { poster in
-                PosterRowView(poster: poster) // Unterview
+                PosterRowView(poster: poster)
+                    .listRowSeparator(.hidden) // Unterview
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         // Löschen-Aktion
                         Button(role: .destructive) {
@@ -144,36 +145,37 @@ extension PostersMainView {
     }
 
 }
-
 struct PosterRowView: View {
     let poster: PosterResponseDTO
     @StateObject private var locationViewModel = LocationsViewModel()
     
     var body: some View {
         NavigationLink(destination: LocationsView(poster: poster).environmentObject(locationViewModel)) {
-            HStack(spacing: 5) {
-                if let uiImage = UIImage(data: poster.image) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 100) // Höhe einstellen
-                        .cornerRadius(10)
-                }
-                VStack{
-                    HStack{
-                        Spacer()
-                        Text(poster.name)
-                            .font(.title2)
-                        Spacer()
+            VStack {
+                HStack(spacing: 5) {
+                    if let uiImage = UIImage(data: poster.image) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 100) // Höhe einstellen
+                            .cornerRadius(10)
                     }
-
-                    
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Text(poster.name)
+                                .font(.title2)
+                            Spacer()
+                        }
+                    }
                 }
-
+                Divider() // Dieser Divider nimmt die gesamte Breite der Zelle ein
+                    .padding(.vertical, 5) // Optional: Abstand über und unter dem Divider
             }
         }
     }
 }
+
 
 
 struct SammelpostenErstellenView: View {

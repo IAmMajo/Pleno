@@ -16,18 +16,20 @@ struct ProgressBarView: View {
         let status = position.status
         switch status {
         case .hangs:
-            return 190
+            return 250
         case .takenDown:
             return 500
         case .toHang:
             return 20
         case .overdue:
-            return 190
+            return 250
+        case .damaged:
+            return 250
         default:
-            return 190
+            return 250
         }
     }
-    
+
     var progressBarColor: Color {
         let status = position.status
         switch status {
@@ -39,6 +41,8 @@ struct ProgressBarView: View {
             return Color(UIColor.secondaryLabel)
         case .overdue:
             return .red
+        case .damaged:
+            return .orange
         default:
             return Color(UIColor.secondaryLabel)
         }

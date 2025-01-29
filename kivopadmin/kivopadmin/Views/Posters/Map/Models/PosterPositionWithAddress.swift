@@ -25,6 +25,7 @@ extension PosterPositionWithAddress {
         case .overdue: return .red
         case .hangs: return .green
         case .takenDown: return .gray
+        case .damaged: return .orange
         default: return .blue
         }
     }

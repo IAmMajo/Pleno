@@ -15,7 +15,8 @@ struct LocationsView: View {
     @State private var expiresAt: Date = Date()
     @State private var selectedUsers: [UUID] = []
     @State private var showUserSelectionSheet = false
-    private var filterOptions: [PosterPositionStatus] = [.toHang, .hangs, .overdue, .takenDown]
+    @State private var maxWidth2: CGFloat? = nil
+    private var filterOptions: [PosterPositionStatus] = [.toHang, .hangs, .damaged, .overdue, .takenDown]
 
     @ObservedObject var userManager = UserManager()
 
@@ -41,7 +42,7 @@ struct LocationsView: View {
                             filterMenu
                         }
                     }
-
+                    Spacer()
                     // Zeige die Adresse oder lade sie asynchron
                     VStack{
 
@@ -71,6 +72,7 @@ struct LocationsView: View {
                                         locationViewModel.isEditing = false
                                     }
                                 }){
+                                    //Text(locationViewModel.selectedPosterPosition?.address ?? "Wählen Sie eine Position aus").foregroundColor(.primary).frame(height: 55).frame(maxWidth: .infinity)
                                     Text(locationViewModel.selectedPosterPosition?.address ?? "Wählen Sie eine Position aus").foregroundColor(.primary).frame(height: 55).frame(maxWidth: .infinity)
                                         .overlay(alignment: .leading){
                                             Image(systemName: "arrow.down").font(.headline).foregroundColor(.primary).padding().rotationEffect(Angle(degrees: locationViewModel.showLocationsList ? 180 : 0))
@@ -87,14 +89,18 @@ struct LocationsView: View {
                             .frame(maxWidth: maxWidth)
                         }
                     }
+                    Spacer()
+                    VStack{
+                        searchButton
+                        editButton
+                        mapStyleButton
+                    }
 
-                    searchButton
-
-                    editButton
 
                     
                 }
 
+                
                     
                 
                 Spacer()
@@ -144,7 +150,7 @@ struct LocationsView: View {
                         locationViewModel.showNextLocation(location: position)
                     }
             }
-        })
+        }).mapStyle(locationViewModel.satelliteView ? .imagery : .standard)
     }
     
     private var searchButton: some View {
@@ -181,7 +187,7 @@ struct LocationsView: View {
                         if option == locationViewModel.selectedFilter{
                             RoundedRectangle(cornerRadius: 8) // Abgerundete Ecken
                                 .fill(Color.gray.opacity(0.2)) // Farbe und Transparenz
-                                .frame(width: 30, height: 30)
+                                .frame(width: 60, height: 30)
                         }
                         Button(action: {
                             withAnimation {
@@ -195,6 +201,7 @@ struct LocationsView: View {
                             let icon = getFilterIcon(for: option)
                             Image(systemName: icon.symbol)
                                 .foregroundColor(icon.color)
+                            Text(getSummaryCount(for: option))
                         }
                         .buttonStyle(.plain)
                         
@@ -206,7 +213,8 @@ struct LocationsView: View {
 
             }
         }
-        .padding()
+        .padding(8)
+        .padding(.vertical, 4)
         .background(.thickMaterial)
         .cornerRadius(10)
         .shadow(radius: 4)
@@ -232,6 +240,22 @@ struct LocationsView: View {
         }
     }
     
+    private var mapStyleButton: some View {
+        Button {
+            locationViewModel.satelliteView.toggle()  // Umschalten der Kartenansicht
+        } label: {
+            Image(systemName: locationViewModel.satelliteView ? "map" : "globe.americas")
+                .font(.headline)
+                .padding(16)
+                .foregroundColor(.primary)
+                .background(.thickMaterial)
+                .cornerRadius(10)
+                .shadow(radius: 4)
+                .padding()
+        }
+    }
+
+    
     func getFilterIcon(for status: PosterPositionStatus) -> (symbol: String, color: Color) {
         switch status {
         case .toHang:
@@ -242,6 +266,8 @@ struct LocationsView: View {
             return ("exclamationmark.triangle", .red)
         case .takenDown:
             return ("checkmark.circle", .green)
+        case .damaged:
+            return ("burst", .orange)
         default:
             return ("questionmark.circle", .gray) // Fallback für unbekannte Status
         }
@@ -258,6 +284,8 @@ struct LocationsView: View {
             return "\(locationViewModel.summary?.overdue ?? 0)" // Defaultwert 0, wenn nil
         case .takenDown:
             return "\(locationViewModel.summary?.takenDown ?? 0)" // Defaultwert 0, wenn nil
+        case .damaged:
+            return "\(locationViewModel.summary?.damaged ?? 0)"
         default:
             return "?"
         }
