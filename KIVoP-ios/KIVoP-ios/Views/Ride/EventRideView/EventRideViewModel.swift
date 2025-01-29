@@ -141,7 +141,7 @@ class EventRideViewModel: ObservableObject {
                 do {
                     // Decodieren der Antwort
                     let decodedEventRides = try decoder.decode([GetEventRideDTO].self, from: data)
-                    self.eventRides = decodedEventRides.filter { $0.emptySeats - $0.allocatedSeats > 0 }
+                    self.eventRides = decodedEventRides
                     self.isLoading = false // Ladevorgang erfolgreich beendet
                     for ride in self.eventRides {
                         self.getAddressFromCoordinates(latitude: ride.latitude, longitude: ride.longitude) { address in

@@ -98,9 +98,10 @@ struct EventRideView: View {
                             .padding(.horizontal)
                             .buttonStyle(PlainButtonStyle())
                         } else {
-                            if !viewModel.eventRides.isEmpty {
+                            // Fahrten die keine freien Plätze haben werden nicht angezeigt
+                            if !(viewModel.eventRides.filter { $0.emptySeats - $0.allocatedSeats > 0 }).isEmpty {
                                 Section(header: Text("Fahrten")){
-                                    ForEach( viewModel.eventRides, id: \.id ) { ride in
+                                    ForEach( viewModel.eventRides.filter { $0.emptySeats - $0.allocatedSeats > 0 }, id: \.id ) { ride in
                                         NavigationLink(destination: EventRideDetailView(viewModel: EventRideDetailViewModel(eventRide: ride))) {
                                             HStack {
                                                 ProfilePictureRide(name: ride.driverName, id: ride.driverID)
