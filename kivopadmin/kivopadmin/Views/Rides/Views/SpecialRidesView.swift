@@ -8,11 +8,9 @@ struct SpecialRidesView: View {
         NavigationStack{
             List{
                 ForEach(rideViewModel.specialRides, id: \.id){ specialRide in
-//                    NavigationLink(destination: SpecialRideDetailView(rideId: specialRide.id).environmentObject(rideViewModel)){
-//                        
-//                    }
-                    
-                    Text(specialRide.name)
+                    NavigationLink(destination: SpecialRideDetailView(rideId: specialRide.id).environmentObject(rideViewModel)){
+                        Text(specialRide.name)
+                    }
                 }
             }
         }

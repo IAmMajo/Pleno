@@ -107,6 +107,17 @@ struct EventDetailView: View {
                                 Text("Interessiert an Mitfahrgelegenheiten: \(eventDetail.countRideInterested)")
                                 Text("Freie Plätze: \(eventDetail.countEmptySeats)")
                             }
+                            if eventViewModel.eventRides.isEmpty == false {
+                                Section(header: Text("Eventfahrten")){
+                                    ForEach(eventViewModel.eventRides, id: \.id){ ride in
+                                        NavigationLink(destination: EventRideDetailView(rideId: ride.id)){
+                                            Text("Fahrer: \(ride.driverName)")
+                                        }
+                                        
+                                    }
+                                }
+                            }
+
                         }
                         .navigationTitle(eventDetail.name)
                         .onAppear {
@@ -135,6 +146,7 @@ struct EventDetailView: View {
         }
         .onAppear {
             eventViewModel.fetchEventDetail(eventId: eventId)
+            eventViewModel.fetchEventRides(eventId: eventId)
         }
         
 
