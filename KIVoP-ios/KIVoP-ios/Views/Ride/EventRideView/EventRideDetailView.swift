@@ -127,7 +127,7 @@ struct EventRideDetailView: View {
                                 ForEach(viewModel.acceptedRiders, id: \.id) { rider in
                                     HStack {
                                         // Profilbild
-                                        ProfilePictureRide(name: rider.username, id: rider.id)
+                                        ProfilePictureRide(name: rider.username, id: rider.userID)
                                         VStack{
                                             Text(rider.username)
                                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -185,7 +185,7 @@ struct EventRideDetailView: View {
                                 ForEach(viewModel.requestedRiders, id: \.id) { rider in
                                     HStack {
                                         // Profilbild
-                                        ProfilePictureRide(name: rider.username, id: rider.id)
+                                        ProfilePictureRide(name: rider.username, id: rider.userID)
                                         VStack{
                                             Text(rider.username)
                                                 .frame(maxWidth: .infinity, alignment: .leading)

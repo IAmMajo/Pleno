@@ -6,10 +6,10 @@ class EditRideViewModel: ObservableObject {
     
     private let baseURL = "https://kivop.ipv64.net"
     
-    @Published var ride: GetSpecialRideDTO = GetSpecialRideDTO(name: "", starts: Date(), ends: Date(), emptySeats: 0, allocatedSeats: 0, myState: .nothing)
+    @Published var ride: GetSpecialRideDTO = GetSpecialRideDTO(id: UUID(), name: "", starts: Date(), ends: Date(), emptySeats: 0, allocatedSeats: 0, myState: .nothing)
     
     // SpecialRide der Bearbeitet wird
-    @Published var rideDetail: GetSpecialRideDetailDTO = GetSpecialRideDetailDTO(driverName: "", driverID: UUID(), isSelfDriver: false, name: "", starts: Date(), ends: Date(), startLatitude: 0, startLongitude: 0, destinationLatitude: 0, destinationLongitude: 0, emptySeats: 0, riders: [])
+    @Published var rideDetail: GetSpecialRideDetailDTO = GetSpecialRideDetailDTO(id: UUID(), driverName: "", driverID: UUID(), isSelfDriver: false, name: "", starts: Date(), ends: Date(), startLatitude: 0, startLongitude: 0, destinationLatitude: 0, destinationLongitude: 0, emptySeats: 0, riders: [])
     
     // EventRide der Bearbeitet wird
     @Published var eventRideDetail: GetEventRideDetailDTO = GetEventRideDetailDTO(id: UUID(), eventID: UUID(), eventName: "", driverName: "", driverID: UUID(), isSelfDriver: false, starts: Date(), latitude: 0, longitude: 0, emptySeats: 0, riders: [])
@@ -43,7 +43,7 @@ class EditRideViewModel: ObservableObject {
     @Published var emptySeats: Int? = nil // Event und Special
     
     init(rideDetail: GetSpecialRideDetailDTO? = nil, eventRideDetail: GetEventRideDetailDTO? = nil){
-        self.rideDetail = rideDetail ?? GetSpecialRideDetailDTO(driverName: "", driverID: UUID(), isSelfDriver: false, name: "", starts: Date(), ends: Date(), startLatitude: 0, startLongitude: 0, destinationLatitude: 0, destinationLongitude: 0, emptySeats: 0, riders: [])
+        self.rideDetail = rideDetail ?? GetSpecialRideDetailDTO(id: UUID(), driverName: "", driverID: UUID(), isSelfDriver: false, name: "", starts: Date(), ends: Date(), startLatitude: 0, startLongitude: 0, destinationLatitude: 0, destinationLongitude: 0, emptySeats: 0, riders: [])
         
         self.eventRideDetail = eventRideDetail ?? GetEventRideDetailDTO(id: UUID(), eventID: UUID(), eventName: "", driverName: "", driverID: UUID(), isSelfDriver: false, starts: Date(), latitude: 0, longitude: 0, emptySeats: 0, riders: [])
         

@@ -35,7 +35,7 @@ class RideDetailViewModel: ObservableObject {
         self.ride = ride
         self.selectedOption = "SonderFahrt"
         self.rideDetail = GetSpecialRideDetailDTO(
-            id: nil,
+            id: UUID(),
             driverName: "",
             driverID: UUID(),
             isSelfDriver: false,
@@ -58,8 +58,7 @@ class RideDetailViewModel: ObservableObject {
             do {
                 self.isLoading = true
                 
-                guard let rideID = ride.id?.uuidString,
-                      let url = URL(string: "https://kivop.ipv64.net/specialrides/\(rideID)") else {
+                guard let url = URL(string: "https://kivop.ipv64.net/specialrides/\(ride.id)") else {
                     throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
                 }
                 
@@ -124,8 +123,7 @@ class RideDetailViewModel: ObservableObject {
                 self.isLoading = true
                 
                 // Hier verwenden wir die URL, die mit der speziellen rideID kombiniert wird
-                guard let rideID = ride.id?.uuidString,
-                      let url = URL(string: "https://kivop.ipv64.net/specialrides/\(rideID)") else {
+                guard let url = URL(string: "https://kivop.ipv64.net/specialrides/\(ride.id)") else {
                     throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
                 }
                 
@@ -174,8 +172,7 @@ class RideDetailViewModel: ObservableObject {
                 self.isLoading = true
                 
                 // Hier verwenden wir die URL, die mit der speziellen rideID kombiniert wird
-                guard let rideID = ride.id?.uuidString,
-                      let url = URL(string: "https://kivop.ipv64.net/specialrides/\(rideID)/requests") else {
+                guard let url = URL(string: "https://kivop.ipv64.net/specialrides/\(ride.id)/requests") else {
                     throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
                 }
                 
