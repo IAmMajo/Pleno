@@ -39,6 +39,16 @@ class PostersViewModel: ObservableObject {
             print("Error fetching posters: \(error)")
         }
     }
+   
+   private func loadPosterSummary() {
+      Task {
+         do {
+//            self.summary = try await PosterService.shared.fetchPostersSummary()
+         } catch {
+            print("Error fetching posterSummary: \(error)")
+         }
+      }
+   }
 
     private func fetchPosterPositions() async {
         for poster in posters {

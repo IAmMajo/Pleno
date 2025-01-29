@@ -307,7 +307,7 @@ struct Posters_PositionView: View {
                      .presentationDragIndicator(.hidden)
                }
                
-               if (position.status == .hangs || position.status == .overdue) {
+               if (position.status == .hangs) {
                   HStack {
                      Image(systemName: "exclamationmark.circle")
                      Text("Beschädigung melden")
