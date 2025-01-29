@@ -16,55 +16,83 @@ struct Location: Identifiable {
 }
 
 struct MapPositionsView: View {
-    let locations: [Location]
+    let locationsPositions: [(location: Location, position: PosterPositionResponseDTO)]
+//    let locations: [Location]
     @State private var position: MapCameraPosition
 
-    init(locations: [Location]) {
-        var shiftedLocations: [Location] = []
-        for location in locations {
-            shiftedLocations.append(Location(name: location.name, coordinate: CLLocationCoordinate2D(
-                latitude: location.coordinate.latitude,
-                longitude: location.coordinate.longitude
-            )))
+    init(locationsPositions: [(location: Location, position: PosterPositionResponseDTO)]) {
+        var shiftedLocationsPositions: [(location: Location, position: PosterPositionResponseDTO)] = []
+       for item in locationsPositions {
+          shiftedLocationsPositions.append((
+            location: Location(name: item.location.name, coordinate: CLLocationCoordinate2D(
+               latitude: item.location.coordinate.latitude,
+               longitude: item.location.coordinate.longitude)),
+            position: item.position
+          ))
         }
-        self.locations = shiftedLocations
+        self.locationsPositions = shiftedLocationsPositions
         
 //        // Temporary placeholder for `@State` initialization
 //        _position = State(initialValue: .automatic)
        
-       if let initialRegion = locations.isEmpty
+       if let initialRegion = locationsPositions.isEmpty
             ? nil
-            : MapPositionsView.calculateRegion(for: locations.map { $0.coordinate }) {
+            : MapPositionsView.calculateRegion(for: locationsPositions.map { $0.location.coordinate }) {
           _position = State(initialValue: .region(initialRegion))
        } else {
           _position = State(initialValue: .automatic)
        }
     }
+   
+   func getColor(position: PosterPositionResponseDTO) -> Color {
+      let status = position.status
+      switch status {
+      case .hangs:
+         if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
+            return .orange
+         } else {
+            return .blue
+         }
+      case .takenDown:
+         return .green
+      case .toHang:
+         return .gray
+      case .overdue:
+         return .red
+      case .damaged:
+         return .yellow
+      }
+   }
 
     var body: some View {
         Map(position: $position) {
-            ForEach(locations) { location in
-                Annotation(location.name, coordinate: location.coordinate) {
+            ForEach(locationsPositions, id: \.position.id) { item in
+               Annotation(item.location.name, coordinate: item.location.coordinate) {
                    VStack {
-                      Circle()
-                         .fill(.background)
-                         .shadow(radius: 5)
-                         .overlay(
-                           Image("TestPosterImage")
-                              .resizable()
-                              .scaledToFit()
-                              .clipShape(RoundedRectangle(cornerRadius: 3))
-                              .frame(width: 35, height: 35)
-                         )
-                         .frame(width: 52, height: 52)
-                         .overlay(alignment: .bottom) {
-                            IndicatorShape()
-                               .fill(.background)
-                               .frame(width: 15, height: 10)
-                               .offset(y: 5)
-                         }
+                      ZStack {
+                         Circle()
+                            .fill(.background)
+                            .shadow(radius: 5)
+                            .overlay(
+                              Image("TestPosterImage")
+                                 .resizable()
+                                 .scaledToFit()
+                                 .clipShape(RoundedRectangle(cornerRadius: 3))
+                                 .frame(width: 35, height: 35)
+                            )
+                            .frame(width: 52, height: 52)
+                            .overlay(alignment: .bottom) {
+                               IndicatorShape()
+                                  .fill(getColor(position: item.position))
+                                  .frame(width: 15, height: 10)
+                                  .offset(y: 5)
+                            }
+                         Circle()
+                            .stroke(getColor(position: item.position), lineWidth: 4)
+                            .frame(width: 52-4, height: 52-4)
+                      }
                       
-                      Text(location.name)
+                      Text(item.location.name)
                          .font(.caption2)
                          .bold()
                          .foregroundColor(.primary)
@@ -91,8 +119,8 @@ struct MapPositionsView: View {
         }
         .onAppear {
 //            // Set the position dynamically on appear
-           if !locations.isEmpty {
-              let allCoordinates = locations.map { $0.coordinate }
+           if !locationsPositions.isEmpty {
+              let allCoordinates = locationsPositions.map { $0.location.coordinate }
               let region = MapPositionsView.calculateRegion(for: allCoordinates)
               position = .region(region)
            }
@@ -130,5 +158,5 @@ struct MapPositionsView: View {
       Location(name: "Katerstraße 3", coordinate: CLLocationCoordinate2D(latitude: 51.495553516488205, longitude: 6.565227532716446))
    ]
    
-   MapPositionsView(locations: locations)
+//   MapPositionsView(locations: locations)
 }
