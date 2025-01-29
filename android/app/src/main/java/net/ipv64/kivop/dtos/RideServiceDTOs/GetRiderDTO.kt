@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 
 data class GetRiderDTO (
     var id : UUID,
+    var userID : UUID,
     var username : String,
     var latitude : Float,
     var longitude : Float,
