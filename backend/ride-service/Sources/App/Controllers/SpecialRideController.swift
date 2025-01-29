@@ -140,17 +140,18 @@ struct SpecialRideController: RouteCollection {
                         }
                     }
                 }
+                let rideID = try specialRide.requireID()
                 
                 responseRides.append(
                     GetSpecialRideDTO(
-                    id: specialRide.id,
-                    name: specialRide.name,
-                    starts: specialRide.starts,
-                    ends: specialRide.ends,
-                    emptySeats: specialRide.emptySeats,
-                    allocatedSeats: UInt8(allocatedSeats),
-                    myState: usersState,
-                    openRequests: openRequests
+                        id: rideID,
+                        name: specialRide.name,
+                        starts: specialRide.starts,
+                        ends: specialRide.ends,
+                        emptySeats: specialRide.emptySeats,
+                        allocatedSeats: UInt8(allocatedSeats),
+                        myState: usersState,
+                        openRequests: openRequests
                     )
                 )
             }
