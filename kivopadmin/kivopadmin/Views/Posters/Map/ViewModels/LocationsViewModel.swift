@@ -6,6 +6,7 @@ class LocationsViewModel: ObservableObject {
     @Published var selectedUserNames: [String] = []
     @Published var isEditing = false
     @Published var isLoading: Bool = false
+    @Published var satelliteView: Bool = false
     @Published var summary: PosterSummaryResponseDTO? = nil
     @Published var errorMessage: String? = nil
     @Published var showLocationsList: Bool = false

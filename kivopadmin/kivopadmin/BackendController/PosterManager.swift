@@ -9,12 +9,14 @@ public struct PosterStatusDTO: Codable {
     public var takenDown: Int
     public var toHang: Int
     public var hangs: Int
+    public var damaged: Int
 
-    public init(overdue: Int, takenDown: Int, toHang: Int, hangs: Int) {
+    public init(overdue: Int, takenDown: Int, toHang: Int, hangs: Int, damaged: Int) {
         self.overdue = overdue
         self.takenDown = takenDown
         self.toHang = toHang
         self.hangs = hangs
+        self.damaged = damaged
     }
 }
 

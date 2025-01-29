@@ -7,7 +7,7 @@ struct LocationMapAnnotationView: View {
     let accentColor = Color("AccentColor")
     var body: some View {
         VStack{
-            Image(systemName: "map.circle.fill")
+            getImageForStatus(position: position.position)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 30, height: 30)
@@ -39,8 +39,26 @@ struct LocationMapAnnotationView: View {
         case .takenDown:
             return .green
         case .damaged:
-            return .orange // Farbe für den neuen Status "damaged"
+            return .orange 
+        }
+    }
+    
+    // Funktion zur Auswahl des passenden Bildes je nach Status
+    func getImageForStatus(position: PosterPositionResponseDTO) -> Image {
+        switch position.status {
+        case .toHang:
+            return Image(systemName: "xmark.circle")
+        case .hangs:
+            return Image(systemName: "photo.on.rectangle.angled")
+        case .overdue:
+            return Image(systemName: "exclamationmark.triangle.fill")
+        case .takenDown:
+            return Image(systemName: "checkmark.circle")
+        case .damaged:
+            return Image(systemName: "burst")
         }
     }
 
 }
+
+

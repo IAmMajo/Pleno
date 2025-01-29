@@ -21,6 +21,8 @@ struct LocationPreviewView: View {
             return (text: "hängt noch nicht", color: Color(UIColor.secondaryLabel))
         case .overdue:
             return (text: "überfällig", color: .red)
+        case .damaged:
+            return (text: "beschädigt", color: .orange)
         default:
             return (text: "", color: Color(UIColor.secondaryLabel))
         }
