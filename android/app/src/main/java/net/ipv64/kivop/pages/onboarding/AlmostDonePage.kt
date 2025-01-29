@@ -61,10 +61,19 @@ fun AlmostDonePage(navController: NavController, initState: Int) {
                   val response = checkActiv()
                   if (response == "Successful Login!") {
                     navigateToMainActivity(navController.context)
+                  } else if (response == "Email not verified") {
+                    Toast.makeText(
+                            navController.context,
+                            getString(R.string.missing_email_verification),
+                            Toast.LENGTH_SHORT)
+                        .show()
                   } else {
                     Toast.makeText(
-                            navController.context, "Account not activated", Toast.LENGTH_SHORT)
+                            navController.context,
+                            getString(R.string.missing_admin_verification),
+                            Toast.LENGTH_SHORT)
                         .show()
+                    state = 2
                   }
                 }
               }) {

@@ -56,8 +56,9 @@ import net.ipv64.kivop.pages.SplashActivity
 import net.ipv64.kivop.pages.mainApp.AlreadyVoted
 import net.ipv64.kivop.pages.mainApp.AttendancesCoordinationPage
 import net.ipv64.kivop.pages.mainApp.AttendancesListPage
-import net.ipv64.kivop.pages.mainApp.CarpoolPage
-import net.ipv64.kivop.pages.mainApp.CarpoolingList
+import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolPage
+import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolingList
+import net.ipv64.kivop.pages.mainApp.Carpool.onBoardingCreateRide.CreateRidePage
 import net.ipv64.kivop.pages.mainApp.EventsPage
 import net.ipv64.kivop.pages.mainApp.HomePage
 import net.ipv64.kivop.pages.mainApp.MeetingsListPage
@@ -114,7 +115,9 @@ fun handleLogout(context: Context) {
 fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
 
   val meetingsViewModel = viewModel<MeetingsViewModel>()
+
   LaunchedEffect(Unit) { meetingsViewModel.fetchMeetings() }
+
   NavHost(
       navController = navController,
       startDestination = Screen.Home.rout,
@@ -145,7 +148,16 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
               navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
         }
         // Protokolle
-        composable(route = Screen.Protocol.rout) { ProtocolListPage(navController = navController) }
+        composable(Screen.Protocol.rout) {
+          ProtocolListPage(navController = navController, meetingsViewModel)
+        }
+        //    composable("${Screen.Protocol.rout}/{meetingID}/{protocollang}") { backStackEntry ->
+        //      ProtocolListPage(
+        //        navController,
+        // backStackEntry.arguments?.getString("meetingID").orEmpty(),backStackEntry.arguments?.getString("protocollang").orEmpty())
+        //    }
+        //     composable(route = Screen.Protocol.rout) { ProtocolListPage(navController =
+        // navController) }
         // CarpoolingList
         composable(route = Screen.CarpoolingList.rout) {
           CarpoolingList(navController = navController)
@@ -154,14 +166,16 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         composable(route = "${Screen.Carpool.rout}/{carpoolID}") { backStackEntry ->
           CarpoolPage(navController, backStackEntry.arguments?.getString("carpoolID").orEmpty())
         }
+
+        // Create Carpool
+        composable(route = Screen.CreateCarpool.rout) {
+          CreateRidePage(navController = navController)
+        }
         // Events
         composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
         // Poster
         composable(route = Screen.Poster.rout) { PosterPage(navController = navController) }
-        //        // Abstimmungen Listen Page
-        //        composable(route = Screen.Votings.rout) { VotingsListPage(navController =
-        // navController) }
-        // Abstimmung Resultat Page
+
         composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
           AttendancesCoordinationPage(
               navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
@@ -300,7 +314,13 @@ fun DrawerContent(
           item,
           selected = currentRoute == item.route,
           onClick = {
-            navController.navigate(item.route)
+            navController.navigate(item.route) {
+              popUpTo(navController.graph.startDestinationId) {
+                saveState = true // Save state when navigating back
+              }
+              launchSingleTop = true
+              restoreState = true
+            }
             coroutineScope.launch { drawerState.close() }
           })
       SpacerBetweenElements(4.dp)

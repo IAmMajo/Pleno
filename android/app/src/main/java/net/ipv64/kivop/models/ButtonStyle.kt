@@ -27,7 +27,7 @@ data class ButtonStyle(
 
 var primaryButtonStyle = ButtonStyle(Tertiary, Background_secondary, textContentStyle)
 var secondaryButtonStyle = ButtonStyle(Secondary, Text_tertiary, textContentStyle)
-var neutralBttonStyle = ButtonStyle(Signal_neutral_20, Signal_neutral, textContentStyle)
+var neutralButtonStyle = ButtonStyle(Signal_neutral_20, Signal_neutral, textContentStyle)
 var alertButtonStyle = ButtonStyle(Signal_red, Background_secondary, textContentStyle)
 var alertSecondaryButtonStyle = ButtonStyle(Signal_red_20, Text_tertiary, textContentStyle)
 var textButtonStyle = ButtonStyle(Color.Transparent, Primary, textContentUnderlineStyle)

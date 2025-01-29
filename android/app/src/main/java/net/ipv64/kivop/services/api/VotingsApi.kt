@@ -54,6 +54,7 @@ suspend fun getVotings(meetingId: String): List<GetVotingDTO> =
               val closedAt = voting.get("closedAt")?.asString?.let { stringToLocalDateTime(it) }
               val anonymous = voting.get("anonymous").asBoolean
               val optionsArray = voting.get("options").asJsonArray
+              val iVoted = voting.get("iVoted").asBoolean
               val options =
                   optionsArray.map { option ->
                     val optionObject = option.asJsonObject
@@ -71,6 +72,7 @@ suspend fun getVotings(meetingId: String): List<GetVotingDTO> =
                   startedAt,
                   closedAt,
                   anonymous,
+                  iVoted,
                   options)
             }
           } else {
@@ -183,6 +185,7 @@ suspend fun GetVotingByID(ID: UUID): GetVotingDTO? =
             val closedAt = votingJson.get("closedAt")?.asString?.let { stringToLocalDateTime(it) }
             val anonymous = votingJson.get("anonymous").asBoolean
             val optionsArray = votingJson.get("options").asJsonArray
+            val iVoted = votingJson.get("iVoted").asBoolean
             val options =
                 optionsArray.map { option ->
                   val optionObject = option.asJsonObject
@@ -200,6 +203,7 @@ suspend fun GetVotingByID(ID: UUID): GetVotingDTO? =
                 startedAt,
                 closedAt,
                 anonymous,
+                iVoted,
                 options)
           } else {
             println("Fehler: Leere Antwort erhalten.")
