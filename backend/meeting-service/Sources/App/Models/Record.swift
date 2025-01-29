@@ -31,7 +31,7 @@ extension Record {
             _\(voting.description)_
             **\(LocalizableManager.shared.translate(key: "Opened at", into: lang))**: \(voting.startedAt?.description(with: Locale(identifier: lang)) ?? "X")
             **\(LocalizableManager.shared.translate(key: "Closed at", into: lang))**: \(voting.closedAt?.description(with: Locale(identifier: lang)) ?? "X")
-            ** \(LocalizableManager.shared.translate(key: "Options",  into: lang))**: \(getVotingDTO.options.map(\.text).joined(separator: ", "))
+            **\(LocalizableManager.shared.translate(key: "Options",  into: lang))**: \(getVotingDTO.options.map(\.text).joined(separator: ", "))
             ### \(LocalizableManager.shared.translate(key: "Distribution of votes",  into: lang))
             \(getVotingResultsDTO.results.map({ getVotingResultDTO in
             let votingOptionText: String

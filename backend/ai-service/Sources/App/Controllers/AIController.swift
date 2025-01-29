@@ -6,7 +6,7 @@ struct AIController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let openAPITag = TagObject(name: "AI")
         
-        routes.post("extend-record", use: extendRecord).openAPI(
+        routes.post("extend-record", ":lang", use: extendRecord).openAPI(
             tags: openAPITag,
             summary: "Protokoll erweitern",
             description:
@@ -22,7 +22,7 @@ struct AIController: RouteCollection {
             responseContentType: .init(rawValue: "text/markdown"),
             responseDescription: "Erweitertes Protokoll"
         )
-        routes.post("generate-social-media-post", use: generateSocialMediaPost).openAPI(
+        routes.post("generate-social-media-post", ":lang", use: generateSocialMediaPost).openAPI(
             tags: openAPITag,
             summary: "Social Media Post generieren",
             description:
@@ -42,20 +42,22 @@ struct AIController: RouteCollection {
 
     @Sendable
     func extendRecord(req: Request) async throws -> Response {
+        let lang = req.parameters.get("lang")!
         let dto = try req.content.decode(AISendMessageDTO.self)
         return try await req.ai.getStreamedAIResponse(
             promptName: "extend-record",
-            message: "Protokoll:\n\n\(dto.content)",
+            message: "Sprachcode \"\(lang)\":\n\n\(dto.content)",
             maxCompletionTokens: 10000
         )
     }
 
     @Sendable
     func generateSocialMediaPost(req: Request) async throws -> Response {
+        let lang = req.parameters.get("lang")!
         let dto = try req.content.decode(AISendMessageDTO.self)
         return try await req.ai.getStreamedAIResponse(
             promptName: "generate-social-media-post",
-            message: "Protokoll:\n\n\(dto.content)",
+            message: "Sprachcode \"\(lang)\":\n\n\(dto.content)",
             maxCompletionTokens: 1000
         )
     }
