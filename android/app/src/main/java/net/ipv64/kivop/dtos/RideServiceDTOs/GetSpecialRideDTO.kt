@@ -4,7 +4,7 @@ import java.util.UUID
 import java.time.LocalDateTime
 
 data class GetSpecialRideDTO (
-    var id : UUID?,
+    var id : UUID,
     var name : String,
     var starts : LocalDateTime,
     var ends : LocalDateTime,
