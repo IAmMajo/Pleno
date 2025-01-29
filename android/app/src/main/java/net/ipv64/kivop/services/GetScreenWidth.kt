@@ -10,7 +10,5 @@ import androidx.compose.ui.unit.dp
 fun GetScreenWidth(): Dp {
   val configuration = LocalConfiguration.current
   val density = LocalDensity.current
-  return with(density) {
-    configuration.screenWidthDp.dp
-  }
+  return with(density) { configuration.screenWidthDp.dp }
 }

@@ -1,4 +1,3 @@
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,35 +48,28 @@ fun AgendaCard(
           modifier
               .wrapContentHeight()
               .fillMaxWidth()
-              .background(
-                  color = backgroundColor,
-                  shape = RoundedCornerShape(8.dp) 
-                  )
+              .background(color = backgroundColor, shape = RoundedCornerShape(8.dp))
               .padding(16.dp)) {
         if (content.length > maxLength) {
           shortenedContent = content.take(maxLength) + "..."
           ExpandableBox(
               contentFoldedIn = {
                 Column() {
-                  Row(modifier = Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = name,
-                        color = fontColor,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 19.sp
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    EditBox()
-                    
-                    
-                  }
+                  Row(
+                      modifier = Modifier.fillMaxWidth(),
+                      verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = name,
+                            color = fontColor,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 19.sp)
+                        Spacer(modifier = Modifier.weight(1f))
+                        EditBox()
+                      }
                   Spacer(modifier = Modifier.height(8.dp))
                   Row(modifier = Modifier.fillMaxWidth()) {
-                    Markdown(
-                      markdown = shortenedContent,
-                      fontColor = fontColor
-                    )
+                    Markdown(markdown = shortenedContent, fontColor = fontColor)
                   }
                   Spacer(modifier = Modifier.height(6.dp))
                   Row(
@@ -104,16 +96,13 @@ fun AgendaCard(
                     Spacer(modifier = Modifier.weight(1f))
                     EditBox()
                   }
-                  
+
                   Spacer(modifier = Modifier.height(8.dp))
-                  Row(modifier = Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically) {
-                    Markdown(
-                      markdown = content,
-                      fontColor = fontColor
-                    )
-                   
-                  }
-                 
+                  Row(
+                      modifier = Modifier.fillMaxWidth(),
+                      verticalAlignment = Alignment.CenterVertically) {
+                        Markdown(markdown = content, fontColor = fontColor)
+                      }
 
                   Spacer(modifier = Modifier.height(6.dp))
                   Row(
@@ -130,24 +119,22 @@ fun AgendaCard(
               })
         } else {
           Column() {
-            Row(modifier = Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically) {
-              Text(
-                  text = name,
-                  color = fontColor,
-                  style = MaterialTheme.typography.labelLarge,
-                  fontWeight = FontWeight.SemiBold,
-                  fontSize = 19.sp)
-              Spacer(modifier = Modifier.weight(1f))
-              EditBox()
-            }
-            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically) {
+                  Text(
+                      text = name,
+                      color = fontColor,
+                      style = MaterialTheme.typography.labelLarge,
+                      fontWeight = FontWeight.SemiBold,
+                      fontSize = 19.sp)
+                  Spacer(modifier = Modifier.weight(1f))
+                  EditBox()
+                }
 
             Spacer(modifier = Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
-             Markdown(
-               markdown = content,
-               fontColor = fontColor
-             )
+              Markdown(markdown = content, fontColor = fontColor)
             }
           }
         }

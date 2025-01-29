@@ -29,20 +29,16 @@ fun ProtocolListPage(navController: NavController, meetingsViewModel: MeetingsVi
   Column {
     SpacerTopBar()
 
-    LazyColumn(
-        modifier = Modifier.fillMaxHeight()) {
-          items(meetings) { meeting ->
-            if (meeting != null && meeting.status != MeetingStatus.scheduled) {
-              ListenItem(
-                  itemListData = meeting,
-                  onClick = { navController.navigate("protokolleDetail/${meeting.id}") },
-                  isProtokoll = true
-              )
-              Spacer(modifier = Modifier.height(12.dp))
-            }
-           
-          }
-        
+    LazyColumn(modifier = Modifier.fillMaxHeight()) {
+      items(meetings) { meeting ->
+        if (meeting != null && meeting.status != MeetingStatus.scheduled) {
+          ListenItem(
+              itemListData = meeting,
+              onClick = { navController.navigate("protokolleDetail/${meeting.id}") },
+              isProtokoll = true)
+          Spacer(modifier = Modifier.height(12.dp))
         }
+      }
+    }
   }
 }

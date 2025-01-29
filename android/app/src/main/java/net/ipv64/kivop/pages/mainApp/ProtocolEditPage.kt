@@ -25,13 +25,11 @@ import net.ipv64.kivop.models.viewModel.ProtocolViewModelFactory
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
-
 @Composable
 fun ProtocolEditPage(navController: NavController, meetingId: String, protocolLang: String) {
   // ViewModel laden
-  val protocolViewModel: ProtocolViewModel = viewModel(
-    factory = ProtocolViewModelFactory(meetingId, protocolLang)
-  )
+  val protocolViewModel: ProtocolViewModel =
+      viewModel(factory = ProtocolViewModelFactory(meetingId, protocolLang))
 
   // BackHandler für Navigation
   BackHandler {
@@ -46,10 +44,7 @@ fun ProtocolEditPage(navController: NavController, meetingId: String, protocolLa
   if (protocol == null) {
     // Ladeanzeige
     SpacerTopBar()
-    Box(
-      modifier = Modifier.fillMaxSize(),
-      contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
       CircularProgressIndicator()
     }
   } else {
@@ -57,41 +52,32 @@ fun ProtocolEditPage(navController: NavController, meetingId: String, protocolLa
     val tabs = listOf("Protokoll Bearbeiten", "Protokoll Vorschau")
 
     // Definiere die Inhalte der Tabs
-    val tabContents: List<@Composable () -> Unit> = listOf(
-      {
-        // Editor-Tab Inhalt
-        MarkdownEditorTab(
-          editableMarkdown = editableMarkdown,
-          onMarkdownChange = { protocolViewModel.onMarkdownChange(it) }
-        )
-      },
-      {
-        // Vorschau-Tab Inhalt mit Button
-        Column(
-          modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-        ) {
-          // Markdown-Vorschau nimmt den verfügbaren Platz ein
-          MarkdownPreviewTab(
-            markdown = editableMarkdown,
-            modifier = Modifier.weight(1f)
-          )
-
-          // "Speichern"-Button unten platzieren
-          CustomButton(
-            text = "Speichern",
-            onClick = {
-              protocolViewModel.saveProtocolContent()
-              navController.popBackStack()
+    val tabContents: List<@Composable () -> Unit> =
+        listOf(
+            {
+              // Editor-Tab Inhalt
+              MarkdownEditorTab(
+                  editableMarkdown = editableMarkdown,
+                  onMarkdownChange = { protocolViewModel.onMarkdownChange(it) })
             },
-            modifier = Modifier,
-            color = Primary,
-            fontColor = Text_prime_light
-          )
-        }
-      }
-    )
+            {
+              // Vorschau-Tab Inhalt mit Button
+              Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                // Markdown-Vorschau nimmt den verfügbaren Platz ein
+                MarkdownPreviewTab(markdown = editableMarkdown, modifier = Modifier.weight(1f))
+
+                // "Speichern"-Button unten platzieren
+                CustomButton(
+                    text = "Speichern",
+                    onClick = {
+                      protocolViewModel.saveProtocolContent()
+                      navController.popBackStack()
+                    },
+                    modifier = Modifier,
+                    color = Primary,
+                    fontColor = Text_prime_light)
+              }
+            })
 
     // Haupt-UI mit Tabs und Speichern-Button
     Column(modifier = Modifier.fillMaxSize()) {
@@ -99,10 +85,6 @@ fun ProtocolEditPage(navController: NavController, meetingId: String, protocolLa
 
       // GenerateTabs enthält die TabRow und die HorizontalPager
       GenerateTabs(tabs = tabs, tabContents = tabContents)
-      
-      
     }
   }
 }
-
-

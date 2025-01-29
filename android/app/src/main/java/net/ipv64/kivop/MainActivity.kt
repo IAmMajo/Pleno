@@ -153,18 +153,18 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         composable(Screen.Protocol.rout) {
           ProtocolListPage(navController = navController, meetingsViewModel)
         }
-            composable("${Screen.ProtocolEditPage.rout}/{meetingID}/{protocollang}") { backStackEntry ->
-              ProtocolEditPage(
-                navController,
-         backStackEntry.arguments?.getString("meetingID").orEmpty(),backStackEntry.arguments?.getString("protocollang").orEmpty())
-            }
+        composable("${Screen.ProtocolEditPage.rout}/{meetingID}/{protocollang}") { backStackEntry ->
+          ProtocolEditPage(
+              navController,
+              backStackEntry.arguments?.getString("meetingID").orEmpty(),
+              backStackEntry.arguments?.getString("protocollang").orEmpty())
+        }
 
         composable("${Screen.ProtocolDetailPage.rout}/{meetingID}") { backStackEntry ->
           ProtocolDetailPage(
-            navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
+              navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
         }
-      
-    
+
         // CarpoolingList
         composable(route = Screen.CarpoolingList.rout) {
           CarpoolingList(navController = navController)

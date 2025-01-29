@@ -10,7 +10,8 @@ import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetRecordDTO
 import net.ipv64.kivop.services.api.getProtocolApi
 
-class ProtocolViewModel(private val meetingId: String, private val protocolLang: String) : ViewModel() {
+class ProtocolViewModel(private val meetingId: String, private val protocolLang: String) :
+    ViewModel() {
   // Internes MutableState
   private val _protocol = mutableStateOf<GetRecordDTO?>(null)
 
@@ -57,7 +58,7 @@ class ProtocolViewModel(private val meetingId: String, private val protocolLang:
 }
 
 class ProtocolViewModelFactory(private val meetingId: String, private val protocolLang: String) :
-  ViewModelProvider.Factory {
+    ViewModelProvider.Factory {
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
     if (modelClass.isAssignableFrom(ProtocolViewModel::class.java)) {
       @Suppress("UNCHECKED_CAST")
@@ -66,4 +67,3 @@ class ProtocolViewModelFactory(private val meetingId: String, private val protoc
     throw IllegalArgumentException("Unknown ViewModel class")
   }
 }
-

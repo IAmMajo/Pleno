@@ -1,4 +1,3 @@
-
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
@@ -50,7 +49,6 @@ fun GenerateTabs(tabs: List<String>, tabContents: List<@Composable (() -> Unit)?
         indicator = { tabPositions -> CustomIndicator(tabPositions, pagerState) }) {
           tabs.forEachIndexed { index, title ->
             Tab(
-              
                 modifier =
                     Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         .heightIn(34.dp)
@@ -59,7 +57,7 @@ fun GenerateTabs(tabs: List<String>, tabContents: List<@Composable (() -> Unit)?
                             else Background_secondary,
                             shape = RoundedCornerShape(50.dp),
                         ),
-              onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
+                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
                 text = {
                   Text(
                       text = title,
@@ -67,7 +65,6 @@ fun GenerateTabs(tabs: List<String>, tabContents: List<@Composable (() -> Unit)?
                       style = MaterialTheme.typography.labelMedium)
                 },
                 selected = pagerState.currentPage == index,
-               
             )
           }
         }

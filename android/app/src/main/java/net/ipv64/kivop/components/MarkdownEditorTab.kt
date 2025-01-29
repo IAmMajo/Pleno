@@ -17,51 +17,34 @@ import net.ipv64.kivop.ui.theme.Text_prime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MarkdownEditorTab(
-  editableMarkdown: String,
-  onMarkdownChange: (String) -> Unit
-) {
-  Column(
-    modifier = Modifier
-      .fillMaxWidth()
-      .padding(16.dp)
-  ) {
+fun MarkdownEditorTab(editableMarkdown: String, onMarkdownChange: (String) -> Unit) {
+  Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
     TextField(
-      value = editableMarkdown,
-      onValueChange = { newValue ->
-        Log.d("MarkdownEditor", "TextField changed: $newValue")
-        onMarkdownChange(newValue)
-      },
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(1f, fill = true)
-        .background(color = Color.Transparent),
-      colors = TextFieldDefaults.colors(
-        focusedTextColor = Text_prime,
-        unfocusedTextColor = Text_prime,
-        focusedContainerColor = Color.Transparent, // Hintergrund transparent
-        unfocusedContainerColor = Color.Transparent,
-        disabledContainerColor = Color.Transparent,
-        focusedIndicatorColor = Color.Transparent,  // Linienfarbe fokussiert
-        unfocusedIndicatorColor = Color.Transparent, // Linienfarbe unfokussiert
-      ),
-      
-      
-     
+        value = editableMarkdown,
+        onValueChange = { newValue ->
+          Log.d("MarkdownEditor", "TextField changed: $newValue")
+          onMarkdownChange(newValue)
+        },
+        modifier =
+            Modifier.fillMaxWidth().weight(1f, fill = true).background(color = Color.Transparent),
+        colors =
+            TextFieldDefaults.colors(
+                focusedTextColor = Text_prime,
+                unfocusedTextColor = Text_prime,
+                focusedContainerColor = Color.Transparent, // Hintergrund transparent
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent, // Linienfarbe fokussiert
+                unfocusedIndicatorColor = Color.Transparent, // Linienfarbe unfokussiert
+            ),
     )
   }
 }
 
 @Composable
-fun MarkdownPreviewTab(markdown: String,modifier: Modifier) {
+fun MarkdownPreviewTab(markdown: String, modifier: Modifier) {
   Log.d("MarkdownPreview", "Markdown content: $markdown")
-  Column(
-    modifier = modifier
-  ) {
-    Markdown(
-      modifier = Modifier.fillMaxSize(),
-      markdown = markdown,
-      fontColor = Text_prime
-    )
+  Column(modifier = modifier) {
+    Markdown(modifier = Modifier.fillMaxSize(), markdown = markdown, fontColor = Text_prime)
   }
 }

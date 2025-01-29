@@ -157,39 +157,36 @@ fun AttendancesCoordinationPage(
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                   meetingViewModel.votings.forEach { voting ->
                     var votingData =
-                      ItemListData(
-                        title = voting.question,
-                        id = voting.id.toString(),
-                        date = null,
-                        time = null,
-                        meetingStatus = "",
-                        timeRend = false,
-                        iconRend = false
-                      )
+                        ItemListData(
+                            title = voting.question,
+                            id = voting.id.toString(),
+                            date = null,
+                            time = null,
+                            meetingStatus = "",
+                            timeRend = false,
+                            iconRend = false)
                     try {
                       votingData =
-                        ItemListData(
-                          title = voting.question,
-                          id = voting.id.toString(),
-                          date = voting.startedAt!!.toLocalDate(),
-                          time = null,
-                          meetingStatus = "",
-                          timeRend = false,
-                          iconRend = false
-                        )
+                          ItemListData(
+                              title = voting.question,
+                              id = voting.id.toString(),
+                              date = voting.startedAt!!.toLocalDate(),
+                              time = null,
+                              meetingStatus = "",
+                              timeRend = false,
+                              iconRend = false)
                     } catch (e: Exception) {
                       Log.d("test", e.message.toString())
                       Log.d("test", voting.question)
                     }
                     IconTextField(
-                      text = votingData.title,
-                      icon = ImageVector.vectorResource(R.drawable.ic_pie_chart),
-                      onClick = { navController.navigate("abstimmung/${voting.id}") }) 
+                        text = votingData.title,
+                        icon = ImageVector.vectorResource(R.drawable.ic_pie_chart),
+                        onClick = { navController.navigate("abstimmung/${voting.id}") })
                   }
                 }
                 SpacerBetweenElements()
               }
-              
             }
 
             item {
@@ -199,17 +196,14 @@ fun AttendancesCoordinationPage(
                 Log.d("Deteil", "${meetingViewModel.protocols}")
                 meetingViewModel.meeting?.let {
                   ListenItem(
-                    itemListData = it,
-                    onClick = { navController.navigate("protokolleDetail/${it.id}") },
-                    isProtokoll = true
-                  )
+                      itemListData = it,
+                      onClick = { navController.navigate("protokolleDetail/${it.id}") },
+                      isProtokoll = true)
                 }
                 SpacerBetweenElements()
               }
             }
-              
-            }
           }
-    
+    }
   }
 }
