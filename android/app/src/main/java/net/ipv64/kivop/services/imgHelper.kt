@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
+import androidx.core.content.FileProvider
+import java.io.File
 import java.io.InputStream
 
 fun uriToBase64String(context: Context, uri: Uri): String? {
@@ -57,4 +59,9 @@ fun encodeImageToBase64(imageByteArray: ByteArray?): String? {
 
 fun decodeFromBase64(base64String: String): ByteArray {
   return Base64.decode(base64String, Base64.NO_WRAP)
+}
+
+fun createTempUri(context: Context): Uri {
+  val tempFile = File(context.cacheDir, "photo_${System.currentTimeMillis()}.jpg")
+  return FileProvider.getUriForFile(context, "${context.packageName}.provider", tempFile)
 }

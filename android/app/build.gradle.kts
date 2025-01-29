@@ -1,6 +1,24 @@
 plugins {
   alias(libs.plugins.androidApplication)
   alias(libs.plugins.jetbrainsKotlinAndroid)
+  id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+}
+
+secrets {
+  // To add your Maps API key to this project:
+  // 1. If the secrets.properties file does not exist, create it in the same folder as the local.properties file.
+  // 2. Add this line, where YOUR_API_KEY is your API key:
+  //        MAPS_API_KEY=YOUR_API_KEY
+  propertiesFileName = "secrets.properties"
+
+  // A properties file containing default secret values. This file can be
+  // checked in version control.
+  defaultPropertiesFileName = "local.defaults.properties"
+
+  // Configure which keys should be ignored by the plugin by providing regular expressions.
+  // "sdk.dir" is ignored by default.
+  ignoreList.add("keyToIgnore") // Ignore the key "keyToIgnore"
+  ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
 }
 
 android {
@@ -34,9 +52,12 @@ android {
     targetCompatibility = JavaVersion.VERSION_1_8
   }
   kotlinOptions { jvmTarget = "1.8" }
-  buildFeatures { compose = true }
+  buildFeatures { 
+    compose = true
+    buildConfig = true}
   composeOptions { kotlinCompilerExtensionVersion = "1.5.1" }
   packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
+  
 }
 
 dependencies {
@@ -74,8 +95,6 @@ dependencies {
   // Tav Compose
   implementation(libs.accompanist.pager)
   implementation(libs.accompanist.pager.indicators)
-  implementation("org.osmdroid:osmdroid-android:6.1.16")
-  implementation(
-      "tech.utsmankece:osm-androd-compose:0.0.3") // TODO: bugged Look for alternative - not getting
-  // updated
+  implementation("com.google.android.gms:play-services-maps:19.0.0")
+  implementation("com.google.maps.android:maps-compose:6.4.0")
 }

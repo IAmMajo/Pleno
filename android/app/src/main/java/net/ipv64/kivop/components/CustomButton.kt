@@ -19,7 +19,7 @@ import net.ipv64.kivop.models.ButtonStyle
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.TextStyles
-import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay.fontColor
+
 
 @Composable
 // ToDo - ButtonStyle ergänzen
@@ -40,7 +40,8 @@ fun CustomButton(
             modifier
                 .fillMaxWidth()
                 .height(44.dp)
-                .background(color = buttonStyle.backgroundColor, shape = RoundedCornerShape(100.dp))
+                .clip(shape = RoundedCornerShape(100.dp))
+                .background(color = buttonStyle.backgroundColor)
                 .clickable(enabled = enabled, onClick = onClick)) {
           Text(text, color = buttonStyle.contentColor, style = TextStyles.largeContentStyle)
         }
@@ -51,7 +52,8 @@ fun CustomButton(
             modifier
                 .fillMaxWidth()
                 .height(44.dp)
-                .background(color = color, shape = RoundedCornerShape(100.dp))
+                .clip(shape = RoundedCornerShape(100.dp))
+                .background(color = color)
                 .clickable(enabled = enabled, onClick = onClick)) {
           Text(text, color = fontColor, style = TextStyles.largeContentStyle)
         }

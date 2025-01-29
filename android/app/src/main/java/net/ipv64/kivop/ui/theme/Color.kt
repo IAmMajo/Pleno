@@ -10,6 +10,7 @@ val Tertiary = Color(0xFF1061DA)
 val Tertiary_60 = Color(0x991061da)
 // Text colors dark
 val Text_prime = Color(0xff373434)
+val Text_prime70 = Color(0xB2373434)
 val Text_secondary = Color(0xFF43578A)
 val Text_tertiary = Color(0xFF404445)
 // Text colors light
@@ -29,3 +30,5 @@ val Signal_red = Color(0xFFDA1043)
 val Signal_red_20 = Color(0x33da1043)
 val Signal_neutral = Color(0xFF686D74)
 val Signal_neutral_20 = Color(0x33686d74)
+
+val ProgressBarGray = Color(0xFFE1E2E3)

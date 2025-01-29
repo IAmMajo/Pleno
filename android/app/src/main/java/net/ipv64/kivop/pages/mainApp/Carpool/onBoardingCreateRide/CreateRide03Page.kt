@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.utsman.osmandcompose.OpenStreetMap
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.components.DebouncedTextFieldCustomInputField
 import net.ipv64.kivop.components.SpacerBetweenElements
@@ -184,19 +183,5 @@ fun CreateRide03Page(
                     Text(text = "Weiter", style = TextStyles.contentStyle, color = Text_prime_light)
                   }
             }
-      }
-}
-
-@Composable
-fun TestMap() {
-  Box(
-      modifier =
-          Modifier.width(500.dp)
-              .aspectRatio(1.5f)
-              .clip(RoundedCornerShape(8.dp))
-              .background(Color.White)) {
-        OpenStreetMap(
-            modifier = Modifier.fillMaxSize().clipToBounds(),
-        ) {}
       }
 }
