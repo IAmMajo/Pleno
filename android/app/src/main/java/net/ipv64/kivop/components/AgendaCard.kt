@@ -1,3 +1,4 @@
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import io.noties.markwon.Markwon
 import net.ipv64.kivop.R
 import net.ipv64.kivop.components.ExpandableBox
+import net.ipv64.kivop.components.Markdown
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Text_prime
 
@@ -36,6 +38,7 @@ fun AgendaCard(
     backgroundColor: Color = Background_secondary,
     fontColor: Color = Text_prime,
     name: String = "",
+    EditBox: @Composable () -> Unit = {}
 ) {
   val context = LocalContext.current
   val markwon = Markwon.create(context)
@@ -48,7 +51,7 @@ fun AgendaCard(
               .fillMaxWidth()
               .background(
                   color = backgroundColor,
-                  shape = RoundedCornerShape(8.dp) // todo: get dp from stylesheet
+                  shape = RoundedCornerShape(8.dp) 
                   )
               .padding(16.dp)) {
         if (content.length > maxLength) {
@@ -56,23 +59,25 @@ fun AgendaCard(
           ExpandableBox(
               contentFoldedIn = {
                 Column() {
-                  Row(modifier = Modifier.fillMaxWidth()) {
+                  Row(modifier = Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = name,
                         color = fontColor,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 19.sp)
+                        fontSize = 19.sp
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    EditBox()
+                    
+                    
                   }
                   Spacer(modifier = Modifier.height(8.dp))
                   Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = shortenedContent,
-                        color = fontColor,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp,
-                        letterSpacing = 0.25.sp)
+                    Markdown(
+                      markdown = shortenedContent,
+                      fontColor = fontColor
+                    )
                   }
                   Spacer(modifier = Modifier.height(6.dp))
                   Row(
@@ -96,17 +101,20 @@ fun AgendaCard(
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 19.sp)
+                    Spacer(modifier = Modifier.weight(1f))
+                    EditBox()
                   }
+                  
                   Spacer(modifier = Modifier.height(8.dp))
-                  Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = content,
-                        color = fontColor,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp,
-                        letterSpacing = 0.25.sp)
+                  Row(modifier = Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically) {
+                    Markdown(
+                      markdown = content,
+                      fontColor = fontColor
+                    )
+                   
                   }
+                 
+
                   Spacer(modifier = Modifier.height(6.dp))
                   Row(
                       modifier = Modifier.fillMaxWidth().height(25.dp),
@@ -122,23 +130,24 @@ fun AgendaCard(
               })
         } else {
           Column() {
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(modifier = Modifier.fillMaxWidth(),verticalAlignment = Alignment.CenterVertically) {
               Text(
                   text = name,
                   color = fontColor,
                   style = MaterialTheme.typography.labelLarge,
                   fontWeight = FontWeight.SemiBold,
                   fontSize = 19.sp)
+              Spacer(modifier = Modifier.weight(1f))
+              EditBox()
             }
+            
+
             Spacer(modifier = Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
-              Text(
-                  text = content,
-                  color = fontColor,
-                  fontWeight = FontWeight.Medium,
-                  fontSize = 14.sp,
-                  lineHeight = 20.sp,
-                  letterSpacing = 0.25.sp)
+             Markdown(
+               markdown = content,
+               fontColor = fontColor
+             )
             }
           }
         }

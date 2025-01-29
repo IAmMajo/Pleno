@@ -10,6 +10,9 @@ sealed class Screen(val rout: String) {
   object Attendance : Screen("anwesenheit")
 
   object Protocol : Screen("protokolle")
+  object ProtocolDetailPage : Screen("protokolleDetail")
+  object ProtocolEditPage : Screen("protokolleEdit")
+  
 
   object CarpoolingList : Screen("carpoolingList")
 
