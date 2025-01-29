@@ -93,7 +93,7 @@ struct PostersView: View {
                          
                          Spacer()
                          
-                         //damaged count hinzufügen
+                         //damaged count hinzufügen?
                          if (item.tohangCount != 0) {
                             if item.tohangCount > 99 {
                                Capsule()
