@@ -57,6 +57,7 @@ fun GenerateTabs(tabs: List<String>, tabContents: List<@Composable (() -> Unit)?
                             else Background_secondary,
                             shape = RoundedCornerShape(50.dp),
                         ),
+                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
                 text = {
                   Text(
                       text = title,
@@ -64,7 +65,6 @@ fun GenerateTabs(tabs: List<String>, tabContents: List<@Composable (() -> Unit)?
                       style = MaterialTheme.typography.labelMedium)
                 },
                 selected = pagerState.currentPage == index,
-                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
             )
           }
         }

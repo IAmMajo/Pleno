@@ -11,6 +11,10 @@ sealed class Screen(val rout: String) {
 
   object Protocol : Screen("protokolle")
 
+  object ProtocolDetailPage : Screen("protokolleDetail")
+
+  object ProtocolEditPage : Screen("protokolleEdit")
+
   object CarpoolingList : Screen("carpoolingList")
 
   object Carpool : Screen("carpool")
