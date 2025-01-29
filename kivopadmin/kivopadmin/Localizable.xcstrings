@@ -71,6 +71,7 @@
       }
     },
     "- %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -220,6 +221,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ (%@)"
+          }
+        }
+      }
+    },
+    "%@ am %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ am %2$@"
           }
         }
       }
@@ -2050,6 +2061,9 @@
         }
       }
     },
+    "Datum und Zeit" : {
+
+    },
     "Datum: %@" : {
       "localizations" : {
         "de" : {
@@ -2578,6 +2592,16 @@
         }
       }
     },
+    "Endzeit: %@ um %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Endzeit: %1$@ um %2$@"
+          }
+        }
+      }
+    },
     "Error: %@" : {
       "localizations" : {
         "de" : {
@@ -2688,6 +2712,9 @@
         }
       }
     },
+    "Event %@ bearbeiten" : {
+
+    },
     "Event erstellen" : {
       "localizations" : {
         "de" : {
@@ -2709,6 +2736,15 @@
           }
         }
       }
+    },
+    "Event löschen?" : {
+
+    },
+    "Event: %@" : {
+
+    },
+    "Eventfahrten" : {
+
     },
     "Events" : {
       "localizations" : {
@@ -2732,7 +2768,20 @@
         }
       }
     },
+    "Fahrer: %@" : {
+
+    },
+    "Fahrgemeinschaften" : {
+
+    },
+    "Fahrt-Details" : {
+
+    },
+    "Fahrt-Informationen" : {
+
+    },
     "Fahrt-Informationen:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2753,6 +2802,18 @@
           }
         }
       }
+    },
+    "Fahrt: %@" : {
+
+    },
+    "Fahrtdetails" : {
+
+    },
+    "Fahrttyp auswählen" : {
+
+    },
+    "Fahrzeug: %@" : {
+
     },
     "Fast Fertig" : {
       "localizations" : {
@@ -2973,6 +3034,9 @@
           }
         }
       }
+    },
+    "Freie Plätze: %u" : {
+
     },
     "Galerie" : {
       "localizations" : {
@@ -3392,6 +3456,9 @@
         }
       }
     },
+    "Keine Mitfahrer" : {
+
+    },
     "Keine Protokolle verfügbar" : {
       "localizations" : {
         "de" : {
@@ -3436,6 +3503,9 @@
         }
       }
     },
+    "Keine Sammelposten gefunden." : {
+
+    },
     "Keine Sitzung verfügbar" : {
       "localizations" : {
         "de" : {
@@ -3479,6 +3549,9 @@
           }
         }
       }
+    },
+    "Keine Teilnehmer ohne Feedback" : {
+
     },
     "Keine Teilnehmer sichtbar." : {
       "localizations" : {
@@ -3525,6 +3598,7 @@
       }
     },
     "KIVoP " : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3656,6 +3730,9 @@
         }
       }
     },
+    "Lade Fahrtdetails..." : {
+
+    },
     "Lade Profilbild..." : {
       "localizations" : {
         "de" : {
@@ -3699,6 +3776,9 @@
           }
         }
       }
+    },
+    "Lade Sammelposten..." : {
+
     },
     "Lade Umfragen..." : {
       "localizations" : {
@@ -3811,6 +3891,7 @@
       }
     },
     "Latitude: %f" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3987,6 +4068,7 @@
       }
     },
     "Location:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4031,6 +4113,7 @@
       }
     },
     "Longitude: %f" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4228,6 +4311,9 @@
         }
       }
     },
+    "Mitfahrer" : {
+
+    },
     "Mitglieder" : {
       "localizations" : {
         "de" : {
@@ -4315,6 +4401,9 @@
           }
         }
       }
+    },
+    "Möchtest du das Event '%@' wirklich löschen?" : {
+
     },
     "Möchtest du deinen Account wirklich löschen?" : {
       "localizations" : {
@@ -4735,6 +4824,7 @@
       }
     },
     "No posters available." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5349,6 +5439,9 @@
           }
         }
       }
+    },
+    "Pleno " : {
+
     },
     "Positionen" : {
       "localizations" : {
@@ -5966,6 +6059,9 @@
         }
       }
     },
+    "Spezialfahrt-Details" : {
+
+    },
     "Sprache" : {
       "localizations" : {
         "de" : {
@@ -6142,6 +6238,19 @@
         }
       }
     },
+    "Startort" : {
+
+    },
+    "Startzeit: %@ um %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Startzeit: %1$@ um %2$@"
+          }
+        }
+      }
+    },
     "Stimmen" : {
       "localizations" : {
         "de" : {
@@ -6274,7 +6383,14 @@
         }
       }
     },
+    "Teilnehmer" : {
+
+    },
+    "Teilnehmer ohne Feedback" : {
+
+    },
     "Teilnehmer:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6933,6 +7049,9 @@
           }
         }
       }
+    },
+    "Zukünftige Fahrten" : {
+
     },
     "Zur Plakat Position" : {
       "localizations" : {

@@ -10,9 +10,10 @@ struct EventDetailView: View {
     private let geocoder = CLGeocoder()
     @State private var address: String = "Adresse wird geladen..."
     var eventId: UUID
+    @State private var isEditSheetPresented = false
     
     var body: some View {
-        ScrollView {
+        VStack{
             if eventViewModel.isLoading {
                 ProgressView("Lade Event...") // Ladeanzeige
                     .progressViewStyle(CircularProgressViewStyle())
@@ -23,93 +24,134 @@ struct EventDetailView: View {
                 Text("Das Event konnte nicht geladen werden.")
                     .foregroundColor(.secondary)
             } else {
-                if let eventDetail = eventViewModel.eventDetail {
-                    VStack(alignment: .leading, spacing: 16) {
-                        // Event Name
-                        Text(eventDetail.name)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .padding(.bottom, 8)
-                        
-                        // Description
-                        if let description = eventDetail.description {
-                            Text(description)
-                                .font(.body)
-                                .foregroundColor(.secondary)
-                        } else {
-                            Text("Keine Beschreibung verfügbar")
-                                .italic()
-                                .foregroundColor(.gray)
-                        }
-                        
-                        // Dates
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text("Start:")
-                                    .fontWeight(.semibold)
-                                Text(eventDetail.starts, style: .date)
+                NavigationStack{
+                    if let eventDetail = eventViewModel.eventDetail {
+                        List {
+                            // Event Description
+                            Section(header: Text("Beschreibung")) {
+                                if let description = eventDetail.description {
+                                    Text(description)
+                                } else {
+                                    Text("Keine Beschreibung verfügbar")
+                                        .italic()
+                                        .foregroundColor(.gray)
+                                }
                             }
-                            HStack {
-                                Text("Ende:")
-                                    .fontWeight(.semibold)
-                                Text(eventDetail.ends, style: .date)
+
+                            // Event Dates
+                            Section(header: Text("Datum und Zeit")) {
+                                HStack {
+                                    Text("Start:")
+                                    Spacer()
+                                    Text("Am \(DateTimeFormatter.formatDate(eventDetail.starts)) um \(DateTimeFormatter.formatTime(eventDetail.starts))")
+                                }
+                                HStack {
+                                    Text("Ende:")
+                                    Spacer()
+                                    Text("Am \(DateTimeFormatter.formatDate(eventDetail.ends)) um \(DateTimeFormatter.formatTime(eventDetail.ends))")
+                                }
                             }
+                            if address != "" {
+                                // Event Location
+                                Section(header: Text("Adresse")) {
+                                    Button(action: {
+                                        UIPasteboard.general.string = address // Text in die Zwischenablage kopieren
+                                    }) {
+                                        HStack{
+                                            Text(address)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                            Spacer()
+                                            Image(systemName: "doc.on.doc").foregroundColor(.blue)
+                                        }
+                                        
+                                    }.buttonStyle(PlainButtonStyle())
+
+                                }
+                                .onAppear {
+                                    updateAddress(for: CLLocationCoordinate2D(
+                                        latitude: Double(eventDetail.latitude),
+                                        longitude: Double(eventDetail.longitude)
+                                    ))
+                                }
+
+                                
+                            }
+
+
+                            // Participants
+                            Section(header: Text("Teilnehmer")) {
+                                if eventDetail.participations.isEmpty {
+                                    Text("Keine Teilnehmer")
+                                        .italic()
+                                } else {
+                                    ForEach(eventDetail.participations, id: \.id) { participant in
+                                        Text("\(participant.name)")
+                                    }
+                                }
+                            }
+
+                            // Users Without Feedback
+                            Section(header: Text("Teilnehmer ohne Feedback")) {
+                                if eventDetail.userWithoutFeedback.isEmpty {
+                                    Text("Keine Teilnehmer ohne Feedback")
+                                        .italic()
+                                } else {
+                                    ForEach(Array(eventDetail.userWithoutFeedback.enumerated()), id: \.offset) { index, user in
+                                        Text("\(user.name)")
+                                    }
+                                }
+                            }
+
+                            // Ride Information
+                            Section(header: Text("Fahrt-Informationen")) {
+                                Text("Interessiert an Mitfahrgelegenheiten: \(eventDetail.countRideInterested)")
+                                Text("Freie Plätze: \(eventDetail.countEmptySeats)")
+                            }
+                            if eventViewModel.eventRides.isEmpty == false {
+                                Section(header: Text("Eventfahrten")){
+                                    ForEach(eventViewModel.eventRides, id: \.id){ ride in
+                                        NavigationLink(destination: EventRideDetailView(rideId: ride.id)){
+                                            Text("Fahrer: \(ride.driverName)")
+                                        }
+                                        
+                                    }
+                                }
+                            }
+
                         }
-                        
-                        // Location (Latitude and Longitude)
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Location:")
-                                .fontWeight(.semibold)
-                            Text("Latitude: \(eventDetail.latitude)")
-                            Text("Longitude: \(eventDetail.longitude)")
+                        .navigationTitle(eventDetail.name)
+                        .onAppear {
+                            updateAddress(for: CLLocationCoordinate2D(latitude: Double(eventDetail.latitude), longitude: Double(eventDetail.longitude)))
                         }
-                        
-                        // Participations
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Teilnehmer:")
-                                .fontWeight(.semibold)
-                            if eventDetail.participations.isEmpty {
-                                Text("Keine Teilnehmer")
-                                    .italic()
-                            } else {
-                                ForEach(eventDetail.participations, id: \.id) { participation in
-                                    Text("- \(participation.name)")
+                        .refreshable{
+                            eventViewModel.fetchEventDetail(eventId: eventId)
+                        }
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                Button(action: {
+                                    isEditSheetPresented = true
+                                }) {
+                                    Text("Bearbeiten")
+                                    //Label("Bearbeiten", systemImage: "pencil")
                                 }
                             }
                         }
-                        
-                        // Users without Feedback
-//                        VStack(alignment: .leading, spacing: 4) {
-//                            Text("Teilnehmer ohne Feedback:")
-//                                .fontWeight(.semibold)
-//                            if eventDetail.userWithoutFeedback.isEmpty {
-//                                Text("Keine Teilnehmer ohne Feedback")
-//                                    .italic()
-//                            } else {
-//                                ForEach(eventDetail.userWithoutFeedback, id: \.id) { user in
-//                                    Text("- \(user.name)")
-//                                }
-//                            }
-//                        }
-                        
-                        // Ride Information
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Fahrt-Informationen:")
-                                .fontWeight(.semibold)
-                            Text("Interessiert an Mitfahrgelegenheiten: \(eventDetail.countRideInterested)")
-                            Text("Freie Plätze: \(eventDetail.countEmptySeats)")
+                        .sheet(isPresented: $isEditSheetPresented) {
+                            EditEventView(eventDetail: eventDetail, eventId: eventId)
                         }
                     }
-                    .padding()
+
                 }
             }
         }
-        .refreshable{
-            eventViewModel.fetchEventDetail(eventId: eventId)
-        }
         .onAppear {
             eventViewModel.fetchEventDetail(eventId: eventId)
+            eventViewModel.fetchEventRides(eventId: eventId)
         }
+        
+
+
+
     }
     
     private func updateAddress(for coordinate: CLLocationCoordinate2D) {

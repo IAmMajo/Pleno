@@ -43,13 +43,13 @@ struct PostersMainView: View {
         NavigationStack {
             VStack {
                 if posterManager.isLoading {
-                    ProgressView("Loading meetings...") // Ladeanzeige
+                    ProgressView("Lade Sammelposten...") // Ladeanzeige
                         .progressViewStyle(CircularProgressViewStyle())
                 } else if let errorMessage = posterManager.errorMessage {
                     Text("Error: \(errorMessage)")
                         .foregroundColor(.red)
                 } else if posterManager.posters.isEmpty {
-                    Text("No posters available.")
+                    Text("Keine Sammelposten gefunden.")
                         .foregroundColor(.secondary)
                 } else {
                     listView()
