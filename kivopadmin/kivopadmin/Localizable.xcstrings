@@ -15,13 +15,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "** newsletter data **\n\nIf you would like to obtain the newsletter offered on the app, we need an email address from you and information that allows us to check that you are the owner of the specified email address and agree to the receipt of the newsletter.Further data is not collected or only collected on a voluntary basis. We only use this data to send the requested information and do not pass it on to third parties.\n\nThe data entered in the newsletter registration form is processed exclusively on the basis of your consent (Art. 6 Para. 1 lit. a GDPR).You can revoke the consent to the storage of the data, the email address and its use to send the newsletter at any time, for example via the \"Hire\" link in the newsletter. The legality of the data processing processes that have already taken place remains unaffected by the revocation.\n\nThe data you have stored for the purpose of the newsletter cover will be saved by us until your edition from the newsletter and, after the newsletter has been canceled or after a purpose, from the newsletter list list. We reserve the right to delete or block email addresses from our newsletter distributor at our own discretion within the framework of our legitimate interest in accordance with Art. 6 Para. 1 lit. f GDPR.\n\nData that we have stored for other purposes remain unaffected."
+            "value" : "**Newsletter Data**\n\nIf you would like to subscribe to the newsletter offered on the app, we require an email address from you as well as information allowing us to verify that you are the owner of the specified email address and agree to receive the newsletter. Additional data is not collected or only collected on a voluntary basis. We exclusively use this data for the delivery of the requested information and do not forward it to any third parties. \n\nThe processing of the data entered into the newsletter subscription form is done exclusively on the basis of your consent (Art. 6 para. 1 lit. a DSGVO). You can revoke your consent to the storage of the data, the e-mail address, and their use for sending the newsletter at any time, for instance through the \"unsubscribe\" link in the newsletter. The legality of the data processing operations already carried out remains unaffected by the revocation.\n\nThe data deposited with us for the purpose of subscribing to the newsletter will be stored by us until you unsubscribe from the newsletter and will be deleted from the newsletter distribution list after cancellation of the newsletter or after a purpose has ceased to apply. We reserve the right to delete or block e-mail addresses from our newsletter distribution list at our own discretion within the bounds of our legitimate interest according to Art. 6 para. 1 lit. f DSGVO.\n\nData stored by us for other purposes remains unaffected by this."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "** Bülten Verileri **\n\nUygulamada sunulan bülteni almak istiyorsanız, sizden bir e -posta adresine ve belirtilen e -posta adresinin sahibi olduğunuzu ve bültenin alınmasını kabul etmemizi sağlayan bilgilere ihtiyacımız var.Daha fazla veri toplanmaz veya yalnızca gönüllü olarak toplanmaz. Bu verileri yalnızca istenen bilgileri göndermek ve üçüncü taraflara aktarmamak için kullanırız.\n\nBülten kayıt formuna girilen veriler yalnızca onayınıza göre işlenir (Madde 6 para. 1 Lit. A GDPR).Verilerin depolanmasına, e -posta adresine ve bültenin herhangi bir zamanda gönderilmesi için kullanımı, örneğin bültendeki \"Kiralama\" bağlantısı aracılığıyla rızayı iptal edebilirsiniz. Zaten gerçekleşmiş olan veri işleme işlemlerinin yasallığı, iptalten etkilenmez.\n\nBülten kapağının amacı için sakladığınız veriler, bültenden baskınız olana kadar ve bülten iptal edildikten sonra veya bir amaçtan sonra bülten listesinden kaydedilecektir. Bülteni distribütörümüzden e -posta adreslerini ART'a göre meşru ilgimizle saklama hakkını saklı tutuyoruz.\n\nBaşka amaçlar için sakladığımız veriler etkilenmez."
+            "value" : "**Haber Bülteni Verileri**\n\nUygulamada sunulan haber bültenini almak isterseniz, sizden bir e-posta adresi ve bülten almayı kabul ettiğinizi ve belirtilen e-posta adresinin sahibi olduğunuzu doğrulamamıza izin veren bilgiler gereklidir. Diğer veriler sadece gönüllü olarak toplanır. Bu verileri sadece istenen bilgilerin gönderilmesi için kullanırız ve bu verileri üçüncü taraflarla paylaşmayız.\n\nHaber bülteni kayıt formuna girilen verilerin işlenmesi, yalnızca sizin onayınıza dayanır (Madde 6, 1. Paragraf, a DSGVO). Veri saklama, e-posta adresi ve haber bültenini göndermek için kullanımına verilen onayınızı her zaman, örneğin haber bültenindeki \"Aboneliği İptal Et\" bağlantısına tıklayarak iptal edebilirsiniz. İptalden etkilenmeyen veri işleme işlemlerinin yasallığı devam eder.\n\nHaber bültenine abone olmak için tarafımıza verdiğiniz veriler, bülten aboneliğinizi iptal edene kadar veya bülten dağıtım listesinden çıktıktan veya amaç sona erdikten sonra tarafımızdan saklanır ve silinir. Madde 6'ya göre, 1. Para, f. DSGVO kapsamında, kendi takdirimize bağlı olarak, haber bülteni dağıtım listemizden e-posta adreslerini silmek veya bloke etmek. \n\nTarafımızca başka amaçlarla saklanmış olan veriler bundan etkilenmez."
           }
         }
       }
@@ -37,13 +37,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "** Server log files **\n\nThe provider of the pages automatically collects and stores information in so-called server log files that your browser automatically transmits to us. These are:\n\n- Browser type and browser version\n- Operating system used\n- Referrer URL\n- Host name of the accessible computer\n- Time of the server request\n- IP address\n\nThis data is not merged with other data sources.\nThis data is recorded on the basis of Art. 6 Para. 1 lit. f GDPR. The operator has a legitimate interest in the technically error-free presentation and the optimization of his website, for which the server log files must be recorded.\n."
+            "value" : "**Server Log Files**\n\nThe provider of the pages automatically collects and stores information in so-called server log files, which your browser automatically transmits to us. These are:\n\n   - Browser type and browser version\n   - Operating system used\n   - Referrer URL\n   - Hostname of the accessing computer\n   - Time of the server request\n   - IP address\n\nThere is no merging of this data with other data sources.\nThe collection of this data is based on Art. 6 para. 1 lit. f DSGVO. The operator has a legitimate interest in the technically error-free presentation and optimization of his website, for this the server log files must be recorded."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "** Sunucu Günlük Dosyaları **\n\nSayfaların sağlayıcısı, tarayıcınızın bize otomatik olarak ilettiği sunucu günlük dosyalarında otomatik olarak bilgi toplar ve depolar. Bunlar:\n\n- Tarayıcı türü ve tarayıcı sürümü\n- Kullanım Sistemi\n- Yönlendirici URL\n- Erişilebilir bilgisayarın ana bilgisayar adı\n- Sunucu isteğinin zamanı\n- IP adresi\n\nBu veriler diğer veri kaynaklarıyla birleştirilmez.\nBu veriler 6 para. Operatör, sunucu günlük dosyalarının kaydedilmesi gereken teknik olarak hatasız sunum ve web sitesinin optimizasyonuna meşru bir ilgiye sahiptir.\n."
+            "value" : "**Sunucu Log Dosyaları**\n\nSayfaların sağlayıcısı otomatik olarak belirli bilgileri, tarayıcınızın otomatik olarak bize ilettiği, sunucu log dosyaları adı verilen dosyalarda toplar ve saklar. Bunlar:\n\n   - Tarayıcı tipi ve tarayıcı versiyonu\n   - Kullanılan işletim sistemi\n   - Referans URL\n   - Erişim yapan bilgisayarın ev sahibi adı\n   - Sunucu isteği zamanı\n   - IP adresi \n\nBu verilerin diğer veri kaynaklarıyla birleştirilmesi yapılmamaktadır. \nBu verilerin toplanması, Madde, 6 Fıkra, 1 lit. f DSGVO'ya dayanmaktadır. İşletmeci, web sitesinin teknik olarak hata içermeyen sunumu ve optimizasyonu konusunda meşru bir ilgiye sahip olduğu için sunucu log dosyalarının toplanması gerekmektedir."
           }
         }
       }
@@ -59,13 +59,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "in the confirmation email."
+            "value" : "In the confirmation email."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "onay e -postasında."
+            "value" : "Onay e-postasında."
           }
         }
       }
@@ -74,7 +74,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "- %@"
           }
         },
@@ -96,20 +96,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "(ca. %U min.)"
+            "state" : "needs_review",
+            "value" : "(ca. %u min.)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "(approx. %U min.)"
+            "value" : "(ca. %u min.)"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "(yaklaşık %U min.)"
+            "value" : "(ca. %u min.)"
           }
         }
       }
@@ -118,20 +118,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "(ca. 160 min.)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "(approx. 160 min.)"
+            "value" : "(ca. 160 min.)"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "(Yaklaşık 160 dk.)"
+            "value" : "(ca. 160 min.)"
           }
         }
       }
@@ -147,13 +147,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**General information**\nThe following information provides a simple overview of what happens to your personal data when you use the app \"Pleno\".Personal data is all data with which you can be personally identified. Detailed information on data protection can be found in our data protection declaration listed under this text.\n\n** Data acquisition in this app **\n\n** Who is responsible for data acquisition on this website? **\nData processing in the app is carried out by us as an operator.You can find our contact details in the section, reference to the person responsible. ** How do we collect your data? **\n\nOn the one hand, your data will be collected by telling us this, e.g.B. by entering the user profile.Other data is recorded automatically or after your consent when using the app by IT systems.These are primarily technical data (e.g. device type, operating system or time of access).\n\n** What do we use your data for? **\nPart of the data is collected to ensure error -free provision of the app. Other data is recorded to enable the app's organizational functions. This includes:\n\n- ** The name of the association and its logo: ** This information is used for identification and assignment within the app.\n- ** Place and time of events or meetings: ** This data is necessary to ensure the schedule and the formation of carpools between club members.\n- ** Rolling and tasks of the members: ** These are recorded in order to support the structuring and task distribution within the association.\n- ** uploaded content such as protocols or documents: ** This information is used for the archiving and availability of session documents.\n\nThis data is necessary to provide the functions of the app and enable efficient use of the platform.\n\n** What rights do you have in terms of your data? **\nYou have the right to obtain information about origin, recipient and the purpose of your stored personal data at any time. You also have the right to request the correction or deletion of this data.If you have given consent to data processing, you can revoke this consent at any time for the future.You also have the right to request the processing of your personal data under certain circumstances.Furthermore, you have a right to complain to the responsible supervisory authority. You can contact us at any time for further questions about data protection .."
+            "value" : "**General Information**\nThe following guidelines provide a simple overview of what happens to your personal data when you use the \"Pleno\" app. Personal data are all data by which you can be personally identified. For detailed information on data protection, please refer to our privacy policy listed below this text.\n\n**Data Collection in this App**\n\n**Who is responsible for data collection on this app?**\nThe data processing in the app is carried out by us as operators. You can find our contact details in the ‘Notice on responsibility’ section of this privacy statement.\n\n**How do we collect your data?**\nYour data are collected in two ways. Firstly, you provide us with your data, e.g., by entering it into your user profile. Other data are automatically collected or, with your consent, by using the app through IT systems. These are primarily technical data (e.g., type of device, operating system, or time of access).\n\n**What do we use your data for?**\nSome of the data is collected to ensure the error-free provision of the app. Other data are collected to enable the organizational functions of the app. This includes:\n\n- **The name of the club and its logo:** This information is used for identification and allocation within the app.\n- **Location and time of events or meetings:** This data is necessary to ensure the scheduling and sharing of rides among club members.\n- **Roles and tasks of members:** These are recorded to support the structuring and task distribution within the club.\n- **Uploaded content such as protocols or documents:** This information serves the archiving and availability of meeting documents.\n\nThese data are necessary to provide the functions of the app and to allow for efficient use of the platform.\n\n**What rights do you have regarding your data?**\nYou have the right at any time to obtain information free of charge about the origin, recipient, and purpose of your stored personal data. You also have the right to request the correction or deletion of this data. If you have given your consent to data processing, you can revoke this consent at any time for future processing. In addition, under certain conditions, you have the right to demand the restriction of the processing of your personal data. Furthermore, you have the right to file a complaint with the competent supervisory authority. In case of questions concerning data protection, you can contact us at any time."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Genel bilgi**\nAşağıdaki bilgiler, \"pleno\" uygulamasını kullanırken kişisel verilerinize ne olacağına dair basit bir genel bakış sunmaktadır.Kişisel veriler, kişisel olarak tanımlanabileceğiniz tüm verilerdir. Veri koruması hakkında ayrıntılı bilgiler, bu metin altında listelenen veri koruma bildirimimizde bulunabilir.\n\n** Bu uygulamada veri toplama **\n\n** Bu web sitesinde veri ediniminden kim sorumlu?\nUygulamada veri işleme operatör olarak bizim tarafımızdan gerçekleştirilir.İletişim bilgilerimizi sorumlu kişiye referans bölümünde bulabilirsiniz. ** Verilerinizi nasıl topluyoruz?\n\nBir yandan, verileriniz bunu bize söyleyerek toplanacaktır, ör.B. Kullanıcı profilini girerek.Diğer veriler, uygulamayı BT sistemleri tarafından kullanılırken otomatik olarak veya onayınızdan sonra kaydedilir.Bunlar öncelikle teknik verilerdir (örn. Cihaz türü, işletim sistemi veya erişim süresi).\n\n** Verilerinizi ne için kullanıyoruz?\nUygulamanın hatasız sağlanmasını sağlamak için verilerin bir kısmı toplanır. Uygulamanın organizasyon işlevlerini etkinleştirmek için diğer veriler kaydedilir. Bu şunları içerir:\n\n- ** Derneğin adı ve logosu: ** Bu bilgiler, uygulama içindeki kimlik ve atama için kullanılır.\n- ** Etkinliklerin veya toplantıların yeri ve zamanı: ** Bu veriler kulüp üyeleri arasında karpoollerin programını ve oluşumunu sağlamak için gereklidir.\n- ** Üyelerin yuvarlanma ve görevleri: ** Bunlar, dernek içindeki yapılandırma ve görev dağıtımını desteklemek için kaydedilir.\n- ** Protokoller veya belgeler gibi yüklenen içerik: ** Bu bilgiler, oturum belgelerinin arşivlenmesi ve kullanılabilirliği için kullanılır.\n\nBu veriler, uygulamanın işlevlerini sağlamak ve platformun verimli kullanımını sağlamak için gereklidir.\n\n** Verileriniz açısından hangi haklarınız var?\nMenşe, alıcı ve depolanan kişisel verilerinizin amacı hakkında bilgi edinme hakkına sahipsiniz. Ayrıca bu verilerin düzeltilmesini veya silinmesini talep etme hakkınız vardır.Veri işlemeye onay verdiyseniz, bu rızayı gelecek için herhangi bir zamanda iptal edebilirsiniz.Ayrıca, belirli koşullar altında kişisel verilerinizin işlenmesini talep etme hakkınız vardır.Ayrıca, sorumlu denetim otoritesine şikayet etme hakkınız vardır. Veri koruması hakkında başka sorularınız için istediğiniz zaman bizimle iletişime geçebilirsiniz."
+            "value" : "**Genel Bilgiler**\nBu bilgiler \"Pleno\" uygulamasını kullandığınızda kişisel verilerinizle ne olduğuna dair basit bir genel bakış sunar. Kişisel veriler, sizin kişisel olarak tanımlanabildiğiniz tüm verilerdir. Gizlilik ile ilgili ayrıntılı bilgileri, bu metin altında listelenen Gizlilik İlkeleri'nden alabilirsiniz.\n\n**Bu Uygulamadaki Veri Toplama**\n\n**Bu uygulamadaki veri toplamadan kim sorumlu?**\nUygulamadaki veri işleme işlemi bizim tarafımızdan, operatörler olarak yürütülür. İletişim bilgilerimizi Gizlilik Bildiriminin 'Sorumlu Kişiye İlişkin Bilgiler' bölümünde bulabilirsiniz.\n\n**Verilerinizi nasıl topluyoruz?**\n\nVerileriniz, mesela kullanıcı profilinize bilgi girerek bizimle paylaştığınız veriler ve IT sistemleri tarafından uygulamayı kullandığınızda otomatik olarak veya izninizle toplanan diğer veriler şeklinde toplanır. Bunlar ağırlıklı olarak teknik verilerdir (örneğin cihaz tipi, işletim sistemi veya erişim süresi).\n\n**Verilerinizi ne için kullanıyoruz?**\nVerilerin bir kısmı, uygulamanın hata olmadan sağlanabilmesi için toplanır. Diğer veriler, uygulamanın organizasyonel işlevlerini sağlamak için toplanır. Bu işlevler şunları içerir:\n\n- **Derneğin adı ve logosu:** Bu bilgiler uygulama içinde tanımlama ve atama için kullanılır.\n- **Etkinlikler veya toplantıların zamanı ve yeri:** Bu veriler, dernek üyeleri arasında etkinlik planlama ve araç paylaşımının sağlanması için gereklidir.\n- **Üyelerin rolleri ve görevleri:** Bu bilgiler, dernek içinde yapılanma ve görev dağılımını desteklemek için toplanır.\n- **Yüklenen içerikler, tutanaklar veya dokümanlar gibi:** Bu bilgiler toplantı belgelerinin arşivlenmesi ve kullanılabilirliği için gereklidir.\n\nBu veriler, uygulamanın işlevlerini sağlamak ve platformun verimli kullanımını sağlamak için gereklidir.\n\n**Verilerinizle ilgili hangi haklara sahipsiniz?**\nKişisel verilerinizin kökeni, alıcısı ve amacı hakkında her zaman ücretsiz bilgi alma hakkına sahipsiniz. Ayrıca, bu verilerin düzeltilmesini veya silinmesini talep etme hakkına sahipsiniz. Veri işleme için onay verdiyseniz, bu onayı gelecekte herhangi bir zamanda geri çekebilirsiniz. Ayrıca, belirli durumlardaki kişisel verilerinizin işlenmesini sınırlama hakkı da vardır. Ayrıca, yetkili denetim otoritesine şikayette bulunma hakkınız bulunmaktadır. Gizlilik konusunda daha fazla sorunuz varsa, her zaman bizimle iletişime geçebilirsiniz."
           }
         }
       }
@@ -169,13 +169,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "** Data protection **\n\nThe operators of this app take the protection of your personal data very seriously.We treat your personal data confidentially and in accordance with the statutory data protection regulations and this data protection declaration.\n\nIf you use this app, various personal data will be collected.Personal data is data that can be used to personally identify. The present data protection declaration explains which data we collect and for what we use it for.She also explains how and for what purpose it happens.\n\nWe would like to point out that data transmission on the Internet (e.g. when communicating by email) can have security gaps. Complete protection of the data before access by third parties is not possible.\n\n** Note on the responsible body **\n\nThe responsible body for data processing on this app is:\n\nEsther Lukeba\nBlumermann Straße 17\n53842 Troisdorf\nTelephone: 022418667509\nEmail: esther.lukeba [@hsrw.org] (mailto: lennart-luis.guggenberger@hsrw.org)\n\nThe responsible body is the natural or legal person who, alone or together with others, for the purposes and means of processing personal data (e.g. B. Names, email addresses or the like) decides.\n\n** memory duration **\n\nInsofar as no more specific storage duration was mentioned within this data protection declaration, your personal data remains with us until the purpose for data processing is no longer necessary. If you claim a legitimate deletion request or revoke consent to data processing, your personal data, such as email address, telephone number and profile picture, will be deleted.\n\nHowever, in order to ensure the completeness and traceability of the meeting protocols, the identity of the person concerned (e.g. name and role) remains in these protocols.This serves to authenticity and integrity of the documentation. The other personal data is irrevocably removed if there are no other legally permissible reasons for the storage (e.g. tax or commercial retention periods).In the latter case, the deletion is deleted according to these reasons.\n\n** General information on the legal basis of data processing on this website **\n\nIf you have consented to data processing, we process your personal data based on Art. 6 para. 1 lit. a GDPR or Art. 9 Para. 2 lit. a GDPR, provided that special data categories are processed according to Art. 9 Para. 1 GDPR.In the event of an express consent to the transfer of personal data in third countries, data processing also takes place on the basis of Art. 49 Para. 1 lit. a GDPR.If you are storing cookies or accessing information in your end device (e.g. have consented via device fingerprinting), data processing is also carried out on the basis of Section 25 (1) TDDDG.The consent can be revoked at any time.If your data is required for the fulfillment of the contract or carry out pre -contractual measures, we process your data based on Art. 6 Para. 1 Lit.B GDPR.We also process your data if this\nTo fulfill a legal obligation, are required on the basis of Art. 6 Para. 1 lit. C GDPR.Data processing can also be carried out on the basis of our legitimate interest in accordance with Art. 6 Para. 1 lit. f GDPR.In the following paragraphs of this data protection declaration, the legal bases relevant in each individual case are informed.\n\n** Revocation of your consent to data processing **\nMany data processing processes are only possible with their express consent.You can revoke an already granted consent at any time. The legality of the data processing carried out until the revocation remains unaffected by the revocation.\n\n** Right of objection against data collection in special cases and against\nDirect advertising (Art. 21 GDPR) **\nIf the data processing based on Art.6 para.1 lit. E or F GDPR, you have the right to object to the processing of your personal data at any time, for reasons that result from your particular situation;This also applies to a profiling based on these provisions.The respective legal basis on which processing is based can be found in this data protection declaration. If you make an objection, we will no longer process your data subject to personal data, unless we can demonstrate compelling legitimate grounds for the processing that outweigh your interests, rights and freedoms or the processing serves to assert, exercise or defend\nLegal claims (objection according to Art. 21 Para. 1 GDPR). If your personal data is processed to operate direct mail, you have the right to object at any time to the processing of personal data relating to the purpose of such advertising;This also applies to profiling, insofar as it is connected to such direct advertising.If you contradict, your personal data will then no longer be used for the purpose of direct mail (objection according to Art. 21 Para. 2 GDPR).\n\n** Complaint right with the responsible supervisory authority **\nIn the event of violations of the GDPR, those affected have a right to complain to one\nSupervisory authority, especially in the Member State of their habitual stay, their workplace or the place of the alleged violation. The right to complain is without prejudice to other administrative or judicial remedies.\n\n** Right to data portability **\nYou have the right, data that we are based on your consent or in fulfilling a contract\nProcessing automatically, having yourself or to a third party in a common, machine -readable format. If you request the direct transfer of the data to another person responsible, this is only done if it is technically feasible.\n\n** Information, correction and deletion **\nAs part of the applicable legal provisions, you have the right to free information about your stored personal data, its origin and recipient and the purpose of data processing and, if necessary, the right to correct or delete this data. You can contact us at any time for further questions about personal data.\n\n** Right to restriction of processing **\nYou have the right to restrict the processing of your personal data.You can contact us at any time. The right to restriction of processing is there in the following cases:\n\n- If you deny the correctness of your personal data stored by us, we usually need time to check this. For the duration of the exam, you have the right to restrict the processing of your personal data.\n- If the processing of your personal data is ill/happens, you can request the restriction of data processing instead of deletion.\n- If we no longer need your personal data, but you need you to exercise, defend or assert legal claims, you have the right to request the processing of your personal data instead of deleting.\n- If you are contradictory. 21 Para. 1 GDPR must have a weighing up between your and our interests. As long as it is not yet clear whose interests outweigh you, you have the right to restrict the processing of your personal data.\n- If you have restricted the processing of your personal data, this data may - apart from your storage - only with your consent or to assert, exercise or defend legal claims or to protect the rights of a different natural or legal person or for reasons of an important publicInterest of the European Union or a Member State.\n\n** SSL or TLS encryption **\n\nThis app uses SSL or TLS encryption for safety reasons and to protect confidential content, such as registration data or inquiries that you send via the app.You can see an encrypted connection from the fact that a corresponding security certificate is stored in your app connection.\n\nIf the SSL or TLS encryption is activated, the data you transmit to us cannot be read by third parties.\n\n** Objection to advertising emails **\n\nThe use of contact details published within the framework of the imprint obligation to send not expressly requested advertising and information material is hereby objected. The operators of the pages expressly reserve the right to take legal steps in the event of unsolicited sending of advertising formations, for example through spam emails."
+            "value" : "Translate the following German text into English: **Privacy Policy**\n\nThe operators of this app take your personal data protection very seriously. We treat your personal data confidentially and in accordance with the statutory data protection regulations and this privacy policy.\n\nWhen you use this app, various personal data are collected. Personal data are data with which you can be personally identified. This privacy policy explains what data we collect and what we use it for. It also explains how and for what purpose this is done.\n\nWe would like to point out that data transmission over the Internet (e.g., communication by e-mail) can have security gaps. A complete protection of data against access by third parties is not possible.\n\n**Note on the responsible body**\n\nThe responsible party for data processing on this app is:\n\nEsther Lukeba\nBlumenmann Straße 17\n53842 Troisdorf\nPhone: 022418667509\nEmail: Esther.lukeba[@hsrw.org](mailto:lennart-luis.guggenberger@hsrw.org)\n\nThe responsible body is the natural or legal person who alone or together with others decides on the purposes and means of processing personal data (e.g., names, email addresses, etc.).\n\n**Storage duration**\n\nUnless a more specific storage period has been specified in this privacy policy, your personal data will remain with us until the purpose for the data processing no longer applies. If you assert a justified deletion request or revoke your consent to data processing, your personal data, such as email address, phone number, and profile picture, will be deleted.\n\nHowever, to ensure the completeness and traceability of the meeting minutes, the identity of the relevant person (e.g., name and role) is retained in these minutes. This serves the authenticity and integrity of the documentation. The remaining personal data are irrevocably removed unless there are other legally valid reasons for the storage (e.g., tax or commercial law retention periods). In the latter case, deletion takes place after these reasons cease to exist.\n\n**General notes on the legal basis for the data processing on this website**\n\nIf you have given consent for data processing, we process your personal data based on Art. 6 para. 1 lit. a GDPR or Art. 9 para. 2 lit. a GDPR if special data categories according to Art. 9 para. 1 GDPR are processed. In the case of a clear consent for the transfer of personal data to third countries, the data processing is also done based on Art. 49 para. 1 lit. a GDPR. If you have consented to the storage of cookies or to access information on your device (e.g., via device fingerprinting), the data processing also takes place based on § 25 para. 1 TDDDG. The consent can be revoked at any time. If your data is necessary for contract fulfilment or for the implementation of pre-contractual measures, we process your data based on Art. 6 para. 1 lit. b GDPR. We further process your data if required to fulfil a legal obligation on the basis of Art. 6 para. 1 lit. c GDPR. The data processing can also take place based on our justified interest after Art. 6 para. 1 lit. f GDPR. The respective legal bases relevant in the individual case are informed about in the following paragraphs of this privacy policy.\n\n**Revocation of your consent to data processing**\nMany data processing operations are only possible with your explicit consent. You can revoke an existing consent at any time. The legality of data processing carried out until the revocation remains unaffected by the revocation.\n\n**Right to object to data collection in specific cases and against direct advertising (Art. 21 GDPR)**\nIF DATA PROCESSING IS CARRIED OUT ON THE BASIS OF ART. 6 PARA. 1 LIT. E OR F GDPR, YOU HAVE THE RIGHT AT ANY TIME TO OBJECT TO THE PROCESSING OF YOUR PERSONAL DATA FOR REASONS ARISING FROM YOUR PARTICULAR SITUATION; THIS ALSO APPLIES TO PROFILING BASED ON THESE PROVISIONS. THE RESPECTIVE LEGAL BASIS ON WHICH PROCESSING RELIES CAN BE FOUND IN THIS PRIVACY POLICY. IF YOU OBJECT, WE WILL NO LONGER PROCESS YOUR AFFECTED PERSONAL DATA UNLESS WE CAN PROVIDE EVIDENCE OF COMPELLING LEGITIMATE GROUNDS FOR PROCESSING THAT OUTWEIGH YOUR INTERESTS, RIGHTS AND FREEDOMS, OR THE PROCESSING IS FOR THE ASSERTION, EXERCISE OR DEFENSE OF LEGAL CLAIMS (OBJECTION ACCORDING TO ART. 21 PARA. 1 GDPR). IF YOUR PERSONAL DATA ARE PROCESSED FOR THE PURPOSE OF DIRECT ADVERTISING, YOU HAVE THE RIGHT TO OBJECT AT ANY TIME TO THE PROCESSING OF PERSONAL DATA CONCERNING YOU FOR THE PURPOSE OF SUCH ADVERTISING; THIS ALSO APPLIES TO PROFILING TO THE EXTENT THAT IT IS RELATED TO SUCH DIRECT ADVERTISING. IF YOU OBJECT, YOUR PERSONAL DATA WILL SUBSEQUENTLY NO LONGER BE USED FOR THE PURPOSE OF DIRECT ADVERTISING (OBJECTION ACCORDING TO ART. 21 PARA. 2 GDPR).\n\n**Right to complain to the competent supervisory authority**\nIn the case of violations of the GDPR, the persons affected have a right of complaint to a supervisory authority, particularly in the Member State of their habitual residence, their place of work, or the place of the suspected violation. The right of complaint is without prejudice to other administrative or judiciary recourse.\n\n**Right to data portability**\nYou have the right to have data that we process automatically based on your consent or in fulfilment of a contract handed over to you or to a third party in a standard, machine-readable format. If you request the direct transfer of the data to another responsible party, this will only take place to the extent that it is technically feasible.\n\n**Information, correction and deletion**\nUnder applicable legal provisions, you have the right to free information about your stored personal data, their origin and recipients and the purpose of data processing and, if necessary, a right to amend or delete this data at any time. For this, as well as other questions about personal data, you can always contact us.\n\n**Right to restriction of processing**\nYou have the right to request the restriction of the processing of your personal data. You can contact us at any time for this purpose. The right to restriction of processing exists in the following cases:\n\n- If you dispute the correctness of your personal data stored with us, we usually need time to verify this. For the duration of the review, you have the right to request the restriction of the processing of your personal data.\n- If the processing of your personal data was done unlawfully, you can request the restriction of data processing instead of deletion.\n- If we no longer need your personal data, but you need them to exercise, defend or assert legal claims, you have the right to request the restriction of the processing of your personal data instead of deletion.\n- If you have lodged an objection according to Art. 21 para. 1 GDPR, your and our interests must be weighed. As long as it is not yet clear whose interests predominate, you have the right to demand the restriction of the processing of your personal data.\n- If you have restricted the processing of your personal data, these data may only be processed – apart from their storage – with your consent or to assert, exercise or defend legal claims or protect the rights of another natural or legal person or for reasons of important public interest of the European Union or a Member State.\n\n**SSL or TLS encryption**\n\nThis app uses SSL or TLS encryption for security reasons and to protect the transmission of confidential content, such as registration data or inquiries, which you send through the app. You can recognize an encrypted connection by the security certificate stored in your app's connection.\n\nIf SSL or TLS encryption is activated, the data you transmit to us cannot be read by third parties.\n\n**Objection to advertising emails**\n\nWe hereby object to the use of contact data published within the scope of the imprint obligation for sending unsolicited advertising and information materials. The operators of the pages expressly reserve the right to take legal action in the event of unsolicited sending of advertising information, such as spam emails."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "** Veri Koruması **\n\nBu uygulamanın operatörleri kişisel verilerinizin korunmasını çok ciddiye alır.Kişisel verilerinizi gizli ve yasal veri koruma düzenlemelerine ve bu veri koruma beyanına uygun olarak ele alıyoruz.\n\nBu uygulamayı kullanırsanız, çeşitli kişisel veriler toplanacaktır.Kişisel veriler, kişisel olarak tanımlamak için kullanılabilecek verilerdir. Mevcut Veri Koruma Beyanı, hangi verileri topladığımızı ve ne için kullandığımızı açıklar.Ayrıca nasıl ve hangi amaçla olduğunu açıklıyor.\n\nİnternetteki veri iletiminin (örneğin e -posta ile iletişim kurarken) güvenlik boşluklarına sahip olabileceğini belirtmek isteriz. Üçüncü tarafların erişiminden önce verilerin tam olarak korunması mümkün değildir.\n\n** Sorumlu bedenle ilgili not **\n\nBu uygulamada veri işleme için sorumlu gövde:\n\nEsther Lukeba\nBlumermann Straße 17\n53842 Troisdorf\nTelefon: 022418667509\nE-posta: Esther.Lukeba [@hsrw.org] (Mailto: Lennart-luis.guggenberger@hsrw.org)\n\nSorumlu beden, kişisel verileri işleme amaçları ve araçları için tek başına veya başkalarıyla birlikte olan doğal veya yasal kişidir (ör. B. İsimler, e -posta adresleri veya benzerleri) karar verir.\n\n** Bellek Süresi **\n\nBu Veri Koruma Beyannamesi'nde daha özel bir depolama süresi belirtilmediğinden, veri işleme amacı artık gerekli olmayana kadar kişisel verileriniz bizimle kalır. Meşru bir silme talebi talep ederseniz veya veri işleme rızasını iptal ederseniz, e -posta adresi, telefon numarası ve profil resmi gibi kişisel verileriniz silinecektir.\n\nBununla birlikte, toplantı protokollerinin bütünlüğünü ve izlenebilirliğini sağlamak için, ilgili kişinin kimliği (örneğin isim ve rol) bu protokollerde devam etmektedir.Bu, belgelerin özgünlüğüne ve bütünlüğüne hizmet eder. Diğer kişisel veriler, depolama için yasal olarak izin verilen başka bir neden yoksa (örn. Vergi veya ticari tutma süreleri) geri dönülmez bir şekilde kaldırılır.İkinci durumda, silme bu nedenlere göre silinir.\n\n** Bu web sitesinde veri işlemenin yasal temeli hakkında genel bilgiler **\n\nVeri işlemeye rıza gösterdiyseniz, kişisel verilerinizi ART'a göre işleriz. 6 Para.Üçüncü ülkelerde kişisel verilerin aktarılması durumunda, bir GDPR.Çerezleri saklıyorsanız veya son cihazınızda bilgilere erişiyorsanız (ör. Cihaz parmak izi yoluyla onaylanmıştır), veri işleme ayrıca Bölüm 25 (1) TDDDG temelinde gerçekleştirilir.Onay herhangi bir zamanda iptal edilebilir.Verileriniz, sözleşmenin yerine getirilmesi için gerekiyorsa, verilerinizi 1 LIT.B GDPR'ye göre işleriz.Bu ise verilerinizi de işleriz\nYasal bir yükümlülüğü yerine getirmek için 6 para. C GDPR.Veri işleme, 6 para.Bu veri koruma beyanının aşağıdaki paragraflarında, her bir davada ilgili yasal temeller bilgilendirilmiştir.\n\n** Veri işlemeye rızanızın iptali **\nBirçok veri işleme işlemi yalnızca açık rızalarıyla mümkündür.Zaten verilen bir rızayı herhangi bir zamanda iptal edebilirsiniz. Veri işlemenin yasallığı, iptal, iptalten etkilenene kadar gerçekleştirilir.\n\n** Özel durumlarda ve karşı veri toplamaya karşı itiraz hakkı\nDoğrudan Reklam (Madde 21 GDPR) **\nVeri işleme sanata dayalı ise.6 para.1 LIT. E veya F GDPR, kişisel verilerinizin işlenmesine herhangi bir zamanda, özel durumunuzdan kaynaklanan nedenlerden dolayı itiraz etme hakkına sahipsiniz;Bu, bu hükümlere dayanan bir profilleme için de geçerlidir.İşlemenin dayandığı ilgili yasal temel bu veri koruma beyanında bulunabilir. Bir itirazda bulunursanız, çıkarlarınızı, haklarınızı ve özgürlüklerinizi veya işlemenizi daha ağır basan işleme için zorlayıcı meşru gerekçeler gösteremedikçe, verilerinizi kişisel verilere tabi olarak işlemeyeceğiz.\nYasal Talepler (Madde 21 para. 1 GDPR'ye göre itiraz). Kişisel verileriniz doğrudan posta çalıştırmak için işlenirse, bu tür reklamların amacıyla ilgili kişisel verilerin işlenmesine herhangi bir zamanda itiraz etme hakkınız vardır;Bu, bu tür doğrudan reklamlara bağlı olduğu sürece profil oluşturma için de geçerlidir.Çelişiyorsanız, kişisel verileriniz artık doğrudan posta amacıyla kullanılmayacaktır (Madde 21 paragrafına göre itiraz. 2 GDPR).\n\n** Sorumlu Denetim Kurumu ile Şikayet Doğru **\nGDPR'nin ihlali durumunda, etkilenenlerin birine şikayet etme hakkı vardır.\nDenetim Otoritesi, özellikle üye ülkelerinde alışılmış kalış sürelerinde, işyerlerinin veya iddia edilen ihlallerin yeri. Şikayet etme hakkı, diğer idari veya adli hukuk yollarına önyargısızdır.\n\n** Veri taşınabilirliği hakkı **\nRızanıza dayandığımız veya bir sözleşmeyi yerine getirme hakkına, verilere sahipsiniz\nOtomatik olarak işleme, kendiniz veya üçüncü bir tarafa ortak, makine okunabilir bir formatta sahip olmak. Verilerin sorumlu başka bir kişiye doğrudan aktarılmasını talep ederseniz, bu yalnızca teknik olarak mümkünse yapılır.\n\n** Bilgi, düzeltme ve silme **\nGeçerli yasal hükümlerin bir parçası olarak, depolanan kişisel verileriniz, kökeni ve alıcısı ve veri işleme amacı ve gerekirse bu verileri düzeltme veya silme hakkı hakkında ücretsiz bilgilere sahipsiniz. Kişisel verilerle ilgili daha fazla soru için istediğiniz zaman bizimle iletişime geçebilirsiniz.\n\n** İşleme kısıtlama hakkı **\nKişisel verilerinizin işlenmesini kısıtlama hakkına sahipsiniz.Sizin zaman bizimle iletişime geçebilirsiniz. İşleme kısıtlama hakkı aşağıdaki durumlarda vardır:\n\n- Bizim tarafımızdan saklanan kişisel verilerinizin doğruluğunu inkar ederseniz, bunu kontrol etmek için genellikle zamana ihtiyacımız var. Sınav süresi boyunca, kişisel verilerinizin işlenmesini kısıtlama hakkına sahipsiniz.\n- Kişisel verilerinizin işlenmesi hasta/gerçekleşirse, silme yerine veri işleme kısıtlamasını talep edebilirsiniz.\n- Artık kişisel verilerinize ihtiyacımız yoksa, ancak yasal talepleri kullanmanız, savunmanız veya iddia etmeniz gerekiyorsa, silmek yerine kişisel verilerinizin işlenmesini talep etme hakkına sahipsiniz.\n- Çelişkili iseniz. 21 para. Kimin çıkarlarının sizi ağır bastığı henüz açık olmadığı sürece, kişisel verilerinizin işlenmesini kısıtlama hakkına sahipsiniz.\n- Kişisel verilerinizin işlenmesini kısıtladıysanız, bu veriler - depolamanız dışında - yalnızca rızanızla veya yasal talepleri iddia etmek, kullanmak veya savunmak veya farklı bir doğal veya yasal kişinin haklarını korumak veya nedenlerle veya nedenlerle olabilir. Avrupa Birliği veya Üye Devletin önemli bir kamu yararı.\n\n** SSL veya TLS Şifreleme **\n\nBu uygulama, güvenlik nedeniyle ve kayıt verileri veya uygulama üzerinden gönderdiğiniz sorular gibi gizli içeriği korumak için SSL veya TLS şifrelemesini kullanır.Uygulama bağlantınızda karşılık gelen bir güvenlik sertifikası depolandığı gerçeğinden şifreli bir bağlantı görebilirsiniz.\n\nSSL veya TLS şifrelemesi etkinleştirilir, bize ilettiğiniz veriler üçüncü taraflar tarafından okunamaz.\n\n** Reklam e -postalarına itiraz **\n\nAçıkça talep edilmeyen reklam ve bilgi materyali gönderme yükümlülüğü çerçevesinde yayınlanan iletişim bilgilerinin kullanımı burası itiraz edilir. Sayfaların operatörleri, reklam oluşumlarının istenmeyen gönderilmesi durumunda, örneğin spam e -postaları aracılığıyla yasal adımlar atma hakkını saklı tutar."
+            "value" : "**Kişisel Verilerin Korunması**\n\nBu uygulamanın işletmecileri kişisel verilerinizin korunmasını çok ciddiye almaktadır. Kişisel verilerinizi yasal veri koruma yönetmeliklerine ve bu veri koruma bildirgesine uygun şekilde gizli tutuyoruz.\n\nBu uygulamayı kullandığınızda çeşitli kişisel veriler toplanır. Kişisel veriler, sizin kişisel olarak tanımlanabileceğiniz verilerdir. Bu veri koruma bildirgesi, hangi verileri topladığımızı ve bu verileri ne için kullandığımızı açıklar. Ayrıca, bu işlemin nasıl ve hangi amaca hizmet ettiği hakkında da bilgi verir.\n\nİnternetteki veri aktarımının (örneğin e-posta iletişimi sırasında) güvenlik açıkları olabileceğini belirtmek isteriz. Üçüncü kişilerin verilere erişimine karşı tam koruma mümkün değildir.\n\n**Sorumlu Kara İçin İpucu**\n\nBu uygulamadaki verilerin işlenmesinden sorumlu kuruluş:\nEsther Lukeba\nBlumenmann Sokak 17\n53842 Troisdorf\nTelefon: 022418667509\nE-posta: Esther.lukeba[@hsrw.org](mailto:lennart-luis.guggenberger@hsrw.org)\n\nSorumlu kuruluş, kişisel verilerin işlenmesi amacı ve vasıtası üzerinde tek başına veya başkalarıyla birlikte karar veren doğal veya tüzel kişidir (örneğin isimler, e-posta adresleri vb.).\n\n**Depolama Süresi**\n\nBu veri koruma bildirgesi içinde daha özel bir depolama süresi belirtilmediği sürece, verilerin işlenmesi amacı sona erdiğinde kişisel verileriniz bizde kalır. Geçerli bir silme talebini ileri sürerseniz veya verilerin işlenmesine ilişkin izninizizi geri çekerseniz, kişisel verileriniz (örneğin e-posta adresi, telefon numarası ve profil resmi gibi) silinir.\n\nAncak, toplantı protokollerinin eksiksizliğini ve takip edilebilirliğini garanti etmek için, ilgili kişinin kimliği (örneğin isim ve rol) bu protokollerde kalır. Bu, belgelendirmenin otantisitesi ve bütünlüğüne hizmet eder. Diğer kişisel veriler, başka hiçbir yasal nedenin olmaması halinde geri alınamaz bir şekilde kaldırılır (örneğin vergi veya ticari saklama süreleri). Son durumda, bu nedenlerin ortadan kalkmasından sonra silme gerçekleştirilir.\n\n**Bu web sitesindeki veri işleme hukuki dayanaklarına genel bilgiler**\n\nVeri işlemesine izin verdiyseniz, kişisel verilerinizi, özel veri kategorileri işlendiğinde Art. 9 Abs. 1 DSGVO'ya göre Art. 6 Abs. 1 lit. a DSGVO veya Art. 9 Abs. 2 lit. a DSGVO temelinde işleriz. Kişisel verilerin üçüncü ülkelere aktarılması için açık izin verilmesi durumunda, veri işlemesi ayrıca Art. 49 Abs. 1 lit. a DSGVO temelinde gerçekleştirilir. Çerezlerin veya bilgilerin cihazınıza (ör. cihaz parmak izi ile) erişimin saklanmasına izin verdiyseniz, § 25 Abs. 1 TDDDG'ye göre ilave veri işlemesi gerçekleştirilir. İzin her zaman iptal edilebilir. Verilerinizin bir sözleşmenin yerine getirilmesi veya sözleşme öncesi tedbirlerin uygulanması durumunda gerekli olduğu durumlarda, verilerinizi Art. 6 Abs. 1 lit. b DSGVO temelinde işleriz. Bunun dışında, verilerinizi, bunlar hukuki bir yükümlülüğün yerine getirilmesi için gerekliysa, Art. 6 Abs. 1 lit. c DSGVO temelinde işleriz. Veri işlemesi, meşru menfaatlerimiz temelinde de Art. 6 Abs. 1 lit. f DSGVO'ya göre gerçekleştirilebilir. Veri koruma bildirgesinin ilgili bölümlerinde hangi hukuki dayanakların geçerli olduğunu bulabilirsiniz.\n\n**Verilerin işlenmesine izninizi geri çekme:**\nBirçok veri işlemesi sadece açık izninizle mümkündür. Zaten verdiğiniz bir izni her zaman geri çekebilirsiniz. İzni çekene kadar verilerin işlenmesinin meşru olması bu çekilmeden etkilenmez.\n\n**Özel durumlarda veri toplama ve doğrudan reklamlara karşı itiraz hakkı (Madde 21 DSGVO)**\nVERİ İŞLEME, MADDE 6 ABS. 1 LIT. E VEYA F DSGVO TEMELİNDE GERÇEKLEŞİRSE, KİŞİSEL DURUMUNUZA DAYANAN NEDENLERDEN DOLAYI HER ZAMAN KİŞİSEL VERİLERİNİZİN İŞLENMESİNE İTİRAZ ETME HAKKINA SAHİPSİNİZ; BU PROFLILLEME İÇİN DE GEÇERLİDİR. BİR İŞLEMENİN HANGİ HUKUKİ TEMELLERE DAYANDIĞINI BU VERİ KORUMA BİLDİRGESİNDEN ÖĞRENEBİLİRSİNİZ. İTİRAZ ETTİĞİNİZ TAKDİRDE, İLGİLİ KİŞİSEL\nVERİLERİNİZİ DAHA FAZLA İŞLEMEYECEĞİZ, YANİ İŞLEMENİN SİZİN ÇIKARLARINIZA, HAKLARINIZA VE ÖZGÜRLÜKLERİNİZE BASKIN OLDUĞUNA DAİR HAKLILIK GÖSTEREBİLİR YAHUT İŞLEME HUKUKİ İDDİALARIN YÜRÜTÜLMESİ, UYGULANMASI VEYA KORUNMASI AMACIYLA HİZMET ETMEKTEDİR (MAD. 21 ABS. 1 DSGVO'YA GÖRE İTİRAZ). KİŞİSEL VERİLERİNİZ DOĞRUDAN REKLAMCILIĞI YÜRÜTMEK İÇİN İŞLENİYORSA, HER ZAMAN BÖYLE BİR REKLAMCILIĞIN VASITASIYLA İŞLENEBİLEN KİŞİSEL VERİLERİNE KARŞI İTİRAZ ETME HAKKINA SAHİPSİNİZ; BU, PROFİLLEME İLE İLGİLİ OLARAK BU DOĞRUDAN REKLAMLA İLGİLİDİR. EĞER İTİRAZ EDERSENİZ, KİŞİSEL VERİLERİNİZ DAHA SONRA DOĞRUDAN REKLAMCILIĞIN AMAÇLARI İÇİN KULLANILMAZ (MAD. 21 ABS. 2 DSGVO'YA GÖRE İTİRAZ).\n\n**Yetkili denetim otoritesine şikâyet hakkı**\nDSGVO ihlalleri durumunda, mağdurlara, özellikle normal ikametgâhlarının, iş yerlerinin veya ihlalin tahmin edilen yerinin bulunduğu üye devletin denetim otoritesi olmak üzere bir şikâyet hakkı düşer. Şikayet hakkı, diğer idari veya yargı yolları zarar görmeksizin var olur.\n\n**Veri Taşınabilirliği Hakkı**\nVerilerinizi, izniniz temelinde veya bir sözleşmenin yerine getirilmesi bağlamında otomatik olarak işliyoruz, size veya üçüncü bir kişiye yaygın bir, makine tarafından okunabilir bir format da verilmiştir. Verilerin direkt olarak başka sorumlu bir kişiye aktarılmasını talep ederseniz, bu sadece teknik olarak gerçekleştirilebilir.\n\n**Bilgi, Düzeltme ve Silme**\nGeçerli yasal düzenlemeler çerçevesinde, her zaman ücretsiz bilgi alma hakkına sahipsiniz, depolanmış olan kişisel verileriniz, onların kaynağı ve alıcısı ve veri işlemenin amacı hakkında ve gerekliyse bu verilerin düzeltilmesi veya silinmesi hakkında. Bu ve kişisel verilerle ilgili diğer sorularınızla ilgili olarak her zaman bizimle iletişime geçebilirsiniz.\n\n**Veri İşleme Kısıtlaması Hakkı**\nKişisel verilerinizin işlenmesinin kısıtlanmasını talep etme hakkına sahipsiniz. Bu konuda her zaman bizimle iletişime geçebilirsiniz. Data işlemesi kısıtlaması hakkı, aşağıdaki durumlarda vardır:\n\n- Bizde depolanan kişisel verilerinizin doğruluğunu reddediyorsanız, bunu kontrol etmek genellikle zaman alır. Kontrol süresi boyunca, kişisel verilerinizin işlenmesinin kısıtlanmasını talep etme hakkına sahipsiniz.\n- Kişisel verilerinizin işlenmesi hukuka aykırı olmuştur veya hukuka aykırıdır, veri işleme kısıtlamasını isteyebilirsiniz.\n- Kişisel verilerinize artık ihtiyacımız yoksa, ancak hak taleplerini savunma veya senaryo için ihtiyacınız varsa, kişisel verilerinizi silmek yerine, işleme kısıtlamasını talep etme hakkına sahipsiniz.\n- Madde 21 Abs. 1 DSGVO'ya göre bir itiraz oluşturduysanız, sizin ve bizim çıkarlarımız arasında bir dengeleme yapılmalıdır. Hangi çıkarların ağır basacağı henüz belirsiz olduğu sürece, kişisel verilerinizin işlemesinin kısıtlanmasını talep etme hakkına sahipsiniz.\n- Kişisel verilerinizin işlemesini kısıtladıysanız, bu veriler - depolanmaları dışında - izninizle veya hak taleplerini savunma veya uygulama veya başka bir adli veya tüzel kişinin haklarını koruma ya da Avrupa Birliği veya bir Üye Devletin önemli kamu çıkarları için işlenemez.\n\n**SSL veya TLS Şifreleme**\n\nBu uygulama, gizli içeriklerin korunması, örneğin uygulama aracılığıyla gönderdiğiniz kayıt verileri veya istekler, için güvenlik nedenleriyle ve bir SSL veya TLS şifrelemesini kullanmaktadır. Bir uygulama bağlantınızda ilgili bir güvenlik sertifikasının tasarlandığı şifreli bir bağlantıyı tanıyabilirsiniz.\n\nSSL veya TLS şifrelemesi aktif olduğunda, bize ilettiğiniz verileri üçüncü kişiler tarafından okunamaz hale getirilir.\n\n**Reklam E-Postalarına Karşı İtiraz**\n\nYayın bilgileri yükümlülüğü çerçevesinde yayınlanan iletişim verilerinin, özellikle istenmeyen reklam ve bilgi materyallerinin gönderilmesi için kullanılmasına karşı çıkılır. Sayfanın operatörleri, talep edilmeyen reklam bilgisi gönderilmesi durumunda, örneğin spam e-postalarla, açıkça hukuki işlem başlatma hakkını saklı tutar."
           }
         }
       }
@@ -184,7 +184,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "%@"
           }
         },
@@ -228,20 +228,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "%lld"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%LLD"
+            "value" : "%lld"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%Lld"
+            "value" : "%lld"
           }
         }
       }
@@ -263,7 +263,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%Lld/%lld"
+            "value" : "%lld/%lld"
           }
         }
       }
@@ -272,20 +272,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "%llu Stimmen (%@%%)"
           }
         },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$llu Stimmen (%2$@%%)"
+            "state" : "translated",
+            "value" : "%llu Votes (%@%%)"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "%llu oyu (%@%%)"
+            "state" : "needs_review",
+            "value" : "%llu oy (%@%%)"
           }
         }
       }
@@ -301,13 +301,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1. Data protection at a glance"
+            "value" : "1. Data Protection at a Glance"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1. Bir bakışta veri koruması"
+            "value" : "1. Bir Bakışta Veri Gizliliği"
           }
         }
       }
@@ -316,7 +316,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "1/4"
           }
         },
@@ -351,7 +351,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "2. Hosting"
+            "value" : "2. Barındırma"
           }
         }
       }
@@ -389,13 +389,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "3. General information and compulsory information"
+            "value" : "3. General Information and Mandatory Information"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "3. Genel Bilgi ve Zorunlu Bilgiler"
+            "value" : "3. Genel Bilgilendirme ve Zorunlu Bilgiler"
           }
         }
       }
@@ -411,13 +411,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "4. Data acquisition on this website"
+            "value" : "4. Data Collection on this Website"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "4. Bu web sitesinde veri toplama"
+            "value" : "Bu web sitesindeki 4. Veri Toplama"
           }
         }
       }
@@ -433,7 +433,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "5. Newsletter"
+            "value" : "5th Newsletter"
           }
         },
         "tr" : {
@@ -461,7 +461,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "8/12"
+            "value" : "12/8"
           }
         }
       }
@@ -499,13 +499,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "01/21/2024"
+            "value" : "January 21, 2024"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "01/21/2024"
+            "value" : "21.01.2024"
           }
         }
       }
@@ -543,13 +543,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hung"
+            "value" : "Aged"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Asılı"
+            "value" : "Askıya Alınmış"
           }
         }
       }
@@ -571,7 +571,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tamamlanmış"
+            "value" : "Tamamlandı"
           }
         }
       }
@@ -587,13 +587,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Completed (%LLD)"
+            "value" : "Completed (%lld)"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tamamlandı (%LLD)"
+            "value" : "Tamamlandı (%lld)"
           }
         }
       }
@@ -615,7 +615,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tamamlandı: %@"
+            "value" : "Bitirildiği tarih: %@"
           }
         }
       }
@@ -631,13 +631,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Depreciation:"
+            "value" : "Dependency date:"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Amortisman:"
+            "value" : "Bağımlılık Tarihi:"
           }
         }
       }
@@ -653,7 +653,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Expiry date"
+            "value" : "Expiration date"
           }
         },
         "tr" : {
@@ -675,7 +675,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Date of expiry:"
+            "value" : "Expiration date:"
           }
         },
         "tr" : {
@@ -697,7 +697,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Date of expiry: %@"
+            "value" : "Expiry date: %@"
           }
         },
         "tr" : {
@@ -719,7 +719,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Refuse"
+            "value" : "Reject"
           }
         },
         "tr" : {
@@ -741,13 +741,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Log out"
+            "value" : "Sign out"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Çıkış yapmak"
+            "value" : "Oturumu kapat"
           }
         }
       }
@@ -763,13 +763,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Final hours"
+            "value" : "Graduation time"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Son saatler"
+            "value" : "Bitiş Zamanı"
           }
         }
       }
@@ -785,13 +785,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit vote"
+            "value" : "Edit Voting"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oylama Düzenle"
+            "value" : "Oylamayı düzenle"
           }
         }
       }
@@ -813,7 +813,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oylamayı bitir"
+            "value" : "Oylamayı bitirin"
           }
         }
       }
@@ -829,13 +829,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voting is loaded ..."
+            "value" : "Loading poll..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oylama yüklendi ..."
+            "value" : "Oylama yükleniyor..."
           }
         }
       }
@@ -851,13 +851,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voting"
+            "value" : "Votes"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oylama"
+            "value" : "Oylamalar"
           }
         }
       }
@@ -879,7 +879,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hesap Sil"
+            "value" : "Hesabı sil"
           }
         }
       }
@@ -939,13 +939,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "address"
+            "value" : "Address"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "adres"
+            "value" : "Adres"
           }
         }
       }
@@ -961,13 +961,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Search address"
+            "value" : "Searching for address"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arama adresi"
+            "value" : "Adres arama"
           }
         }
       }
@@ -983,13 +983,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Actions"
+            "value" : "ACTIONS"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eylem"
+            "value" : "EYLEMLER"
           }
         }
       }
@@ -1027,13 +1027,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Active (%LLD)"
+            "value" : "Active (%lld)"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktif (%LLD)"
+            "value" : "Aktif (%lld)"
           }
         }
       }
@@ -1049,13 +1049,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Current"
+            "value" : "Currently"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Akım"
+            "value" : "Şu anda"
           }
         }
       }
@@ -1071,13 +1071,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "There are currently no meetings."
+            "value" : "Currently, there are no sessions in progress."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Şu anda toplantı yok."
+            "value" : "Şu anda herhangi bir oturum devam etmiyor."
           }
         }
       }
@@ -1093,13 +1093,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Current session"
+            "value" : "CURRENT SESSION"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mevcut oturum"
+            "value" : "GÜNCEL OTURUM"
           }
         }
       }
@@ -1181,13 +1181,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "General information"
+            "value" : "General Information"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Genel bilgi"
+            "value" : "Genel Bilgiler"
           }
         }
       }
@@ -1196,20 +1196,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Am %@ um %@"
           }
         },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Am %1$@ um %2$@"
+            "state" : "translated",
+            "value" : "at the %1$@ at %2$@"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "AM %@ um %@"
+            "state" : "needs_review",
+            "value" : "%@ tarihinde saat %@"
           }
         }
       }
@@ -1247,13 +1247,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "save Changes"
+            "value" : "Save changes"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Değişiklikleri Kaydet"
+            "value" : "Değişiklikleri kaydet"
           }
         }
       }
@@ -1269,13 +1269,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registration is checked ..."
+            "value" : "Registration is being verified..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kayıt kontrol edilir ..."
+            "value" : "Kayıt kontrol ediliyor..."
           }
         }
       }
@@ -1313,13 +1313,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anonymous coordination"
+            "value" : "Anonymous Voting"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anonim koordinasyon"
+            "value" : "Anonim Oylama"
           }
         }
       }
@@ -1335,13 +1335,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anonymous survey"
+            "value" : "Anonymous Survey"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anonim anket"
+            "value" : "Anonim Anket"
           }
         }
       }
@@ -1357,13 +1357,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Upcoming dates"
+            "value" : "Upcoming Appointments"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Önümüzdeki tarihler"
+            "value" : "Bekleyen Randevular"
           }
         }
       }
@@ -1379,13 +1379,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "presence"
+            "value" : "Presence"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mevcudiyet"
+            "value" : "Varlık"
           }
         }
       }
@@ -1423,13 +1423,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hung"
+            "value" : "Hanged up"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Asılı"
+            "value" : "Asılmış"
           }
         }
       }
@@ -1445,13 +1445,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "hanging\nconfirm"
+            "value" : "Hang up\nConfirm"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "asılı\nonaylamak"
+            "value" : "Asmak, onaylamak"
           }
         }
       }
@@ -1473,7 +1473,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Üstün"
+            "value" : "Bekleyen"
           }
         }
       }
@@ -1489,13 +1489,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Selection options"
+            "value" : "Auswahlmöglichkeiten - Choice options"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seçim Seçenekleri"
+            "value" : "Seçenekler"
           }
         }
       }
@@ -1504,7 +1504,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Bearbeiten"
           }
         },
@@ -1516,8 +1516,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Düzenlemek"
+            "state" : "needs_review",
+            "value" : "Düzenle"
           }
         }
       }
@@ -1533,13 +1533,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Accident request"
+            "value" : "Membership Request"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaza talebi"
+            "value" : "Üyelik Başvurusu"
           }
         }
       }
@@ -1555,13 +1555,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Access inquiries"
+            "value" : "Membership requests"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Erişim Soruları"
+            "value" : "Katılım talepleri"
           }
         }
       }
@@ -1577,13 +1577,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Accession management"
+            "value" : "ACCESS MANAGEMENT"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Katılım yönetimi"
+            "value" : "KATILIM YÖNETİMİ"
           }
         }
       }
@@ -1605,7 +1605,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kullanıcı seçin"
+            "value" : "Kullanıcı Seçin"
           }
         }
       }
@@ -1621,13 +1621,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "User is loaded ..."
+            "value" : "User is loading..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kullanıcı yüklendi ..."
+            "value" : "Kullanıcı yükleniyor..."
           }
         }
       }
@@ -1643,13 +1643,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "User name:"
+            "value" : "Username:"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kullanıcı adı:"
+            "value" : "Kullanıcı Adı:"
           }
         }
       }
@@ -1665,13 +1665,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enter user names"
+            "value" : "Enter username"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kullanıcı Adları Girin"
+            "value" : "Kullanıcı adını girin"
           }
         }
       }
@@ -1693,7 +1693,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tanım"
+            "value" : "Açıklama"
           }
         }
       }
@@ -1702,7 +1702,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Beschreibung (optional)"
           }
         },
@@ -1737,7 +1737,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Açıklama girin"
+            "value" : "Giriş açıklamasını girin"
           }
         }
       }
@@ -1775,7 +1775,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Remove the picture"
+            "value" : "Remove image"
           }
         },
         "tr" : {
@@ -1797,13 +1797,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Upload the image"
+            "value" : "Upload picture"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Resmi yükleyin"
+            "value" : "Resim yükle"
           }
         }
       }
@@ -1825,7 +1825,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Resmi Sil"
+            "value" : "Resmi sil"
           }
         }
       }
@@ -1841,13 +1841,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Please click on the"
+            "value" : "Please now click on the"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lütfen tıklayın"
+            "value" : "Lütfen şimdi bu düğmeye tıklayın."
           }
         }
       }
@@ -1856,20 +1856,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Buchstabe"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Letter"
+            "value" : "letter"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mektup"
+            "state" : "needs_review",
+            "value" : "Harf"
           }
         }
       }
@@ -1891,7 +1891,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mektup (isteğe bağlı)"
+            "value" : "Harf (isteğe bağlı)"
           }
         }
       }
@@ -1907,13 +1907,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scan code"
+            "value" : "Scan the code"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kodu Tarama"
+            "value" : "Kodu tarayın"
           }
         }
       }
@@ -1922,7 +1922,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Count"
           }
         },
@@ -1934,8 +1934,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saymak"
+            "state" : "needs_review",
+            "value" : "Kont"
           }
         }
       }
@@ -1973,13 +1973,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The password is too weak.Please use at least 8 characters, a number and a special character."
+            "value" : "The password is too weak. Please use at least 8 characters, a number, and a special character."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parola çok zayıf.Lütfen en az 8 karakter, bir sayı ve özel bir karakter kullanın."
+            "value" : "Şifre çok zayıf. Lütfen en az 8 karakter, bir sayı ve bir özel karakter kullanın."
           }
         }
       }
@@ -1995,13 +1995,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Data protection declaration"
+            "value" : "Privacy Policy"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Veri Koruma Beyanı"
+            "value" : "Gizlilik Politikası"
           }
         }
       }
@@ -2010,7 +2010,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Datum"
           }
         },
@@ -2022,7 +2022,7 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Tarih"
           }
         }
@@ -2039,7 +2039,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Date and time"
+            "value" : "Date and Time"
           }
         },
         "tr" : {
@@ -2054,7 +2054,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Datum: %@"
           }
         },
@@ -2066,7 +2066,7 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Tarih: %@"
           }
         }
@@ -2089,7 +2089,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Süre (dakikalar halinde)"
+            "value" : "Süre (dakika olarak)"
           }
         }
       }
@@ -2105,13 +2105,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Duration (in Minutes)"
+            "value" : "Duration (in minutes)"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Süre (dakikalar halinde)"
+            "value" : "Süre (dakika olarak)"
           }
         }
       }
@@ -2120,20 +2120,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Dein Name: "
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your name:"
+            "value" : "Your Name:"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adınız:"
+            "value" : "Senin adın:"
           }
         }
       }
@@ -2155,7 +2155,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Detaylar"
+            "value" : "Ayrıntılar"
           }
         }
       }
@@ -2171,13 +2171,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Details for the marker"
+            "value" : "Details for the Marker"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "İşaretleyici için ayrıntılar"
+            "value" : "İşaretleyici için detaylar"
           }
         }
       }
@@ -2193,13 +2193,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Details of the vote"
+            "value" : "Details about the vote"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oylamanın detayları"
+            "value" : "Oylama detayları"
           }
         }
       }
@@ -2215,13 +2215,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Details about the session"
+            "value" : "Details about the meeting"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oturumla ilgili ayrıntılar"
+            "value" : "Toplantı ile ilgili detaylar"
           }
         }
       }
@@ -2243,7 +2243,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parolalar eşleşmiyor."
+            "value" : "Şifreler eşleşmiyor."
           }
         }
       }
@@ -2259,13 +2259,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This is only a preliminary survey to determine how many members come."
+            "value" : "This is just a preliminary survey to determine how many members will attend."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu sadece kaç üyenin geldiğini belirlemek için bir ön ankettir."
+            "value" : "Bu sadece kaç üyenin geleceğini belirlemek için geçici bir anket."
           }
         }
       }
@@ -2281,13 +2281,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This action cannot be reversed."
+            "value" : "This action cannot be undone."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu eylem tersine çevrilemez."
+            "value" : "Bu işlem geri alınamaz."
           }
         }
       }
@@ -2303,13 +2303,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You can no longer change your choice afterwards!"
+            "value" : "You cannot change your choice after this!"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Artık seçiminizi daha sonra değiştiremezsiniz!"
+            "value" : "Seçiminizi daha sonra değiştiremezsiniz!"
           }
         }
       }
@@ -2325,13 +2325,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Send email again"
+            "value" : "Resend email"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tekrar E -posta Gönder"
+            "value" : "E-postayı tekrar gönder"
           }
         }
       }
@@ -2347,13 +2347,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Send email again (%LLDS)"
+            "value" : "Resend email (%llds)"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tekrar e -posta gönderin (%LLDS)"
+            "value" : "E-postayı yeniden gönder (%llds)"
           }
         }
       }
@@ -2369,13 +2369,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Send email"
+            "value" : "Send Email"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "E -posta Gönder"
+            "value" : "E-posta gönder"
           }
         }
       }
@@ -2391,7 +2391,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "E-mail:"
+            "value" : "E-Mail:"
           }
         },
         "tr" : {
@@ -2413,13 +2413,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "An error has occurred.Please try again."
+            "value" : "An error has occurred. Please try again."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bir hata oluştu.Lütfen tekrar deneyin."
+            "value" : "Bir hata oluştu. Lütfen tekrar deneyin."
           }
         }
       }
@@ -2435,13 +2435,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Skip"
+            "value" : "Skip introduction"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Atlamak"
+            "value" : "Girişi atla"
           }
         }
       }
@@ -2463,7 +2463,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gönderilmiş"
+            "value" : "Sunulmuş"
           }
         }
       }
@@ -2529,7 +2529,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bitiş tarihi"
+            "value" : "Bitiş Tarihi"
           }
         }
       }
@@ -2573,7 +2573,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sonlar: %@"
+            "value" : "Son: %@"
           }
         }
       }
@@ -2595,7 +2595,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hata: %@"
+            "value" : "Fehler: %@"
           }
         }
       }
@@ -2611,13 +2611,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "create"
+            "value" : "Create"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "yaratmak"
+            "value" : "oluştur"
           }
         }
       }
@@ -2639,7 +2639,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yaratmak"
+            "value" : "Oluştur"
           }
         }
       }
@@ -2661,7 +2661,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ON ON"
+            "value" : "Oluşturulma tarihi"
           }
         }
       }
@@ -2683,7 +2683,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oluşturulan: %@"
+            "value" : "Oluşturulma tarihi: %@"
           }
         }
       }
@@ -2705,7 +2705,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etkinlik Oluştur"
+            "value" : "Etkinlik oluştur"
           }
         }
       }
@@ -2727,7 +2727,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Olaylar"
+            "value" : "Etkinlikler"
           }
         }
       }
@@ -2743,13 +2743,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Travel information:"
+            "value" : "Travel Information:"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seyahat Bilgileri:"
+            "value" : "Yolculuk Bilgileri:"
           }
         }
       }
@@ -2765,13 +2765,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Almost finished"
+            "value" : "Almost Finished"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Neredeyse bitti"
+            "value" : "Neredeyse Hazır"
           }
         }
       }
@@ -2787,7 +2787,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mistake"
+            "value" : "Error"
           }
         },
         "tr" : {
@@ -2809,13 +2809,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Error loading the data: %@"
+            "value" : "Error loading data: %@"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verileri yükleme hatası: %@"
+            "value" : "Veri yükleme hatası: %@"
           }
         }
       }
@@ -2831,13 +2831,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Error when saving the changes."
+            "value" : "Error in saving changes."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Değişiklikleri kaydederken hata."
+            "value" : "Değişiklikleri kaydetme hatası."
           }
         }
       }
@@ -2853,13 +2853,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mistake: %@"
+            "value" : "Error: %@"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mistake: %@"
+            "value" : "Hata: %@"
           }
         }
       }
@@ -2890,20 +2890,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Filter"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "filter"
+            "value" : "Filter"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "filtre"
+            "state" : "needs_review",
+            "value" : "Filtre"
           }
         }
       }
@@ -2912,20 +2912,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Frage"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ask"
+            "value" : "Question"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sormak"
+            "state" : "needs_review",
+            "value" : "Soru"
           }
         }
       }
@@ -2941,13 +2941,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enter the question"
+            "value" : "Enter the question."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Soruyu Girin"
+            "value" : "Soru girin"
           }
         }
       }
@@ -2963,13 +2963,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Free places: %LLD"
+            "value" : "Available seats: %lld"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ücretsiz yerler: %lld"
+            "value" : "Boş Yerler: %lld"
           }
         }
       }
@@ -2985,13 +2985,35 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "gallery"
+            "value" : "Gallery"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "galeri"
+            "value" : "Galeri"
+          }
+        }
+      }
+    },
+    "Generierter Social-Media-Post" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generierter Social-Media-Post"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generated social media post"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üretilen Sosyal Medya Gönderisi"
           }
         }
       }
@@ -3057,7 +3079,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Selam Dünya!"
+            "value" : "Merhaba, Dünya!"
           }
         }
       }
@@ -3073,13 +3095,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "In Progress"
+            "value" : "In progress"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Devam etmekte"
+            "value" : "İşlemde"
           }
         }
       }
@@ -3095,13 +3117,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "In the old gym behind the cemetery\nAltes Grab 5 b, 42069 Hölle"
+            "value" : "In the old gymnasium behind the cemetery\nOld Grave 5 b, 42069 Hell"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mezarlığın arkasındaki eski spor salonunda\nOld Mezar 5 B, 42069 Cehennem"
+            "value" : "Eski spor salonunun arkasında mezarlık\nEski Mezar 5 b, 42069 Cehennem"
           }
         }
       }
@@ -3123,7 +3145,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Planlamada"
+            "value" : "Planlama aşamasında"
           }
         }
       }
@@ -3139,13 +3161,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "info"
+            "value" : "Information"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Info"
+            "value" : "Bilgi"
           }
         }
       }
@@ -3161,13 +3183,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "info@meinverein.de"
+            "value" : "info@myclub.de"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "info@meinverein.de"
+            "value" : "info@benimkulubum.de"
           }
         }
       }
@@ -3183,13 +3205,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Interested in carpooling: %LLD"
+            "value" : "Interested in carpooling opportunities: %lld"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Carpooling ile ilgileniyor: %lld"
+            "value" : "Araç paylaşımına ilgili: %lld"
           }
         }
       }
@@ -3233,7 +3255,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yıllık Genel Toplantı"
+            "value" : "Yıllık Genel Kurul Toplantısı"
           }
         }
       }
@@ -3249,13 +3271,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "camera"
+            "value" : "Camera"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "kamera"
+            "value" : "Kamera"
           }
         }
       }
@@ -3277,7 +3299,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu tarihte yapabilir misin?"
+            "value" : "Bu tarihte müsait misin?"
           }
         }
       }
@@ -3293,13 +3315,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No polls found."
+            "value" : "No votes found."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oy bulunamadı."
+            "value" : "Hiçbir oylama bulunamadı."
           }
         }
       }
@@ -3321,7 +3343,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oylama sonuçları yok."
+            "value" : "Mevcut oylama sonuçları yok."
           }
         }
       }
@@ -3337,13 +3359,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No active meetings available"
+            "value" : "No active meetings available."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktif toplantı yok"
+            "value" : "Aktif toplantılar mevcut değil"
           }
         }
       }
@@ -3365,7 +3387,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No selection"
+            "value" : "Seçim yok"
           }
         }
       }
@@ -3387,7 +3409,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No description available"
+            "value" : "Açıklama mevcut değil"
           }
         }
       }
@@ -3409,7 +3431,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No protocols available"
+            "value" : "Mevcut protokol yok"
           }
         }
       }
@@ -3431,7 +3453,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No logs available."
+            "value" : "Mevcut protokol yok."
           }
         }
       }
@@ -3453,7 +3475,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seans yok"
+            "value" : "Hiç oturum mevcut değil"
           }
         }
       }
@@ -3475,7 +3497,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No participants"
+            "value" : "Katılımcı yok"
           }
         }
       }
@@ -3497,7 +3519,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hiçbir katılımcı görünmez."
+            "value" : "Katılımcı görünmüyor."
           }
         }
       }
@@ -3513,38 +3535,41 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No polls available."
+            "value" : "No surveys available."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anket yok."
+            "value" : "Mevcut anket yok."
           }
         }
       }
     },
-    "KIVoP " : {
+    "KI-generierte Verbesserung" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "KIVoP "
+            "state" : "translated",
+            "value" : "KI-generierte Verbesserung"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "KIVoP"
+            "value" : "AI-generated improvement"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Yırtılmak"
+            "state" : "translated",
+            "value" : "Yapay Zeka tarafından üretilen iyileştirme"
           }
         }
       }
+    },
+    "KI-Vorschlag" : {
+
     },
     "Konto löschen" : {
       "localizations" : {
@@ -3563,7 +3588,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "delete account"
+            "value" : "Hesabı sil"
           }
         }
       }
@@ -3579,13 +3604,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loading polls..."
+            "value" : "Loading votes..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loading polls..."
+            "value" : "Oylamaları yüklüyor..."
           }
         }
       }
@@ -3601,13 +3626,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Charge inquiries ..."
+            "value" : "Loading requests..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loading requests..."
+            "value" : "İstekler yükleniyor..."
           }
         }
       }
@@ -3629,7 +3654,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Şarj Sonuçları ..."
+            "value" : "Sonuçlar yükleniyor..."
           }
         }
       }
@@ -3645,13 +3670,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Charge event ..."
+            "value" : "Loading event..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Leave Event..."
+            "value" : "Etkinlik yükleniyor..."
           }
         }
       }
@@ -3667,13 +3692,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lade profile picture ..."
+            "value" : "Loading profile picture..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Added Profile Picture..."
+            "value" : "Profil resmi yükleniyor..."
           }
         }
       }
@@ -3689,13 +3714,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lade protocols ..."
+            "value" : "Loading protocols..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lade Protokolleri ..."
+            "value" : "Protokolleri yükle..."
           }
         }
       }
@@ -3711,13 +3736,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Charge surveys ..."
+            "value" : "Loading polls..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ücret anketleri ..."
+            "value" : "Anketler yükleniyor..."
           }
         }
       }
@@ -3733,13 +3758,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Charge ..."
+            "value" : "Loading..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Şarj ..."
+            "value" : "Yükleniyor..."
           }
         }
       }
@@ -3755,13 +3780,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Load..."
+            "value" : "Translating into English: Loading..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laden..."
+            "value" : "Yükleniyor..."
           }
         }
       }
@@ -3777,13 +3802,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loads ..."
+            "value" : "Loading..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loading..."
+            "value" : "Yükleniyor..."
           }
         }
       }
@@ -3805,7 +3830,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lat: %lf, lon: %lf"
+            "value" : "Lat: %lf, Lon: %lf\n\nIn Turkish: Enlem: %lf, Boylam: %lf"
           }
         }
       }
@@ -3815,19 +3840,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Latitude: %F"
+            "value" : "Latitude: %f"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Latitude: %F"
+            "value" : "Latitude: %f"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enlem: %F"
+            "value" : "Enlem: %f"
           }
         }
       }
@@ -3849,7 +3874,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enlem: %lf, boylam: %lf"
+            "value" : "Enlem: %lf, Boylam: %lf"
           }
         }
       }
@@ -3865,13 +3890,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Runs: %@"
+            "value" : "Expires: %@"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Koşular: %@"
+            "value" : "Sona eriyor: %@"
           }
         }
       }
@@ -3880,20 +3905,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Link"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "link"
+            "value" : "Link"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "bağlantı"
+            "state" : "needs_review",
+            "value" : "Bağlantı"
           }
         }
       }
@@ -3909,13 +3934,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loading locations ..."
+            "value" : "Loading locations..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yükleme Konumları ..."
+            "value" : "Konumlar yükleniyor..."
           }
         }
       }
@@ -3924,20 +3949,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Loading meetings..."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Loading meetings ..."
+            "value" : "Loading meetings..."
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yükleme toplantıları ..."
+            "state" : "needs_review",
+            "value" : "Toplantıları yükleme..."
           }
         }
       }
@@ -3946,7 +3971,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Loading..."
           }
         },
@@ -3959,7 +3984,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yükleme ..."
+            "value" : "Loading..."
           }
         }
       }
@@ -3975,13 +4000,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Location details"
+            "value" : "Location Details"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Konum Ayrıntıları"
+            "value" : "Konum Detayları"
           }
         }
       }
@@ -4025,7 +4050,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Giriş yapmak"
+            "value" : "Giriş Yap"
           }
         }
       }
@@ -4035,19 +4060,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Longitude: %F"
+            "value" : "Longitude: %f"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Longitude: %F"
+            "value" : "Longitude: %f"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Boylam: %F"
+            "value" : "Boylam: %f"
           }
         }
       }
@@ -4069,7 +4094,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Silmek"
+            "value" : "Silme"
           }
         }
       }
@@ -4085,13 +4110,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Select meeting"
+            "value" : "Select a meeting"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toplantı Seçin"
+            "value" : "Toplantıyı seçin"
           }
         }
       }
@@ -4107,13 +4132,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meeting-Code"
+            "value" : "Meeting Code"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toplantı kodu"
+            "value" : "Toplantı Kodu"
           }
         }
       }
@@ -4129,13 +4154,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meetings are loaded ..."
+            "value" : "Loading meetings..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toplantılar yüklendi ..."
+            "value" : "Toplantılar yükleniyor..."
           }
         }
       }
@@ -4151,13 +4176,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Allow multiple selections"
+            "value" : "Allow multiple selection"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Birden çok seçime izin ver"
+            "value" : "Çoklu seçime izin ver"
           }
         }
       }
@@ -4210,7 +4235,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Mit "
           }
         },
@@ -4223,7 +4248,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "With"
+            "value" : "ile"
           }
         }
       }
@@ -4245,7 +4270,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "members"
+            "value" : "Üyeler"
           }
         }
       }
@@ -4261,13 +4286,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Would you really like to end the session?"
+            "value" : "Do you really want to end the session?"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Are you sure you want to end the session?"
+            "value" : "Gerçekten oturumu sonlandırmak istiyor musunuz?"
           }
         }
       }
@@ -4283,13 +4308,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Would you really like to start the session?"
+            "value" : "Do you really want to start the session?"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seansa gerçekten başlamak ister misiniz?"
+            "value" : "Gerçekten oturumu başlatmak istiyor musunuz?"
           }
         }
       }
@@ -4305,13 +4330,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Are you sure you want to delete this account?"
+            "value" : "Do you really want to delete this account?"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu hesabı gerçekten silmek ister misiniz?"
+            "value" : "Bu hesabı gerçekten silmek istiyor musunuz?"
           }
         }
       }
@@ -4327,13 +4352,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Are you sure you want to delete your account?"
+            "value" : "Do you really want to delete your account?"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hesabınızı gerçekten silmek istiyor musunuz?"
+            "value" : "Gerçekten hesabınızı silmek istiyor musunuz?"
           }
         }
       }
@@ -4349,13 +4374,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Do you really want to delete this survey?This action cannot be reversed."
+            "value" : "Do you really want to delete this survey? This action cannot be undone."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu anketi gerçekten silmek istiyor musunuz?Bu eylem tersine çevrilemez."
+            "value" : "Bu anketi gerçekten silmek istiyor musunuz? Bu eylem geri alınamaz."
           }
         }
       }
@@ -4371,13 +4396,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Search for question"
+            "value" : "Search for the question"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Soru arayın"
+            "value" : "Soru aramak"
           }
         }
       }
@@ -4393,13 +4418,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Search for Meeting"
+            "value" : "Search for meeting"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bir toplantı arayın"
+            "value" : "Toplantı aramak"
           }
         }
       }
@@ -4415,13 +4440,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Search for the session"
+            "value" : "Search for meeting"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Search for session"
+            "value" : "Oturum arama"
           }
         }
       }
@@ -4465,7 +4490,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "isim"
+            "value" : "İsim"
           }
         }
       }
@@ -4487,7 +4512,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adı Düzenle"
+            "value" : "İsim düzenle"
           }
         }
       }
@@ -4509,7 +4534,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "name of the session"
+            "value" : "Oturumun Adı"
           }
         }
       }
@@ -4531,7 +4556,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mekanın Adı"
+            "value" : "Yerin ismi"
           }
         }
       }
@@ -4575,7 +4600,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "HAYIR"
+            "value" : "Hayır"
           }
         }
       }
@@ -4591,7 +4616,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "New vote"
+            "value" : "New Vote"
           }
         },
         "tr" : {
@@ -4619,7 +4644,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yeni Bir Yer Ekle"
+            "value" : "Yeni yer ekle"
           }
         }
       }
@@ -4635,7 +4660,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "New password"
+            "value" : "New Password"
           }
         },
         "tr" : {
@@ -4657,13 +4682,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "New password"
+            "value" : "NEW PASSWORD"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yeni Şifre"
+            "value" : "YENİ ŞİFRE"
           }
         }
       }
@@ -4685,7 +4710,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No Data"
+            "value" : "Veri Yok"
           }
         }
       }
@@ -4701,13 +4726,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No Locations Available."
+            "value" : "No locations available."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mevcut yer yok."
+            "value" : "Mevcut konum yok."
           }
         }
       }
@@ -4723,13 +4748,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No meetings Available."
+            "value" : "No meetings available."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toplantı yok."
+            "value" : "Herhangi bir toplantı mevcut değil."
           }
         }
       }
@@ -4751,7 +4776,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poster yok."
+            "value" : "Hiç poster mevcut değil."
           }
         }
       }
@@ -4767,13 +4792,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No Records Available."
+            "value" : "No records available."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kayıt yok."
+            "value" : "Kayıt bulunmamaktadır."
           }
         }
       }
@@ -4789,13 +4814,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "number"
+            "value" : "Number"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "sayı"
+            "value" : "Numara"
           }
         }
       }
@@ -4811,13 +4836,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Users are displayed here if you take part in the session"
+            "value" : "Users will be displayed here when they participate in the session."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oturuma katılırsanız kullanıcılar burada görüntülenir"
+            "value" : "Kullanıcılar, oturuma katıldıklarında burada gösterilir."
           }
         }
       }
@@ -4833,13 +4858,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "User overview"
+            "value" : "USER OVERVIEW"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "USER OVERVIEW"
+            "value" : "KULLANICI GENEL BAKIŞ"
           }
         }
       }
@@ -4855,13 +4880,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "User management"
+            "value" : "User Management"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kullanıcı yönetimi"
+            "value" : "Kullanıcı Yönetimi"
           }
         }
       }
@@ -4877,7 +4902,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "or"
+            "value" : "oder translates to \"or\" in English."
           }
         },
         "tr" : {
@@ -4899,13 +4924,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Or plan your next"
+            "value" : "or plan your next"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "or plan your next"
+            "value" : "veya bir sonraki planını yap"
           }
         }
       }
@@ -4914,7 +4939,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "OK"
           }
         },
@@ -4926,8 +4951,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "TAMAM"
+            "state" : "needs_review",
+            "value" : "Tamam"
           }
         }
       }
@@ -4936,20 +4961,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Option"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "option"
+            "value" : "Option"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Option"
+            "state" : "needs_review",
+            "value" : "Seçenek"
           }
         }
       }
@@ -4965,13 +4990,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Option %LLD"
+            "value" : "Option %lld"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seçenek %LLD"
+            "value" : "Opsiyon %lld"
           }
         }
       }
@@ -4981,19 +5006,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Option %U:"
+            "value" : "Option %u:"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Option %U:"
+            "value" : "Option %u:"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seçenek %U:"
+            "value" : "Seçenek %u:"
           }
         }
       }
@@ -5015,7 +5040,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "options"
+            "value" : "Seçenekler"
           }
         }
       }
@@ -5031,16 +5056,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Organisation"
+            "value" : "Organization"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "organizasyon"
+            "value" : "Organizasyon"
           }
         }
       }
+    },
+    "Originaltext" : {
+
     },
     "Ort" : {
       "localizations" : {
@@ -5053,13 +5081,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Location"
+            "value" : "Place"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Konum"
+            "value" : "Yer"
           }
         }
       }
@@ -5075,13 +5103,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "password"
+            "value" : "Password"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "password"
+            "value" : "Şifre"
           }
         }
       }
@@ -5119,13 +5147,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Change Password"
+            "value" : "Change password"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Change Password"
+            "value" : "Şifre Değiştir"
           }
         }
       }
@@ -5141,13 +5169,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Forget password?"
+            "value" : "Forgot your password?"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Forgot your password?"
+            "value" : "Şifrenizi mi unuttunuz?"
           }
         }
       }
@@ -5169,7 +5197,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Repeat password"
+            "value" : "Şifreyi tekrarla"
           }
         }
       }
@@ -5185,13 +5213,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Repeat password"
+            "value" : "REPEAT PASSWORD"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Şifreyi tekrar girin"
+            "value" : "ŞİFREYİ TEKRARLA"
           }
         }
       }
@@ -5207,13 +5235,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reset password"
+            "value" : "Reset Password"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reset password"
+            "value" : "Şifreyi Sıfırla"
           }
         }
       }
@@ -5235,7 +5263,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poster %@"
+            "value" : "Afiş %@"
           }
         }
       }
@@ -5251,13 +5279,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "posters"
+            "value" : "Posters"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "posters"
+            "value" : "Afişler"
           }
         }
       }
@@ -5279,7 +5307,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit poster position"
+            "value" : "Afiş pozisyonunu düzenle"
           }
         }
       }
@@ -5295,13 +5323,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add Poster Position"
+            "value" : "Add poster position"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add Poster Position"
+            "value" : "Afiş pozisyonu ekle"
           }
         }
       }
@@ -5317,13 +5345,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Delete the poster position?"
+            "value" : "Delete poster position?"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Delete poster position?"
+            "value" : "Afiş pozisyonunu sil?"
           }
         }
       }
@@ -5339,13 +5367,35 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "poster positions"
+            "value" : "Poster Positions"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poster pozisyonları"
+            "value" : "Afiş Pozisyonları"
+          }
+        }
+      }
+    },
+    "Pleno " : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Pleno "
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pleno"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pleno"
           }
         }
       }
@@ -5367,7 +5417,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "positions"
+            "value" : "Pozisyonlar"
           }
         }
       }
@@ -5383,13 +5433,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poster design"
+            "value" : "Poster Design"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poster tasarımı"
+            "value" : "Afiş Tasarımı"
           }
         }
       }
@@ -5405,13 +5455,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Postal code"
+            "value" : "Postal Code"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Postal code"
+            "value" : "Posta kodu"
           }
         }
       }
@@ -5433,7 +5483,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Profile"
+            "value" : "Profil"
           }
         }
       }
@@ -5449,13 +5499,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Profile"
+            "value" : "Profile picture"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Profil"
+            "value" : "Profil resmi"
           }
         }
       }
@@ -5471,13 +5521,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Protocol on"
+            "value" : "\"Meeting minutes on\""
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "protocol on"
+            "value" : "Protokol üzerinde"
           }
         }
       }
@@ -5493,13 +5543,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Select the protocol"
+            "value" : "Select Protocol"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Protokolü seçin"
+            "value" : "Protokol seçin"
           }
         }
       }
@@ -5521,7 +5571,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open protocol in"
+            "value" : "Protokolü açmak için"
           }
         }
       }
@@ -5543,7 +5593,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Protokol:"
+            "value" : "Tutanak:"
           }
         }
       }
@@ -5559,13 +5609,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Protocol selection"
+            "value" : "Selection of Protocol Antennas"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Protokol seçimi"
+            "value" : "Tutanak Seçimi"
           }
         }
       }
@@ -5587,7 +5637,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Protokoller"
+            "value" : "Tutanaklar"
           }
         }
       }
@@ -5603,13 +5653,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Council meetings,"
+            "value" : "City council meetings,"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Konsey toplantıları,"
+            "value" : "Belediye Meclisi toplantıları,"
           }
         }
       }
@@ -5631,7 +5681,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Register"
+            "value" : "Kayıt Ol"
           }
         }
       }
@@ -5640,20 +5690,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Rolle"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "role"
+            "value" : "Role"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rolle"
+            "value" : "Rulo"
           }
         }
       }
@@ -5669,13 +5719,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit collective items"
+            "value" : "Edit collective account"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Koleksiyon öğesini düzenle"
+            "value" : "Toplu gönderileri düzenle"
           }
         }
       }
@@ -5691,13 +5741,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Create collecting items"
+            "value" : "Create collective item"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toplama öğeleri oluşturun"
+            "value" : "Toplu gönderi oluşturun"
           }
         }
       }
@@ -5713,13 +5763,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Delete collecting items"
+            "value" : "Delete collective entry"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toplama öğelerini sil"
+            "value" : "Toplu postaları sil"
           }
         }
       }
@@ -5735,13 +5785,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Save collecting items"
+            "value" : "Save collective items"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toplama öğelerini kaydedin"
+            "value" : "Toplu postaları sakla"
           }
         }
       }
@@ -5750,7 +5800,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Select Status"
           }
         },
@@ -5762,8 +5812,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select Status"
+            "state" : "needs_review",
+            "value" : "Durum Seçin"
           }
         }
       }
@@ -5779,13 +5829,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You must first take the poll to see the live score."
+            "value" : "You must first participate in the survey to see the live status."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Canlı standı görmek için önce ankete katılmalısınız."
+            "value" : "Canlı durumu görebilmek için önce ankete katılmanız gerekiyor."
           }
         }
       }
@@ -5807,7 +5857,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ Um %@"
+            "value" : "%@ tarihinde saat %@'de toplantı"
           }
         }
       }
@@ -5823,13 +5873,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit session"
+            "value" : "Edit Meeting"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit session"
+            "value" : "Toplantıyı düzenle"
           }
         }
       }
@@ -5851,7 +5901,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Son oturum"
+            "value" : "Oturumu sonlandır"
           }
         }
       }
@@ -5873,7 +5923,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oturum Oluşturma"
+            "value" : "Toplantı oluştur"
           }
         }
       }
@@ -5889,13 +5939,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start session"
+            "value" : "Start meeting"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start session"
+            "value" : "Toplantıyı başlatın"
           }
         }
       }
@@ -5911,13 +5961,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sessions"
+            "value" : "Meetings"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oturumlar"
+            "value" : "Toplantılar"
           }
         }
       }
@@ -5933,13 +5983,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Headmaster"
+            "value" : "Session Chair"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "chairperson"
+            "value" : "Toplantı Başkanı"
           }
         }
       }
@@ -5983,7 +6033,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Language"
+            "value" : "Dil"
           }
         }
       }
@@ -6005,7 +6055,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Select language"
+            "value" : "Dil Seçin"
           }
         }
       }
@@ -6027,7 +6077,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Language:"
+            "value" : "Dil:"
           }
         }
       }
@@ -6071,7 +6121,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Select location"
+            "value" : "Konum seçin"
           }
         }
       }
@@ -6093,7 +6143,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add Location"
+            "value" : "Konum ekle"
           }
         }
       }
@@ -6102,7 +6152,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Start:"
           }
         },
@@ -6114,8 +6164,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Başlangıç:"
+            "state" : "needs_review",
+            "value" : "Baslangıc:"
           }
         }
       }
@@ -6137,7 +6187,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start date"
+            "value" : "Başlangıç tarihi"
           }
         }
       }
@@ -6197,13 +6247,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Search address"
+            "value" : "Search for address"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arama adresi"
+            "value" : "Adres arama"
           }
         }
       }
@@ -6219,13 +6269,35 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seek"
+            "value" : "Search"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aramak"
+            "value" : "Arama"
+          }
+        }
+      }
+    },
+    "Teilen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teilen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paylaşmak"
           }
         }
       }
@@ -6247,7 +6319,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Katılımı onaylayın"
+            "value" : "Katılımı onayla"
           }
         }
       }
@@ -6307,13 +6379,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Term"
+            "value" : "Appointments"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tarihler"
+            "value" : "Randevular"
           }
         }
       }
@@ -6329,13 +6401,35 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "title"
+            "value" : "Title"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "başlık"
+            "value" : "Başlık"
+          }
+        }
+      }
+    },
+    "Übernehmen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übernehmen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take over"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devralmak"
           }
         }
       }
@@ -6357,7 +6451,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tercüme etmek"
+            "value" : "Çevirmek"
           }
         }
       }
@@ -6373,13 +6467,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Survey results"
+            "value" : "Survey Results"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anket sonuçları"
+            "value" : "Anket Sonuçları"
           }
         }
       }
@@ -6401,7 +6495,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Create a survey"
+            "value" : "Anket oluşturmak"
           }
         }
       }
@@ -6423,7 +6517,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sil anket?"
+            "value" : "Anketi silmek?"
           }
         }
       }
@@ -6439,13 +6533,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "surveys"
+            "value" : "Surveys"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "surveys"
+            "value" : "Anketler"
           }
         }
       }
@@ -6461,7 +6555,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Polls,"
+            "value" : "Surveys,"
           }
         },
         "tr" : {
@@ -6489,7 +6583,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bilinmeyen Durum"
+            "value" : "Bilinmeyen durum"
           }
         }
       }
@@ -6511,7 +6605,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Desteklenmeyen veri türü"
+            "value" : "Desteklenmeyen veri tipi"
           }
         }
       }
@@ -6527,13 +6621,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Responsible %LLD"
+            "value" : "Responsible %lld"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sorumlu %LLD"
+            "value" : "Sorumlu %lld"
           }
         }
       }
@@ -6549,13 +6643,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Responsible person"
+            "value" : "Responsible Person"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sorumlu kişi"
+            "value" : "Sorumlu Kişi"
           }
         }
       }
@@ -6571,13 +6665,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Responsible persons"
+            "value" : "Responsible Persons"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sorumlu kişiler"
+            "value" : "Sorumlu Kişiler"
           }
         }
       }
@@ -6593,13 +6687,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Club settings"
+            "value" : "Club Settings"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kulüp ayarları"
+            "value" : "Dernek Ayarları"
           }
         }
       }
@@ -6615,13 +6709,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Logo"
+            "value" : "Club Logo"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Logo"
+            "value" : "Dernek logosu"
           }
         }
       }
@@ -6637,13 +6731,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "club planning"
+            "value" : "Club Planning"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kulüp planlaması"
+            "value" : "Dernek Planlama"
           }
         }
       }
@@ -6659,13 +6753,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Club trip ..."
+            "value" : "Club Trip..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kulüp gezisi ..."
+            "value" : "Dernek gezisi..."
           }
         }
       }
@@ -6681,13 +6775,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Past dates"
+            "value" : "Past Appointments"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Past Events"
+            "value" : "Geçmiş Randevular"
           }
         }
       }
@@ -6709,7 +6803,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yayınlamak"
+            "value" : "Yayımla"
           }
         }
       }
@@ -6731,7 +6825,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Published"
+            "value" : "Yayınlanan"
           }
         }
       }
@@ -6753,7 +6847,29 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Üstesinden gelmek"
+            "value" : "Yönet"
+          }
+        }
+      }
+    },
+    "Verwerfen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwerfen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reddetmek"
           }
         }
       }
@@ -6762,14 +6878,14 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "VL"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vl"
+            "value" : "VL"
           }
         },
         "tr" : {
@@ -6791,13 +6907,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wait for real-time data ..."
+            "value" : "Waiting for real-time data..."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gerçek zamanlı verileri bekleyin ..."
+            "value" : "Gerçek zamanlı verileri bekliyor..."
           }
         }
       }
@@ -6813,13 +6929,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Further"
+            "value" : "Continue"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Further"
+            "value" : "Devam"
           }
         }
       }
@@ -6828,14 +6944,14 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "WIP"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wip"
+            "value" : "WIP"
           }
         },
         "tr" : {
@@ -6857,13 +6973,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit WIP"
+            "value" : "Edit the WIP"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Edit WIP"
+            "value" : "WIP'yi düzenle"
           }
         }
       }
@@ -6872,20 +6988,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Wir hosten die Inhalte unserer Website bei folgendem Anbieter:\n\n**Hetzner**\n\nAnbieter ist die Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen (nachfolgend Hetzner).\n\nDetails entnehmen Sie der Datenschutzerklärung von Hetzner:\nhttps://www.hetzner.com/de/legal/privacy-policy/.\n\nDie Verwendung von Hetzner erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Wir haben ein berechtigtes Interesse an einer möglichst zuverlässigen Darstellung unserer Website. Sofern eine entsprechende Einwilligung abgefragt wurde, erfolgt die Verarbeitung ausschließlich auf Grundlage von Art.6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG, soweit die Einwilligung die Speicherung von Cookies oder den Zugriff auf Informationen im Endgerät des Nutzers (z. B. Device-Fingerprinting) im Sinne des TDDDG umfasst. Die Einwilligung ist jederzeit widerrufbar.\n\n**Auftragsverarbeitung**\nWir haben einen Vertrag über Auftragsverarbeitung (AVV) zur Nutzung des oben genannten Dienstes geschlossen. Hierbei handelt es sich um einen datenschutzrechtlich vorgeschriebenen Vertrag, der gewährleistet, dass dieser die personenbezogenen Daten unserer Websitebesucher nur nach unseren Weisungen und unter Einhaltung der DSGVO verarbeitet."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "We host the content of our website with the following provider:\n\n** Hetzner **\n\nThe provider is Hetzner Online GmbH, Industriestr.25, 91710 Gunzenhausen (hereinafter Hetzner).\n\nDetails can be found in Hetzner's data protection declaration:\nhttps://www.hetzner.com/de/legal/privacy-policy/.\n\nHetzner is used on the basis of Art. 6 Para. 1 lit. f GDPR.We have a legitimate interest in the most reliable representation of our website. If a corresponding consent has been queried, the processing takes place exclusively on the basis of Article 6 (1) lit. a GDPR and Section 25 (1) TDDDG, insofar as consent storage of cookies or access to information in the end device of the user (z.. B. Device fingerprinting). The consent can be revoked at any time.\n\n** Order processing **\nWe have concluded a contract for order processing (AVV) to use the above service.This is a contract prescribed by data protection law that ensures that it only processes the personal data of our website visitors according to our instructions and in compliance with the DSGVO."
+            "value" : "We host the content of our website with the following provider:\n\n**Hetzner**\n\nThe provider is Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen (hereinafter referred to as Hetzner).\n\nDetails can be found in Hetzner's privacy policy:\nhttps://www.hetzner.com/de/legal/privacy-policy/.\n\nThe use of Hetzner is based on Art. 6 para. 1 lit. f DSGVO. We have a legitimate interest in the most reliable presentation of our website. If consent has been requested, the processing is carried out exclusively on the basis of Art.6 para. 1 lit. a DSGVO and § 25 para. 1 TDDSG, insofar as the consent includes the storage of cookies or access to information on the user's terminal device (e.g., device fingerprinting) in the sense of the TDDSG. Consent can be revoked at any time.\n\n**Order Processing**\nWe have entered into a contract for order processing (AVV) for the use of the above-named service. This is a contract required by data protection law, which ensures that the provider processes the personal data of our website visitors only according to our instructions and in compliance with the DSGVO."
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Web sitemizin içeriğini aşağıdaki sağlayıcı ile barındırıyoruz:\n\n** Hetzner **\n\nSağlayıcı Hetzner Online GmbH, Industriestr.25, 91710 Gunzenhausen (bundan böyle Hetzner olarak anılacaktır).\n\nAyrıntılar Hetzner'ın Veri Koruma Beyannamesi'nde bulunabilir:\nhttps://www.hetzner.com/de/legal/privacy-policy/.\n\nHetzner, 6 para.Web sitemizin en güvenilir temsiline meşru bir ilgimiz var. İlgili bir onay sorgulanmışsa, işlem sadece 6 (1) LIT. kullanıcı (z. B. cihaz parmak izi). Onay herhangi bir zamanda iptal edilebilir.\n\n** Sipariş İşleme **\nYukarıdaki hizmeti kullanmak için sipariş işleme (AVV) için bir sözleşme yaptık.Bu, veri koruma yasası tarafından öngörülen bir sözleşmedir ve bu da web sitesi ziyaretçilerimizin kişisel verilerini talimatlarımıza ve GDPR'ye uygun olarak işlemesini sağlar."
+            "state" : "translated",
+            "value" : "Aşağıda belirtilen sağlayıcıda, web sitemizin içeriğini barındırıyoruz:\n\n**Hetzner**\n\nHizmet sağlayıcı Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen'dır (bundan sonra 'Hetzner' olarak anılacaktır).\n\nHetzner'in gizlilik politikasındaki ayrıntıları alabilirsiniz: \nhttps://www.hetzner.com/de/legal/privacy-policy/.\n\nHetzner'ın kullanımı, DSGVO'nun 6. Madde 1. Paragraf f. maddeye dayanmaktadır. Web sitemizin mümkün olduğunca güvenilir bir şekilde sunulmasına yönelik meşru bir çıkarımız var. İlgili izin talep edildiğinde, işleme yalnızca DSGVO'nun 6. Madde 1. Paragraf a. madde ve TDDDG'nin 25. Madde 1. Paragrafı temelinde gerçekleştirilir, bu da kullanıcının son cihazında (ör. Cihaz parmak izi) bilgilere erişim veya çerezlerin saklanması anlamına gelir TDDDG. Onay her zaman geri alınabilir.\n\n**Veri İşleme Sözleşmesi**\nYukarıda belirtilen hizmetin kullanılması için bir Veri İşleme Sözleşmesi (AVV) imzaladık. Bu, sağlayıcının, web sitemizi ziyaret eden kişilerin kişisel verilerini yalnızca talimatlarımız doğrultusunda ve DSGVO'ya uygun şekilde işlediğini garanti eden veri koruma anlaşmasıdır."
           }
         }
       }
@@ -6901,13 +7017,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Really unsubscribe?"
+            "value" : "Really sign out?"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gerçekten abonelikten çıkın mı?"
+            "value" : "Gerçekten çıkış yapmak mı?"
           }
         }
       }
@@ -6923,13 +7039,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "To an improved"
+            "value" : "\"towards an improvement\""
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geliştirilmiş"
+            "value" : "daha iyi bir hale getirmek için"
           }
         }
       }
@@ -6951,7 +7067,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poster pozisyonuna"
+            "value" : "Afiş Pozisyonuna"
           }
         }
       }
@@ -6989,7 +7105,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Back to the login"
+            "value" : "Back to login"
           }
         },
         "tr" : {

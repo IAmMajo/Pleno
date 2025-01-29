@@ -8,6 +8,9 @@ struct MarkdownEditorView: View {
     @State private var isEditing: Bool = false
     @State private var markdownText: String = ""
     @State private var isTranslationSheetPresented = false // Zustand für das Sheet
+    @State private var isExtendSheetPresented = false // Zustand für das AI-Feature
+    @State private var isSocialPostSheetPresented = false
+
 
     @State private var recordStatus: RecordStatus = .underway
 
@@ -149,7 +152,30 @@ struct MarkdownEditorView: View {
                         Text(isEditing ? "Speichern" : "Bearbeiten")
                     }
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                                    if isEditing {
+                                        Button(action: {
+                                            isExtendSheetPresented.toggle()
+                                        }) {
+                                            Image(systemName: "wand.and.stars")
+                                                .foregroundColor(.blue)
+                                        }
+                                    } else {
+                                        Button(action: {
+                                            isSocialPostSheetPresented.toggle()
+                                        }) {
+                                            Image(systemName: "square.and.arrow.up")
+                                                .foregroundColor(.blue)
+                                        }
+                                    }
+                                }
             }
+            .sheet(isPresented: $isExtendSheetPresented) {
+                ExtendRecordView(markdownText: $markdownText)
+            }
+            .sheet(isPresented: $isSocialPostSheetPresented) {
+                            SocialMediaPostView(markdownText: markdownText)
+                        }
         }
         .onAppear {
             
@@ -292,3 +318,224 @@ struct TranslationSheetView: View {
 //    }
 }
 
+
+import SwiftUI
+import MarkdownUI
+import MeetingServiceDTOs
+import Foundation
+import UIKit
+
+import SwiftUI
+import MarkdownUI
+import MeetingServiceDTOs
+import Foundation
+import UIKit
+
+struct ExtendRecordView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var markdownText: String
+    @State private var aiGeneratedText: String = ""
+    @State private var isLoading = true
+    @State private var userEditedText: String = ""
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("KI-generierte Verbesserung")
+                .font(.headline)
+                .foregroundColor(.primary)
+                .padding(.top, 16)
+                .padding(.horizontal)
+            
+            HStack(spacing: 20) {
+                VStack {
+                    Text("Originaltext")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                    
+                    TextEditor(text: $markdownText)
+                        .font(.body)
+                        .foregroundColor(.primary)
+                        .padding()
+                        .frame(maxWidth: .infinity, minHeight: 300)
+                        //.background(Color(.systemGray6))
+                        .cornerRadius(8)
+                }
+                
+                VStack {
+                    Text("KI-Vorschlag")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                    
+                    TextEditor(text: $userEditedText)
+                        .font(.body)
+                        .foregroundColor(.primary)
+                        .padding()
+                        .frame(maxWidth: .infinity, minHeight: 300)
+                        .background(Color.white)
+                        .cornerRadius(8)
+                }
+            }
+            .padding(.horizontal)
+            .frame(maxWidth: .infinity)
+            
+            Spacer()
+            
+            HStack(spacing: 15) {
+                Button(action: {
+                    dismiss()
+                }) {
+                    Text("Verwerfen")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+                
+                Button(action: {
+                    markdownText = userEditedText
+                    dismiss()
+                }) {
+                    Text("Übernehmen")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 20)
+        }
+        .background(Color.white)
+        .frame(minWidth: 1200, maxWidth: 3000) // Breiteres Layout für bessere Übersicht
+        .task {
+            await fetchExtendedRecord()
+        }
+        .onAppear {
+            userEditedText = aiGeneratedText // Text zur Bearbeitung vorbereiten
+        }
+    }
+    
+    private func fetchExtendedRecord() async {
+        isLoading = true
+        aiGeneratedText = ""
+        
+        await RecordsAPI.extendRecord(content: markdownText) { chunk in
+            DispatchQueue.main.async {
+                aiGeneratedText += chunk + " "
+                userEditedText = aiGeneratedText // Laufende Aktualisierung im Editor
+            }
+        }
+        
+        isLoading = false
+    }
+}
+
+
+struct SocialMediaPostView: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var socialMediaText: String = ""
+    @State private var isLoading = true
+    var markdownText: String
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Generierter Social-Media-Post")
+                .font(.headline)
+                .foregroundColor(.primary)
+                .padding(.top, 16)
+                .padding(.horizontal)
+            
+            ScrollView {
+                Text(socialMediaText.isEmpty ? "Lade Social-Media-Post..." : socialMediaText)
+                    .font(.body)
+                    .foregroundColor(.primary)
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.white)
+            }
+            .padding(.horizontal)
+            
+            Spacer()
+            
+            Button(action: sharePost) {
+                Label("Teilen", systemImage: "square.and.arrow.up")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 20)
+        }
+        .background(Color.white)
+        .task {
+            await fetchSocialMediaPost()
+        }
+    }
+    
+    private func fetchSocialMediaPost() async {
+        isLoading = true
+        socialMediaText = ""
+        
+        await RecordsAPI.generateSocialMediaPost(content: markdownText) { chunk in
+            DispatchQueue.main.async {
+                socialMediaText += chunk + " "
+            }
+        }
+        
+        isLoading = false
+    }
+    
+    private func sharePost() {
+            let activityController = UIActivityViewController(activityItems: [socialMediaText], applicationActivities: nil)
+            
+            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootViewController = scene.windows.first?.rootViewController {
+                rootViewController.present(activityController, animated: true, completion: nil)
+            }
+        }
+    }
+
+class RecordsAPI {
+    static func extendRecord(content: String, updateHandler: @escaping (String) -> Void) async {
+        await fetchAIResponse(endpoint: "extend-record", content: content, updateHandler: updateHandler)
+    }
+    
+    static func generateSocialMediaPost(content: String, updateHandler: @escaping (String) -> Void) async {
+        await fetchAIResponse(endpoint: "generate-social-media-post", content: content, updateHandler: updateHandler)
+    }
+    
+    private static func fetchAIResponse(endpoint: String, content: String, updateHandler: @escaping (String) -> Void) async {
+        guard let url = URL(string: "https://kivop.ipv64.net/ai/" + endpoint) else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let requestBody: [String: String] = ["content": content]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: requestBody, options: [])
+        
+        do {
+            let (stream, response) = try await URLSession.shared.bytes(for: request)
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else { return }
+            
+            for try await line in stream.lines {
+                DispatchQueue.main.async {
+                    updateHandler(line)
+                }
+                try await Task.sleep(nanoseconds: 1)
+            }
+        } catch {
+            DispatchQueue.main.async {
+                updateHandler("Fehler: \(error.localizedDescription)")
+            }
+        }
+    }
+}
