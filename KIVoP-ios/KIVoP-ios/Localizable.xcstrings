@@ -283,6 +283,9 @@
         }
       }
     },
+    "Abfahrtszeit" : {
+
+    },
     "Abgehängt" : {
 
     },
@@ -682,9 +685,6 @@
     "Auto und Sitzplätze" : {
 
     },
-    "Baut Adrian noch" : {
-
-    },
     "Bearbeiten" : {
       "localizations" : {
         "de" : {
@@ -731,6 +731,9 @@
     "Beschreibung oder weitere Infos zu deiner Fahrt" : {
 
     },
+    "Beschreibung zur Fahrt: " : {
+
+    },
     "Bestätige mit einem Bild, dass das Plakat beschädigt wurde, oder es nicht mehr an der vorgesehenen Stelle hängt." : {
 
     },
@@ -740,10 +743,16 @@
     "Bestätigung" : {
 
     },
+    "Bevor du einer Eventfahrt beitreten kannst, musst du deinen Standort festlegen. Dieser kann später noch über das Symbol oben rechts geändert werden." : {
+
+    },
     "Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt." : {
 
     },
     "Bist du sicher, dass du das Plakat abhängen möchtest?" : {
+
+    },
+    "Bitte ein Event auswählen." : {
 
     },
     "Bitte füllen Sie alle Felder aus. Das Startdatum muss außerdem in der Zukunft liegen." : {
@@ -848,6 +857,9 @@
     "Details der Fahrt" : {
 
     },
+    "Details zum Event" : {
+
+    },
     "Die Abstimmung läuft noch. Du hast bereits abgestimmt." : {
 
     },
@@ -873,7 +885,19 @@
         }
       }
     },
+    "Du bietest eine andere Fahrgemeinschaft an. Daher kannst du nicht an einer anderen Fahrt teilnehmen!" : {
+
+    },
+    "Du bist bereits Fahrer bei diesem Event, und kannst keine weitere Fahrgemeinschaft anlegen." : {
+
+    },
     "Du hast bereits angefragt mitgenommen zu werden." : {
+
+    },
+    "Du hast dem ausgewählten Event nicht zugesagt, und kannst daher keine Fahrgemeinschaft anbieten." : {
+
+    },
+    "Du hast dem ausgewählten Event nicht zugesagt, und kannst daher keiner Fahrgemeinschaft beitreten." : {
 
     },
     "Du kannst deine Wahl danach nciht mehr ändern!" : {
@@ -908,6 +932,9 @@
           }
         }
       }
+    },
+    "Du wirst schon von jemandem mitgenommen." : {
+
     },
     "E-Mail erneut senden" : {
 
@@ -1000,13 +1027,22 @@
         }
       }
     },
+    "Es wurden noch keine Fahrgemeinschaften zu diesem Event angelegt." : {
+
+    },
     "Es wurden noch keine Protokolle veröffentlicht." : {
 
     },
-    "Event" : {
+    "Event auswählen" : {
+
+    },
+    "Event Beschreibung" : {
 
     },
     "Event Fahrt" : {
+
+    },
+    "Event Informationen" : {
 
     },
     "Events" : {
@@ -1018,9 +1054,6 @@
     "Fahrgemeinschaft" : {
 
     },
-    "Fahrgemeinschaft ist bereits voll." : {
-
-    },
     "Fahrgemeinschaften" : {
 
     },
@@ -1028,6 +1061,9 @@
 
     },
     "Fahrt löschen" : {
+
+    },
+    "Fahrten" : {
 
     },
     "Fast fertig" : {
@@ -1078,9 +1114,6 @@
 
     },
     "Freigeben" : {
-
-    },
-    "Freuen Sie sich schon bald auf Event gebundene Fahrgemeinschaften." : {
 
     },
     "Galerie" : {
@@ -1153,10 +1186,16 @@
     "Heinz-Peters" : {
 
     },
-    "Hiermit betsätigst du, dass du von dieser Adresse abgeholt werden möchtest und an dieser Fahrgemeinschaft teilnimmst" : {
+    "Hiermit bestätigst du, dass du von dieser Adresse abgeholt werden möchtest und an dieser Fahrgemeinschaft teilnimmst" : {
+
+    },
+    "Hiermit bestätigst du, dass du von dieser Adresse abgeholt werden möchtest." : {
 
     },
     "Hinweis" : {
+
+    },
+    "Hinweise" : {
 
     },
     "Hinzufügen" : {
@@ -1166,6 +1205,12 @@
 
     },
     "In Zwischenablage kopiert" : {
+
+    },
+    "Informationen zur Fahrt" : {
+
+    },
+    "Interesse entfernen" : {
 
     },
     "Ja" : {
@@ -1206,6 +1251,15 @@
           }
         }
       }
+    },
+    "Jetzt Abholort angeben." : {
+
+    },
+    "Jetzt teilnehmen" : {
+
+    },
+    "Jetzt zusagen!" : {
+
     },
     "Kamera" : {
       "localizations" : {
@@ -1601,6 +1655,9 @@
     "Neu laden" : {
 
     },
+    "Neue Event Fahrt" : {
+
+    },
     "Neue Fahrt" : {
 
     },
@@ -1853,9 +1910,6 @@
     "Plakate" : {
 
     },
-    "Planned Ride for %@" : {
-
-    },
     "Pleno " : {
 
     },
@@ -2007,6 +2061,9 @@
       }
     },
     "Schließen" : {
+
+    },
+    "Sie müssen erst am Event teilnehmen, bevor Sie an der Fahrgemeinschaft teilnehmen" : {
 
     },
     "Sitzung" : {
@@ -2431,13 +2488,7 @@
     "Willst du an dem Event teilnehmen?" : {
 
     },
-    "Wir arbeiten noch an dieser Funktion." : {
-
-    },
     "Wir hosten die Inhalte unserer Website bei folgendem Anbieter:\n\n**Hetzner**\n\nAnbieter ist die Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen (nachfolgend Hetzner).\n\nDetails entnehmen Sie der Datenschutzerklärung von Hetzner:\nhttps://www.hetzner.com/de/legal/privacy-policy/.\n\nDie Verwendung von Hetzner erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Wir haben ein berechtigtes Interesse an einer möglichst zuverlässigen Darstellung unserer Website. Sofern eine entsprechende Einwilligung abgefragt wurde, erfolgt die Verarbeitung ausschließlich auf Grundlage von Art.6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG, soweit die Einwilligung die Speicherung von Cookies oder den Zugriff auf Informationen im Endgerät des Nutzers (z. B. Device-Fingerprinting) im Sinne des TDDDG umfasst. Die Einwilligung ist jederzeit widerrufbar.\n\n**Auftragsverarbeitung**\nWir haben einen Vertrag über Auftragsverarbeitung (AVV) zur Nutzung des oben genannten Dienstes geschlossen. Hierbei handelt es sich um einen datenschutzrechtlich vorgeschriebenen Vertrag, der gewährleistet, dass dieser die personenbezogenen Daten unserer Websitebesucher nur nach unseren Weisungen und unter Einhaltung der DSGVO verarbeitet." : {
-
-    },
-    "Wird vom Event ausgelesen" : {
 
     },
     "Wirklich abmelden?" : {

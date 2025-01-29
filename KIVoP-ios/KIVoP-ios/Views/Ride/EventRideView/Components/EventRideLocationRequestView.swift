@@ -1,8 +1,9 @@
 import SwiftUI
 import MapKit
+import CoreLocation
 
-struct LocationRequestView: View {
-    @ObservedObject var viewModel: RideDetailViewModel
+struct EventRideLocationRequestView: View {
+    @ObservedObject var viewModel: EventRideViewModel
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -19,7 +20,7 @@ struct LocationRequestView: View {
                         .padding()
                     
                     SelectRideLocationView(selectedLocation: $viewModel.requestedLocation)
-                        .frame(width: 350, height: 450)
+                        .frame(width: 350, height: 400)
                         .cornerRadius(10)
 
                     List {
@@ -36,9 +37,26 @@ struct LocationRequestView: View {
                     }
                     .scrollDisabled(true)
                     
-                    Text("Hiermit betsätigst du, dass du von dieser Adresse abgeholt werden möchtest und an dieser Fahrgemeinschaft teilnimmst")
-                        .font(.footnote)
-                        .foregroundColor(.gray)
+                    if viewModel.editInterestEvent {
+                        Button(action: {
+                            viewModel.deleteInterestEventRide()
+                            dismiss()
+                        }){
+                            Text("Interesse entfernen")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.red)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+                        .buttonStyle(PlainButtonStyle())
+                    } else {
+                        Text("Hiermit bestätigst du, dass du von dieser Adresse abgeholt werden möchtest.")
+                            .multilineTextAlignment(.center)
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                    }
                 }
                 .onChange(of: viewModel.requestedLocation) {
                     // Hier gibt es keinen Parameter, da es ein Binding ist
@@ -50,7 +68,6 @@ struct LocationRequestView: View {
                         }
                     }
                 }
-
                 .navigationBarTitle("Adresse bestätigen", displayMode: .inline)
                 .navigationBarItems(
                     leading: Button("Abbrechen") {
@@ -61,12 +78,20 @@ struct LocationRequestView: View {
                         // Bestätigen-Aktion
                         viewModel.requestLat = Float(viewModel.requestedLocation!.latitude)
                         viewModel.requestLong = Float(viewModel.requestedLocation!.longitude)
-                        viewModel.requestRide()
+                        if viewModel.editInterestEvent {
+                            viewModel.patchInterestEventRide()
+                        } else {
+                            viewModel.requestInterestEventRide()
+                        }
                         dismiss()
                     }
                 )
                 .onAppear(){
-                    viewModel.requestedLocation = viewModel.startLocation
+                    if viewModel.editInterestEvent && viewModel.interestedEvent != nil {
+                        viewModel.requestedLocation = CLLocationCoordinate2D(latitude: CLLocationDegrees(viewModel.interestedEvent!.latitude), longitude: CLLocationDegrees(viewModel.interestedEvent!.longitude))
+                    } else {
+                        viewModel.requestedLocation = CLLocationCoordinate2D(latitude: CLLocationDegrees(viewModel.eventDetails!.latitude), longitude: CLLocationDegrees(viewModel.eventDetails!.longitude))
+                    }
                 }
             }
         }

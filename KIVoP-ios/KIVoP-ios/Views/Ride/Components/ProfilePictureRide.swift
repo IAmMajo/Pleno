@@ -32,8 +32,8 @@ struct ProfilePictureRide: View {
             }
         }
         .onAppear {
-            self.shortName = MainPageAPI.calculateShortName(from: name)
             fetchUserImage()
+            self.shortName = MainPageAPI.calculateShortName(from: name)
         }
     }
 

@@ -1,9 +1,9 @@
 import SwiftUI
+import Foundation
 import MapKit
 
-struct RideDetailView: View {
-    @StateObject var viewModel: RideDetailViewModel
-    @ObservedObject var rideViewModel: RideViewModel
+struct EventRideDetailView: View {
+    @StateObject var viewModel: EventRideDetailViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var shouldShowDriversProfilePicture = false
     
@@ -28,7 +28,7 @@ struct RideDetailView: View {
                     .edgesIgnoringSafeArea(.all)
                 // Inhalt
                 VStack {
-                    Text(viewModel.formattedDate(viewModel.rideDetail.starts))
+                    Text(viewModel.formattedDate(viewModel.eventRideDetail.starts))
                         .padding(5)
                         .overlay(
                             RoundedRectangle(cornerRadius: 30)
@@ -37,30 +37,33 @@ struct RideDetailView: View {
                         .padding(.vertical)
                     
                     // Wenn man Fahrer ist nie anzeigen
-                    if !viewModel.rideDetail.isSelfDriver && viewModel.rider?.accepted == false {
+                    if !viewModel.eventRideDetail.isSelfDriver && viewModel.rider?.accepted == false {
                         Text("Du hast bereits angefragt mitgenommen zu werden.")
                             .font(.headline)
                             .frame(maxWidth: 250, alignment: .center)
+                    }
+                
+                    Section(header: Text("Event Beschreibung").font(.headline)){
+                        Text(viewModel.eventDetails.description ?? "Keine Beschreibung zum Event vorhanden")
                             .multilineTextAlignment(.center)
                     }
                     
-                    // Fahrtbeschreibung
-                    Text("Beschreibung zur Fahrt: ")
-                        .font(.headline)
-                    Text(viewModel.rideDetail.description ?? "Keine Beschreibung zur Fahrt vorhanden")
-                        .multilineTextAlignment(.center)
+                    Section(header: Text("Informationen zur Fahrt").font(.headline)){
+                        Text(viewModel.eventRideDetail.description ?? "Keine Beschreibung zur Fahrt vorhanden")
+                            .multilineTextAlignment(.center)
+                    }
 
-                    // Ort
-                    RideLocationView(selectedLocation: $viewModel.location)
+                    // Eventort
+                    RideLocationView(selectedLocation: $viewModel.eventLocation)
                         .cornerRadius(10)
                         .frame(width: 350, height: 150)
-                    Text(viewModel.destinationAddress)
+                    Text(viewModel.eventAddress)
                         .foregroundColor(.blue)
                         .onAppear {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                viewModel.getAddressFromCoordinates(latitude: viewModel.rideDetail.destinationLatitude, longitude: viewModel.rideDetail.destinationLongitude) { address in
+                                viewModel.getAddressFromCoordinates(latitude: viewModel.eventDetails.latitude, longitude: viewModel.eventDetails.longitude) { address in
                                     if let address = address {
-                                        viewModel.destinationAddress = address
+                                        viewModel.eventAddress = address
                                     }
                                 }
                             }
@@ -68,25 +71,24 @@ struct RideDetailView: View {
                         .onTapGesture {
                             showMapOptions = true
                             setKoords = CLLocationCoordinate2D(
-                                latitude: CLLocationDegrees(viewModel.rideDetail.destinationLatitude),
-                                longitude: CLLocationDegrees(viewModel.rideDetail.destinationLongitude)
+                                latitude: CLLocationDegrees(viewModel.eventDetails.latitude),
+                                longitude: CLLocationDegrees(viewModel.eventDetails.longitude)
                             )
-                            setAddress = viewModel.destinationAddress
+                            setAddress = viewModel.eventAddress
                         }
-                    Text("\(viewModel.rideDetail.destinationLatitude), \(viewModel.rideDetail.destinationLongitude)")
+                    Text("\(viewModel.eventDetails.latitude), \(viewModel.eventDetails.longitude)")
                         .font(.subheadline)
                         .foregroundColor(.gray)
 
                     List{
-                        
                         Section(header: Text("Fahrer")){
                             HStack{
                                 // Leichte Verzögerung damit Daten geladen sind
                                 if shouldShowDriversProfilePicture {
-                                    ProfilePictureRide(name: viewModel.rideDetail.driverName, id: viewModel.rideDetail.driverID)
+                                    ProfilePictureRide(name: viewModel.eventRideDetail.driverName, id: viewModel.eventRideDetail.driverID)
                                 }
                                 VStack{
-                                    Text(viewModel.rideDetail.driverName)
+                                    Text(viewModel.eventRideDetail.driverName)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                     Text(viewModel.driverAddress)
                                         .font(.subheadline)
@@ -95,7 +97,7 @@ struct RideDetailView: View {
                                         .onAppear {
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                                 shouldShowDriversProfilePicture = true
-                                                viewModel.getAddressFromCoordinates(latitude: viewModel.rideDetail.startLatitude, longitude: viewModel.rideDetail.startLongitude) { address in
+                                                viewModel.getAddressFromCoordinates(latitude: viewModel.eventRideDetail.latitude, longitude: viewModel.eventRideDetail.longitude) { address in
                                                     if let address = address {
                                                         viewModel.driverAddress = address
                                                     }
@@ -109,15 +111,15 @@ struct RideDetailView: View {
                                     .onTapGesture {
                                         showMapOptions = true
                                         setKoords = CLLocationCoordinate2D(
-                                            latitude: CLLocationDegrees(viewModel.rideDetail.startLatitude),
-                                            longitude: CLLocationDegrees(viewModel.rideDetail.startLongitude)
+                                            latitude: CLLocationDegrees(viewModel.eventRideDetail.latitude),
+                                            longitude: CLLocationDegrees(viewModel.eventRideDetail.longitude)
                                         )
                                         setAddress = viewModel.driverAddress
                                     }
                             }
                         }
-                        
-                        Section(header: Text("Mitfahrer (\(viewModel.acceptedRiders.count)/\(viewModel.rideDetail.emptySeats))")){
+
+                        Section(header: Text("Mitfahrer (\(viewModel.acceptedRiders.count)/\(viewModel.eventRideDetail.emptySeats))")){
                             if viewModel.acceptedRiders.isEmpty {
                                 Text("Keine Mitfahrer")
                             } else {
@@ -129,7 +131,7 @@ struct RideDetailView: View {
                                         VStack{
                                             Text(rider.username)
                                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                            if viewModel.rideDetail.isSelfDriver {
+                                            if viewModel.eventRideDetail.isSelfDriver {
                                                 Text(viewModel.riderAddresses[rider.id] ?? "Lädt Adresse...")
                                                     .font(.subheadline)
                                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -137,7 +139,7 @@ struct RideDetailView: View {
                                             }
                                         }
                                         Spacer()
-                                        if viewModel.rideDetail.isSelfDriver {
+                                        if viewModel.eventRideDetail.isSelfDriver {
                                             Image(systemName: "square.and.arrow.up")
                                                 .foregroundColor(.blue)
                                                 .onTapGesture {
@@ -164,7 +166,7 @@ struct RideDetailView: View {
                                                             // Aktion zum Löschen für den Fahrer
                                                             viewModel.removeFromPassengers(rider: viewModel.rider!)
                                                             viewModel.showPassengerDeleteRequest = false
-                                                            viewModel.fetchRideDetails()
+                                                            viewModel.fetchEventRideDetails()
                                                         },
                                                         secondaryButton: .cancel()
                                                     )
@@ -175,7 +177,7 @@ struct RideDetailView: View {
                             }
                         }
                         
-                        if viewModel.requestedRiders.isEmpty || !viewModel.rideDetail.isSelfDriver {
+                        if viewModel.requestedRiders.isEmpty || !viewModel.eventRideDetail.isSelfDriver {
                         // Nichts wird angezeigt wenn es keine Requests gibt oder man nicht Fahrer ist
                         } else {
                             // Anfragen
@@ -187,7 +189,7 @@ struct RideDetailView: View {
                                         VStack{
                                             Text(rider.username)
                                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                            if viewModel.rideDetail.isSelfDriver {
+                                            if viewModel.eventRideDetail.isSelfDriver {
                                                 Text(viewModel.riderAddresses[rider.id] ?? "Lädt Adresse...")
                                                     .font(.subheadline)
                                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -195,7 +197,7 @@ struct RideDetailView: View {
                                             }
                                         }
                                         Spacer()
-                                        if viewModel.rideDetail.isSelfDriver {
+                                        if viewModel.eventRideDetail.isSelfDriver {
                                             Image(systemName: "plus.circle.fill")
                                                 .foregroundColor(.green)
                                                 .onTapGesture {
@@ -212,7 +214,7 @@ struct RideDetailView: View {
                                                             // Aktion zum hinzufügen für den Fahrer
                                                             viewModel.acceptRequestedRider(rider: viewModel.rider!)
                                                             viewModel.showPassengerAddRequest = false
-                                                            viewModel.fetchRideDetails()
+                                                            viewModel.fetchEventRideDetails()
                                                         },
                                                         secondaryButton: .cancel()
                                                     )
@@ -224,7 +226,7 @@ struct RideDetailView: View {
                         }
                         // Beschreibung zum Auto
                         Section(header: Text("Beschreibung Auto")){
-                            if let vehicleDescription = viewModel.rideDetail.vehicleDescription {
+                            if let vehicleDescription = viewModel.eventRideDetail.vehicleDescription {
                                 Text(vehicleDescription)
                             } else {
                                 Text("Keine Fahrzeugbeschreibung vorhanden.")
@@ -232,7 +234,7 @@ struct RideDetailView: View {
                         }
                     }
                     .listStyle(.insetGrouped)
-                    SpecialRideDecision(viewModel: viewModel, rideViewModel: rideViewModel)
+                    EventRideDecision(viewModel: viewModel )
                 }
             }
             .overlay {
@@ -242,12 +244,16 @@ struct RideDetailView: View {
             }
             .onAppear {
                Task {
-                   viewModel.fetchRideDetails()
+                   viewModel.fetchEventRideDetails()
+                   viewModel.fetchEventDetails()
+                   viewModel.fetchEventRides()
                }
             }
             .refreshable {
                 Task {
-                    viewModel.fetchRideDetails()
+                    viewModel.fetchEventRideDetails()
+                    viewModel.fetchEventDetails()
+                    viewModel.fetchEventRides()
                 }
             }
         }
@@ -278,21 +284,17 @@ struct RideDetailView: View {
            }
            Button("Abbrechen", role: .cancel) {}
         }
-        .navigationTitle(viewModel.rideDetail.name)
+        .navigationTitle(viewModel.eventRide.eventName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar{
-            if viewModel.rideDetail.isSelfDriver {
+            if viewModel.eventRideDetail.isSelfDriver {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: EditSpecialRideView(viewModel: EditRideViewModel(rideDetail: viewModel.rideDetail))) {
+                    NavigationLink(destination: EditEventRideView(viewModel: EditRideViewModel(eventRideDetail: viewModel.eventRideDetail))) {
                         Text("Bearbeiten")
                             .font(.body)
                     }
                 }
             }
-        }
-        // .sheet() für die Location Request
-        .sheet(isPresented: $viewModel.showLocationRequest) {
-            SpecialRideLocationRequestView(viewModel: viewModel)
         }
     }
 }
