@@ -355,7 +355,7 @@ fun DrawerContent(
                 modifier = Modifier,
                 icon = R.drawable.planner_banner_ad_pt_20dp,
                 title = getString(R.string.poster),
-                route = Screen.Poster.rout),
+                route = Screen.Posters.rout),
             drawerItem(
                 modifier = Modifier,
                 icon = R.drawable.chart_outlined_20dp,
