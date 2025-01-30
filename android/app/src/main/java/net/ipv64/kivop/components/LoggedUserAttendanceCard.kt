@@ -20,6 +20,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,8 +58,10 @@ fun LoggedUserAttendacneCard(
     meetingViewModel: MeetingViewModel,
     checkInClick: () -> Unit = {},
     acceptClick: () -> Unit = {},
-    declineClick: () -> Unit = {}
+    declineClick: () -> Unit = {},
+    showPopupcl: Boolean = false
 ) {
+  var showPopup by remember { mutableStateOf(showPopupcl) }
   // Header
   Column(
       modifier =
@@ -150,15 +156,19 @@ fun LoggedUserAttendacneCard(
                 }
           }
         } else if (meetingStatus == MeetingStatus.inSession) {
-          Button(
-              modifier = Modifier.fillMaxWidth(),
-              colors =
-                  ButtonDefaults.buttonColors(
-                      containerColor = Tertiary, contentColor = Text_prime_light),
-              onClick = { checkInClick() }) {
-                Text(text = "Check In")
-              }
+          if (user.status != AttendanceStatus.present) {
+
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = Tertiary, contentColor = Text_prime_light),
+                onClick = { checkInClick() }) {
+                  Text(text = "Check In")
+                }
+          }
         }
+
         SpacerBetweenElements()
         ExpandableBox(
             contentFoldedIn = {

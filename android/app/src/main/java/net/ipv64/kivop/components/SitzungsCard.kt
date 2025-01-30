@@ -33,6 +33,7 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetLocationDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetRecordDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
 import net.ipv64.kivop.services.api.getAttendances
 import net.ipv64.kivop.ui.theme.Background_secondary
@@ -43,7 +44,11 @@ import net.ipv64.kivop.ui.theme.Text_prime_light
 import net.ipv64.kivop.ui.theme.Text_secondary
 
 @Composable
-fun SitzungsCard(GetMeetingDTO: GetMeetingDTO, backgroundColor: Color = Color.Transparent) {
+fun SitzungsCard(
+    GetMeetingDTO: GetMeetingDTO,
+    backgroundColor: Color = Color.Transparent,
+    protocoll: List<GetRecordDTO>
+) {
   val dateFormatter = java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy")
   val timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
 
@@ -140,6 +145,19 @@ fun SitzungsCard(GetMeetingDTO: GetMeetingDTO, backgroundColor: Color = Color.Tr
                 backgroundColor = Background_secondary.copy(0.15f),
                 texColor = Text_prime_light,
                 onClick = {})
+          }
+          Spacer(modifier = Modifier.height(8.dp))
+          if (GetMeetingDTO.status == MeetingStatus.inSession ||
+              GetMeetingDTO.status == MeetingStatus.completed) {
+            if (protocoll.isNotEmpty()) {
+              ProfileCardSmall(
+                  name = protocoll[0].identity.name,
+                  role = "Protokollant",
+                  profilePicture = null,
+                  backgroundColor = Background_secondary.copy(0.15f),
+                  texColor = Text_prime_light,
+                  onClick = {})
+            }
           }
         }
       }
