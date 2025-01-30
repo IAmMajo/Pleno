@@ -16,12 +16,7 @@ import androidx.compose.ui.unit.dp
 import net.ipv64.kivop.ui.theme.Primary_20
 import net.ipv64.kivop.ui.theme.Text_secondary
 
-data class drawerItem(
-    val modifier: Modifier,
-    val icon: Int,
-    val title: String,
-    val route: String
-)
+data class drawerItem(val modifier: Modifier, val icon: Int, val title: String, val route: String)
 
 @Composable
 fun DrawerItem(drawerItem: drawerItem, selected: Boolean, onClick: () -> Unit) {
@@ -29,9 +24,9 @@ fun DrawerItem(drawerItem: drawerItem, selected: Boolean, onClick: () -> Unit) {
       modifier = drawerItem.modifier.fillMaxWidth(),
       icon = {
         Icon(
-          painter = painterResource(drawerItem.icon),
-          contentDescription = drawerItem.title,
-          tint = Text_secondary)
+            painter = painterResource(drawerItem.icon),
+            contentDescription = drawerItem.title,
+            tint = Text_secondary)
       },
       label = {
         Text(
