@@ -38,6 +38,14 @@ sealed class Screen(val rout: String) {
   object Voted : Screen("abgestimmt/{votingID}")
 
   object Poll : Screen("umfrage")
+
+  object PollList : Screen("umfragen")
+  
+  object PollResult : Screen("umfrageErgebnis")
+
+  object PollCreate : Screen("umfrageErstellen")
+  
+  object PollOnHold : Screen("umfrageAbgestimmt")
 }
 
 // routing später anpassen: navController.
