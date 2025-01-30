@@ -37,7 +37,13 @@ struct PostersView: View {
    
    
     var body: some View {
-       ZStack {
+       VStack {
+//          if isLoading {
+//             ProgressView("Loading...")
+//          } else if let error = error {
+//             Text("Error: \(error)")
+//                .foregroundColor(.red)
+//          }
           ZStack(alignment: .top) {
              if !viewModel.posters.isEmpty {
                 List {

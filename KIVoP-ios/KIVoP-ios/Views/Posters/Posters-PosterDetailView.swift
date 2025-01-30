@@ -120,7 +120,7 @@ struct Posters_PosterDetailView: View {
    var body: some View {
       
       VStack {
-         if viewModel.isLoading {
+         if isLoading {
             ProgressView("Loading...")
 //               .frame(maxWidth: .infinity)
 //               .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
@@ -313,7 +313,9 @@ struct Posters_PosterDetailView: View {
          .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
          .onAppear {
             Task {
+               isLoading = true
                await viewModel.fetchPoster()
+               isLoading = false
             }
          }
       }
