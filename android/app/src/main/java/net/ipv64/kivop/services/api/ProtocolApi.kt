@@ -13,7 +13,11 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.RecordStatus
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import org.json.JSONObject
 
 // ToDO LIste
 suspend fun getProtocolsApi(id: String): List<GetRecordDTO> =
@@ -145,3 +149,36 @@ suspend fun getProtocolApi(id: String, lang: String): GetRecordDTO? =
         null
       }
     }
+
+suspend fun patchProtocol(id: String, lang: String, content: String): Response? {
+  val path = "meetings/$id/records/$lang" // Path for the update request
+
+  val token = auth.getSessionToken()
+  if (token.isNullOrEmpty()) {
+    println("Fehler: Kein Token verfügbar")
+    return null
+  }
+
+  // Create the request body with the changed fields only
+  val jsonBody = JSONObject().apply { put("content", content) }
+
+  // Create the PATCH request
+  val request =
+      Request.Builder()
+          .url(BASE_URL + path)
+          .patch(jsonBody.toString().toRequestBody("application/json".toMediaTypeOrNull()))
+          .addHeader("Authorization", "Bearer $token")
+          .build()
+
+  Log.i("Save-Log", request.toString())
+  Log.i("Save-Log", jsonBody.toString())
+  return withContext(Dispatchers.IO) {
+    try {
+      val response = okHttpClient.newCall(request).execute()
+      return@withContext response
+    } catch (e: Exception) {
+      println("Fehler: ${e.message}")
+      null
+    }
+  }
+}

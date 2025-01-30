@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import java.time.LocalDateTime
@@ -19,7 +20,6 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.ui.theme.Background_prime
-import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.TextStyles
 import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_prime_light
@@ -29,7 +29,8 @@ import net.ipv64.kivop.ui.theme.Text_tertiary
 fun DateTimePicker(
     modifier: Modifier,
     context: Context,
-    name: String = "",
+    name: String? = null,
+    backgroundColor: Color = Background_prime,
     onDateTimeSelected: (LocalDateTime) -> Unit
 ) {
   var selectedDateTime by remember { mutableStateOf<LocalDateTime?>(null) }
@@ -60,16 +61,18 @@ fun DateTimePicker(
           calendar.get(Calendar.MONTH),
           calendar.get(Calendar.DAY_OF_MONTH))
 
-  Column(modifier = Modifier.fillMaxWidth().background(Primary).then(modifier)) {
-    Text(text = name, style = TextStyles.contentStyle, color = Text_prime_light)
-    SpacerBetweenElements(4.dp)
+  Column(modifier = Modifier.fillMaxWidth().background(Color.Transparent).then(modifier)) {
+    if (name != null) {
+      Text(text = name, style = TextStyles.contentStyle, color = Text_prime_light)
+      SpacerBetweenElements(4.dp)
+    }
     Box(
         modifier =
             Modifier.fillMaxWidth()
                 .height(56.dp)
                 .clickable { datePicker.show() }
                 .clip(RoundedCornerShape(4.dp))
-                .background(Background_prime)
+                .background(backgroundColor)
                 .padding(horizontal = 6.dp, vertical = 8.dp)) {
           Text(
               modifier = Modifier.align(Alignment.CenterStart),

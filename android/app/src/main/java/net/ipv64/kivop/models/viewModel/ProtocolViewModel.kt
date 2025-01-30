@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetRecordDTO
 import net.ipv64.kivop.services.api.getProtocolApi
+import net.ipv64.kivop.services.api.patchProtocol
 
 class ProtocolViewModel(private val meetingId: String, private val protocolLang: String) :
     ViewModel() {
@@ -49,9 +50,10 @@ class ProtocolViewModel(private val meetingId: String, private val protocolLang:
     viewModelScope.launch {
       _protocol.value?.let { protocol ->
         protocol.content = _editableMarkdown.value
-        // Hier solltest du deinen Repository-/API-Aufruf zum Speichern durchführen
-        // Beispiel: repository.updateProtocol(protocol)
-        Log.d("ProtocolViewModel", "Gespeichert: ${protocol.content}")
+
+        patchProtocol(meetingId, protocolLang, protocol.content)
+
+        Log.d("ProtocolViewModel2", "Gespeichert: ${protocol.content}")
       }
     }
   }

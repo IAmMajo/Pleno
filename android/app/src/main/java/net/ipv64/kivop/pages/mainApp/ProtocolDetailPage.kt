@@ -56,9 +56,11 @@ import net.ipv64.kivop.components.SitzungsCard
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.RecordStatus
 import net.ipv64.kivop.models.PlanAttendance
 import net.ipv64.kivop.models.viewModel.MeetingViewModel
 import net.ipv64.kivop.models.viewModel.MeetingViewModelFactory
+import net.ipv64.kivop.models.viewModel.UserViewModel
 import net.ipv64.kivop.services.GetScreenHeight
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Secondary
@@ -70,7 +72,8 @@ import net.ipv64.kivop.ui.theme.Text_prime
 fun ProtocolDetailPage(
     navController: NavController,
     meetingId: String,
-    meetingViewModel: MeetingViewModel = viewModel(factory = MeetingViewModelFactory(meetingId))
+    meetingViewModel: MeetingViewModel = viewModel(factory = MeetingViewModelFactory(meetingId)),
+    userViewModel: UserViewModel
 ) {
   BackHandler {
     isBackPressed = navController.popBackStack()
@@ -80,7 +83,7 @@ fun ProtocolDetailPage(
   val screenHeightDp = GetScreenHeight()
   var columnHeightDp by remember { mutableStateOf(0.dp) }
   val density = LocalDensity.current
-
+  var user = userViewModel.getProfile()
   val contentHeightDp by
       remember(screenHeightDp, columnHeightDp) {
         derivedStateOf { screenHeightDp - columnHeightDp }
@@ -229,24 +232,39 @@ fun ProtocolDetailPage(
                   for (protocol in meetingViewModel.protocols) {
                     if (protocol.lang == selectedLanguage) {
                       meetingViewModel.meeting?.let {
-                        AgendaCard(
-                            name = it.name,
-                            content =
-                                protocol.content +
-                                    "\n" +
-                                    protocol.votingResultsAppendix +
-                                    "\n" +
-                                    protocol.attendancesAppendix,
-                            EditBox = {
-                              IconBoxClickable(
-                                  icon = ImageVector.vectorResource(id = R.drawable.ic_edit),
-                                  onClick = {
-                                    navController.navigate(
-                                        "protokolleEdit/${it.id}/${selectedLanguage}")
-                                  },
-                                  backgroundColor = Tertiary.copy(0.19f),
-                                  tint = Tertiary)
-                            })
+                        if (user != null) {
+                          if (user.isAdmin && protocol.status != RecordStatus.approved ||
+                              protocol.iAmTheRecorder && protocol.status != RecordStatus.approved) {
+                            AgendaCard(
+                                name = it.name,
+                                content =
+                                    protocol.content +
+                                        "\n" +
+                                        protocol.votingResultsAppendix +
+                                        "\n" +
+                                        protocol.attendancesAppendix,
+                                EditBox = {
+                                  IconBoxClickable(
+                                      icon = ImageVector.vectorResource(id = R.drawable.ic_edit),
+                                      onClick = {
+                                        navController.navigate(
+                                            "protokolleEdit/${it.id}/${selectedLanguage}")
+                                      },
+                                      backgroundColor = Tertiary.copy(0.19f),
+                                      tint = Tertiary)
+                                })
+                          } else {
+                            AgendaCard(
+                                name = it.name,
+                                content =
+                                    protocol.content +
+                                        "\n" +
+                                        protocol.votingResultsAppendix +
+                                        "\n" +
+                                        protocol.attendancesAppendix,
+                            )
+                          }
+                        }
                       }
                     }
                   }

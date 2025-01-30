@@ -42,13 +42,21 @@ fun AttendanceCoordinationList(
     onVisibilityToggle: (Boolean) -> Unit,
     background: Color = Color(color = 0xFF686D74)
 ) {
-  // stickyHeader
   Column {
-    LabelMax(onClick = { onVisibilityToggle(!isVisible) }, backgroundColor = background) {
-      AttendanceSeparatorContent(
-          text = title, maxMembernumber = maxMembernumber, statusMembernumber = responses.size)
-    }
-    // Item with AnimatedVisibility
+    // Der gesamte Header ist jetzt klickbar
+    LabelMax(
+        backgroundColor = background,
+        onClick = { onVisibilityToggle(!isVisible) } // Klick schaltet Sichtbarkeit um
+        ) {
+          AttendanceSeparatorContent(
+              text = title,
+              maxMembernumber = maxMembernumber,
+              statusMembernumber = responses.size,
+              // onClick = { onVisibilityToggle(!isVisible) } // Hier klickbar machen!
+          )
+        }
+
+    // Sichtbare Liste mit Animation
     AnimatedVisibility(visible = isVisible, enter = expandVertically(), exit = shrinkVertically()) {
       Column { responses.forEach { item -> AttendanceItemRow(item = item) } }
     }
@@ -85,9 +93,17 @@ fun AttendanceItemRow(item: attendancesList) {
 }
 
 @Composable
-fun AttendanceSeparatorContent(text: String, maxMembernumber: Int, statusMembernumber: Int) {
+fun AttendanceSeparatorContent(
+    text: String,
+    maxMembernumber: Int,
+    statusMembernumber: Int,
+    // onClick: () -> Unit // Klick-Callback für Sichtbarkeitswechsel
+) {
   Row(
-      modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
+      modifier =
+          Modifier.fillMaxWidth()
+              // .clickable { onClick() } // Klick-Event für den Header
+              .padding(start = 8.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.SpaceBetween) {
         Text(

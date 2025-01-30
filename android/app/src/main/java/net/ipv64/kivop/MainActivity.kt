@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
@@ -62,6 +61,11 @@ import net.ipv64.kivop.pages.mainApp.Events.EventsDetailPage
 import net.ipv64.kivop.pages.mainApp.Events.EventsPage
 import net.ipv64.kivop.pages.mainApp.HomePage
 import net.ipv64.kivop.pages.mainApp.MeetingsListPage
+import net.ipv64.kivop.pages.mainApp.Polls.PollCreate
+import net.ipv64.kivop.pages.mainApp.Polls.PollOnHoldPage
+import net.ipv64.kivop.pages.mainApp.Polls.PollPage
+import net.ipv64.kivop.pages.mainApp.Polls.PollResultPage
+import net.ipv64.kivop.pages.mainApp.Polls.PollsListPage
 import net.ipv64.kivop.pages.mainApp.Posters.PosterDetailedPage
 import net.ipv64.kivop.pages.mainApp.Posters.PosterPage
 import net.ipv64.kivop.pages.mainApp.Posters.PostersListPage
@@ -167,7 +171,9 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
 
         composable("${Screen.ProtocolDetailPage.rout}/{meetingID}") { backStackEntry ->
           ProtocolDetailPage(
-              navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
+              navController,
+              backStackEntry.arguments?.getString("meetingID").orEmpty(),
+              userViewModel = userViewModel)
         }
 
         // CarpoolingList
@@ -219,6 +225,7 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
               val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
               VotingResultPage(navController = navController, votingID = votingID)
             }
+
         composable(
             route = Screen.Vote.rout,
             arguments =
@@ -228,6 +235,7 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
               val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
               VotePage(navController = navController, votingID = votingID)
             }
+
         composable(
             route = Screen.Voted.rout,
             arguments =
@@ -237,6 +245,20 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
               val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
               AlreadyVoted(navController = navController, votingID = votingID)
             }
+        // Polls
+        composable(route = Screen.PollList.rout) { PollsListPage(navController = navController) }
+        // Poll
+        composable("${Screen.Poll.rout}/{pollID}") { backStackEntry ->
+          PollPage(navController, backStackEntry.arguments?.getString("pollID").orEmpty())
+        }
+        // Poll result
+        composable("${Screen.PollResult.rout}/{pollID}") { backStackEntry ->
+          PollResultPage(navController, backStackEntry.arguments?.getString("pollID").orEmpty())
+        }
+        // Poll create
+        composable(route = Screen.PollCreate.rout) { PollCreate(navController = navController) }
+        // Poll onHold
+        composable(route = Screen.PollOnHold.rout) { PollOnHoldPage(navController = navController) }
       }
 }
 
@@ -337,12 +359,12 @@ fun DrawerContent(
                 modifier = Modifier,
                 icon = R.drawable.planner_banner_ad_pt_20dp,
                 title = getString(R.string.poster),
-                route = Screen.Poster.rout),
+                route = Screen.Posters.rout),
             drawerItem(
                 modifier = Modifier,
                 icon = R.drawable.chart_outlined_20dp,
                 title = getString(R.string.poll),
-                route = Screen.Poll.rout),
+                route = Screen.PollList.rout),
         )
 
     drawerItems.forEach { item ->

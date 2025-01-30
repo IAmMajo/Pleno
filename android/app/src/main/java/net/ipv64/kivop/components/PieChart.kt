@@ -22,6 +22,8 @@ import java.util.UUID
 import kotlin.math.*
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
+import net.ipv64.kivop.dtos.PollServiceDTOs.GetPollResultDTO
+import net.ipv64.kivop.dtos.PollServiceDTOs.GetPollResultsDTO
 import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.VotingColors
@@ -46,6 +48,44 @@ fun PieChart(
                     drawPieChart(
                         votingResults.results,
                         votingResults.totalCount.toInt(),
+                        explodeDistance = explodeDistance,
+                        showLabel)
+                  } else {
+                    val noVotings =
+                        GetVotingResultsDTO(
+                            votingId = UUID.randomUUID(),
+                            myVote = (0).toUByte(),
+                            totalCount = 1u,
+                            results =
+                                listOf(
+                                    GetVotingResultDTO((0).toUByte(), 1u, 100.0, listOf()),
+                                ))
+                    drawPieChart(noVotings.results, noVotings.totalCount.toInt(), 1.0f, showLabel)
+                  }
+                }) {}
+      }
+}
+
+@Composable
+fun PieChartPoll(
+    pollResults: GetPollResultsDTO,
+    explodeDistance: Float = 10f,
+    showLabel: Boolean = false,
+) {
+  Column(
+      modifier =
+          Modifier.fillMaxWidth()
+              .customShadow()
+              .background(Background_secondary, shape = RoundedCornerShape(8.dp))
+              .padding(10.dp),
+      horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier =
+                Modifier.size(250.dp).aspectRatio(1f).drawBehind {
+                  if (pollResults.totalCount.toInt() != 0) {
+                    drawPieChartPoll(
+                        pollResults.results,
+                        pollResults.totalCount.toInt(),
                         explodeDistance = explodeDistance,
                         showLabel)
                   } else {
@@ -97,7 +137,7 @@ fun DrawScope.drawPieChart(
     // calc explodeOffset. How much each slice is moved from the center
     val explodeOffset = calcPointOnCircle(startingAngle, sweepAngle, explodeDistance)
     drawArc(
-        colors[i],
+        colors[list[i].index.toInt()],
         startingAngle,
         sweepAngle,
         true,
@@ -149,30 +189,70 @@ fun calcPointOnCircle(startingAngle: Float, sweepAngle: Float, explodeDistance: 
   return Offset(offsetX, offsetY)
 }
 
-// just a test for coloring each slice
-fun interpolateColor(startColor: Color, endColor: Color, steps: Int): List<Color> {
-  val startRed = startColor.red * 255
-  val startGreen = startColor.green * 255
-  val startBlue = startColor.blue * 255
+fun DrawScope.drawPieChartPoll(
+    list: List<GetPollResultDTO>,
+    totalVotes: Int,
+    explodeDistance: Float,
+    showLabel: Boolean
+) {
+  val colors: List<Color> = VotingColors
+  // startingAngle -90° to start at the top
+  var startingAngle: Float = -90.0f
 
-  val endRed = endColor.red * 255
-  val endGreen = endColor.green * 255
-  val endBlue = endColor.blue * 255
+  // adjust size of chart to keep it in bound -- takes away the explode distance from each side
+  val adjustedSize =
+      size.copy(
+          width = size.width - explodeDistance * 2, height = size.height - explodeDistance * 2)
+  // offset to keep the chart in bound
+  val offset = Offset(explodeDistance, explodeDistance)
+  // set textPaint
+  val textPaint =
+      Paint().apply {
+        color = android.graphics.Color.WHITE
+        textSize = 60f
+        textAlign = Paint.Align.CENTER
+      }
 
-  val colors = mutableListOf<Color>()
-  val redDiff = (endRed - startRed) / (steps - 1)
-  val greenDiff = (endGreen - startGreen) / (steps - 1)
-  val blueDiff = (endBlue - startBlue) / (steps - 1)
+  for (i in list.indices) {
+    // calc sweep angle percentage of total votes
+    val sweepAngle = calcSweepAngle(list[i].count.toInt(), totalVotes)
+    // calc explodeOffset. How much each slice is moved from the center
+    val explodeOffset = calcPointOnCircle(startingAngle, sweepAngle, explodeDistance)
+    drawArc(
+        colors[list[i].index.toInt()],
+        startingAngle,
+        sweepAngle,
+        true,
+        topLeft = offset.copy(x = offset.x + explodeOffset.x, y = offset.y + explodeOffset.y),
+        size = adjustedSize)
+    //    if (showLabel) {
+    //      // radius of the circle adjustedSize = diameter
+    //      val radius = size.width / 2
+    //      // find Text offset 1/3
+    //      val textOffset = calcPointOnCircle(startingAngle, sweepAngle, adjustedSize.width / 3)
+    //      // calc text position by taking the center and add the offset from textOffset
+    //      val textPos = Offset(radius, radius) + textOffset
+    //      // estimate the width of the arc
+    //      val sliceWidth = (sweepAngle / 360) * (2 * Math.PI * radius).toFloat() * 0.5f
+    //      // set text name
+    //      val textName = list[i].label
+    //      // calc set percentage
+    //      val textPercentage = list[i].percentage.toString() + "%"
+    //      // get the text name width
+    //      val textWidth = textPaint.measureText(textName)
+    //      // check if the text fits in the slice
+    //      if (textWidth < sliceWidth) {
+    //        // draw name
+    //        drawContext.canvas.nativeCanvas.drawText(textName, textPos.x, textPos.y, textPaint)
+    //        // draw percentage under name
+    //        val textPercentageOffsetY = textPaint.textSize * 1.1f
+    //        drawContext.canvas.nativeCanvas.drawText(
+    //            textPercentage, textPos.x, textPos.y + textPercentageOffsetY, textPaint)
+    //      }
+    //    }
 
-  for (i in 0 until steps) {
-    val red = (startRed + redDiff * i).toInt()
-    val green = (startGreen + greenDiff * i).toInt()
-    val blue = (startBlue + blueDiff * i).toInt()
-
-    colors.add(Color(red = red / 255f, green = green / 255f, blue = blue / 255f))
+    startingAngle += sweepAngle
   }
-
-  return colors
 }
 
 @Preview
