@@ -49,10 +49,10 @@ fun CreateRide00Page(pagerState: PagerState) {
                     .customRoundedBottom(Background_prime, heightPercent = 40, widthPercent = 30),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
-          Image(
-            painter = painterResource(id = R.drawable.createridescreen1),
-            contentDescription = "Onboarding Screen 1",
-            modifier = Modifier.fillMaxWidth().aspectRatio(1f))
+              Image(
+                  painter = painterResource(id = R.drawable.createridescreen1),
+                  contentDescription = "Onboarding Screen 1",
+                  modifier = Modifier.fillMaxWidth().aspectRatio(1f))
             }
         Column(
             modifier = Modifier.fillMaxWidth().weight(1f).background(Primary),

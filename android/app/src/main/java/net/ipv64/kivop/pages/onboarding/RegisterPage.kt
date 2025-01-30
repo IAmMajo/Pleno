@@ -48,7 +48,7 @@ fun RegisterPage(navController: NavController) {
   val focusRequester2 = remember { FocusRequester() }
   val focusRequester3 = remember { FocusRequester() }
   val focusRequester4 = remember { FocusRequester() }
-  
+
   val scope = rememberCoroutineScope()
 
   Column(modifier = Modifier.fillMaxWidth().background(Color.Green)) {
@@ -72,43 +72,40 @@ fun RegisterPage(navController: NavController) {
               uriToBase64String(navController.context, uri)
             }
           })
-      
-        CustomInputField(
+
+      CustomInputField(
           label = "Name",
           placeholder = "Max Mustermann",
           value = name,
           onValueChange = { name = it },
           focusRequester = focusRequester1,
           nextFocusRequester = focusRequester2 // Fokus auf das nächste Feld setzen
-        )
+          )
 
-        CustomInputField(
+      CustomInputField(
           label = "Email",
           placeholder = "Max@pleno.net",
           value = email,
           onValueChange = { email = it },
           focusRequester = focusRequester2,
-          nextFocusRequester = focusRequester3
-        )
+          nextFocusRequester = focusRequester3)
 
-        CustomInputField(
+      CustomInputField(
           label = "Passwort",
           placeholder = "******",
           value = password,
           onValueChange = { password = it },
           isPasswort = true,
           focusRequester = focusRequester3,
-          nextFocusRequester = focusRequester4
-        )
+          nextFocusRequester = focusRequester4)
 
-        CustomInputField(
+      CustomInputField(
           label = "Passwort wiederholen",
           placeholder = "******",
           value = confirmPassword,
           onValueChange = { confirmPassword = it },
           isPasswort = true,
-          focusRequester = focusRequester4
-        )
+          focusRequester = focusRequester4)
     }
     Column(
         modifier =

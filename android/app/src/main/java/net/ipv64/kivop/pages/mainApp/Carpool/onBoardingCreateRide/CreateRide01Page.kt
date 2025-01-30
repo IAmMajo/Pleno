@@ -61,7 +61,7 @@ fun CreateRide01Page(
               onValueChange = { createSpecialRideViewModel.name = it },
               focusRequester = focusRequester1,
               nextFocusRequester = focusRequester2 // Fokus auf das nächste Feld setzen
-          )
+              )
           SpacerBetweenElements()
           val maxChars = 128
           CustomInputField(
@@ -71,7 +71,7 @@ fun CreateRide01Page(
               placeholder = "Beschreibe deine Fahrt...",
               backgroundColor = Background_prime,
               value = createSpecialRideViewModel.description,
-            focusRequester = focusRequester2,
+              focusRequester = focusRequester2,
               onValueChange = {
                 if (it.length <= maxChars) {
                   createSpecialRideViewModel.description = it

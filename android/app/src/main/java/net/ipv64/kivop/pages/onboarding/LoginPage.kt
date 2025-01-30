@@ -44,7 +44,7 @@ fun LoginPage(navController: NavController) {
   var password by remember { mutableStateOf("") }
   val focusRequester1 = remember { FocusRequester() }
   val focusRequester2 = remember { FocusRequester() }
-  
+
   var scope = rememberCoroutineScope()
 
   Column(modifier = Modifier.fillMaxWidth().background(Color.Green)) {
@@ -68,15 +68,14 @@ fun LoginPage(navController: NavController) {
           value = email,
           onValueChange = { email = it },
           focusRequester = focusRequester1,
-          nextFocusRequester = focusRequester2
-      )
+          nextFocusRequester = focusRequester2)
       CustomInputField(
           label = "Passwort",
           placeholder = "Max Mustermann",
           value = password,
           onValueChange = { password = it },
           isPasswort = true,
-        focusRequester = focusRequester2,
+          focusRequester = focusRequester2,
       )
     }
     Column(
