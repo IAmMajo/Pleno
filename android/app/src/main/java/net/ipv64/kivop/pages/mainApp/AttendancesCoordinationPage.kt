@@ -2,6 +2,7 @@ package net.ipv64.kivop.pages.mainApp
 
 import AgendaCard
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -40,6 +42,7 @@ import net.ipv64.kivop.R
 import net.ipv64.kivop.components.IconTextField
 import net.ipv64.kivop.components.ListenItem
 import net.ipv64.kivop.components.LoggedUserAttendacneCard
+import net.ipv64.kivop.components.PopupCheckIn
 import net.ipv64.kivop.components.SitzungsCard
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
@@ -48,6 +51,8 @@ import net.ipv64.kivop.models.ItemListData
 import net.ipv64.kivop.models.PlanAttendance
 import net.ipv64.kivop.models.viewModel.MeetingViewModel
 import net.ipv64.kivop.models.viewModel.MeetingViewModelFactory
+import net.ipv64.kivop.models.viewModel.ProtocolViewModel
+import net.ipv64.kivop.models.viewModel.ProtocolViewModelFactory
 import net.ipv64.kivop.services.GetScreenHeight
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Tertiary
@@ -63,10 +68,13 @@ fun AttendancesCoordinationPage(
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
-
+  val context = LocalContext.current
   val screenHeightDp = GetScreenHeight()
   var columnHeightDp by remember { mutableStateOf(0.dp) }
   val density = LocalDensity.current
+  var confirmationMeeting by remember { mutableStateOf(false) }
+  val protocolViewModel: ProtocolViewModel =
+      viewModel(factory = ProtocolViewModelFactory(meetingId, "de"))
 
   val contentHeightDp by
       remember(screenHeightDp, columnHeightDp) {
@@ -74,6 +82,13 @@ fun AttendancesCoordinationPage(
       }
 
   var isDelayedVisible by remember { mutableStateOf(false) }
+
+  LaunchedEffect(Unit) {
+    meetingViewModel.fetchMeeting()
+    meetingViewModel.fetchAttendance()
+    meetingViewModel.fetchVotings()
+    meetingViewModel.fetchProtocol()
+  }
 
   LaunchedEffect(meetingViewModel.attendance.isNotEmpty()) {
     if (meetingViewModel.attendance.isNotEmpty()) {
@@ -98,7 +113,9 @@ fun AttendancesCoordinationPage(
                   }
                 }) {
           SpacerTopBar()
-          meetingViewModel.meeting?.let { SitzungsCard(it) }
+          meetingViewModel.meeting?.let {
+            SitzungsCard(GetMeetingDTO = it, protocoll = meetingViewModel.protocols)
+          }
         }
 
     var scope = rememberCoroutineScope()
@@ -137,7 +154,8 @@ fun AttendancesCoordinationPage(
                         } else {
                           meetingViewModel.presentListcount
                         },
-                    meetingViewModel = meetingViewModel)
+                    meetingViewModel = meetingViewModel,
+                    checkInClick = { confirmationMeeting = true })
               }
               SpacerBetweenElements()
             }
@@ -182,7 +200,33 @@ fun AttendancesCoordinationPage(
                     IconTextField(
                         text = votingData.title,
                         icon = ImageVector.vectorResource(R.drawable.ic_pie_chart),
-                        onClick = { navController.navigate("abstimmung/${voting.id}") })
+                        onClick = {
+                          if (meetingViewModel.meeting!!.myAttendanceStatus == null) {
+                            Toast.makeText(
+                                    context,
+                                    "Du bist nicht bei der Sitzung angemeldet",
+                                    Toast.LENGTH_SHORT)
+                                .show()
+                          } else {
+                            if (voting.isOpen) {
+                              if (voting.iVoted && voting.closedAt == null) {
+                                navController.navigate("abgestimmt/${voting.id}")
+                              } else if (voting.iVoted) {
+                                navController.navigate("abstimmung/${voting.id}")
+                              } else {
+                                navController.navigate("abstimmen/${voting.id}")
+                              }
+                            } else if (voting.closedAt != null) {
+                              navController.navigate("abstimmung/${voting.id}")
+                            } else {
+                              Toast.makeText(
+                                      context,
+                                      "Die Abstimmung ist noch nicht geöffnet",
+                                      Toast.LENGTH_SHORT)
+                                  .show()
+                            }
+                          }
+                        })
                   }
                 }
                 SpacerBetweenElements()
@@ -204,6 +248,34 @@ fun AttendancesCoordinationPage(
               }
             }
           }
+    }
+  }
+  val code = remember { mutableStateOf("") }
+  val scope = rememberCoroutineScope()
+  when {
+    confirmationMeeting -> {
+
+      meetingViewModel.meeting?.let {
+        PopupCheckIn(
+            onDismissRequest = { confirmationMeeting = false },
+            onConfirmation = {
+              scope.launch {
+                if (meetingViewModel.attend(code.value)) {
+                  confirmationMeeting = false
+                } else {
+                  Toast.makeText(context, "Der Code ist falsch.", Toast.LENGTH_SHORT).show()
+                }
+              }
+            },
+            title = "Code eingeben",
+            descriptionText = "Geben Sie den Zugangscode ein.",
+            buttonDismissText = "Abbrechen",
+            buttonConfirmText = "Senden",
+            onOpenCamera = { /* Kamera öffnen */ },
+            valueCode = code.value,
+            onValueChange = { code.value = it },
+        )
+      }
     }
   }
 }

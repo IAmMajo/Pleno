@@ -1,5 +1,6 @@
 package net.ipv64.kivop.services.api
 
+import android.util.Base64
 import android.util.Log
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -92,4 +93,46 @@ suspend fun postResendEmail(email: String): Boolean =
         Log.e("Registration", "Fehler bei der Registrierung", e)
       }
       return@withContext false
+    }
+
+suspend fun getProfileImage(userID: String): String? =
+    withContext(Dispatchers.IO) {
+      val path = "users/profile-image/user/$userID"
+
+      val token = auth.getSessionToken()
+
+      if (token.isNullOrEmpty()) {
+        println("Fehler: Kein Token verfügbar")
+        return@withContext null
+      }
+
+      val request =
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .get()
+              .build()
+
+      return@withContext try {
+        val response = okHttpClient.newCall(request).execute()
+        if (response.isSuccessful) {
+          val responseBody = response.body?.bytes()
+          if (responseBody != null) {
+            var base64String = Base64.encodeToString(responseBody, Base64.DEFAULT)
+            // remove unwanted characters
+            base64String = base64String.replace("\n", "")
+
+            return@withContext base64String
+          } else {
+            println("Fehler: Leere Antwort erhalten.")
+            null
+          }
+        } else {
+          println("Fehler bei der Anfrage: ${response.message}")
+          null
+        }
+      } catch (e: Exception) {
+        println("Fehler: ${e.message}")
+        null
+      }
     }

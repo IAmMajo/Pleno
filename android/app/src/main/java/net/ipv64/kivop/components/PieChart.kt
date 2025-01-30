@@ -16,17 +16,19 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import java.util.UUID
 import kotlin.math.*
-import net.ipv64.kivop.models.VotingResults
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
 import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
+import net.ipv64.kivop.ui.theme.VotingColors
 
 @Composable
 fun PieChart(
-    list: List<VotingResults>,
+    votingResults: GetVotingResultsDTO,
     explodeDistance: Float = 10f,
     showLabel: Boolean = false,
 ) {
@@ -40,14 +42,23 @@ fun PieChart(
         Box(
             modifier =
                 Modifier.size(250.dp).aspectRatio(1f).drawBehind {
-                  if (list.sumOf { it.votes } != 0) {
-                    drawPieChart(list, explodeDistance = explodeDistance, showLabel)
+                  if (votingResults.totalCount.toInt() != 0) {
+                    drawPieChart(
+                        votingResults.results,
+                        votingResults.totalCount.toInt(),
+                        explodeDistance = explodeDistance,
+                        showLabel)
                   } else {
                     val noVotings =
-                        listOf(
-                            VotingResults("Keine Stimmen", 1, 100.0),
-                        )
-                    drawPieChart(noVotings, 1.0f, showLabel)
+                        GetVotingResultsDTO(
+                            votingId = UUID.randomUUID(),
+                            myVote = (0).toUByte(),
+                            totalCount = 1u,
+                            results =
+                                listOf(
+                                    GetVotingResultDTO((0).toUByte(), 1u, 100.0, listOf()),
+                                ))
+                    drawPieChart(noVotings.results, noVotings.totalCount.toInt(), 1.0f, showLabel)
                   }
                 }) {}
       }
@@ -56,9 +67,13 @@ fun PieChart(
 val CakeColorStart = Color(0xFF2C7D91)
 val CakeColorEnd = Color(0xFFF7DEC8)
 
-fun DrawScope.drawPieChart(list: List<VotingResults>, explodeDistance: Float, showLabel: Boolean) {
-  val totalVotes = list.sumOf { it.votes }
-  val colors: List<Color> = interpolateColor(CakeColorStart, CakeColorEnd, list.size)
+fun DrawScope.drawPieChart(
+    list: List<GetVotingResultDTO>,
+    totalVotes: Int,
+    explodeDistance: Float,
+    showLabel: Boolean
+) {
+  val colors: List<Color> = VotingColors
   // startingAngle -90° to start at the top
   var startingAngle: Float = -90.0f
 
@@ -78,7 +93,7 @@ fun DrawScope.drawPieChart(list: List<VotingResults>, explodeDistance: Float, sh
 
   for (i in list.indices) {
     // calc sweep angle percentage of total votes
-    val sweepAngle = calcSweepAngle(list[i].votes, totalVotes)
+    val sweepAngle = calcSweepAngle(list[i].count.toInt(), totalVotes)
     // calc explodeOffset. How much each slice is moved from the center
     val explodeOffset = calcPointOnCircle(startingAngle, sweepAngle, explodeDistance)
     drawArc(
@@ -88,31 +103,31 @@ fun DrawScope.drawPieChart(list: List<VotingResults>, explodeDistance: Float, sh
         true,
         topLeft = offset.copy(x = offset.x + explodeOffset.x, y = offset.y + explodeOffset.y),
         size = adjustedSize)
-    if (showLabel) {
-      // radius of the circle adjustedSize = diameter
-      val radius = size.width / 2
-      // find Text offset 1/3
-      val textOffset = calcPointOnCircle(startingAngle, sweepAngle, adjustedSize.width / 3)
-      // calc text position by taking the center and add the offset from textOffset
-      val textPos = Offset(radius, radius) + textOffset
-      // estimate the width of the arc
-      val sliceWidth = (sweepAngle / 360) * (2 * Math.PI * radius).toFloat() * 0.5f
-      // set text name
-      val textName = list[i].label
-      // calc set percentage
-      val textPercentage = list[i].percentage.toString() + "%"
-      // get the text name width
-      val textWidth = textPaint.measureText(textName)
-      // check if the text fits in the slice
-      if (textWidth < sliceWidth) {
-        // draw name
-        drawContext.canvas.nativeCanvas.drawText(textName, textPos.x, textPos.y, textPaint)
-        // draw percentage under name
-        val textPercentageOffsetY = textPaint.textSize * 1.1f
-        drawContext.canvas.nativeCanvas.drawText(
-            textPercentage, textPos.x, textPos.y + textPercentageOffsetY, textPaint)
-      }
-    }
+    //    if (showLabel) {
+    //      // radius of the circle adjustedSize = diameter
+    //      val radius = size.width / 2
+    //      // find Text offset 1/3
+    //      val textOffset = calcPointOnCircle(startingAngle, sweepAngle, adjustedSize.width / 3)
+    //      // calc text position by taking the center and add the offset from textOffset
+    //      val textPos = Offset(radius, radius) + textOffset
+    //      // estimate the width of the arc
+    //      val sliceWidth = (sweepAngle / 360) * (2 * Math.PI * radius).toFloat() * 0.5f
+    //      // set text name
+    //      val textName = list[i].label
+    //      // calc set percentage
+    //      val textPercentage = list[i].percentage.toString() + "%"
+    //      // get the text name width
+    //      val textWidth = textPaint.measureText(textName)
+    //      // check if the text fits in the slice
+    //      if (textWidth < sliceWidth) {
+    //        // draw name
+    //        drawContext.canvas.nativeCanvas.drawText(textName, textPos.x, textPos.y, textPaint)
+    //        // draw percentage under name
+    //        val textPercentageOffsetY = textPaint.textSize * 1.1f
+    //        drawContext.canvas.nativeCanvas.drawText(
+    //            textPercentage, textPos.x, textPos.y + textPercentageOffsetY, textPaint)
+    //      }
+    //    }
 
     startingAngle += sweepAngle
   }
@@ -164,10 +179,15 @@ fun interpolateColor(startColor: Color, endColor: Color, steps: Int): List<Color
 @Composable
 fun PieChartPreview() {
   val votingResults =
-      listOf(
-          VotingResults("Keine Stimmen", 50, 50.0),
-          VotingResults("Keine Stimmen", 40, 40.0),
-          VotingResults("Keine Stimmen", 10, 10.0),
-      )
-  PieChart(list = votingResults)
+      GetVotingResultsDTO(
+          votingId = UUID.randomUUID(),
+          myVote = (1).toUByte(),
+          totalCount = 10u,
+          results =
+              listOf(
+                  GetVotingResultDTO((0).toUByte(), 5u, 50.0, listOf()),
+                  GetVotingResultDTO((1).toUByte(), 2u, 20.0, listOf()),
+                  GetVotingResultDTO((2).toUByte(), 3u, 30.0, listOf()),
+              ))
+  PieChart(votingResults)
 }

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import java.util.UUID
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileDTO
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileUpdateDTO
@@ -24,6 +25,10 @@ class UserViewModel : ViewModel() {
 
   fun getProfile(): UserProfileDTO? {
     return this.user
+  }
+
+  fun getID(): UUID? {
+    return this.user?.uid
   }
 
   fun updateUser(

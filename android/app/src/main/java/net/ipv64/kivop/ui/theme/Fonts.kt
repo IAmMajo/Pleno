@@ -17,6 +17,7 @@ val robotoFontFamily =
         Font(R.font.roboto_italic, style = FontStyle.Italic) // Italic style
         )
 
+// Todo: Aline entfernen. FontStyle.kt already exists
 data class CustomFontStyle(
     val fontFamily: FontFamily,
     val fontWeight: FontWeight?,

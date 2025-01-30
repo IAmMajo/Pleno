@@ -58,6 +58,7 @@ suspend fun getProtocolsApi(id: String): List<GetRecordDTO> =
                     GetIdentityDTO(
                         UUID.fromString(chair.get("id").asString), chair.get("name").asString)
                   }
+              val iAmTheRecorder = protocol.get("iAmTheRecorder").asBoolean
               Log.d("Protokoll-in-3", "Protokoll erhalten: $meetingId")
 
               GetRecordDTO(
@@ -67,7 +68,8 @@ suspend fun getProtocolsApi(id: String): List<GetRecordDTO> =
                   status,
                   content,
                   attendancesAppendix,
-                  votingResultsAppendix)
+                  votingResultsAppendix,
+                  iAmTheRecorder)
             }
           }
         } else {
@@ -116,6 +118,7 @@ suspend fun getProtocolApi(id: String, lang: String): GetRecordDTO? =
                       chair.get("id").asString.let { UUID.fromString(it) },
                       chair.get("name").asString)
                 }
+            val iAmTheRecorder = protocol.get("iAmTheRecorder").asBoolean
             Log.i(
                 "Protokoll",
                 "Protokoll erhalten: $meetingId , $lang , $identity , $status , $content , $attendancesAppendix , $votingResultsAppendix")
@@ -127,7 +130,8 @@ suspend fun getProtocolApi(id: String, lang: String): GetRecordDTO? =
                 status,
                 content,
                 attendancesAppendix,
-                votingResultsAppendix)
+                votingResultsAppendix,
+                iAmTheRecorder)
           } else {
             println("Fehler: Leere Antwort erhalten.")
             null

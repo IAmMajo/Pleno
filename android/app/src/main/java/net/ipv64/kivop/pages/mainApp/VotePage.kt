@@ -26,10 +26,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import java.util.UUID
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.AbstimmungCard
+import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.components.VoteOptions
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
@@ -44,6 +44,7 @@ import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
 fun VotePage(navController: NavController, votingID: String) {
+
   BackHandler {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
@@ -53,10 +54,11 @@ fun VotePage(navController: NavController, votingID: String) {
   var votedIndex by remember { mutableIntStateOf(-1) }
   var scope = rememberCoroutineScope()
   LaunchedEffect(Unit) {
-    votingData = GetVotingByID(UUID.fromString(votingID))
+    votingData = GetVotingByID(votingID)
     meetingData = getMeetingByID(votingData!!.meetingId.toString())
   }
   Column(modifier = Modifier.background(Primary)) {
+    SpacerTopBar()
     if (votingData != null) {
       AbstimmungCard(
           title = votingData!!.question,

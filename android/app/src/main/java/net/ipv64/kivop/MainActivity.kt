@@ -62,7 +62,9 @@ import net.ipv64.kivop.pages.mainApp.Carpool.onBoardingCreateRide.CreateRidePage
 import net.ipv64.kivop.pages.mainApp.EventsPage
 import net.ipv64.kivop.pages.mainApp.HomePage
 import net.ipv64.kivop.pages.mainApp.MeetingsListPage
-import net.ipv64.kivop.pages.mainApp.PosterPage
+import net.ipv64.kivop.pages.mainApp.Posters.PosterDetailedPage
+import net.ipv64.kivop.pages.mainApp.Posters.PosterPage
+import net.ipv64.kivop.pages.mainApp.Posters.PostersListPage
 import net.ipv64.kivop.pages.mainApp.ProtocolDetailPage
 import net.ipv64.kivop.pages.mainApp.ProtocolEditPage
 import net.ipv64.kivop.pages.mainApp.ProtocolListPage
@@ -119,7 +121,9 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
   val meetingsViewModel = viewModel<MeetingsViewModel>()
 
   LaunchedEffect(Unit) { meetingsViewModel.fetchMeetings() }
-
+  LaunchedEffect(navController.currentDestination) {
+    Log.i("currentDestination", navController.currentDestination.toString())
+  }
   NavHost(
       navController = navController,
       startDestination = Screen.Home.rout,
@@ -153,6 +157,7 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         composable(Screen.Protocol.rout) {
           ProtocolListPage(navController = navController, meetingsViewModel)
         }
+
         composable("${Screen.ProtocolEditPage.rout}/{meetingID}/{protocollang}") { backStackEntry ->
           ProtocolEditPage(
               navController,
@@ -180,8 +185,23 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         }
         // Events
         composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
+        // PostersList
+        composable(route = Screen.Posters.rout) { PostersListPage(navController = navController) }
         // Poster
-        composable(route = Screen.Poster.rout) { PosterPage(navController = navController) }
+        composable("${Screen.Poster.rout}/{posterID}") { backStackEntry ->
+          PosterPage(
+              navController,
+              backStackEntry.arguments?.getString("posterID").orEmpty(),
+              userViewModel)
+        }
+        // PosterDetail
+        composable("${Screen.PosterDetail.rout}/{posterID}/{locationID}") { backStackEntry ->
+          PosterDetailedPage(
+              navController,
+              userViewModel = userViewModel,
+              backStackEntry.arguments?.getString("posterID").orEmpty(),
+              backStackEntry.arguments?.getString("locationID").orEmpty())
+        }
 
         composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
           AttendancesCoordinationPage(
@@ -317,10 +337,11 @@ fun DrawerContent(
             route = Screen.Poster.rout),
           drawerItem(
             modifier = Modifier,
-            icon = R.drawable.chart_outlined_20,
+            icon = R.drawable.chart_outlined_20dp,
             title = getString(R.string.poll),
             route = Screen.Poll.rout),
           )
+
     drawerItems.forEach { item ->
       DrawerItem(
           item,
@@ -331,7 +352,6 @@ fun DrawerContent(
                 saveState = true // Save state when navigating back
               }
               launchSingleTop = true
-              restoreState = true
             }
             coroutineScope.launch { drawerState.close() }
           })

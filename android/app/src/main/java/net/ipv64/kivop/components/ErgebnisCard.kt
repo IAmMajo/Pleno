@@ -1,6 +1,7 @@
 package net.ipv64.kivop.components
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,19 +17,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import net.ipv64.kivop.models.VotingResults
-import net.ipv64.kivop.services.interpolateColor
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
 import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
+import net.ipv64.kivop.ui.theme.TextStyles
 import net.ipv64.kivop.ui.theme.Text_prime
+import net.ipv64.kivop.ui.theme.VotingColors
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun ResultCard(votingResults: List<VotingResults>) {
-  val totalVotes = votingResults.sumOf { it.votes }
-  val colors: List<Color> = interpolateColor(CakeColorStart, CakeColorEnd, votingResults.size)
+fun ResultCard(votingResults: GetVotingResultsDTO, votingData: GetVotingDTO) {
+  val colors: List<Color> = VotingColors
+  Log.i("ResultCard", "ResultCard: $votingResults")
+  Log.i("ResultCard", "ResultCard: $votingData")
   Box(
       modifier =
           Modifier.fillMaxWidth()
@@ -36,38 +39,32 @@ fun ResultCard(votingResults: List<VotingResults>) {
               .background(color = Background_secondary, shape = RoundedCornerShape(6.dp))
               .padding(6.dp)) {
         Column {
-          votingResults.forEach { result ->
+          votingResults.results.forEach { result ->
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 3.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
               Box(
                   modifier =
-                      Modifier.background(
-                              colors[votingResults.indexOf(result)], shape = CircleShape)
+                      Modifier.background(colors[result.index.toInt()], shape = CircleShape)
                           .size(16.dp),
               ) {}
               // Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = "wahl", tint =
               // colors[votingResults.indexOf(result)])
               Spacer(modifier = Modifier.size(3.dp))
-              Text(result.label, color = Text_prime)
+              if (result.index.toInt() == 0) {
+                Text("Enthalten", color = Text_prime, style = TextStyles.contentStyle)
+              } else {
+                Text(
+                    votingData.options[result.index.toInt() - 1].text,
+                    color = Text_prime,
+                    style = TextStyles.contentStyle)
+              }
+
               Spacer(modifier = Modifier.weight(1f))
               Text(text = result.percentage.toString() + "%", color = Text_prime)
             }
           }
         }
       }
-}
-
-@Preview
-@Composable
-private fun PreviewErgebnisCard() {
-  ResultCard(
-      votingResults =
-          listOf(
-              VotingResults("Option 1", 10, 10.0),
-              VotingResults("Option 2", 20, 20.0),
-              VotingResults("Option 3", 30, 30.0),
-              VotingResults("Option 3", 40, 40.0),
-          ))
 }

@@ -115,7 +115,7 @@ fun ProtocolDetailPage(
                   }
                 }) {
           SpacerTopBar()
-          meetingViewModel.meeting?.let { SitzungsCard(it) }
+          meetingViewModel.meeting?.let { SitzungsCard(it, protocoll = meetingViewModel.protocols) }
         }
 
     var scope = rememberCoroutineScope()
