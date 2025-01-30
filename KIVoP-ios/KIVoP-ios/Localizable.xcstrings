@@ -85,6 +85,16 @@
         }
       }
     },
+    "%@ - %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ - %2$@"
+          }
+        }
+      }
+    },
     "%@ %@, %@ Uhr" : {
       "localizations" : {
         "en" : {
@@ -170,12 +180,6 @@
           }
         }
       }
-    },
-    "0" : {
-
-    },
-    "1" : {
-
     },
     "1. Datenschutz auf einen Blick" : {
 
@@ -1439,9 +1443,6 @@
 
     },
     "Mitfahrt löschen" : {
-
-    },
-    "Mitglied 1" : {
 
     },
     "Mitglieder" : {

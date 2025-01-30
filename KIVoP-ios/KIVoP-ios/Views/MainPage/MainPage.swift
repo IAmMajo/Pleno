@@ -100,14 +100,14 @@ struct MainPage: View {
                             Text("No meetings available.")
                         }
                         
-//                        NavigationLink(destination: EventView()) {
-//                            HStack {
-//                               Image(systemName: "star")
-//                                    .foregroundColor(.accentColor)
-//                                Text("Events")
-//                                    .foregroundColor(Color.primary)
-//                            }
-//                        }
+                        NavigationLink(destination: EventView()) {
+                            HStack {
+                               Image(systemName: "star")
+                                    .foregroundColor(.accentColor)
+                                Text("Events")
+                                    .foregroundColor(Color.primary)
+                            }
+                        }
                     }
 
                     Section {
