@@ -22,6 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -41,7 +42,9 @@ import net.ipv64.kivop.ui.theme.Text_prime_light
 fun LoginPage(navController: NavController) {
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-
+  val focusRequester1 = remember { FocusRequester() }
+  val focusRequester2 = remember { FocusRequester() }
+  
   var scope = rememberCoroutineScope()
 
   Column(modifier = Modifier.fillMaxWidth().background(Color.Green)) {
@@ -64,6 +67,8 @@ fun LoginPage(navController: NavController) {
           placeholder = "Max Mustermann",
           value = email,
           onValueChange = { email = it },
+          focusRequester = focusRequester1,
+          nextFocusRequester = focusRequester2
       )
       CustomInputField(
           label = "Passwort",
@@ -71,6 +76,7 @@ fun LoginPage(navController: NavController) {
           value = password,
           onValueChange = { password = it },
           isPasswort = true,
+        focusRequester = focusRequester2,
       )
     }
     Column(
