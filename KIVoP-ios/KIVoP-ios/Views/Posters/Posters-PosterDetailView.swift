@@ -55,17 +55,6 @@ struct Posters_PosterDetailView: View {
       }
    }
    
-   func locations(positions: [PosterPositionResponseDTO]) -> [Location] {
-      positions.compactMap { position in
-         guard let address = addresses[position.id] else { return nil }
-         let adressName = String(address.split(separator: ", ").first ?? "")
-         return Location(
-            name: adressName,
-            coordinate: CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)
-         )
-      }
-   }
-   
    func locationsPositions(positions: [PosterPositionResponseDTO]) -> [(location: Location, position: PosterPositionResponseDTO)] {
       positions.compactMap { position in
 //         guard let address = addresses[position.id] else { return nil }
