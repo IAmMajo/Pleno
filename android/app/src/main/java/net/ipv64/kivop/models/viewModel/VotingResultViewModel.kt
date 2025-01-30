@@ -12,21 +12,18 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
 import net.ipv64.kivop.models.GetVotingByID
 import net.ipv64.kivop.models.GetVotingResultByID
 
-
 class VotingResultViewModel(private val votingId: String) : ViewModel() {
   var votingData by mutableStateOf<GetVotingDTO?>(null)
   var votingResults by mutableStateOf<GetVotingResultsDTO?>(null)
-  
+
   private fun fetchVotingData() {
-    viewModelScope.launch {
-      votingData = GetVotingByID(votingId)
-    }
+    viewModelScope.launch { votingData = GetVotingByID(votingId) }
   }
+
   private fun fetchVotingResults() {
-    viewModelScope.launch {
-      votingResults = GetVotingResultByID(votingId)
-    }
+    viewModelScope.launch { votingResults = GetVotingResultByID(votingId) }
   }
+
   init {
     fetchVotingData()
     fetchVotingResults()

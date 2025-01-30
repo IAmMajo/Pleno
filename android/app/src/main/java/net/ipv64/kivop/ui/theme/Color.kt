@@ -33,18 +33,18 @@ val Signal_neutral_20 = Color(0x33686d74)
 
 val ProgressBarGray = Color(0xFFE1E2E3)
 
-
-val VotingColors = listOf(
-  Color(0xFFF0D176),
-  Color(0xFFFFFB3A),
-  Color(0xFF8BF024),
-  Color(0xFF1DB30C),
-  Color(0xFF00C76D),
-  Color(0xFF0CCDEB),
-  Color(0xFF3D75FA),
-  Color(0xFF231C3C),
-  Color(0xFFAC19BD),
-  Color(0xFFC58CF5),
-  Color(0xFF80150D),
-  Color(0xFFA87D52),
-)
+val VotingColors =
+    listOf(
+        Color(0xFFF0D176),
+        Color(0xFFFFFB3A),
+        Color(0xFF8BF024),
+        Color(0xFF1DB30C),
+        Color(0xFF00C76D),
+        Color(0xFF0CCDEB),
+        Color(0xFF3D75FA),
+        Color(0xFF231C3C),
+        Color(0xFFAC19BD),
+        Color(0xFFC58CF5),
+        Color(0xFF80150D),
+        Color(0xFFA87D52),
+    )

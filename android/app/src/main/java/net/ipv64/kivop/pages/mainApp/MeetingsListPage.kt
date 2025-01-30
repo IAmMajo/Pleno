@@ -27,10 +27,8 @@ fun MeetingsListPage(navController: NavController, meetingsViewModel: MeetingsVi
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
-  LaunchedEffect(Unit) {
-    meetingsViewModel.fetchMeetings()
-  }
-  
+  LaunchedEffect(Unit) { meetingsViewModel.fetchMeetings() }
+
   val meetings = meetingsViewModel.meetings
   var tabs = listOf<String>()
   val scheduledMeetings = meetings.filter { it?.status == MeetingStatus.scheduled }

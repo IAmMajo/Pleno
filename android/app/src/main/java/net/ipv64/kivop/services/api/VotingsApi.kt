@@ -16,7 +16,6 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
@@ -301,9 +300,10 @@ suspend fun getMyVote(ID: UUID): GetMyVoteDTO? =
       }
     }
 
-
-class VotingWebSocketClient(private val votingId: UUID, private val listener: VotingWebSocketListener) :
-  WebSocketListener() {
+class VotingWebSocketClient(
+    private val votingId: UUID,
+    private val listener: VotingWebSocketListener
+) : WebSocketListener() {
 
   private var webSocket: WebSocket? = null
 
@@ -315,10 +315,7 @@ class VotingWebSocketClient(private val votingId: UUID, private val listener: Vo
     }
 
     val url = "$BASE_URL/meetings/votings/$votingId/live-status"
-    val request = Request.Builder()
-      .url(url)
-      .addHeader("Authorization", "Bearer $token")
-      .build()
+    val request = Request.Builder().url(url).addHeader("Authorization", "Bearer $token").build()
 
     webSocket = okHttpClient.newWebSocket(request, this)
     Log.d("WebSocket", "Verbindung zu $url wird hergestellt...")

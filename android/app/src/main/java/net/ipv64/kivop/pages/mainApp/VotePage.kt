@@ -26,7 +26,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import java.util.UUID
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.AbstimmungCard
@@ -45,7 +44,7 @@ import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
 fun VotePage(navController: NavController, votingID: String) {
-  
+
   BackHandler {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")

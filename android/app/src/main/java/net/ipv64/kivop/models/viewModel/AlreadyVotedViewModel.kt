@@ -4,16 +4,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
-import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
 import net.ipv64.kivop.services.api.ApiConfig
 import okhttp3.*
 import okio.ByteString
-import java.util.UUID
 
 class VotingViewModel(private val votingId: String) : ViewModel() {
 
@@ -33,55 +29,55 @@ class VotingViewModel(private val votingId: String) : ViewModel() {
     }
 
     val url = "${ApiConfig.BASE_URL}meetings/votings/$votingId/live-status"
-    val request = Request.Builder()
-      .url(url)
-      .addHeader("Authorization", "Bearer $token")
-      .build()
+    val request = Request.Builder().url(url).addHeader("Authorization", "Bearer $token").build()
 
-    webSocket = ApiConfig.okHttpClient.newWebSocket(request, object : WebSocketListener() {
-      override fun onOpen(webSocket: WebSocket, response: Response) {
-        Log.d("WebSocket", "Verbunden mit WebSocket")
-      }
+    webSocket =
+        ApiConfig.okHttpClient.newWebSocket(
+            request,
+            object : WebSocketListener() {
+              override fun onOpen(webSocket: WebSocket, response: Response) {
+                Log.d("WebSocket", "Verbunden mit WebSocket")
+              }
 
-      override fun onMessage(webSocket: WebSocket, text: String) {
-        Log.d("WebSocket", "Empfangen: $text")
+              override fun onMessage(webSocket: WebSocket, text: String) {
+                Log.d("WebSocket", "Empfangen: $text")
 
-        viewModelScope.launch {
-          // Check if the response contains an error message
-          if (text.startsWith("ERROR:")) {
-            // Handle error message
-            _votingStatus.emit("Fehler: ${text.substring(7)}")
-          } else if (text.contains("/")) {
-            // Handle vote count, format "n/total"
-            val voteStatus = text.trim()
-            _votingStatus.emit(voteStatus) // Emit as "n/total"
-          }
-        }
-      }
+                viewModelScope.launch {
+                  // Check if the response contains an error message
+                  if (text.startsWith("ERROR:")) {
+                    // Handle error message
+                    _votingStatus.emit("Fehler: ${text.substring(7)}")
+                  } else if (text.contains("/")) {
+                    // Handle vote count, format "n/total"
+                    val voteStatus = text.trim()
+                    _votingStatus.emit(voteStatus) // Emit as "n/total"
+                  }
+                }
+              }
 
-      override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        val message = bytes.utf8() // Decode ByteString to UTF-8 String
-        Log.d("WebSocket", "Empfangene Bytes: $message")
+              override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+                val message = bytes.utf8() // Decode ByteString to UTF-8 String
+                Log.d("WebSocket", "Empfangene Bytes: $message")
 
-        try {
-            viewModelScope.launch {
-              _votingResults.emit(true) // Emit true (or any signal you'd like to use)
-            }
-        } catch (e: Exception) {
-          Log.e("WebSocket", "Fehler beim Parsen der Abstimmungsergebnisse: ${e.message}")
-        }
-      }
+                try {
+                  viewModelScope.launch {
+                    _votingResults.emit(true) // Emit true (or any signal you'd like to use)
+                  }
+                } catch (e: Exception) {
+                  Log.e("WebSocket", "Fehler beim Parsen der Abstimmungsergebnisse: ${e.message}")
+                }
+              }
 
-      override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-        Log.d("WebSocket", "WebSocket wird geschlossen: $code / $reason")
-        
-        webSocket.close(1000, null)
-      }
+              override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                Log.d("WebSocket", "WebSocket wird geschlossen: $code / $reason")
 
-      override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        Log.e("WebSocket", "Fehler: ${t.message}")
-      }
-    })
+                webSocket.close(1000, null)
+              }
+
+              override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                Log.e("WebSocket", "Fehler: ${t.message}")
+              }
+            })
 
     Log.d("WebSocket", "Verbindung zu $url wird hergestellt...")
   }
