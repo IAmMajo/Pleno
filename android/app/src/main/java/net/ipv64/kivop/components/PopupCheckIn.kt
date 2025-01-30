@@ -24,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import net.ipv64.kivop.R
@@ -42,21 +41,20 @@ import net.ipv64.kivop.ui.theme.textSubHeadingStyle
 
 @Composable
 fun PopupCheckIn(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    title: String,
-    descriptionText: String,
+  onDismissRequest: () -> Unit,
+  onConfirmation: () -> Unit,
+  title: String,
+  descriptionText: String,
     // Button 1
-    buttonDismissText: String,
+  buttonDismissText: String,
     // Button 2
-    buttonConfirmText: String,
+  buttonConfirmText: String,
     // Button open-camera
-    onOpenCamera: () -> Unit,
-    // Meeting Info
-    meetingId: String,
+  onOpenCamera: () -> Unit,
+
+  valueCode: String,
+  onValueChange: (String) -> Unit = {}
 ) {
-  var code = "123456" // meetingViewModel.meeting.code?
-  var userInput by remember { mutableStateOf("") }
   var isCorrect by remember { mutableStateOf(true) }
 
   Dialog(
@@ -99,8 +97,8 @@ fun PopupCheckIn(
       }
       Row {
         TextField(
-            value = userInput,
-            onValueChange = { newInput -> userInput = newInput },
+            value = valueCode,
+            onValueChange = onValueChange,
             placeholder = { Text("000000") },
             colors =
                 TextFieldDefaults.colors(
@@ -157,13 +155,8 @@ fun PopupCheckIn(
             CustomPopupButton(
                 onClick = {
                   // hier wird der User-Attendence status geupdatet
-                  if (code == userInput) {
-                    // putAttend(meetingId = meetingId, code = userInput)
                     onConfirmation()
-                    isCorrect = true
-                  } else {
-                    isCorrect = false
-                  }
+                  
                 },
                 text = buttonConfirmText,
                 buttonStyle = primaryButtonStyle,
@@ -174,17 +167,17 @@ fun PopupCheckIn(
   }
 }
 
-@Preview
-@Composable
-fun Screen() {
-  PopupCheckIn(
-      onDismissRequest = {},
-      onConfirmation = {},
-      title = "Popup Titel",
-      descriptionText = "Das ist Text, das ist auch Text. usw usw usw usw ... Text",
-      buttonDismissText = "dismiss",
-      buttonConfirmText = "confirm",
-      onOpenCamera = {},
-      meetingId = "213445",
-  )
-}
+//@Preview
+//@Composable
+//fun Screen() {
+//  PopupCheckIn(
+//      onDismissRequest = {},
+//      onConfirmation = {},
+//      title = "Popup Titel",
+//      descriptionText = "Das ist Text, das ist auch Text. usw usw usw usw ... Text",
+//      buttonDismissText = "dismiss",
+//      buttonConfirmText = "confirm",
+//      onOpenCamera = {},
+//      meetingId = "213445",
+//  )
+//}
