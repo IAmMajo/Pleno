@@ -12,6 +12,7 @@
     <string name="carpooling">Carpooling</string>
     <string name="events">Events</string>
     <string name="poster">Poster</string>
+    <string name="poll">Surveys</string>
 
     <!-- Profile Page -->
     <string name="user_info">User information</string>

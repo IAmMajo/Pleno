@@ -12,6 +12,7 @@
     <string name="carpooling">Fahrgemeinschaft</string>
     <string name="events">Events</string>
     <string name="poster">Plakate</string>
+    <string name="poll">Umfragen</string>
 
     <!-- Profile Page -->
     <string name="user_info">Nutzerinformationen</string>

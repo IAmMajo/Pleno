@@ -36,6 +36,8 @@ sealed class Screen(val rout: String) {
   object Vote : Screen("abstimmen/{votingID}")
 
   object Voted : Screen("abgestimmt/{votingID}")
+
+  object Poll : Screen("umfrage")
 }
 
 // routing später anpassen: navController.
