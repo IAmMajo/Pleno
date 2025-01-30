@@ -100,18 +100,17 @@ struct Onboarding_Login: View {
                 .padding(.horizontal, 24)
 
                 // Back Button
-                Button(action: {
-                    dismiss() // Zur vorherigen Ansicht zurückkehren
-                }) {
-                    Text("Zurück")
-                        .foregroundColor(.gray)
-                        .font(.footnote)
-                        .underline()
-                }
-                .padding(.top, 10)
-                .padding(.bottom, 20)
+                NavigationLink(destination: Onboarding(isManualNavigation: true, isLoggedIn: $isLoggedIn)) { // Setze isManualNavigation auf true
+                                    Text("Zurück")
+                                        .foregroundColor(.gray)
+                                        .font(.footnote)
+                                        .underline()
+                                }
+                                .padding(.top, 10)
+                                .padding(.bottom, 20)
 
-                Spacer().frame(height: 20)
+                                Spacer().frame(height: 20)
+
             }
             .background(Color(UIColor.systemGray6))
             .edgesIgnoringSafeArea(.all)

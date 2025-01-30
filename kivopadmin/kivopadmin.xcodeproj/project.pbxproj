@@ -53,9 +53,22 @@
 		A8390B9C2CE5F9E6006D2D80 /* kivopadminUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = kivopadminUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A8E8DE312D4ABB9800D9F6A9 /* Exceptions for "kivopadmin" folder in "kivopadmin" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A8390B812CE5F9E4006D2D80 /* kivopadmin */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A8390B842CE5F9E4006D2D80 /* kivopadmin */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A8E8DE312D4ABB9800D9F6A9 /* Exceptions for "kivopadmin" folder in "kivopadmin" target */,
+			);
 			path = kivopadmin;
 			sourceTree = "<group>";
 		};
@@ -474,6 +487,7 @@
 				DEVELOPMENT_TEAM = A3K4X48J8A;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = kivopadmin/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Pleno;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "";
@@ -506,6 +520,7 @@
 				DEVELOPMENT_TEAM = A3K4X48J8A;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = kivopadmin/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Pleno;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "";
