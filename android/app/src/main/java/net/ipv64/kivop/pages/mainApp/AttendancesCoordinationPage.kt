@@ -60,9 +60,9 @@ import net.ipv64.kivop.ui.theme.Tertiary
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AttendancesCoordinationPage(
-    navController: NavController,
-    meetingId: String,
-    meetingViewModel: MeetingViewModel = viewModel(factory = MeetingViewModelFactory(meetingId))
+  navController: NavController,
+  meetingId: String,
+  meetingViewModel: MeetingViewModel = viewModel(factory = MeetingViewModelFactory(meetingId))
 ) {
   BackHandler {
     isBackPressed = navController.popBackStack()
@@ -74,14 +74,21 @@ fun AttendancesCoordinationPage(
   val density = LocalDensity.current
   var confirmationMeeting by remember { mutableStateOf(false) }
   val protocolViewModel: ProtocolViewModel =
-      viewModel(factory = ProtocolViewModelFactory(meetingId, "de"))
+    viewModel(factory = ProtocolViewModelFactory(meetingId, "de"))
 
   val contentHeightDp by
-      remember(screenHeightDp, columnHeightDp) {
-        derivedStateOf { screenHeightDp - columnHeightDp }
-      }
+  remember(screenHeightDp, columnHeightDp) {
+    derivedStateOf { screenHeightDp - columnHeightDp }
+  }
 
   var isDelayedVisible by remember { mutableStateOf(false) }
+
+  LaunchedEffect(Unit) {
+    meetingViewModel.fetchMeeting()
+    meetingViewModel.fetchAttendance()
+    meetingViewModel.fetchVotings()
+    meetingViewModel.fetchProtocol()
+  }
 
   LaunchedEffect(meetingViewModel.attendance.isNotEmpty()) {
     if (meetingViewModel.attendance.isNotEmpty()) {
@@ -93,128 +100,165 @@ fun AttendancesCoordinationPage(
 
   // UI anzeigen
   // Layout
-  Column(modifier = Modifier.fillMaxSize().background(Tertiary)) {
+  Column(
+    modifier = Modifier
+      .fillMaxSize()
+      .background(Tertiary)
+  ) {
     // Oberer Bereich
     Column(
-        modifier =
-            Modifier.fillMaxWidth()
-                // .padding(start = 18.dp, end = 18.dp)
-                .onGloballyPositioned { coordinates ->
-                  val newHeightDp = with(density) { coordinates.size.height.toDp() }
-                  if (newHeightDp != columnHeightDp) {
-                    columnHeightDp = newHeightDp
-                  }
-                }) {
-          SpacerTopBar()
-          meetingViewModel.meeting?.let {
-            SitzungsCard(GetMeetingDTO = it, protocoll = meetingViewModel.protocols)
+      modifier =
+      Modifier
+        .fillMaxWidth()
+        // .padding(start = 18.dp, end = 18.dp)
+        .onGloballyPositioned { coordinates ->
+          val newHeightDp = with(density) { coordinates.size.height.toDp() }
+          if (newHeightDp != columnHeightDp) {
+            columnHeightDp = newHeightDp
           }
-        }
+        }) {
+      SpacerTopBar()
+      meetingViewModel.meeting?.let {
+        SitzungsCard(GetMeetingDTO = it, protocoll = meetingViewModel.protocols)
+      }
+    }
 
     var scope = rememberCoroutineScope()
 
     // Hauptinhalt
     val offsetY by
-        animateDpAsState(
-            targetValue = if (isDelayedVisible) 0.dp else contentHeightDp,
-            animationSpec = tween(durationMillis = 500))
+    animateDpAsState(
+      targetValue = if (isDelayedVisible) 0.dp else contentHeightDp,
+      animationSpec = tween(durationMillis = 500)
+    )
 
     Column(
-        modifier =
-            Modifier.offset(y = offsetY)
-                .fillMaxHeight()
-                .clip(RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp))
-                .background(Background_prime)
-                .padding(top = 18.dp, start = 18.dp, end = 18.dp),
+      modifier =
+      Modifier
+        .offset(y = offsetY)
+        .fillMaxHeight()
+        .clip(RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp))
+        .background(Background_prime)
+        .padding(top = 18.dp, start = 18.dp, end = 18.dp),
     ) {
       LazyColumn(
-          verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            item {
-              meetingViewModel.you?.let {
-                LoggedUserAttendacneCard(
-                    it,
-                    meetingViewModel.meeting?.status,
-                    acceptClick = {
-                      scope.launch { meetingViewModel.planAttendance(PlanAttendance.present) }
-                    },
-                    declineClick = {
-                      scope.launch { meetingViewModel.planAttendance(PlanAttendance.absent) }
-                    },
-                    maxMembernumber = meetingViewModel.maxMembernumber,
-                    acceptedORpresentListcound =
-                        if (meetingViewModel.meeting?.status == MeetingStatus.scheduled) {
-                          meetingViewModel.acceptedListcound
-                        } else {
-                          meetingViewModel.presentListcount
-                        },
-                    meetingViewModel = meetingViewModel,
-                    checkInClick = { confirmationMeeting = true })
-              }
-              SpacerBetweenElements()
-            }
-            item {
-              Text(text = "Agenda")
-              SpacerBetweenElements()
-              meetingViewModel.meeting?.let {
-                AgendaCard(name = meetingViewModel.meeting!!.name, content = it.description)
-              }
-              SpacerBetweenElements()
-            }
-
-            item {
-              if (meetingViewModel.votings.isNotEmpty()) {
-                Text(text = "Votings")
-                SpacerBetweenElements()
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                  meetingViewModel.votings.forEach { voting ->
-                    var votingData =
-                        ItemListData(
-                            title = voting.question,
-                            id = voting.id.toString(),
-                            date = null,
-                            time = null,
-                            meetingStatus = "",
-                            timeRend = false,
-                            iconRend = false)
-                    try {
-                      votingData =
-                          ItemListData(
-                              title = voting.question,
-                              id = voting.id.toString(),
-                              date = voting.startedAt!!.toLocalDate(),
-                              time = null,
-                              meetingStatus = "",
-                              timeRend = false,
-                              iconRend = false)
-                    } catch (e: Exception) {
-                      Log.d("test", e.message.toString())
-                      Log.d("test", voting.question)
-                    }
-                    IconTextField(
-                        text = votingData.title,
-                        icon = ImageVector.vectorResource(R.drawable.ic_pie_chart),
-                        onClick = { navController.navigate("abstimmung/${voting.id}") })
-                  }
-                }
-                SpacerBetweenElements()
-              }
-            }
-
-            item {
-              if (meetingViewModel.meeting?.status != MeetingStatus.scheduled) {
-                Text(text = "Protokoll")
-                SpacerBetweenElements()
-                Log.d("Deteil", "${meetingViewModel.protocols}")
-                meetingViewModel.meeting?.let {
-                  ListenItem(
-                      itemListData = it,
-                      onClick = { navController.navigate("protokolleDetail/${it.id}") },
-                      isProtokoll = true)
-                }
-                SpacerBetweenElements()
-              }
-            }
+        verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()
+      ) {
+        item {
+          meetingViewModel.you?.let {
+            LoggedUserAttendacneCard(
+              it,
+              meetingViewModel.meeting?.status,
+              acceptClick = {
+                scope.launch { meetingViewModel.planAttendance(PlanAttendance.present) }
+              },
+              declineClick = {
+                scope.launch { meetingViewModel.planAttendance(PlanAttendance.absent) }
+              },
+              maxMembernumber = meetingViewModel.maxMembernumber,
+              acceptedORpresentListcound =
+              if (meetingViewModel.meeting?.status == MeetingStatus.scheduled) {
+                meetingViewModel.acceptedListcound
+              } else {
+                meetingViewModel.presentListcount
+              },
+              meetingViewModel = meetingViewModel,
+              checkInClick = { confirmationMeeting = true })
           }
+          SpacerBetweenElements()
+        }
+        item {
+          Text(text = "Agenda")
+          SpacerBetweenElements()
+          meetingViewModel.meeting?.let {
+            AgendaCard(name = meetingViewModel.meeting!!.name, content = it.description)
+          }
+          SpacerBetweenElements()
+        }
+
+        item {
+          if (meetingViewModel.votings.isNotEmpty()) {
+            Text(text = "Votings")
+            SpacerBetweenElements()
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+              meetingViewModel.votings.forEach { voting ->
+                var votingData =
+                  ItemListData(
+                    title = voting.question,
+                    id = voting.id.toString(),
+                    date = null,
+                    time = null,
+                    meetingStatus = "",
+                    timeRend = false,
+                    iconRend = false
+                  )
+                try {
+                  votingData =
+                    ItemListData(
+                      title = voting.question,
+                      id = voting.id.toString(),
+                      date = voting.startedAt!!.toLocalDate(),
+                      time = null,
+                      meetingStatus = "",
+                      timeRend = false,
+                      iconRend = false
+                    )
+                } catch (e: Exception) {
+                  Log.d("test", e.message.toString())
+                  Log.d("test", voting.question)
+                }
+                IconTextField(
+                  text = votingData.title,
+                  icon = ImageVector.vectorResource(R.drawable.ic_pie_chart),
+                  onClick = {
+                    if (meetingViewModel.meeting!!.myAttendanceStatus == null) {
+                      Toast.makeText(
+                        context,
+                        "Du bist nicht bei der Sitzung angemeldet",
+                        Toast.LENGTH_SHORT
+                      ).show()
+                    } else {
+                      if (voting.isOpen) {
+                        if (voting.iVoted && voting.closedAt == null) {
+                          navController.navigate("abgestimmt/${voting.id}")
+                        } else if (voting.iVoted) {
+                          navController.navigate("abstimmung/${voting.id}")
+                        } else {
+                          navController.navigate("abstimmen/${voting.id}")
+                        }
+                      } else if (voting.closedAt != null) {
+                        navController.navigate("abstimmung/${voting.id}")
+                      } else {
+                        Toast.makeText(
+                          context,
+                          "Die Abstimmung ist noch nicht geöffnet",
+                          Toast.LENGTH_SHORT
+                        ).show()
+                      }
+                    }
+                  })
+              }
+            }
+            SpacerBetweenElements()
+          }
+        }
+
+        item {
+          if (meetingViewModel.meeting?.status != MeetingStatus.scheduled) {
+            Text(text = "Protokoll")
+            SpacerBetweenElements()
+            Log.d("Deteil", "${meetingViewModel.protocols}")
+            meetingViewModel.meeting?.let {
+              ListenItem(
+                itemListData = it,
+                onClick = { navController.navigate("protokolleDetail/${it.id}") },
+                isProtokoll = true
+              )
+            }
+            SpacerBetweenElements()
+          }
+        }
+      }
     }
   }
   val code = remember { mutableStateOf("") }
@@ -224,23 +268,23 @@ fun AttendancesCoordinationPage(
 
       meetingViewModel.meeting?.let {
         PopupCheckIn(
-            onDismissRequest = { confirmationMeeting = false },
-            onConfirmation = {
-              scope.launch {
-                if (meetingViewModel.attend(code.value)) {
-                  confirmationMeeting = false
-                } else {
-                  Toast.makeText(context, "Der Code ist falsch.", Toast.LENGTH_SHORT).show()
-                }
+          onDismissRequest = { confirmationMeeting = false },
+          onConfirmation = {
+            scope.launch {
+              if (meetingViewModel.attend(code.value)) {
+                confirmationMeeting = false
+              } else {
+                Toast.makeText(context, "Der Code ist falsch.", Toast.LENGTH_SHORT).show()
               }
-            },
-            title = "Code eingeben",
-            descriptionText = "Geben Sie den Zugangscode ein.",
-            buttonDismissText = "Abbrechen",
-            buttonConfirmText = "Senden",
-            onOpenCamera = { /* Kamera öffnen */ },
-            valueCode = code.value,
-            onValueChange = { code.value = it },
+            }
+          },
+          title = "Code eingeben",
+          descriptionText = "Geben Sie den Zugangscode ein.",
+          buttonDismissText = "Abbrechen",
+          buttonConfirmText = "Senden",
+          onOpenCamera = { /* Kamera öffnen */ },
+          valueCode = code.value,
+          onValueChange = { code.value = it },
         )
       }
     }
