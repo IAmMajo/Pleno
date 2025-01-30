@@ -68,6 +68,8 @@ import net.ipv64.kivop.pages.mainApp.MeetingsListPage
 import net.ipv64.kivop.pages.mainApp.Posters.PosterDetailedPage
 import net.ipv64.kivop.pages.mainApp.Posters.PosterPage
 import net.ipv64.kivop.pages.mainApp.Posters.PostersListPage
+import net.ipv64.kivop.pages.mainApp.ProtocolDetailPage
+import net.ipv64.kivop.pages.mainApp.ProtocolEditPage
 import net.ipv64.kivop.pages.mainApp.ProtocolListPage
 import net.ipv64.kivop.pages.mainApp.UserPage
 import net.ipv64.kivop.pages.mainApp.VotePage
@@ -159,6 +161,19 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
           ProtocolListPage(navController = navController, meetingsViewModel)
         }
 
+        composable("${Screen.ProtocolEditPage.rout}/{meetingID}/{protocollang}") { backStackEntry ->
+          ProtocolEditPage(
+              navController,
+              backStackEntry.arguments?.getString("meetingID").orEmpty(),
+              backStackEntry.arguments?.getString("protocollang").orEmpty())
+        }
+
+        composable("${Screen.ProtocolDetailPage.rout}/{meetingID}") { backStackEntry ->
+          ProtocolDetailPage(
+              navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
+        }
+
+        // CarpoolingList
         composable(route = Screen.CarpoolingList.rout) {
           CarpoolingList(navController = navController)
         }

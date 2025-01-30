@@ -112,9 +112,9 @@ fun ListenItem(
           Modifier.fillMaxWidth()
               .customShadow(cornersRadius = 8.dp, shadowBlurRadius = 2.dp)
               .clip(RoundedCornerShape(8.dp))
+              .clickable(onClick = onClick!!)
               .background(Background_secondary)
-              .padding(8.dp)
-              .clickable(onClick = onClick!!),
+              .padding(8.dp),
   ) {
     Column(modifier = Modifier) {
       Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
