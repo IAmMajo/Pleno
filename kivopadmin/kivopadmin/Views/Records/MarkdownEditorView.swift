@@ -322,69 +322,115 @@ struct TranslationSheetView: View {
 struct ExtendRecordView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var markdownText: String
-    @State private var aiGeneratedText: String = ""
+    @State private var aiGeneratedText: String = "" // Unformatierter KI-Text
+    @State private var formattedText: String = "" // Formatierter KI-Text
+    @State private var userEditedText: String = "" // Bearbeiteter Text
     @State private var isLoading = true
-    @State private var userEditedText: String = ""
-    @State private var isFullyLoaded = false // Neue Variable, um das Ende des Streams zu erkennen
+    @State private var isEditing = false // Bearbeitungsmodus
     var lang: String
-    
+
     var body: some View {
         VStack(spacing: 20) {
-            Text("KI-generierte Verbesserung")
-                .font(.headline)
-                .foregroundColor(.primary)
-                .padding(.top, 16)
-                .padding(.horizontal)
-            
+            // **Titel-Leiste mit Zurück & Speichern**
+            HStack {
+                // **Zurück-Button links oben**
+                if isEditing {
+                    Button("Zurück") {
+                        isEditing = false
+                        userEditedText = aiGeneratedText
+                        formattedText = formatMarkdown(aiGeneratedText)
+                    }
+                    .foregroundColor(.blue)
+                }
+
+                Spacer()
+
+                // **Mittige Überschrift**
+                Text("KI-generierte Verbesserung")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .center)
+
+                Spacer()
+
+                // **Bearbeitungsmodus-Toggle**
+                Button(action: {
+                    isEditing.toggle()
+                    if !isEditing {
+                        // **Speichern: Änderungen in den Markdown-Text übernehmen**
+                        aiGeneratedText = userEditedText
+                        formattedText = formatMarkdown(userEditedText)
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: isEditing ? "checkmark" : "pencil")
+                            .font(.system(size: 18, weight: .bold)) // **Stift größer**
+                        if isEditing {
+                            Text("Speichern")
+                        }
+                    }
+                    .foregroundColor(.blue)
+                }
+            }
+            .padding(.horizontal)
+            .frame(height: 44) // **Einheitliche Höhe für die Titelleiste**
+
             HStack(spacing: 20) {
+                // **Linke Seite - Originaltext**
                 VStack {
                     Text("Originaltext")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
-                    
-                    TextEditor(text: $markdownText)
+
+                    TextEditor(text: .constant(markdownText))
                         .font(.body)
                         .foregroundColor(.primary)
                         .padding()
                         .frame(maxWidth: .infinity, minHeight: 300)
+                        .background(Color(.systemGray6))
                         .cornerRadius(8)
                         .border(Color.gray, width: 1)
+                        .disabled(true) // Nicht editierbar
                 }
-                
+
+                // **Rechte Seite - KI-Text**
                 VStack {
                     Text("KI-Vorschlag")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
-                    
-                    ScrollView {
-                        if isFullyLoaded {
-                            // Nach vollständigem Laden: MarkdownUI zur Formatierung verwenden
-                            Markdown(userEditedText)
+
+                    if isEditing {
+                        // **Editierbare Version des KI-Textes**
+                        TextEditor(text: $userEditedText)
+                            .font(.body)
+                            .foregroundColor(.primary)
+                            .padding()
+                            .frame(maxWidth: .infinity, minHeight: 300)
+                            .background(Color.white)
+                            .cornerRadius(8)
+                            .border(Color.gray, width: 1)
+                    } else {
+                        // **Markdown-Ansicht des KI-Textes**
+                        ScrollView {
+                            Markdown(formattedText)
                                 .markdownTheme(.basic)
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                        } else {
-                            // Während des Ladens: Normaler Text (unformatiert)
-                            Text(userEditedText)
-                                .font(.body)
-                                .padding()
-                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
+                        .background(Color.white)
+                        .cornerRadius(8)
+                        .border(Color.gray, width: 1)
                     }
-                    .background(Color.white)
-                    .cornerRadius(8)
-                    .border(Color.gray, width: 1)
                 }
             }
             .padding(.horizontal)
             .frame(maxWidth: .infinity)
-            
+
             Spacer()
-            
+
             HStack(spacing: 15) {
                 Button(action: {
                     dismiss()
@@ -396,9 +442,9 @@ struct ExtendRecordView: View {
                         .foregroundColor(.white)
                         .cornerRadius(8)
                 }
-                
+
                 Button(action: {
-                    markdownText = userEditedText
+                    markdownText = formattedText
                     dismiss()
                 }) {
                     Text("Übernehmen")
@@ -417,52 +463,41 @@ struct ExtendRecordView: View {
         .task {
             await fetchExtendedRecord()
         }
-        .onAppear {
-            userEditedText = ""
-        }
     }
-    
+
     private func fetchExtendedRecord() async {
         isLoading = true
         aiGeneratedText = ""
-        isFullyLoaded = false // Setze den Status zurück
-        
+
         await RecordsAPI.extendRecord(content: markdownText, lang: lang) { chunk in
             DispatchQueue.main.async {
                 aiGeneratedText += chunk + "\n"
-                userEditedText = aiGeneratedText // Unformatierter Text wird schrittweise aktualisiert
+                userEditedText = aiGeneratedText // **Unformatierter Text wird direkt angezeigt**
             }
         }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             print("Finaler AI-Text:\n\(aiGeneratedText)")
-            userEditedText = aiGeneratedText // Nach kompletter Übertragung nochmals setzen
-            isFullyLoaded = true // Jetzt erst Markdown-Rendering aktivieren
+            formattedText = formatMarkdown(aiGeneratedText) // Formatierter Text erst nach vollständigem Laden
+            isLoading = false
         }
-        
-        isLoading = false
     }
-}
 
-
-    // Funktion zur Bereinigung der Markdown-Syntax in Echtzeit
+    // **Markdown-Formatierungsfunktion**
     private func formatMarkdown(_ text: String) -> String {
         var formattedText = text
         
-        // Echte Zeilenumbrüche für Markdown-Struktur
-        formattedText = formattedText.replacingOccurrences(of: "### ", with: "\n### ") // Große Überschriften
-        formattedText = formattedText.replacingOccurrences(of: "## ", with: "\n## ") // Mittlere Überschriften
-        formattedText = formattedText.replacingOccurrences(of: "# ", with: "\n# ") // Hauptüberschriften
-        formattedText = formattedText.replacingOccurrences(of: "- ", with: "\n- ") // Listenpunkte
-        formattedText = formattedText.replacingOccurrences(of: "---", with: "\n\n—\n\n") // Trennlinien lesbarer machen
+        formattedText = formattedText.replacingOccurrences(of: "### ", with: "\n### ")
+        formattedText = formattedText.replacingOccurrences(of: "## ", with: "\n## ")
+        formattedText = formattedText.replacingOccurrences(of: "# ", with: "\n# ")
+        formattedText = formattedText.replacingOccurrences(of: "- ", with: "\n- ")
+        formattedText = formattedText.replacingOccurrences(of: "---", with: "\n\n—\n\n")
 
-        // Überflüssige doppelte Leerzeilen entfernen
         formattedText = formattedText.replacingOccurrences(of: "\n\n\n", with: "\n\n")
         
         return formattedText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
-
-
+}
 
 
 
