@@ -21,21 +21,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.components.AbstimmungCard
-import net.ipv64.kivop.components.PieChart
 import net.ipv64.kivop.components.PieChartPoll
 import net.ipv64.kivop.components.ResultCard
 import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.models.viewModel.PollResultViewModel
 import net.ipv64.kivop.models.viewModel.PollResultViewModelFactory
-import net.ipv64.kivop.models.viewModel.VotingResultViewModel
-import net.ipv64.kivop.models.viewModel.VotingResultViewModelFactory
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Primary
 
 @Composable
 fun PollResultPage(navController: NavController, pollID: String) {
   val pollResultViewModel: PollResultViewModel =
-    viewModel(factory = PollResultViewModelFactory(pollID))
+      viewModel(factory = PollResultViewModelFactory(pollID))
   val previousBackStackEntry = navController.previousBackStackEntry
   BackHandler {
     if (previousBackStackEntry != null) {
@@ -54,28 +51,26 @@ fun PollResultPage(navController: NavController, pollID: String) {
   Column(modifier = Modifier.background(Primary)) {
     SpacerTopBar()
     if (pollResultViewModel.poll != null) {
-      pollResultViewModel.poll!!.let {
-        AbstimmungCard(title = it.question, date = it.startedAt)
-      }
+      pollResultViewModel.poll!!.let { AbstimmungCard(title = it.question, date = it.startedAt) }
     }
     Spacer(modifier = Modifier.size(16.dp))
     //
     LazyColumn(
-      modifier =
-      Modifier.fillMaxWidth()
-        .fillMaxHeight()
-        .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
-        .background(Background_prime)
-        .padding(18.dp)) {
-      item {
-        pollResultViewModel.pollResults?.let {
-          PieChartPoll(pollResults = it, explodeDistance = 15f)
+        modifier =
+            Modifier.fillMaxWidth()
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
+                .background(Background_prime)
+                .padding(18.dp)) {
+          item {
+            pollResultViewModel.pollResults?.let {
+              PieChartPoll(pollResults = it, explodeDistance = 15f)
+            }
+            Spacer(modifier = Modifier.size(16.dp))
+            if (pollResultViewModel.pollResults != null && pollResultViewModel.poll != null) {
+              ResultCard(pollResultViewModel.pollResults!!, pollResultViewModel.poll!!)
+            }
+          }
         }
-        Spacer(modifier = Modifier.size(16.dp))
-        if (pollResultViewModel.pollResults != null && pollResultViewModel.poll != null) {
-          ResultCard(pollResultViewModel.pollResults!!, pollResultViewModel.poll!!)
-        }
-      }
-    }
   }
 }

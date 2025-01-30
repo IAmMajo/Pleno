@@ -60,13 +60,13 @@ fun ListenItem(
   //    }
 
   Column(
-    modifier =
-    Modifier.fillMaxWidth()
-      .customShadow(cornersRadius = 8.dp)
-      .clip(RoundedCornerShape(8.dp))
-      .clickable(onClick = onClick!!)
-      .background(Background_secondary)
-      .padding(8.dp),
+      modifier =
+          Modifier.fillMaxWidth()
+              .customShadow(cornersRadius = 8.dp)
+              .clip(RoundedCornerShape(8.dp))
+              .clickable(onClick = onClick!!)
+              .background(Background_secondary)
+              .padding(8.dp),
   ) {
     Column(modifier = Modifier) {
       // Heading-Row

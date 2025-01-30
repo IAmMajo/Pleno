@@ -32,43 +32,37 @@ fun PollOnHoldPage(navController: NavController) {
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
   Column(
-    modifier = Modifier
-      .background(Background_prime)
-      .fillMaxHeight(),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center) {
-    Spacer(Modifier.weight(0.5f))
-    Icon(
-      modifier = Modifier.size(300.dp),
-      tint = Text_prime,
-      painter = painterResource(id = R.drawable.ic_clock),
-      contentDescription = "Icon Clock"
-    )
-    Text(
-      text = "Die Abstimmung ist noch im Gange...",
-      color = Text_prime,
-      textAlign = TextAlign.Center,
-      style = TextStyles.headingStyle
-    )
-    Spacer(Modifier.weight(1f))
-    CustomButton(
-      text = "Zurück",
-      onClick = {
-        val previousBackStackEntry = navController.previousBackStackEntry
-        if (previousBackStackEntry != null) {
-          // only go back two steps when last Page was Vote Page
-          if (previousBackStackEntry.destination.route.toString() ==
-            "umfrage/{pollID}") {
-            isBackPressed = navController.popBackStack()
-            navController.popBackStack()
-          } else {
-            isBackPressed = navController.popBackStack()
-          }
-        }
-      },
-      modifier = Modifier,
-      buttonStyle = primaryButtonStyle
-    )
-    Spacer(Modifier.size(22.dp))
-  }
+      modifier = Modifier.background(Background_prime).fillMaxHeight(),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center) {
+        Spacer(Modifier.weight(0.5f))
+        Icon(
+            modifier = Modifier.size(300.dp),
+            tint = Text_prime,
+            painter = painterResource(id = R.drawable.ic_clock),
+            contentDescription = "Icon Clock")
+        Text(
+            text = "Die Abstimmung ist noch im Gange...",
+            color = Text_prime,
+            textAlign = TextAlign.Center,
+            style = TextStyles.headingStyle)
+        Spacer(Modifier.weight(1f))
+        CustomButton(
+            text = "Zurück",
+            onClick = {
+              val previousBackStackEntry = navController.previousBackStackEntry
+              if (previousBackStackEntry != null) {
+                // only go back two steps when last Page was Vote Page
+                if (previousBackStackEntry.destination.route.toString() == "umfrage/{pollID}") {
+                  isBackPressed = navController.popBackStack()
+                  navController.popBackStack()
+                } else {
+                  isBackPressed = navController.popBackStack()
+                }
+              }
+            },
+            modifier = Modifier,
+            buttonStyle = primaryButtonStyle)
+        Spacer(Modifier.size(22.dp))
+      }
 }

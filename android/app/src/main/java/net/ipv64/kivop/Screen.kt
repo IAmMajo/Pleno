@@ -40,11 +40,11 @@ sealed class Screen(val rout: String) {
   object Poll : Screen("umfrage")
 
   object PollList : Screen("umfragen")
-  
+
   object PollResult : Screen("umfrageErgebnis")
 
   object PollCreate : Screen("umfrageErstellen")
-  
+
   object PollOnHold : Screen("umfrageAbgestimmt")
 }
 

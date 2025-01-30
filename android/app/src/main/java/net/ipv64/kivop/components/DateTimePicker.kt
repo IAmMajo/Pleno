@@ -20,7 +20,6 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.ui.theme.Background_prime
-import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.TextStyles
 import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_prime_light
@@ -63,7 +62,7 @@ fun DateTimePicker(
           calendar.get(Calendar.DAY_OF_MONTH))
 
   Column(modifier = Modifier.fillMaxWidth().background(Color.Transparent).then(modifier)) {
-    if (name != null){
+    if (name != null) {
       Text(text = name, style = TextStyles.contentStyle, color = Text_prime_light)
       SpacerBetweenElements(4.dp)
     }

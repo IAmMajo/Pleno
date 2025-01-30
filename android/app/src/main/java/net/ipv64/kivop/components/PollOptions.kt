@@ -1,12 +1,10 @@
 package net.ipv64.kivop.components
 
 import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,15 +19,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.R
-import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingOptionDTO
-import net.ipv64.kivop.dtos.PollServiceDTOs.GetPollDTO
 import net.ipv64.kivop.dtos.PollServiceDTOs.GetPollVotingOptionDTO
 import net.ipv64.kivop.ui.customShadow
-import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Secondary
@@ -37,7 +30,7 @@ import net.ipv64.kivop.ui.theme.Secondary
 @Composable
 fun PollOptions(options: List<GetPollVotingOptionDTO>, onCheckedChange: (Int) -> Unit) {
   var selectedIndex by remember { mutableIntStateOf(-1) } // -1 means no selection
-  
+
   Column(
       modifier =
           Modifier.customShadow()
@@ -76,4 +69,3 @@ fun PollOptions(options: List<GetPollVotingOptionDTO>, onCheckedChange: (Int) ->
         }
       }
 }
-

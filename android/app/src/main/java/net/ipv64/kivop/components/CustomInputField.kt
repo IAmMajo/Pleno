@@ -38,101 +38,89 @@ import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
 fun CustomInputField(
-  label: String? = null,
-  labelColor: Color = Background_prime,
-  placeholder: String,
-  modifier: Modifier = Modifier,
-  isPasswort: Boolean = false,
-  singleLine: Boolean = true,
-  lines: Int = 1,
-  value: String,
-  backgroundColor: Color = Background_prime,
-  onValueChange: (String) -> Unit,
-  isNumberOnly: Boolean = false,
-  maxChars: Int? = null,
-  keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-  focusRequester: FocusRequester = FocusRequester(),
-  nextFocusRequester: FocusRequester? = null // Für Fokuswechsel zum nächsten Feld
+    label: String? = null,
+    labelColor: Color = Background_prime,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    isPasswort: Boolean = false,
+    singleLine: Boolean = true,
+    lines: Int = 1,
+    value: String,
+    backgroundColor: Color = Background_prime,
+    onValueChange: (String) -> Unit,
+    isNumberOnly: Boolean = false,
+    maxChars: Int? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    focusRequester: FocusRequester = FocusRequester(),
+    nextFocusRequester: FocusRequester? = null // Für Fokuswechsel zum nächsten Feld
 ) {
   val focusManager = LocalFocusManager.current // Steuerung des Fokus-Managements
 
   Column(modifier = modifier.fillMaxWidth()) {
     if (label != null) {
       Text(
-        text = label,
-        style = TextStyles.contentStyle,
-        color = labelColor,
-        modifier = Modifier.fillMaxWidth()
-      )
+          text = label,
+          style = TextStyles.contentStyle,
+          color = labelColor,
+          modifier = Modifier.fillMaxWidth())
       SpacerBetweenElements(4.dp)
     }
     val visualTransformation =
-      (if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None).also {
-
-        Box() {
-          OutlinedTextField(
-            visualTransformation = it,
-            value = value,
-            colors =
-            OutlinedTextFieldDefaults.colors(
-              focusedContainerColor = backgroundColor,
-              unfocusedContainerColor = backgroundColor,
-              disabledContainerColor = backgroundColor,
-              unfocusedBorderColor = backgroundColor,
-              focusedBorderColor = backgroundColor,
-              focusedTextColor = Text_prime,
-              unfocusedTextColor = Text_prime
-            ),
-            singleLine = singleLine,
-            maxLines = if (singleLine) 1 else lines,
-            minLines = lines,
-            onValueChange = onValueChange,
-            modifier = Modifier
-              .fillMaxWidth()
-              .focusRequester(focusRequester),
-            textStyle = TextStyles.contentStyle,
-            placeholder = {
-              Text(
-                text = placeholder,
-                color = Text_tertiary.copy(0.4f),
-                style = TextStyles.contentStyle
-              )
-            },
-            keyboardOptions =
-            keyboardOptions.copy(
-              keyboardType = if (isNumberOnly) KeyboardType.Number else KeyboardType.Text,
-              imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done
-            ),
-            keyboardActions =
-            KeyboardActions(
-              onNext = {
-                nextFocusRequester?.requestFocus() // Springt zum nächsten Eingabefeld
-              },
-              onDone = {
-                focusManager.clearFocus() // Schließt die Tastatur
-              })
-          )
-          if (maxChars != null) {
-            Box(modifier = Modifier
-              .matchParentSize()
-              .zIndex(1f)
-              .padding(3.dp)) {
-              val textColor =
-                if (value.length <= maxChars) Text_tertiary.copy(0.4f)
-                else Signal_red.copy(0.4f)
-              Text(
-                text = "${value.length}/${maxChars}",
-                color = textColor,
-                style = TextStyles.contentStyle.copy(fontSize = 10.sp),
-                modifier = Modifier.align(Alignment.BottomEnd)
-              )
+        (if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None).also {
+          Box() {
+            OutlinedTextField(
+                visualTransformation = it,
+                value = value,
+                colors =
+                    OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = backgroundColor,
+                        unfocusedContainerColor = backgroundColor,
+                        disabledContainerColor = backgroundColor,
+                        unfocusedBorderColor = backgroundColor,
+                        focusedBorderColor = backgroundColor,
+                        focusedTextColor = Text_prime,
+                        unfocusedTextColor = Text_prime),
+                singleLine = singleLine,
+                maxLines = if (singleLine) 1 else lines,
+                minLines = lines,
+                onValueChange = onValueChange,
+                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                textStyle = TextStyles.contentStyle,
+                placeholder = {
+                  Text(
+                      text = placeholder,
+                      color = Text_tertiary.copy(0.4f),
+                      style = TextStyles.contentStyle)
+                },
+                keyboardOptions =
+                    keyboardOptions.copy(
+                        keyboardType = if (isNumberOnly) KeyboardType.Number else KeyboardType.Text,
+                        imeAction =
+                            if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done),
+                keyboardActions =
+                    KeyboardActions(
+                        onNext = {
+                          nextFocusRequester?.requestFocus() // Springt zum nächsten Eingabefeld
+                        },
+                        onDone = {
+                          focusManager.clearFocus() // Schließt die Tastatur
+                        }))
+            if (maxChars != null) {
+              Box(modifier = Modifier.matchParentSize().zIndex(1f).padding(3.dp)) {
+                val textColor =
+                    if (value.length <= maxChars) Text_tertiary.copy(0.4f)
+                    else Signal_red.copy(0.4f)
+                Text(
+                    text = "${value.length}/${maxChars}",
+                    color = textColor,
+                    style = TextStyles.contentStyle.copy(fontSize = 10.sp),
+                    modifier = Modifier.align(Alignment.BottomEnd))
+              }
             }
           }
         }
-      }
   }
 }
-
 
 @Preview(showBackground = true)
 @Composable
@@ -141,19 +129,18 @@ fun CustomInputFieldPreview() {
   Column(modifier = Modifier.background(Signal_blue)) {
     // Erstes CustomInputField
     CustomInputField(
-      label = "Vorname",
-      placeholder = "Gib deinen Vornamen ein",
-      value = username,
-      onValueChange = { username = it })
+        label = "Vorname",
+        placeholder = "Gib deinen Vornamen ein",
+        value = username,
+        onValueChange = { username = it })
 
     CustomInputField(
-      label = "Vorname",
-      placeholder = "Gib deinen Vornamen ein",
-      value = username,
-      onValueChange = { username = it },
-      singleLine = false,
-      lines = 3,
-      maxChars = 10
-    )
+        label = "Vorname",
+        placeholder = "Gib deinen Vornamen ein",
+        value = username,
+        onValueChange = { username = it },
+        singleLine = false,
+        lines = 3,
+        maxChars = 10)
   }
 }

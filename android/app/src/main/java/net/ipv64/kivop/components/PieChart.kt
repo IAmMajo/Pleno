@@ -68,40 +68,40 @@ fun PieChart(
 
 @Composable
 fun PieChartPoll(
-  pollResults: GetPollResultsDTO,
-  explodeDistance: Float = 10f,
-  showLabel: Boolean = false,
+    pollResults: GetPollResultsDTO,
+    explodeDistance: Float = 10f,
+    showLabel: Boolean = false,
 ) {
   Column(
-    modifier =
-    Modifier.fillMaxWidth()
-      .customShadow()
-      .background(Background_secondary, shape = RoundedCornerShape(8.dp))
-      .padding(10.dp),
-    horizontalAlignment = Alignment.CenterHorizontally) {
-    Box(
       modifier =
-      Modifier.size(250.dp).aspectRatio(1f).drawBehind {
-        if (pollResults.totalCount.toInt() != 0) {
-          drawPieChartPoll(
-            pollResults.results,
-            pollResults.totalCount.toInt(),
-            explodeDistance = explodeDistance,
-            showLabel)
-        } else {
-          val noVotings =
-            GetVotingResultsDTO(
-              votingId = UUID.randomUUID(),
-              myVote = (0).toUByte(),
-              totalCount = 1u,
-              results =
-              listOf(
-                GetVotingResultDTO((0).toUByte(), 1u, 100.0, listOf()),
-              ))
-          drawPieChart(noVotings.results, noVotings.totalCount.toInt(), 1.0f, showLabel)
-        }
-      }) {}
-  }
+          Modifier.fillMaxWidth()
+              .customShadow()
+              .background(Background_secondary, shape = RoundedCornerShape(8.dp))
+              .padding(10.dp),
+      horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier =
+                Modifier.size(250.dp).aspectRatio(1f).drawBehind {
+                  if (pollResults.totalCount.toInt() != 0) {
+                    drawPieChartPoll(
+                        pollResults.results,
+                        pollResults.totalCount.toInt(),
+                        explodeDistance = explodeDistance,
+                        showLabel)
+                  } else {
+                    val noVotings =
+                        GetVotingResultsDTO(
+                            votingId = UUID.randomUUID(),
+                            myVote = (0).toUByte(),
+                            totalCount = 1u,
+                            results =
+                                listOf(
+                                    GetVotingResultDTO((0).toUByte(), 1u, 100.0, listOf()),
+                                ))
+                    drawPieChart(noVotings.results, noVotings.totalCount.toInt(), 1.0f, showLabel)
+                  }
+                }) {}
+      }
 }
 
 val CakeColorStart = Color(0xFF2C7D91)
@@ -189,14 +189,11 @@ fun calcPointOnCircle(startingAngle: Float, sweepAngle: Float, explodeDistance: 
   return Offset(offsetX, offsetY)
 }
 
-
-
-
 fun DrawScope.drawPieChartPoll(
-  list: List<GetPollResultDTO>,
-  totalVotes: Int,
-  explodeDistance: Float,
-  showLabel: Boolean
+    list: List<GetPollResultDTO>,
+    totalVotes: Int,
+    explodeDistance: Float,
+    showLabel: Boolean
 ) {
   val colors: List<Color> = VotingColors
   // startingAngle -90° to start at the top
@@ -204,17 +201,17 @@ fun DrawScope.drawPieChartPoll(
 
   // adjust size of chart to keep it in bound -- takes away the explode distance from each side
   val adjustedSize =
-    size.copy(
-      width = size.width - explodeDistance * 2, height = size.height - explodeDistance * 2)
+      size.copy(
+          width = size.width - explodeDistance * 2, height = size.height - explodeDistance * 2)
   // offset to keep the chart in bound
   val offset = Offset(explodeDistance, explodeDistance)
   // set textPaint
   val textPaint =
-    Paint().apply {
-      color = android.graphics.Color.WHITE
-      textSize = 60f
-      textAlign = Paint.Align.CENTER
-    }
+      Paint().apply {
+        color = android.graphics.Color.WHITE
+        textSize = 60f
+        textAlign = Paint.Align.CENTER
+      }
 
   for (i in list.indices) {
     // calc sweep angle percentage of total votes
@@ -222,12 +219,12 @@ fun DrawScope.drawPieChartPoll(
     // calc explodeOffset. How much each slice is moved from the center
     val explodeOffset = calcPointOnCircle(startingAngle, sweepAngle, explodeDistance)
     drawArc(
-      colors[list[i].index.toInt()],
-      startingAngle,
-      sweepAngle,
-      true,
-      topLeft = offset.copy(x = offset.x + explodeOffset.x, y = offset.y + explodeOffset.y),
-      size = adjustedSize)
+        colors[list[i].index.toInt()],
+        startingAngle,
+        sweepAngle,
+        true,
+        topLeft = offset.copy(x = offset.x + explodeOffset.x, y = offset.y + explodeOffset.y),
+        size = adjustedSize)
     //    if (showLabel) {
     //      // radius of the circle adjustedSize = diameter
     //      val radius = size.width / 2
@@ -258,9 +255,6 @@ fun DrawScope.drawPieChartPoll(
   }
 }
 
-
-
-
 @Preview
 @Composable
 fun PieChartPreview() {
@@ -277,5 +271,3 @@ fun PieChartPreview() {
               ))
   PieChart(votingResults)
 }
-
-

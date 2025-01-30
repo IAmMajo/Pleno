@@ -19,7 +19,6 @@ import net.ipv64.kivop.components.ListenItem
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.models.primaryButtonStyle
-import net.ipv64.kivop.models.viewModel.CarpoolingListViewModel
 import net.ipv64.kivop.models.viewModel.PollsListViewModel
 
 @Composable
@@ -29,38 +28,33 @@ fun PollsListPage(navController: NavController) {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
-  LaunchedEffect(Unit) {
-    pollsListViewModel.fetchPoll()
-  }
-  //content
-  Column(
-    modifier = Modifier.padding(22.dp)
-  ) { 
+  LaunchedEffect(Unit) { pollsListViewModel.fetchPoll() }
+  // content
+  Column(modifier = Modifier.padding(22.dp)) {
     SpacerTopBar()
-    LazyColumn { 
-      items(pollsListViewModel.pollsList){ poll ->
+    LazyColumn {
+      items(pollsListViewModel.pollsList) { poll ->
         if (poll != null) {
-          ListenItem(poll, onClick = {
-            if (poll.isOpen && !poll.iVoted) {
-              navController.navigate("umfrage/${poll.id}")
-            } else if (poll.isOpen && poll.iVoted) {
-              navController.navigate("umfrageAbgestimmt")
-            }else{
-              navController.navigate("umfrageErgebnis/${poll.id}")
-            }
-          })
+          ListenItem(
+              poll,
+              onClick = {
+                if (poll.isOpen && !poll.iVoted) {
+                  navController.navigate("umfrage/${poll.id}")
+                } else if (poll.isOpen && poll.iVoted) {
+                  navController.navigate("umfrageAbgestimmt")
+                } else {
+                  navController.navigate("umfrageErgebnis/${poll.id}")
+                }
+              })
           SpacerBetweenElements(8.dp)
         }
       }
     }
     Spacer(Modifier.weight(1f))
     CustomButton(
-      modifier = Modifier,
-      text = "Erstellen",
-      buttonStyle = primaryButtonStyle,
-      onClick = {
-        navController.navigate("umfrageErstellen")
-      }
-    )
+        modifier = Modifier,
+        text = "Erstellen",
+        buttonStyle = primaryButtonStyle,
+        onClick = { navController.navigate("umfrageErstellen") })
   }
 }

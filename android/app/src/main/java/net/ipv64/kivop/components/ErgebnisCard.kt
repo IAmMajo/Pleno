@@ -78,38 +78,38 @@ fun ResultCard(votingResults: GetPollResultsDTO, votingData: GetPollDTO) {
   Log.i("ResultCard", "ResultCard: $votingResults")
   Log.i("ResultCard", "ResultCard: $votingData")
   Box(
-    modifier =
-    Modifier.fillMaxWidth()
-      .customShadow()
-      .background(color = Background_secondary, shape = RoundedCornerShape(6.dp))
-      .padding(6.dp)) {
-    Column {
-      votingResults.results.forEach { result ->
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 3.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Box(
-            modifier =
-            Modifier.background(colors[result.index.toInt()], shape = CircleShape)
-              .size(16.dp),
-          ) {}
-          // Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = "wahl", tint =
-          // colors[votingResults.indexOf(result)])
-          Spacer(modifier = Modifier.size(3.dp))
-          if (result.index.toInt() == 0) {
-            Text("Enthalten", color = Text_prime, style = TextStyles.contentStyle)
-          } else {
-            Text(
-              votingData.options[result.index.toInt() - 1].text,
-              color = Text_prime,
-              style = TextStyles.contentStyle)
-          }
+      modifier =
+          Modifier.fillMaxWidth()
+              .customShadow()
+              .background(color = Background_secondary, shape = RoundedCornerShape(6.dp))
+              .padding(6.dp)) {
+        Column {
+          votingResults.results.forEach { result ->
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 3.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Box(
+                  modifier =
+                      Modifier.background(colors[result.index.toInt()], shape = CircleShape)
+                          .size(16.dp),
+              ) {}
+              // Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = "wahl", tint =
+              // colors[votingResults.indexOf(result)])
+              Spacer(modifier = Modifier.size(3.dp))
+              if (result.index.toInt() == 0) {
+                Text("Enthalten", color = Text_prime, style = TextStyles.contentStyle)
+              } else {
+                Text(
+                    votingData.options[result.index.toInt() - 1].text,
+                    color = Text_prime,
+                    style = TextStyles.contentStyle)
+              }
 
-          Spacer(modifier = Modifier.weight(1f))
-          Text(text = String.format("%.2f%%", result.percentage), color = Text_prime)
+              Spacer(modifier = Modifier.weight(1f))
+              Text(text = String.format("%.2f%%", result.percentage), color = Text_prime)
+            }
+          }
         }
       }
-    }
-  }
 }

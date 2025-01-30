@@ -12,13 +12,10 @@ import net.ipv64.kivop.services.api.getPollsApi
 class PollsListViewModel() : ViewModel() {
   var pollsList by mutableStateOf<List<GetPollDTO?>>(emptyList())
 
-
   fun fetchPoll() {
     viewModelScope.launch {
       val response = getPollsApi()
-      response?.let {
-        pollsList = it
-      }
+      response?.let { pollsList = it }
     }
   }
 
