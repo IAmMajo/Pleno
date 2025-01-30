@@ -2,10 +2,8 @@ package net.ipv64.kivop
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.slideInHorizontally
@@ -38,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -124,7 +121,7 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
   val meetingsViewModel = viewModel<MeetingsViewModel>()
 
   LaunchedEffect(Unit) { meetingsViewModel.fetchMeetings() }
-  LaunchedEffect(navController.currentDestination){
+  LaunchedEffect(navController.currentDestination) {
     Log.i("currentDestination", navController.currentDestination.toString())
   }
   NavHost(
@@ -193,17 +190,17 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         // Poster
         composable("${Screen.Poster.rout}/{posterID}") { backStackEntry ->
           PosterPage(
-            navController,
-            backStackEntry.arguments?.getString("posterID").orEmpty(),
-            userViewModel)
+              navController,
+              backStackEntry.arguments?.getString("posterID").orEmpty(),
+              userViewModel)
         }
         // PosterDetail
         composable("${Screen.PosterDetail.rout}/{posterID}/{locationID}") { backStackEntry ->
           PosterDetailedPage(
-            navController,
-            userViewModel = userViewModel,
-            backStackEntry.arguments?.getString("posterID").orEmpty(),
-            backStackEntry.arguments?.getString("locationID").orEmpty())
+              navController,
+              userViewModel = userViewModel,
+              backStackEntry.arguments?.getString("posterID").orEmpty(),
+              backStackEntry.arguments?.getString("locationID").orEmpty())
         }
 
         composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->

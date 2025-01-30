@@ -32,4 +32,5 @@ var neutralButtonStyle = ButtonStyle(Signal_neutral_20, Signal_neutral, textCont
 var alertButtonStyle = ButtonStyle(Signal_red, Background_secondary, textContentStyle)
 var alertSecondaryButtonStyle = ButtonStyle(Signal_red_20, Text_tertiary, textContentStyle)
 var textButtonStyle = ButtonStyle(Color.Transparent, Primary, textContentUnderlineStyle)
-var posterButtonStyle = ButtonStyle(Background_secondary.copy(0.15f), Background_tertiary, textContentStyle)
+var posterButtonStyle =
+    ButtonStyle(Background_secondary.copy(0.15f), Background_tertiary, textContentStyle)

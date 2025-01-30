@@ -6,7 +6,8 @@ plugins {
 
 secrets {
   // To add your Maps API key to this project:
-  // 1. If the secrets.properties file does not exist, create it in the same folder as the local.properties file.
+  // 1. If the secrets.properties file does not exist, create it in the same folder as the
+  // local.properties file.
   // 2. Add this line, where YOUR_API_KEY is your API key:
   //        MAPS_API_KEY=YOUR_API_KEY
   propertiesFileName = "secrets.properties"
@@ -18,7 +19,7 @@ secrets {
   // Configure which keys should be ignored by the plugin by providing regular expressions.
   // "sdk.dir" is ignored by default.
   ignoreList.add("keyToIgnore") // Ignore the key "keyToIgnore"
-  ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
+  ignoreList.add("sdk.*") // Ignore all keys matching the regexp "sdk.*"
 }
 
 android {
@@ -52,12 +53,12 @@ android {
     targetCompatibility = JavaVersion.VERSION_1_8
   }
   kotlinOptions { jvmTarget = "1.8" }
-  buildFeatures { 
+  buildFeatures {
     compose = true
-    buildConfig = true}
+    buildConfig = true
+  }
   composeOptions { kotlinCompilerExtensionVersion = "1.5.1" }
   packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
-  
 }
 
 dependencies {

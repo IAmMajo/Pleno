@@ -56,4 +56,3 @@ fun CreateRidePage(navController: NavController) {
     }
   }
 }
-

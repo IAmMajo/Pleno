@@ -2,14 +2,11 @@ package net.ipv64.kivop.services.api
 
 import android.util.Base64
 import android.util.Log
-import com.example.kivopandriod.services.stringToLocalDateTime
 import com.google.gson.Gson
-import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileUpdateDTO
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserRegistrationDTO
-import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterSummaryResponseDTO
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
@@ -99,43 +96,43 @@ suspend fun postResendEmail(email: String): Boolean =
     }
 
 suspend fun getProfileImage(userID: String): String? =
-  withContext(Dispatchers.IO) {
-    val path = "users/profile-image/user/$userID"
+    withContext(Dispatchers.IO) {
+      val path = "users/profile-image/user/$userID"
 
-    val token = auth.getSessionToken()
+      val token = auth.getSessionToken()
 
-    if (token.isNullOrEmpty()) {
-      println("Fehler: Kein Token verfügbar")
-      return@withContext null
-    }
+      if (token.isNullOrEmpty()) {
+        println("Fehler: Kein Token verfügbar")
+        return@withContext null
+      }
 
-    val request =
-      Request.Builder()
-        .url(BASE_URL + path)
-        .addHeader("Authorization", "Bearer $token")
-        .get()
-        .build()
+      val request =
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .get()
+              .build()
 
-    return@withContext try {
-      val response = okHttpClient.newCall(request).execute()
-      if (response.isSuccessful) {
-        val responseBody = response.body?.bytes()
-        if (responseBody != null) {
-          var base64String = Base64.encodeToString(responseBody, Base64.DEFAULT)
-          //remove unwanted characters
-          base64String = base64String.replace("\n", "")
-          
-          return@withContext base64String
+      return@withContext try {
+        val response = okHttpClient.newCall(request).execute()
+        if (response.isSuccessful) {
+          val responseBody = response.body?.bytes()
+          if (responseBody != null) {
+            var base64String = Base64.encodeToString(responseBody, Base64.DEFAULT)
+            // remove unwanted characters
+            base64String = base64String.replace("\n", "")
+
+            return@withContext base64String
+          } else {
+            println("Fehler: Leere Antwort erhalten.")
+            null
+          }
         } else {
-          println("Fehler: Leere Antwort erhalten.")
+          println("Fehler bei der Anfrage: ${response.message}")
           null
         }
-      } else {
-        println("Fehler bei der Anfrage: ${response.message}")
+      } catch (e: Exception) {
+        println("Fehler: ${e.message}")
         null
       }
-    } catch (e: Exception) {
-      println("Fehler: ${e.message}")
-      null
     }
-  }

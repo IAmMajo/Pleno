@@ -23,16 +23,19 @@ fun uriToBase64String(context: Context, uri: Uri): String? {
 
     // Convert original image to byte array (to get its size)
     val originalOutputStream = ByteArrayOutputStream()
-    originalBitmap.compress(Bitmap.CompressFormat.JPEG, 100, originalOutputStream) // No compression for size check
+    originalBitmap.compress(
+        Bitmap.CompressFormat.JPEG, 100, originalOutputStream) // No compression for size check
     val originalByteArray = originalOutputStream.toByteArray()
     val originalSizeKB = originalByteArray.size / 1024 // Convert to KB
 
     // Resize the bitmap (adjust width & height as needed)
-    val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, 800, 800, true) // Adjust size as needed
+    val resizedBitmap =
+        Bitmap.createScaledBitmap(originalBitmap, 800, 800, true) // Adjust size as needed
 
     // Compress and convert to Base64
     val compressedOutputStream = ByteArrayOutputStream()
-    resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, compressedOutputStream) // Adjust quality (70%)
+    resizedBitmap.compress(
+        Bitmap.CompressFormat.JPEG, 80, compressedOutputStream) // Adjust quality (70%)
     val compressedByteArray = compressedOutputStream.toByteArray()
     val compressedSizeKB = compressedByteArray.size / 1024 // Convert to KB
 
@@ -41,7 +44,7 @@ fun uriToBase64String(context: Context, uri: Uri): String? {
     Log.d("ImageSize", "Compressed Size: ${compressedSizeKB}KB")
     // return Base64 and remove \n
     return Base64.encodeToString(compressedByteArray, Base64.DEFAULT).replace("\n", "")
-    } catch (e: Exception) {
+  } catch (e: Exception) {
     e.printStackTrace()
     null
   }

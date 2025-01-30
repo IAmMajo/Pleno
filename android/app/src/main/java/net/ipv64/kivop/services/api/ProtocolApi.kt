@@ -69,7 +69,7 @@ suspend fun getProtocolsApi(id: String): List<GetRecordDTO> =
                   content,
                   attendancesAppendix,
                   votingResultsAppendix,
-                iAmTheRecorder)
+                  iAmTheRecorder)
             }
           }
         } else {

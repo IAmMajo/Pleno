@@ -28,9 +28,9 @@ sealed class Screen(val rout: String) {
   object Posters : Screen("posters")
 
   object Poster : Screen("poster/{posterID}")
-  
+
   object PosterDetail : Screen("posterDetail/{posterID}")
-  
+
   object Voting : Screen("abstimmung/{votingID}")
 
   object Vote : Screen("abstimmen/{votingID}")

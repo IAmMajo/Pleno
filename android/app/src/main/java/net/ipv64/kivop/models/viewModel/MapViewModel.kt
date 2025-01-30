@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import net.ipv64.kivop.services.api.OpenCageGeocoder
 import net.ipv64.kivop.services.getCurrentLocation
 
-
 class MapViewModel : ViewModel() {
   var startCoordinates by mutableStateOf<LatLng?>(null)
   var destinationCoordinates by mutableStateOf<LatLng?>(null)

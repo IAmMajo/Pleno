@@ -153,7 +153,7 @@ suspend fun postCarpoolApi(createSpecialRideDTO: CreateSpecialRideDTO): Boolean 
           ?.let { jsonMap["vehicleDescription"] = it }
 
       val jsonBody = Gson().toJson(jsonMap)
-      
+
       val request =
           Request.Builder()
               .url(BASE_URL + path)

@@ -20,7 +20,6 @@ import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.TextStyles
 
-
 @Composable
 // ToDo - ButtonStyle ergänzen
 fun CustomButton(
