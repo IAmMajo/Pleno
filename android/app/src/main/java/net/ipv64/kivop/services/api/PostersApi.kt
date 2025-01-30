@@ -368,13 +368,49 @@ suspend fun putTakeDownPoster(locationID: String, base64: String): Boolean =
       return@withContext false
     }
 
-    val jsonBody = Gson().toJson(base64)
+    val jsonBody = JSONObject().apply { put("image", base64) }
 
     val request =
       Request.Builder()
         .url(BASE_URL + path)
         .addHeader("Authorization", "Bearer $token")
-        .put(jsonBody.toRequestBody("application/json".toMediaTypeOrNull()))
+        .put(jsonBody.toString().toRequestBody("application/json".toMediaTypeOrNull()))
+        .build()
+
+    return@withContext try {
+      val response = okHttpClient.newCall(request).execute()
+      if (response.isSuccessful) {
+        true
+      } else {
+        val responseBody = response.body?.string()
+        val reason = Gson().fromJson(responseBody, JsonObject::class.java).get("reason").asString
+        println("Fehler bei der Anfrage: $reason")
+        false
+      }
+    } catch (e: Exception) {
+      Log.e("put", "Fehler: ${e.message}")
+      false
+    }
+  }
+
+suspend fun putReportDamagePoster(locationID: String, base64: String): Boolean =
+  withContext(Dispatchers.IO) {
+    val path = "posters/positions/$locationID/report-damage"
+
+    val token = auth.getSessionToken()
+
+    if (token.isNullOrEmpty()) {
+      println("Fehler: Kein Token verfügbar")
+      return@withContext false
+    }
+
+    val jsonBody = JSONObject().apply { put("image", base64) }
+
+    val request =
+      Request.Builder()
+        .url(BASE_URL + path)
+        .addHeader("Authorization", "Bearer $token")
+        .put(jsonBody.toString().toRequestBody("application/json".toMediaTypeOrNull()))
         .build()
 
     return@withContext try {

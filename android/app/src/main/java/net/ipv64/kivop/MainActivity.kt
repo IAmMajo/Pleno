@@ -179,7 +179,8 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         composable("${Screen.Poster.rout}/{posterID}") { backStackEntry ->
           PosterPage(
             navController,
-            backStackEntry.arguments?.getString("posterID").orEmpty())
+            backStackEntry.arguments?.getString("posterID").orEmpty(),
+            userViewModel)
         }
         // PosterDetail
         composable("${Screen.PosterDetail.rout}/{posterID}/{locationID}") { backStackEntry ->

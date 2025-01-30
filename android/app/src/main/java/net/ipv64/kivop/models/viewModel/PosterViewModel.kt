@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide.init
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterPositionResponseDTO
+import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterPositionStatus
 import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterResponseDTO
 import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterSummaryResponseDTO
 import net.ipv64.kivop.models.Address
@@ -27,8 +28,19 @@ class PosterViewModel(private val posterId: String): ViewModel() {
   var posterAddresses by mutableStateOf<Map<UUID, String>>(emptyMap())
 
   var isLoading by mutableStateOf(true)
+  //order for sorting
+  val statusOrder = listOf(
+    PosterPositionStatus.overdue,
+    PosterPositionStatus.damaged,
+    PosterPositionStatus.toHang,
+    PosterPositionStatus.hangs,
+    PosterPositionStatus.takenDown
+  )
+  //Grouped and sorted
+  val groupedPosters: Map<PosterPositionStatus, List<PosterPositionResponseDTO>>
+    get() = posterPositions.sortedBy { statusOrder.indexOf(it.status) }.groupBy { it.status }
   
-
+  
   fun fetchPosterData() {
     viewModelScope.launch {
       isLoading = true

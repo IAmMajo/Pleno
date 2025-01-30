@@ -8,20 +8,40 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.core.content.FileProvider
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
 
 fun uriToBase64String(context: Context, uri: Uri): String? {
   return try {
     // Open input stream from the URI
-    val inputStream: InputStream = context.contentResolver.openInputStream(uri)!!
+    val inputStream = context.contentResolver.openInputStream(uri)
 
-    // Convert InputStream to ByteArray
-    val byteArray = inputStream.readBytes()
+    // Read original image into a bitmap
+    val originalBitmap = BitmapFactory.decodeStream(inputStream)
+    inputStream?.close()
 
-    // Encode the ByteArray in Base64 and return it as a String
-    Base64.encodeToString(byteArray, Base64.NO_WRAP)
-  } catch (e: Exception) {
+    // Convert original image to byte array (to get its size)
+    val originalOutputStream = ByteArrayOutputStream()
+    originalBitmap.compress(Bitmap.CompressFormat.JPEG, 100, originalOutputStream) // No compression for size check
+    val originalByteArray = originalOutputStream.toByteArray()
+    val originalSizeKB = originalByteArray.size / 1024 // Convert to KB
+
+    // Resize the bitmap (adjust width & height as needed)
+    val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, 800, 800, true) // Adjust size as needed
+
+    // Compress and convert to Base64
+    val compressedOutputStream = ByteArrayOutputStream()
+    resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, compressedOutputStream) // Adjust quality (70%)
+    val compressedByteArray = compressedOutputStream.toByteArray()
+    val compressedSizeKB = compressedByteArray.size / 1024 // Convert to KB
+
+    // Log sizes
+    Log.d("ImageSize", "Original Size: ${originalSizeKB}KB")
+    Log.d("ImageSize", "Compressed Size: ${compressedSizeKB}KB")
+    // return Base64 and remove \n
+    return Base64.encodeToString(compressedByteArray, Base64.DEFAULT).replace("\n", "")
+    } catch (e: Exception) {
     e.printStackTrace()
     null
   }

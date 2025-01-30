@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -59,6 +60,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.R
+import net.ipv64.kivop.Screen
 import net.ipv64.kivop.components.CustomButton
 import net.ipv64.kivop.components.IconBox
 import net.ipv64.kivop.components.MapSingleMarker
@@ -67,6 +69,8 @@ import net.ipv64.kivop.components.PosterLocationCard
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.components.UserCard
+import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterPositionStatus
+import net.ipv64.kivop.models.alertButtonStyle
 import net.ipv64.kivop.models.posterButtonStyle
 import net.ipv64.kivop.models.primaryButtonStyle
 import net.ipv64.kivop.models.secondaryButtonStyle
@@ -78,6 +82,7 @@ import net.ipv64.kivop.models.viewModel.UserViewModel
 import net.ipv64.kivop.services.checkAndRequestPermissions
 import net.ipv64.kivop.services.createTempUri
 import net.ipv64.kivop.services.uriToBase64String
+import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Primary
@@ -86,14 +91,18 @@ import net.ipv64.kivop.ui.theme.Tertiary
 import net.ipv64.kivop.ui.theme.TextStyles
 import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_prime_light
+import java.time.LocalDateTime
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 @OptIn(ExperimentalEncodingApi::class)
 @Composable
 fun PosterDetailedPage(navController: NavController,userViewModel: UserViewModel, posterID: String, locationID: String) {
-  //popup state confirmationHangPoster
+  //popup states
   var confirmationHangPoster by remember { mutableStateOf(false) }
+  var confirmationTakeOffPoster by remember { mutableStateOf(false) }
+  var confirmationReportDamagePoster by remember { mutableStateOf(false) }
+  
   //Format image string
   val posterDetailedViewModel: PosterDetailedViewModel = viewModel(factory = PosterDetailedViewModelFactory(posterID, locationID))
   
@@ -119,7 +128,8 @@ fun PosterDetailedPage(navController: NavController,userViewModel: UserViewModel
   val context = LocalContext.current
   var capturedImageUri = remember { createTempUri(context) }
   var base64Image by remember { mutableStateOf("") }
-
+  var currentPosterAction by remember { mutableStateOf<PosterAction?>(null) }
+  
   // Register for activity result to handle the camera capture
   val cameraLauncher = rememberLauncherForActivityResult(
     contract = ActivityResultContracts.TakePicture(),
@@ -145,7 +155,7 @@ fun PosterDetailedPage(navController: NavController,userViewModel: UserViewModel
       modifier = Modifier
         .fillMaxWidth()
         .wrapContentHeight()
-        .padding(18.dp)
+        .padding(top = 18.dp, start = 18.dp, end = 18.dp)
     ) {
       SpacerTopBar()
       Text(text = "Plakatposition", style = TextStyles.headingStyle, color = Text_prime_light)
@@ -155,21 +165,21 @@ fun PosterDetailedPage(navController: NavController,userViewModel: UserViewModel
           .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
-        //Hang poster
+        //Poster Image Box
         Box(
           modifier = Modifier
-            .width(270.dp)
-            .aspectRatio(1.5f)
+            .size(200.dp)
+            .customShadow()
             .clip(shape = RoundedCornerShape(8.dp))
             .background(Background_prime.copy(0.2f))
-            .padding(horizontal = 40.dp)
+            //.padding(horizontal = 40.dp)
         ) {
           if (!posterDetailedViewModel.isLoading) {
             //Is loggedIn User in responsibleUsers list
             if (posterDetailedViewModel.poster?.responsibleUsers?.any { it.id == userViewModel?.getID() } == true) {
               when (posterDetailedViewModel.poster?.status) {
                 // Show button if the poster is to be hung
-                "toHang" -> {
+                PosterPositionStatus.toHang -> {
                   Column(
                     modifier = Modifier.fillMaxHeight(),
                     verticalArrangement = Arrangement.Center,
@@ -193,7 +203,7 @@ fun PosterDetailedPage(navController: NavController,userViewModel: UserViewModel
                   }
                 }
                 // Show image if poster is already hung
-                "hangs","overdue","removed" -> {
+                else -> {
                   AsyncImage(
                     model = base64ImageByteArray.value,
                     contentDescription = "Poster_Image",
@@ -242,18 +252,18 @@ fun PosterDetailedPage(navController: NavController,userViewModel: UserViewModel
         if (posterDetailedViewModel.poster?.responsibleUsers?.any { it.id == userViewModel.getID() } == true) {
           when (posterDetailedViewModel.poster?.status) {
             //Shows button to remove poster when poster already hangs
-            "hangs" -> {
+            PosterPositionStatus.hangs -> {
               CustomButton(
                 modifier = Modifier.width(270.dp),
                 text = "Plakat abhängen",
                 buttonStyle = primaryButtonStyle,
                 onClick = {
-                  
+                  confirmationTakeOffPoster = true
                 }
               )
             }
             //Shows button to remove poster when poster is overdue
-            "overdue" -> {
+            PosterPositionStatus.overdue -> {
               Text(
                 text = "Plakat muss dringend entfert werden!",
                 style = TextStyles.subHeadingStyle,
@@ -265,17 +275,47 @@ fun PosterDetailedPage(navController: NavController,userViewModel: UserViewModel
                 text = "Plakat abhängen",
                 buttonStyle = primaryButtonStyle,
                 onClick = {
-
+                  confirmationTakeOffPoster = true
                 }
               )
             }
             //Shows text that the poster has been removed
-            "removed" -> {
+            PosterPositionStatus.takenDown -> {
               Text(
                 text = "Plakat wurde entfernt",
                 style = TextStyles.subHeadingStyle,
                 color = Text_prime_light
               )
+              if(LocalDateTime.now() < posterDetailedViewModel.poster!!.expiresAt){
+                SpacerBetweenElements(4.dp)
+                CustomButton(
+                  modifier = Modifier.width(270.dp),
+                  text = "Plakat neu aufhängen",
+                  buttonStyle = primaryButtonStyle,
+                  onClick = {
+                    confirmationHangPoster = true
+                  }
+                )
+              }
+            }
+            PosterPositionStatus.damaged -> {
+              Text(
+                text = "Plakat neu aufhängen!",
+                style = TextStyles.subHeadingStyle,
+                color = Text_prime_light
+              )
+              SpacerBetweenElements()
+              CustomButton(
+                modifier = Modifier.width(270.dp),
+                text = "Plakat aufhängen",
+                buttonStyle = primaryButtonStyle,
+                onClick = {
+                  confirmationHangPoster = true
+                }
+              )
+            }
+            else -> {
+              
             }
           }
         }
@@ -314,6 +354,23 @@ fun PosterDetailedPage(navController: NavController,userViewModel: UserViewModel
       }
       if (posterDetailedViewModel.posterAddress != null) {
         LazyColumn() {
+          item {
+            if (posterDetailedViewModel.poster != null){
+              when {
+                posterDetailedViewModel.poster!!.status == PosterPositionStatus.hangs -> {
+                  CustomButton(
+                    modifier = Modifier,
+                    text = "Schaden am Plakat melden",
+                    buttonStyle = alertButtonStyle,
+                    onClick = {
+                      confirmationReportDamagePoster = true
+                    }
+                  )
+                  SpacerBetweenElements()
+                }
+              }
+            }
+          }
           item {
             Text(text = "Standort", style = TextStyles.subHeadingStyle, color = Text_prime)
             SpacerBetweenElements()
@@ -384,7 +441,20 @@ fun PosterDetailedPage(navController: NavController,userViewModel: UserViewModel
   //Launches when base64Image changes - when captured photo
   LaunchedEffect(base64Image) {
     if (base64Image.isNotEmpty()){
-      posterDetailedViewModel.hangPoster(base64Image)
+      when(currentPosterAction){
+        PosterAction.HANG -> {
+          posterDetailedViewModel.hangPoster(base64Image)
+        }
+        PosterAction.TAKE_OFF -> {
+          posterDetailedViewModel.takeOffPoster(base64Image)
+        }
+        PosterAction.REPORT_DAMAGE -> {
+          posterDetailedViewModel.reportDamage(base64Image)
+        }
+        else -> {
+          
+        }
+      }
     }
   }
   when{
@@ -395,6 +465,7 @@ fun PosterDetailedPage(navController: NavController,userViewModel: UserViewModel
           //Checks if CAMERA permission is granted
           //runs cameraPermissionLauncher if not granted
           if(checkAndRequestPermissions(context, CAMERA, cameraPermissionLauncher)){
+            currentPosterAction = PosterAction.HANG
             cameraLauncher.launch(capturedImageUri)
             confirmationHangPoster = false
           }else{
@@ -410,5 +481,57 @@ fun PosterDetailedPage(navController: NavController,userViewModel: UserViewModel
         alert = false,
       )
     }
+    confirmationTakeOffPoster -> {
+      CallToConfirmation(
+        onDismissRequest = { confirmationTakeOffPoster = false },
+        onConfirmation = {
+          //Checks if CAMERA permission is granted
+          //runs cameraPermissionLauncher if not granted
+          if(checkAndRequestPermissions(context, CAMERA, cameraPermissionLauncher)){
+            currentPosterAction = PosterAction.TAKE_OFF
+            cameraLauncher.launch(capturedImageUri)
+            confirmationTakeOffPoster = false
+          }else{
+            Toast.makeText(context, "Kamera Zugriff nicht gewährt", Toast.LENGTH_SHORT).show()
+            confirmationTakeOffPoster = false
+          }
+        },
+        dialogTitle = "Bild erstellen",
+        dialogText = "Zur Bestätigung wird ein Bild des abgehangenen Plakats benötigt. \n" +
+          "Achten Sie bei der Aufnahme darauf, dass die Umgebung gut zu erkennen ist.",
+        buttonOneText = "Kamera öffnen",
+        buttonTextDismiss = "Abbrechen",
+        alert = false,
+      )
+    }
+    confirmationReportDamagePoster -> {
+      CallToConfirmation(
+        onDismissRequest = { confirmationReportDamagePoster = false },
+        onConfirmation = {
+          //Checks if CAMERA permission is granted
+          //runs cameraPermissionLauncher if not granted
+          if(checkAndRequestPermissions(context, CAMERA, cameraPermissionLauncher)){
+            currentPosterAction = PosterAction.REPORT_DAMAGE
+            cameraLauncher.launch(capturedImageUri)
+            confirmationReportDamagePoster = false
+          }else{
+            Toast.makeText(context, "Kamera Zugriff nicht gewährt", Toast.LENGTH_SHORT).show()
+            confirmationReportDamagePoster = false
+          }
+        },
+        dialogTitle = "Bild erstellen",
+        dialogText = "Zur Bestätigung wird ein Bild des beschädigten Plakats benötigt. \n" +
+          "Achten Sie bei der Aufnahme darauf, dass die Umgebung gut zu erkennen ist.",
+        buttonOneText = "Kamera öffnen",
+        buttonTextDismiss = "Abbrechen",
+        alert = false,
+      )
+    }
   }
+}
+
+enum class PosterAction {
+  HANG,
+  TAKE_OFF,
+  REPORT_DAMAGE
 }
