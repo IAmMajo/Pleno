@@ -61,13 +61,13 @@ fun EventsPage(navController: NavController) {
       .padding(horizontal = 22.dp),
   ){
     SpacerTopBar()
-    EventListItem(eventA)
+    EventListItem(eventA, {navController.navigate("events/mockEvent")})
     SpacerBetweenElements(8.dp)
-    EventListItem(eventD)
+    EventListItem(eventD, {navController.navigate("events/mockEvent")})
     SpacerBetweenElements(8.dp)
-    EventListItem(eventB)
+    EventListItem(eventB, {navController.navigate("events/mockEvent")})
     SpacerBetweenElements(8.dp)
-    EventListItem(eventC)
+    EventListItem(eventC, {navController.navigate("events/mockEvent")})
   }
 }
 
