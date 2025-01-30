@@ -444,39 +444,45 @@ struct SocialMediaPostView: View {
     var markdownText: String
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Generierter Social-Media-Post")
-                .font(.headline)
-                .foregroundColor(.primary)
-                .padding(.top, 16)
+        NavigationStack {
+            VStack {
+                ScrollView {
+                    Text(socialMediaText.isEmpty ? "Lade Social-Media-Post..." : socialMediaText)
+                        .font(.body)
+                        .foregroundColor(.primary)
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.white)
+                }
                 .padding(.horizontal)
-            
-            ScrollView {
-                Text(socialMediaText.isEmpty ? "Lade Social-Media-Post..." : socialMediaText)
-                    .font(.body)
-                    .foregroundColor(.primary)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.white)
+                
+                Spacer()
+                
+                Button(action: sharePost) {
+                    Label("Teilen", systemImage: "square.and.arrow.up")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 20)
             }
-            .padding(.horizontal)
-            
-            Spacer()
-            
-            Button(action: sharePost) {
-                Label("Teilen", systemImage: "square.and.arrow.up")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+            .background(Color.white)
+            .task {
+                await fetchSocialMediaPost()
             }
-            .padding(.horizontal)
-            .padding(.bottom, 20)
-        }
-        .background(Color.white)
-        .task {
-            await fetchSocialMediaPost()
+            .navigationTitle("Generierter Social-Media-Post") // **Mittiger Titel**
+            .navigationBarTitleDisplayMode(.inline) // **Sorgt für eine perfekte zentrierte Darstellung**
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Abbrechen") {
+                        dismiss()
+                    }
+                    .foregroundColor(.blue)
+                }
+            }
         }
     }
     
@@ -494,14 +500,16 @@ struct SocialMediaPostView: View {
     }
     
     private func sharePost() {
-            let activityController = UIActivityViewController(activityItems: [socialMediaText], applicationActivities: nil)
-            
-            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let rootViewController = scene.windows.first?.rootViewController {
-                rootViewController.present(activityController, animated: true, completion: nil)
-            }
+        let activityController = UIActivityViewController(activityItems: [socialMediaText], applicationActivities: nil)
+        
+        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = scene.windows.first?.rootViewController {
+            rootViewController.present(activityController, animated: true, completion: nil)
         }
     }
+}
+
+
 
 class RecordsAPI {
     static func extendRecord(content: String, updateHandler: @escaping (String) -> Void) async {

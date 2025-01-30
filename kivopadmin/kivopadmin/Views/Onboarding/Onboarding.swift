@@ -4,8 +4,13 @@ struct Onboarding: View {
     @State private var currentIndex = 0
     @State private var ClubLogo: String = "VL"
     @State private var navigateToLogin = false
-    
+    @State private var hasCheckedOnboarding = false
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    var isManualNavigation: Bool = false // Neuer Parameter
     @Binding var isLoggedIn: Bool
+
+
+
 
     var body: some View {
         NavigationStack {
@@ -74,7 +79,7 @@ struct Onboarding: View {
                             + Text("oder plane deine nächste ")
                                 .font(.title3)
                                 .fontWeight(.regular)
-                            + Text("Vereinsreise...")
+                            + Text(" Vereinsreise...")
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(.blue)
@@ -126,8 +131,8 @@ struct Onboarding: View {
                             if currentIndex < 1 {
                                 currentIndex += 1
                             } else {
-                                // Flag in UserDefaults setzen und zu Login weiterleiten
-                                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                                // Flag um zu Login weiterleiten
+                                hasSeenOnboarding = true
                                 navigateToLogin = true
                             }
                         }
@@ -176,19 +181,23 @@ struct Onboarding: View {
             .navigationDestination(isPresented: $navigateToLogin) {
                 Onboarding_Login(isLoggedIn: $isLoggedIn)
             }
+
         }
         .onAppear {
-            // Wenn der Benutzer das Onboarding bereits gesehen hat, direkt zur Login-Ansicht weiterleiten
-            if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+            // Nur automatisch zur LoginView navigieren, wenn dies nicht manuell aufgerufen wurde
+            if hasSeenOnboarding && !isManualNavigation {
                 navigateToLogin = true
             }
         }
+
+
         .navigationBarBackButtonHidden(true)
     }
 }
 
-//struct Onboarding_Previews: PreviewProvider {
-//    static var previews: some View {
-//        Onboarding($isLoggedIn: false)
-//    }
-//}
+/*struct Onboarding_Previews: PreviewProvider {
+    static var previews: some View {
+        Onboarding()
+    }
+}
+*/
