@@ -58,7 +58,7 @@ import net.ipv64.kivop.pages.mainApp.AttendancesListPage
 import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolPage
 import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolingList
 import net.ipv64.kivop.pages.mainApp.Carpool.onBoardingCreateRide.CreateRidePage
-import net.ipv64.kivop.pages.mainApp.EventsPage
+import net.ipv64.kivop.pages.mainApp.Events.EventsPage
 import net.ipv64.kivop.pages.mainApp.HomePage
 import net.ipv64.kivop.pages.mainApp.MeetingsListPage
 import net.ipv64.kivop.pages.mainApp.Posters.PosterDetailedPage

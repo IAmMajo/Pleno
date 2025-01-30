@@ -5,6 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
+import net.ipv64.kivop.components.SitzungsCard
 
 @Composable
 fun EventsDetailPage(navController: NavController) {
@@ -12,4 +13,6 @@ fun EventsDetailPage(navController: NavController) {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
+  
+  //SitzungsCard()
 }
