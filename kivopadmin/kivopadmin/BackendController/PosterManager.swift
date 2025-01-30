@@ -3,22 +3,11 @@ import PosterServiceDTOs
 import Foundation
 import CoreLocation
 
-
-public struct PosterStatusDTO: Codable {
-    public var overdue: Int
-    public var takenDown: Int
-    public var toHang: Int
-    public var hangs: Int
-    public var damaged: Int
-
-    public init(overdue: Int, takenDown: Int, toHang: Int, hangs: Int, damaged: Int) {
-        self.overdue = overdue
-        self.takenDown = takenDown
-        self.toHang = toHang
-        self.hangs = hangs
-        self.damaged = damaged
-    }
+struct PosterWithSummary {
+    var poster: PosterResponseDTO
+    var summary: PosterSummaryResponseDTO?
 }
+
 
 class PosterManager: ObservableObject {
     @Published var posterPositions: [PosterPositionResponseDTO] = []
@@ -30,9 +19,9 @@ class PosterManager: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     @Published var poster: PosterResponseDTO?
-    @Published var status: PosterStatusDTO?
 
     @Published var posterPosition: PosterPositionResponseDTO?
+    @Published var postersWithSummaries: [PosterWithSummary] = []
 
 
     func fetchPoster() {
@@ -97,7 +86,110 @@ class PosterManager: ObservableObject {
     }
     
 
+    func fetchPostersAndSummaries() {
+        guard let url = URL(string: "https://kivop.ipv64.net/posters") else {
+            errorMessage = "Invalid URL."
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            errorMessage = "Unauthorized: Token not found."
+            return
+        }
+
+        isLoading = true
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                do {
+                    self?.isLoading = false
+                    
+                    if let error = error {
+                        self?.errorMessage = "Network error: \(error.localizedDescription)"
+                        return
+                    }
+                    
+                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                        self?.errorMessage = "Invalid server response."
+                        return
+                    }
+                    
+                    guard let data = data else {
+                        self?.errorMessage = "No data received."
+                        return
+                    }
+
+                    let decoder = JSONDecoder()
+                    let fetchedPosters = try decoder.decode([PosterResponseDTO].self, from: data)
+                    
+                    // Erstelle die Poster-Array und lade Summaries
+                    self?.postersWithSummaries = fetchedPosters.map { PosterWithSummary(poster: $0, summary: nil) }
+                    
+                    for (index, poster) in fetchedPosters.enumerated() {
+                        self?.fetchPosterSummary(poster: poster, index: index)
+                    }
+                    
+                } catch {
+                    self?.errorMessage = "Failed to decode posters: \(error.localizedDescription)"
+                    print("Decoding error: \(error)")
+                }
+            }
+        }.resume()
+    }
+
     
+    func fetchPosterSummary(poster: PosterResponseDTO, index: Int) {
+        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/summary") else {
+            errorMessage = "Invalid URL."
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            errorMessage = "Unauthorized: Token not found."
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                do {
+                    if let error = error {
+                        self?.errorMessage = "Network error: \(error.localizedDescription)"
+                        return
+                    }
+                    
+                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                        self?.errorMessage = "Invalid server response."
+                        return
+                    }
+                    
+                    guard let data = data else {
+                        self?.errorMessage = "No data received."
+                        return
+                    }
+                    
+                    let decoder = JSONDecoder()
+                    decoder.dateDecodingStrategy = .iso8601
+                    let summary = try decoder.decode(PosterSummaryResponseDTO.self, from: data)
+                    
+                    // Summary zum entsprechenden Poster hinzufügen
+                    self?.postersWithSummaries[index].summary = summary
+                    
+                } catch {
+                    self?.errorMessage = "Failed to decode summary: \(error.localizedDescription)"
+                    print("Decoding error: \(error)")
+                }
+            }
+        }.resume()
+    }
+
     func createPoster(poster: CreatePosterDTO) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters") else {
             errorMessage = "Invalid URL."
@@ -391,61 +483,61 @@ class PosterManager: ObservableObject {
         
     }
     
-    func postersSummary() {
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/summary") else {
-            errorMessage = "Invalid URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        isLoading = true
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                do{
-                    self?.isLoading = false
-                    
-                    if let error = error {
-                        self?.errorMessage = "Network error: \(error.localizedDescription)"
-                        return
-                    }
-                    
-                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                        self?.errorMessage = "Invalid server response."
-                        return
-                    }
-                    
-                    guard let data = data else {
-                        self?.errorMessage = "No data received."
-                        return
-                    }
-                    
-                    
-                    let decoder = JSONDecoder()
-                    
-                    
-                    // Dekodiere die Daten
-                    self?.status = try decoder.decode(PosterStatusDTO.self, from: data)
-                    
-
-
-                }catch {
-                    self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
-                    print("Decoding error: \(error)")
-                }
-
-
-            }
-        }.resume()
-    }
+//    func postersSummary() {
+//        guard let url = URL(string: "https://kivop.ipv64.net/posters/summary") else {
+//            errorMessage = "Invalid URL."
+//            return
+//        }
+//
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "GET"
+//        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+//            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+//        } else {
+//            errorMessage = "Unauthorized: Token not found."
+//            return
+//        }
+//
+//        isLoading = true
+//
+//        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+//            DispatchQueue.main.async {
+//                do{
+//                    self?.isLoading = false
+//                    
+//                    if let error = error {
+//                        self?.errorMessage = "Network error: \(error.localizedDescription)"
+//                        return
+//                    }
+//                    
+//                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+//                        self?.errorMessage = "Invalid server response."
+//                        return
+//                    }
+//                    
+//                    guard let data = data else {
+//                        self?.errorMessage = "No data received."
+//                        return
+//                    }
+//                    
+//                    
+//                    let decoder = JSONDecoder()
+//                    
+//                    
+//                    // Dekodiere die Daten
+//                    self?.status = try decoder.decode(PosterSummaryResponseDTO.self, from: data)
+//                    
+//
+//
+//                }catch {
+//                    self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
+//                    print("Decoding error: \(error)")
+//                }
+//
+//
+//            }
+//        }.resume()
+//    }
 
     
     func createPosterPosition(posterPosition: CreatePosterPositionDTO, posterId: UUID) {

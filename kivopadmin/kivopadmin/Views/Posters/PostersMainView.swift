@@ -3,6 +3,7 @@ import PosterServiceDTOs
 import PhotosUI
 
 struct PostersMainView: View {
+    @StateObject private var locationViewModel = LocationsViewModel()
    @State private var isPostenSheetPresented = false // Zustand für das Sheet
     @State private var postersFiltered: [PosterResponseDTO] = []
    
@@ -48,7 +49,7 @@ struct PostersMainView: View {
                 } else if let errorMessage = posterManager.errorMessage {
                     Text("Error: \(errorMessage)")
                         .foregroundColor(.red)
-                } else if posterManager.posters.isEmpty {
+                } else if posterManager.postersWithSummaries.isEmpty {
                     Text("Keine Sammelposten gefunden.")
                         .foregroundColor(.secondary)
                 } else {
@@ -80,7 +81,7 @@ struct PostersMainView: View {
             }
         }
         .onAppear(){
-            posterManager.fetchPoster()
+            posterManager.fetchPostersAndSummaries()
         }
         .alert("Sammelposten löschen", isPresented: $showDeleteConfirmation, actions: {
             Button("Löschen", role: .destructive) {
@@ -122,23 +123,15 @@ struct PostersMainView: View {
 extension PostersMainView {
     private func listView() -> some View {
         List {
-            ForEach(posterManager.posters, id: \.id) { poster in
-                PosterRowView(poster: poster)
-                    .listRowSeparator(.hidden) // Unterview
+            ForEach(posterManager.postersWithSummaries, id: \.poster.id) { posterWithSummary in
+                PosterRowView(poster: posterWithSummary)
+                    .listRowSeparator(.hidden)
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        // Löschen-Aktion
                         Button(role: .destructive) {
-                            deletePoster(poster: poster)
+                            deletePoster(poster: posterWithSummary.poster)
                         } label: {
                             Label("Löschen", systemImage: "trash")
                         }
-                        
-                        // Bearbeiten-Aktion
-//                        Button {
-//                            editPoster(poster: poster)
-//                        } label: {
-//                            Label("Bearbeiten", systemImage: "pencil")
-//                        }
                     }
             }
         }
@@ -146,32 +139,69 @@ extension PostersMainView {
 
 }
 struct PosterRowView: View {
-    let poster: PosterResponseDTO
+    let poster: PosterWithSummary
+
     @StateObject private var locationViewModel = LocationsViewModel()
     
     var body: some View {
-        NavigationLink(destination: LocationsView(poster: poster).environmentObject(locationViewModel)) {
+        NavigationLink(destination: LocationsView(poster: poster.poster).environmentObject(locationViewModel)) {
             VStack {
                 HStack(spacing: 5) {
-                    if let uiImage = UIImage(data: poster.image) {
+                    if let uiImage = UIImage(data: poster.poster.image) {
                         Image(uiImage: uiImage)
                             .resizable()
                             .scaledToFit()
                             .frame(height: 100) // Höhe einstellen
                             .cornerRadius(10)
                     }
-                    VStack {
-                        HStack {
-                            Spacer()
-                            Text(poster.name)
-                                .font(.title2)
-                            Spacer()
-                        }
+                    Spacer()
+                    VStack(alignment: .leading){
+                        Text(poster.poster.name)
+                            .font(.title)
                     }
+                    Spacer()
+                    VStack(alignment: .trailing) {
+                        if let summary = poster.summary {
+                            Text("Hängt noch nicht: \(summary.toHang)")
+                            Text("Hängt: \(summary.hangs)")
+                            Text("Beschädigt: \(summary.damaged)")
+                            Text("Überfällig: \(summary.overdue)")
+                            Text("Abgehangen: \(summary.takenDown)")
+//                            Spacer()
+//                            HStack(alignment: .bottom, spacing: 12){
+//                                
+//                                summaryItem(title: "Hängt noch nicht", value: summary.toHang)
+//                                summaryItem(title: "Hängt", value: summary.hangs)
+//                                summaryItem(title: "Beschädigt", value: summary.damaged)
+//                                summaryItem(title: "Überfällig", value: summary.overdue)
+//                                summaryItem(title: "Abgehangen", value: summary.takenDown)
+//                                
+//                            }
+
+                        }
+                    }.padding(.horizontal, 6)
                 }
                 Divider() // Dieser Divider nimmt die gesamte Breite der Zelle ein
                     .padding(.vertical, 5) // Optional: Abstand über und unter dem Divider
             }
+        }
+    }
+    
+    private func summaryItem(title: String, value: Int) -> some View {
+        VStack {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.gray)
+                .lineLimit(2) // Verhindert Zeilenumbrüche
+                //.fixedSize(horizontal: false, vertical: true) // Erzwingt einzeilige Darstellung
+
+            
+            Text("\(value)")
+                .font(.title2)
+                .fontWeight(.bold)
+                .padding()
+                .frame(width: 60, height: 50)
+                .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThickMaterial))
         }
     }
 }
@@ -358,10 +388,4 @@ struct SammelpostenBearbeitenView: View {
         // API-Aufruf zur Aktualisierung des Posters
         posterManager.patchPoster(poster: updatedPoster, posterId: poster.id)
     }
-}
-
-
-
-#Preview {
-    PostersMainView()
 }
