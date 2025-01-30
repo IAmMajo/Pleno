@@ -24,7 +24,7 @@ sealed class Screen(val rout: String) {
   object CreateCarpool : Screen("createCarpool")
 
   object Events : Screen("events")
-  
+
   object Event : Screen("events/mockEvent")
 
   object Posters : Screen("posters")

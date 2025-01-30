@@ -193,7 +193,7 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
 
         composable(route = Screen.Event.rout) { EventsDetailPage(navController = navController) }
-    
+
         // PostersList
         composable(route = Screen.Posters.rout) { PostersListPage(navController = navController) }
         // Poster
