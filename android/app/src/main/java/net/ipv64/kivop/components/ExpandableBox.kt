@@ -28,36 +28,35 @@ fun ExpandableBox(
 
   var expanded by remember { mutableStateOf(false) }
   Surface(
-    modifier = Modifier
-      .fillMaxWidth()
-      .clickable(
-        interactionSource = remember { MutableInteractionSource() }, // Verhindert Ripple-Effekt
-        indication = null, // Keine Klick-Markierung
-        onClick = { expanded = !expanded }
-      ),
-    color = Color.Transparent
-  ) {
-    AnimatedContent(
-        targetState = expanded,
-        transitionSpec = {
-          fadeIn(animationSpec = tween(150, 150)) togetherWith
-              fadeOut(animationSpec = tween(150)) using
-              SizeTransform { initialSize, targetSize ->
-                keyframes {
-                  // Expand horizontally first.
-                  IntSize(targetSize.width, initialSize.height) at 800
-                  durationMillis = 300
-                }
+      modifier =
+          Modifier.fillMaxWidth()
+              .clickable(
+                  interactionSource =
+                      remember { MutableInteractionSource() }, // Verhindert Ripple-Effekt
+                  indication = null, // Keine Klick-Markierung
+                  onClick = { expanded = !expanded }),
+      color = Color.Transparent) {
+        AnimatedContent(
+            targetState = expanded,
+            transitionSpec = {
+              fadeIn(animationSpec = tween(150, 150)) togetherWith
+                  fadeOut(animationSpec = tween(150)) using
+                  SizeTransform { initialSize, targetSize ->
+                    keyframes {
+                      // Expand horizontally first.
+                      IntSize(targetSize.width, initialSize.height) at 800
+                      durationMillis = 300
+                    }
+                  }
+            },
+            label = "size transform") { targetExpanded ->
+              if (targetExpanded) {
+
+                contentFoldedOut()
+              } else {
+
+                contentFoldedIn()
               }
-        },
-        label = "size transform") { targetExpanded ->
-          if (targetExpanded) {
-
-            contentFoldedOut()
-          } else {
-
-            contentFoldedIn()
-          }
-        }
-  }
+            }
+      }
 }

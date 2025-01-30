@@ -35,38 +35,30 @@ import net.ipv64.kivop.ui.theme.Text_prime
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
 fun AttendanceCoordinationList(
-  responses: List<attendancesList>,
-  title: String,
-  isVisible: Boolean,
-  maxMembernumber: Int,
-  onVisibilityToggle: (Boolean) -> Unit,
-  background: Color = Color(color = 0xFF686D74)
+    responses: List<attendancesList>,
+    title: String,
+    isVisible: Boolean,
+    maxMembernumber: Int,
+    onVisibilityToggle: (Boolean) -> Unit,
+    background: Color = Color(color = 0xFF686D74)
 ) {
   Column {
     // Der gesamte Header ist jetzt klickbar
     LabelMax(
-      backgroundColor = background,
-      onClick = { onVisibilityToggle(!isVisible) } // Klick schaltet Sichtbarkeit um
-    ) {
-      AttendanceSeparatorContent(
-        text = title,
-        maxMembernumber = maxMembernumber,
-        statusMembernumber = responses.size,
-       // onClick = { onVisibilityToggle(!isVisible) } // Hier klickbar machen!
-      )
-    }
+        backgroundColor = background,
+        onClick = { onVisibilityToggle(!isVisible) } // Klick schaltet Sichtbarkeit um
+        ) {
+          AttendanceSeparatorContent(
+              text = title,
+              maxMembernumber = maxMembernumber,
+              statusMembernumber = responses.size,
+              // onClick = { onVisibilityToggle(!isVisible) } // Hier klickbar machen!
+          )
+        }
 
     // Sichtbare Liste mit Animation
-    AnimatedVisibility(
-      visible = isVisible,
-      enter = expandVertically(),
-      exit = shrinkVertically()
-    ) {
-      Column {
-        responses.forEach { item ->
-          AttendanceItemRow(item = item)
-        }
-      }
+    AnimatedVisibility(visible = isVisible, enter = expandVertically(), exit = shrinkVertically()) {
+      Column { responses.forEach { item -> AttendanceItemRow(item = item) } }
     }
   }
 }
@@ -102,39 +94,35 @@ fun AttendanceItemRow(item: attendancesList) {
 
 @Composable
 fun AttendanceSeparatorContent(
-  text: String,
-  maxMembernumber: Int,
-  statusMembernumber: Int,
-  //onClick: () -> Unit // Klick-Callback für Sichtbarkeitswechsel
+    text: String,
+    maxMembernumber: Int,
+    statusMembernumber: Int,
+    // onClick: () -> Unit // Klick-Callback für Sichtbarkeitswechsel
 ) {
   Row(
-    modifier = Modifier
-      .fillMaxWidth()
-     // .clickable { onClick() } // Klick-Event für den Header
-      .padding(start = 8.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.SpaceBetween
-  ) {
-    Text(
-      text = text,
-      color = Background_prime,
-      fontWeight = FontWeight.SemiBold,
-      fontSize = 12.sp
-    )
-    Row(verticalAlignment = Alignment.CenterVertically) {
-      Icon(
-        painter = painterResource(id = R.drawable.ic_groups),
-        contentDescription = null,
-        tint = Background_prime,
-        modifier = Modifier.size(24.dp)
-      )
-      Spacer(modifier = Modifier.width(8.dp))
-      Text(
-        text = "$statusMembernumber / $maxMembernumber",
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 10.sp,
-        color = Background_prime
-      )
-    }
-  }
+      modifier =
+          Modifier.fillMaxWidth()
+              // .clickable { onClick() } // Klick-Event für den Header
+              .padding(start = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(
+            text = text,
+            color = Background_prime,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 12.sp)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Icon(
+              painter = painterResource(id = R.drawable.ic_groups),
+              contentDescription = null,
+              tint = Background_prime,
+              modifier = Modifier.size(24.dp))
+          Spacer(modifier = Modifier.width(8.dp))
+          Text(
+              text = "$statusMembernumber / $maxMembernumber",
+              fontWeight = FontWeight.SemiBold,
+              fontSize = 10.sp,
+              color = Background_prime)
+        }
+      }
 }

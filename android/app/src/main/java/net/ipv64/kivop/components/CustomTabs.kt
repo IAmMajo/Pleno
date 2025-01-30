@@ -1,4 +1,3 @@
-
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
@@ -47,61 +46,52 @@ fun GenerateTabs(tabs: List<String>, tabContents: List<@Composable (() -> Unit)?
 
   Column {
     ScrollableTabRow(
-      selectedTabIndex = pagerState.currentPage,
-      edgePadding = 16.dp,
-      contentColor = Color.Transparent,
-      containerColor = Color.Transparent,
-      divider = {},
-      indicator = { tabPositions -> CustomIndicator(tabPositions, pagerState) }
-    ) {
-      tabs.forEachIndexed { index, title ->
-        Box(
-          modifier = Modifier
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .height(40.dp) // Normale Tab-Höhe für bessere Optik
-            .wrapContentWidth() // Passt sich der Tab-Breite an
-            .background(
-              if (pagerState.currentPage == index) Color.Transparent 
-              else Background_secondary,
-              shape = RoundedCornerShape(50.dp)
-            )
-            .clickable(
-              interactionSource = remember { MutableInteractionSource() },
-              indication = null, // Entfernt das Standard-Click-Verhalten
-              onClick = {
-                coroutineScope.launch {
-                  pagerState.animateScrollToPage(index)
+        selectedTabIndex = pagerState.currentPage,
+        edgePadding = 16.dp,
+        contentColor = Color.Transparent,
+        containerColor = Color.Transparent,
+        divider = {},
+        indicator = { tabPositions -> CustomIndicator(tabPositions, pagerState) }) {
+          tabs.forEachIndexed { index, title ->
+            Box(
+                modifier =
+                    Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        .height(40.dp) // Normale Tab-Höhe für bessere Optik
+                        .wrapContentWidth() // Passt sich der Tab-Breite an
+                        .background(
+                            if (pagerState.currentPage == index) Color.Transparent
+                            else Background_secondary,
+                            shape = RoundedCornerShape(50.dp))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null, // Entfernt das Standard-Click-Verhalten
+                            onClick = {
+                              coroutineScope.launch { pagerState.animateScrollToPage(index) }
+                            }),
+                contentAlignment = Alignment.Center) {
+                  Text(
+                      text = title,
+                      color = if (pagerState.currentPage == index) Text_prime else Text_tertiary,
+                      style = MaterialTheme.typography.labelMedium,
+                      modifier =
+                          Modifier.padding(
+                              horizontal = 16.dp, vertical = 8.dp) // Text richtig ausrichten
+                      )
                 }
-              }
-            ),
-          contentAlignment = Alignment.Center
-        ) {
-          Text(
-            text = title,
-            color = if (pagerState.currentPage == index) Text_prime else Text_tertiary,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp) // Text richtig ausrichten
-          )
+          }
         }
-      }
-    }
 
     HorizontalPager(
-      count = tabs.size,
-      state = pagerState,
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(18.dp)
-    ) { page ->
-      if (page < 0 || page >= tabContents.size) {
-        Text(text = "Kein Inhalt in diesem Tab")
-      } else {
-        tabContents[page]?.invoke()
-      }
-    }
+        count = tabs.size, state = pagerState, modifier = Modifier.fillMaxSize().padding(18.dp)) {
+            page ->
+          if (page < 0 || page >= tabContents.size) {
+            Text(text = "Kein Inhalt in diesem Tab")
+          } else {
+            tabContents[page]?.invoke()
+          }
+        }
   }
 }
-
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable

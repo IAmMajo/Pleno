@@ -46,17 +46,12 @@ fun LabelMax(
         modifier =
             Modifier.fillMaxWidth()
                 .clip(RoundedCornerShape(50))
-              .then(
-                if (onClick != null) Modifier.clickable { onClick() }
-                else Modifier)// Optionaler Klick
+                .then(
+                    if (onClick != null) Modifier.clickable { onClick() }
+                    else Modifier) // Optionaler Klick
                 .background(backgroundColor) // Hintergrund der Box
                 .padding(horizontal = 18.dp, vertical = 6.dp),
-                content = content
-    
-    
-    )
-      
-               
+        content = content)
   }
 }
 

@@ -233,37 +233,35 @@ fun ProtocolDetailPage(
                     if (protocol.lang == selectedLanguage) {
                       meetingViewModel.meeting?.let {
                         if (user != null) {
-                          if (user.isAdmin && protocol.status != RecordStatus.approved || protocol.iAmTheRecorder && protocol.status != RecordStatus.approved ) {
+                          if (user.isAdmin && protocol.status != RecordStatus.approved ||
+                              protocol.iAmTheRecorder && protocol.status != RecordStatus.approved) {
                             AgendaCard(
-                              name = it.name,
-                              content =
-                              protocol.content +
-                                "\n" +
-                                protocol.votingResultsAppendix +
-                                "\n" +
-                                protocol.attendancesAppendix,
-                              EditBox = {
-                                IconBoxClickable(
-                                  icon = ImageVector.vectorResource(id = R.drawable.ic_edit),
-                                  onClick = {
-                                    navController.navigate(
-                                      "protokolleEdit/${it.id}/${selectedLanguage}"
-                                    )
-                                  },
-                                  backgroundColor = Tertiary.copy(0.19f),
-                                  tint = Tertiary
-                                )
-                              }
-                            )
-                          }else{
+                                name = it.name,
+                                content =
+                                    protocol.content +
+                                        "\n" +
+                                        protocol.votingResultsAppendix +
+                                        "\n" +
+                                        protocol.attendancesAppendix,
+                                EditBox = {
+                                  IconBoxClickable(
+                                      icon = ImageVector.vectorResource(id = R.drawable.ic_edit),
+                                      onClick = {
+                                        navController.navigate(
+                                            "protokolleEdit/${it.id}/${selectedLanguage}")
+                                      },
+                                      backgroundColor = Tertiary.copy(0.19f),
+                                      tint = Tertiary)
+                                })
+                          } else {
                             AgendaCard(
-                              name = it.name,
-                              content =
-                              protocol.content +
-                                "\n" +
-                                protocol.votingResultsAppendix +
-                                "\n" +
-                                protocol.attendancesAppendix,
+                                name = it.name,
+                                content =
+                                    protocol.content +
+                                        "\n" +
+                                        protocol.votingResultsAppendix +
+                                        "\n" +
+                                        protocol.attendancesAppendix,
                             )
                           }
                         }

@@ -50,17 +50,13 @@ class ProtocolViewModel(private val meetingId: String, private val protocolLang:
     viewModelScope.launch {
       _protocol.value?.let { protocol ->
         protocol.content = _editableMarkdown.value
-        
+
         patchProtocol(meetingId, protocolLang, protocol.content)
-        
+
         Log.d("ProtocolViewModel2", "Gespeichert: ${protocol.content}")
       }
     }
   }
-  
- 
-  
-  
 }
 
 class ProtocolViewModelFactory(private val meetingId: String, private val protocolLang: String) :

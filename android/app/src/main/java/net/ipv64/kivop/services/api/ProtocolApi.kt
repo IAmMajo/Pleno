@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
@@ -17,7 +18,6 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.json.JSONObject
-import java.util.UUID
 
 // ToDO LIste
 suspend fun getProtocolsApi(id: String): List<GetRecordDTO> =
@@ -150,8 +150,7 @@ suspend fun getProtocolApi(id: String, lang: String): GetRecordDTO? =
       }
     }
 
-
-suspend fun patchProtocol(id: String, lang: String,content: String): Response? {
+suspend fun patchProtocol(id: String, lang: String, content: String): Response? {
   val path = "meetings/$id/records/$lang" // Path for the update request
 
   val token = auth.getSessionToken()
@@ -163,17 +162,16 @@ suspend fun patchProtocol(id: String, lang: String,content: String): Response? {
   // Create the request body with the changed fields only
   val jsonBody = JSONObject().apply { put("content", content) }
 
-
   // Create the PATCH request
   val request =
-    Request.Builder()
-      .url(BASE_URL + path)
-      .patch(jsonBody.toString().toRequestBody("application/json".toMediaTypeOrNull()))
-      .addHeader("Authorization", "Bearer $token")
-      .build()
+      Request.Builder()
+          .url(BASE_URL + path)
+          .patch(jsonBody.toString().toRequestBody("application/json".toMediaTypeOrNull()))
+          .addHeader("Authorization", "Bearer $token")
+          .build()
 
-  Log.i("Save-Log",request.toString())
-  Log.i("Save-Log",jsonBody.toString())
+  Log.i("Save-Log", request.toString())
+  Log.i("Save-Log", jsonBody.toString())
   return withContext(Dispatchers.IO) {
     try {
       val response = okHttpClient.newCall(request).execute()
