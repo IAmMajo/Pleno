@@ -1,4 +1,4 @@
-package net.ipv64.kivop.pages.mainApp
+package net.ipv64.kivop.pages.mainApp.Events
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -7,10 +7,9 @@ import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
 
 @Composable
-fun EventsPage(navController: NavController) {
+fun EventsDetailPage(navController: NavController) {
   BackHandler {
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
-  // Your composable code here
 }
