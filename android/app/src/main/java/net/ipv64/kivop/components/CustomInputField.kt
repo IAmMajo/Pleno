@@ -34,7 +34,7 @@ import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
 fun CustomInputField(
-    label: String,
+    label: String? = null,
     labelColor: Color = Background_prime,
     placeholder: String,
     modifier: Modifier = Modifier,
@@ -49,14 +49,17 @@ fun CustomInputField(
 ) {
   val textState = remember { mutableStateOf(TextFieldValue()) }
   Column(modifier = modifier.fillMaxWidth()) {
-    Text(
+    if (label != null){
+      Text(
         text = label,
         style = TextStyles.contentStyle,
         color = labelColor,
         modifier = Modifier.fillMaxWidth())
+      SpacerBetweenElements(4.dp)
+    }
     val visualTransformation =
         (if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None).also {
-          SpacerBetweenElements(4.dp)
+          
           Box() {
             OutlinedTextField(
                 visualTransformation = it,

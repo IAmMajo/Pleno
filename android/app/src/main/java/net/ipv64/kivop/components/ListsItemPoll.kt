@@ -60,10 +60,10 @@ fun ListenItem(
 //      }
 //    }
 
-  Box(
+  Column(
     modifier =
     Modifier.fillMaxWidth()
-      .customShadow(cornersRadius = 8.dp, shadowBlurRadius = 2.dp)
+      .customShadow(cornersRadius = 8.dp)
       .clip(RoundedCornerShape(8.dp))
       .clickable(onClick = onClick!!)
       .background(Background_secondary)

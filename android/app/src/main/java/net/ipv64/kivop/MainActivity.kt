@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
@@ -58,9 +57,14 @@ import net.ipv64.kivop.pages.mainApp.AttendancesListPage
 import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolPage
 import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolingList
 import net.ipv64.kivop.pages.mainApp.Carpool.onBoardingCreateRide.CreateRidePage
-import net.ipv64.kivop.pages.mainApp.EventsPage
+import net.ipv64.kivop.pages.mainApp.Events.EventsPage
 import net.ipv64.kivop.pages.mainApp.HomePage
 import net.ipv64.kivop.pages.mainApp.MeetingsListPage
+import net.ipv64.kivop.pages.mainApp.Polls.PollCreate
+import net.ipv64.kivop.pages.mainApp.Polls.PollOnHoldPage
+import net.ipv64.kivop.pages.mainApp.Polls.PollPage
+import net.ipv64.kivop.pages.mainApp.Polls.PollResultPage
+import net.ipv64.kivop.pages.mainApp.Polls.PollsListPage
 import net.ipv64.kivop.pages.mainApp.Posters.PosterDetailedPage
 import net.ipv64.kivop.pages.mainApp.Posters.PosterPage
 import net.ipv64.kivop.pages.mainApp.Posters.PostersListPage
@@ -94,8 +98,8 @@ class MainActivity : ComponentActivity() {
 
         // A surface container using the 'background' color from the theme
         Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Background_prime,
+          modifier = Modifier.fillMaxSize(),
+          color = Background_prime,
         ) {
           NavBar(navController, userViewModel)
         }
@@ -124,116 +128,149 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
     Log.i("currentDestination", navController.currentDestination.toString())
   }
   NavHost(
-      navController = navController,
-      startDestination = Screen.Home.rout,
-      modifier = Modifier.fillMaxWidth().zIndex(-1f),
-      enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
-      exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },
-      popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
-      popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) }) {
+    navController = navController,
+    startDestination = Screen.Home.rout,
+    modifier = Modifier
+      .fillMaxWidth()
+      .zIndex(-1f),
+    enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+    exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },
+    popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
+    popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) }) {
 
-        // StartScreen
+    // StartScreen
 
-        composable(Screen.Home.rout) {
-          HomePage(navController = navController, userViewModel, meetingsViewModel)
-        }
-        // UserPage
-        composable(Screen.User.rout) { UserPage(navController = navController, userViewModel) }
-        // Sitzungen
-        composable(Screen.Meetings.rout) {
-          MeetingsListPage(navController = navController, meetingsViewModel)
-        }
-        // Anwesenheit
-        composable(route = Screen.Attendance.rout) {
-          AttendancesListPage(navController = navController)
-        }
-        // Anwesenheit liste
-        composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
-          AttendancesCoordinationPage(
-              navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
-        }
-        // Protokolle
-        composable(Screen.Protocol.rout) {
-          ProtocolListPage(navController = navController, meetingsViewModel)
-        }
+    composable(Screen.Home.rout) {
+      HomePage(navController = navController, userViewModel, meetingsViewModel)
+    }
+    // UserPage
+    composable(Screen.User.rout) { UserPage(navController = navController, userViewModel) }
+    // Sitzungen
+    composable(Screen.Meetings.rout) {
+      MeetingsListPage(navController = navController, meetingsViewModel)
+    }
+    // Anwesenheit
+    composable(route = Screen.Attendance.rout) {
+      AttendancesListPage(navController = navController)
+    }
+    // Anwesenheit liste
+    composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
+      AttendancesCoordinationPage(
+        navController, backStackEntry.arguments?.getString("meetingID").orEmpty()
+      )
+    }
+    // Protokolle
+    composable(Screen.Protocol.rout) {
+      ProtocolListPage(navController = navController, meetingsViewModel)
+    }
 
-        composable("${Screen.ProtocolEditPage.rout}/{meetingID}/{protocollang}") { backStackEntry ->
-          ProtocolEditPage(
-              navController,
-              backStackEntry.arguments?.getString("meetingID").orEmpty(),
-              backStackEntry.arguments?.getString("protocollang").orEmpty())
-        }
+    composable("${Screen.ProtocolEditPage.rout}/{meetingID}/{protocollang}") { backStackEntry ->
+      ProtocolEditPage(
+        navController,
+        backStackEntry.arguments?.getString("meetingID").orEmpty(),
+        backStackEntry.arguments?.getString("protocollang").orEmpty()
+      )
+    }
 
-        composable("${Screen.ProtocolDetailPage.rout}/{meetingID}") { backStackEntry ->
-          ProtocolDetailPage(
-              navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
-        }
+    composable("${Screen.ProtocolDetailPage.rout}/{meetingID}") { backStackEntry ->
+      ProtocolDetailPage(
+        navController, backStackEntry.arguments?.getString("meetingID").orEmpty()
+      )
+    }
 
-        // CarpoolingList
-        composable(route = Screen.CarpoolingList.rout) {
-          CarpoolingList(navController = navController)
-        }
-        // Carpool
-        composable(route = "${Screen.Carpool.rout}/{carpoolID}") { backStackEntry ->
-          CarpoolPage(navController, backStackEntry.arguments?.getString("carpoolID").orEmpty())
-        }
+    // CarpoolingList
+    composable(route = Screen.CarpoolingList.rout) {
+      CarpoolingList(navController = navController)
+    }
+    // Carpool
+    composable(route = "${Screen.Carpool.rout}/{carpoolID}") { backStackEntry ->
+      CarpoolPage(navController, backStackEntry.arguments?.getString("carpoolID").orEmpty())
+    }
 
-        // Create Carpool
-        composable(route = Screen.CreateCarpool.rout) {
-          CreateRidePage(navController = navController)
-        }
-        // Events
-        composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
-        // PostersList
-        composable(route = Screen.Posters.rout) { PostersListPage(navController = navController) }
-        // Poster
-        composable("${Screen.Poster.rout}/{posterID}") { backStackEntry ->
-          PosterPage(
-              navController,
-              backStackEntry.arguments?.getString("posterID").orEmpty(),
-              userViewModel)
-        }
-        // PosterDetail
-        composable("${Screen.PosterDetail.rout}/{posterID}/{locationID}") { backStackEntry ->
-          PosterDetailedPage(
-              navController,
-              userViewModel = userViewModel,
-              backStackEntry.arguments?.getString("posterID").orEmpty(),
-              backStackEntry.arguments?.getString("locationID").orEmpty())
-        }
+    // Create Carpool
+    composable(route = Screen.CreateCarpool.rout) {
+      CreateRidePage(navController = navController)
+    }
+    // Events
+    composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
+    // PostersList
+    composable(route = Screen.Posters.rout) { PostersListPage(navController = navController) }
+    // Poster
+    composable("${Screen.Poster.rout}/{posterID}") { backStackEntry ->
+      PosterPage(
+        navController,
+        backStackEntry.arguments?.getString("posterID").orEmpty(),
+        userViewModel
+      )
+    }
+    // PosterDetail
+    composable("${Screen.PosterDetail.rout}/{posterID}/{locationID}") { backStackEntry ->
+      PosterDetailedPage(
+        navController,
+        userViewModel = userViewModel,
+        backStackEntry.arguments?.getString("posterID").orEmpty(),
+        backStackEntry.arguments?.getString("locationID").orEmpty()
+      )
+    }
 
-        composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
-          AttendancesCoordinationPage(
-              navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
-        }
-        composable(
-            route = Screen.Voting.rout,
-            arguments =
-                listOf(
-                    navArgument("votingID") { type = NavType.StringType },
-                )) { backStackEntry ->
-              val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
-              VotingResultPage(navController = navController, votingID = votingID)
-            }
-        composable(
-            route = Screen.Vote.rout,
-            arguments =
-                listOf(
-                    navArgument("votingID") { type = NavType.StringType },
-                )) { backStackEntry ->
-              val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
-              VotePage(navController = navController, votingID = votingID)
-            }
-        composable(
-            route = Screen.Voted.rout,
-            arguments =
-                listOf(
-                    navArgument("votingID") { type = NavType.StringType },
-                )) { backStackEntry ->
-              val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
-              AlreadyVoted(navController = navController, votingID = votingID)
-            }
-      }
+    composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
+      AttendancesCoordinationPage(
+        navController, backStackEntry.arguments?.getString("meetingID").orEmpty()
+      )
+    }
+    composable(
+      route = Screen.Voting.rout,
+      arguments =
+      listOf(
+        navArgument("votingID") { type = NavType.StringType },
+      )
+    ) { backStackEntry ->
+      val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
+      VotingResultPage(navController = navController, votingID = votingID)
+    }
+
+    composable(
+      route = Screen.Vote.rout,
+      arguments =
+      listOf(
+        navArgument("votingID") { type = NavType.StringType },
+      )
+    ) { backStackEntry ->
+      val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
+      VotePage(navController = navController, votingID = votingID)
+    }
+
+    composable(
+      route = Screen.Voted.rout,
+      arguments =
+      listOf(
+        navArgument("votingID") { type = NavType.StringType },
+      )
+    ) { backStackEntry ->
+      val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
+      AlreadyVoted(navController = navController, votingID = votingID)
+    }
+    //Polls
+    composable(route = Screen.PollList.rout) { PollsListPage(navController = navController) }
+    //Poll
+    composable("${Screen.Poll.rout}/{pollID}") { backStackEntry ->
+      PollPage(
+        navController,
+        backStackEntry.arguments?.getString("pollID").orEmpty()
+      )
+    }
+    //Poll result
+    composable("${Screen.PollResult.rout}/{pollID}") { backStackEntry ->
+      PollResultPage(
+        navController,
+        backStackEntry.arguments?.getString("pollID").orEmpty()
+      )
+    }
+    //Poll create
+    composable(route = Screen.PollCreate.rout) { PollCreate(navController = navController) }
+    //Poll onHold
+    composable(route = Screen.PollOnHold.rout) { PollOnHoldPage(navController = navController) }
+  }
 }
 
 @Composable
@@ -242,43 +279,45 @@ fun NavBar(navController: NavHostController, userViewModel: UserViewModel) {
   val scope = rememberCoroutineScope()
 
   ModalNavigationDrawer(
-      drawerState = drawerState,
-      drawerContent = {
-        Box(
-            modifier =
-                Modifier.fillMaxHeight()
-                    .width(LocalConfiguration.current.screenWidthDp.dp * 0.75f)
-                    .background(Background_prime) // 75% des Bildschirms
-            ) {
-              DrawerContent(
-                  navController,
-                  drawerState,
-                  userViewModel) // Übergabe des NavControllers an den Drawer
-            }
-      },
-      gesturesEnabled = true // zum swipen des NavDrawers
+    drawerState = drawerState,
+    drawerContent = {
+      Box(
+        modifier =
+        Modifier
+          .fillMaxHeight()
+          .width(LocalConfiguration.current.screenWidthDp.dp * 0.75f)
+          .background(Background_prime) // 75% des Bildschirms
       ) {
-        // Implementierung der TopBar mit Boolean, welcher aus drawerState entnommen wird.
-        GlobalTopBar(
-            navController,
-            onOpenDrawer = {
-              scope.launch() {
-                // open/close NavDrawer
-                drawerState.apply {
-                  if (drawerState.isClosed) drawerState.open() else drawerState.close()
-                }
-              }
-            })
-
-        navigation(navController, userViewModel)
+        DrawerContent(
+          navController,
+          drawerState,
+          userViewModel
+        ) // Übergabe des NavControllers an den Drawer
       }
+    },
+    gesturesEnabled = true // zum swipen des NavDrawers
+  ) {
+    // Implementierung der TopBar mit Boolean, welcher aus drawerState entnommen wird.
+    GlobalTopBar(
+      navController,
+      onOpenDrawer = {
+        scope.launch() {
+          // open/close NavDrawer
+          drawerState.apply {
+            if (drawerState.isClosed) drawerState.open() else drawerState.close()
+          }
+        }
+      })
+
+    navigation(navController, userViewModel)
+  }
 }
 
 @Composable
 fun DrawerContent(
-    navController: NavController,
-    drawerState: DrawerState,
-    userViewModel: UserViewModel
+  navController: NavController,
+  drawerState: DrawerState,
+  userViewModel: UserViewModel
 ) {
   val coroutineScope = rememberCoroutineScope()
   val user = userViewModel.getProfile()
@@ -291,69 +330,75 @@ fun DrawerContent(
   }
 
   Column(
-      modifier = Modifier.padding(top = 60.dp, start = 20.dp, end = 8.dp, bottom = 10.dp),
+    modifier = Modifier.padding(top = 60.dp, start = 20.dp, end = 8.dp, bottom = 10.dp),
   ) {
     if (user != null) {
       ProfileCardSmall(
-          user.name!!,
-          user.profileImage,
-          role = "@Verein",
-          onClick = {
-            coroutineScope.launch { drawerState.close() }
-            if (currentRoute != Screen.User.rout) {
-              navController.navigate(Screen.User.rout)
-            }
-          })
+        user.name!!,
+        user.profileImage,
+        role = "@Verein",
+        onClick = {
+          coroutineScope.launch { drawerState.close() }
+          if (currentRoute != Screen.User.rout) {
+            navController.navigate(Screen.User.rout)
+          }
+        })
     }
 
     Spacer(modifier = Modifier.height(4.dp))
     val drawerItems =
-        listOf(
-            drawerItem(
-                modifier = Modifier,
-                icon = R.drawable.ic_groups,
-                title = getString(R.string.meetings),
-                route = Screen.Meetings.rout),
-            drawerItem(
-                modifier = Modifier,
-                icon = R.drawable.inbox_20dp,
-                title = getString(R.string.protocol),
-                route = Screen.Protocol.rout),
-            drawerItem(
-                modifier = Modifier,
-                icon = R.drawable.directions_car_20dp,
-                title = getString(R.string.carpooling),
-                route = Screen.CarpoolingList.rout),
-            drawerItem(
-                modifier = Modifier,
-                icon = R.drawable.event_today_20dp,
-                title = getString(R.string.events),
-                route = Screen.Events.rout),
-            drawerItem(
-                modifier = Modifier,
-                icon = R.drawable.planner_banner_ad_pt_20dp,
-                title = getString(R.string.poster),
-                route = Screen.Poster.rout),
-            drawerItem(
-                modifier = Modifier,
-                icon = R.drawable.chart_outlined_20dp,
-                title = getString(R.string.poll),
-                route = Screen.Poll.rout),
-        )
+      listOf(
+        drawerItem(
+          modifier = Modifier,
+          icon = R.drawable.ic_groups,
+          title = getString(R.string.meetings),
+          route = Screen.Meetings.rout
+        ),
+        drawerItem(
+          modifier = Modifier,
+          icon = R.drawable.inbox_20dp,
+          title = getString(R.string.protocol),
+          route = Screen.Protocol.rout
+        ),
+        drawerItem(
+          modifier = Modifier,
+          icon = R.drawable.directions_car_20dp,
+          title = getString(R.string.carpooling),
+          route = Screen.CarpoolingList.rout
+        ),
+        drawerItem(
+          modifier = Modifier,
+          icon = R.drawable.event_today_20dp,
+          title = getString(R.string.events),
+          route = Screen.Events.rout
+        ),
+        drawerItem(
+          modifier = Modifier,
+          icon = R.drawable.planner_banner_ad_pt_20dp,
+          title = getString(R.string.poster),
+          route = Screen.Poster.rout
+        ),
+        drawerItem(
+          modifier = Modifier,
+          icon = R.drawable.chart_outlined_20dp,
+          title = getString(R.string.poll),
+          route = Screen.PollList.rout
+        ),
+      )
 
     drawerItems.forEach { item ->
       DrawerItem(
-          item,
-          selected = currentRoute == item.route,
-          onClick = {
-            navController.navigate(item.route) {
-              popUpTo(navController.graph.startDestinationId) {
-                saveState = true // Save state when navigating back
-              }
-              launchSingleTop = true
+        item,
+        selected = currentRoute == item.route,
+        onClick = {
+          navController.navigate(item.route) {
+            popUpTo(navController.graph.startDestinationId) {
+              saveState = true // Save state when navigating back
             }
-            coroutineScope.launch { drawerState.close() }
-          })
+            launchSingleTop = true
+          }
+          coroutineScope.launch { drawerState.close() }
+        })
       SpacerBetweenElements(4.dp)
     }
   }
