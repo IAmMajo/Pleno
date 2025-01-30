@@ -19,6 +19,7 @@ import net.ipv64.kivop.models.getVotings
 import net.ipv64.kivop.services.api.getAttendances
 import net.ipv64.kivop.services.api.getMeetingByID
 import net.ipv64.kivop.services.api.getProtocolsApi
+import net.ipv64.kivop.services.api.putAttend
 import net.ipv64.kivop.services.api.putPlanAttendance
 
 class MeetingViewModel(private val meetingId: String) : ViewModel() {
@@ -49,6 +50,7 @@ class MeetingViewModel(private val meetingId: String) : ViewModel() {
     viewModelScope.launch {
       val response = getMeetingByID(meetingId)
       response.let { meeting = it }
+      Log.i("Meetin chik", response.toString())
     }
   }
 
@@ -111,6 +113,31 @@ class MeetingViewModel(private val meetingId: String) : ViewModel() {
         absentList = responseItems.filter { it.status == AttendanceStatus.absent }
         acceptedList = responseItems.filter { it.status == AttendanceStatus.accepted }
       }
+    }
+  }
+
+  suspend fun attend(code: String): Boolean {
+    if (putAttend(meetingId, code)) {
+      var updatedStatus = AttendanceStatus.present
+
+      you = you?.copy(status = updatedStatus)
+      you?.let { user ->
+        // Remove the user from all lists first
+        responseItems = responseItems.filter { it.name != user.identity.name }
+
+        // Add the user to the appropriate list
+        val updatedItem = attendancesList(name = user.identity.name, status = updatedStatus)
+        responseItems = responseItems + updatedItem
+
+        // Rebuild the categorized lists
+        pendingList = responseItems.filter { it.status == null }
+        presentList = responseItems.filter { it.status == AttendanceStatus.present }
+        absentList = responseItems.filter { it.status == AttendanceStatus.absent }
+        acceptedList = responseItems.filter { it.status == AttendanceStatus.accepted }
+      }
+      return true
+    } else {
+      return false
     }
   }
 

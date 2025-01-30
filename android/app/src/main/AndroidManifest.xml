@@ -8,6 +8,7 @@ xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     <uses-permission android:name="android.permission.CAMERA"></uses-permission>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
@@ -26,7 +27,19 @@ xmlns:tools="http://schemas.android.com/tools">
     tools:targetApi="33">
     <meta-data
         android:name="com.google.android.geo.API_KEY"
-        android:value="YOUR_API_KEY_HERE"/>
+        android:value="${MAPS_API_KEY}" />
+    <meta-data
+        android:name="com.google.android.gms.version"
+        android:value="@integer/google_play_services_version" />
+    <provider
+        android:name="androidx.core.content.FileProvider"
+        android:authorities="${applicationId}.provider"
+        android:exported="false"
+        android:grantUriPermissions="true">
+        <meta-data
+            android:name="android.support.FILE_PROVIDER_PATHS"
+            android:resource="@xml/file_paths" />
+    </provider>
     <activity
         android:name=".pages.SplashActivity"
         android:exported="true"
@@ -45,7 +58,6 @@ xmlns:tools="http://schemas.android.com/tools">
             <category android:name="android.intent.category.BROWSABLE"/>
             <action android:name="android.intent.action.VIEW"/>
         </intent-filter>
-
     </activity>
     <activity android:name=".MainActivity" />
     <activity android:name=".pages.onboarding.LoginActivity" />

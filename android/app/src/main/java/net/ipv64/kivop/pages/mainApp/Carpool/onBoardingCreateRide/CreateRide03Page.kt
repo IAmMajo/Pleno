@@ -4,17 +4,13 @@ import DateTimePicker
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -23,13 +19,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.utsman.osmandcompose.OpenStreetMap
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.components.DebouncedTextFieldCustomInputField
 import net.ipv64.kivop.components.SpacerBetweenElements
@@ -184,19 +177,5 @@ fun CreateRide03Page(
                     Text(text = "Weiter", style = TextStyles.contentStyle, color = Text_prime_light)
                   }
             }
-      }
-}
-
-@Composable
-fun TestMap() {
-  Box(
-      modifier =
-          Modifier.width(500.dp)
-              .aspectRatio(1.5f)
-              .clip(RoundedCornerShape(8.dp))
-              .background(Color.White)) {
-        OpenStreetMap(
-            modifier = Modifier.fillMaxSize().clipToBounds(),
-        ) {}
       }
 }

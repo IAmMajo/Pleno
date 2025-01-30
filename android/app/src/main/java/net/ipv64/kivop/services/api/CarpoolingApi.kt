@@ -107,6 +107,7 @@ suspend fun getCarpoolApi(id: String): GetSpecialRideDetailDTO? =
                       val riderObject = rider.asJsonObject
                       GetRiderDTO(
                           id = riderObject.get("id").asString.let { UUID.fromString(it) },
+                          userID = riderObject.get("userID").asString.let { UUID.fromString(it) },
                           username = riderObject.get("username").asString,
                           latitude = riderObject.get("latitude").asFloat,
                           longitude = riderObject.get("longitude").asFloat,
@@ -153,7 +154,6 @@ suspend fun postCarpoolApi(createSpecialRideDTO: CreateSpecialRideDTO): Boolean 
 
       val jsonBody = Gson().toJson(jsonMap)
 
-      Log.d("JSON", jsonBody)
       val request =
           Request.Builder()
               .url(BASE_URL + path)
