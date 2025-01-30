@@ -16,6 +16,7 @@ struct EventVotingView: View {
     @State private var details: GetEventDetailDTO?
     let baseURL = "https://kivop.ipv64.net"
     @State private var selectedLocation: CLLocationCoordinate2D?
+    var event: GetEventDTO
 
     var body: some View {
         ScrollView {
@@ -23,7 +24,7 @@ struct EventVotingView: View {
                 EventDateSection(details: details)
                 EventDescriptionSection(details: details)
                 EventLocationSection(address: $address, selectedLocation: $selectedLocation, details: details)
-                CarpoolSection()
+                CarpoolSection(event: event)
                 ParticipationSection(details: details, onParticipate: handleParticipation)
                 ParticipantListSection(details: details)
             }
@@ -32,7 +33,7 @@ struct EventVotingView: View {
         .background(Color(UIColor.systemGray5).edgesIgnoringSafeArea(.all))
         .navigationTitle(details?.name ?? "Event Name")
         .onAppear {
-            fetchEventDetails(eventID: eventID)
+            fetchEventDetails(eventID: event.id)
             updateSelectedLocation()
         }
     }
@@ -235,17 +236,20 @@ struct AddressBox: View {
 
 
 struct CarpoolSection: View {
+    let event: GetEventDTO
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Fahrgemeinschaft")
                 .font(.subheadline)
                 .foregroundColor(.gray)
-            
-            Text("Fahrgemeinschaften ansehen")
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
-                .background(Color(UIColor.systemGray6))
-                .cornerRadius(8)
+            NavigationLink(destination: EventRideView(viewModel: EventRideViewModel(event: event))) {
+                Text("Fahrgemeinschaften ansehen")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(Color(UIColor.systemGray6))
+                    .cornerRadius(8)
+            }
         }
         .padding(.horizontal)
     }

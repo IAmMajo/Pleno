@@ -59,7 +59,7 @@ struct EventView: View {
                 
                 // Event-Liste
                 List(filteredEvents, id: \.id) { event in
-                    NavigationLink(destination: EventVotingView(eventID: event.id)) {
+                    NavigationLink(destination: EventVotingView(eventID: event.id, event: event)) {
                         HStack {
                             VStack(alignment: .leading) {
                                 Text(event.name)
