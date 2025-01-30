@@ -12,9 +12,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -36,6 +38,8 @@ fun CreateRide02Page(
     createSpecialRideViewModel: CreateSpecialRideViewModel = viewModel()
 ) {
   val context = LocalContext.current
+  val focusRequester1 = remember { FocusRequester() }
+  val focusRequester2 = remember { FocusRequester() }
   Column(
       modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Primary),
       horizontalAlignment = Alignment.CenterHorizontally,
@@ -54,6 +58,8 @@ fun CreateRide02Page(
                   labelColor = Text_prime_light,
                   placeholder = "Beschreibe dein Auto...",
                   backgroundColor = Background_prime,
+                  focusRequester = focusRequester1,
+                  nextFocusRequester = focusRequester2, // Fokus auf das nächste Feld setzen
                   value = createSpecialRideViewModel.vehicleDescription,
                   onValueChange = { createSpecialRideViewModel.vehicleDescription = it },
                   singleLine = false,
@@ -64,6 +70,7 @@ fun CreateRide02Page(
                   label = "Freie Sitze",
                   labelColor = Text_prime_light,
                   placeholder = "Wieviele Sitze stehen zu verfügung?",
+                  focusRequester = focusRequester2,
                   backgroundColor = Background_prime,
                   value =
                       if (createSpecialRideViewModel.emptySeats != null)

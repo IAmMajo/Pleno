@@ -18,6 +18,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -43,6 +44,11 @@ fun RegisterPage(navController: NavController) {
   var password by remember { mutableStateOf("") }
   var confirmPassword by remember { mutableStateOf("") }
 
+  val focusRequester1 = remember { FocusRequester() }
+  val focusRequester2 = remember { FocusRequester() }
+  val focusRequester3 = remember { FocusRequester() }
+  val focusRequester4 = remember { FocusRequester() }
+
   val scope = rememberCoroutineScope()
 
   Column(modifier = Modifier.fillMaxWidth().background(Color.Green)) {
@@ -66,33 +72,40 @@ fun RegisterPage(navController: NavController) {
               uriToBase64String(navController.context, uri)
             }
           })
-      // Todo: Fix CustomInputField.kt
+
       CustomInputField(
           label = "Name",
           placeholder = "Max Mustermann",
           value = name,
           onValueChange = { name = it },
-      )
+          focusRequester = focusRequester1,
+          nextFocusRequester = focusRequester2 // Fokus auf das nächste Feld setzen
+          )
+
       CustomInputField(
           label = "Email",
           placeholder = "Max@pleno.net",
           value = email,
           onValueChange = { email = it },
-      )
+          focusRequester = focusRequester2,
+          nextFocusRequester = focusRequester3)
+
       CustomInputField(
           label = "Passwort",
-          placeholder = "*******",
+          placeholder = "******",
           value = password,
           onValueChange = { password = it },
           isPasswort = true,
-      )
+          focusRequester = focusRequester3,
+          nextFocusRequester = focusRequester4)
+
       CustomInputField(
           label = "Passwort wiederholen",
-          placeholder = "*******",
+          placeholder = "******",
           value = confirmPassword,
           onValueChange = { confirmPassword = it },
           isPasswort = true,
-      )
+          focusRequester = focusRequester4)
     }
     Column(
         modifier =

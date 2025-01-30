@@ -12,9 +12,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,6 +36,8 @@ fun CreateRide01Page(
     pagerState: PagerState,
     createSpecialRideViewModel: CreateSpecialRideViewModel = viewModel()
 ) {
+  val focusRequester1 = remember { FocusRequester() }
+  val focusRequester2 = remember { FocusRequester() }
   Column(
       modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Primary),
       horizontalAlignment = Alignment.CenterHorizontally,
@@ -55,7 +59,9 @@ fun CreateRide01Page(
               backgroundColor = Background_prime,
               value = createSpecialRideViewModel.name,
               onValueChange = { createSpecialRideViewModel.name = it },
-          )
+              focusRequester = focusRequester1,
+              nextFocusRequester = focusRequester2 // Fokus auf das nächste Feld setzen
+              )
           SpacerBetweenElements()
           val maxChars = 128
           CustomInputField(
@@ -65,6 +71,7 @@ fun CreateRide01Page(
               placeholder = "Beschreibe deine Fahrt...",
               backgroundColor = Background_prime,
               value = createSpecialRideViewModel.description,
+              focusRequester = focusRequester2,
               onValueChange = {
                 if (it.length <= maxChars) {
                   createSpecialRideViewModel.description = it

@@ -2,22 +2,26 @@ import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScrollableTabRow
-import androidx.compose.material3.Tab
 import androidx.compose.material3.TabPosition
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +35,7 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Signal_blue
+import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @OptIn(ExperimentalPagerApi::class)
@@ -48,24 +53,31 @@ fun GenerateTabs(tabs: List<String>, tabContents: List<@Composable (() -> Unit)?
         divider = {},
         indicator = { tabPositions -> CustomIndicator(tabPositions, pagerState) }) {
           tabs.forEachIndexed { index, title ->
-            Tab(
+            Box(
                 modifier =
                     Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        .heightIn(34.dp)
+                        .height(40.dp) // Normale Tab-Höhe für bessere Optik
+                        .wrapContentWidth() // Passt sich der Tab-Breite an
                         .background(
                             if (pagerState.currentPage == index) Color.Transparent
                             else Background_secondary,
-                            shape = RoundedCornerShape(50.dp),
-                        ),
-                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
-                text = {
+                            shape = RoundedCornerShape(50.dp))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null, // Entfernt das Standard-Click-Verhalten
+                            onClick = {
+                              coroutineScope.launch { pagerState.animateScrollToPage(index) }
+                            }),
+                contentAlignment = Alignment.Center) {
                   Text(
                       text = title,
-                      color = Text_tertiary,
-                      style = MaterialTheme.typography.labelMedium)
-                },
-                selected = pagerState.currentPage == index,
-            )
+                      color = if (pagerState.currentPage == index) Text_prime else Text_tertiary,
+                      style = MaterialTheme.typography.labelMedium,
+                      modifier =
+                          Modifier.padding(
+                              horizontal = 16.dp, vertical = 8.dp) // Text richtig ausrichten
+                      )
+                }
           }
         }
 
@@ -116,7 +128,7 @@ private fun CustomIndicator(tabPositions: List<TabPosition>, pagerState: PagerSt
           .wrapContentSize(align = Alignment.BottomStart)
           .width(indicatorEnd - indicatorStart)
           // .padding(2.dp)
-          .heightIn(48.dp)
+          .heightIn(45.dp)
           .background(Signal_blue.copy(0.19f), RoundedCornerShape(50))
           .zIndex(-1f))
 }
