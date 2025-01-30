@@ -7,6 +7,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -26,9 +28,14 @@ fun ExpandableBox(
 
   var expanded by remember { mutableStateOf(false) }
   Surface(
-      modifier = Modifier.fillMaxWidth(),
-      color = Color.Transparent,
-      onClick = { expanded = !expanded },
+    modifier = Modifier
+      .fillMaxWidth()
+      .clickable(
+        interactionSource = remember { MutableInteractionSource() }, // Verhindert Ripple-Effekt
+        indication = null, // Keine Klick-Markierung
+        onClick = { expanded = !expanded }
+      ),
+    color = Color.Transparent
   ) {
     AnimatedContent(
         targetState = expanded,

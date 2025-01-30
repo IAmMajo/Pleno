@@ -167,7 +167,7 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
 
         composable("${Screen.ProtocolDetailPage.rout}/{meetingID}") { backStackEntry ->
           ProtocolDetailPage(
-              navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
+              navController, backStackEntry.arguments?.getString("meetingID").orEmpty(),userViewModel = userViewModel)
         }
 
         // CarpoolingList
