@@ -171,10 +171,10 @@ struct MarkdownEditorView: View {
                                 }
             }
             .sheet(isPresented: $isExtendSheetPresented) {
-                ExtendRecordView(markdownText: $markdownText)
+                ExtendRecordView(markdownText: $markdownText, lang: lang)
             }
             .sheet(isPresented: $isSocialPostSheetPresented) {
-                            SocialMediaPostView(markdownText: markdownText)
+                            SocialMediaPostView(markdownText: markdownText, lang: lang)
                         }
         }
         .onAppear {
@@ -319,24 +319,14 @@ struct TranslationSheetView: View {
 }
 
 
-import SwiftUI
-import MarkdownUI
-import MeetingServiceDTOs
-import Foundation
-import UIKit
-
-import SwiftUI
-import MarkdownUI
-import MeetingServiceDTOs
-import Foundation
-import UIKit
-
 struct ExtendRecordView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var markdownText: String
     @State private var aiGeneratedText: String = ""
     @State private var isLoading = true
     @State private var userEditedText: String = ""
+    @State private var isFullyLoaded = false // Neue Variable, um das Ende des Streams zu erkennen
+    var lang: String
     
     var body: some View {
         VStack(spacing: 20) {
@@ -359,8 +349,8 @@ struct ExtendRecordView: View {
                         .foregroundColor(.primary)
                         .padding()
                         .frame(maxWidth: .infinity, minHeight: 300)
-                        //.background(Color(.systemGray6))
                         .cornerRadius(8)
+                        .border(Color.gray, width: 1)
                 }
                 
                 VStack {
@@ -370,13 +360,24 @@ struct ExtendRecordView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
                     
-                    TextEditor(text: $userEditedText)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .padding()
-                        .frame(maxWidth: .infinity, minHeight: 300)
-                        .background(Color.white)
-                        .cornerRadius(8)
+                    ScrollView {
+                        if isFullyLoaded {
+                            // Nach vollständigem Laden: MarkdownUI zur Formatierung verwenden
+                            Markdown(userEditedText)
+                                .markdownTheme(.basic)
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        } else {
+                            // Während des Ladens: Normaler Text (unformatiert)
+                            Text(userEditedText)
+                                .font(.body)
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    .border(Color.gray, width: 1)
                 }
             }
             .padding(.horizontal)
@@ -412,24 +413,31 @@ struct ExtendRecordView: View {
             .padding(.bottom, 20)
         }
         .background(Color.white)
-        .frame(minWidth: 1200, maxWidth: 3000) // Breiteres Layout für bessere Übersicht
+        .frame(minWidth: 1200, maxWidth: 2800)
         .task {
             await fetchExtendedRecord()
         }
         .onAppear {
-            userEditedText = aiGeneratedText // Text zur Bearbeitung vorbereiten
+            userEditedText = ""
         }
     }
     
     private func fetchExtendedRecord() async {
         isLoading = true
         aiGeneratedText = ""
+        isFullyLoaded = false // Setze den Status zurück
         
-        await RecordsAPI.extendRecord(content: markdownText) { chunk in
+        await RecordsAPI.extendRecord(content: markdownText, lang: lang) { chunk in
             DispatchQueue.main.async {
-                aiGeneratedText += chunk + " "
-                userEditedText = aiGeneratedText // Laufende Aktualisierung im Editor
+                aiGeneratedText += chunk + "\n"
+                userEditedText = aiGeneratedText // Unformatierter Text wird schrittweise aktualisiert
             }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            print("Finaler AI-Text:\n\(aiGeneratedText)")
+            userEditedText = aiGeneratedText // Nach kompletter Übertragung nochmals setzen
+            isFullyLoaded = true // Jetzt erst Markdown-Rendering aktivieren
         }
         
         isLoading = false
@@ -437,11 +445,35 @@ struct ExtendRecordView: View {
 }
 
 
+    // Funktion zur Bereinigung der Markdown-Syntax in Echtzeit
+    private func formatMarkdown(_ text: String) -> String {
+        var formattedText = text
+        
+        // Echte Zeilenumbrüche für Markdown-Struktur
+        formattedText = formattedText.replacingOccurrences(of: "### ", with: "\n### ") // Große Überschriften
+        formattedText = formattedText.replacingOccurrences(of: "## ", with: "\n## ") // Mittlere Überschriften
+        formattedText = formattedText.replacingOccurrences(of: "# ", with: "\n# ") // Hauptüberschriften
+        formattedText = formattedText.replacingOccurrences(of: "- ", with: "\n- ") // Listenpunkte
+        formattedText = formattedText.replacingOccurrences(of: "---", with: "\n\n—\n\n") // Trennlinien lesbarer machen
+
+        // Überflüssige doppelte Leerzeilen entfernen
+        formattedText = formattedText.replacingOccurrences(of: "\n\n\n", with: "\n\n")
+        
+        return formattedText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+
+
+
+
+
 struct SocialMediaPostView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var socialMediaText: String = ""
     @State private var isLoading = true
     var markdownText: String
+    var lang: String
+
     
     var body: some View {
         NavigationStack {
@@ -490,7 +522,7 @@ struct SocialMediaPostView: View {
         isLoading = true
         socialMediaText = ""
         
-        await RecordsAPI.generateSocialMediaPost(content: markdownText) { chunk in
+        await RecordsAPI.generateSocialMediaPost(content: markdownText, lang: lang) { chunk in
             DispatchQueue.main.async {
                 socialMediaText += chunk + " "
             }
@@ -511,39 +543,4 @@ struct SocialMediaPostView: View {
 
 
 
-class RecordsAPI {
-    static func extendRecord(content: String, updateHandler: @escaping (String) -> Void) async {
-        await fetchAIResponse(endpoint: "extend-record", content: content, updateHandler: updateHandler)
-    }
-    
-    static func generateSocialMediaPost(content: String, updateHandler: @escaping (String) -> Void) async {
-        await fetchAIResponse(endpoint: "generate-social-media-post", content: content, updateHandler: updateHandler)
-    }
-    
-    private static func fetchAIResponse(endpoint: String, content: String, updateHandler: @escaping (String) -> Void) async {
-        guard let url = URL(string: "https://kivop.ipv64.net/ai/" + endpoint) else { return }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let requestBody: [String: String] = ["content": content]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: requestBody, options: [])
-        
-        do {
-            let (stream, response) = try await URLSession.shared.bytes(for: request)
-            guard (response as? HTTPURLResponse)?.statusCode == 200 else { return }
-            
-            for try await line in stream.lines {
-                DispatchQueue.main.async {
-                    updateHandler(line)
-                }
-                try await Task.sleep(nanoseconds: 1)
-            }
-        } catch {
-            DispatchQueue.main.async {
-                updateHandler("Fehler: \(error.localizedDescription)")
-            }
-        }
-    }
-}
+
