@@ -57,6 +57,7 @@ import net.ipv64.kivop.pages.mainApp.AttendancesListPage
 import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolPage
 import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolingList
 import net.ipv64.kivop.pages.mainApp.Carpool.onBoardingCreateRide.CreateRidePage
+import net.ipv64.kivop.pages.mainApp.Events.EventsDetailPage
 import net.ipv64.kivop.pages.mainApp.Events.EventsPage
 import net.ipv64.kivop.pages.mainApp.HomePage
 import net.ipv64.kivop.pages.mainApp.MeetingsListPage
@@ -190,6 +191,9 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
         }
         // Events
         composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
+
+        composable(route = Screen.Event.rout) { EventsDetailPage(navController = navController) }
+    
         // PostersList
         composable(route = Screen.Posters.rout) { PostersListPage(navController = navController) }
         // Poster

@@ -1,5 +1,6 @@
 package net.ipv64.kivop.dtos.RideServiceDTOs
 
+import com.example.kivopandriod.services.stringToLocalDateTime
 import java.util.UUID
 import java.time.LocalDateTime
 
@@ -16,3 +17,4 @@ data class GetEventDetailDTO (
     var countRideInterested : Int,
     var countEmptySeats : Int,
 )
+
