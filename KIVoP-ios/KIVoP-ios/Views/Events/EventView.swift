@@ -8,24 +8,12 @@
 import SwiftUI
 import RideServiceDTOs
 
-//struct Event: Identifiable {
-//    let id = UUID()
-//    let name: String
-//    let date: Date
-//}
-
 struct EventView: View {
     @State private var searchText = ""
     @State private var selectedGroup = "Aktuelle"
     @State private var events: [GetEventDTO] = []
     let baseURL = "https://kivop.ipv64.net"
-
-    
     let currentDate = Date()
-//    let events: [Event] = [
-//        Event(name: "Event1", date: Calendar.current.date(from: DateComponents(year: 2025, month: 2, day: 15))!),
-//        Event(name: "Event2", date: Calendar.current.date(from: DateComponents(year: 2024, month: 12, day: 31))!),
-//    ]
     
     var filteredEvents: [GetEventDTO] {
         events
