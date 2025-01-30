@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -26,6 +27,10 @@ fun MeetingsListPage(navController: NavController, meetingsViewModel: MeetingsVi
     isBackPressed = navController.popBackStack()
     Log.i("BackHandler", "BackHandler: $isBackPressed")
   }
+  LaunchedEffect(Unit) {
+    meetingsViewModel.fetchMeetings()
+  }
+  
   val meetings = meetingsViewModel.meetings
   var tabs = listOf<String>()
   val scheduledMeetings = meetings.filter { it?.status == MeetingStatus.scheduled }

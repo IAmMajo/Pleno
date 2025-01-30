@@ -16,8 +16,13 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
+import okio.ByteString
 
 suspend fun getVotings(meetingId: String): List<GetVotingDTO> =
     withContext(Dispatchers.IO) {
@@ -89,7 +94,7 @@ suspend fun getVotings(meetingId: String): List<GetVotingDTO> =
       }
     }
 
-suspend fun GetVotingResultByID(id: UUID): GetVotingResultsDTO? =
+suspend fun GetVotingResultByID(id: String): GetVotingResultsDTO? =
     withContext(Dispatchers.IO) {
       val path = "meetings/votings/$id/results"
 
@@ -151,7 +156,7 @@ suspend fun GetVotingResultByID(id: UUID): GetVotingResultsDTO? =
       }
     }
 
-suspend fun GetVotingByID(ID: UUID): GetVotingDTO? =
+suspend fun GetVotingByID(ID: String): GetVotingDTO? =
     withContext(Dispatchers.IO) {
       val path = "meetings/votings/$ID"
 
@@ -295,3 +300,62 @@ suspend fun getMyVote(ID: UUID): GetMyVoteDTO? =
         null
       }
     }
+
+
+class VotingWebSocketClient(private val votingId: UUID, private val listener: VotingWebSocketListener) :
+  WebSocketListener() {
+
+  private var webSocket: WebSocket? = null
+
+  suspend fun connect() {
+    val token = auth.getSessionToken()
+    if (token.isNullOrEmpty()) {
+      Log.e("WebSocket", "Fehler: Kein Token verfügbar")
+      return
+    }
+
+    val url = "$BASE_URL/meetings/votings/$votingId/live-status"
+    val request = Request.Builder()
+      .url(url)
+      .addHeader("Authorization", "Bearer $token")
+      .build()
+
+    webSocket = okHttpClient.newWebSocket(request, this)
+    Log.d("WebSocket", "Verbindung zu $url wird hergestellt...")
+  }
+
+  fun disconnect() {
+    webSocket?.close(1000, "Client disconnected")
+  }
+
+  override fun onOpen(webSocket: WebSocket, response: Response) {
+    Log.d("WebSocket", "Verbunden mit WebSocket")
+  }
+
+  override fun onMessage(webSocket: WebSocket, text: String) {
+    Log.d("WebSocket", "Empfangen: $text")
+    try {
+      val votingStatus = Gson().fromJson(text, GetVotingDTO::class.java)
+      listener.onVotingStatusUpdate(votingStatus)
+    } catch (e: Exception) {
+      Log.e("WebSocket", "Fehler beim Parsen der Nachricht: ${e.message}")
+    }
+  }
+
+  override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+    Log.d("WebSocket", "Empfangene Bytes: ${bytes.hex()}")
+  }
+
+  override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+    Log.d("WebSocket", "WebSocket wird geschlossen: $code / $reason")
+    webSocket.close(1000, null)
+  }
+
+  override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+    Log.e("WebSocket", "Fehler: ${t.message}")
+  }
+}
+
+interface VotingWebSocketListener {
+  fun onVotingStatusUpdate(voting: GetVotingDTO)
+}
