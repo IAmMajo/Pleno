@@ -495,12 +495,11 @@ struct SocialMediaPostView: View {
     var markdownText: String
     var lang: String
 
-    
     var body: some View {
         NavigationStack {
             VStack {
                 ScrollView {
-                    Text(socialMediaText.isEmpty ? "Lade Social-Media-Post..." : socialMediaText)
+                    Text(socialMediaText.isEmpty ? "Lade Social-Media-Post..." : removeMarkdownSyntax(from: socialMediaText))
                         .font(.body)
                         .foregroundColor(.primary)
                         .padding()
@@ -560,6 +559,24 @@ struct SocialMediaPostView: View {
             rootViewController.present(activityController, animated: true, completion: nil)
         }
     }
+    
+    private func removeMarkdownSyntax(from text: String) -> String {
+        var cleanedText = text
+
+        // **Markdown entfernen**
+        cleanedText = cleanedText.replacingOccurrences(of: "# ", with: "")
+        cleanedText = cleanedText.replacingOccurrences(of: "## ", with: "")
+        cleanedText = cleanedText.replacingOccurrences(of: "### ", with: "")
+        cleanedText = cleanedText.replacingOccurrences(of: "**", with: "")
+        cleanedText = cleanedText.replacingOccurrences(of: "*", with: "")
+        cleanedText = cleanedText.replacingOccurrences(of: "- ", with: "")
+        cleanedText = cleanedText.replacingOccurrences(of: "---", with: "")
+        cleanedText = cleanedText.replacingOccurrences(of: "—", with: "")
+        cleanedText = cleanedText.trimmingCharacters(in: CharacterSet(charactersIn: "\"“”„"))
+
+        return cleanedText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
 }
 
 
