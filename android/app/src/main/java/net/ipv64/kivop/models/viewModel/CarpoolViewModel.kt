@@ -59,6 +59,7 @@ class CarpoolViewModel(private val carpoolId: String) : ViewModel() {
       me =
           GetRiderDTO(
               id = UUID.randomUUID(),
+              userID = UUID.randomUUID(),
               username = "New Rider",
               latitude = 1.0f,
               longitude = 1.0f,

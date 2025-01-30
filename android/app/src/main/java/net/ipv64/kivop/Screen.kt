@@ -25,10 +25,12 @@ sealed class Screen(val rout: String) {
 
   object Events : Screen("events")
 
-  object Poster : Screen("poster")
+  object Posters : Screen("posters")
 
-  object Votings : Screen("abstimmungen") // todo remove
-
+  object Poster : Screen("poster/{posterID}")
+  
+  object PosterDetail : Screen("posterDetail/{posterID}")
+  
   object Voting : Screen("abstimmung/{votingID}")
 
   object Vote : Screen("abstimmen/{votingID}")
