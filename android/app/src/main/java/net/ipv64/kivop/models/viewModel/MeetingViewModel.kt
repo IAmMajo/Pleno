@@ -116,12 +116,10 @@ class MeetingViewModel(private val meetingId: String) : ViewModel() {
     }
   }
 
-  
-  
-  suspend fun attend(code: String):Boolean {
+  suspend fun attend(code: String): Boolean {
     if (putAttend(meetingId, code)) {
       var updatedStatus = AttendanceStatus.present
-   
+
       you = you?.copy(status = updatedStatus)
       you?.let { user ->
         // Remove the user from all lists first
@@ -136,14 +134,13 @@ class MeetingViewModel(private val meetingId: String) : ViewModel() {
         presentList = responseItems.filter { it.status == AttendanceStatus.present }
         absentList = responseItems.filter { it.status == AttendanceStatus.absent }
         acceptedList = responseItems.filter { it.status == AttendanceStatus.accepted }
-        
       }
       return true
-    }else{
+    } else {
       return false
     }
   }
-  
+
   init {
     fetchMeeting()
     fetchAttendance()

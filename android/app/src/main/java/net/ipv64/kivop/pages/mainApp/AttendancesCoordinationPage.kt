@@ -74,9 +74,8 @@ fun AttendancesCoordinationPage(
   val density = LocalDensity.current
   var confirmationMeeting by remember { mutableStateOf(false) }
   val protocolViewModel: ProtocolViewModel =
-    viewModel(factory = ProtocolViewModelFactory(meetingId, "de"))
-  
-  
+      viewModel(factory = ProtocolViewModelFactory(meetingId, "de"))
+
   val contentHeightDp by
       remember(screenHeightDp, columnHeightDp) {
         derivedStateOf { screenHeightDp - columnHeightDp }
@@ -107,7 +106,9 @@ fun AttendancesCoordinationPage(
                   }
                 }) {
           SpacerTopBar()
-          meetingViewModel.meeting?.let { SitzungsCard(GetMeetingDTO = it, protocoll = meetingViewModel.protocols) }
+          meetingViewModel.meeting?.let {
+            SitzungsCard(GetMeetingDTO = it, protocoll = meetingViewModel.protocols)
+          }
         }
 
     var scope = rememberCoroutineScope()
@@ -147,12 +148,7 @@ fun AttendancesCoordinationPage(
                           meetingViewModel.presentListcount
                         },
                     meetingViewModel = meetingViewModel,
-                  checkInClick = {
-                     confirmationMeeting = true
-                  }
-                  
-                )
-              
+                    checkInClick = { confirmationMeeting = true })
               }
               SpacerBetweenElements()
             }
@@ -221,33 +217,30 @@ fun AttendancesCoordinationPage(
           }
     }
   }
-  val code = remember{mutableStateOf("")}
+  val code = remember { mutableStateOf("") }
   val scope = rememberCoroutineScope()
-  when  {
+  when {
     confirmationMeeting -> {
 
       meetingViewModel.meeting?.let {
         PopupCheckIn(
-          onDismissRequest = {
-            confirmationMeeting =  false
-          },
-          onConfirmation =
-          {
-            scope.launch { 
-              if (meetingViewModel.attend(code.value)) {
-                confirmationMeeting = false
-              }else{
-                Toast.makeText(context, "Der Code ist falsch.", Toast.LENGTH_SHORT).show()
+            onDismissRequest = { confirmationMeeting = false },
+            onConfirmation = {
+              scope.launch {
+                if (meetingViewModel.attend(code.value)) {
+                  confirmationMeeting = false
+                } else {
+                  Toast.makeText(context, "Der Code ist falsch.", Toast.LENGTH_SHORT).show()
+                }
               }
-            }
-          },
-          title = "Code eingeben",
-          descriptionText = "Geben Sie den Zugangscode ein.",
-          buttonDismissText = "Abbrechen",
-          buttonConfirmText = "Senden",
-          onOpenCamera = { /* Kamera öffnen */ },
-          valueCode = code.value,
-          onValueChange = { code.value = it },
+            },
+            title = "Code eingeben",
+            descriptionText = "Geben Sie den Zugangscode ein.",
+            buttonDismissText = "Abbrechen",
+            buttonConfirmText = "Senden",
+            onOpenCamera = { /* Kamera öffnen */ },
+            valueCode = code.value,
+            onValueChange = { code.value = it },
         )
       }
     }

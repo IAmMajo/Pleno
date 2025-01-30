@@ -41,19 +41,18 @@ import net.ipv64.kivop.ui.theme.textSubHeadingStyle
 
 @Composable
 fun PopupCheckIn(
-  onDismissRequest: () -> Unit,
-  onConfirmation: () -> Unit,
-  title: String,
-  descriptionText: String,
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    title: String,
+    descriptionText: String,
     // Button 1
-  buttonDismissText: String,
+    buttonDismissText: String,
     // Button 2
-  buttonConfirmText: String,
+    buttonConfirmText: String,
     // Button open-camera
-  onOpenCamera: () -> Unit,
-
-  valueCode: String,
-  onValueChange: (String) -> Unit = {}
+    onOpenCamera: () -> Unit,
+    valueCode: String,
+    onValueChange: (String) -> Unit = {}
 ) {
   var isCorrect by remember { mutableStateOf(true) }
 
@@ -155,8 +154,7 @@ fun PopupCheckIn(
             CustomPopupButton(
                 onClick = {
                   // hier wird der User-Attendence status geupdatet
-                    onConfirmation()
-                  
+                  onConfirmation()
                 },
                 text = buttonConfirmText,
                 buttonStyle = primaryButtonStyle,
@@ -167,9 +165,9 @@ fun PopupCheckIn(
   }
 }
 
-//@Preview
-//@Composable
-//fun Screen() {
+// @Preview
+// @Composable
+// fun Screen() {
 //  PopupCheckIn(
 //      onDismissRequest = {},
 //      onConfirmation = {},
@@ -180,4 +178,4 @@ fun PopupCheckIn(
 //      onOpenCamera = {},
 //      meetingId = "213445",
 //  )
-//}
+// }
