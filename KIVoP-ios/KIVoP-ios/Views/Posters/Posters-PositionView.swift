@@ -28,6 +28,7 @@ struct Posters_PositionView: View {
    @State private var myId: UUID?
    @State private var address: String?
    @State private var isLoadingAddress = true
+   @State private var isLoading = false
    
    @State private var isGoogleMapsInstalled = false
    @State private var isWazeInstalled = false
@@ -92,9 +93,10 @@ struct Posters_PositionView: View {
    
    var body: some View {
       VStack {
-         if viewModel.isLoading {
-            ProgressView()
-         }
+//         if isLoading {
+//            ProgressView()
+//               .frame(maxWidth: .infinity, maxHeight: 40)
+//         }
          if let position = viewModel.position,
             let address = viewModel.address {
             ScrollView {
@@ -114,6 +116,7 @@ struct Posters_PositionView: View {
                      currentCoordinates: $currentCoordinates,
                      onUpdate: { image, coordinates in
                         Task {
+                           isLoading = true
                            do {
                               try await viewModel.hangPosition(image: image, latitude: coordinates.latitude, longitude: coordinates.longitude)
                               await viewModel.fetchPosition()
@@ -121,6 +124,7 @@ struct Posters_PositionView: View {
                               print("Error hanging position: \(error)")
                            }
                            await viewModel.fetchPosition() //wegmachen evtl sobald server error behoben wurde?
+                           isLoading = false
                         }
                      }
                   )
@@ -389,6 +393,7 @@ struct Posters_PositionView: View {
                         primaryButton: .default(Text("Ja")) {
                            Task {
                               // Perform "Plakat abhängen" action here
+                              isLoading = true
                               do {
                                  try await viewModel.takeDownPosition(image: position.image ?? Data())
                                  await viewModel.fetchPosition()
@@ -396,6 +401,7 @@ struct Posters_PositionView: View {
                                  print("Error taking down position: \(error)")
                               }
                               await viewModel.fetchPosition() //wegmachen evtl sobald server error behoben wurde?
+                              isLoading = false
                            }
                         },
                         secondaryButton: .cancel(Text("Nein"))
@@ -407,6 +413,7 @@ struct Posters_PositionView: View {
                         primaryButton: .default(Text("Ja")) {
                            Task {
                               // Perform "Abhängen zurückziehen" action here
+                              isLoading = true
                               do {
                                  try await viewModel.hangPosition(image: position.image ?? Data(), latitude: nil, longitude: nil) //Koordinaten ergänzen
                                  await viewModel.fetchPosition()
@@ -414,6 +421,7 @@ struct Posters_PositionView: View {
                                  print("Error hanging position after taking it down: \(error)")
                               }
                               await viewModel.fetchPosition() //wegmachen evtl sobald server error behoben wurde?
+                              isLoading = false
                            }
                         },
                         secondaryButton: .cancel(Text("Nein"))
@@ -424,9 +432,9 @@ struct Posters_PositionView: View {
                }
             }
          } else if viewModel.isLoading {
-//            ProgressView("Loading...")
-//               .frame(maxWidth: .infinity, maxHeight: .infinity)
-//               .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
+            ProgressView("Loading...")
+               .frame(maxWidth: .infinity, maxHeight: .infinity)
+               .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
         } else if let error = viewModel.error {
             Text("Error: \(error)")
                 .foregroundColor(.red)
@@ -434,6 +442,14 @@ struct Posters_PositionView: View {
             Text("No poster data available.")
                 .foregroundColor(.secondary)
         }
+      }
+      .overlay {
+         if isLoading {
+            ProgressView("Loading...")
+               .tint(.black)
+               .frame(maxWidth: .infinity, maxHeight: .infinity)
+               .background(.black.opacity(0.2))
+         }
       }
       .navigationBarTitleDisplayMode(.inline)
       .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
