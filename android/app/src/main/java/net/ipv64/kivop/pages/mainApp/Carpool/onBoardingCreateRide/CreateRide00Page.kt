@@ -1,14 +1,13 @@
 package net.ipv64.kivop.pages.mainApp.Carpool.onBoardingCreateRide
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,12 +15,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.ipv64.kivop.R
 import net.ipv64.kivop.ui.customRoundedBottom
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Primary
@@ -50,9 +49,10 @@ fun CreateRide00Page(pagerState: PagerState) {
                     .customRoundedBottom(Background_prime, heightPercent = 40, widthPercent = 30),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
-              Box(modifier = Modifier.height(100.dp).aspectRatio(1.444f).background(Color.Red)) {
-                // todo: add img
-              }
+          Image(
+            painter = painterResource(id = R.drawable.createridescreen1),
+            contentDescription = "Onboarding Screen 1",
+            modifier = Modifier.fillMaxWidth().aspectRatio(1f))
             }
         Column(
             modifier = Modifier.fillMaxWidth().weight(1f).background(Primary),

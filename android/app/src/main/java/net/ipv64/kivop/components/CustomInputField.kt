@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -16,10 +17,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,72 +38,92 @@ import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
 fun CustomInputField(
-    label: String,
-    labelColor: Color = Background_prime,
-    placeholder: String,
-    modifier: Modifier = Modifier,
-    isPasswort: Boolean = false,
-    singleLine: Boolean = true,
-    lines: Int = 1,
-    value: String,
-    backgroundColor: Color = Background_prime,
-    onValueChange: (String) -> Unit,
-    isNumberOnly: Boolean = false,
-    maxChars: Int? = null
+  label: String,
+  labelColor: Color = Background_prime,
+  placeholder: String,
+  modifier: Modifier = Modifier,
+  isPasswort: Boolean = false,
+  singleLine: Boolean = true,
+  lines: Int = 1,
+  value: String,
+  backgroundColor: Color = Background_prime,
+  onValueChange: (String) -> Unit,
+  isNumberOnly: Boolean = false,
+  maxChars: Int? = null,
+  keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+  focusRequester: FocusRequester = FocusRequester(),
+  nextFocusRequester: FocusRequester? = null // Für Fokuswechsel zum nächsten Feld
 ) {
-  val textState = remember { mutableStateOf(TextFieldValue()) }
+  val focusManager = LocalFocusManager.current // Steuerung des Fokus-Managements
+
   Column(modifier = modifier.fillMaxWidth()) {
     Text(
-        text = label,
-        style = TextStyles.contentStyle,
-        color = labelColor,
-        modifier = Modifier.fillMaxWidth())
+      text = label,
+      style = TextStyles.contentStyle,
+      color = labelColor,
+      modifier = Modifier.fillMaxWidth()
+    )
+
     val visualTransformation =
-        (if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None).also {
-          SpacerBetweenElements(4.dp)
-          Box() {
-            OutlinedTextField(
-                visualTransformation = it,
-                value = value,
-                colors =
-                    OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = backgroundColor,
-                        unfocusedContainerColor = backgroundColor,
-                        disabledContainerColor = backgroundColor,
-                        unfocusedBorderColor = backgroundColor,
-                        focusedBorderColor = backgroundColor,
-                        focusedTextColor = Text_prime,
-                        unfocusedTextColor = Text_prime),
-                singleLine = singleLine,
-                maxLines = if (singleLine) 1 else lines,
-                minLines = lines,
-                onValueChange = onValueChange,
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = TextStyles.contentStyle,
-                placeholder = {
-                  Text(
-                      text = placeholder,
-                      color = Text_tertiary.copy(0.4f),
-                      style = TextStyles.contentStyle)
-                },
-                keyboardOptions =
-                    KeyboardOptions.Default.copy(
-                        keyboardType =
-                            if (isNumberOnly) KeyboardType.Number else KeyboardType.Text))
-            if (maxChars != null) {
-              Box(modifier = Modifier.matchParentSize().zIndex(1f).padding(3.dp)) {
-                val textColor =
-                    if (value.length <= maxChars) Text_tertiary.copy(0.4f)
-                    else Signal_red.copy(0.4f)
-                Text(
-                    text = "${value.length}/${maxChars}",
-                    color = textColor,
-                    style = TextStyles.contentStyle.copy(fontSize = 10.sp),
-                    modifier = Modifier.align(Alignment.BottomEnd))
-              }
-            }
+      if (isPasswort) PasswordVisualTransformation() else VisualTransformation.None
+
+    Box {
+      OutlinedTextField(
+        visualTransformation = visualTransformation,
+        value = value,
+        colors =
+        OutlinedTextFieldDefaults.colors(
+          focusedContainerColor = backgroundColor,
+          unfocusedContainerColor = backgroundColor,
+          disabledContainerColor = backgroundColor,
+          unfocusedBorderColor = backgroundColor,
+          focusedBorderColor = backgroundColor,
+          focusedTextColor = Text_prime,
+          unfocusedTextColor = Text_prime
+        ),
+        singleLine = singleLine,
+        maxLines = if (singleLine) 1 else lines,
+        minLines = lines,
+        onValueChange = onValueChange,
+        modifier = Modifier
+          .fillMaxWidth()
+          .focusRequester(focusRequester), // WICHTIG: FocusRequester verbinden!
+        textStyle = TextStyles.contentStyle,
+        placeholder = {
+          Text(
+            text = placeholder,
+            color = Text_tertiary.copy(0.4f),
+            style = TextStyles.contentStyle
+          )
+        },
+        keyboardOptions = keyboardOptions.copy(
+          keyboardType = if (isNumberOnly) KeyboardType.Number else KeyboardType.Text,
+          imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+          onNext = {
+             nextFocusRequester?.requestFocus()  // Springt zum nächsten Eingabefeld
+          },
+          onDone = {
+            focusManager.clearFocus() // Schließt die Tastatur
           }
+        )
+      )
+
+      if (maxChars != null) {
+        Box(modifier = Modifier.matchParentSize().zIndex(1f).padding(3.dp)) {
+          val textColor =
+            if (value.length <= maxChars) Text_tertiary.copy(0.4f)
+            else Signal_red.copy(0.4f)
+          Text(
+            text = "${value.length}/$maxChars",
+            color = textColor,
+            style = TextStyles.contentStyle.copy(fontSize = 10.sp),
+            modifier = Modifier.align(Alignment.BottomEnd)
+          )
         }
+      }
+    }
   }
 }
 
