@@ -171,10 +171,10 @@ struct MarkdownEditorView: View {
                                 }
             }
             .sheet(isPresented: $isExtendSheetPresented) {
-                ExtendRecordView(markdownText: $markdownText)
+                ExtendRecordView(markdownText: $markdownText, lang: lang)
             }
             .sheet(isPresented: $isSocialPostSheetPresented) {
-                            SocialMediaPostView(markdownText: markdownText)
+                            SocialMediaPostView(markdownText: markdownText, lang: lang)
                         }
         }
         .onAppear {
@@ -319,33 +319,55 @@ struct TranslationSheetView: View {
 }
 
 
-import SwiftUI
-import MarkdownUI
-import MeetingServiceDTOs
-import Foundation
-import UIKit
-
-import SwiftUI
-import MarkdownUI
-import MeetingServiceDTOs
-import Foundation
-import UIKit
-
 struct ExtendRecordView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var markdownText: String
-    @State private var aiGeneratedText: String = ""
+    @State private var aiGeneratedText: String = "" // Unformatierter KI-Text
+    @State private var formattedText: String = "" // Formatierter KI-Text
+    @State private var userEditedText: String = "" // Bearbeiteter Text
     @State private var isLoading = true
-    @State private var userEditedText: String = ""
-    
+    @State private var isEditing = false // Bearbeitungsmodus
+    var lang: String
+
     var body: some View {
         VStack(spacing: 20) {
-            Text("KI-generierte Verbesserung")
-                .font(.headline)
-                .foregroundColor(.primary)
-                .padding(.top, 16)
-                .padding(.horizontal)
-            
+            // **Titel-Leiste mit Zurück & Speichern**
+            HStack {
+                if isEditing {
+                    Button("Zurück") {
+                        isEditing = false
+                        userEditedText = aiGeneratedText
+                        formattedText = formatMarkdown(aiGeneratedText)
+                    }
+                    .foregroundColor(.blue)
+                }
+                Spacer()
+                Text("KI-generierte Verbesserung")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Spacer()
+                Button(action: {
+                    isEditing.toggle()
+                    if !isEditing {
+                        aiGeneratedText = userEditedText
+                        formattedText = formatMarkdown(userEditedText)
+                    }
+                }) {
+                    HStack {
+                        if isEditing {
+                            Text("Speichern")
+                                .font(.system(size: 18))
+                        } else {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 18, weight: .bold))
+                        }
+                    }
+                    .foregroundColor(.blue)
+                }
+            }
+            .padding(.horizontal)
+            .frame(height: 44)
+
             HStack(spacing: 20) {
                 VStack {
                     Text("Originaltext")
@@ -353,37 +375,54 @@ struct ExtendRecordView: View {
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
-                    
                     TextEditor(text: $markdownText)
                         .font(.body)
                         .foregroundColor(.primary)
                         .padding()
                         .frame(maxWidth: .infinity, minHeight: 300)
-                        //.background(Color(.systemGray6))
                         .cornerRadius(8)
+                        .border(Color.gray, width: 1)
                 }
-                
                 VStack {
                     Text("KI-Vorschlag")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
-                    
-                    TextEditor(text: $userEditedText)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .padding()
-                        .frame(maxWidth: .infinity, minHeight: 300)
+                    if isLoading {
+                        TextEditor(text: $aiGeneratedText)
+                            .font(.body)
+                            .foregroundColor(.primary)
+                            .padding()
+                            .frame(maxWidth: .infinity, minHeight: 300)
+                            .background(Color.white)
+                            .cornerRadius(8)
+                            .border(Color.gray, width: 1)
+                    } else if isEditing {
+                        TextEditor(text: $userEditedText)
+                            .font(.body)
+                            .foregroundColor(.primary)
+                            .padding()
+                            .frame(maxWidth: .infinity, minHeight: 300)
+                            .background(Color.white)
+                            .cornerRadius(8)
+                            .border(Color.gray, width: 1)
+                    } else {
+                        ScrollView {
+                            Markdown(formattedText)
+                                .markdownTheme(.basic)
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
                         .background(Color.white)
                         .cornerRadius(8)
+                        .border(Color.gray, width: 1)
+                    }
                 }
             }
             .padding(.horizontal)
             .frame(maxWidth: .infinity)
-            
             Spacer()
-            
             HStack(spacing: 15) {
                 Button(action: {
                     dismiss()
@@ -395,9 +434,8 @@ struct ExtendRecordView: View {
                         .foregroundColor(.white)
                         .cornerRadius(8)
                 }
-                
                 Button(action: {
-                    markdownText = userEditedText
+                    markdownText = formattedText
                     dismiss()
                 }) {
                     Text("Übernehmen")
@@ -412,29 +450,42 @@ struct ExtendRecordView: View {
             .padding(.bottom, 20)
         }
         .background(Color.white)
-        .frame(minWidth: 1200, maxWidth: 3000) // Breiteres Layout für bessere Übersicht
+        .frame(minWidth: 1200, maxWidth: 2800)
         .task {
             await fetchExtendedRecord()
         }
-        .onAppear {
-            userEditedText = aiGeneratedText // Text zur Bearbeitung vorbereiten
-        }
     }
-    
+
     private func fetchExtendedRecord() async {
         isLoading = true
         aiGeneratedText = ""
-        
-        await RecordsAPI.extendRecord(content: markdownText) { chunk in
+
+        await RecordsAPI.extendRecord(content: markdownText, lang: lang) { chunk in
             DispatchQueue.main.async {
-                aiGeneratedText += chunk + " "
-                userEditedText = aiGeneratedText // Laufende Aktualisierung im Editor
+                aiGeneratedText += chunk + "\n"
             }
         }
-        
-        isLoading = false
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            print("Finaler AI-Text:\n\(aiGeneratedText)")
+            formattedText = formatMarkdown(aiGeneratedText)
+            userEditedText = aiGeneratedText
+            isLoading = false
+        }
+    }
+
+    private func formatMarkdown(_ text: String) -> String {
+        var formattedText = text
+        formattedText = formattedText.replacingOccurrences(of: "### ", with: "\n### ")
+        formattedText = formattedText.replacingOccurrences(of: "## ", with: "\n## ")
+        //formattedText = formattedText.replacingOccurrences(of: "# ", with: "\n# ")
+        formattedText = formattedText.replacingOccurrences(of: "- ", with: "\n- ")
+        formattedText = formattedText.replacingOccurrences(of: "---", with: "\n\n—\n\n")
+        formattedText = formattedText.replacingOccurrences(of: "\n\n\n", with: "\n\n")
+        return formattedText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
+
 
 
 struct SocialMediaPostView: View {
@@ -442,6 +493,8 @@ struct SocialMediaPostView: View {
     @State private var socialMediaText: String = ""
     @State private var isLoading = true
     var markdownText: String
+    var lang: String
+
     
     var body: some View {
         NavigationStack {
@@ -490,7 +543,7 @@ struct SocialMediaPostView: View {
         isLoading = true
         socialMediaText = ""
         
-        await RecordsAPI.generateSocialMediaPost(content: markdownText) { chunk in
+        await RecordsAPI.generateSocialMediaPost(content: markdownText, lang: lang) { chunk in
             DispatchQueue.main.async {
                 socialMediaText += chunk + " "
             }
@@ -511,39 +564,4 @@ struct SocialMediaPostView: View {
 
 
 
-class RecordsAPI {
-    static func extendRecord(content: String, updateHandler: @escaping (String) -> Void) async {
-        await fetchAIResponse(endpoint: "extend-record", content: content, updateHandler: updateHandler)
-    }
-    
-    static func generateSocialMediaPost(content: String, updateHandler: @escaping (String) -> Void) async {
-        await fetchAIResponse(endpoint: "generate-social-media-post", content: content, updateHandler: updateHandler)
-    }
-    
-    private static func fetchAIResponse(endpoint: String, content: String, updateHandler: @escaping (String) -> Void) async {
-        guard let url = URL(string: "https://kivop.ipv64.net/ai/" + endpoint) else { return }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let requestBody: [String: String] = ["content": content]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: requestBody, options: [])
-        
-        do {
-            let (stream, response) = try await URLSession.shared.bytes(for: request)
-            guard (response as? HTTPURLResponse)?.statusCode == 200 else { return }
-            
-            for try await line in stream.lines {
-                DispatchQueue.main.async {
-                    updateHandler(line)
-                }
-                try await Task.sleep(nanoseconds: 1)
-            }
-        } catch {
-            DispatchQueue.main.async {
-                updateHandler("Fehler: \(error.localizedDescription)")
-            }
-        }
-    }
-}
+
