@@ -98,4 +98,16 @@ dependencies {
   implementation(libs.accompanist.pager.indicators)
   implementation("com.google.android.gms:play-services-maps:19.0.0")
   implementation("com.google.maps.android:maps-compose:6.4.0")
+  // ML Kit Barcode Scanning
+  implementation(libs.mlkit.barcode.scanning)
+  implementation(libs.camera.mlkit.vision)
+// CameraX dependencies for camera integration
+  implementation(libs.androidx.camera.core)
+  implementation(libs.camera.camera2)
+  implementation(libs.camera.lifecycle)
+  implementation(libs.camera.view)
+// Accompanist Permissions for handling runtime permissions
+  implementation(libs.accompanistPermissions)
+  
+  
 }

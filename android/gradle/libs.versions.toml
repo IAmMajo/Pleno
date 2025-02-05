@@ -15,8 +15,28 @@ navigationRuntimeKtx = "2.8.4"
 material3Android = "1.3.1"
 playServicesMaps = "19.0.0"
 playServicesLocation = "21.3.0"
+cameraCore = "1.4.1"
+cameraMlkitVision = "1.4.1"
+camerax = "1.4.1"
+mlkit-barcode-scanning = "17.3.0"
+accompanistPermissions = "0.34.0"
+
+
+
+
 
 [libraries]
+#camera
+camera-mlkit-vision = { group = "androidx.camera", name = "camera-mlkit-vision", version.ref = "cameraMlkitVision" }
+camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraCore" }
+mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkit-barcode-scanning" }
+#For the permission
+accompanistPermissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
+#--------------------------------------------------------------------------------------------------------------------------------
+
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
 accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanistPager" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
