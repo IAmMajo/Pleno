@@ -84,33 +84,33 @@ fun PopupCheckIn(
         )
       }
       Row {
-//        TextField(
-//          value = valueCode,  // Wert wird aus AttendancesCoordinationPage aktualisiert
-//          onValueChange = onValueChange,  // Wert wird automatisch nach Scan gesetzt
-//          placeholder = { Text("000000") },
-//          colors = TextFieldDefaults.colors(
-//            unfocusedTextColor = Signal_neutral,
-//            unfocusedContainerColor = Signal_neutral_20,
-//          ),
-//        )
+        //        TextField(
+        //          value = valueCode,  // Wert wird aus AttendancesCoordinationPage aktualisiert
+        //          onValueChange = onValueChange,  // Wert wird automatisch nach Scan gesetzt
+        //          placeholder = { Text("000000") },
+        //          colors = TextFieldDefaults.colors(
+        //            unfocusedTextColor = Signal_neutral,
+        //            unfocusedContainerColor = Signal_neutral_20,
+        //          ),
+        //        )
         CustomInputField(
-          value = valueCode,  // Wert wird aus AttendancesCoordinationPage aktualisiert
-          onValueChange = onValueChange,  // Wert wird automatisch nach Scan gesetzt
-          placeholder = "000000",
-          maxChars = 6,
-          label = descriptionText,
-          labelColor = Text_tertiary,
-          backgroundColor = ProgressBarGray,
+            value = valueCode, // Wert wird aus AttendancesCoordinationPage aktualisiert
+            onValueChange = onValueChange, // Wert wird automatisch nach Scan gesetzt
+            placeholder = "000000",
+            maxChars = 6,
+            label = descriptionText,
+            labelColor = Text_tertiary,
+            backgroundColor = ProgressBarGray,
         )
-
       }
       SpacerBetweenElements(12.dp)
       IconButton(
-        onClick = { onOpenCamera() },  //  Scanner wird geöffnet
-        colors = IconButtonDefaults.iconButtonColors(
-          contentColor = Signal_neutral,
-          containerColor = Signal_neutral_20,
-        ),
+          onClick = { onOpenCamera() }, //  Scanner wird geöffnet
+          colors =
+              IconButtonDefaults.iconButtonColors(
+                  contentColor = Signal_neutral,
+                  containerColor = Signal_neutral_20,
+              ),
           modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth(),
       ) {
         Row {
