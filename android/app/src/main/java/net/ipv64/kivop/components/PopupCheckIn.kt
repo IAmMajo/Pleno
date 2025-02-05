@@ -13,8 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +28,7 @@ import net.ipv64.kivop.R
 import net.ipv64.kivop.models.primaryButtonStyle
 import net.ipv64.kivop.models.secondaryButtonStyle
 import net.ipv64.kivop.ui.theme.Background_prime
+import net.ipv64.kivop.ui.theme.ProgressBarGray
 import net.ipv64.kivop.ui.theme.Signal_neutral
 import net.ipv64.kivop.ui.theme.Signal_neutral_20
 import net.ipv64.kivop.ui.theme.Signal_red
@@ -76,16 +75,6 @@ fun PopupCheckIn(
           color = Text_prime,
       )
       SpacerBetweenElements(12.dp)
-      // Beschreibung
-      Text(
-          text = descriptionText,
-          fontStyle = textContentStyle.fontStyle,
-          fontWeight = textContentStyle.fontWeight,
-          fontSize = textContentStyle.fontSize,
-          fontFamily = textContentStyle.fontFamily,
-          color = Text_tertiary,
-      )
-      SpacerBetweenElements(12.dp)
       // ToDo - styling font
       if (!isCorrect) {
         Text(
@@ -95,28 +84,33 @@ fun PopupCheckIn(
         )
       }
       Row {
-        TextField(
-            value = valueCode,
-            onValueChange = onValueChange,
-            placeholder = { Text("000000") },
-            colors =
-                TextFieldDefaults.colors(
-                    unfocusedTextColor = Signal_neutral,
-                    // focusedTextColor = Text_tertiary,
-                    unfocusedContainerColor = Signal_neutral_20,
-                    // focusedContainerColor = Signal_neutral_20,
-                ),
-            // lineLimits = //TextFieldLineLimits.Default,
+//        TextField(
+//          value = valueCode,  // Wert wird aus AttendancesCoordinationPage aktualisiert
+//          onValueChange = onValueChange,  // Wert wird automatisch nach Scan gesetzt
+//          placeholder = { Text("000000") },
+//          colors = TextFieldDefaults.colors(
+//            unfocusedTextColor = Signal_neutral,
+//            unfocusedContainerColor = Signal_neutral_20,
+//          ),
+//        )
+        CustomInputField(
+          value = valueCode,  // Wert wird aus AttendancesCoordinationPage aktualisiert
+          onValueChange = onValueChange,  // Wert wird automatisch nach Scan gesetzt
+          placeholder = "000000",
+          maxChars = 6,
+          label = descriptionText,
+          labelColor = Text_tertiary,
+          backgroundColor = ProgressBarGray,
         )
+
       }
       SpacerBetweenElements(12.dp)
       IconButton(
-          onClick = onOpenCamera,
-          colors =
-              IconButtonDefaults.iconButtonColors(
-                  contentColor = Signal_neutral,
-                  containerColor = Signal_neutral_20,
-              ),
+        onClick = { onOpenCamera() },  //  Scanner wird geöffnet
+        colors = IconButtonDefaults.iconButtonColors(
+          contentColor = Signal_neutral,
+          containerColor = Signal_neutral_20,
+        ),
           modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth(),
       ) {
         Row {
