@@ -155,31 +155,20 @@ struct PosterRowView: View {
                             .cornerRadius(10)
                     }
                     Spacer()
-                    VStack(alignment: .leading){
+                    VStack(){
                         Text(poster.poster.name)
                             .font(.title)
+                        
+                        HStack() {
+                            if let summary = poster.summary {
+                                CircularProgressView(poster: poster, status: .hangs).padding(.horizontal, 2)
+                                CircularProgressView(poster: poster, status: .takenDown).padding(.horizontal, 2)
+
+                            }
+                        }.padding(.horizontal, 6)
+                            .padding(.top, 10)
                     }
                     Spacer()
-                    VStack(alignment: .trailing) {
-                        if let summary = poster.summary {
-                            Text("Hängt noch nicht: \(summary.toHang)")
-                            Text("Hängt: \(summary.hangs)")
-                            Text("Beschädigt: \(summary.damaged)")
-                            Text("Überfällig: \(summary.overdue)")
-                            Text("Abgehangen: \(summary.takenDown)")
-//                            Spacer()
-//                            HStack(alignment: .bottom, spacing: 12){
-//                                
-//                                summaryItem(title: "Hängt noch nicht", value: summary.toHang)
-//                                summaryItem(title: "Hängt", value: summary.hangs)
-//                                summaryItem(title: "Beschädigt", value: summary.damaged)
-//                                summaryItem(title: "Überfällig", value: summary.overdue)
-//                                summaryItem(title: "Abgehangen", value: summary.takenDown)
-//                                
-//                            }
-
-                        }
-                    }.padding(.horizontal, 6)
                 }
                 Divider() // Dieser Divider nimmt die gesamte Breite der Zelle ein
                     .padding(.vertical, 5) // Optional: Abstand über und unter dem Divider
@@ -193,7 +182,7 @@ struct PosterRowView: View {
                 .font(.caption)
                 .foregroundColor(.gray)
                 .lineLimit(2) // Verhindert Zeilenumbrüche
-                //.fixedSize(horizontal: false, vertical: true) // Erzwingt einzeilige Darstellung
+
 
             
             Text("\(value)")
