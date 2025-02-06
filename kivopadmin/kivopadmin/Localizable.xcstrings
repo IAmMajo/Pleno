@@ -70,6 +70,9 @@
         }
       }
     },
+    " Vereinsreise..." : {
+
+    },
     "- %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -324,6 +327,7 @@
       }
     },
     "1/4" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -368,6 +372,7 @@
       }
     },
     "2/3" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3060,6 +3065,9 @@
         }
       }
     },
+    "Generierter Social-Media-Post" : {
+
+    },
     "Hallo %@" : {
       "localizations" : {
         "de" : {
@@ -3596,6 +3604,12 @@
           }
         }
       }
+    },
+    "KI-generierte Verbesserung" : {
+
+    },
+    "KI-Vorschlag" : {
+
     },
     "KIVoP " : {
       "extractionState" : "stale",
@@ -5132,6 +5146,9 @@
         }
       }
     },
+    "Originaltext" : {
+
+    },
     "Ort" : {
       "localizations" : {
         "de" : {
@@ -6339,6 +6356,9 @@
         }
       }
     },
+    "Teilen" : {
+
+    },
     "Teilnahme bestätigen" : {
       "localizations" : {
         "de" : {
@@ -6455,6 +6475,9 @@
           }
         }
       }
+    },
+    "Übernehmen" : {
+
     },
     "Übersetzen" : {
       "localizations" : {
@@ -6765,6 +6788,7 @@
       }
     },
     "Vereinsreise..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6873,6 +6897,9 @@
           }
         }
       }
+    },
+    "Verwerfen" : {
+
     },
     "VL" : {
       "localizations" : {

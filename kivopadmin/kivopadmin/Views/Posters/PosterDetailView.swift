@@ -150,27 +150,27 @@ struct TopView: View {
                     }
                  }.padding(.top, 5)
                 VStack{
-                      CircularProgressView(value: 2, total: 3, status: Status.hung)
-                         .frame(maxWidth: 35, maxHeight: 35)
-                         .padding(.bottom, 5)
-                      Text("2/3")
-                         .font(.title3)
-                         .fontWeight(.semibold)
-                      Text("Aufgehangen")
-                         .font(.subheadline)
-                         .foregroundStyle(.black.opacity(0.6))
+                      //CircularProgressView(value: 2, total: 3, status: Status.hung)
+//                         .frame(maxWidth: 35, maxHeight: 35)
+//                         .padding(.bottom, 5)
+//                      Text("2/3")
+//                         .font(.title3)
+//                         .fontWeight(.semibold)
+//                      Text("Aufgehangen")
+//                         .font(.subheadline)
+//                         .foregroundStyle(.black.opacity(0.6))
                    }
                    
                    VStack{
-                      CircularProgressView(value: 1, total: 4, status: Status.takenDown)
-                         .frame(maxWidth: 35, maxHeight: 35)
-                         .padding(.bottom, 5)
-                      Text("1/4")
-                         .font(.title3)
-                         .fontWeight(.semibold)
-                      Text("Abgehangen")
-                         .font(.subheadline)
-                         .foregroundStyle(.black.opacity(0.6))
+                      //CircularProgressView(value: 1, total: 4, status: Status.takenDown)
+//                         .frame(maxWidth: 35, maxHeight: 35)
+//                         .padding(.bottom, 5)
+//                      Text("1/4")
+//                         .font(.title3)
+//                         .fontWeight(.semibold)
+//                      Text("Abgehangen")
+//                         .font(.subheadline)
+//                         .foregroundStyle(.black.opacity(0.6))
                    }
             }
         }
