@@ -42,7 +42,7 @@ struct Polls_PollResultView: View {
 
                 HStack {
                    Image(systemName: "calendar.badge.clock")
-                   let string = poll.isOpen ? "Schließt:" : "Geschlossen:"
+                   let string = poll.isOpen ? NSLocalizedString("Schließt:", comment: "") : NSLocalizedString("Geschlossen:", comment: "")
                    Text("\(string) \(DateTimeFormatter.formatDate(poll.closedAt)), \(DateTimeFormatter.formatTime(poll.closedAt)) Uhr")
                       .frame(maxWidth: .infinity, alignment: .leading)
                 }

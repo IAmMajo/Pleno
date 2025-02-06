@@ -80,6 +80,7 @@ extension HangPosterPositionResponseDTO: @retroactive @unchecked Sendable {}
 extension TakeDownPosterPositionDTO: @retroactive @unchecked Sendable {}
 extension TakeDownPosterPositionResponseDTO: @retroactive @unchecked Sendable {}
 extension ReportDamagedPosterPositionDTO: @retroactive @unchecked Sendable {}
+extension PosterSummaryResponseDTO: @retroactive @unchecked Sendable {}
 
 extension GetPollDTO: @retroactive Identifiable {}
 extension GetPollDTO: @retroactive Equatable {}

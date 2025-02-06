@@ -10,15 +10,24 @@ import PosterServiceDTOs
 
 struct FilteredPoster: Equatable {
    let poster: PosterResponseDTO
-   let earliestPosition: PosterPositionResponseDTO
+   let nextTakeDownPosition: PosterPositionResponseDTO
    let tohangCount: Int
    let expiredCount: Int
    
    static func == (lhs: FilteredPoster, rhs: FilteredPoster) -> Bool {
       return lhs.poster.id == rhs.poster.id &&
-      lhs.earliestPosition.id == rhs.earliestPosition.id &&
+      lhs.nextTakeDownPosition.id == rhs.nextTakeDownPosition.id &&
       lhs.tohangCount == rhs.tohangCount &&
       lhs.expiredCount == rhs.expiredCount
+   }
+}
+
+struct FilteredPoster2: Equatable {
+   let poster: PosterResponseDTO
+   let posterSummary: PosterSummaryResponseDTO
+   
+   static func == (lhs: FilteredPoster2, rhs: FilteredPoster2) -> Bool {
+      return lhs.poster.id == rhs.poster.id
    }
 }
 
@@ -35,6 +44,17 @@ struct PostersView: View {
    
    @State private var searchText = ""
    
+//   static func getDateColor(overdueCount: Int, date: Date) -> Color {
+//      if overdueCount > 0 {
+//         return .red
+//      } else {
+//         if date < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
+//            return .orange
+//         } else {
+//            return Color(UIColor.secondaryLabel)
+//         }
+//      }
+//    }
    
     var body: some View {
        VStack {
@@ -90,16 +110,15 @@ struct PostersView: View {
                             Text(item.poster.name)
                                .frame(maxWidth: .infinity, alignment: .leading)
                             //
-                            Text("\(DateTimeFormatter.formatDate(item.earliestPosition.expiresAt))")
+                            Text("\(DateTimeFormatter.formatDate(item.nextTakeDownPosition.expiresAt))")
                                .frame(maxWidth: .infinity, alignment: .leading)
                                .font(.callout)
-                               .foregroundStyle(DateColorHelper.getDateColor(position: item.earliestPosition))
+                               .foregroundStyle(DateColorHelper.getDateColor(position: item.nextTakeDownPosition))
                             
                          }
                          
                          Spacer()
                          
-                         //damaged count hinzufügen?
                          if (item.tohangCount != 0) {
                             if item.tohangCount > 99 {
                                Capsule()
@@ -217,7 +236,7 @@ struct PostersView: View {
              Task {
                 isLoading = true
                 await viewModel.fetchPosters()
-                postersFiltered = viewModel.filteredPosters
+//                postersFiltered = viewModel.filteredPosters
                 isLoading = false
              }
           }

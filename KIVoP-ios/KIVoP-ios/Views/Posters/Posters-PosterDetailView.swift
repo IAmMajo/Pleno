@@ -40,18 +40,18 @@ struct Posters_PosterDetailView: View {
       switch status {
       case .hangs:
          if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
-            return (text: "morgen überfällig", color: .orange)
+            return (text: NSLocalizedString("morgen überfällig", comment: ""), color: .orange)
          } else {
-            return (text: "hängt", color: .blue)
+            return (text: NSLocalizedString("hängt", comment: ""), color: .blue)
          }
       case .takenDown:
-         return (text: "abgehängt", color: .green)
+         return (text: NSLocalizedString("abgehängt", comment: ""), color: .green)
       case .toHang:
-         return (text: "hängt noch nicht", color: Color(UIColor.secondaryLabel))
+         return (text: NSLocalizedString("hängt noch nicht", comment: ""), color: Color(UIColor.secondaryLabel))
       case .overdue:
-         return (text: "überfällig", color: .red)
+         return (text: NSLocalizedString("überfällig", comment: ""), color: .red)
       case .damaged:
-         return (text: "beschädigt", color: .yellow)
+         return (text: NSLocalizedString("beschädigt", comment: ""), color: .yellow)
       }
    }
    
