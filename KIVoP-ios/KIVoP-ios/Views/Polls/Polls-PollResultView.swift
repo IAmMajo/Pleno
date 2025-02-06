@@ -66,7 +66,22 @@ struct Polls_PollResultView: View {
                    .padding(.horizontal)
                 }
                 
-                PollResultList(results: pollResults, optionTextMap: optionTextMap)
+                if pollResults.totalCount != 0 {
+                   PollResultList(results: pollResults, optionTextMap: optionTextMap)
+                } else {
+                   ZStack {
+                      HStack {
+                         Image(systemName: "info.circle.fill")
+                            .padding(.top, 1)
+                         Text("Für diese Umfrage hat keiner abgestimmt.")
+                      }
+                      .foregroundStyle(Color(UIColor.label).opacity(0.6))
+                      .padding()
+                      .frame(maxWidth: .infinity, alignment: .leading)
+                   }.background(Color(UIColor.systemBackground))
+                      .cornerRadius(10)
+                      .padding(.horizontal) .padding(.top)
+                }
 
              }
           } else if isLoading {

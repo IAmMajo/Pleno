@@ -76,32 +76,25 @@ struct PieChartView: View {
 
    var body: some View {
       VStack {
-         Chart(votingResults.results, id: \.index) { result in
-            SectorMark(
-               angle: .value("Count", result.count),
-               //            innerRadius: .ratio(0.5),
-               angularInset: 4
-            )
-            .cornerRadius(6)
-            .foregroundStyle(colorMapping[result.index] ?? .black)
-            //         .foregroundStyle(by: .value("Option", optionTextMap[result.index] ?? ""))
+         if votingResults.totalCount != 0 {
+            Chart(votingResults.results, id: \.index) { result in
+               SectorMark(
+                  angle: .value("Count", result.count),
+                  //            innerRadius: .ratio(0.5),
+                  angularInset: 4
+               )
+               .cornerRadius(6)
+               .foregroundStyle(colorMapping[result.index] ?? .black)
+               //         .foregroundStyle(by: .value("Option", optionTextMap[result.index] ?? ""))
+            }
+            .scaledToFit()
+            //         .chartLegend(alignment: .center, spacing: 16)
+         } else {
+            Image(systemName: "chart.pie.fill")
+               .resizable()
+               .scaledToFit()
+               .foregroundStyle(Color(UIColor.secondaryLabel).opacity(0.5))
          }
-         .scaledToFit()
-//         .chartLegend(alignment: .center, spacing: 16)
-         
-//         HStack(alignment: .center, spacing: 13) { // Legende
-//            ForEach (votingResults.results) { result in
-//               HStack(spacing: 6) {
-//                  Circle()
-//                     .fill(colorMapping[result.index] ?? .black)
-//                     .frame(width: 10, height: 10)
-//                  Text(optionTextMap[result.index] ?? "")
-//                     .font(.footnote)
-//                     .foregroundStyle(Color(UIColor.secondaryLabel))
-//               }
-//            }
-//         }
-//         .padding(.top, 8)
          
          let colorArray = colorMapping
              .sorted(by: { $0.key < $1.key }) // Sort by key
