@@ -20,6 +20,7 @@ struct Votings_VoteView: View {
    @State private var showingAlert = false
    
    @Environment(\.dismiss) private var dismiss
+   @Environment(\.colorScheme) var colorScheme
    
 //   var onNavigate: (GetVotingResultsDTO) -> Void
    var onNavigate: () -> Void
@@ -50,7 +51,7 @@ struct Votings_VoteView: View {
                               Text(option.text)
                            }
                         }
-                        .listRowBackground(Color(UIColor.systemBackground))
+                        .listRowBackground(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
                      } else {
                         HStack {
                            Image(systemName: "circle")
@@ -117,7 +118,7 @@ struct Votings_VoteView: View {
                   )
                }
             }
-            .background(Color(UIColor.secondarySystemBackground))
+            .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Abbrechen", action: { dismiss() })
