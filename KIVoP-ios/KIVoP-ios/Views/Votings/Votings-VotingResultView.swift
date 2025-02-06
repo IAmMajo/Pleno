@@ -93,8 +93,21 @@ struct Votings_VotingResultView: View {
                    }.background(Color(UIColor.systemBackground))
                       .cornerRadius(10)
                       .padding(.horizontal) .padding(.top)
-                } else {
+                } else if votingResults.totalCount != 0 {
                    VotingResultList(results: votingResults, optionTextMap: optionTextMap)
+                } else {
+                   ZStack {
+                      HStack {
+                         Image(systemName: "info.circle.fill")
+                            .padding(.top, 1)
+                         Text("Für diese Abstimmung hat keiner abgestimmt.")
+                      }
+                      .foregroundStyle(Color(UIColor.label).opacity(0.6))
+                      .padding()
+                      .frame(maxWidth: .infinity, alignment: .leading)
+                   }.background(Color(UIColor.systemBackground))
+                      .cornerRadius(10)
+                      .padding(.horizontal) .padding(.top)
                 }
              }
           } else if isLoading {

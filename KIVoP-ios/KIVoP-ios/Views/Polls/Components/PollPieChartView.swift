@@ -30,18 +30,25 @@ struct PollPieChartView: View {
 
    var body: some View {
       VStack {
-         Chart(pollResults.results, id: \.index) { result in
-            SectorMark(
-               angle: .value("Count", result.count),
-               //            innerRadius: .ratio(0.5),
-               angularInset: 4
-            )
-            .cornerRadius(6)
-            .foregroundStyle(colorMappingPoll[result.index] ?? .black)
-//                     .foregroundStyle(by: .value("Option", optionTextMap[result.index] ?? ""))
+         if pollResults.totalCount != 0 {
+            Chart(pollResults.results, id: \.index) { result in
+               SectorMark(
+                  angle: .value("Count", result.count),
+                  //            innerRadius: .ratio(0.5),
+                  angularInset: 4
+               )
+               .cornerRadius(6)
+               .foregroundStyle(colorMappingPoll[result.index] ?? .black)
+   //                     .foregroundStyle(by: .value("Option", optionTextMap[result.index] ?? ""))
+            }
+            .scaledToFit()
+   //         .chartLegend(alignment: .center, spacing: 16)
+         } else {
+            Image(systemName: "chart.pie.fill")
+               .resizable()
+               .scaledToFit()
+               .foregroundStyle(Color(UIColor.secondaryLabel).opacity(0.5))
          }
-         .scaledToFit()
-//         .chartLegend(alignment: .center, spacing: 16)
          
          let colorArray = colorMappingPoll
              .sorted(by: { $0.key < $1.key }) // Sort by key
