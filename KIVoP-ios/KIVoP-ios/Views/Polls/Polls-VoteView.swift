@@ -20,6 +20,7 @@ struct Polls_VoteView: View {
    @State private var showingAlert = false
    
    @Environment(\.dismiss) private var dismiss
+   @Environment(\.colorScheme) var colorScheme
    
 //   var onNavigate: (GetVotingResultsDTO) -> Void
    var onNavigate: () -> Void
@@ -47,7 +48,7 @@ struct Polls_VoteView: View {
                                   .foregroundStyle(selection.contains(option) ? .blue : .gray)
                               Text(option.text)
                           }
-                          .listRowBackground(Color(UIColor.systemBackground))
+                          .listRowBackground(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
                           .frame(maxWidth: .infinity, alignment: .leading)
                           .contentShape(Rectangle())
                           .onTapGesture {
@@ -100,7 +101,7 @@ struct Polls_VoteView: View {
                   .buttonStyle(.bordered)
                   .controlSize(.large)
               }
-              .background(Color(UIColor.secondarySystemBackground))
+              .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
               .toolbar {
                   ToolbarItem(placement: .cancellationAction) {
                       Button("Abbrechen", action: { dismiss() })
