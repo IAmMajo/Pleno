@@ -290,6 +290,8 @@ fun AttendancesCoordinationPage(
           code.value = scannedCode //  Code in Inputfeld speichern
           showScanner = false // Scanner schließen
           confirmationMeeting = true
-        })
+        },
+      navController = navController
+      )
   }
 }

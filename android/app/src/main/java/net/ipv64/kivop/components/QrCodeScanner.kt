@@ -1,6 +1,10 @@
 package net.ipv64.kivop.components
 
+import android.Manifest
+import android.content.Intent
 import android.graphics.Rect
+import android.net.Uri
+import android.provider.Settings
 import android.util.Log
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.mlkit.vision.MlKitAnalyzer
@@ -8,6 +12,8 @@ import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,11 +28,17 @@ import androidx.compose.ui.graphics.toComposeRect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import kotlinx.coroutines.delay
 import net.ipv64.kivop.ui.theme.Primary
+import net.ipv64.kivop.ui.theme.Text_prime_light
 
 // Der Code stammt aus folgendem Blog:
 // https://proandroiddev.com/integrating-google-ml-kit-for-barcode-scanning-in-jetpack-compose-android-apps-5deda28377c9
@@ -34,9 +46,11 @@ import net.ipv64.kivop.ui.theme.Primary
 
 @Composable
 fun ScanCode(
-    onQrCodeDetected: (String) -> Unit, // Callback to handle detected QR/barcode
-    modifier: Modifier = Modifier
+  onQrCodeDetected: (String) -> Unit, // Callback to handle detected QR/barcode
+  modifier: Modifier = Modifier,
+  navController: NavController
 ) {
+  PopCameraPermission(navController = navController)
   // State to hold the detected barcode value
   var barcode by remember { mutableStateOf<String?>(null) }
 
@@ -138,6 +152,60 @@ fun DrawRectangle(rect: Rect?) {
           size = Size(it.width, it.height), // Set the size of the rectangle
           style = Stroke(width = 5f) // Use a stroke style with a width of 5f
           )
+    }
+  }
+}
+
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun PopCameraPermission(modifier: Modifier = Modifier,navController: NavController,) {
+  val permissionState = rememberPermissionState(Manifest.permission.CAMERA)
+  val context = LocalContext.current
+
+  Log.i("PermissionState", "PermissionState: ${permissionState.status}")
+
+  // 🚀 Berechtigungsanfrage direkt ausführen, wenn notwendig
+  LaunchedEffect(permissionState.status) {
+    if (!permissionState.status.isGranted) {
+      permissionState.launchPermissionRequest() // Android-Standardanfrage immer direkt starten
+    }
+  }
+
+  when {
+    permissionState.status.isGranted -> {
+      // Kamera-Berechtigung wurde erteilt, keine weitere Aktion nötig
+    }
+
+    permissionState.status.shouldShowRationale.not() -> {
+      // „Nie wieder fragen“ wurde gewählt → Nutzer muss in die Einstellungen
+      AlertDialog(
+        onDismissRequest = {},
+        title = { Text("Berechtigung in Einstellungen aktivieren") },
+        text = { Text("Die Kamera-Berechtigung wurde dauerhaft verweigert. Bitte aktiviere sie in den App-Einstellungen.") },
+        confirmButton = {
+          CustomButton(
+            onClick = {
+              val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", context.packageName, null)
+              }
+              context.startActivity(intent)
+            },
+            text = "Einstellungen öffnen",
+            modifier = modifier,
+            color = Primary,
+            fontColor = Text_prime_light
+          )
+        },
+        dismissButton = {
+          CustomButton(
+            onClick = { navController.navigate("home")},
+            text = "Abbrechen",
+            modifier = modifier,
+            )
+        }
+        
+      )
     }
   }
 }
