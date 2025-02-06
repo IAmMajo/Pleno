@@ -46,9 +46,9 @@ import net.ipv64.kivop.ui.theme.Text_prime_light
 
 @Composable
 fun ScanCode(
-  onQrCodeDetected: (String) -> Unit, // Callback to handle detected QR/barcode
-  modifier: Modifier = Modifier,
-  navController: NavController
+    onQrCodeDetected: (String) -> Unit, // Callback to handle detected QR/barcode
+    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
   PopCameraPermission(navController = navController)
   // State to hold the detected barcode value
@@ -156,10 +156,12 @@ fun DrawRectangle(rect: Rect?) {
   }
 }
 
-
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun PopCameraPermission(modifier: Modifier = Modifier,navController: NavController,) {
+fun PopCameraPermission(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+) {
   val permissionState = rememberPermissionState(Manifest.permission.CAMERA)
   val context = LocalContext.current
 
@@ -180,32 +182,33 @@ fun PopCameraPermission(modifier: Modifier = Modifier,navController: NavControll
     permissionState.status.shouldShowRationale.not() -> {
       // „Nie wieder fragen“ wurde gewählt → Nutzer muss in die Einstellungen
       AlertDialog(
-        onDismissRequest = {},
-        title = { Text("Berechtigung in Einstellungen aktivieren") },
-        text = { Text("Die Kamera-Berechtigung wurde dauerhaft verweigert. Bitte aktiviere sie in den App-Einstellungen.") },
-        confirmButton = {
-          CustomButton(
-            onClick = {
-              val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.fromParts("package", context.packageName, null)
-              }
-              context.startActivity(intent)
-            },
-            text = "Einstellungen öffnen",
-            modifier = modifier,
-            color = Primary,
-            fontColor = Text_prime_light
-          )
-        },
-        dismissButton = {
-          CustomButton(
-            onClick = { navController.navigate("home")},
-            text = "Abbrechen",
-            modifier = modifier,
+          onDismissRequest = {},
+          title = { Text("Berechtigung in Einstellungen aktivieren") },
+          text = {
+            Text(
+                "Die Kamera-Berechtigung wurde dauerhaft verweigert. Bitte aktiviere sie in den App-Einstellungen.")
+          },
+          confirmButton = {
+            CustomButton(
+                onClick = {
+                  val intent =
+                      Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                      }
+                  context.startActivity(intent)
+                },
+                text = "Einstellungen öffnen",
+                modifier = modifier,
+                color = Primary,
+                fontColor = Text_prime_light)
+          },
+          dismissButton = {
+            CustomButton(
+                onClick = { navController.navigate("home") },
+                text = "Abbrechen",
+                modifier = modifier,
             )
-        }
-        
-      )
+          })
     }
   }
 }

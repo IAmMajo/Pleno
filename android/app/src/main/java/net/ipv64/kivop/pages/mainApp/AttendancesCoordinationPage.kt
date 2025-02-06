@@ -291,7 +291,6 @@ fun AttendancesCoordinationPage(
           showScanner = false // Scanner schließen
           confirmationMeeting = true
         },
-      navController = navController
-      )
+        navController = navController)
   }
 }
