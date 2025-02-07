@@ -15,11 +15,13 @@ import MeetingServiceDTOs
 class PostersViewModel: ObservableObject {
     @Published var posters: [PosterResponseDTO] = []
 //   @Published var filteredPosters: [(poster: PosterResponseDTO, nextTakeDownPosition: PosterPositionResponseDTO, tohangCount: Int, expiredCount: Int)] = []
-   @Published var filteredPosters: [FilteredPoster] = []
+   @Published var filteredPosters: [FilteredPoster2] = []
     @Published var selectedTab: Int = 0 {
-        didSet {
-            filterPosters()
-        }
+       didSet {
+          Task {
+             await filterPosters()
+          }
+       }
     }
 
     private var posterPositionsMap: [UUID: [PosterPositionResponseDTO]] = [:]
@@ -49,130 +51,119 @@ class PostersViewModel: ObservableObject {
                 print("Error fetching positions for poster \(poster.id): \(error)")
             }
         }
-        filterPosters()
+        await filterPosters()
     }
    
-//   private func filterPosters() async {
+   private func filterPosters() async {
+      var updatedFilteredPosters: [FilteredPoster2] = []
+      
+      for poster in posters {
+         guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { continue }
+         
+         do {
+            let posterSummary = try await PosterService.shared.fetchPosterSummary(for: poster.id)
+            
+            // Check if the poster is archived
+            let isArchived = positions.allSatisfy { position in
+               position.status == .takenDown &&
+               position.expiresAt <= Calendar.current.date(byAdding: .day, value: -3, to: Date())!
+            }
+            
+            switch selectedTab {
+            case 0 where !isArchived, 1 where isArchived:
+               updatedFilteredPosters.append(FilteredPoster2(poster: poster, posterSummary: posterSummary))
+            default:
+               continue
+            }
+         } catch {
+            print("Error fetching posterSummary: \(error)")
+            // Fallback to mock data if fetching fails
+//            updatedFilteredPosters.append(FilteredPoster2(poster: poster, posterSummary: mockPosterSummary))
+         }
+      }
+      
+      // Sorting logic after fetching all summaries
+      filteredPosters = updatedFilteredPosters.sorted {
+         if $0.posterSummary.hangs > 0 || $0.posterSummary.overdue > 0 {
+            if $1.posterSummary.hangs > 0 || $1.posterSummary.overdue > 0 {
+               return $0.posterSummary.nextTakeDown ?? Date() < $1.posterSummary.nextTakeDown ?? Date()
+            } else {
+               return true
+            }
+         } else if $1.posterSummary.hangs > 0 || $1.posterSummary.overdue > 0 {
+            return false
+         } else {
+            return $0.posterSummary.nextTakeDown ?? Date() < $1.posterSummary.nextTakeDown ?? Date()
+         }
+      }
+      
+   
+//   private func filterPosters() {
 //       filteredPosters = posters.compactMap { poster in
-//          guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { return nil }
-//          var posterSummary: PosterSummaryResponseDTO = mockPosterSummary
-//          Task {
-//             do {
-//                posterSummary = try await PosterService.shared.fetchPosterSummary(for: poster.id)
-//             } catch {
-//                print("Error fetching posterSummary: \(error)")
-//             }
-//             
-//             // Check if the poster is archived
-//             let isArchived = positions.allSatisfy { position in
-//                position.status == .takenDown &&
-//                 position.expiresAt <= Calendar.current.date(byAdding: .day, value: -3, to: Date())!
-//             }
-//             
-//             switch selectedTab {
-//             case 0:
-//                 // Include only non-archived posters for the "Aktuell" tab
-//                 if !isArchived {
-//                     return FilteredPoster2(
-//                         poster: poster,
-//                         posterSummary: posterSummary
-//                     )
-//                 }
-//             case 1:
-//                 // Include only archived posters for the "Archiviert" tab
-//                 if isArchived {
-//                     return FilteredPoster2(
-//                         poster: poster,
-//                         posterSummary: posterSummary
-//                     )
-//                 }
-//             default:
-//                 break
-//             }
-//             return FilteredPoster2(poster: poster, posterSummary: posterSummary)
+//           guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { return nil }
+//           
+//           // Count the number of positions with specific statuses
+//          let tohangCount = positions.filter { $0.status == .toHang }.count
+//          let expiredCount = positions.filter { $0.status == .overdue }.count
+//          
+//          // Find the position with the earliest `expiresAt`
+////          guard let nextTakeDownPosition = positions.min(by: { $0.expiresAt < $1.expiresAt }) else { return nil }
+//          let nextTakeDownPositionDTO: PosterPositionResponseDTO?
+//          // Reinitialization of nextTakeDownPosition to earliest expired position
+//          if expiredCount > 0 {
+//             let expiredPosition = positions.filter { $0.status == .overdue }
+//             nextTakeDownPositionDTO = expiredPosition.min(by: { $0.expiresAt < $1.expiresAt })
+//          } else {
+//             nextTakeDownPositionDTO = positions.min(by: { $0.expiresAt < $1.expiresAt })
 //          }
+//          guard let nextTakeDownPosition = nextTakeDownPositionDTO else { return nil }
+//          
+//           // Check if the poster is archived
+//           let isArchived = positions.allSatisfy { position in
+//              position.status == .takenDown &&
+//               position.expiresAt <= Calendar.current.date(byAdding: .day, value: -3, to: Date())!
+//           }
+//           
+//           switch selectedTab {
+//           case 0:
+//               // Include only non-archived posters for the "Aktuell" tab
+//               if !isArchived {
+//                   return FilteredPoster(
+//                       poster: poster,
+//                       nextTakeDownPosition: nextTakeDownPosition,
+//                       tohangCount: tohangCount,
+//                       expiredCount: expiredCount
+//                   )
+//               }
+//           case 1:
+//               // Include only archived posters for the "Archiviert" tab
+//               if isArchived {
+//                   return FilteredPoster(
+//                       poster: poster,
+//                       nextTakeDownPosition: nextTakeDownPosition,
+//                       tohangCount: tohangCount,
+//                       expiredCount: expiredCount
+//                   )
+//               }
+//           default:
+//               break
+//           }
+//           return nil
 //       }
 //       .sorted {
 //           // Custom sorting: prioritize .hangs and .overdue, then by `expiresAt`
-//          if $0.posterSummary.hangs > 0 || $0.posterSummary.overdue > 0 {
-//             if $1.posterSummary.hangs > 0 || $1.posterSummary.overdue > 0 {
-//                return $0.posterSummary.nextTakeDown ?? Date() < $1.posterSummary.nextTakeDown ?? Date()
+//          if $0.nextTakeDownPosition.status == .hangs || $0.nextTakeDownPosition.status == .overdue {
+//             if $1.nextTakeDownPosition.status == .hangs || $1.nextTakeDownPosition.status == .overdue {
+//                   return $0.nextTakeDownPosition.expiresAt < $1.nextTakeDownPosition.expiresAt
 //               } else {
 //                   return true
 //               }
-//          } else if $1.posterSummary.hangs > 0 || $1.posterSummary.overdue > 0 {
+//          } else if $1.nextTakeDownPosition.status == .hangs || $1.nextTakeDownPosition.status == .overdue {
 //               return false
 //           } else {
-//               return $0.posterSummary.nextTakeDown ?? Date() < $1.posterSummary.nextTakeDown ?? Date()
+//               return $0.nextTakeDownPosition.expiresAt < $1.nextTakeDownPosition.expiresAt
 //           }
 //       }
-   
-   private func filterPosters() {
-       filteredPosters = posters.compactMap { poster in
-           guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { return nil }
-           
-           // Count the number of positions with specific statuses
-          let tohangCount = positions.filter { $0.status == .toHang }.count
-          let expiredCount = positions.filter { $0.status == .overdue }.count
-          
-          // Find the position with the earliest `expiresAt`
-//          guard let nextTakeDownPosition = positions.min(by: { $0.expiresAt < $1.expiresAt }) else { return nil }
-          let nextTakeDownPositionDTO: PosterPositionResponseDTO?
-          // Reinitialization of nextTakeDownPosition to earliest expired position
-          if expiredCount > 0 {
-             let expiredPosition = positions.filter { $0.status == .overdue }
-             nextTakeDownPositionDTO = expiredPosition.min(by: { $0.expiresAt < $1.expiresAt })
-          } else {
-             nextTakeDownPositionDTO = positions.min(by: { $0.expiresAt < $1.expiresAt })
-          }
-          guard let nextTakeDownPosition = nextTakeDownPositionDTO else { return nil }
-          
-           // Check if the poster is archived
-           let isArchived = positions.allSatisfy { position in
-              position.status == .takenDown &&
-               position.expiresAt <= Calendar.current.date(byAdding: .day, value: -3, to: Date())!
-           }
-           
-           switch selectedTab {
-           case 0:
-               // Include only non-archived posters for the "Aktuell" tab
-               if !isArchived {
-                   return FilteredPoster(
-                       poster: poster,
-                       nextTakeDownPosition: nextTakeDownPosition,
-                       tohangCount: tohangCount,
-                       expiredCount: expiredCount
-                   )
-               }
-           case 1:
-               // Include only archived posters for the "Archiviert" tab
-               if isArchived {
-                   return FilteredPoster(
-                       poster: poster,
-                       nextTakeDownPosition: nextTakeDownPosition,
-                       tohangCount: tohangCount,
-                       expiredCount: expiredCount
-                   )
-               }
-           default:
-               break
-           }
-           return nil
-       }
-       .sorted {
-           // Custom sorting: prioritize .hangs and .overdue, then by `expiresAt`
-          if $0.nextTakeDownPosition.status == .hangs || $0.nextTakeDownPosition.status == .overdue {
-             if $1.nextTakeDownPosition.status == .hangs || $1.nextTakeDownPosition.status == .overdue {
-                   return $0.nextTakeDownPosition.expiresAt < $1.nextTakeDownPosition.expiresAt
-               } else {
-                   return true
-               }
-          } else if $1.nextTakeDownPosition.status == .hangs || $1.nextTakeDownPosition.status == .overdue {
-               return false
-           } else {
-               return $0.nextTakeDownPosition.expiresAt < $1.nextTakeDownPosition.expiresAt
-           }
-       }
    }
 }
 
