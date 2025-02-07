@@ -146,7 +146,7 @@ struct FullMapPositionsSheet: View {
                .navigationTitle(item.location.name)
          }
       }
-      .navigationTitle("Alle Positionen")
+      .navigationTitle("Alle Standorte")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
          ToolbarItem(placement: .navigationBarLeading) {

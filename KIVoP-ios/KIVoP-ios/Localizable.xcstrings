@@ -99,8 +99,8 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %2$@, %3$@ Uhr"
+            "state" : "translated",
+            "value" : "%1$@ %2$@, %3$@ o'clock"
           }
         }
       }
@@ -165,8 +165,8 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$llu Stimmen von %2$llu Personen"
+            "state" : "translated",
+            "value" : "%1$llu votes from %2$llu people"
           }
         }
       }
@@ -290,32 +290,98 @@
     "Abfahrtszeit" : {
 
     },
+    "abgehängt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "taken-down"
+          }
+        }
+      }
+    },
     "Abgehängt" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taken-down"
+          }
+        }
+      }
     },
     "abgehängt am %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taken-down on %@"
+          }
+        }
+      }
     },
     "Abgeschlossen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completed"
+          }
+        }
+      }
     },
     "Abgeschlossen am: %@" : {
 
     },
     "Abhängedatum:" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take-down Date:"
+          }
+        }
+      }
     },
     "Abhängedatum: %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take-down Date: %@"
+          }
+        }
+      }
     },
     "Abhängen bestätigen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm Take-down"
+          }
+        }
+      }
     },
     "Abhängen zurückziehen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo Take-down"
+          }
+        }
+      }
     },
     "Abhängen zurückziehen?" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo Take-down?"
+          }
+        }
+      }
     },
     "Abmelden" : {
       "localizations" : {
@@ -340,7 +406,14 @@
       }
     },
     "Abschlusszeit" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closing Time"
+          }
+        }
+      }
     },
     "Abstimmen" : {
       "localizations" : {
@@ -402,7 +475,14 @@
       }
     },
     "Abstimmungs-Ergebnis" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voting Result"
+          }
+        }
+      }
     },
     "Account löschen" : {
       "localizations" : {
@@ -427,7 +507,24 @@
       }
     },
     "Achte beim Aufnehmen des Bildes darauf, dass das Plakat sowie der Hintergrund und die Umgebung gut zu erkennen sind." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When taking the picture, make sure that the poster as well as the background and the surrounding area can be clearly seen."
+          }
+        }
+      }
+    },
+    "Achtung, du kannst das Bild später nicht mehr ändern. Ist das Plakat und seine Umgebung gut zu erkennen und das Bild nicht verwackelt?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attention, you won't be able to change the image later. Is the poster and its surroundings clearly visible, and is the image not blurry?"
+          }
+        }
+      }
     },
     "Add Item" : {
 
@@ -439,7 +536,14 @@
 
     },
     "ADRESSE IN DER NÄHE" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ADDRESS NEARBY"
+          }
+        }
+      }
     },
     "Adresse suchen" : {
 
@@ -467,10 +571,24 @@
       }
     },
     "Aktiv" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active"
+          }
+        }
+      }
     },
     "Aktuell" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current"
+          }
+        }
+      }
     },
     "Aktuell ist keine Sitzung im Gange." : {
       "extractionState" : "stale",
@@ -581,14 +699,35 @@
     "Alle nicht gespeicherten Änderungen gehen verloren!" : {
 
     },
-    "Alle Positionen" : {
-
+    "Alle Standorte" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All locations"
+          }
+        }
+      }
     },
     "Alles im Blick?" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Is everything visible?"
+          }
+        }
+      }
     },
     "Allgemeine Informationen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "General Information"
+          }
+        }
+      }
     },
     "Anfrage zurücknehmen" : {
 
@@ -600,7 +739,14 @@
 
     },
     "Anonymisierung aktivieren" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable anonymization"
+          }
+        }
+      }
     },
     "Anschließend kann der " : {
       "localizations" : {
@@ -669,22 +815,57 @@
       }
     },
     "Archiviert" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archived"
+          }
+        }
+      }
     },
     "Aufgehängt" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hangs"
+          }
+        }
+      }
     },
     "aufgehängt am %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hung on %@"
+          }
+        }
+      }
     },
     "Aufhängen\nbestätigen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm\nHanging"
+          }
+        }
+      }
     },
     "Auswahl" : {
 
     },
     "Auswahlmöglichkeiten" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Options"
+          }
+        }
+      }
     },
     "Auto und Sitzplätze" : {
 
@@ -712,22 +893,74 @@
       }
     },
     "behoben" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fixed"
+          }
+        }
+      }
+    },
+    "beschädigt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "damaged"
+          }
+        }
+      }
     },
     "Beschädigung" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Damage"
+          }
+        }
+      }
     },
     "Beschädigung melden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report damage"
+          }
+        }
+      }
     },
     "Beschädigung melden?" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report damage?"
+          }
+        }
+      }
     },
     "Beschreibung" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Description"
+          }
+        }
+      }
     },
     "BESCHREIBUNG" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DESCRIPTION"
+          }
+        }
+      }
     },
     "Beschreibung Auto" : {
 
@@ -739,7 +972,14 @@
 
     },
     "Bestätige mit einem Bild, dass das Plakat beschädigt wurde, oder es nicht mehr an der vorgesehenen Stelle hängt." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm with a picture that the poster was damaged or it is no longer hanging in the intended place."
+          }
+        }
+      }
     },
     "Bestätigen" : {
 
@@ -751,10 +991,24 @@
 
     },
     "Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to undo the take-down? The poster will then be considered as hung again."
+          }
+        }
+      }
     },
     "Bist du sicher, dass du das Plakat abhängen möchtest?" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to take down the poster?"
+          }
+        }
+      }
     },
     "Bitte ein Event auswählen." : {
 
@@ -865,10 +1119,24 @@
 
     },
     "Die Abstimmung läuft noch. Du hast bereits abgestimmt." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The voting is still in progress. You have already voted."
+          }
+        }
+      }
     },
     "Die Abstimmungsergebnisse konnten nicht geladen werden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The voting results could not be loaded."
+          }
+        }
+      }
     },
     "Die Passwörter stimmen nicht überein." : {
 
@@ -975,7 +1243,14 @@
 
     },
     "Ende:" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closes at:"
+          }
+        }
+      }
     },
     "Endet: %@" : {
 
@@ -989,6 +1264,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abstain"
+          }
+        }
+      }
+    },
+    "Erneut aufnehmen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retake picture"
           }
         }
       }
@@ -1019,14 +1304,21 @@
       }
     },
     "Erstellen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create"
+          }
+        }
+      }
     },
     "Es haben %lld von %lld Personen abgestimmt." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Es haben %1$lld von %2$lld Personen abgestimmt."
+            "state" : "translated",
+            "value" : "%1$lld out of %2$lld people have voted."
           }
         }
       }
@@ -1109,7 +1401,14 @@
 
     },
     "Frage" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Question"
+          }
+        }
+      }
     },
     "Franz" : {
 
@@ -1121,10 +1420,24 @@
 
     },
     "Für diese Abstimmung hat keiner abgestimmt." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No one has voted in this voting."
+          }
+        }
+      }
     },
     "Für diese Umfrage hat keiner abgestimmt." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No one has voted in this poll."
+          }
+        }
+      }
     },
     "Galerie" : {
       "localizations" : {
@@ -1144,6 +1457,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Galeri"
+          }
+        }
+      }
+    },
+    "Geschlossen:" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closed at:"
           }
         }
       }
@@ -1193,6 +1516,36 @@
         }
       }
     },
+    "hängt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hangs"
+          }
+        }
+      }
+    },
+    "hängt (überfällig)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hangs (overdue)"
+          }
+        }
+      }
+    },
+    "hängt noch nicht" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "not hung yet"
+          }
+        }
+      }
+    },
     "Heinz-Peters" : {
 
     },
@@ -1222,6 +1575,26 @@
     },
     "Interesse entfernen" : {
 
+    },
+    "ist beschädigt oder fehlt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "is damaged or missing"
+          }
+        }
+      }
+    },
+    "Ist das beschädigte, oder fehlende Plakat und seine Umgebung gut zu erkennen und das Bild nicht verwackelt?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Is the damaged or missing poster and its surroundings clearly visible, and is the image not blurry?"
+          }
+        }
+      }
     },
     "Ja" : {
       "localizations" : {
@@ -1310,7 +1683,14 @@
       }
     },
     "Keine Abstimmungen gefunden." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No voting found"
+          }
+        }
+      }
     },
     "Keine aktuelle Sitzung verfügbar" : {
 
@@ -1340,7 +1720,14 @@
 
     },
     "Keins vorhanden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not available"
+          }
+        }
+      }
     },
     "Key" : {
       "extractionState" : "manual"
@@ -1369,7 +1756,14 @@
       }
     },
     "Lade Abstimmungen..." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Load votings…"
+          }
+        }
+      }
     },
     "Lade Ergebnisse..." : {
 
@@ -1471,10 +1865,24 @@
       }
     },
     "Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take a photo of the hung poster now and confirm its position."
+          }
+        }
+      }
     },
     "Mehrfachauswahl erlauben" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow multiple selections"
+          }
+        }
+      }
     },
     "Meine Fahrten" : {
 
@@ -1611,6 +2019,16 @@
     },
     "Möchtest du wirklich zurück?" : {
 
+    },
+    "morgen überfällig" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "overdue tomorrow"
+          }
+        }
+      }
     },
     "Nach Meeting suchen" : {
 
@@ -1766,13 +2184,34 @@
       }
     },
     "Öffnen mit Apple Maps" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open with Apple Maps"
+          }
+        }
+      }
     },
     "Öffnen mit Google Maps" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open with Google Maps"
+          }
+        }
+      }
     },
     "Öffnen mit Waze" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open with Waze"
+          }
+        }
+      }
     },
     "OK" : {
 
@@ -1781,7 +2220,14 @@
 
     },
     "Optionen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
     },
     "Organisation" : {
 
@@ -1810,6 +2256,26 @@
     },
     "Ort" : {
 
+    },
+    "Passt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got it"
+          }
+        }
+      }
+    },
+    "Passt alles?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything visible?"
+          }
+        }
+      }
     },
     "Passwort" : {
       "localizations" : {
@@ -1909,13 +2375,34 @@
 
     },
     "Plakat %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poster %@"
+          }
+        }
+      }
     },
     "Plakat abhängen?" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take down poster?"
+          }
+        }
+      }
     },
     "Plakate" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posters"
+          }
+        }
+      }
     },
     "Pleno " : {
 
@@ -2068,7 +2555,24 @@
       }
     },
     "Schließen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        }
+      }
+    },
+    "Schließt:" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closes at:"
+          }
+        }
+      }
     },
     "Sie müssen erst am Event teilnehmen, bevor Sie an der Fahrgemeinschaft teilnehmen" : {
 
@@ -2172,7 +2676,14 @@
 
     },
     "STANDORTE (%lld)" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LOCATIONS (%lld)"
+          }
+        }
+      }
     },
     "Start: %@" : {
 
@@ -2184,7 +2695,14 @@
 
     },
     "Stimmen (%llu)" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votes (%llu)"
+          }
+        }
+      }
     },
     "Suchen" : {
       "localizations" : {
@@ -2203,7 +2721,14 @@
       }
     },
     "Teilen..." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share…"
+          }
+        }
+      }
     },
     "Teilnahme bestätigen" : {
       "localizations" : {
@@ -2253,20 +2778,58 @@
         }
       }
     },
+    "überfällig" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "overdue"
+          }
+        }
+      }
+    },
     "Umfrage Details" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poll details"
+          }
+        }
+      }
     },
     "Umfrage Ergebnisse" : {
 
     },
     "Umfrage erstellen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create poll"
+          }
+        }
+      }
     },
     "Umfrage-Ergebnis" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poll Results"
+          }
+        }
+      }
     },
     "Umfragen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Polls"
+          }
+        }
+      }
     },
     "Umfragen, " : {
       "localizations" : {
@@ -2305,7 +2868,14 @@
 
     },
     "VERANTWORTLICHE (%lld)" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RESPONSIBLE (%lld)"
+          }
+        }
+      }
     },
     "Vereinsfarbe" : {
       "extractionState" : "stale",
@@ -2417,7 +2987,14 @@
       }
     },
     "Verstanden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got it"
+          }
+        }
+      }
     },
     "Verwalte " : {
       "localizations" : {

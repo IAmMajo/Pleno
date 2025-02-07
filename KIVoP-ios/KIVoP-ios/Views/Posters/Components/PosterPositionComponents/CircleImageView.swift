@@ -251,19 +251,19 @@ class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerContro
       
       // Present the alert over the camera
       let alertController = UIAlertController(
-         title: "Passt alles?",
-         message: self.picker.isDamageReport ? "Ist das beschädigte, oder fehlende Plakat und seine Umgebung gut zu erkennen und das Bild nicht verwackelt?" : "Achtung, du kannst das Bild später nicht mehr ändern. Ist das Plakat und seine Umgebung gut zu erkennen und das Bild nicht verwackelt?",
+         title: NSLocalizedString("Passt alles?", comment: ""),
+         message: self.picker.isDamageReport ? NSLocalizedString("Ist das beschädigte, oder fehlende Plakat und seine Umgebung gut zu erkennen und das Bild nicht verwackelt?", comment: "") : NSLocalizedString("Achtung, du kannst das Bild später nicht mehr ändern. Ist das Plakat und seine Umgebung gut zu erkennen und das Bild nicht verwackelt?", comment: ""),
          preferredStyle: .alert
       )
       
-      alertController.addAction(UIAlertAction(title: "Passt", style: .default, handler: { _ in
+      alertController.addAction(UIAlertAction(title: NSLocalizedString("Passt", comment: ""), style: .default, handler: { _ in
          self.picker.selectedImage = selectedImage
          // Notify SwiftUI view that the photo was confirmed
          self.picker.onPhotoPicked()
          picker.dismiss(animated: true) // Dismiss the camera
       }))
       
-      alertController.addAction(UIAlertAction(title: "Erneut aufnehmen", style: .cancel, handler: { _ in
+      alertController.addAction(UIAlertAction(title: NSLocalizedString("Erneut aufnehmen", comment: ""), style: .cancel, handler: { _ in
          if !self.picker.isDamageReport {
             self.picker.updateLocationForCameraReset()
          }

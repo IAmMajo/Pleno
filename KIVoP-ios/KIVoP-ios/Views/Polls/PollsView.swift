@@ -175,13 +175,13 @@ struct PollsView: View {
          }
          .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen")
          .onChange(of: searchText) { old, newValue in
-            //             if newValue.isEmpty {
-            //                polls.update(items: pollsOriginal.items)
-            //             } else {
-            //                polls.update(items: pollsOriginal.items.filter {
-            //                   $0.pollDTO.question.localizedCaseInsensitiveContains(newValue)
-            //                })
-            //             }
+            if searchText.isEmpty {
+               pollsFiltered = viewModel.polls
+            } else {
+               pollsFiltered = viewModel.polls.filter { item in
+                  return item.poll.question.localizedCaseInsensitiveContains(searchText)
+               }
+            }
          }
       }
       

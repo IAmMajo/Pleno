@@ -17,18 +17,18 @@ struct ProgressInfoView: View {
       switch status {
       case .hangs:
          if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
-            return (text: "hängt", value: 100, color: .orange)
+            return (text: NSLocalizedString("hängt", comment: ""), value: 100, color: .orange)
          } else {
-            return (text: "hängt", value: 100, color: .blue)
+            return (text: NSLocalizedString("hängt", comment: ""), value: 100, color: .blue)
          }
       case .takenDown:
-         return (text: "abgehängt", value: 140, color: .green)
+         return (text: NSLocalizedString("abgehängt", comment: ""), value: 140, color: .green)
       case .toHang:
-         return (text: "hängt noch nicht", value: 170, color: .gray)
+         return (text: NSLocalizedString("hängt noch nicht", comment: ""), value: 170, color: .gray)
       case .overdue:
-         return (text: "hängt (überfällig)", value: 175, color: .red)
+         return (text: NSLocalizedString("hängt (überfällig)", comment: ""), value: 175, color: .red)
       case .damaged:
-         return (text: "ist beschädigt oder fehlt", value: 210, color: .yellow)
+         return (text: NSLocalizedString("ist beschädigt oder fehlt", comment: ""), value: 210, color: .yellow)
       }
    }
    

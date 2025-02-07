@@ -10,15 +10,24 @@ import PosterServiceDTOs
 
 struct FilteredPoster: Equatable {
    let poster: PosterResponseDTO
-   let earliestPosition: PosterPositionResponseDTO
+   let nextTakeDownPosition: PosterPositionResponseDTO
    let tohangCount: Int
    let expiredCount: Int
    
    static func == (lhs: FilteredPoster, rhs: FilteredPoster) -> Bool {
       return lhs.poster.id == rhs.poster.id &&
-      lhs.earliestPosition.id == rhs.earliestPosition.id &&
+      lhs.nextTakeDownPosition.id == rhs.nextTakeDownPosition.id &&
       lhs.tohangCount == rhs.tohangCount &&
       lhs.expiredCount == rhs.expiredCount
+   }
+}
+
+struct FilteredPoster2: Equatable {
+   let poster: PosterResponseDTO
+   let posterSummary: PosterSummaryResponseDTO
+   
+   static func == (lhs: FilteredPoster2, rhs: FilteredPoster2) -> Bool {
+      return lhs.poster.id == rhs.poster.id
    }
 }
 
@@ -27,7 +36,7 @@ struct PostersView: View {
    @Environment(\.colorScheme) var colorScheme
 
    @StateObject private var viewModel = PostersViewModel()
-   @State private var postersFiltered: [FilteredPoster] = []
+   @State private var postersFiltered: [FilteredPoster2] = []
    @State private var selectedPoster: PosterResponseDTO?
    @State private var isShowingDetails: Bool = false
    @State private var isLoading = false
@@ -35,6 +44,17 @@ struct PostersView: View {
    
    @State private var searchText = ""
    
+   func getDateColor(overdueCount: Int, date: Date) -> Color {
+      if overdueCount > 0 {
+         return .red
+      } else {
+         if date < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
+            return .orange
+         } else {
+            return Color(UIColor.secondaryLabel)
+         }
+      }
+    }
    
     var body: some View {
        VStack {
@@ -90,22 +110,22 @@ struct PostersView: View {
                             Text(item.poster.name)
                                .frame(maxWidth: .infinity, alignment: .leading)
                             //
-                            Text("\(DateTimeFormatter.formatDate(item.earliestPosition.expiresAt))")
-                               .frame(maxWidth: .infinity, alignment: .leading)
-                               .font(.callout)
-                               .foregroundStyle(DateColorHelper.getDateColor(position: item.earliestPosition))
-                            
+                            if item.posterSummary.nextTakeDown != nil {
+                               Text("\(DateTimeFormatter.formatDate(item.posterSummary.nextTakeDown ?? Date()))")
+                                  .frame(maxWidth: .infinity, alignment: .leading)
+                                  .font(.callout)
+                                  .foregroundStyle(getDateColor(overdueCount: item.posterSummary.overdue, date: item.posterSummary.nextTakeDown ?? Date()))
+                            }
                          }
                          
                          Spacer()
                          
-                         //damaged count hinzufügen?
-                         if (item.tohangCount != 0) {
-                            if item.tohangCount > 99 {
+                         if (item.posterSummary.toHang > 0) {
+                            if item.posterSummary.toHang > 99 {
                                Capsule()
                                   .fill(.blue)
                                   .overlay(
-                                    Text("\(item.tohangCount)")
+                                    Text("\(item.posterSummary.toHang)")
                                        .font(.system(size: 12))
                                        .frame(width: 22)
                                        .fontWeight(.semibold)
@@ -113,11 +133,11 @@ struct PostersView: View {
                                        .padding(4)
                                   )
                                   .frame(width: 28, height: 22)
-                            } else if item.tohangCount > 50 {
+                            } else if item.posterSummary.toHang > 50 {
                                Capsule()
                                   .fill(.blue)
                                   .overlay(
-                                    Text("\(item.tohangCount)")
+                                    Text("\(item.posterSummary.toHang)")
                                        .font(.system(size: 12))
                                        .frame(width: 20)
                                        .fontWeight(.semibold)
@@ -126,7 +146,7 @@ struct PostersView: View {
                                   )
                                   .frame(width: 22, height: 22)
                             } else {
-                               Image(systemName: "\(item.tohangCount).circle.fill")
+                               Image(systemName: "\(item.posterSummary.toHang).circle.fill")
                                   .resizable()
                                   .frame(maxWidth: 22, maxHeight: 22)
                                   .aspectRatio(1, contentMode: .fit)
@@ -134,12 +154,12 @@ struct PostersView: View {
                                   .padding(.trailing, 5)
                             }
                          }
-                         if(item.expiredCount > 0){
-                            if item.expiredCount > 99 {
+                         if(item.posterSummary.overdue > 0){
+                            if item.posterSummary.overdue > 99 {
                                Capsule()
                                   .fill(.red)
                                   .overlay(
-                                    Text("\(item.expiredCount)")
+                                    Text("\(item.posterSummary.overdue)")
                                        .font(.system(size: 12))
                                        .frame(width: 22)
                                        .fontWeight(.semibold)
@@ -147,11 +167,11 @@ struct PostersView: View {
                                        .padding(4)
                                   )
                                   .frame(width: 28, height: 22)
-                            } else if item.expiredCount > 50 {
+                            } else if item.posterSummary.overdue > 50 {
                                Capsule()
                                   .fill(.red)
                                   .overlay(
-                                    Text("\(item.expiredCount)")
+                                    Text("\(item.posterSummary.overdue)")
                                        .font(.system(size: 12))
                                        .frame(width: 20)
                                        .fontWeight(.semibold)
@@ -160,7 +180,7 @@ struct PostersView: View {
                                   )
                                   .frame(width: 22, height: 22)
                             } else {
-                               Image(systemName: "\(item.expiredCount).circle.fill")
+                               Image(systemName: "\(item.posterSummary.overdue).circle.fill")
                                   .resizable()
                                   .frame(maxWidth: 22, maxHeight: 22)
                                   .aspectRatio(1, contentMode: .fit)
@@ -217,7 +237,7 @@ struct PostersView: View {
              Task {
                 isLoading = true
                 await viewModel.fetchPosters()
-                postersFiltered = viewModel.filteredPosters
+//                postersFiltered = viewModel.filteredPosters
                 isLoading = false
              }
           }
