@@ -20,25 +20,24 @@ extension PosterPosition {
             posterId: self.$poster.id,
             latitude: self.latitude,
             longitude: self.longitude,
-            postedBy: self.posted_by?.name,
-            postedAt: self.posted_at,
-            expiresAt: self.expires_at,
-            removedBy: self.removed_by?.name,
-            removedAt: self.removed_at,
-            image: self.image,
+            postedBy: self.postedBy?.name,
+            postedAt: self.postedAt,
+            expiresAt: self.expiresAt,
+            removedBy: self.removedBy?.name,
+            removedAt: self.removedAt,
             responsibleUsers: responsibleUsers,
             status: self.status
         )
         
     }
     var status: PosterPositionStatus {
-        if self.removed_at != nil {
+        if self.removedAt != nil {
             return .takenDown
         }
-        if self.posted_at == nil {
+        if self.postedAt == nil {
             return .toHang
         }
-        if self.expires_at < .now {
+        if self.expiresAt < .now {
             return .overdue
         }
         if self.damaged {

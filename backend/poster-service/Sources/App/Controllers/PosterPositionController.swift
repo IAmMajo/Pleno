@@ -5,8 +5,6 @@ import Models
 import VaporToOpenAPI
 import PosterServiceDTOs
 
-/// Controller für Poster und PosterPositionen.
-/// Dieser Controller enthält Routen zum Erstellen, Aktualisieren, Löschen und Abrufen von Postern und deren Positionen.
 struct PosterPositionController: RouteCollection, Sendable {
     
     let adminMiddleware: Middleware
@@ -61,6 +59,18 @@ struct PosterPositionController: RouteCollection, Sendable {
             body: .type(ReportDamagedPosterPositionDTO.self),
             contentType: .application(.json),
             response: .type(PosterPositionResponseDTO.self),
+            responseContentType: .application(.json),
+            auth: .bearer()
+        )
+        // GET /posters/positions/:positionid/image
+        positions.get(":positionid", "image", use: getImage).openAPI(
+            tags: openAPITagPosterPosition,
+            summary: "Gibt das Bild zur zugehörigen PosterPosition zurück",
+            description: """
+                         Gibt das Bild zur zugehörigen PosterPosition zurück
+                         """,
+            path: .type(PosterPosition.IDValue.self),
+            response: .type(ImageDTO.self),
             responseContentType: .application(.json),
             auth: .bearer()
         )
@@ -164,63 +174,29 @@ struct PosterPositionController: RouteCollection, Sendable {
     
     // MARK: - PosterPosition-Routen
     
-    /// Erstellt eine neue PosterPosition mit Bild und speichert sie in der Datenbank.
-    /// Gibt 201 (Created) + das erstellte Objekt zurück.
+    /// Erstellt eine neue PosterPositionen
     @Sendable
     func createPosterPosition(_ req: Request) async throws -> Response {
-        let dto = try req.content.decode(CreatePosterPositionDTO.self)
+        guard let dto = try? req.content.decode(CreatePosterPositionDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected CreatePosterPositionDTO.")
+        }
         
         guard let posterId = req.parameters.get("id", as: UUID.self) else {
-            throw Abort(.badRequest, reason: "Ungültige Poster-ID.")
+            throw Abort(.badRequest, reason: "Invalid Poster-ID.")
+        }
+    
+        guard let posterPosition = try? await dto.toPosterPosition(posterId: posterId, on: req.db) else {
+            throw Abort(.internalServerError)
         }
         
-        // Prüfen der Koordinaten
-        guard (-90...90).contains(dto.latitude) else {
-            throw Abort(.badRequest, reason: "Latitude muss zwischen -90 und 90 liegen.")
-        }
-        guard (-180...180).contains(dto.longitude) else {
-            throw Abort(.badRequest, reason: "Longitude muss zwischen -180 und 180 liegen.")
-        }
-        let responsibleUserIDs = try await dto.responsibleUsers.uniqued().map { uuid in
-            guard let user = try await User.find(uuid, on: req.db) else {
-                throw Abort(.badRequest, reason: "Invalid user id '\(uuid)'.")
-            }
-            return try user.requireID()
-        }
-        
-        // Neue PosterPosition erstellen
-        let posterPosition = PosterPosition(
-            posterId: posterId,
-            latitude: dto.latitude,
-            longitude: dto.longitude,
-            expiresAt: dto.expiresAt
-        )
-        
-        
-        try await req.db.transaction { db in
-            try await posterPosition.create(on: db)
-            
-            try await responsibleUserIDs.map { userID in
-                try PosterPositionResponsibilities(userID: userID, posterPositionID: posterPosition.requireID())
-            }.create(on: db)
-        }
-        
-        // Verantwortlichkeiten neu laden
-        try await posterPosition.$responsibilities.load(on: req.db)
-        for responsibility in posterPosition.responsibilities {
-            try await responsibility.$user.load(on: req.db)
-            try await responsibility.user.$identity.load(on: req.db)
-        }
-        
-        // DTO zurückgeben
         return try await posterPosition.toPosterPositionResponseDTO().encodeResponse(status: .created, for: req)
     }
     
-    /// Gibt eine einzelne PosterPosition als DTO zurück.
+    /// Gibt eine PosterPositionen eines Posters zurück
     @Sendable
     func getPostersPosition(_ req: Request) async throws -> PosterPositionResponseDTO {
         guard let positionId = req.parameters.get("positionid", as: UUID.self) else {
-            throw Abort(.badRequest, reason: "Ungültige Position-ID.")
+            throw Abort(.badRequest, reason: "Invalid Position-ID.")
         }
         
         let position = try await PosterPosition.query(on: req.db)
@@ -229,175 +205,77 @@ struct PosterPositionController: RouteCollection, Sendable {
                     user.with(\.$identity)
                 }
             }
-            .with(\.$posted_by)
-            .with(\.$removed_by)
+            .with(\.$postedBy)
+            .with(\.$removedBy)
             .filter(\.$id == positionId)
             .first()
         
         guard let position = position else {
-            throw Abort(.notFound, reason: "PosterPosition nicht gefunden")
+            throw Abort(.notFound, reason: "PosterPosition not Found")
         }
         
         return try position.toPosterPositionResponseDTO()
     }
     
-    /// Gibt alle Positionen zu einem Poster zurück.
+    /// Gibt alle PosterPositionen eines Posters zurück
     @Sendable
     func getPostersPositions(_ req: Request) async throws -> [PosterPositionResponseDTO] {
         guard let poster = try await Poster.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
+        
         return try await poster.$positions.query(on: req.db)
             .with(\.$responsibilities) { responsibilities in
                 responsibilities.with(\.$user) { user in
                     user.with(\.$identity)
                 }
             }
-            .with(\.$posted_by)
-            .with(\.$removed_by)
-            .sort(\.$expires_at, .ascending)
+            .with(\.$postedBy)
+            .with(\.$removedBy)
+            .sort(\.$expiresAt, .ascending)
             .all()
             .toPosterPositionResponseDTOArray()
     }
     
-    /// Aktualisiert eine vorhandene PosterPosition (Location, Ablaufdatum, Verantwortlicher etc.).
+    /// Updatet eine PosterPosition
     @Sendable
     func updatePosterPosition(_ req: Request) async throws -> PosterPositionResponseDTO {
         guard let positionId = req.parameters.get("positionid", as: UUID.self) else {
-            throw Abort(.badRequest, reason: "Ungültige Position-ID.")
+            throw Abort(.badRequest, reason: "Invalid Position-ID.")
         }
         
-        let dto = try req.content.decode(UpdatePosterPositionDTO.self)
-        
-        guard let position = try await PosterPosition.query(on: req.db)
-            .with(\.$posted_by)
-            .with(\.$removed_by)
-            .filter(\.$id == positionId)
-            .first()
-        else {
-            throw Abort(.notFound, reason: "PosterPosition nicht gefunden.")
+        guard let dto = try? req.content.decode(UpdatePosterPositionDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected UpdatePosterPositionDTO")
         }
         
-        
-        // Nur updaten, was im DTO vorhanden ist
-        if let newLatitude = dto.latitude {
-            position.latitude = round(newLatitude * 1_000_000) / 1_000_000
-        }
-        if let newLongitude = dto.longitude {
-            position.longitude = round(newLongitude * 1_000_000) / 1_000_000
-        }
-        if let newExpiresAt = dto.expiresAt {
-            position.expires_at = newExpiresAt
-        }
-        if let newPosterId = dto.posterId {
-            position.$poster.id = newPosterId
+        guard let position = try? await dto.updatePosterPosition(positionId: positionId, on: req.db) else {
+            throw Abort(.internalServerError)
         }
         
-        // Verantwortlichkeiten nur aktualisieren, wenn `responsibleUsers` im DTO enthalten war
-        if let newResponsibleUsers = dto.responsibleUsers {
-            let currentResponsibilities = try await PosterPositionResponsibilities.query(on: req.db)
-                .filter(\.$poster_position.$id == positionId)
-                .all()
-            let currentUserIds = Set(currentResponsibilities.map { $0.$user.id })
-            let newUserIds = Set(newResponsibleUsers)
-            
-            // Neue hinzufügen
-            let toAdd = newUserIds.subtracting(currentUserIds)
-            for userId in toAdd {
-                let responsibility = PosterPositionResponsibilities(userID: userId, posterPositionID: positionId)
-                try await responsibility.save(on: req.db)
-            }
-            
-            // Entfernen, was nicht mehr benötigt wird
-            let toRemove = currentUserIds.subtracting(newUserIds)
-            if !toRemove.isEmpty {
-                try await PosterPositionResponsibilities.query(on: req.db)
-                    .filter(\.$poster_position.$id == positionId)
-                    .filter(\.$user.$id ~~ toRemove)
-                    .delete()
-            }
-        }
-        
-        // Bild updaten
-        if let newImage = dto.image {
-            position.image = newImage
-        }
-        
-        try await position.update(on: req.db)
-        
-        // Verantwortlichkeiten neu laden
-        try await position.$responsibilities.load(on: req.db)
-        for responsibility in position.responsibilities {
-            try await responsibility.$user.load(on: req.db)
-            try await responsibility.user.$identity.load(on: req.db)
-        }
-        
-        
-        // DTO zurückgeben
         return try position.toPosterPositionResponseDTO()
     }
     
-    /// Markiert eine Poster-Position als aufgehängt (hängt Poster auf).
+    /// Markiert eine Poster-Position als aufgehängt.
     @Sendable
     func hangPosterPosition(_ req: Request) async throws -> HangPosterPositionResponseDTO {
-        guard let positionId = req.parameters.get("positionid", as: UUID.self) else {
-            throw Abort(.badRequest, reason: "Ungültige Position-ID.")
-        }
+        
         guard let userId = req.jwtPayload?.userID else {
             throw Abort(.unauthorized)
         }
         
-        let dto = try req.content.decode(HangPosterPositionDTO.self)
-        
-        guard let position = try await PosterPosition.query(on: req.db)
-            .filter(\.$id == positionId)
-            .with(\.$responsibilities)
-            .first() else {
-            throw Abort(.notFound, reason: "PosterPosition nicht gefunden")
+        guard let positionId = req.parameters.get("positionid", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid Position-ID.")
         }
         
-        guard position.responsibilities.contains(where: { $0.$user.id == userId }) else {
-            throw Abort(.forbidden, reason: "Sie sind nicht verantwortlich für diese PosterPosition.")
+        guard let dto = try? req.content.decode(HangPosterPositionDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected HangPosterPositionDTO")
         }
         
-        // Schon aufgehängt?
-        guard position.posted_at == nil || position.removed_at != nil || position.damaged else {
-            throw Abort(.badRequest, reason: "Diese PosterPosition ist bereits aufgehängt.")
+        guard let response = try? await  dto.hangPosterPosition(userId: userId, positionId: positionId, on: req.db) else {
+            throw Abort(.internalServerError)
         }
         
-        // falls neu aufgehängt
-        if position.removed_at != nil || position.removed_by != nil {
-            position.removed_at = nil
-            position.$removed_by.id = nil
-        }
-        
-        // posted_by: Identity des aktuellen Users
-        let identity = try await Identity.byUserId(userId, req.db)
-        
-        position.image = dto.image
-        position.posted_at = Date()
-        position.$posted_by.id = identity.id
-        
-        if let latitude = dto.latitude{
-            position.latitude = round(latitude * 1_000_000) / 1_000_000
-        }
-        
-        if let longitude = dto.longitude{
-            position.longitude = round(longitude * 1_000_000) / 1_000_000
-        }
-        
-        position.damaged = false
-        
-        try await position.update(on: req.db)
-        
-        return HangPosterPositionResponseDTO(
-            posterPosition: try position.requireID(),
-            postedAt: position.posted_at!,
-            postedBy: try identity.requireID(),
-            latitude: position.latitude,
-            longitude: position.longitude,
-            image: position.image!
-        )
+        return response
     }
     
     /// Markiert eine Poster-Position als abgehängt.
@@ -410,37 +288,14 @@ struct PosterPositionController: RouteCollection, Sendable {
             throw Abort(.unauthorized)
         }
         
-        let dto = try req.content.decode(TakeDownPosterPositionDTO.self)
-        
-        guard let position = try await PosterPosition.query(on: req.db)
-            .filter(\.$id == positionId)
-            .with(\.$responsibilities)
-            .first() else {
-            throw Abort(.notFound, reason: "PosterPosition nicht gefunden")
+        guard let dto = try? req.content.decode(TakeDownPosterPositionDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected TakeDownPosterPositionDTO")
         }
         
-        guard position.responsibilities.contains(where: { $0.$user.id == userId }) else {
-            throw Abort(.forbidden, reason: "Sie sind nicht verantwortlich für diese PosterPosition.")
+        guard let response = try? await dto.takeDownPosterPosition(userId: userId, positionId: positionId, on: req.db) else {
+            throw Abort(.internalServerError)
         }
-        
-        guard position.removed_by == nil && position.removed_at == nil else {
-            throw Abort(.badRequest, reason: "Diese PosterPosition ist bereits abgehängt worden.")
-        }
-        
-        let identity = try await Identity.byUserId(userId, req.db)
-        
-        position.image = dto.image
-        position.removed_at = Date()
-        position.$removed_by.id = identity.id
-        
-        try await position.update(on: req.db)
-        
-        return try TakeDownPosterPositionResponseDTO(
-            posterPosition: position.requireID(),
-            removedAt: position.removed_at!,
-            removedBy: try identity.requireID(),
-            image: position.image!
-        )
+        return response
     }
     
     /// Markiert eine Poster-Position als beschädigt.
@@ -466,7 +321,7 @@ struct PosterPositionController: RouteCollection, Sendable {
             try await responsibility.$user.load(on: req.db)
             try await responsibility.user.$identity.load(on: req.db)
         }
-        try await posterPosition.$posted_by.load(on: req.db)
+        try await posterPosition.$postedBy.load(on: req.db)
         
         return try posterPosition.toPosterPositionResponseDTO()
     }
@@ -475,11 +330,11 @@ struct PosterPositionController: RouteCollection, Sendable {
     @Sendable
     func deletePosterPosition(_ req: Request) async throws -> HTTPStatus {
         guard let positionID = req.parameters.get("positionid", as: UUID.self) else {
-            throw Abort(.badRequest, reason: "Ungültige PosterPosition-ID.")
+            throw Abort(.badRequest, reason: "Invalid PosterPosition-ID.")
         }
         
         guard let position = try await PosterPosition.find(positionID, on: req.db) else {
-            throw Abort(.notFound, reason: "PosterPosition mit der ID \(positionID) wurde nicht gefunden.")
+            throw Abort(.notFound, reason: "PosterPosition with ID \(positionID) not found.")
         }
         
         try await position.delete(on: req.db)
@@ -493,7 +348,7 @@ struct PosterPositionController: RouteCollection, Sendable {
         let positionIDs = deleteDTO.ids
         
         guard !positionIDs.isEmpty else {
-            throw Abort(.badRequest, reason: "Es müssen mindestens eine PosterPosition-ID übergeben werden.")
+            throw Abort(.badRequest, reason: "There has to be at least one PosterPosition-ID.")
         }
         
         let positionsToDelete = try await PosterPosition.query(on: req.db)
@@ -503,7 +358,7 @@ struct PosterPositionController: RouteCollection, Sendable {
         if positionsToDelete.count != positionIDs.count {
             let foundIDs = Set(positionsToDelete.compactMap { $0.id })
             let notFoundIDs = positionIDs.filter { !foundIDs.contains($0) }
-            throw Abort(.notFound, reason: "PosterPositionen mit den folgenden IDs wurden nicht gefunden: \(notFoundIDs.map { $0.uuidString }.joined(separator: ", "))")
+            throw Abort(.notFound, reason: "PosterPositions with the following IDs were not found: \(notFoundIDs.map { $0.uuidString }.joined(separator: ", "))")
         }
         
         for position in positionsToDelete {
@@ -511,6 +366,21 @@ struct PosterPositionController: RouteCollection, Sendable {
         }
         
         return .noContent
+    }
+    
+    /// Gibt das Bild zu einer PosterPosition zurück
+    @Sendable
+    func getImage(_ req: Request) async throws -> ImageDTO {
+        guard let positionID = req.parameters.get("positionid", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid PosterPosition-ID.")
+        }
+        guard let position = try await PosterPosition.find(positionID, on: req.db) else {
+            throw Abort(.notFound, reason: "PosterPosition with ID \(positionID) not found.")
+        }
+        guard let image = position.image else {
+            throw Abort(.notFound, reason: "There is not image associated with PosterPosition ID \(positionID)")
+        }
+        return ImageDTO(image: image)
     }
 }
 

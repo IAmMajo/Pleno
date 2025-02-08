@@ -1,14 +1,4 @@
-//
-//  SettingBulkUpdateDTO.swift.swift
-//  config-service
-//
-//  Created by Dennis Sept on 19.11.24.
-//
+import ConfigServiceDTOs
+import Vapor
 
-public struct SettingBulkUpdateDTO: Codable {
-    public var updates: [SettingUpdateItemDTO]
-    
-    public init(updates: [SettingUpdateItemDTO]) {
-        self.updates = updates
-    }
-}
+extension SettingBulkUpdateDTO: @retroactive Content, @unchecked @retroactive Sendable {}

@@ -1,14 +1,6 @@
-//
-//  service_settings.swift
-//  config-service
-//
-//  Created by Dennis Sept on 30.10.24.
-//
 import Fluent
 import Foundation
-/// Property wrappers interact poorly with `Sendable` checking, causing a warning for the `@ID` property
-/// It is recommended you write your model with sendability checking on and then suppress the warning
-/// afterwards with `@unchecked Sendable`.
+
 public final class ServiceSetting: Model, @unchecked Sendable {
     public static let schema = "service_settings"
     @ID(key: .id)
