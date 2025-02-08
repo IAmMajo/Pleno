@@ -16,7 +16,7 @@ enum class UsersEventState {
     absent,
     present,
 }
-
+//TODO: REMOVE BEFORE MERGE INTO MAIN
 // Mockdaten
  val eventA = GetEventDTO(
    UUID.randomUUID(),"Event #1",

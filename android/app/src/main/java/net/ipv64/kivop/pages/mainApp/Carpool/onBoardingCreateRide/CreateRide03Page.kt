@@ -1,6 +1,7 @@
 package net.ipv64.kivop.pages.mainApp.Carpool.onBoardingCreateRide
 
 import DateTimePicker
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,8 +26,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.components.DebouncedTextFieldCustomInputField
+import net.ipv64.kivop.components.MapDynamic
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
+import net.ipv64.kivop.components.TextFieldStatus
 import net.ipv64.kivop.models.viewModel.CreateSpecialRideViewModel
 import net.ipv64.kivop.models.viewModel.MapViewModel
 import net.ipv64.kivop.ui.customRoundedTop
@@ -47,7 +50,7 @@ fun CreateRide03Page(
       verticalArrangement = Arrangement.Center) {
         SpacerTopBar()
         Text(
-            text = "Plane deine Route", // TODO: replace text with getString
+            text = "Plane deine Route", // TODO: replace text with getString (Übersetzung)
             style = TextStyles.headingStyle,
             color = Text_prime_light)
         Column(
@@ -78,6 +81,13 @@ fun CreateRide03Page(
                   singleLine = true,
                   value = mapViewModel.startAddress,
                   backgroundColor = Background_prime,
+                  status = {
+                    if (mapViewModel.startCoordinates != null) {
+                      TextFieldStatus.done
+                    } else {
+                      TextFieldStatus.pending
+                    }
+                  },
                   onValueChange = {
                     mapViewModel.startAddress = it
                     createSpecialRideViewModel.startAddress = it
@@ -98,6 +108,13 @@ fun CreateRide03Page(
                   singleLine = true,
                   value = mapViewModel.destinationAddress,
                   backgroundColor = Background_prime,
+                  status = {
+                    if (mapViewModel.startCoordinates != null) {
+                      TextFieldStatus.done
+                    } else {
+                      TextFieldStatus.pending
+                    }
+                  },
                   onValueChange = {
                     mapViewModel.destinationAddress = it
                     createSpecialRideViewModel.destinationAddress = it
@@ -110,22 +127,23 @@ fun CreateRide03Page(
                     }
                   })
               LaunchedEffect(mapViewModel.startCoordinates, mapViewModel.destinationCoordinates) {
-                if (mapViewModel.startCoordinates != null &&
-                    mapViewModel.destinationCoordinates != null) {
-                  createSpecialRideViewModel.startLatitude =
-                      mapViewModel.startCoordinates!!.latitude.toFloat()
-                  createSpecialRideViewModel.startLongitude =
-                      mapViewModel.startCoordinates!!.longitude.toFloat()
-                  createSpecialRideViewModel.destinationLatitude =
-                      mapViewModel.destinationCoordinates!!.latitude.toFloat()
-                  createSpecialRideViewModel.destinationLongitude =
-                      mapViewModel.destinationCoordinates!!.longitude.toFloat()
-                }
+                createSpecialRideViewModel.startLatitude = mapViewModel.startCoordinates?.latitude?.toFloat()
+                createSpecialRideViewModel.startLongitude = mapViewModel.startCoordinates?.longitude?.toFloat()
+              }
+              LaunchedEffect(mapViewModel.destinationCoordinates) {
+                createSpecialRideViewModel.destinationLatitude = mapViewModel.destinationCoordinates?.latitude?.toFloat()
+                createSpecialRideViewModel.destinationLongitude = mapViewModel.destinationCoordinates?.longitude?.toFloat()
               }
             }
             SpacerBetweenElements(16.dp)
-            // TODO: bugged Look for alternative - not getting updated
-            // OsmdroidMapView(mapViewModel.startCoordinates,mapViewModel.destinationCoordinates,currentLocation = mapViewModel.currentLocation)
+            if (mapViewModel.currentLocation != null){
+              MapDynamic(
+                modifier = Modifier.padding(bottom = 38.dp),
+                markerPositionStart = mapViewModel.startCoordinates,
+                markerPositionEnd = mapViewModel.destinationCoordinates,
+                currentLocation = mapViewModel.currentLocation!!
+              )
+            }
           }
         }
         Column(
@@ -156,6 +174,7 @@ fun CreateRide03Page(
               Button(
                   modifier = Modifier.fillMaxWidth(),
                   onClick = {
+                    Log.i("CreateRide03Page", "onClick: ${createSpecialRideViewModel.startLatitude}, ${createSpecialRideViewModel.startLongitude}, ${createSpecialRideViewModel.destinationLatitude}, ${createSpecialRideViewModel.destinationLongitude}")
                     if (createSpecialRideViewModel.starts != null &&
                         createSpecialRideViewModel.ends != null &&
                         createSpecialRideViewModel.startLatitude != null &&
