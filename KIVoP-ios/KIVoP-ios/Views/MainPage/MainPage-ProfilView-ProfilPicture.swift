@@ -17,6 +17,7 @@ struct MainPage_ProfilView_ProfilPicture: View {
                     .edgesIgnoringSafeArea(.all)
 
                 VStack(spacing: 30) {
+                    // Ladeanzeige oder Fehlermeldung
                     if isLoading {
                         ProgressView("Lade Profilbild...")
                             .padding()
@@ -27,6 +28,7 @@ struct MainPage_ProfilView_ProfilPicture: View {
                             .padding()
                     } else {
                         ZStack {
+                            // Profilbild oder Platzhalter anzeigen
                             if let image = selectedImage {
                                 Image(uiImage: image)
                                     .resizable()
@@ -45,7 +47,7 @@ struct MainPage_ProfilView_ProfilPicture: View {
                             }
                         }
 
-                        // Profilbild löschen
+                        // Button zum Löschen des Profilbilds
                         Button("Löschen") {
                             deleteProfileImage()
                         }
@@ -53,7 +55,7 @@ struct MainPage_ProfilView_ProfilPicture: View {
                         .foregroundColor(.red)
                         .disabled(isUpdating)
 
-                        // Kamera- und Galerie-Aktionen
+                        // Auswahl zwischen Kamera und Galerie
                         HStack(spacing: 50) {
                             Button(action: {
                                 sourceType = .camera
@@ -100,6 +102,7 @@ struct MainPage_ProfilView_ProfilPicture: View {
                     fetchProfileImage()
                 }
             }
+            // Bildauswahl-Sheet
             .sheet(isPresented: $showImagePicker) {
                 ImagePicker(selectedImage: $selectedImage, sourceType: sourceType) { updatedImage in
                     self.updateProfileImage(with: updatedImage)
@@ -165,7 +168,7 @@ struct MainPage_ProfilView_ProfilPicture: View {
         isUpdating = true
         errorMessage = nil
 
-        // Profil erneut abrufen, um den aktuellen Benutzernamen zu erhalten
+        // Nutzername erneut abrufen, um ein Fallback-Kürzel anzuzeigen
         MainPageAPI.fetchUserProfile { result in
             DispatchQueue.main.async {
                 switch result {
@@ -178,7 +181,7 @@ struct MainPage_ProfilView_ProfilPicture: View {
             }
         }
 
-        // Leeres Bild-Datenobjekt senden
+        // API-Aufruf zum Löschen des Profilbilds
         MainPageAPI.updateUserProfileImage(profileImage: UIImage()) { result in
             DispatchQueue.main.async {
                 self.isUpdating = false
@@ -198,7 +201,7 @@ struct MainPage_ProfilView_ProfilPicture: View {
 
 
 
-    // MARK: - ImagePicker
+    // MARK: - ImagePicker für Kamera- und Galerie-Funktionalität
     struct ImagePicker: UIViewControllerRepresentable {
         @Binding var selectedImage: UIImage?
         var sourceType: UIImagePickerController.SourceType

@@ -2,44 +2,54 @@ import SwiftUI
 import AuthServiceDTOs
 
 struct Onboarding_Register: View {
+    // Benutzer-Eingaben für die Registrierung
     @State private var name: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
+    
+    // Fehlermeldungen und Ladezustand
     @State private var errorMessage: String? = nil
     @State private var isLoading: Bool = false
     @State private var registrationSuccessful: Bool = false
+    
+    // Ausgewähltes Profilbild
     @State private var selectedImage: UIImage? = nil
+    // Steuert die Anzeige der Datenschutzerklärung
     @State private var showPrivacyPolicy: Bool = false
-
+    
+    // Validierungsmeldungen für Passwörter
     @State private var passwordValidationMessage: String = ""
     @State private var confirmPasswordValidationMessage: String = ""
-
+    
     var body: some View {
         NavigationStack {
             VStack {
                 Spacer().frame(height: 40)
-
-                // Titel
+                
+                // Titel der Registrierungsseite
                 Text("Registrieren")
                     .font(.title)
                     .fontWeight(.bold)
                     .padding(.bottom, 40)
                     .padding(.top, 40)
-
+                
+                // Sektion für das Profilbild
                 profileImageSection()
-
+                
+                // Eingabefelder für Name, E-Mail und Passwörter
                 inputField(title: "Name", text: $name)
                 inputField(title: "E-Mail", text: $email)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
-
+                
                 passwordField()
                 confirmPasswordField()
-
+                
                 Spacer()
-
+                
+                // Datenschutz-Hinweis vor Registrierung
                 Button(action: {
                     showPrivacyPolicy.toggle()
                 }) {
@@ -62,8 +72,10 @@ struct Onboarding_Register: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 10)
+                // Button deaktiviert, falls Eingaben ungültig oder unvollständig sind
                 .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty || !passwordValidationMessage.isEmpty || !confirmPasswordValidationMessage.isEmpty)
-
+                
+                // Navigation zurück zur Login-Seite
                 NavigationLink(destination: Onboarding_Login()) {
                     Text("Zurück zum Login")
                         .foregroundColor(.blue)
@@ -77,16 +89,18 @@ struct Onboarding_Register: View {
                 .padding(.bottom, 20)
             }
             .safeAreaInset(edge: .bottom) {
-                Color(UIColor.systemGray6)
-                    .frame(height: 0)
-                    .edgesIgnoringSafeArea(.bottom)
+                Color(.secondarySystemBackground) // Passt sich an den Dark Mode an
+                    .frame(height: 20)
             }
+
             .background(Color(UIColor.systemGray6))
             .ignoresSafeArea()
             .navigationBarBackButtonHidden(true)
+            // Falls Registrierung erfolgreich war, zur Onboarding-Warteansicht wechseln
             .navigationDestination(isPresented: $registrationSuccessful) {
                 Onboarding_Wait(email: $email)
             }
+            // Datenschutzerklärung als Sheet anzeigen
             .sheet(isPresented: $showPrivacyPolicy) {
                 PrivacyPolicyView(onAccept: {
                     registerUser()
@@ -96,14 +110,15 @@ struct Onboarding_Register: View {
             }
         }
     }
-
+    
+    // MARK: - Passwort-Eingabefeld mit Validierung
     private func passwordField() -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text("PASSWORT")
                 .font(.caption)
                 .foregroundColor(.gray)
                 .padding(.horizontal, 5)
-
+            
             SecureField("Neues Passwort", text: $password)
                 .onChange(of: password) {
                     validatePassword()
@@ -115,7 +130,7 @@ struct Onboarding_Register: View {
                     RoundedRectangle(cornerRadius: 10)
                         .stroke(password.isEmpty ? Color.clear : (passwordValidationMessage.isEmpty ? Color.green : Color.red), lineWidth: 2)
                 )
-
+            
             if !password.isEmpty && !passwordValidationMessage.isEmpty {
                 Text(passwordValidationMessage)
                     .font(.caption)
@@ -126,14 +141,15 @@ struct Onboarding_Register: View {
         .padding(.horizontal, 24)
         .padding(.bottom, 10)
     }
-
+    
+    // MARK: - Passwort-Bestätigung mit Validierung
     private func confirmPasswordField() -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text("PASSWORT WIEDERHOLEN")
                 .font(.caption)
                 .foregroundColor(.gray)
                 .padding(.horizontal, 5)
-
+            
             SecureField("Passwort wiederholen", text: $confirmPassword)
                 .onChange(of: confirmPassword) {
                     validateConfirmPassword()
@@ -145,7 +161,7 @@ struct Onboarding_Register: View {
                     RoundedRectangle(cornerRadius: 10)
                         .stroke(confirmPassword.isEmpty ? Color.clear : (confirmPasswordValidationMessage.isEmpty ? Color.green : Color.red), lineWidth: 2)
                 )
-
+            
             if !confirmPassword.isEmpty && !confirmPasswordValidationMessage.isEmpty {
                 Text(confirmPasswordValidationMessage)
                     .font(.caption)
@@ -156,11 +172,12 @@ struct Onboarding_Register: View {
         .padding(.horizontal, 24)
         .padding(.bottom, 10)
     }
-
+    
+    // MARK: - Passwortvalidierung
     private func validatePassword() {
         let passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$"
         let predicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
-
+        
         if password.isEmpty {
             passwordValidationMessage = ""
         } else if predicate.evaluate(with: password) {
@@ -169,7 +186,8 @@ struct Onboarding_Register: View {
             passwordValidationMessage = "Mind. 8 Zeichen, 1 Zahl, 1 Sonderzeichen."
         }
     }
-
+    
+    // MARK: - Bestätigungspasswort-Validierung
     private func validateConfirmPassword() {
         if confirmPassword.isEmpty {
             confirmPasswordValidationMessage = ""
@@ -179,18 +197,19 @@ struct Onboarding_Register: View {
             confirmPasswordValidationMessage = "Passwörter stimmen nicht überein."
         }
     }
-
+    
+    // MARK: - Registrierungsfunktion
     private func registerUser() {
         isLoading = true
         errorMessage = nil
-
+        
         let registrationDTO = UserRegistrationDTO(
             name: name,
             email: email,
             password: password,
             profileImage: selectedImage.flatMap { compressImage($0) }
         )
-
+        
         OnboardingAPI.registerUser(with: registrationDTO) { result in
             DispatchQueue.main.async {
                 self.isLoading = false
@@ -204,14 +223,15 @@ struct Onboarding_Register: View {
             }
         }
     }
-
+    
+    // MARK: - Eingabefelder
     private func inputField(title: String, text: Binding<String>) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
                 .font(.caption)
                 .foregroundColor(.gray)
                 .padding(.horizontal, 5)
-
+            
             TextField(title, text: text)
                 .padding()
                 .background(Color(UIColor.systemBackground))
@@ -220,7 +240,8 @@ struct Onboarding_Register: View {
         .padding(.horizontal, 24)
         .padding(.bottom, 10)
     }
-
+    
+    // MARK: - Profilbild-Sektion
     private func profileImageSection() -> some View {
         VStack {
             ZStack {
@@ -238,7 +259,7 @@ struct Onboarding_Register: View {
                 }
             }
             .padding(.bottom, 10)
-
+            
             NavigationLink(destination: Onboarding_ProfilePicture(selectedImage: $selectedImage)) {
                 Text("Bearbeiten")
                     .foregroundColor(.blue)
@@ -247,19 +268,21 @@ struct Onboarding_Register: View {
             .padding(.bottom, 30)
         }
     }
-
+    
+    // MARK: - Profilbild-komprimieren
+    // Damit das Bild nict zu groß ist wird es bevor es zum Server geschickt wird komprimiert
     private func compressImage(_ image: UIImage) -> Data? {
         let targetSize = CGSize(width: 200, height: 200)
         let renderer = UIGraphicsImageRenderer(size: targetSize)
-
+        
         let resizedImage = renderer.image { _ in
             image.draw(in: CGRect(origin: .zero, size: targetSize))
         }
-
+        
         return resizedImage.jpegData(compressionQuality: 0.8)
     }
+    
 }
-
 
 
 struct PrivacyPolicyView: View {
