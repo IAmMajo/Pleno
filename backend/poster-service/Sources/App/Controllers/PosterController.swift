@@ -372,7 +372,7 @@ struct PosterController: RouteCollection, Sendable {
     
     /// Gibt das Bild zu einem Poster zurück
     @Sendable
-    func getImage(_ req: Request) async throws -> ImageDTO {
+    func getImage(_ req: Request) async throws -> Response {
         guard let posterID = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid Poster-ID.")
         }
@@ -380,6 +380,6 @@ struct PosterController: RouteCollection, Sendable {
             throw Abort(.notFound, reason: "PosterPosition with ID \(posterID) not found.")
         }
         
-        return ImageDTO(image: poster.image)
+        return Response(status: .ok, body: .init(data: poster.image))
     }
 }
