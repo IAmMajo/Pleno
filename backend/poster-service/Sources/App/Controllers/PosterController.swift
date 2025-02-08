@@ -168,10 +168,6 @@ struct PosterController: RouteCollection, Sendable {
             throw Abort(.badRequest, reason: "Invalid request body! Expected CreatePosterDTO.")
         }
         
-        guard posterData.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            throw Abort(.badRequest, reason: "Name is required")
-        }
-        
         let poster = Poster(
             name: posterData.name,
             description: posterData.description,

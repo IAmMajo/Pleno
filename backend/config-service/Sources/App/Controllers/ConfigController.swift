@@ -145,84 +145,23 @@ func update(req: Request) async throws -> SettingResponseDTO {
         throw Abort(.badRequest, reason: "Invalid request body! Expected SettingUpdateDTO.")
     }
     
-    guard let setting = try await Setting.find(id, on: req.db) else {
-        throw Abort(.notFound, reason: "Setting not found")
-    }
-    
-    let oldValue = setting.value
-    setting.value = dto.value
-    
-    do {
-        try await setting.update(on: req.db)
-        
-    } catch {
-        throw Abort(.internalServerError, reason: "Error updating Setting: \(error.localizedDescription)")
-    }
-    
-    do{
-        try await sendWebhookNotification(req: req, event: "updated", setting: setting, oldValue: oldValue)
-    }
-    catch{
-        throw Abort(.internalServerError)
-    }
-    
-    let responseDTO = SettingResponseDTO(
-        id: setting.id,
-        key: setting.key,
-        datatype: setting.datatype.rawValue,
-        value: setting.value,
-        description: setting.description
-    )
-    return responseDTO
+    return try await dto.performUpdate(req: req, settingID: id)
 }
 
 /// PATCH /config
 @Sendable
 func bulkUpdate(req: Request) async throws -> Response {
-    let dto: SettingBulkUpdateDTO
-    do {
-        dto = try req.content.decode(SettingBulkUpdateDTO.self)
-    } catch {
+   
+    guard let dto: SettingBulkUpdateDTO = try? req.content.decode(SettingBulkUpdateDTO.self)
+    else {
         throw Abort(.badRequest, reason: "Invalid request body! Expected SettingBulkUpdateDTO.")
     }
     
-    let (updatedIDs, failedIDs) = try await req.db.transaction { transaction -> ([UUID], [UUID: String]) in
-        var updated = [UUID]()
-        var failed = [UUID: String]()
-        
-        for updateItem in dto.updates {
-            do {
-                
-                if let setting = try await Setting.find(updateItem.id, on: transaction) {
-                    let oldValue = setting.value
-                    setting.value = updateItem.value
-                    try await setting.update(on: transaction)
-                    
-                    if let id = setting.id {
-                        updated.append(id)
-                    } else {
-                        failed[updateItem.id] = "Updated setting has no ID."
-                    }
-                    
-                    try await sendWebhookNotification(
-                        req: req,
-                        event: "updated",
-                        setting: setting,
-                        oldValue: oldValue
-                    )
-                } else {
-                    failed[updateItem.id] = "Setting not found."
-                }
-            } catch {
-                failed[updateItem.id] = error.localizedDescription
-            }
-        }
-        
-        return (updated, failed)
-    }
+    let responseDTO = try await dto.performBulkUpdate(req: req)
     
-    return try await BulkUpdateResponseDTO(updated: updatedIDs, failed: failedIDs).encodeResponse(status: .multiStatus, for: req)
+    return try await responseDTO.encodeResponse(status: .multiStatus, for: req)
 }
+
 
 
 /// GET /service/:serviceID
@@ -252,48 +191,5 @@ func settingsForService(req: Request) async throws -> [SettingResponseDTO] {
     return responseDTOs
 }
 
-/// Sendet eine Webhook-Benachrichtigung an alle aktiven Services, die mit einer bestimmten Einstellung verknüpft sind.
-private func sendWebhookNotification(req: Request, event: String, setting: Setting, oldValue: String) async throws {
-    let services = try await Service.query(on: req.db)
-        .join(ServiceSetting.self, on: \Service.$id == \ServiceSetting.$service.$id)
-        .filter(ServiceSetting.self, \ServiceSetting.$setting.$id == setting.id!)
-        .filter(\Service.$webhook_url != nil)
-        .filter(\Service.$active == true)
-        .all()
-    
-    for service in services {
-        guard let webhookURL = service.webhook_url else {
-            continue
-        }
-        
-        let payload = WebhookPayloadDTO(
-            event: event,
-            settings_id: setting.id!,
-            new_value: SettingValueDTO(
-                key: setting.key,
-                datatype: setting.datatype.rawValue,
-                value: setting.value
-            ),
-            old_value: SettingValueDTO(
-                key: setting.key,
-                datatype: setting.datatype.rawValue,
-                value: oldValue
-            )
-        )
-        
-        let payloadData = try JSONEncoder().encode(payload)
-        
-        var webhookRequest = ClientRequest()
-        webhookRequest.method = .POST
-        webhookRequest.url = URI(string: webhookURL)
-        webhookRequest.headers.contentType = .json
-        webhookRequest.body = .init(data: payloadData)
-        
-        do {
-            _ = try await req.client.send(webhookRequest)
-        } catch {
-            throw Abort(.internalServerError, reason: "Could not send Webhook request")
-        }
-    }
-}
+
 
