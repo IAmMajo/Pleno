@@ -4,6 +4,7 @@ import MeetingServiceDTOs
 import UIKit
 
 struct MainPage: View {
+    // Nutzer- und Meeting-Daten
     @State private var name: String = ""
     @State private var shortName: String = "??"
     @State private var profileImage: UIImage? = nil
@@ -11,9 +12,11 @@ struct MainPage: View {
     @State private var meetingDate: String? = nil
     @State private var meetingTime: String? = nil
     @State private var attendeesCount: Int? = nil
+    // UI-Zustände
     @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
 
+    // Meeting-Manager zur Verwaltung von Meeting-Daten
     @StateObject private var meetingManager = MeetingManager()
 
     var body: some View {
@@ -35,7 +38,7 @@ struct MainPage: View {
                         .padding([.top, .leading], 20)
                 }
 
-                // Profil-Informationen
+                // Profil-Bereich
                 NavigationLink(destination: MainPage_ProfilView()) {
                     HStack {
                         if let profileImage = profileImage {
@@ -78,7 +81,7 @@ struct MainPage: View {
                     .padding(10)
                 }
 
-                // Options List
+                // Navigationsmenü für verschiedene Funktionen
                 List {
                     Section {
                         if meetingManager.isLoading {
@@ -172,7 +175,7 @@ struct MainPage: View {
                 }
 
                 Spacer()
-
+                // Anzeige des aktuellen Meetings am unteren Bildschirmrand
                 CurrentMeetingBottomView()
             }
             .background(Color(UIColor.systemGroupedBackground))
@@ -185,7 +188,7 @@ struct MainPage: View {
         }
     }
 
-    // MARK: - Daten laden
+    // MARK: - Nutzerprofil laden
     func loadUserProfile(retryCount: Int = 4) {
         guard retryCount > 0 else {
             self.errorMessage = "Fehler: Profil konnte nicht geladen werden."
@@ -209,7 +212,7 @@ struct MainPage: View {
                     self.errorMessage = "Fehler beim Laden des Profils: \(error.localizedDescription)"
                     print("Retry \(5 - retryCount): \(error.localizedDescription)")
 
-                    // Retry nach 2 Sekunden
+                    // Wiederholter Abruf nach 2 Sekunden
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                         self.loadUserProfile(retryCount: retryCount - 1)
                     }
@@ -217,7 +220,8 @@ struct MainPage: View {
             }
         }
     }
-
+    
+    // MARK: - Aktuelles Meeting laden
     func loadCurrentMeeting() {
         MainPageAPI.fetchCurrentMeeting { result in
             DispatchQueue.main.async {

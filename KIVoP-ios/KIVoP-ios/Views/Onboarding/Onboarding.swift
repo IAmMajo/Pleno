@@ -1,22 +1,24 @@
 import SwiftUI
 
 struct Onboarding: View {
+    // Index des aktuellen Onboarding-Bildschirms
     @State private var currentIndex = 0
+    // Vereinslogo als Platzhalter-Text
     @State private var ClubLogo: String = "VL"
+    // Steuerung der Navigation zur Login-Ansicht
     @State private var navigateToLogin = false
+    // Prüft, ob das Onboarding bereits angesehen wurde
     @State private var hasCheckedOnboarding = false
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
-    var isManualNavigation: Bool = false // Neuer Parameter
-
-
-
+    // Parameter zur manuellen Navigation (falls von außerhalb gesteuert)
+    var isManualNavigation: Bool = false
 
     var body: some View {
         NavigationStack {
             VStack {
                 Spacer()
                 
-                // Vereinslogo placeholder
+                // Platzhalter für das Vereinslogo
                 Circle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 120, height: 120)
@@ -24,7 +26,7 @@ struct Onboarding: View {
                     .padding(.bottom, 10)
                 
                 if currentIndex == 0 {
-                    // Erster Onboarding-Bildschirm
+                    // Erster Onboarding-Bildschirm mit Image und Text
                     VStack {
                         Image("onboarding2")
                             .resizable()
@@ -53,7 +55,7 @@ struct Onboarding: View {
                         Spacer().frame(height: 20)
                     }
                 } else if currentIndex == 1 {
-                    // Zweiter Onboarding-Bildschirm
+                    // Zweiter Onboarding-Bildschirm mit Image und Beschreibung der Features
                     VStack {
                         Image("onboarding1")
                             .resizable()
@@ -92,7 +94,7 @@ struct Onboarding: View {
                 
                 Spacer()
                 
-                // Seitenindikator
+                // Indikator für die aktuelle Seite (Onboarding-Schritte)
                 HStack(spacing: 8) {
                     Circle()
                         .fill(currentIndex == 0 ? Color.blue : Color.gray.opacity(0.3))
@@ -104,7 +106,7 @@ struct Onboarding: View {
                 }
                 .padding(.bottom, 20)
                 
-                // Navigationsbuttons
+                // Navigationsbuttons für Vor- und Zurückblättern
                 HStack {
                     if currentIndex > 0 {
                         Button(action: {
@@ -130,7 +132,7 @@ struct Onboarding: View {
                             if currentIndex < 1 {
                                 currentIndex += 1
                             } else {
-                                // Flag um zu Login weiterleiten
+                                // Falls letzter Bildschirm erreicht, Navigation zur Login-Seite
                                 hasSeenOnboarding = true
                                 navigateToLogin = true
                             }
@@ -148,8 +150,8 @@ struct Onboarding: View {
                 .padding(.bottom, 30)
                 
                 if currentIndex == 0 {
+                    // Möglichkeit, das Onboarding zu überspringen
                     Button(action: {
-                        // Onboarding überspringen
                         UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
                         navigateToLogin = true
                     }) {
@@ -161,38 +163,40 @@ struct Onboarding: View {
                     .padding(.bottom, 20)
                 }
             }
+            // Wischen nach links oder rechts erlaubt Navigation zwischen den Onboarding-Bildschirmen
             .gesture(
                 DragGesture()
                     .onEnded { value in
                         if value.translation.width < -50 && currentIndex < 1 {
-                            // Swipe nach links
+                            // Wischbewegung nach links
                             withAnimation {
                                 currentIndex += 1
                             }
                         } else if value.translation.width > 50 && currentIndex > 0 {
-                            // Swipe nach rechts
+                            // Wischbewegung nach rechts
                             withAnimation {
                                 currentIndex -= 1
                             }
                         }
                     }
             )
+            // Navigation zur Login-Seite nach Onboarding-Abschluss
             .navigationDestination(isPresented: $navigateToLogin) {
                 Onboarding_Login()
             }
         }
         .onAppear {
-            // Nur automatisch zur LoginView navigieren, wenn dies nicht manuell aufgerufen wurde
+            // Falls das Onboarding bereits gesehen wurde, direkt zur Login-Seite weiterleiten
             if hasSeenOnboarding && !isManualNavigation {
                 navigateToLogin = true
             }
         }
-
-
+        // Versteckt den Zurück-Button in der Navigation
         .navigationBarBackButtonHidden(true)
     }
 }
 
+// Vorschau für das Onboarding-View
 struct Onboarding_Previews: PreviewProvider {
     static var previews: some View {
         Onboarding()

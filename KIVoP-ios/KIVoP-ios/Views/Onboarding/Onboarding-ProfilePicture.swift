@@ -2,18 +2,22 @@ import SwiftUI
 import UIKit
 
 struct Onboarding_ProfilePicture: View {
+    // Das ausgewählte Bild wird über ein Binding aus einer übergeordneten View übergeben
     @Binding var selectedImage: UIImage?
+    // Steuert die Anzeige des ImagePickers
     @State private var showImagePicker = false
-    @State private var imagePickerType: ImagePickerType? // Optional, um das Sheet korrekt zu kontrollieren
+    // Definiert, ob Kamera oder Galerie geöffnet wird
+    @State private var imagePickerType: ImagePickerType?
 
     var body: some View {
         NavigationStack {
             ZStack {
+                // Hintergrundfarbe für eine konsistente Darstellung im System-Design
                 Color(UIColor.systemBackground)
                     .edgesIgnoringSafeArea(.all)
 
                 VStack(spacing: 30) {
-                    // Profilbild oder Platzhalter
+                    // Profilbild-Anzeige oder Platzhalter-Kreis, falls kein Bild vorhanden ist
                     ZStack {
                         if let image = selectedImage {
                             Image(uiImage: image)
@@ -28,8 +32,9 @@ struct Onboarding_ProfilePicture: View {
                         }
                     }
 
-                    // Kamera- und Galerie-Aktionen
+                    // Auswahlmöglichkeiten: Kamera oder Galerie
                     HStack(spacing: 50) {
+                        // Kamera-Button
                         Button(action: {
                             imagePickerType = ImagePickerType(type: .camera)
                         }) {
@@ -48,6 +53,7 @@ struct Onboarding_ProfilePicture: View {
                             .cornerRadius(15)
                         }
 
+                        // Galerie-Button
                         Button(action: {
                             imagePickerType = ImagePickerType(type: .photoLibrary)
                         }) {
@@ -69,19 +75,20 @@ struct Onboarding_ProfilePicture: View {
                 }
                 .padding()
             }
+            // Zeigt den ImagePicker als Sheet an, basierend auf der Auswahl (Kamera oder Galerie)
             .sheet(item: $imagePickerType) { pickerType in
                 ImagePicker(selectedImage: $selectedImage, sourceType: pickerType.type)
             }
         }
     }
 
-    // MARK: - Wrapper für SourceType
+    // MARK: - Wrapper für SourceType (ermöglicht die Nutzung in .sheet als Identifiable)
     struct ImagePickerType: Identifiable {
         let id = UUID()
         let type: UIImagePickerController.SourceType
     }
 
-    // MARK: - ImagePicker
+    // MARK: - ImagePicker (UIKit-Integration für Kamera & Galerie)
     struct ImagePicker: UIViewControllerRepresentable {
         @Binding var selectedImage: UIImage?
         var sourceType: UIImagePickerController.SourceType
@@ -90,7 +97,7 @@ struct Onboarding_ProfilePicture: View {
             let picker = UIImagePickerController()
             picker.delegate = context.coordinator
             picker.sourceType = sourceType
-            picker.allowsEditing = true
+            picker.allowsEditing = true // Erlaubt das Bearbeiten des Bildes vor der Auswahl
             return picker
         }
 
@@ -100,6 +107,7 @@ struct Onboarding_ProfilePicture: View {
             Coordinator(self)
         }
 
+        // MARK: - Coordinator zur Verarbeitung der Bildauswahl
         class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
             let parent: ImagePicker
 
@@ -107,13 +115,15 @@ struct Onboarding_ProfilePicture: View {
                 self.parent = parent
             }
 
+            // Wird aufgerufen, wenn der Benutzer ein Bild ausgewählt hat
             func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
                 if let image = info[.editedImage] as? UIImage ?? info[.originalImage] as? UIImage {
                     parent.selectedImage = image
                 }
-                picker.dismiss(animated: true)
+                picker.dismiss(animated: true) // Schließt den Picker nach der Auswahl
             }
 
+            // Wird aufgerufen, wenn der Benutzer den Picker ohne Auswahl verlässt
             func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
                 picker.dismiss(animated: true)
             }
