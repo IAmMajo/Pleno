@@ -32,7 +32,7 @@ extension TakeDownPosterPositionDTO: @retroactive Content, @unchecked @retroacti
             throw Abort(.internalServerError, reason: "Error while updating the PosterPosition.")
         }
         
-        guard let removedAt = position.removedAt, let image = position.image else {
+        guard let removedAt = position.removedAt else {
             throw Abort(.internalServerError, reason: "Required fields are missing after update.")
         }
         
@@ -42,8 +42,7 @@ extension TakeDownPosterPositionDTO: @retroactive Content, @unchecked @retroacti
         return TakeDownPosterPositionResponseDTO(
             posterPosition: posID,
             removedAt: removedAt,
-            removedBy: identityID,
-            image: image
+            removedBy: identityID
         )
     }
 }

@@ -55,8 +55,6 @@ struct PosterController: RouteCollection, Sendable {
                          Gibt das Bild zum zugehörigen Poster  zurück
                          """,
             path: .type(Poster.IDValue.self),
-            response: .type(ImageDTO.self),
-            responseContentType: .application(.json),
             auth: .bearer()
         )
         // GET /posters/:id
@@ -339,19 +337,14 @@ struct PosterController: RouteCollection, Sendable {
             throw Abort(.badRequest, reason: "Invalid request body! Expected DeleteDTO.")
         }
         let posterIDs = deleteDTO.ids
-        
+
         guard !posterIDs.isEmpty else {
             throw Abort(.badRequest, reason: "At least one Poster-ID must be provided.")
         }
         
-        let postersToDelete: [Poster]
-        do {
-            postersToDelete = try await Poster.query(on: req.db)
-                .filter(\.$id ~~ posterIDs)
-                .all()
-        } catch {
-            throw Abort(.internalServerError, reason: "Error querying posters: \(error.localizedDescription)")
-        }
+        let postersToDelete = try await Poster.query(on: req.db)
+            .filter(\.$id ~~ posterIDs)
+            .all()
         
         if postersToDelete.count != posterIDs.count {
             let foundIDs = Set(postersToDelete.compactMap { $0.id })
@@ -359,16 +352,15 @@ struct PosterController: RouteCollection, Sendable {
             throw Abort(.notFound, reason: "Posters with IDs not found: \(notFoundIDs.map { $0.uuidString }.joined(separator: ", "))")
         }
         
-        for poster in postersToDelete {
-            do {
-                try await poster.delete(on: req.db)
-            } catch {
-                throw Abort(.internalServerError, reason: "Error deleting poster with ID \(poster.id?.uuidString ?? "unknown"): \(error.localizedDescription)")
+        try await req.db.transaction { transaction in
+            for poster in postersToDelete {
+                try await poster.delete(on: transaction)
             }
         }
         
         return .noContent
     }
+
     
     /// Gibt das Bild zu einem Poster zurück
     @Sendable

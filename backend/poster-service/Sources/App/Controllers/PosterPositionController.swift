@@ -70,8 +70,6 @@ struct PosterPositionController: RouteCollection, Sendable {
                          Gibt das Bild zur zugehörigen PosterPosition zurück
                          """,
             path: .type(PosterPosition.IDValue.self),
-            response: .type(ImageDTO.self),
-            responseContentType: .application(.json),
             auth: .bearer()
         )
         

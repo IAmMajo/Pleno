@@ -48,9 +48,8 @@ extension HangPosterPositionDTO: @retroactive Content, @unchecked @retroactive S
             throw Abort(.internalServerError, reason: "Error while updating the PosterPosition.")
         }
         
-        guard
-            let postedAt = position.postedAt,
-            let image = position.image
+        
+        guard  let postedAt = position.postedAt
         else {
             throw Abort(.internalServerError, reason: "Required fields (postedAt, image) are missing.")
         }
@@ -60,8 +59,7 @@ extension HangPosterPositionDTO: @retroactive Content, @unchecked @retroactive S
             postedAt: postedAt,
             postedBy: try identity.requireID(),
             latitude: position.latitude,
-            longitude: position.longitude,
-            image: image
+            longitude: position.longitude
         )
     }
 }
