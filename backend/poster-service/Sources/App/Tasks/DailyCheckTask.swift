@@ -65,12 +65,12 @@ struct DailyCheckTask: LifecycleHandler {
         
         app.logger.info("Gefundene PosterPositionen für Erinnerungen: \(targetDate)")
         do {
-            // Abfrage der PosterPositions, deren expires_at genau dem targetDate entspricht
+            // Abfrage der PosterPositions, deren expiresAt genau dem targetDate entspricht
             let positions = try await PosterPosition.query(on: app.db)
-                .filter(\.$posted_by.$id != nil)
-                .filter(\.$removed_by.$id == nil)
-                .filter(\.$expires_at <= targetDate)
-                .with(\.$posted_by)
+                .filter(\.$postedBy.$id != nil)
+                .filter(\.$removedBy.$id == nil)
+                .filter(\.$expiresAt <= targetDate)
+                .with(\.$postedBy)
                 .with(\.$responsibilities)
                 .all()
             
@@ -83,7 +83,7 @@ struct DailyCheckTask: LifecycleHandler {
                     // Berechnen der Tage bis zum Ablaufdatum
                     let daysLeft: Int?
                     if reminderDays < 0 {
-                        daysLeft = calendar.dateComponents([.day], from: now, to: position.expires_at).day
+                        daysLeft = calendar.dateComponents([.day], from: now, to: position.expiresAt).day
                     } else {
                         daysLeft = nil
                     }

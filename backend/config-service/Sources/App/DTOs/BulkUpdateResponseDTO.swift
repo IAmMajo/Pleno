@@ -1,17 +1,4 @@
-//
-//  BulkUpdateResponseDTO.swift
-//  config-service
-//
-//  Created by Dennis Sept on 19.11.24.
-//
-import Foundation
+import ConfigServiceDTOs
+import Vapor
 
-public struct BulkUpdateResponseDTO: Codable {
-    public var updated: [UUID]
-    public var failed: [UUID: String]
-    
-    public init(updated: [UUID], failed: [UUID: String]) {
-        self.updated = updated
-        self.failed = failed
-    }
-}
+extension BulkUpdateResponseDTO: @retroactive Content, @unchecked @retroactive Sendable {}

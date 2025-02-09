@@ -11,14 +11,12 @@ extension Identity {
     }
     
     public static func getUser(from identityId: Identity.IDValue, on db: Database) async throws -> User {
-        // Finde den entsprechenden Eintrag in der Tabelle IdentityHistory
         guard let history = try await IdentityHistory.query(on: db)
-            .filter(\.$identity.$id == identityId) // Filter nach der Identity-ID
+            .filter(\.$identity.$id == identityId) 
             .first() else {
             throw Abort(.notFound, reason: "No history found for the given identity.")
         }
 
-        // Gib den User zurück
         return history.user!
     }
 }

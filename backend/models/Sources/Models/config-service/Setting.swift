@@ -1,9 +1,6 @@
 import Fluent
 import Foundation
 
-/// Property wrappers interact poorly with `Sendable` checking, causing a warning for the `@ID` property
-/// It is recommended you write your model with sendability checking on and then suppress the warning
-/// afterwards with `@unchecked Sendable`.
 public final class Setting: Model, @unchecked Sendable {
     public static let schema = "settings"
     
