@@ -7,5 +7,4 @@ data class PosterResponseDTO (
     var id : UUID,
     var name : String,
     var description : String?,
-    var image : String,
 )
