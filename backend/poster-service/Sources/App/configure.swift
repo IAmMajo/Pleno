@@ -4,6 +4,7 @@ import NIOSSL
 import Fluent
 import FluentPostgresDriver
 import Vapor
+import JWTKit
 
 
 // Konfiguriert deine Anwendung
@@ -22,6 +23,15 @@ public func configure(_ app: Application) async throws {
         database: Environment.get("DATABASE_NAME") ?? "kivop",
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
+
+    let publicCertPath = Environment.get("PUBLIC_CERT_PATH") ?? "/app/certs/jwt/public.pem"
+    guard let publicKeyData = try? Data(contentsOf: URL(fileURLWithPath: publicCertPath)) else {
+        throw Abort(.internalServerError, reason: "Error: Public key could not be loaded.")
+    }
+    guard let publicKey = try? ECDSAKey.public(pem: publicKeyData) else {
+        throw Abort(.internalServerError, reason: "Error: The public key could not be decrypted properly.")
+    }
+    app.jwt.signers.use(.es256(key: publicKey), kid: "public")
     
     // Settings beim Start laden
     Task {

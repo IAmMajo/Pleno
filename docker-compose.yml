@@ -121,6 +121,9 @@ services:
       config-service:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
+      - jwt-key:/app/certs/auth
     labels:
       traefik.enable: true
       traefik.http.routers.auth-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/auth-service`) || PathPrefix(`/auth`) || PathPrefix(`/users`) || PathPrefix(`/.well-known`))
@@ -159,6 +162,8 @@ services:
       ai-service:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.meeting-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/meeting-service`) || PathPrefix(`/meetings`))
@@ -195,6 +200,8 @@ services:
       auth-service:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.notifications-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/notifications-service`) || PathPrefix(`/notification-devices`))
@@ -231,6 +238,8 @@ services:
       auth-service:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.ride-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/ride-service`) || PathPrefix(`/specialrides`) || PathPrefix(`/eventrides`) || PathPrefix(`/events`))
@@ -266,6 +275,8 @@ services:
       auth-service:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.poster-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/poster-service`) || PathPrefix(`/posters`))
@@ -325,6 +336,8 @@ services:
       auth-service:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.poll-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/poll-service`) || PathPrefix(`/polls`))
@@ -384,6 +397,10 @@ volumes:
     name: "tdums-postgres-data"
   images-data:
     name: "kivop-images-data"
+  jwt-cert:
+    name: "kivop-jwt-cert"
+  jwt-key:
+    name: "kivop-jwt-key"
 
 #
 # Networks

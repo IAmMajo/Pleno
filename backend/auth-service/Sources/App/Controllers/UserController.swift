@@ -26,8 +26,7 @@ struct UserController: RouteCollection {
             body: .type(ResetPasswordDTO.self)
         )
         
-        let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
-        let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
+        let authMiddleware = AuthMiddleware(payloadType: JWTPayloadDTO.self)
         let protectedRoutes = userRoutes.grouped(authMiddleware)
         
         userRoutes.on(.POST, "register", body: .collect(maxSize: "7000kb"), use: self.register).openAPI(
@@ -43,7 +42,7 @@ struct UserController: RouteCollection {
             contentType: .application(.json)
         )
         
-        userRoutes.get("profile", use: self.getProfile).openAPI(
+        protectedRoutes.get("profile", use: self.getProfile).openAPI(
             summary: "Get profile",
             description: "Get current profile of user",
             body: .none,
@@ -276,28 +275,36 @@ struct UserController: RouteCollection {
     
     @Sendable
     func getProfile(req: Request) async throws -> UserProfileDTO {
-        // parse and verify jwt token
-        let token = try req.jwt.verify(as: JWTPayloadDTO.self)
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
         
+        guard let userID = payload.userID else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap userID")
+        }
         // query user
         guard let user = try await User.query(on: req.db)
-            .filter(\.$id == token.userID!)
+            .filter(\.$id == userID)
             .with(\.$identity)
             .with(\.$emailVerification)
             .first() else {
             throw Abort(.notFound)
         }
         
+        guard let userIDNumber = try? user.requireID(), let userCreatedAt = user.createdAt, let emailVerification = user.emailVerification, let userEmailVerificationStatus = AuthServiceDTOs.VerificationStatus(rawValue: emailVerification.status.rawValue) else {
+            throw Abort(.internalServerError, reason: "Error unwrapping userID or createdAt")
+        }
+        
         // build reponse object
         let response = UserProfileDTO(
-            uid: user.id!,
+            uid: userIDNumber,
             email: user.email,
             name: user.identity.name,
             profileImage: user.profileImage,
             isAdmin: user.isAdmin,
             isActive: user.isActive,
-            emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue)!,
-            createdAt: user.createdAt!,
+            emailVerification: userEmailVerificationStatus,
+            createdAt: userCreatedAt,
             isNotificationsActive: user.isNotificationsActive,
             isPushNotificationsActive: user.isPushNotificationsActive
         )
@@ -310,10 +317,12 @@ struct UserController: RouteCollection {
         try UserRegistrationDTO.validate(content: req)
         
         // parse registration data
-        let registrationData = try req.content.decode(UserRegistrationDTO.self)
+        guard let registrationData = try? req.content.decode(UserRegistrationDTO.self), let registrationEmail = registrationData.email, let registrationPassword = registrationData.password else {
+            throw Abort(.internalServerError, reason: "Cant decode user registration data")
+        }
         
         // check for user with same email
-        let count = try await User.query(on: req.db).filter(\.$email == registrationData.email!).count()
+        let count = try await User.query(on: req.db).filter(\.$email == registrationEmail).count()
         if count != 0 {
             throw Abort(.conflict, reason: "a user with this email already exists")
         }
@@ -329,16 +338,16 @@ struct UserController: RouteCollection {
         let identity = Identity(name: registrationData.name!)
         
         // save identity in database
-        try await identity.save(on: req.db)
+        try await identity.create(on: req.db)
         
         // hash password
-        let passwordHash = try req.password.hash(registrationData.password!)
+        let passwordHash = try req.password.hash(registrationPassword)
         
         // extract identity id
         let identityID = try identity.requireID()
         
         // create new user
-        let user = User(identityID: identityID, email: registrationData.email!, passwordHash: passwordHash, profileImage: profileImageData)
+        let user = User(identityID: identityID, email: registrationEmail, passwordHash: passwordHash, profileImage: profileImageData)
         
         // the first user becomes admin and instant access
         let countAll = try await User.query(on: req.db).count()
@@ -351,7 +360,7 @@ struct UserController: RouteCollection {
         user.isPushNotificationsActive = false
         
         // save user in database
-        try await user.save(on: req.db)
+        try await user.create(on: req.db)
         
         // extract identity id
         let userID = try user.requireID()
@@ -360,28 +369,32 @@ struct UserController: RouteCollection {
         let history = IdentityHistory(userID: userID, identityID: identityID)
         
         // save history entry
-        try await history.save(on: req.db)
+        try await history.create(on: req.db)
         
         let verificationCode = String(format: "%06d", Int.random(in: 0...999999))
             
         let emailVerification = EmailVerification(
             email: user.email,
-            user: user.id!,
+            user: userID,
             code: verificationCode,
             status: .pending,
             expiresAt: Date().addingTimeInterval(3600)
         )
         
-        try await emailVerification.save(on: req.db)
+        try await emailVerification.create(on: req.db)
+        
+        guard let userEmailVerificationStatus = AuthServiceDTOs.VerificationStatus(rawValue: emailVerification.status.rawValue) else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap email verification status")
+        }
         
         let registeredUser = UserProfileDTO(
-            uid: user.id!,
+            uid: userID,
             email: user.email,
             name: identity.name,
             profileImage: user.profileImage,
             isAdmin: user.isAdmin,
             isActive: user.isActive,
-            emailVerification: VerificationStatus(rawValue: emailVerification.status.rawValue)!,
+            emailVerification: userEmailVerificationStatus,
             createdAt: user.createdAt!,
             isNotificationsActive: user.isNotificationsActive,
             isPushNotificationsActive: user.isPushNotificationsActive
@@ -389,7 +402,9 @@ struct UserController: RouteCollection {
         
         let emailString = try emailVerification.requireID()
         
-        let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailString)/\(verificationCode)"
+        let url = req.application.baseURL
+        
+        let verifyLink = "\(url)/auth/email/verify/\(emailString)/\(verificationCode)"
         
         let emailData = SendEmailDTO(
             receiver: user.email,
@@ -419,6 +434,9 @@ struct UserController: RouteCollection {
         guard let emailVerification = try await EmailVerification.find(email, on: req.db) else {
             return Response(status: .ok, body: .init(string: "If the email exists, a new verification email has been sent."))
         }
+        guard let emailExpiresAt = emailVerification.expiresAt else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap expiresAt")
+        }
         
         // Prüft ob der Eintrag noch nicht als verifiziert wurde
         guard emailVerification.status != .verified else {
@@ -426,7 +444,7 @@ struct UserController: RouteCollection {
         }
         
         // Prüft ob der Eintrag schon abgelaufen ist
-        if emailVerification.expiresAt! < Date() {
+        if emailExpiresAt < Date() {
             let newVerificationCode = String(format: "%06d", Int.random(in: 0...999999))
                     
             if emailVerification.status == .failed {
@@ -435,11 +453,13 @@ struct UserController: RouteCollection {
             emailVerification.code = newVerificationCode
             emailVerification.expiresAt = Date().addingTimeInterval(3600)
             
-            try await emailVerification.save(on: req.db)
+            try await emailVerification.update(on: req.db)
             
             let emailString = try emailVerification.requireID()
             
-            let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailString)/\(emailVerification.code)"
+            let url = req.application.baseURL
+            
+            let verifyLink = "\(url)/auth/email/verify/\(emailString)/\(emailVerification.code)"
             
             let emailData = SendEmailDTO(
                 receiver: emailString,
@@ -460,7 +480,9 @@ struct UserController: RouteCollection {
             
             let emailString = try emailVerification.requireID()
             
-            let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailString)/\(emailVerification.code)"
+            let url = req.application.baseURL
+            
+            let verifyLink = "\(url)/auth/email/verify/\(emailString)/\(emailVerification.code)"
             
             let emailData = SendEmailDTO(
                 receiver: emailString,
@@ -492,15 +514,18 @@ struct UserController: RouteCollection {
         var userProfiles: [UserProfileDTO] = []
         
         for user in users {
+            guard let userIDNumber = try? user.requireID(), let userCreatedAt = user.createdAt, let emailVerification = user.emailVerification, let userEmailVerificationStatus = AuthServiceDTOs.VerificationStatus(rawValue: emailVerification.status.rawValue) else {
+                throw Abort(.internalServerError, reason: "Error unwrapping userID, createdAt or emailverification")
+            }
             let profileDTO = UserProfileDTO(
-                uid: user.id!,
+                uid: userIDNumber,
                 email: user.email,
                 name: user.identity.name,
                 profileImage: user.profileImage,
                 isAdmin: user.isAdmin,
                 isActive: user.isActive,
-                emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue)!,
-                createdAt: user.createdAt!,
+                emailVerification: userEmailVerificationStatus,
+                createdAt: userCreatedAt,
                 isNotificationsActive: user.isNotificationsActive,
                 isPushNotificationsActive: user.isPushNotificationsActive
             )
@@ -532,16 +557,20 @@ struct UserController: RouteCollection {
             throw Abort(.notFound, reason: "User not found")
         }
         
+        guard let userIDNumber = try? user.requireID(), let userCreatedAt = user.createdAt, let emailVerification = user.emailVerification, let userEmailVerificationStatus = AuthServiceDTOs.VerificationStatus(rawValue: emailVerification.status.rawValue) else {
+            throw Abort(.internalServerError, reason: "Error unwrapping userID, createdAt or emailverification")
+        }
+        
         // Gibt ProfilDTO zurück
         return UserProfileDTO(
-            uid: user.id!,
+            uid: userIDNumber,
             email: user.email,
             name: user.identity.name,
             profileImage: user.profileImage,
             isAdmin: user.isAdmin,
             isActive: user.isActive,
-            emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue)!,
-            createdAt: user.createdAt!,
+            emailVerification: userEmailVerificationStatus,
+            createdAt: userCreatedAt,
             isNotificationsActive: user.isNotificationsActive,
             isPushNotificationsActive: user.isPushNotificationsActive
         )
@@ -601,7 +630,7 @@ struct UserController: RouteCollection {
             user.isAdmin = isAdmin
         }
         
-        try await user.save(on: req.db)
+        try await user.update(on: req.db)
         
         return .ok
     }
@@ -628,7 +657,7 @@ struct UserController: RouteCollection {
         
         for identityHistory in identityHistories {
             identityHistory.$user.id = nil
-            try await identityHistory.save(on: req.db)
+            try await identityHistory.update(on: req.db)
         }
         
         try await user.delete(on: req.db)
@@ -695,8 +724,11 @@ struct UserController: RouteCollection {
         guard let payload = req.jwtPayload else {
             throw Abort(.unauthorized)
         }
+        guard let userID = payload.userID else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap userID")
+        }
         guard let user = try await User.query(on: req.db)
-            .filter(\.$id == payload.userID!)
+            .filter(\.$id == userID)
             .first() else {
             throw Abort(.notFound, reason: "User not found")
         }
@@ -724,18 +756,21 @@ struct UserController: RouteCollection {
         guard let body = try? req.content.decode(ChangePasswordDTO.self) else {
             throw Abort(.badRequest, reason: "Body does not match ChangePasswordDTO")
         }
+        guard let userID = payload.userID, let userOldPassword = body.oldPassword, let userNewPassword = body.newPassword else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap userID, oldPassword or newPassword")
+        }
         guard let user = try await User.query(on: req.db)
-            .filter(\.$id == payload.userID!)
+            .filter(\.$id == userID)
             .first() else {
             throw Abort(.notFound, reason: "User not found")
         }
-        let isCurrentPasswordValid = try Bcrypt.verify(body.oldPassword!, created: user.passwordHash)
+        let isCurrentPasswordValid = try Bcrypt.verify(userOldPassword, created: user.passwordHash)
         guard isCurrentPasswordValid else {
             throw Abort(.unauthorized, reason: "Current password is incorrect")
         }
         do {
-            user.passwordHash = try Bcrypt.hash(body.newPassword!)
-            try await user.save(on: req.db)
+            user.passwordHash = try Bcrypt.hash(userNewPassword)
+            try await user.update(on: req.db)
         } catch {
             throw Abort(.internalServerError, reason: "Failed to update password: \(error.localizedDescription)")
         }
@@ -748,16 +783,21 @@ struct UserController: RouteCollection {
         guard let body = try? req.content.decode(RequestPasswordResetDTO.self) else {
             throw Abort(.badRequest, reason: "Body does not match RequestPasswordResetDTO")
         }
+        guard let bodyEmail = body.email else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap email")
+        }
         guard let user = try await User.query(on: req.db)
-            .filter(\.$email == body.email!)
+            .filter(\.$email == bodyEmail)
             .with(\.$identity)
             .first() else {
             return Response(status: .ok, body: .init(string: "If the email exists, a reset code has been sent."))
         }
         let resetCode = String((100000...999999).randomElement()!)
         
+        let userID = try user.requireID()
+        
         let tokenEntry = PasswordResetToken(
-            userID: user.id!,
+            userID: userID,
             token: resetCode,
             expiresAt: Date().addingTimeInterval(3600) // 1 Stunde gültig
         )
@@ -794,8 +834,10 @@ struct UserController: RouteCollection {
             .first() else {
             throw Abort(.notFound, reason: "User with email \(email) not found")
         }
+        let userID = try user.requireID()
+        
         guard let tokenEntry = try await PasswordResetToken.query(on: req.db)
-            .filter(\.$user.$id == user.id!)
+            .filter(\.$user.$id == userID)
             .filter(\.$token == resetCode)
             .filter(\.$expiresAt > Date())
             .first() else {
@@ -803,7 +845,7 @@ struct UserController: RouteCollection {
         }
         do {
             user.passwordHash = try Bcrypt.hash(newPassword)
-            try await user.save(on: req.db)
+            try await user.update(on: req.db)
             try await tokenEntry.delete(on: req.db)
         } catch {
             throw Abort(.internalServerError, reason: "Failed to reset password: \(error.localizedDescription)")

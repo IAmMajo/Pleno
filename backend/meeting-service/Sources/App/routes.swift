@@ -6,8 +6,7 @@ import Models
 
 func routes(_ app: Application) throws {
     // Einbinden der Middleware und des JWTSigner
-    let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
-    let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
+    let authMiddleware = AuthMiddleware(payloadType: JWTPayloadDTO.self)
     
     let authProtected = app.grouped(authMiddleware)
     let meetings = authProtected.grouped("meetings")

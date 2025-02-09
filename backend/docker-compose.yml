@@ -1,6 +1,7 @@
 x-shared_environment: &shared_environment
   DATABASE_HOST: postgres
   DATABASE_NAME: kivop
+  PUBLIC_CERT_PATH: /app/certs/jwt/public.pem
 
 services:                                                                                                                                      
   traefik:
@@ -23,7 +24,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-#
+# 
 # Database
 #
   postgres:
@@ -80,6 +81,8 @@ services:
       <<: *shared_environment
       DATABASE_USERNAME: ${CONFIG_SERVICE_POSTGRES_USERNAME:?error}
       DATABASE_PASSWORD: ${CONFIG_SERVICE_POSTGRES_PASSWORD:?error}
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.config-service.rule: PathPrefix(`/config-service`) || PathPrefix(`/config`)
@@ -126,6 +129,8 @@ services:
       <<: *shared_environment
       DATABASE_USERNAME: ${MEETING_SERVICE_POSTGRES_USERNAME:?error}
       DATABASE_PASSWORD: ${MEETING_SERVICE_POSTGRES_PASSWORD:?error}
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.meeting-service.rule: PathPrefix(`/meeting-service`) || PathPrefix(`/meeting`)
@@ -168,6 +173,10 @@ services:
       <<: *shared_environment
       DATABASE_USERNAME: ${AUTH_SERVICE_POSTGRES_USERNAME:?error}
       DATABASE_PASSWORD: ${AUTH_SERVICE_POSTGRES_PASSWORD:?error}
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - jwt-cert:/app/certs/jwt
+      - jwt-key:/app/certs/auth
     labels:
       traefik.enable: true
       traefik.http.routers.auth-service.rule: PathPrefix(`/auth-service`) || PathPrefix(`/auth`) || PathPrefix(`/users`) || PathPrefix(`/.well-known`)
@@ -212,6 +221,8 @@ services:
       <<: *shared_environment
       DATABASE_USERNAME: ${NOTIFICATIONS_SERVICE_POSTGRES_USERNAME:?error}
       DATABASE_PASSWORD: ${NOTIFICATIONS_SERVICE_POSTGRES_PASSWORD:?error}
+    volumes:
+      - jwt-cert:/app/certs/jwt
     env_file: ./../.env
     labels:
       traefik.enable: true
@@ -257,6 +268,8 @@ services:
       <<: *shared_environment
       DATABASE_USERNAME: ${POSTER_SERVICE_POSTGRES_USERNAME:?error}
       DATABASE_PASSWORD: ${POSTER_SERVICE_POSTGRES_PASSWORD:?error}
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.poster-service.rule: PathPrefix(`/poster-service`) || PathPrefix(`/posters`)
@@ -301,6 +314,8 @@ services:
       <<: *shared_environment
       DATABASE_USERNAME: ${RIDE_SERVICE_POSTGRES_USERNAME:?error}
       DATABASE_PASSWORD: ${RIDE_SERVICE_POSTGRES_PASSWORD:?error}
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.ride-service.rule: PathPrefix(`/ride-service`) || PathPrefix(`/specialrides`) || PathPrefix(`/eventrides`) || PathPrefix(`/events`)
@@ -371,6 +386,8 @@ services:
       <<: *shared_environment
       DATABASE_USERNAME: ${POLL_SERVICE_POSTGRES_USERNAME:?error}
       DATABASE_PASSWORD: ${POLL_SERVICE_POSTGRES_PASSWORD:?error}
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.poll-service.rule: PathPrefix(`/poll-service`) || PathPrefix(`/poll`)
@@ -471,6 +488,10 @@ volumes:
     name: "kivop-postgres-data"
   tdums-data:
     name: "tdums-postgres-data"
+  jwt-cert:
+    name: "kivop-jwt-cert"
+  jwt-key:
+    name: "kivop-jwt-key"
 
 #
 # Networks

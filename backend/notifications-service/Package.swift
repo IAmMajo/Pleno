@@ -30,7 +30,10 @@ let package = Package(
         // 📧 Firebase Cloud Messaging
         .package(url: "https://github.com/MihaelIsaev/FCM.git", from: "2.13.0"),
         // 📧 SMTP protocol support for the Vapor web framework
-        .package(url: "https://github.com/Mikroservices/Smtp.git", from: "3.1.2")
+        .package(url: "https://github.com/Mikroservices/Smtp.git", from: "3.1.2"),
+        // JWT-KIT
+        .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0"),
+
     ],
     targets: [
         .executableTarget(
@@ -49,7 +52,8 @@ let package = Package(
                 .product(name: "JWT", package: "jwt"),
                 .product(name: "VaporAPNS", package: "apns"),
                 .product(name: "FCM", package: "FCM"),
-                .product(name: "Smtp", package: "Smtp")
+                .product(name: "Smtp", package: "Smtp"),
+                .product(name: "JWTKit", package: "jwt-kit"),
             ],
             swiftSettings: swiftSettings
         ),

@@ -6,8 +6,7 @@ import AuthServiceDTOs
 
 struct AuthController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
-        let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
+        let authMiddleware = AuthMiddleware(payloadType: JWTPayloadDTO.self)
         // Auth-Routen
         let authRoutes = routes.grouped("auth");
         authRoutes.post("login", use: self.login).openAPI(
@@ -98,7 +97,7 @@ struct AuthController: RouteCollection {
         let expiration = Date().addingTimeInterval(3600) // Token für 1 Stunde gültig
         let payload = JWTPayloadDTO(userID: user.id!, exp: expiration, isAdmin: user.isAdmin)
         
-        let token = try req.jwt.sign(payload)
+        let token = try req.jwt.sign(payload, kid: "private")
         
         let tokenResponse = TokenResponseDTO(token: token)
         return tokenResponse
@@ -106,7 +105,6 @@ struct AuthController: RouteCollection {
     
     @Sendable
     func verifyJWTToken(req: Request) async throws -> HTTPResponseStatus {
-        let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
         
         guard let token = req.headers.bearerAuthorization?.token ?? req.cookies["token"]?.string else {
             req.logger.warning("No Token found in Authorization header or cookies")
@@ -114,7 +112,7 @@ struct AuthController: RouteCollection {
         }
         
         do {
-            let payload = try jwtSigner.verify(token, as: JWTPayloadDTO.self)
+            let payload = try req.jwt.verify(token, as: JWTPayloadDTO.self)
             
             req.logger.info("Token verified successfully for user \(payload.userID!)")
             return .ok
@@ -150,7 +148,7 @@ struct AuthController: RouteCollection {
         }
         
         user.isActive = true
-        try await user.save(on: req.db)
+        try await user.update(on: req.db)
         
         return Response(status: .ok, body: .init(string: "User account has been successfully activated"))
     }

@@ -8,8 +8,7 @@ import VaporToOpenAPI
 
 struct NotificationDeviceController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
-        let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
+        let authMiddleware = AuthMiddleware(payloadType: JWTPayloadDTO.self)
         let notificationDevices = routes.grouped("notification-devices")
         let protectedNotificationDevices = notificationDevices.grouped(authMiddleware)
         protectedNotificationDevices.post(use: register).openAPI(
