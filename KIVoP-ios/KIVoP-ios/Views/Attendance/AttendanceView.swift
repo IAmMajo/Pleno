@@ -13,6 +13,7 @@ struct AttendanceView: View {
                         Section(header:
                                     Text("AKTUELLE SITZUNG")
                             .padding(.leading, -5)){
+                                // Alle Meetings die in der variable currentMeetings sind werden angezeigt
                                 ForEach(viewModel.currentMeetings, id: \.id) { currentMeeting in
                                     NavigationLink(destination: viewModel.destinationView(for: currentMeeting)) {
                                         HStack {
@@ -56,6 +57,7 @@ struct AttendanceView: View {
                     }
                     
                     // TabView für vergangene und anstehende Termine
+                    // Je nach ausgewähltem Picker wird entschieden in welche View weitergeleitet werden soll (Detail oder Planning)
                     Picker("Termine", selection: $viewModel.selectedTab) {
                         Text("Vergangene Termine").tag(0)
                         Text("Anstehende Termine").tag(1)
@@ -65,6 +67,7 @@ struct AttendanceView: View {
                     .padding(-20)
                     
                     // Liste für vergangene und anstehende Termine
+                    // In der Schleife wird je nach ausgewähltem Picker eine Liste erstellt mit den jeweiligen Meetings
                     ForEach(viewModel.groupedMeetings, id: \.key) { group in
                         Section(header: Text(group.key)
                             .padding(.leading, -5)
@@ -81,7 +84,7 @@ struct AttendanceView: View {
                                         }
                                         Spacer()
                                         
-                                        // Logik für die Symbolauswahl. Bei vergangenen Terminen gibt es kein Kalender Symbol. Wenn dort der Status noch nicht gesetzt ist, hat man am Meeting nicht teilgenommen.
+                                        // Statusanzeige (Farbe + Symbol)
                                         Image(systemName: {
                                             switch meeting.myAttendanceStatus {
                                             case .accepted, .present:
@@ -116,14 +119,10 @@ struct AttendanceView: View {
                    }
                 }
                 .onAppear {
-                   Task {
-                       viewModel.fetchMeetings()
-                   }
+                   viewModel.fetchMeetings()
                 }
                 .refreshable {
-                    Task {
-                        viewModel.fetchMeetings()
-                    }
+                    viewModel.fetchMeetings()
                 }
             }
             .navigationTitle("Anwesenheit")

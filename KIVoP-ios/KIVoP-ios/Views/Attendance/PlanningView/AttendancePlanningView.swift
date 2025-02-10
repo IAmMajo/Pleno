@@ -5,14 +5,14 @@ struct AttendancePlanningView: View {
     
     var body: some View {
         NavigationStack {
-            // Den gesamten Hintergrund grau hinterlegen
+            // Den gesamten Hintergrund grau hinterlegen (Damit alles so aussieht als wäre es eine Liste)
             ZStack {
                 Color.gray.opacity(0.1)
                     .edgesIgnoringSafeArea(.all)
                 // Inhalt
                 VStack {
                     // Datum + Uhrzeit
-                    Text(viewModel.formattedDate(viewModel.meeting.start))
+                    Text(viewModel.attendanceManager.formattedDate(viewModel.meeting.start))
                         .padding(5)
                         .overlay(
                             RoundedRectangle(cornerRadius: 30)
@@ -40,7 +40,7 @@ struct AttendancePlanningView: View {
                             .cornerRadius(10)
                         }
                         
-                        // "Nein"-Button
+                        // Nicht Teilnehmen Schaltfläche
                         Button(action: {
                             viewModel.markAttendanceAsAbsent()
                         }) {
@@ -63,7 +63,7 @@ struct AttendancePlanningView: View {
                         .multilineTextAlignment(.center)
                         .padding(.top, 10)
                     
-                    // Teilnahme Status Icons
+                    // Teilnahme Status Icons mit Anzahl der Teilnehmer
                     HStack {
                         Spacer()
                         VStack {
@@ -111,7 +111,7 @@ struct AttendancePlanningView: View {
                                     
                                     Spacer()
                                     
-                                    // Symbole zum anzeigen des Anwesenheitsstatus
+                                    // Status
                                     Image(systemName:
                                         attendance.status == .absent ? "xmark.circle" :
                                         attendance.status == .accepted ? "checkmark.circle" :
@@ -134,15 +134,13 @@ struct AttendancePlanningView: View {
                       ProgressView("Lädt...")
                    }
                 }
+                // Anwesenheiten werden geladen wenn die Komponente angezeigt wird
                 .onAppear {
-                   Task {
-                       viewModel.fetchAttendances()
-                   }
+                   viewModel.fetchAttendances()
                 }
+                // Wenn die Liste aktualisiert wird, werden die Anwesenheiten neu geholt
                 .refreshable {
-                    Task {
-                        viewModel.fetchAttendances()
-                    }
+                    viewModel.fetchAttendances()
                 }
             }
             .alert("Hinweis", isPresented: $viewModel.isShowingAlert) {
@@ -153,6 +151,7 @@ struct AttendancePlanningView: View {
             .navigationTitle(viewModel.meeting.name)
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always))
+            // Event zum Kalender hinzufügen (wenn ein Teilnehmer später wieder auf absagen drückt, wird der Termin aus dem Kalender entfernt)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {

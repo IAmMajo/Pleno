@@ -8,6 +8,9 @@ class AttendanceDetailViewModel: ObservableObject {
     @Published var attendances: [GetAttendanceDTO] = []
     @Published var isLoading: Bool = true
     
+    // Hier werden alle API-Aufrufe ausgeführt
+    @Published var attendanceManager = AttendanceManager.shared
+    
     private let baseURL = "https://kivop.ipv64.net"
     var meeting: GetMeetingDTO
     
@@ -15,56 +18,29 @@ class AttendanceDetailViewModel: ObservableObject {
         self.meeting = meeting
     }
     
-    public func fetchAttendances() {
-        isLoading = true
+    // Aufruf von fetchAttendances im Manager
+    func fetchAttendances() {
         Task {
             do {
-                // URL und Request erstellen
-                guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/attendances") else {
-                    print("Ungültige URL.")
-                    isLoading = false
-                    return
-                }
-                
-                var request = URLRequest(url: url)
-                request.httpMethod = "GET"
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    errorMessage = "Unauthorized: Token not found."
-                    isLoading = false
-                    return
-                }
-                
-                // API-Aufruf und Antwort verarbeiten
-                let (data, response) = try await URLSession.shared.data(for: request)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    print("Fehlerhafte Antwort vom Server.")
-                    isLoading = false
-                    return
-                }
-                
-                // JSON dekodieren
-                self.attendances = try JSONDecoder().decode([GetAttendanceDTO].self, from: data)
-                
+                isLoading = true
+                // Versuche, attendances zu laden
+                attendances = try await attendanceManager.fetchAttendances2(meetingId: meeting.id)
+                isLoading = false
             } catch {
-                print("Fehler: \(error.localizedDescription)")
+                // Fehlerbehandlung
+                print("Fehler beim Abrufen der Attendances: \(error.localizedDescription)")
+                isLoading = false
             }
-            isLoading = false
         }
     }
     
+    // Zählen von allen anwesenden
     var presentCount: Int {
         attendances.filter { $0.status == .present }.count
     }
     
+    // Zählen von allen die nicht anwesend waren
     var absentCount: Int {
         attendances.filter { $0.status != .present }.count
-    }
-    
-    func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy - HH:mm 'Uhr'"
-        return formatter.string(from: date)
     }
 }

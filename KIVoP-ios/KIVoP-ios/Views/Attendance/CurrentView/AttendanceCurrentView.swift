@@ -6,16 +6,14 @@ struct AttendanceCurrentView: View {
     
     var body: some View {
         NavigationStack {
-            // Den gesamten Hintergrund grau hinterlegen
+            // Den gesamten Hintergrund grau hinterlegen (Damit alles so aussieht als wäre es eine Liste)
             ZStack {
                 Color.gray.opacity(0.1)
                     .edgesIgnoringSafeArea(.all)
-                
                 // Inhalt
                 VStack {
-                    
                     // Datum + Uhrzeit
-                    Text(viewModel.formattedDate(viewModel.meeting.start))
+                    Text(viewModel.attendanceManager.formattedDate(viewModel.meeting.start))
                         .padding(5)
                         .overlay(
                             RoundedRectangle(cornerRadius: 30)
@@ -23,7 +21,7 @@ struct AttendanceCurrentView: View {
                         )
                         .padding(.vertical)
                     
-                    // Ausblenden wenn am Meeting teilgenommen
+                    // Funktionalität um an Meeting teilzunehmen wird ausgeblendet wenn man bereits teilnimmt
                     if !(viewModel.attendance?.status == .present) {
                         Text("Teilnahme bestätigen")
                             .padding(.top)
@@ -120,7 +118,7 @@ struct AttendanceCurrentView: View {
                                     
                                     Spacer()
                                     
-                                    // Inline-Statusbehandlung und Anzeige von Symbolen
+                                    // Status
                                     Image(systemName:
                                         attendance.status == .present ? "checkmark.circle" :
                                         "checkmark.circle.badge.questionmark"
@@ -141,11 +139,13 @@ struct AttendanceCurrentView: View {
                       ProgressView("Lädt...")
                    }
                 }
+                // Anwesenheiten werden geladen wenn die Komponente angezeigt wird
                 .onAppear {
                    Task {
                        viewModel.fetchAttendances()
                    }
                 }
+                // Wenn die Liste aktualisiert wird, werden die Anwesenheiten neu geholt
                 .refreshable {
                     Task {
                         viewModel.fetchAttendances()
