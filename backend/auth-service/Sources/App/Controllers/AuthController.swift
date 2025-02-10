@@ -6,8 +6,7 @@ import AuthServiceDTOs
 
 struct AuthController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
-        let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
+        let authMiddleware = AuthMiddleware(payloadType: JWTPayloadDTO.self)
         // Auth-Routen
         let authRoutes = routes.grouped("auth");
         authRoutes.post("login", use: self.login).openAPI(
@@ -40,7 +39,7 @@ struct AuthController: RouteCollection {
             summary: "Test given JWT-Token",
             description: "Test if JWT-Token is valid",
             response: .type(HTTPResponseStatus.self),
-            auth: .bearer()
+            auth: AuthMiddleware.schemeObject
         )
         
         protectedRoutes.get("token-test", use: self.tokenTest).openAPI(
@@ -48,14 +47,14 @@ struct AuthController: RouteCollection {
             description: "Get payload infos",
             response: .type(JWTPayloadDTO.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            auth: AuthMiddleware.schemeObject
         )
         
         // Aktivieren des Accounts, durch den Admin => isActive wird auf true gesetzt
         protectedRoutes.put("activate-user", ":id", use: self.adminVerifyAccount).openAPI(
             summary: "Activate user account",
             description: "Activate user account with user id as admin",
-            auth: .bearer()
+            auth: AuthMiddleware.schemeObject
         )
     }
     
@@ -76,13 +75,16 @@ struct AuthController: RouteCollection {
         guard let loginRequest = try? req.content.decode(UserLoginDTO.self) else {
             throw Abort(.badRequest, reason: "Request-Body does not match UserLoginDTO")
         }
+        guard let loginEmail = loginRequest.email, let loginPassword = loginRequest.password else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap email and password")
+        }
         guard let user = try await User.query(on: req.db)
             .with(\.$emailVerification)
-            .filter(\.$email == loginRequest.email!)
+            .filter(\.$email == loginEmail)
             .first() else {
             throw Abort(.notFound, reason: "Invalid credentials")
         }
-        guard try Bcrypt.verify(loginRequest.password!, created: user.passwordHash) else {
+        guard try Bcrypt.verify(loginPassword, created: user.passwordHash) else {
             throw Abort(.notFound, reason: "Invalid credentials")
         }
         
@@ -94,11 +96,12 @@ struct AuthController: RouteCollection {
         guard user.isActive == true else {
             throw Abort(.forbidden, reason: "This account is inactiv")
         }
+        let userIdNumber = try user.requireID()
         
         let expiration = Date().addingTimeInterval(3600) // Token für 1 Stunde gültig
-        let payload = JWTPayloadDTO(userID: user.id!, exp: expiration, isAdmin: user.isAdmin)
+        let payload = JWTPayloadDTO(userID: userIdNumber, exp: expiration, isAdmin: user.isAdmin)
         
-        let token = try req.jwt.sign(payload)
+        let token = try req.jwt.sign(payload, kid: "private")
         
         let tokenResponse = TokenResponseDTO(token: token)
         return tokenResponse
@@ -106,21 +109,14 @@ struct AuthController: RouteCollection {
     
     @Sendable
     func verifyJWTToken(req: Request) async throws -> HTTPResponseStatus {
-        let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
-        
         guard let token = req.headers.bearerAuthorization?.token ?? req.cookies["token"]?.string else {
             req.logger.warning("No Token found in Authorization header or cookies")
             return .unauthorized
         }
-        
         do {
-            let payload = try jwtSigner.verify(token, as: JWTPayloadDTO.self)
-            
-            req.logger.info("Token verified successfully for user \(payload.userID!)")
+            _ = try req.jwt.verify(token, as: JWTPayloadDTO.self)
             return .ok
         } catch {
-            req.logger.error("Token verification failed: \(error)")
-            
             if let jwtError = error as? JWTError, case .claimVerificationFailure(_,_) = jwtError {
                 return .forbidden
             } else {
@@ -150,7 +146,7 @@ struct AuthController: RouteCollection {
         }
         
         user.isActive = true
-        try await user.save(on: req.db)
+        try await user.update(on: req.db)
         
         return Response(status: .ok, body: .init(string: "User account has been successfully activated"))
     }

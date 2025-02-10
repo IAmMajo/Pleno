@@ -5,8 +5,7 @@ import VaporToOpenAPI
 import Models
 
 func routes(_ app: Application) throws {
-    let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
-    let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
+    let authMiddleware = AuthMiddleware(payloadType: JWTPayloadDTO.self)
     
     let authProtected = app.grouped(authMiddleware)
     let posters = authProtected.grouped("posters")

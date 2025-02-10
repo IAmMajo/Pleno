@@ -7,6 +7,7 @@ import Leaf
 import Smtp
 import Vapor
 import VaporAPNS
+import JWTKit
 
 // configures your application
 public func configure(_ app: Application) async throws {
@@ -45,7 +46,15 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateNotificationDevice())
     try await app.autoMigrate()
     
-    app.jwt.signers.use(.hs256(key: "Ganzgeheimespasswort"))
+    //JWT-Public-Key
+    let publicCertPath = Environment.get("PUBLIC_CERT_PATH") ?? "/app/certs/jwt/public.pem"
+    guard let publicKeyData = try? Data(contentsOf: URL(fileURLWithPath: publicCertPath)) else {
+        throw Abort(.internalServerError, reason: "Error: Public key could not be loaded.")
+    }
+    guard let publicKey = try? ECDSAKey.public(pem: publicKeyData) else {
+        throw Abort(.internalServerError, reason: "Error: The public key could not be decrypted properly.")
+    }
+    app.jwt.signers.use(.es256(key: publicKey), kid: "public")
     
     let apnsTeamID = Environment.get("APNS_TEAM_ID") ?? ""
     let apnsKeyID = Environment.get("APNS_KEY_ID") ?? ""

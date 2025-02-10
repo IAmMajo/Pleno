@@ -1,12 +1,11 @@
 import Vapor
 @preconcurrency import JWT
+@preconcurrency import VaporToOpenAPI
 
 struct AuthMiddleware: AsyncMiddleware {
-    let jwtSigner: JWTSigner
     let payloadType: JWTPayloadDTO.Type
     
-    init(jwtSigner: JWTSigner, payloadType: JWTPayloadDTO.Type) {
-        self.jwtSigner = jwtSigner
+    init(payloadType: JWTPayloadDTO.Type) {
         self.payloadType = payloadType
     }
     
@@ -17,7 +16,7 @@ struct AuthMiddleware: AsyncMiddleware {
         }
         
         do {
-            let payload = try jwtSigner.verify(token, as: JWTPayloadDTO.self)
+            let payload = try request.jwt.verify(token, as: JWTPayloadDTO.self)
             
             request.jwtPayload = payload
             
@@ -39,3 +38,6 @@ extension Request {
     }
 }
 
+extension AuthMiddleware {
+    static let schemeObject = AuthSchemeObject.bearer()
+}

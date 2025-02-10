@@ -3,6 +3,17 @@ import Fluent
 import FluentPostgresDriver
 import Vapor
 import JWT
+import JWTKit
+
+private struct BaseURLKey: StorageKey {
+    typealias Value = String
+}
+
+extension Application {
+    var baseURL: String {
+        self.storage[BaseURLKey.self] ?? "http://localhost:80"
+    }
+}
 
 
 // configures your application
@@ -20,6 +31,39 @@ public func configure(_ app: Application) async throws {
         database: Environment.get("DATABASE_NAME") ?? "kivop",
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
+    
+    
+    let baseURL: String
+    
+    if let envDomain = Environment.get("DOMAIN"), !envDomain.isEmpty {
+        baseURL = "https://\(envDomain)"
+    } else {
+        baseURL = "http://localhost:80"
+    }
+    
+    app.logger.info("🌍 Base URL: \(baseURL)")
+    
+    app.storage[BaseURLKey.self] = baseURL
+
+    let privateCertPath = "/app/certs/auth/private.pem"
+    let privateKeyData = try Data(contentsOf: URL(fileURLWithPath: privateCertPath))
+    
+    let privateKey = try ECDSAKey.private(pem: privateKeyData)
+    
+
+    
+    let publicCertPath = Environment.get("PUBLIC_CERT_PATH") ?? "/app/certs/jwt/public.pem"
+    let publicKeyData = try Data(contentsOf: URL(fileURLWithPath: publicCertPath))
+    
+    let publicKey = try ECDSAKey.public(pem: publicKeyData)
+    
+    app.jwt.signers.use(.es256(key: privateKey), kid: "private")
+    app.jwt.signers.use(.es256(key: publicKey), kid: "public")
+    
+    
+    
+    
+    
     
     // Settings beim Start laden
     Task {
@@ -43,8 +87,6 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateEmailVerification())
     app.migrations.add(CreatePasswordResetToken())
     try await app.autoMigrate()
-    
-    app.jwt.signers.use(.hs256(key: "Ganzgeheimespasswort"))
     
     //app.logger.logLevel = .debug
     

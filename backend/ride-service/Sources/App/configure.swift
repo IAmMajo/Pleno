@@ -2,6 +2,7 @@ import NIOSSL
 import Fluent
 import FluentPostgresDriver
 import Vapor
+import JWTKit
 
 // configures your application
 public func configure(_ app: Application) async throws {
@@ -45,7 +46,14 @@ public func configure(_ app: Application) async throws {
     
     try await app.autoMigrate()
     
-    app.jwt.signers.use(.hs256(key: "Ganzgeheimespasswort"))
+    let publicCertPath = Environment.get("PUBLIC_CERT_PATH") ?? "/app/certs/jwt/public.pem"
+    guard let publicKeyData = try? Data(contentsOf: URL(fileURLWithPath: publicCertPath)) else {
+        throw Abort(.internalServerError, reason: "Error: Public key could not be loaded.")
+    }
+    guard let publicKey = try? ECDSAKey.public(pem: publicKeyData) else {
+        throw Abort(.internalServerError, reason: "Error: The public key could not be decrypted properly.")
+    }
+    app.jwt.signers.use(.es256(key: publicKey), kid: "public")
     
     // register routes
     try routes(app)

@@ -4,6 +4,7 @@ import Models
 import JWT
 import NotificationsServiceDTOs
 import AuthServiceDTOs
+@preconcurrency import VaporToOpenAPI
 
 extension SendEmailDTO: @retroactive AsyncResponseEncodable {}
 extension SendEmailDTO: @retroactive AsyncRequestDecodable {}
@@ -18,16 +19,17 @@ struct UserController: RouteCollection {
         userRoutes.put("password", "reset-request", use: self.requestPasswordReset).openAPI(
             summary: "Request Reset Code",
             description: "Request Reset Code with Email",
-            body: .type(RequestPasswordResetDTO.self)
+            body: .type(RequestPasswordResetDTO.self),
+            statusCode: .ok
         )
         userRoutes.put("password", "reset", use: self.userResetPasswort).openAPI(
             summary: "Reset Password with code",
             description: "Reset Password with email, code and new password",
-            body: .type(ResetPasswordDTO.self)
+            body: .type(ResetPasswordDTO.self),
+            statusCode: .ok
         )
         
-        let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
-        let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
+        let authMiddleware = AuthMiddleware(payloadType: JWTPayloadDTO.self)
         let protectedRoutes = userRoutes.grouped(authMiddleware)
         
         userRoutes.on(.POST, "register", body: .collect(maxSize: "7000kb"), use: self.register).openAPI(
@@ -35,28 +37,32 @@ struct UserController: RouteCollection {
             description: "Register an account to new Members",
             body: .type(UserRegistrationDTO.self),
             contentType: .application(.json),
-            response: .type(UserRegistrationDTO.self)
+            response: .type(UserRegistrationDTO.self),
+            statusCode: .created
         )
         userRoutes.put("email", "resend", ":email", use: self.resendVerificationEmail).openAPI(
             summary: "Resend verification email",
             description: "Resend pending verification link",
-            contentType: .application(.json)
+            contentType: .application(.json),
+            statusCode : .ok
         )
         
-        userRoutes.get("profile", use: self.getProfile).openAPI(
+        protectedRoutes.get("profile", use: self.getProfile).openAPI(
             summary: "Get profile",
             description: "Get current profile of user",
             body: .none,
             response: .type(UserProfileDTO.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
         )
         protectedRoutes.on(.PATCH, "profile", body: .collect(maxSize: "7000kb"), use: self.userUpdateUserProfile).openAPI(
             summary: "Update profile",
             description: "Update identity and/or profileImage",
             body: .type(UserProfileUpdateDTO.self),
             response: .type(HTTPResponseStatus.self),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
         )
         
         protectedRoutes.on(.PATCH, "profile", ":id", body: .collect(maxSize: "7000kb"), use: self.adminUpdateUserProfile).openAPI(
@@ -64,7 +70,8 @@ struct UserController: RouteCollection {
             description: "Admin Update identity and/or profileImage",
             body: .type(UserProfileUpdateDTO.self),
             response: .type(HTTPResponseStatus.self),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
         )
         
         // GET /users -> alle User
@@ -74,7 +81,8 @@ struct UserController: RouteCollection {
             body: .none,
             response: .type(UserProfileDTO.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
         )
         // GET /users/:id -> ein User
@@ -84,7 +92,8 @@ struct UserController: RouteCollection {
             body: .none,
             response: .type(UserProfileDTO.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
             
         )
@@ -94,7 +103,8 @@ struct UserController: RouteCollection {
             description: "Get all identites with user id",
             response: .type(Identity.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
         )
         // PATCH /users/:id
@@ -104,7 +114,8 @@ struct UserController: RouteCollection {
             body: .type(UserUpdateAccountDTO.self),
             contentType: .application(.json),
             response: .type(HTTPResponseStatus.self),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
         )
         // DELETE /users/:id
@@ -112,7 +123,8 @@ struct UserController: RouteCollection {
             summary: "Admin delete user account",
             description: "Admin can delete user account with user id",
             response: .type(HTTPResponseStatus.self),
-            auth: .bearer()
+            statusCode: .noContent,
+            auth: AuthMiddleware.schemeObject
             
         )
         // GET /users/profile-image/identity/:identity_id
@@ -120,7 +132,8 @@ struct UserController: RouteCollection {
             summary: "Get profile image",
             description: "Get profile image with identity id",
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
         )
         // GET /users/profile-image/user/:user_id
@@ -128,7 +141,8 @@ struct UserController: RouteCollection {
             summary: "Get profile image",
             description: "Get profile image with user id",
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
             
         )
@@ -138,7 +152,8 @@ struct UserController: RouteCollection {
             description: "Get own identities with JWT-Token",
             response: .type(Identity.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
         )
         // DELETE /users/delete
@@ -147,14 +162,18 @@ struct UserController: RouteCollection {
             description: "Delete own user account with JWT-Token",
             response: .type(HTTPResponseStatus.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .noContent,
+            auth: AuthMiddleware.schemeObject
+            
         )
         // PATCH /users/change-password
         protectedRoutes.patch("change-password", use: self.userChangePassword).openAPI(
             summary: "Change password",
             description: "Change password with old password",
             body: .type(ChangePasswordDTO.self),
-            contentType: .application(.json)
+            contentType: .application(.json),
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
         )
     }
     
@@ -276,28 +295,36 @@ struct UserController: RouteCollection {
     
     @Sendable
     func getProfile(req: Request) async throws -> UserProfileDTO {
-        // parse and verify jwt token
-        let token = try req.jwt.verify(as: JWTPayloadDTO.self)
+        guard let payload = req.jwtPayload else {
+            throw Abort(.unauthorized)
+        }
         
+        guard let userID = payload.userID else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap userID")
+        }
         // query user
         guard let user = try await User.query(on: req.db)
-            .filter(\.$id == token.userID!)
+            .filter(\.$id == userID)
             .with(\.$identity)
             .with(\.$emailVerification)
             .first() else {
             throw Abort(.notFound)
         }
         
+        guard let userIDNumber = try? user.requireID(), let userCreatedAt = user.createdAt, let emailVerification = user.emailVerification, let userEmailVerificationStatus = AuthServiceDTOs.VerificationStatus(rawValue: emailVerification.status.rawValue) else {
+            throw Abort(.internalServerError, reason: "Error unwrapping userID or createdAt")
+        }
+        
         // build reponse object
         let response = UserProfileDTO(
-            uid: user.id!,
+            uid: userIDNumber,
             email: user.email,
             name: user.identity.name,
             profileImage: user.profileImage,
             isAdmin: user.isAdmin,
             isActive: user.isActive,
-            emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue)!,
-            createdAt: user.createdAt!,
+            emailVerification: userEmailVerificationStatus,
+            createdAt: userCreatedAt,
             isNotificationsActive: user.isNotificationsActive,
             isPushNotificationsActive: user.isPushNotificationsActive
         )
@@ -310,10 +337,12 @@ struct UserController: RouteCollection {
         try UserRegistrationDTO.validate(content: req)
         
         // parse registration data
-        let registrationData = try req.content.decode(UserRegistrationDTO.self)
+        guard let registrationData = try? req.content.decode(UserRegistrationDTO.self), let registrationEmail = registrationData.email, let registrationPassword = registrationData.password, let registrationName = registrationData.name else {
+            throw Abort(.internalServerError, reason: "Cant decode user registration data")
+        }
         
         // check for user with same email
-        let count = try await User.query(on: req.db).filter(\.$email == registrationData.email!).count()
+        let count = try await User.query(on: req.db).filter(\.$email == registrationEmail).count()
         if count != 0 {
             throw Abort(.conflict, reason: "a user with this email already exists")
         }
@@ -326,19 +355,19 @@ struct UserController: RouteCollection {
         }
         
         // create new identity
-        let identity = Identity(name: registrationData.name!)
+        let identity = Identity(name: registrationName)
         
         // save identity in database
-        try await identity.save(on: req.db)
+        try await identity.create(on: req.db)
         
         // hash password
-        let passwordHash = try req.password.hash(registrationData.password!)
+        let passwordHash = try req.password.hash(registrationPassword)
         
         // extract identity id
         let identityID = try identity.requireID()
         
         // create new user
-        let user = User(identityID: identityID, email: registrationData.email!, passwordHash: passwordHash, profileImage: profileImageData)
+        let user = User(identityID: identityID, email: registrationEmail, passwordHash: passwordHash, profileImage: profileImageData)
         
         // the first user becomes admin and instant access
         let countAll = try await User.query(on: req.db).count()
@@ -351,7 +380,7 @@ struct UserController: RouteCollection {
         user.isPushNotificationsActive = false
         
         // save user in database
-        try await user.save(on: req.db)
+        try await user.create(on: req.db)
         
         // extract identity id
         let userID = try user.requireID()
@@ -360,28 +389,32 @@ struct UserController: RouteCollection {
         let history = IdentityHistory(userID: userID, identityID: identityID)
         
         // save history entry
-        try await history.save(on: req.db)
+        try await history.create(on: req.db)
         
         let verificationCode = String(format: "%06d", Int.random(in: 0...999999))
             
         let emailVerification = EmailVerification(
             email: user.email,
-            user: user.id!,
+            user: userID,
             code: verificationCode,
             status: .pending,
             expiresAt: Date().addingTimeInterval(3600)
         )
         
-        try await emailVerification.save(on: req.db)
+        try await emailVerification.create(on: req.db)
+        
+        guard let userEmailVerificationStatus = AuthServiceDTOs.VerificationStatus(rawValue: emailVerification.status.rawValue) else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap email verification status")
+        }
         
         let registeredUser = UserProfileDTO(
-            uid: user.id!,
+            uid: userID,
             email: user.email,
             name: identity.name,
             profileImage: user.profileImage,
             isAdmin: user.isAdmin,
             isActive: user.isActive,
-            emailVerification: VerificationStatus(rawValue: emailVerification.status.rawValue)!,
+            emailVerification: userEmailVerificationStatus,
             createdAt: user.createdAt!,
             isNotificationsActive: user.isNotificationsActive,
             isPushNotificationsActive: user.isPushNotificationsActive
@@ -389,7 +422,9 @@ struct UserController: RouteCollection {
         
         let emailString = try emailVerification.requireID()
         
-        let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailString)/\(verificationCode)"
+        let url = req.application.baseURL
+        
+        let verifyLink = "\(url)/auth/email/verify/\(emailString)/\(verificationCode)"
         
         let emailData = SendEmailDTO(
             receiver: user.email,
@@ -419,6 +454,9 @@ struct UserController: RouteCollection {
         guard let emailVerification = try await EmailVerification.find(email, on: req.db) else {
             return Response(status: .ok, body: .init(string: "If the email exists, a new verification email has been sent."))
         }
+        guard let emailExpiresAt = emailVerification.expiresAt else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap expiresAt")
+        }
         
         // Prüft ob der Eintrag noch nicht als verifiziert wurde
         guard emailVerification.status != .verified else {
@@ -426,7 +464,7 @@ struct UserController: RouteCollection {
         }
         
         // Prüft ob der Eintrag schon abgelaufen ist
-        if emailVerification.expiresAt! < Date() {
+        if emailExpiresAt < Date() {
             let newVerificationCode = String(format: "%06d", Int.random(in: 0...999999))
                     
             if emailVerification.status == .failed {
@@ -435,11 +473,13 @@ struct UserController: RouteCollection {
             emailVerification.code = newVerificationCode
             emailVerification.expiresAt = Date().addingTimeInterval(3600)
             
-            try await emailVerification.save(on: req.db)
+            try await emailVerification.update(on: req.db)
             
             let emailString = try emailVerification.requireID()
             
-            let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailString)/\(emailVerification.code)"
+            let url = req.application.baseURL
+            
+            let verifyLink = "\(url)/auth/email/verify/\(emailString)/\(emailVerification.code)"
             
             let emailData = SendEmailDTO(
                 receiver: emailString,
@@ -460,7 +500,9 @@ struct UserController: RouteCollection {
             
             let emailString = try emailVerification.requireID()
             
-            let verifyLink = "https://kivop.ipv64.net/auth/email/verify/\(emailString)/\(emailVerification.code)"
+            let url = req.application.baseURL
+            
+            let verifyLink = "\(url)/auth/email/verify/\(emailString)/\(emailVerification.code)"
             
             let emailData = SendEmailDTO(
                 receiver: emailString,
@@ -492,15 +534,18 @@ struct UserController: RouteCollection {
         var userProfiles: [UserProfileDTO] = []
         
         for user in users {
+            guard let userIDNumber = try? user.requireID(), let userCreatedAt = user.createdAt, let emailVerification = user.emailVerification, let userEmailVerificationStatus = AuthServiceDTOs.VerificationStatus(rawValue: emailVerification.status.rawValue) else {
+                throw Abort(.internalServerError, reason: "Error unwrapping userID, createdAt or emailverification")
+            }
             let profileDTO = UserProfileDTO(
-                uid: user.id!,
+                uid: userIDNumber,
                 email: user.email,
                 name: user.identity.name,
                 profileImage: user.profileImage,
                 isAdmin: user.isAdmin,
                 isActive: user.isActive,
-                emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue)!,
-                createdAt: user.createdAt!,
+                emailVerification: userEmailVerificationStatus,
+                createdAt: userCreatedAt,
                 isNotificationsActive: user.isNotificationsActive,
                 isPushNotificationsActive: user.isPushNotificationsActive
             )
@@ -532,16 +577,20 @@ struct UserController: RouteCollection {
             throw Abort(.notFound, reason: "User not found")
         }
         
+        guard let userIDNumber = try? user.requireID(), let userCreatedAt = user.createdAt, let emailVerification = user.emailVerification, let userEmailVerificationStatus = AuthServiceDTOs.VerificationStatus(rawValue: emailVerification.status.rawValue) else {
+            throw Abort(.internalServerError, reason: "Error unwrapping userID, createdAt or emailverification")
+        }
+        
         // Gibt ProfilDTO zurück
         return UserProfileDTO(
-            uid: user.id!,
+            uid: userIDNumber,
             email: user.email,
             name: user.identity.name,
             profileImage: user.profileImage,
             isAdmin: user.isAdmin,
             isActive: user.isActive,
-            emailVerification: VerificationStatus(rawValue: user.emailVerification!.status.rawValue)!,
-            createdAt: user.createdAt!,
+            emailVerification: userEmailVerificationStatus,
+            createdAt: userCreatedAt,
             isNotificationsActive: user.isNotificationsActive,
             isPushNotificationsActive: user.isPushNotificationsActive
         )
@@ -589,9 +638,7 @@ struct UserController: RouteCollection {
         }
         let update = try req.content.decode(UserUpdateAccountDTO.self)
         
-        guard let user = try await User.query(on: req.db)
-            .filter(\.$id == userID)
-            .first() else {
+        guard let user = try await User.find(userID, on: req.db) else {
             throw Abort(.notFound, reason: "User not found")
         }
         if let isActive = update.isActive {
@@ -601,7 +648,7 @@ struct UserController: RouteCollection {
             user.isAdmin = isAdmin
         }
         
-        try await user.save(on: req.db)
+        try await user.update(on: req.db)
         
         return .ok
     }
@@ -617,9 +664,7 @@ struct UserController: RouteCollection {
         guard let userID = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid or missing user ID")
         }
-        guard let user = try await User.query(on: req.db)
-            .filter(\.$id == userID)
-            .first() else {
+        guard let user = try await User.find(userID, on: req.db) else {
             throw Abort(.notFound, reason: "User not found")
         }
         let identityHistories = try await IdentityHistory.query(on: req.db)
@@ -628,7 +673,7 @@ struct UserController: RouteCollection {
         
         for identityHistory in identityHistories {
             identityHistory.$user.id = nil
-            try await identityHistory.save(on: req.db)
+            try await identityHistory.update(on: req.db)
         }
         
         try await user.delete(on: req.db)
@@ -695,9 +740,10 @@ struct UserController: RouteCollection {
         guard let payload = req.jwtPayload else {
             throw Abort(.unauthorized)
         }
-        guard let user = try await User.query(on: req.db)
-            .filter(\.$id == payload.userID!)
-            .first() else {
+        guard let userID = payload.userID else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap userID")
+        }
+        guard let user = try await User.find(userID, on: req.db) else {
             throw Abort(.notFound, reason: "User not found")
         }
         if user.isAdmin {
@@ -724,18 +770,19 @@ struct UserController: RouteCollection {
         guard let body = try? req.content.decode(ChangePasswordDTO.self) else {
             throw Abort(.badRequest, reason: "Body does not match ChangePasswordDTO")
         }
-        guard let user = try await User.query(on: req.db)
-            .filter(\.$id == payload.userID!)
-            .first() else {
+        guard let userID = payload.userID, let userOldPassword = body.oldPassword, let userNewPassword = body.newPassword else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap userID, oldPassword or newPassword")
+        }
+        guard let user = try await User.find(userID, on: req.db) else {
             throw Abort(.notFound, reason: "User not found")
         }
-        let isCurrentPasswordValid = try Bcrypt.verify(body.oldPassword!, created: user.passwordHash)
+        let isCurrentPasswordValid = try Bcrypt.verify(userOldPassword, created: user.passwordHash)
         guard isCurrentPasswordValid else {
             throw Abort(.unauthorized, reason: "Current password is incorrect")
         }
         do {
-            user.passwordHash = try Bcrypt.hash(body.newPassword!)
-            try await user.save(on: req.db)
+            user.passwordHash = try Bcrypt.hash(userNewPassword)
+            try await user.update(on: req.db)
         } catch {
             throw Abort(.internalServerError, reason: "Failed to update password: \(error.localizedDescription)")
         }
@@ -748,16 +795,21 @@ struct UserController: RouteCollection {
         guard let body = try? req.content.decode(RequestPasswordResetDTO.self) else {
             throw Abort(.badRequest, reason: "Body does not match RequestPasswordResetDTO")
         }
+        guard let bodyEmail = body.email else {
+            throw Abort(.internalServerError, reason: "Cannot unwrap email")
+        }
         guard let user = try await User.query(on: req.db)
-            .filter(\.$email == body.email!)
+            .filter(\.$email == bodyEmail)
             .with(\.$identity)
             .first() else {
             return Response(status: .ok, body: .init(string: "If the email exists, a reset code has been sent."))
         }
         let resetCode = String((100000...999999).randomElement()!)
         
+        let userID = try user.requireID()
+        
         let tokenEntry = PasswordResetToken(
-            userID: user.id!,
+            userID: userID,
             token: resetCode,
             expiresAt: Date().addingTimeInterval(3600) // 1 Stunde gültig
         )
@@ -794,8 +846,10 @@ struct UserController: RouteCollection {
             .first() else {
             throw Abort(.notFound, reason: "User with email \(email) not found")
         }
+        let userID = try user.requireID()
+        
         guard let tokenEntry = try await PasswordResetToken.query(on: req.db)
-            .filter(\.$user.$id == user.id!)
+            .filter(\.$user.$id == userID)
             .filter(\.$token == resetCode)
             .filter(\.$expiresAt > Date())
             .first() else {
@@ -803,7 +857,7 @@ struct UserController: RouteCollection {
         }
         do {
             user.passwordHash = try Bcrypt.hash(newPassword)
-            try await user.save(on: req.db)
+            try await user.update(on: req.db)
             try await tokenEntry.delete(on: req.db)
         } catch {
             throw Abort(.internalServerError, reason: "Failed to reset password: \(error.localizedDescription)")
