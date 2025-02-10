@@ -18,6 +18,17 @@ struct MainPage: View {
 
     // Meeting-Manager zur Verwaltung von Meeting-Daten
     @StateObject private var meetingManager = MeetingManager()
+    
+    init(){
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.titleTextAttributes = [
+            .font: UIFont.boldSystemFont(ofSize: 18),
+            .foregroundColor: UIColor.black
+        ]
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+    }
 
     var body: some View {
         NavigationStack {

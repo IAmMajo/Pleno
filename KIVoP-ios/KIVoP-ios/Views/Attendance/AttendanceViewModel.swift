@@ -11,71 +11,17 @@ class AttendanceViewModel: ObservableObject {
     @Published var meetings: [GetMeetingDTO] = []
     @Published var isLoading: Bool = false
     
-    init() {
-        // Konfigurieren der Navbar
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.titleTextAttributes = [
-            .font: UIFont.boldSystemFont(ofSize: 18),
-            .foregroundColor: UIColor.black
-        ]
-        UINavigationBar.appearance().standardAppearance = appearance
-        UINavigationBar.appearance().scrollEdgeAppearance = appearance
-    }
+    // Hier werden alle API-Aufrufe ausgeführt
+    @Published var attendanceManager = AttendanceManager.shared
     
-    // Abruf der Meetings von der API
+    // Abrufen aller Meetings über den attendanceManager
     func fetchMeetings() {
         Task {
-            do {
-                // Setze isLoading auf true, wenn der Ladevorgang startet
-                self.isLoading = true
-                self.meetings.removeAll() // sicherstellen, das das Array leer ist bevor es gefüllt wird
-                
-                guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
-                    throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
-                }
-                
-                var request = URLRequest(url: url)
-                request.httpMethod = "GET"
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    errorMessage = "Unauthorized: Token not found."
-                    self.isLoading = false
-                    return
-                }
-                
-                let (data, response) = try await URLSession.shared.data(for: request)
-                
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    throw NSError(domain: "Failed to fetch meetings", code: 500, userInfo: nil)
-                }
-                
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    
-                    DispatchQueue.main.async {
-                        do {
-                            let fetchedMeetings = try decoder.decode([GetMeetingDTO].self, from: data)
-                            self.meetings = fetchedMeetings
-                            self.isLoading = false
-                        } catch {
-                            print("Fehler beim Dekodieren der Meetings: \(error.localizedDescription)")
-                            self.isLoading = false
-                        }
-                    }
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    print("\(error.localizedDescription)")
-                    self.isLoading = false
-                }
-            }
+            await self.meetings = attendanceManager.fetchMeetings()
         }
     }
     
-    // Aktuelle Sitzung (falls vorhanden)
+    // Aktuelle Sitzung werden ermittelt (falls vorhanden)
     var currentMeetings: [GetMeetingDTO] {
         meetings
             .filter { $0.status == .inSession }
@@ -115,7 +61,7 @@ class AttendanceViewModel: ObservableObject {
         }
     }
 
-    // Filtert Sitzungen basierend auf dem Tab
+    // Filtert Sitzungen basierend auf dem Status (completed/scheduled)
     private func filteredMeetings() -> [GetMeetingDTO] {
         switch selectedTab {
         case 0:

@@ -5,21 +5,21 @@ struct AttendanceDetailView: View {
     
     var body: some View {
         NavigationStack {
-            // Den gesamten Hintergrund grau hinterlegen
+            // Den gesamten Hintergrund grau hinterlegen (Damit alles so aussieht als wäre es eine Liste)
             ZStack {
                 Color.gray.opacity(0.1)
                     .edgesIgnoringSafeArea(.all)
                 // Inhalt
                 VStack {
-                    
                     // Datum + Uhrzeit
-                    Text(viewModel.formattedDate(viewModel.meeting.start))
+                    Text(viewModel.attendanceManager.formattedDate(viewModel.meeting.start))
                         .padding(5)
                         .overlay(
                             RoundedRectangle(cornerRadius: 30)
                                 .stroke(Color.black, lineWidth: 1)
                         )
                         .padding(.vertical)
+                    
                     // Teilnahme Status Icons
                     HStack {
                         Spacer()
@@ -59,7 +59,7 @@ struct AttendanceDetailView: View {
                                     
                                     Spacer()
                                     
-                                    // Inline-Statusbehandlung und Anzeige von Symbolen
+                                    // Status
                                     Image(systemName:
                                         attendance.status == .present ? "checkmark.circle" :
                                         "xmark.circle"
@@ -80,15 +80,13 @@ struct AttendanceDetailView: View {
                       ProgressView("Lädt...")
                    }
                 }
+                // Anwesenheiten werden geladen wenn die Komponente angezeigt wird
                 .onAppear {
-                   Task {
-                       viewModel.fetchAttendances()
-                   }
+                   viewModel.fetchAttendances()
                 }
+                // Wenn die Liste aktualisiert wird, werden die Anwesenheiten neu geholt
                 .refreshable {
-                    Task {
-                        viewModel.fetchAttendances()
-                    }
+                    viewModel.fetchAttendances()
                 }
             }
             .navigationTitle(viewModel.meeting.name)

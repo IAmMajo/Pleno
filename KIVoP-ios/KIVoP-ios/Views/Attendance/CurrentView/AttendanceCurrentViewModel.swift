@@ -11,6 +11,9 @@ class AttendanceCurrentViewModel: ObservableObject {
     @Published var attendance: GetAttendanceDTO?
     @Published var isLoading: Bool = true
     
+    // Hier werden alle API-Aufrufe ausgeführt
+    @Published var attendanceManager = AttendanceManager.shared
+    
     private let baseURL = "https://kivop.ipv64.net"
     var meeting: GetMeetingDTO
     
@@ -18,110 +21,41 @@ class AttendanceCurrentViewModel: ObservableObject {
         self.meeting = meeting
     }
     
+    // Aufruf von fetchAttendances im Manager
     func fetchAttendances() {
-        isLoading = true
         Task {
             do {
-                // URL und Request erstellen
-                guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/attendances") else {
-                    print("Ungültige URL.")
-                    isLoading = false
-                    return
-                }
-                
-                var request = URLRequest(url: url)
-                request.httpMethod = "GET"
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    errorMessage = "Unauthorized: Token not found."
-                    isLoading = false
-                    return
-                }
-                
-                // API-Aufruf und Antwort verarbeiten
-                let (data, response) = try await URLSession.shared.data(for: request)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    print("Fehlerhafte Antwort vom Server.")
-                    isLoading = false
-                    return
-                }
-                
-                // JSON dekodieren
-                self.attendances = try JSONDecoder().decode([GetAttendanceDTO].self, from: data)
-                self.attendance = attendances.first(where: { $0.itsame })
-                
+                isLoading = true
+                // Versuche, attendances zu laden
+                attendances = try await attendanceManager.fetchAttendances2(meetingId: meeting.id)
+                // Meine Anwesenheit wird festgehalten (Um Status zu setzen etc.)
+                attendance = attendances.first { $0.itsame }
+                isLoading = false
             } catch {
-                print("Fehler: \(error.localizedDescription)")
+                // Fehlerbehandlung
+                print("Fehler beim Abrufen der Attendances: \(error.localizedDescription)")
+                isLoading = false
             }
-            
-            isLoading = false
         }
     }
     
+    // Aufruf der join-Funktion im AttendanceManager
     func joinMeeting() {
-        isLoading = true
-        statusMessage = nil  // Vor jedem Versuch die Nachricht zurücksetzen
         Task {
-            do {
-                // URL und Request vorbereiten
-                guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/attend/\(participationCode)") else {
-                    print("Ungültige URL.")
-                    isLoading = false
-                    statusMessage = "Beim betreten der Sitzung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
-                    return
-                }
-
-                var request = URLRequest(url: url)
-                request.httpMethod = "PUT"
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    errorMessage = "Unauthorized: Token not found."
-                    isLoading = false
-                    statusMessage = "Beim betreten der Sitzung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
-                    return
-                }
-
-                // API-Aufruf und Antwort verarbeiten
-                let (_, response) = try await URLSession.shared.data(for: request)
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    print("Ungültige Antwort vom Server.")
-                    isLoading = false
-                    statusMessage = "Beim betreten der Sitzung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
-                    return
-                }
-
-                if httpResponse.statusCode == 204 {
-                    print("Erfolgreich am Meeting teilgenommen!")
-                    statusMessage = "Erfolgreich der Sitzung beigetreten."
-                    fetchAttendances() // Attendances nach erfolgreichem Beitritt neu laden
-                } else {
-                    print("Fehler: \(httpResponse.statusCode) beim Beitritt zum Meeting.")
-                    statusMessage = "Beim betreten der Sitzung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
-                }
-            } catch {
-                print("Fehler: \(error.localizedDescription)")
-                statusMessage = "Beim betreten der Sitzung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
-            }
-
+            isLoading = true
+            await statusMessage = attendanceManager.joinMeeting(meetingId: meeting.id, participationCode: participationCode)
+            fetchAttendances()
             isLoading = false
         }
     }
-
     
-    // Statuszählung
+    // Zählt alle zugesagten
     var presentCount: Int {
         attendances.filter { $0.status == .present }.count
     }
     
+    // Zählt alle die gesagt haben sie haben Zeit, aber noch nicht da sind
     var acceptedCount: Int {
         attendances.filter { $0.status == .accepted }.count
-    }
-    
-    func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy - HH:mm 'Uhr'"
-        return formatter.string(from: date)
     }
 }

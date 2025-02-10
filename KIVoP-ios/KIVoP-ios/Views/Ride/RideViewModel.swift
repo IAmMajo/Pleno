@@ -12,18 +12,6 @@ class RideViewModel: ObservableObject {
     @Published var events: [EventWithAggregatedData] = []
     private let baseURL = "https://kivop.ipv64.net"
     
-    init() {
-        // Konfigurieren der Navbar
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.titleTextAttributes = [
-            .font: UIFont.boldSystemFont(ofSize: 18),
-            .foregroundColor: UIColor.black
-        ]
-        UINavigationBar.appearance().standardAppearance = appearance
-        UINavigationBar.appearance().scrollEdgeAppearance = appearance
-    }
-    
     func fetchRides(){
         fetchSpecialRides()
         fetchEvents()

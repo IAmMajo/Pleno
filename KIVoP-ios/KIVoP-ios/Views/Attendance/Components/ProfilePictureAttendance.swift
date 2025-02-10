@@ -30,6 +30,8 @@ struct ProfilePictureAttendance: View {
                     )
             }
         }
+        // Profilbild wird geladen
+        // Wenn kein Profilbild vorhanden ist, wird der shortname ermittelt
         .onAppear {
             self.shortName = MainPageAPI.calculateShortName(from: profile.name)
             fetchIdentityImage()

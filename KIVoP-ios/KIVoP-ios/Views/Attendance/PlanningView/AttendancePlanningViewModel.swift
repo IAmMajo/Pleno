@@ -9,9 +9,12 @@ class AttendancePlanningViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     @Published var attendances: [GetAttendanceDTO] = []
     @Published var attendance: GetAttendanceDTO?
-    @Published var isLoading: Bool = true
+    @Published var isLoading: Bool = false
     @Published var isShowingAlert = false
     @Published var alertMessage = ""
+    
+    // Hier werden alle API-Aufrufe ausgeführt
+    @Published var attendanceManager = AttendanceManager.shared
     
     private let eventStore = EKEventStore()
     private let baseURL = "https://kivop.ipv64.net"
@@ -21,127 +24,64 @@ class AttendancePlanningViewModel: ObservableObject {
         self.meeting = meeting
     }
     
-    public func fetchAttendances() {
-        isLoading = true
+    // Aufruf von fetchAttendances im Manager
+    func fetchAttendances() {
         Task {
             do {
-                // URL und Request erstellen
-                guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/attendances") else {
-                    print("Ungültige URL.")
-                    isLoading = false
-                    return
-                }
-                
-                var request = URLRequest(url: url)
-                request.httpMethod = "GET"
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    errorMessage = "Unauthorized: Token not found."
-                    isLoading = false
-                    return
-                }
-                
-                // API-Aufruf und Antwort verarbeiten
-                let (data, response) = try await URLSession.shared.data(for: request)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    print("Fehlerhafte Antwort vom Server.")
-                    isLoading = false
-                    return
-                }
-                
-                // JSON dekodieren
-                self.attendances = try JSONDecoder().decode([GetAttendanceDTO].self, from: data)
-                self.attendance = attendances.first(where: { $0.itsame })
-                
+                isLoading = true
+                // Versuche, attendances zu laden
+                attendances = try await attendanceManager.fetchAttendances2(meetingId: meeting.id)
+                // Meine Anwesenheit wird festgehalten (Um Status zu setzen etc.)
+                attendance = attendances.first { $0.itsame }
+                isLoading = false
             } catch {
-                print("Fehler: \(error.localizedDescription)")
+                // Fehlerbehandlung
+                print("Fehler beim Abrufen der Attendances: \(error.localizedDescription)")
+                isLoading = false
             }
-            
-            isLoading = false
         }
     }
     
-    public func markAttendanceAsAccepted() {
-        isLoading = true
+    // Aufruf der Funktion um einem Meeting zuzusagen im Manager
+    func markAttendanceAsAccepted() {
         Task {
-            do {
-                // URL für die Anfrage erstellen
-                guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/plan-attendance/present") else {
-                    isLoading = false
-                    return
-                }
-                
-                var request = URLRequest(url: url)
-                request.httpMethod = "PUT"
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    isLoading = false
-                    return
-                }
-                
-                // API-Aufruf starten
-                let (_, response) = try await URLSession.shared.data(for: request)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 204 else {
-                    isLoading = false
-                    return
-                }
-                fetchAttendances()
-            }
+            isLoading = true
+            attendanceManager.markAttendanceAsAccepted(meetingId: meeting.id)
+            // eigenen Status ändern, damit es in der View aktualisiert wird
+            if let index = attendances.firstIndex(where: { $0.itsame }) { attendances[index].status = .accepted }
+            isLoading = false
         }
     }
 
-    public func markAttendanceAsAbsent() {
+    // Aufruf der Funktion um einem Meeting abzusagen im Manager
+    func markAttendanceAsAbsent() {
+        Task {
+            isLoading = true
+            attendanceManager.markAttendanceAsAbsent(meetingId: meeting.id)
+            // eigenen Status ändern, damit es in der View aktualisiert wird
+            if let index = attendances.firstIndex(where: { $0.itsame }) { attendances[index].status = .absent }
+            isLoading = false
+        }
+        // entfernen aus Kalender
         removeEvent(eventTitle: meeting.name, eventDate: meeting.start)
-        isLoading = true
-        Task {
-            do {
-                // URL für die Anfrage erstellen
-                guard let url = URL(string: "\(baseURL)/meetings/\(meeting.id)/plan-attendance/absent") else {
-                    isLoading = false
-                    return
-                }
-                
-                var request = URLRequest(url: url)
-                request.httpMethod = "PUT"
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    isLoading = false
-                    return
-                }
-                
-                // API-Aufruf starten
-                let (_, response) = try await URLSession.shared.data(for: request)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 204 else {
-                    isLoading = false
-                    return
-                }
-                fetchAttendances()
-            }
-        }
     }
 
+    // Zählen wie viele Personen noch nicht abgestimmt haben
     var nilCount: Int {
         attendances.filter { $0.status == nil }.count
     }
     
+    // Zählen wie viele Personen teilnehmen
     var acceptedCount: Int {
         attendances.filter { $0.status == .accepted }.count
     }
     
+    // Zählen wie viele Personen nicht teilnehmen
     var absentCount: Int {
         attendances.filter { $0.status == .absent }.count
     }
     
-    func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy - HH:mm 'Uhr'"
-        return formatter.string(from: date)
-    }
-    
-    // Termin zum Kalender hinzufügen
+    // Zugang zum Kalender anfragen
     func requestCalendarAccess(completion: @escaping (Bool) -> Void) {
         eventStore.requestFullAccessToEvents { granted, error in
             if let error = error {
@@ -157,6 +97,7 @@ class AttendancePlanningViewModel: ObservableObject {
         }
     }
     
+    // Termin zum Kalender hinzufügen
     func addEventToCalendar(eventTitle: String, eventDate: Date, duration: UInt16?) {
         requestCalendarAccess { granted in
             guard granted else {
@@ -205,6 +146,7 @@ class AttendancePlanningViewModel: ObservableObject {
         }
     }
     
+    // Termin aus Kalender entfernen
     func removeEvent(eventTitle: String, eventDate: Date) {
         requestCalendarAccess { granted in
             guard granted else {
