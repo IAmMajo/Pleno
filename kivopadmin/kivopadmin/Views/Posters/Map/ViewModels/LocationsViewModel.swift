@@ -3,6 +3,7 @@ import SwiftUI
 import MapKit
 
 class LocationsViewModel: ObservableObject {
+    @Published var uiImage: Data? = nil
     @Published var selectedUserNames: [String] = []
     @Published var isEditing = false
     @Published var isLoading: Bool = false
@@ -41,6 +42,7 @@ class LocationsViewModel: ObservableObject {
             span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
         )
     }
+
 
     func toggleLocationsList(){
         withAnimation(.easeInOut){
@@ -148,11 +150,33 @@ class LocationsViewModel: ObservableObject {
         }
         
         dispatchGroup.notify(queue: .main) { [weak self] in
-            // Sortiere die Liste nach dem Status der Positionen
-
-            // Die sortierte Liste zuweisen
             self?.posterPositionsWithAddresses = positionsWithAddresses
+            self?.fetchImagesForPositions() // Hier Bilder abrufen!
             print("Alle Adressen wurden erfolgreich generiert und sortiert.")
+        }
+
+    }
+    func fetchImagesForPositions() {
+        let dispatchGroup = DispatchGroup()
+
+        for (index, position) in posterPositionsWithAddresses.enumerated() {
+            dispatchGroup.enter()
+            fetchPosterPositionImage(posterPositionId: position.position.id) { imageData in
+                DispatchQueue.main.async {
+                    if let imageData = imageData {
+                        self.posterPositionsWithAddresses[index] = PosterPositionWithAddress(
+                            position: position.position,
+                            address: position.address,
+                            image: imageData
+                        )
+                    }
+                    dispatchGroup.leave()
+                }
+            }
+        }
+
+        dispatchGroup.notify(queue: .main) {
+            print("Alle Bilder wurden erfolgreich geladen.")
         }
     }
 
@@ -209,6 +233,34 @@ class LocationsViewModel: ObservableObject {
             }
         }.resume()
     }
+    func fetchPosterPositionImage(posterPositionId: UUID, completion: @escaping (Data?) -> Void) {
+        guard let url = URL(string: "https://kivop.ipv64.net/posters/positions/\(posterPositionId)/image") else {
+            completion(nil)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            completion(nil)
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            DispatchQueue.main.async {
+                if let data = data, error == nil {
+                    completion(data)
+                } else {
+                    completion(nil)
+                }
+            }
+        }.resume()
+    }
+
+
+    
     func fetchPosterSummary(poster: PosterResponseDTO) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/summary") else {
             errorMessage = "Invalid URL."

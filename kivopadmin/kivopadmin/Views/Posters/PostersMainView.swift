@@ -147,13 +147,14 @@ struct PosterRowView: View {
         NavigationLink(destination: LocationsView(poster: poster.poster).environmentObject(locationViewModel)) {
             VStack {
                 HStack(spacing: 5) {
-                    if let uiImage = UIImage(data: poster.poster.image) {
+                    if let imageData = poster.image, let uiImage = UIImage(data: imageData) {
                         Image(uiImage: uiImage)
                             .resizable()
                             .scaledToFit()
                             .frame(height: 100) // Höhe einstellen
                             .cornerRadius(10)
                     }
+
                     Spacer()
                     VStack(){
                         Text(poster.poster.name)
@@ -371,7 +372,7 @@ struct SammelpostenBearbeitenView: View {
         let updatedPoster = CreatePosterDTO(
             name: title,
             description: description,
-            image: imageData ?? poster.image // Falls kein neues Bild hochgeladen wurde, nutze das alte
+            image: imageData ?? Data() // Falls kein neues Bild hochgeladen wurde, nutze das alte
         )
         
         // API-Aufruf zur Aktualisierung des Posters

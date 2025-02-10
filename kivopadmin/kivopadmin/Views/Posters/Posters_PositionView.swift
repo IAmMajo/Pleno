@@ -60,19 +60,7 @@ struct Posters_PositionView: View {
              }
        }
        .background(Color(UIColor.secondarySystemBackground))
-       .toolbar {
-           ToolbarItem(placement: .navigationBarTrailing) {
-               Button(action: {
-                   posterManager.deleteSignlePosterPosition(posterId: poster.id, positionId: posterPosition.id) {
-                       print("Poster wurde erfolgreich gelöscht.")
-                   }
 
-               }) {
-                   Image(systemName: "trash")
-                       .foregroundColor(.red) // Setzt die Farbe der Mülltonne auf Rot
-               }
-           }
-       }
 
     }
 
