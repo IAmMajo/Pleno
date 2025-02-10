@@ -1,5 +1,6 @@
 import Vapor
 @preconcurrency import JWT
+@preconcurrency import VaporToOpenAPI
 
 struct AuthMiddleware: AsyncMiddleware {
     let payloadType: JWTPayloadDTO.Type
@@ -37,3 +38,6 @@ extension Request {
     }
 }
 
+extension AuthMiddleware {
+    static let schemeObject = AuthSchemeObject.bearer()
+}

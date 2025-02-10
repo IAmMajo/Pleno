@@ -4,6 +4,7 @@ import Models
 import JWT
 import NotificationsServiceDTOs
 import AuthServiceDTOs
+@preconcurrency import VaporToOpenAPI
 
 extension SendEmailDTO: @retroactive AsyncResponseEncodable {}
 extension SendEmailDTO: @retroactive AsyncRequestDecodable {}
@@ -18,12 +19,14 @@ struct UserController: RouteCollection {
         userRoutes.put("password", "reset-request", use: self.requestPasswordReset).openAPI(
             summary: "Request Reset Code",
             description: "Request Reset Code with Email",
-            body: .type(RequestPasswordResetDTO.self)
+            body: .type(RequestPasswordResetDTO.self),
+            statusCode: .ok
         )
         userRoutes.put("password", "reset", use: self.userResetPasswort).openAPI(
             summary: "Reset Password with code",
             description: "Reset Password with email, code and new password",
-            body: .type(ResetPasswordDTO.self)
+            body: .type(ResetPasswordDTO.self),
+            statusCode: .ok
         )
         
         let authMiddleware = AuthMiddleware(payloadType: JWTPayloadDTO.self)
@@ -34,12 +37,14 @@ struct UserController: RouteCollection {
             description: "Register an account to new Members",
             body: .type(UserRegistrationDTO.self),
             contentType: .application(.json),
-            response: .type(UserRegistrationDTO.self)
+            response: .type(UserRegistrationDTO.self),
+            statusCode: .created
         )
         userRoutes.put("email", "resend", ":email", use: self.resendVerificationEmail).openAPI(
             summary: "Resend verification email",
             description: "Resend pending verification link",
-            contentType: .application(.json)
+            contentType: .application(.json),
+            statusCode : .ok
         )
         
         protectedRoutes.get("profile", use: self.getProfile).openAPI(
@@ -48,14 +53,16 @@ struct UserController: RouteCollection {
             body: .none,
             response: .type(UserProfileDTO.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
         )
         protectedRoutes.on(.PATCH, "profile", body: .collect(maxSize: "7000kb"), use: self.userUpdateUserProfile).openAPI(
             summary: "Update profile",
             description: "Update identity and/or profileImage",
             body: .type(UserProfileUpdateDTO.self),
             response: .type(HTTPResponseStatus.self),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
         )
         
         protectedRoutes.on(.PATCH, "profile", ":id", body: .collect(maxSize: "7000kb"), use: self.adminUpdateUserProfile).openAPI(
@@ -63,7 +70,8 @@ struct UserController: RouteCollection {
             description: "Admin Update identity and/or profileImage",
             body: .type(UserProfileUpdateDTO.self),
             response: .type(HTTPResponseStatus.self),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
         )
         
         // GET /users -> alle User
@@ -73,7 +81,8 @@ struct UserController: RouteCollection {
             body: .none,
             response: .type(UserProfileDTO.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
         )
         // GET /users/:id -> ein User
@@ -83,7 +92,8 @@ struct UserController: RouteCollection {
             body: .none,
             response: .type(UserProfileDTO.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
             
         )
@@ -93,7 +103,8 @@ struct UserController: RouteCollection {
             description: "Get all identites with user id",
             response: .type(Identity.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
         )
         // PATCH /users/:id
@@ -103,7 +114,8 @@ struct UserController: RouteCollection {
             body: .type(UserUpdateAccountDTO.self),
             contentType: .application(.json),
             response: .type(HTTPResponseStatus.self),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
         )
         // DELETE /users/:id
@@ -111,7 +123,8 @@ struct UserController: RouteCollection {
             summary: "Admin delete user account",
             description: "Admin can delete user account with user id",
             response: .type(HTTPResponseStatus.self),
-            auth: .bearer()
+            statusCode: .noContent,
+            auth: AuthMiddleware.schemeObject
             
         )
         // GET /users/profile-image/identity/:identity_id
@@ -119,7 +132,8 @@ struct UserController: RouteCollection {
             summary: "Get profile image",
             description: "Get profile image with identity id",
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
         )
         // GET /users/profile-image/user/:user_id
@@ -127,7 +141,8 @@ struct UserController: RouteCollection {
             summary: "Get profile image",
             description: "Get profile image with user id",
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
             
         )
@@ -137,7 +152,8 @@ struct UserController: RouteCollection {
             description: "Get own identities with JWT-Token",
             response: .type(Identity.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
             
         )
         // DELETE /users/delete
@@ -146,14 +162,18 @@ struct UserController: RouteCollection {
             description: "Delete own user account with JWT-Token",
             response: .type(HTTPResponseStatus.self),
             responseContentType: .application(.json),
-            auth: .bearer()
+            statusCode: .noContent,
+            auth: AuthMiddleware.schemeObject
+            
         )
         // PATCH /users/change-password
         protectedRoutes.patch("change-password", use: self.userChangePassword).openAPI(
             summary: "Change password",
             description: "Change password with old password",
             body: .type(ChangePasswordDTO.self),
-            contentType: .application(.json)
+            contentType: .application(.json),
+            statusCode: .ok,
+            auth: AuthMiddleware.schemeObject
         )
     }
     
@@ -317,7 +337,7 @@ struct UserController: RouteCollection {
         try UserRegistrationDTO.validate(content: req)
         
         // parse registration data
-        guard let registrationData = try? req.content.decode(UserRegistrationDTO.self), let registrationEmail = registrationData.email, let registrationPassword = registrationData.password else {
+        guard let registrationData = try? req.content.decode(UserRegistrationDTO.self), let registrationEmail = registrationData.email, let registrationPassword = registrationData.password, let registrationName = registrationData.name else {
             throw Abort(.internalServerError, reason: "Cant decode user registration data")
         }
         
@@ -335,7 +355,7 @@ struct UserController: RouteCollection {
         }
         
         // create new identity
-        let identity = Identity(name: registrationData.name!)
+        let identity = Identity(name: registrationName)
         
         // save identity in database
         try await identity.create(on: req.db)
@@ -618,9 +638,7 @@ struct UserController: RouteCollection {
         }
         let update = try req.content.decode(UserUpdateAccountDTO.self)
         
-        guard let user = try await User.query(on: req.db)
-            .filter(\.$id == userID)
-            .first() else {
+        guard let user = try await User.find(userID, on: req.db) else {
             throw Abort(.notFound, reason: "User not found")
         }
         if let isActive = update.isActive {
@@ -646,9 +664,7 @@ struct UserController: RouteCollection {
         guard let userID = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid or missing user ID")
         }
-        guard let user = try await User.query(on: req.db)
-            .filter(\.$id == userID)
-            .first() else {
+        guard let user = try await User.find(userID, on: req.db) else {
             throw Abort(.notFound, reason: "User not found")
         }
         let identityHistories = try await IdentityHistory.query(on: req.db)
@@ -727,9 +743,7 @@ struct UserController: RouteCollection {
         guard let userID = payload.userID else {
             throw Abort(.internalServerError, reason: "Cannot unwrap userID")
         }
-        guard let user = try await User.query(on: req.db)
-            .filter(\.$id == userID)
-            .first() else {
+        guard let user = try await User.find(userID, on: req.db) else {
             throw Abort(.notFound, reason: "User not found")
         }
         if user.isAdmin {
@@ -759,9 +773,7 @@ struct UserController: RouteCollection {
         guard let userID = payload.userID, let userOldPassword = body.oldPassword, let userNewPassword = body.newPassword else {
             throw Abort(.internalServerError, reason: "Cannot unwrap userID, oldPassword or newPassword")
         }
-        guard let user = try await User.query(on: req.db)
-            .filter(\.$id == userID)
-            .first() else {
+        guard let user = try await User.find(userID, on: req.db) else {
             throw Abort(.notFound, reason: "User not found")
         }
         let isCurrentPasswordValid = try Bcrypt.verify(userOldPassword, created: user.passwordHash)
