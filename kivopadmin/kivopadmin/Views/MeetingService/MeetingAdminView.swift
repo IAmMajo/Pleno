@@ -37,7 +37,7 @@ struct MeetingAdminView: View {
                     Text("Error: \(errorMessage)")
                         .foregroundColor(.red)
                 } else if meetingManager.meetings.isEmpty {
-                    Text("No meetings available.")
+                    Text("Keine Sitzungen verfügbar")
                         .foregroundColor(.secondary)
                 } else {
                     // Picker
@@ -50,36 +50,10 @@ struct MeetingAdminView: View {
                     .padding(.horizontal)
                     
                     // Searchbar
-                    HStack {
-                        HStack(spacing: 8) {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.gray)
-                            TextField("Nach Sitzung suchen", text: $searchText)
-                                .textFieldStyle(PlainTextFieldStyle())
-                        }
-                        .padding(8)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-                    }
-                    .padding(.horizontal)
+                    searchBar
                     
                     // Liste der Meetings
-                    List {
-                        ForEach(filteredMeetings, id: \.id) { meeting in
-                            NavigationLink(destination: MeetingDetailAdminView(meeting: meeting)) {
-                                VStack(alignment: .leading, spacing: 5) {
-                                    Text(meeting.name)
-                                        .font(.headline)
-                                        .foregroundColor(.primary)
-                                    Text("Sitzung am \(DateTimeFormatter.formatDate(meeting.start)) um \(DateTimeFormatter.formatTime(meeting.start))")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            .listRowBackground(Color(.systemBackground))
-                        }
-                    }
-                    .listStyle(PlainListStyle())
+                    listView
                 }
             }
             .navigationTitle("Sitzungen") // Navigation Title
@@ -101,10 +75,40 @@ struct MeetingAdminView: View {
             }
         }
     }
-
-
 }
 
-#Preview {
-    MeetingAdminView()
+extension MeetingAdminView {
+    private var searchBar: some View {
+        HStack {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.gray)
+                TextField("Nach Sitzung suchen", text: $searchText)
+                    .textFieldStyle(PlainTextFieldStyle())
+            }
+            .padding(8)
+            .background(Color(.systemGray6))
+            .cornerRadius(8)
+        }
+        .padding(.horizontal)
+    }
+    
+    private var listView: some View {
+        List {
+            ForEach(filteredMeetings, id: \.id) { meeting in
+                NavigationLink(destination: MeetingDetailAdminView(meeting: meeting)) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(meeting.name)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text("Sitzung am \(DateTimeFormatter.formatDate(meeting.start)) um \(DateTimeFormatter.formatTime(meeting.start))")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .listRowBackground(Color(.systemBackground))
+            }
+        }
+        .listStyle(PlainListStyle())
+    }
 }
