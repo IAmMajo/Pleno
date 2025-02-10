@@ -2180,6 +2180,7 @@
       }
     },
     "Details für den Marker" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3883,6 +3884,7 @@
       }
     },
     "Lat: %lf, Lon: %lf" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3928,6 +3930,7 @@
       }
     },
     "Latitude: %lf, Longitude: %lf" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3950,6 +3953,7 @@
       }
     },
     "Läuft ab: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5392,6 +5396,7 @@
       }
     },
     "Plakatposition hinzufügen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5461,6 +5466,7 @@
 
     },
     "Positionen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5857,6 +5863,7 @@
       }
     },
     "Select Status" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7081,6 +7088,7 @@
 
     },
     "Zur Plakat Position" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

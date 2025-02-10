@@ -50,7 +50,7 @@ extension LocationsListView {
     private func listRowView(position: PosterPositionWithAddress) -> some View {
         HStack {
             Group {
-                if let imageData = position.position.image, // Unwrap optional Data
+                if let imageData = position.image, // Unwrap optional Data
                    let uiImage = UIImage(data: imageData) { // Erzeuge ein UIImage aus Data
                     Image(uiImage: uiImage)
                         .resizable()

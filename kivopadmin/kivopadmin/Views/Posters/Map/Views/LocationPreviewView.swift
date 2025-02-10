@@ -53,7 +53,7 @@ struct LocationPreviewView: View {
 extension LocationPreviewView {
     private var imageSection: some View {
         Group {
-            if let imageData = position.position.image, // Unwrap optional Data
+            if let imageData = position.image, // Unwrap optional Data
                let uiImage = UIImage(data: imageData) { // Erzeuge ein UIImage aus Data
                 Image(uiImage: uiImage)
                     .resizable()

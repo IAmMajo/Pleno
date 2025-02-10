@@ -6,6 +6,7 @@ import CoreLocation
 struct PosterWithSummary {
     var poster: PosterResponseDTO
     var summary: PosterSummaryResponseDTO?
+    var image: Data?
 }
 
 
@@ -126,11 +127,16 @@ class PosterManager: ObservableObject {
                     let decoder = JSONDecoder()
                     let fetchedPosters = try decoder.decode([PosterResponseDTO].self, from: data)
                     
-                    // Erstelle die Poster-Array und lade Summaries
-                    self?.postersWithSummaries = fetchedPosters.map { PosterWithSummary(poster: $0, summary: nil) }
+                    // Initialisiere Poster-Array ohne Summary & Bild
+                    self?.postersWithSummaries = fetchedPosters.map { PosterWithSummary(poster: $0, summary: nil, image: nil) }
                     
                     for (index, poster) in fetchedPosters.enumerated() {
                         self?.fetchPosterSummary(poster: poster, index: index)
+                        self?.fetchPosterImage(posterId: poster.id) { imageData in
+                            DispatchQueue.main.async {
+                                self?.postersWithSummaries[index].image = imageData
+                            }
+                        }
                     }
                     
                 } catch {
@@ -141,7 +147,32 @@ class PosterManager: ObservableObject {
         }.resume()
     }
 
-    
+
+    func fetchPosterImage(posterId: UUID, completion: @escaping (Data?) -> Void) {
+        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/image") else {
+            completion(nil)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            completion(nil)
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            DispatchQueue.main.async {
+                if let data = data, error == nil {
+                    completion(data)
+                } else {
+                    completion(nil)
+                }
+            }
+        }.resume()
+    }
     func fetchPosterSummary(poster: PosterResponseDTO, index: Int) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/summary") else {
             errorMessage = "Invalid URL."
@@ -319,66 +350,7 @@ class PosterManager: ObservableObject {
 
 
 
-    func fetchSinglePoster(poster: PosterResponseDTO) {
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)") else {
-            errorMessage = "Invalid URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        isLoading = true
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                do{
-                    self?.isLoading = false
-                    
-                    if let error = error {
-                        self?.errorMessage = "Network error: \(error.localizedDescription)"
-                        return
-                    }
-                    
-                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                        self?.errorMessage = "Invalid server response."
-                        return
-                    }
-                    
-                    guard let data = data else {
-                        self?.errorMessage = "No data received."
-                        return
-                    }
-                    
-                    // Debug JSON
-                    //print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-                    
-                    let decoder = JSONDecoder()
-                    
-                    
-                    // Dekodiere die Daten
-                    self?.poster = try decoder.decode(PosterResponseDTO.self, from: data)
-                    if(self?.poster != nil){
-                        print(self?.poster)
-                    }
-                    
-
-
-                }catch {
-                    self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
-                    print("Decoding error: \(error)")
-                }
-
-
-            }
-        }.resume()
-    }
+    
     
     func deletePosters(posters: [DeleteDTO], completion: @escaping () -> Void) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/batch") else {
@@ -483,579 +455,7 @@ class PosterManager: ObservableObject {
         
     }
     
-//    func postersSummary() {
-//        guard let url = URL(string: "https://kivop.ipv64.net/posters/summary") else {
-//            errorMessage = "Invalid URL."
-//            return
-//        }
-//
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "GET"
-//        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-//            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-//        } else {
-//            errorMessage = "Unauthorized: Token not found."
-//            return
-//        }
-//
-//        isLoading = true
-//
-//        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-//            DispatchQueue.main.async {
-//                do{
-//                    self?.isLoading = false
-//                    
-//                    if let error = error {
-//                        self?.errorMessage = "Network error: \(error.localizedDescription)"
-//                        return
-//                    }
-//                    
-//                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-//                        self?.errorMessage = "Invalid server response."
-//                        return
-//                    }
-//                    
-//                    guard let data = data else {
-//                        self?.errorMessage = "No data received."
-//                        return
-//                    }
-//                    
-//                    
-//                    let decoder = JSONDecoder()
-//                    
-//                    
-//                    // Dekodiere die Daten
-//                    self?.status = try decoder.decode(PosterSummaryResponseDTO.self, from: data)
-//                    
-//
-//
-//                }catch {
-//                    self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
-//                    print("Decoding error: \(error)")
-//                }
-//
-//
-//            }
-//        }.resume()
-//    }
 
-    
-    func createPosterPosition(posterPosition: CreatePosterPositionDTO, posterId: UUID) {
-        print("Angekommen")
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions") else {
-            self.errorMessage = "Invalid URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        // Authentifizierung hinzufügen
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            self.errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        // JSON-Daten in den Body der Anfrage schreiben
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601 // Sicherstellen, dass das Datum im richtigen Format kodiert wird
-
-        do {
-            let jsonData = try encoder.encode(posterPosition)
-            request.httpBody = jsonData
-
-            // JSON-Daten loggen
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("JSON Payload: \(jsonString)")
-            }
-        } catch {
-            self.errorMessage = "Failed to encode poster position: \(error.localizedDescription)"
-            return
-        }
-
-        isLoading = true
-
-        // Netzwerkaufruf starten
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                self?.isLoading = false
-
-                if let error = error {
-                    self?.errorMessage = "Network error: \(error.localizedDescription)"
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    self?.errorMessage = "Unexpected response format."
-                    return
-                }
-
-                if !(200...299).contains(httpResponse.statusCode) {
-                    self?.errorMessage = "Server error: \(httpResponse.statusCode) - \(HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode))"
-                    if let data = data, let responseText = String(data: data, encoding: .utf8) {
-                        print("Server Response: \(responseText)")
-                    }
-                    return
-                }
-
-                // Erfolg: Daten verarbeiten
-                if let data = data {
-                    print("Success: \(String(data: data, encoding: .utf8) ?? "No response data")")
-                }
-
-                self?.errorMessage = nil // Erfolgreich
-            }
-        }.resume()
-    }
-    
-    func fetchPosterPositions(poster: PosterResponseDTO) {
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/positions") else {
-            errorMessage = "Invalid URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        isLoading = true
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                do {
-                    self?.isLoading = false
-                    
-                    if let error = error {
-                        self?.errorMessage = "Network error: \(error.localizedDescription)"
-                        return
-                    }
-                    
-                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                        self?.errorMessage = "Invalid server response."
-                        return
-                    }
-                    
-                    guard let data = data else {
-                        self?.errorMessage = "No data received."
-                        return
-                    }
-                    
-                    // Set up the JSONDecoder with dateDecodingStrategy for ISO8601 format
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601  // Add this line to handle ISO 8601 date format
-                    
-                    // Decode the data into PosterPositionResponseDTO array
-                    self?.posterPositions = try decoder.decode([PosterPositionResponseDTO].self, from: data)
-
-                } catch {
-                    self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
-                    print("Decoding error: \(error)")
-                }
-            }
-        }.resume()
-    }
-
-    func fetchPosterPositionsHangs(poster: PosterResponseDTO) {
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/positions?status=hangs") else {
-            errorMessage = "Invalid URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        isLoading = true
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                do {
-                    self?.isLoading = false
-                    
-                    if let error = error {
-                        self?.errorMessage = "Network error: \(error.localizedDescription)"
-                        return
-                    }
-                    
-                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                        self?.errorMessage = "Invalid server response."
-                        return
-                    }
-                    
-                    guard let data = data else {
-                        self?.errorMessage = "No data received."
-                        return
-                    }
-                    
-                    // Debug JSON
-                    // print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-                    
-                    let decoder = JSONDecoder()
-                    
-                    // Passe den Decoder an, um Strings in Zahlen zu konvertieren oder andere Anpassungen vorzunehmen
-                    decoder.dateDecodingStrategy = .iso8601 // Beispiel für ISO 8601-Daten
-                    decoder.keyDecodingStrategy = .convertFromSnakeCase
-                    
-                    // Dekodiere die Daten
-                    self?.posterPositionsHangs = try decoder.decode([PosterPositionResponseDTO].self, from: data)
-                    
-                } catch DecodingError.typeMismatch(let type, let context) {
-                    self?.errorMessage = "Type mismatch error: \(type), context: \(context.debugDescription)"
-                    print("Type mismatch error: \(type), context: \(context)")
-                } catch {
-                    self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
-                    print("Decoding error: \(error)")
-                }
-            }
-        }.resume()
-    }
-
-    
-    func fetchPosterPositionsToHang(poster: PosterResponseDTO) {
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/positions?status=tohang") else {
-            errorMessage = "Invalid URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        isLoading = true
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                do {
-                    self?.isLoading = false
-
-                    if let error = error {
-                        self?.errorMessage = "Network error: \(error.localizedDescription)"
-                        return
-                    }
-
-                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                        self?.errorMessage = "Invalid server response."
-                        return
-                    }
-
-                    guard let data = data else {
-                        self?.errorMessage = "No data received."
-                        return
-                    }
-
-                    // Debug JSON
-                    // print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-
-                    let decoder = JSONDecoder()
-                    
-                    // Passe den Decoder an, um Strings in Double oder andere Typkonflikte zu lösen
-                    decoder.dateDecodingStrategy = .iso8601 // Beispiel für ISO-8601-Datumsformat
-                    decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-                    // Dekodiere die Daten
-                    self?.posterPositionsToHang = try decoder.decode([PosterPositionResponseDTO].self, from: data)
-                    
-                } catch DecodingError.typeMismatch(let type, let context) {
-                    self?.errorMessage = "Type mismatch error: \(type), context: \(context.debugDescription)"
-                    print("Type mismatch error: \(type), context: \(context)")
-                } catch {
-                    self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
-                    print("Decoding error: \(error)")
-                }
-            }
-        }.resume()
-    }
-    func fetchPosterPositionsOverdue(poster: PosterResponseDTO) {
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/positions?status=overdue") else {
-            errorMessage = "Invalid URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        isLoading = true
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                do {
-                    self?.isLoading = false
-
-                    if let error = error {
-                        self?.errorMessage = "Network error: \(error.localizedDescription)"
-                        return
-                    }
-
-                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                        self?.errorMessage = "Invalid server response."
-                        return
-                    }
-
-                    guard let data = data else {
-                        self?.errorMessage = "No data received."
-                        return
-                    }
-
-                    // Debug JSON
-                    // print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-
-                    let decoder = JSONDecoder()
-                    
-                    // Passe den Decoder an, um mögliche Typkonflikte zu lösen
-                    decoder.dateDecodingStrategy = .iso8601 // Beispiel: ISO-8601-Datumsformat
-                    decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-                    // Dekodiere die Daten
-                    self?.posterPositionsOverdue = try decoder.decode([PosterPositionResponseDTO].self, from: data)
-
-                } catch DecodingError.typeMismatch(let type, let context) {
-                    self?.errorMessage = "Type mismatch error: \(type), context: \(context.debugDescription)"
-                    print("Type mismatch error: \(type), context: \(context)")
-                } catch {
-                    self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
-                    print("Decoding error: \(error)")
-                }
-            }
-        }.resume()
-    }
-
-    
-    func fetchPosterPositionsTakendown(poster: PosterResponseDTO) {
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/positions?status=takendown") else {
-            errorMessage = "Invalid URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        isLoading = true
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                do {
-                    self?.isLoading = false
-
-                    if let error = error {
-                        self?.errorMessage = "Network error: \(error.localizedDescription)"
-                        return
-                    }
-
-                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                        self?.errorMessage = "Invalid server response."
-                        return
-                    }
-
-                    guard let data = data else {
-                        self?.errorMessage = "No data received."
-                        return
-                    }
-
-                    // Debug JSON
-                    // print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-
-                    let decoder = JSONDecoder()
-                    
-                    // Passe den Decoder an, um mögliche Typkonflikte zu lösen
-                    decoder.dateDecodingStrategy = .iso8601 // Beispiel: ISO-8601-Datumsformat
-                    decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-                    // Dekodiere die Daten
-                    self?.posterPositionsTakendown = try decoder.decode([PosterPositionResponseDTO].self, from: data)
-
-                } catch DecodingError.typeMismatch(let type, let context) {
-                    self?.errorMessage = "Type mismatch error: \(type), context: \(context.debugDescription)"
-                    print("Type mismatch error: \(type), context: \(context)")
-                } catch {
-                    self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
-                    print("Decoding error: \(error)")
-                }
-            }
-        }.resume()
-    }
-
-    func fetchSinglePosterPosition(posterId: UUID, positionId: UUID) {
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions/\(positionId)") else {
-            errorMessage = "Invalid URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        isLoading = true
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                do {
-                    self?.isLoading = false
-
-                    if let error = error {
-                        self?.errorMessage = "Network error: \(error.localizedDescription)"
-                        return
-                    }
-
-                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                        self?.errorMessage = "Invalid server response."
-                        return
-                    }
-
-                    guard let data = data else {
-                        self?.errorMessage = "No data received."
-                        return
-                    }
-
-                    // Debug JSON
-                    // print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-
-                    let decoder = JSONDecoder()
-                    
-                    // Passe den Decoder an, um mögliche Typkonflikte zu lösen
-                    decoder.dateDecodingStrategy = .iso8601 // Beispiel: ISO-8601-Datumsformat
-                    decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-                    // Dekodiere die Daten
-                    self?.posterPosition = try decoder.decode(PosterPositionResponseDTO.self, from: data)
-
-                } catch DecodingError.typeMismatch(let type, let context) {
-                    self?.errorMessage = "Type mismatch error: \(type), context: \(context.debugDescription)"
-                    print("Type mismatch error: \(type), context: \(context)")
-                } catch {
-                    self?.errorMessage = "Failed to decode position: \(error.localizedDescription)"
-                    print("Decoding error: \(error)")
-                }
-            }
-        }.resume()
-    }
-
-    func deleteSignlePosterPosition(posterId: UUID, positionId: UUID, completion: @escaping () -> Void) {
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions/\(positionId)") else {
-            self.errorMessage = "Invalid URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            self.errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        isLoading = true
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                self?.isLoading = false
-
-                if let error = error {
-                    self?.errorMessage = "Network error: \(error.localizedDescription)"
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                    self?.errorMessage = "Server error or unexpected response."
-                    return
-                }
-
-                // Erfolgsfall: Completion aufrufen
-                completion()
-            }
-        }.resume()
-    }
-
-    
-    func deletePosterPosition(posterId: UUID, positionIds: [UUID], completion: @escaping () -> Void) {
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions/batch") else {
-            self.errorMessage = "Invalid URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            self.errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        // Erstellen des JSON-Objekts
-        let body: [String: Any] = [
-            "ids": positionIds.map { $0.uuidString }
-        ]
-        
-        do {
-            // Kodieren des JSON-Objekts in den Body
-            let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
-            request.httpBody = jsonData
-        } catch {
-            self.errorMessage = "Failed to encode JSON: \(error.localizedDescription)"
-            return
-        }
-
-        isLoading = true
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                self?.isLoading = false
-
-                if let error = error {
-                    self?.errorMessage = "Network error: \(error.localizedDescription)"
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                    self?.errorMessage = "Server error or unexpected response."
-                    return
-                }
-
-                // Erfolgsfall: Completion aufrufen
-                completion()
-            }
-        }.resume()
-    }
 
     
 
