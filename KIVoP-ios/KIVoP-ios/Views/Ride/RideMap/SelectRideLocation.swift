@@ -4,6 +4,7 @@ import MapKit
 import PosterServiceDTOs
 import AuthServiceDTOs
 
+// Verarbeitet die Änderungen der beiden Map Views
 struct SelectRideLocation: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion
     var onRegionChange: (MKCoordinateRegion) -> Void
@@ -43,12 +44,15 @@ struct SelectRideLocation: UIViewRepresentable {
     }
 }
 
+// Kleine MapView, die dazu gedacht ist, nur den Standort wiederzuspiegeln, ohne das dieser sich manuell ändern lässt
 struct RideLocationView: View {
+    // Wenn keine Position übergeben wird, wird Datteln gesetzt
     @State private var mapRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
         span: MKCoordinateSpan(latitudeDelta: 0.007, longitudeDelta: 0.007)
     )
     
+    // Wenn sich die selectedLocation im Hauptthread ändert, wird sie sich auch in der Ansicht ändern
     @Binding var selectedLocation: CLLocationCoordinate2D?
     
     @ObservedObject private var locationMapManager = LocationMapManager()
@@ -56,6 +60,7 @@ struct RideLocationView: View {
     var body: some View {
         VStack {
             ZStack {
+                // Map
                 SelectRideLocation(region: $mapRegion, onRegionChange: { newRegion in
                     DispatchQueue.main.async {
                         mapRegion = newRegion
@@ -65,6 +70,7 @@ struct RideLocationView: View {
                 .ignoresSafeArea()
                 .frame(maxHeight: .infinity)
                 
+                // Markierung des Standorts auf der Map
                 Circle()
                     .fill(Color.white)
                     .shadow(radius: 5)
@@ -99,6 +105,7 @@ struct RideLocationView: View {
     }
 }
 
+// MapView, die dazu gedacht ist, den Standort selber festlegen zu können
 struct SelectRideLocationView: View {
     @State private var mapRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
@@ -109,14 +116,17 @@ struct SelectRideLocationView: View {
     
     @Environment(\.dismiss) private var dismiss
     
+    // Wenn sich die selectedLocation im Hauptthread ändert, wird sie sich auch in der Ansicht ändern
     @Binding var selectedLocation: CLLocationCoordinate2D?
     
+    // Für die Sucheingabe
     @State private var searchText: String = ""
 
     var body: some View {
 
         VStack {
             ZStack {
+                // Map
                 SelectRideLocation(region: $mapRegion, onRegionChange: { newRegion in
                     DispatchQueue.main.async {
                         mapRegion = newRegion
@@ -126,6 +136,7 @@ struct SelectRideLocationView: View {
                     .frame(maxHeight: .infinity)
                 VStack {
                     ZStack {
+                        // Address Suche
                         TextField("Adresse suchen", text: $searchText, onCommit: {
                             performSearch()
                         })
@@ -139,6 +150,7 @@ struct SelectRideLocationView: View {
                             }.padding(.trailing, 20)
                         }
                     }
+                    // Standort des Nutzers
                     HStack {
                         Spacer()
                         Button(action: centerOnUserLocation) {
@@ -173,6 +185,7 @@ struct SelectRideLocationView: View {
                     HStack {
 
                         Spacer()
+                        // Gibt den Standort an die Hauptview zurück
                         Button(action: addLocation) {
                             Text("Standort hinzufügen")
                                 .padding()

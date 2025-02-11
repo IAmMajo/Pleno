@@ -1,6 +1,8 @@
 import SwiftUI
 import MapKit
 
+// Komponente um bei einer Anfrage zu einer Fahrt seinen Standort zu bestätigen
+// Erscheint als Sheet
 struct SpecialRideLocationRequestView: View {
     @ObservedObject var viewModel: RideDetailViewModel
     @Environment(\.dismiss) private var dismiss
@@ -18,10 +20,13 @@ struct SpecialRideLocationRequestView: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                     
+                    // Karte um Standort auszuwählen
+                    // Zu beginn wird der Standort des Fahrers angezeigt
                     SelectRideLocationView(selectedLocation: $viewModel.requestedLocation)
                         .frame(width: 350, height: 400)
                         .cornerRadius(10)
 
+                    // Adresse für den ausgewählten Standort
                     List {
                         Section{
                             Text(viewModel.requestedAdress.isEmpty ? "Standort auswählen" : viewModel.requestedAdress)
@@ -40,8 +45,9 @@ struct SpecialRideLocationRequestView: View {
                         .font(.footnote)
                         .foregroundColor(.gray)
                 }
+                // Wenn requestedLocation ist mit dem Wert in der Karte verknüpft.
+                // Wenn sich der Standort auf der Karte ändert (auf Standort hinzufügen geklickt wird), wird dieser übernommen
                 .onChange(of: viewModel.requestedLocation) {
-                    // Hier gibt es keinen Parameter, da es ein Binding ist
                     if let location = viewModel.requestedLocation {
                         viewModel.getAddressFromCoordinates(latitude: Float(location.latitude), longitude: Float(location.longitude)) { address in
                             if let address = address {
@@ -65,6 +71,7 @@ struct SpecialRideLocationRequestView: View {
                         dismiss()
                     }
                 )
+                // Wenn das sheet erscheint, wird der Standort auf den vom Fahrer gesetzt
                 .onAppear(){
                     viewModel.requestedLocation = viewModel.startLocation
                 }
