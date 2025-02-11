@@ -12,40 +12,11 @@ struct EventRideDetailView: View {
     var body: some View {
         List {
             if let rideDetail = rideViewModel.eventRideDetail {
-                Section(header: Text("Fahrtdetails")) {
-                    Text("Event: \(rideDetail.eventName)")
-                    Text("Fahrer: \(rideDetail.driverName)")
-                    Text("Fahrzeug: \(rideDetail.vehicleDescription ?? "Keine Angabe")")
-                    Text("Startzeit: \(DateTimeFormatter.formatDate(rideDetail.starts)) um \(DateTimeFormatter.formatTime(rideDetail.starts))")
-                    Text("Freie Plätze: \(rideDetail.emptySeats)")
-                }
+                detailsSection(rideDetail: rideDetail)
 
-                Section(header: Text("Startort")) {
-                    Button(action: {
-                        UIPasteboard.general.string = address // Text in die Zwischenablage kopieren
-                    }) {
-                        HStack{
-                            Text("\(address)")
-                            .fixedSize(horizontal: false, vertical: true)
-                            Spacer()
-                            Image(systemName: "doc.on.doc").foregroundColor(.blue)
-                        }
-                        
-                    }.buttonStyle(PlainButtonStyle())
-                }
-                .onAppear {
-                    updateAddress(for: CLLocationCoordinate2D(latitude: Double(rideDetail.latitude), longitude: Double(rideDetail.longitude)))
-                }
+                placeSection(rideDetail: rideDetail)
 
-                Section(header: Text("Mitfahrer")) {
-                    if rideDetail.riders.isEmpty {
-                        Text("Keine Mitfahrer")
-                    } else {
-                        ForEach(rideDetail.riders, id: \.id) { rider in
-                            Text(rider.username)
-                        }
-                    }
-                }
+                participationsSection(rideDetail: rideDetail)
             } else {
                 Text("Lade Fahrtdetails...")
                     .foregroundColor(.gray)
@@ -57,6 +28,7 @@ struct EventRideDetailView: View {
         }
     }
     
+    // Funktion zum Übersetzen von Koordinaten in eine Adresse
     private func updateAddress(for coordinate: CLLocationCoordinate2D) {
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         geocoder.reverseGeocodeLocation(location) { placemarks, error in
@@ -80,4 +52,47 @@ struct EventRideDetailView: View {
             }
         }
     }
+}
+
+extension EventRideDetailView {
+    private func detailsSection(rideDetail: GetEventRideDetailDTO) -> some View {
+        Section(header: Text("Fahrtdetails")) {
+            Text("Event: \(rideDetail.eventName)")
+            Text("Fahrer: \(rideDetail.driverName)")
+            Text("Fahrzeug: \(rideDetail.vehicleDescription ?? "Keine Angabe")")
+            Text("Startzeit: \(DateTimeFormatter.formatDate(rideDetail.starts)) um \(DateTimeFormatter.formatTime(rideDetail.starts))")
+            Text("Freie Plätze: \(rideDetail.emptySeats)")
+        }
+    }
+    
+    private func placeSection(rideDetail: GetEventRideDetailDTO) -> some View {
+        Section(header: Text("Startort")) {
+            Button(action: {
+                UIPasteboard.general.string = address // Text in die Zwischenablage kopieren
+            }) {
+                HStack{
+                    Text("\(address)")
+                    .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    Image(systemName: "doc.on.doc").foregroundColor(.blue)
+                }
+                
+            }.buttonStyle(PlainButtonStyle())
+        }
+        .onAppear {
+            updateAddress(for: CLLocationCoordinate2D(latitude: Double(rideDetail.latitude), longitude: Double(rideDetail.longitude)))
+        }
+    }
+    private func participationsSection(rideDetail: GetEventRideDetailDTO) -> some View {
+        Section(header: Text("Mitfahrer")) {
+            if rideDetail.riders.isEmpty {
+                Text("Keine Mitfahrer")
+            } else {
+                ForEach(rideDetail.riders, id: \.id) { rider in
+                    Text(rider.username)
+                }
+            }
+        }
+    }
+    
 }

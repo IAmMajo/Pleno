@@ -27,8 +27,6 @@ struct RidesMainView: View {
                 } else {
                     SpecialRidesView().environmentObject(rideViewModel)
                 }
-                
-                // Hier könntest du später eine Liste der ausgewählten Fahrten anzeigen
             }
             .navigationTitle("Fahrgemeinschaften")
         }

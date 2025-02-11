@@ -98,7 +98,7 @@ class UserManager: ObservableObject {
 
             // Debugging: Serverantwort in Klartext ausgeben
             if let jsonString = String(data: data, encoding: .utf8) {
-                print("Das ist es: -------------------- Server Response: \(jsonString)")
+                print("Server Response: \(jsonString)")
             }
 
             let decoder = JSONDecoder()

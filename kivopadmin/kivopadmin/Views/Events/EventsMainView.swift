@@ -7,20 +7,24 @@ import RideServiceDTOs
 struct EventsMainView: View {
     @Environment(\.dismiss) var dismiss
     @State private var isEventSheetPresented = false // Zustand für das Sheet
+    
+    // ViewModel für die Events
     @StateObject private var eventViewModel = EventViewModel()
 
    
+    // Variable für die Suchleiste
     @State private var searchText = ""
     @State private var selectedTab = 0 // Zustand für den Picker
     
     @State private var eventToDelete: GetEventDTO? // Temporäre Variable für das zu löschende Event
     @State private var showDeleteConfirmation = false   // Zeigt den Bestätigungsdialog an
    
+    // Event Filter für die Hauptanzeige
     var filteredEvents: [GetEventDTO] {
         switch selectedTab {
-        case 0: // Aktuell
+        case 0: // Bevorstehende Events
             return eventViewModel.events.filter { $0.ends > Date() }
-        case 1: // Archiviert
+        case 1: // Zurückliegende Events
             return eventViewModel.events.filter { $0.ends <= Date() }
         default:
             return eventViewModel.events
@@ -30,11 +34,14 @@ struct EventsMainView: View {
    
     var body: some View {
         NavigationStack {
+            // Picker um zwischen bevorstehenden und zurückliegenden Events zu unterscheiden
             Picker("Termine", selection: $selectedTab) {
                 Text("Aktuell").tag(0)
                 Text("Archiviert").tag(1)
             }.padding()
             .pickerStyle(SegmentedPickerStyle()) // Optional: Stil ändern
+            
+            // View für eine Zeile der Liste
             EventListView(
                 eventViewModel: eventViewModel,
                 eventToDelete: $eventToDelete,
@@ -62,14 +69,11 @@ struct EventsMainView: View {
             eventViewModel.fetchEvents()
         }
     }
-    
-
-
-
-
 }
 
+// Ansicht eine Zeile
 struct EventRow: View {
+    // Event wird bei Aufruf übergeben
     let event: GetEventDTO
 
     var body: some View {
@@ -83,6 +87,7 @@ struct EventRow: View {
     }
 }
 
+// Listenansicht der Hauptseite
 struct EventListView: View {
     @ObservedObject var eventViewModel: EventViewModel
     @Binding var eventToDelete: GetEventDTO? // Binding für das zu löschende Event
@@ -96,6 +101,7 @@ struct EventListView: View {
                 NavigationLink(destination: EventDetailView(eventId: event.id).environmentObject(eventViewModel)) {
                     EventRow(event: event)
                 }
+                // Event über SwipeActions löschen
                 .swipeActions {
                     Button(role: .destructive) {
                         confirmDelete(event: event)
@@ -106,6 +112,7 @@ struct EventListView: View {
                 }
             }
         }
+        // Alert, um das löschen zu bestätigen
         .alert("Event löschen?", isPresented: $showDeleteConfirmation, actions: {
             Button("Löschen", role: .destructive, action: deleteConfirmed)
             Button("Abbrechen", role: .cancel, action: { eventToDelete = nil })
@@ -116,11 +123,13 @@ struct EventListView: View {
         })
     }
 
+    // Alert anzeigen
     private func confirmDelete(event: GetEventDTO) {
         eventToDelete = event
         showDeleteConfirmation = true
     }
 
+    // Event tatsächlich löschen
     private func deleteConfirmed() {
         if let event = eventToDelete {
             eventViewModel.deleteEvent(eventId: event.id) {

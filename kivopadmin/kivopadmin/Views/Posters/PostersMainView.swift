@@ -3,43 +3,27 @@ import PosterServiceDTOs
 import PhotosUI
 
 struct PostersMainView: View {
+    // locationViewModel wird hier initialisiert und an alle "Unter-Views" weitergegeben
     @StateObject private var locationViewModel = LocationsViewModel()
-   @State private var isPostenSheetPresented = false // Zustand für das Sheet
-    @State private var postersFiltered: [PosterResponseDTO] = []
-   
-   @StateObject private var postersViewModel = PostersViewModel()
-    @StateObject private var posterManager = PosterManager() // MeetingManager als StateObject
-   
-   @State private var isLoading = false
-   @State private var error: String?
-   
-   @State private var searchText = ""
     
+    // Bool für Sheet
+    @State private var isPostenSheetPresented = false
+    
+    // ViewModel für Sammelposten
+    @StateObject private var posterManager = PosterManager()
+
+    // Suchtext
+    @State private var searchText = ""
+    
+    // Bool für Delete Confirmation
     @State private var showDeleteConfirmation = false
+    
     @State private var posterToDelete: UUID? // Die ID des Posters, das gelöscht werden soll
     @State private var isEditSheetPresented = false // Steuert das Sheet
     @State private var selectedPoster: PosterResponseDTO? // Das aktuell zu bearbeitende Poster
-   
-   let numberOfPostersToHang = [1, 0, 4]
     
-   
-//   Calendar.current.isDateInTomorrow(yourDate)
-   
-   func getDateColor(status: Status) -> Color {
-      switch status {
-      case .hung:
-         return Color(UIColor.darkText)
-      case .takenDown:
-         return Color(UIColor.darkText)
-      case .notDisplayed:
-         return Color(UIColor.darkText)
-      case .expiresInOneDay:
-         return .orange
-      case .expired:
-         return .red
-      }
-   }
-   
+
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -53,12 +37,11 @@ struct PostersMainView: View {
                     Text("Keine Sammelposten gefunden.")
                         .foregroundColor(.secondary)
                 } else {
+                    // Wenn die Sammelposten geladen wurden, wird die Liste angezeigt
                     listView()
-
-
                 }
             }
-
+            
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen")
             .navigationTitle("Plakate")
             .toolbar {
@@ -72,17 +55,21 @@ struct PostersMainView: View {
                 }
             }
         }
+        // Sheet um Sammelposten zu erstellen
         .sheet(isPresented: $isPostenSheetPresented) {
-            SammelpostenErstellenView(posterManager: posterManager)
+            CreatePosterView(posterManager: posterManager)
         }
+        
+        // Sheet um Sammelposten zu bearbeiten
         .sheet(isPresented: $isEditSheetPresented) {
             if let selectedPoster = selectedPoster {
-                SammelpostenBearbeitenView(poster: selectedPoster)
+                EditPosterView(poster: selectedPoster)
             }
         }
         .onAppear(){
             posterManager.fetchPostersAndSummaries()
         }
+        // Confirmation Alert -> der Nutzer soll das Löschen bestätigen
         .alert("Sammelposten löschen", isPresented: $showDeleteConfirmation, actions: {
             Button("Löschen", role: .destructive) {
                 if let posterId = posterToDelete {
@@ -90,7 +77,7 @@ struct PostersMainView: View {
                     posterManager.deletePoster(posterId: posterId, completion: { _ in
                         print("Gelöscht")
                     })
-
+                    
                     // Lokale Liste nach kurzer Verzögerung aktualisieren
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         posterManager.fetchPoster()
@@ -102,13 +89,13 @@ struct PostersMainView: View {
                 posterToDelete = nil // Zurücksetzen
             }
         })
-
+        
     }
-
+    
     
     private func deletePoster(poster: PosterResponseDTO) {
         // API-Aufruf mit der ID des Posters
-
+        
         posterToDelete = poster.id
         showDeleteConfirmation = true
     }
@@ -116,8 +103,8 @@ struct PostersMainView: View {
         selectedPoster = poster
         isEditSheetPresented = true
     }
-
-
+    
+    
 }
 
 extension PostersMainView {
@@ -126,6 +113,7 @@ extension PostersMainView {
             ForEach(posterManager.postersWithSummaries, id: \.poster.id) { posterWithSummary in
                 PosterRowView(poster: posterWithSummary)
                     .listRowSeparator(.hidden)
+                    // SwipeAction um Sammelposten zu löschen
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         Button(role: .destructive) {
                             deletePoster(poster: posterWithSummary.poster)
@@ -136,14 +124,19 @@ extension PostersMainView {
             }
         }
     }
-
+    
 }
-struct PosterRowView: View {
-    let poster: PosterWithSummary
 
+// Listenelement Anzeige
+struct PosterRowView: View {
+    // Sammelposten mit zugehöriger Zusammenfassung und Bild wird übergeben
+    let poster: PosterWithSummary
+    
     @StateObject private var locationViewModel = LocationsViewModel()
     
     var body: some View {
+        // Link zur Karte
+        // locationViewModel wird als EnvironmentObject gesetzt
         NavigationLink(destination: LocationsView(poster: poster.poster).environmentObject(locationViewModel)) {
             VStack {
                 HStack(spacing: 5) {
@@ -154,7 +147,7 @@ struct PosterRowView: View {
                             .frame(height: 100) // Höhe einstellen
                             .cornerRadius(10)
                     }
-
+                    
                     Spacer()
                     VStack(){
                         Text(poster.poster.name)
@@ -164,7 +157,7 @@ struct PosterRowView: View {
                             if let summary = poster.summary {
                                 CircularProgressView(poster: poster, status: .hangs).padding(.horizontal, 2)
                                 CircularProgressView(poster: poster, status: .takenDown).padding(.horizontal, 2)
-
+                                
                             }
                         }.padding(.horizontal, 6)
                             .padding(.top, 10)
@@ -176,206 +169,6 @@ struct PosterRowView: View {
             }
         }
     }
-    
-    private func summaryItem(title: String, value: Int) -> some View {
-        VStack {
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.gray)
-                .lineLimit(2) // Verhindert Zeilenumbrüche
-
-
-            
-            Text("\(value)")
-                .font(.title2)
-                .fontWeight(.bold)
-                .padding()
-                .frame(width: 60, height: 50)
-                .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThickMaterial))
-        }
-    }
 }
 
 
-
-struct SammelpostenErstellenView: View {
-    @Environment(\.dismiss) var dismiss
-    @State private var title: String = ""
-    @State private var description: String = ""
-    @State private var selectedItem: PhotosPickerItem? = nil
-    @State private var imageData: Data? = nil // Optional Data für das Bild
-    @State var posterManager = PosterManager()
-
-    var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Allgemeine Informationen")) {
-                    TextField("Titel", text: $title)
-                    TextField("Beschreibung", text: $description)
-                }
-
-                Section(header: Text("Posterdesign")) {
-                    if let imageData = imageData, let uiImage = UIImage(data: imageData) {
-                        VStack {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 200)
-                                .cornerRadius(10)
-                                .padding(.bottom, 10)
-
-                            Button(action: {
-                                // Bild entfernen
-                                self.imageData = nil
-                                self.selectedItem = nil
-                            }) {
-                                Text("Bild entfernen")
-                                    .foregroundColor(.red)
-                            }
-                        }
-                    } else {
-                        PhotosPicker(
-                            selection: $selectedItem,
-                            matching: .images,
-                            photoLibrary: .shared()
-                        ) {
-                            Text("Bild hochladen")
-                                .foregroundColor(.blue)
-                        }
-                        .onChange(of: selectedItem) { newItem in
-                            Task {
-                                if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                                    self.imageData = data
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Button(action: saveSammelposten) {
-                    Text("Sammelposten erstellen")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(10)
-            }
-            .navigationTitle("Sammelposten erstellen")
-        }
-    }
-
-    // Funktion zum Speichern des Sammelpostens
-    private func saveSammelposten() {
-        guard !title.isEmpty, let imageData = imageData else {
-            print("Titel oder Bild fehlt!")
-            return
-        }
-            
-        let newPoster = CreatePosterDTO(
-            name: title,
-            description: description,
-            image: imageData
-        )
-        
-        //posterManager.createPoster(poster: newPoster)
-        posterManager.createPoster(poster: newPoster)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            posterManager.fetchPoster()
-        }
-        
-        dismiss()
-    }
-}
-
-struct SammelpostenBearbeitenView: View {
-    @Environment(\.dismiss) var dismiss
-    var poster: PosterResponseDTO // Übergabe des Posters zur Bearbeitung
-    @State private var selectedItem: PhotosPickerItem? = nil
-    @State private var imageData: Data? = nil // Optional Data für das Bild
-    @State private var title: String // Titel des Posters
-    @State private var description: String // Beschreibung des Posters
-    @State private var posterManager = PosterManager()
-
-    init(poster: PosterResponseDTO) {
-        self.poster = poster
-        _title = State(initialValue: poster.name) // Initialisiere den Titel
-        _description = State(initialValue: poster.description ?? "") // Initialisiere die Beschreibung
-    }
-
-    var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Allgemeine Informationen")) {
-                    TextField("Titel", text: $title)
-                    TextField("Beschreibung", text: $description)
-                }
-
-                Section(header: Text("Posterdesign")) {
-                    if let imageData = imageData, let uiImage = UIImage(data: imageData) {
-                        VStack {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 200)
-                                .cornerRadius(10)
-                                .padding(.bottom, 10)
-
-                            Button(action: {
-                                // Bild entfernen
-                                self.imageData = nil
-                                self.selectedItem = nil
-                            }) {
-                                Text("Bild entfernen")
-                                    .foregroundColor(.red)
-                            }
-                        }
-                    } else {
-                        PhotosPicker(
-                            selection: $selectedItem,
-                            matching: .images,
-                            photoLibrary: .shared()
-                        ) {
-                            Text("Bild hochladen")
-                                .foregroundColor(.blue)
-                        }
-                        .onChange(of: selectedItem) { newItem in
-                            Task {
-                                if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                                    self.imageData = data
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Button(action: saveSammelposten) {
-                    Text("Sammelposten speichern")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(10)
-            }
-            .navigationTitle("Sammelposten bearbeiten")
-        }
-    }
-
-    // Funktion zum Speichern des Sammelpostens
-    private func saveSammelposten() {
-        guard !title.isEmpty else {
-            print("Titel fehlt!")
-            return
-        }
-        
-        let updatedPoster = CreatePosterDTO(
-            name: title,
-            description: description,
-            image: imageData ?? Data() // Falls kein neues Bild hochgeladen wurde, nutze das alte
-        )
-        
-        // API-Aufruf zur Aktualisierung des Posters
-        posterManager.patchPoster(poster: updatedPoster, posterId: poster.id)
-    }
-}

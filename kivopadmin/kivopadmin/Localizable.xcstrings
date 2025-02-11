@@ -119,6 +119,7 @@
       }
     },
     "(ca. 160 min.)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -461,6 +462,7 @@
       }
     },
     "8/12" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -483,6 +485,7 @@
       }
     },
     "18:06" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -505,6 +508,7 @@
       }
     },
     "21.01.2024" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -637,6 +641,7 @@
       }
     },
     "Abhängedatum:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -965,6 +970,9 @@
           }
         }
       }
+    },
+    "Adresse auswählen" : {
+
     },
     "Adresse suchen" : {
       "localizations" : {
@@ -1451,6 +1459,7 @@
       }
     },
     "Aufhängen\nbestätigen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3114,6 +3123,7 @@
       }
     },
     "Hello, World!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3158,6 +3168,7 @@
       }
     },
     "In der alten Turnhalle hinter dem Friedhof\nAltes Grab 5 b, 42069 Hölle" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3290,6 +3301,7 @@
       }
     },
     "Jahreshauptversammlung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3468,6 +3480,9 @@
     "Keine Mitfahrer" : {
 
     },
+    "Keine Orte verfügbar" : {
+
+    },
     "Keine Protokolle verfügbar" : {
       "localizations" : {
         "de" : {
@@ -3536,6 +3551,9 @@
           }
         }
       }
+    },
+    "Keine Sitzungen verfügbar" : {
+
     },
     "Keine Teilnehmer" : {
       "localizations" : {
@@ -3748,6 +3766,9 @@
     "Lade Fahrtdetails..." : {
 
     },
+    "Lade Orte..." : {
+
+    },
     "Lade Profilbild..." : {
       "localizations" : {
         "de" : {
@@ -3793,6 +3814,9 @@
       }
     },
     "Lade Sammelposten..." : {
+
+    },
+    "Lade Sitzungen..." : {
 
     },
     "Lade Umfragen..." : {
@@ -3998,6 +4022,7 @@
       }
     },
     "Loading locations..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4798,6 +4823,7 @@
       }
     },
     "No locations available." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4865,6 +4891,7 @@
       }
     },
     "No records available." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5330,6 +5357,7 @@
       }
     },
     "Plakat %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5643,6 +5671,7 @@
       }
     },
     "Protokoll:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6619,6 +6648,7 @@
       }
     },
     "Unbekannter Status" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6663,6 +6693,7 @@
       }
     },
     "Verantwortliche %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
