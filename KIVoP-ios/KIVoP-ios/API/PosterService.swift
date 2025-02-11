@@ -95,6 +95,24 @@ class PosterService: ObservableObject {
         }.resume()
     }
    
+   func fetchPosterImage(posterId: UUID) async throws -> Data {
+      guard let url = URL(string: "\(baseURL)/\(posterId)/image") else {
+         throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+      }
+      
+      guard let request = createAuthorizedRequest(url: url, method: "GET") else {
+         throw NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)
+      }
+      
+      let (data, response) = try await URLSession.shared.data(for: request)
+      
+      guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+         throw NSError(domain: "Failed to fetch poster image", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: nil)
+      }
+      
+      return data
+   }
+   
    private func createJSONDecoder() -> JSONDecoder {
       let decoder = JSONDecoder()
       decoder.dateDecodingStrategy = .iso8601
@@ -163,6 +181,24 @@ class PosterService: ObservableObject {
             completion(.failure(error))
          }
       }.resume()
+   }
+   
+   func fetchPositionImage(positionId: UUID) async throws -> Data {
+      guard let url = URL(string: "\(baseURL)/positions/\(positionId)/image") else {
+         throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+      }
+      
+      guard let request = createAuthorizedRequest(url: url, method: "GET") else {
+         throw NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)
+      }
+      
+      let (data, response) = try await URLSession.shared.data(for: request)
+      
+      guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+         throw NSError(domain: "Failed to fetch position image", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: nil)
+      }
+      
+      return data
    }
    
    func fetchPostersSummary() async throws -> PosterSummaryResponseDTO {

@@ -19,10 +19,6 @@ struct Posters_PositionView: View {
    init(posterId: UUID, positionId: UUID) {
       _viewModel = StateObject(wrappedValue: PosterPositionViewModel(posterId: posterId, positionId: positionId))
    }
-   
-//   @State var name: String = "Name"
-//   @State var coordinate: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)
-   
    @State private var currentCoordinates: CLLocationCoordinate2D? = CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)
    
    @State private var myId: UUID?
@@ -112,6 +108,7 @@ struct Posters_PositionView: View {
                   
                   CircleImageView(
                      position: position,
+                     positionImage: viewModel.positionImageData != nil ? UIImage(data: viewModel.positionImageData!) : nil,
                      isResponsible: isResponsible(),
                      currentCoordinates: $currentCoordinates,
                      onUpdate: { image, coordinates in
@@ -119,15 +116,21 @@ struct Posters_PositionView: View {
                            isLoading = true
                            do {
                               try await viewModel.hangPosition(image: image, latitude: coordinates.latitude, longitude: coordinates.longitude)
-                              await viewModel.fetchPosition()
                            } catch {
                               print("Error hanging position: \(error)")
                            }
-                           await viewModel.fetchPosition() //wegmachen evtl sobald server error behoben wurde?
+                           await viewModel.fetchPosition()
+                           viewModel.fetchPositionImage(for: position.id)
                            isLoading = false
                         }
                      }
                   )
+                  .onAppear() {
+                     // loads the image of the position asynchronous
+                     if viewModel.positionImageData == nil {
+                        viewModel.fetchPositionImage(for: position.id)
+                     }
+                  }
                   .padding(.top, -95)
                   .shadow(radius: 5)
                   
@@ -346,11 +349,11 @@ struct Posters_PositionView: View {
                            Task {
                               do {
                                  try await viewModel.reportDamagedPosition(image: imageData)
-                                 await viewModel.fetchPosition()
                               } catch {
                                  print("Error reporting damaged position: \(error)")
                               }
-                              await viewModel.fetchPosition() //wegmachen evtl sobald server error behoben wurde?
+                              await viewModel.fetchPosition()
+                              viewModel.fetchPositionImage(for: position.id)
                            }
                         }
                      }
@@ -362,6 +365,7 @@ struct Posters_PositionView: View {
             .refreshable {
                loadMyId()
                await viewModel.fetchPosition()
+               viewModel.fetchPositionImage(for: position.id)
             }
             if (position.status != .toHang && isResponsible()) {
                Button {
@@ -394,14 +398,16 @@ struct Posters_PositionView: View {
                            Task {
                               // Perform "Plakat abhängen" action here
                               isLoading = true
-                              do {
-                                 try await viewModel.takeDownPosition(image: position.image ?? Data())
+                              if let image = viewModel.positionImageData {
+                                 do {
+                                    try await viewModel.takeDownPosition(image: image)
+                                 } catch {
+                                    print("Error taking down position: \(error)")
+                                 }
                                  await viewModel.fetchPosition()
-                              } catch {
-                                 print("Error taking down position: \(error)")
+                                 viewModel.fetchPositionImage(for: position.id)
+                                 isLoading = false
                               }
-                              await viewModel.fetchPosition() //wegmachen evtl sobald server error behoben wurde?
-                              isLoading = false
                            }
                         },
                         secondaryButton: .cancel(Text("Nein"))
@@ -414,14 +420,16 @@ struct Posters_PositionView: View {
                            Task {
                               // Perform "Abhängen zurückziehen" action here
                               isLoading = true
-                              do {
-                                 try await viewModel.hangPosition(image: position.image ?? Data(), latitude: nil, longitude: nil) //Koordinaten ergänzen
+                              if let image = viewModel.positionImageData {
+                                 do {
+                                    try await viewModel.hangPosition(image: image, latitude: nil, longitude: nil) //Koordinaten ergänzen
+                                 } catch {
+                                    print("Error hanging position after taking it down: \(error)")
+                                 }
                                  await viewModel.fetchPosition()
-                              } catch {
-                                 print("Error hanging position after taking it down: \(error)")
+                                 viewModel.fetchPositionImage(for: position.id)
+                                 isLoading = false
                               }
-                              await viewModel.fetchPosition() //wegmachen evtl sobald server error behoben wurde?
-                              isLoading = false
                            }
                         },
                         secondaryButton: .cancel(Text("Nein"))
@@ -446,9 +454,9 @@ struct Posters_PositionView: View {
       .overlay {
          if isLoading {
             ProgressView("Loading...")
-               .tint(.black)
+               .tint(Color(UIColor.label))
                .frame(maxWidth: .infinity, maxHeight: .infinity)
-               .background(.black.opacity(0.2))
+               .background(.black.opacity(0.3))
          }
       }
       .navigationBarTitleDisplayMode(.inline)
