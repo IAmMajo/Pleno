@@ -87,6 +87,8 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.config-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/config-service`) || PathPrefix(`/config`))
