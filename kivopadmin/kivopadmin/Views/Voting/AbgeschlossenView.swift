@@ -1,18 +1,17 @@
-//
-//  AbgeschlossenView.swift
-//  kivopadmin
-//
-//  Created by Amine Ahamri on 01.12.24.
-//
+// This file is licensed under the MIT-0 License.
 
 import SwiftUI
 import MeetingServiceDTOs
 
-
 struct AbgeschlossenView: View {
+    // Die Abstimmung und die zugehörigen Ergebnisse
     let voting: GetVotingDTO
     let votingResults: GetVotingResultsDTO?
+    
+    // Speichert die aktuell ausgewählte Option für die Anzeige von Teilnehmern
     @State private var selectedOption: UInt8? = nil
+    
+    // Zwischenspeicher für Profilbilder der Teilnehmer
     @State private var identityImages: [UUID: Data?] = [:]
 
     var body: some View {
@@ -34,6 +33,7 @@ struct AbgeschlossenView: View {
         }
     }
 
+    // Erstellt ein Kuchendiagramm basierend auf den Abstimmungsergebnissen
     private func renderPieChart(for results: GetVotingResultsDTO) -> some View {
         let optionTextMap = Dictionary(uniqueKeysWithValues: voting.options.map { ($0.index, $0.text) })
         return PieChartView(optionTextMap: optionTextMap, votingResults: results)
@@ -41,6 +41,7 @@ struct AbgeschlossenView: View {
             .padding()
     }
 
+    // Erstellt eine Liste mit den Abstimmungsergebnissen
     private func renderResultsList(for results: GetVotingResultsDTO) -> some View {
         let optionTextMap = Dictionary(uniqueKeysWithValues: voting.options.map { ($0.index, $0.text) })
         return VStack(alignment: .leading, spacing: 16) {
@@ -48,7 +49,7 @@ struct AbgeschlossenView: View {
                 VStack {
                     renderResultRow(result: result, optionTextMap: optionTextMap)
 
-                    // Zeige die Identitäten nur, wenn die Abstimmung nicht anonym ist
+                    // Teilnehmer werden nur angezeigt, wenn die Abstimmung nicht anonym ist und die Option ausgewählt wurde
                     if !voting.anonymous && selectedOption == result.index {
                         renderIdentities(for: result.identities)
                     }
@@ -58,6 +59,7 @@ struct AbgeschlossenView: View {
         .padding()
     }
 
+    // Erstellt eine einzelne Zeile für ein Abstimmungsergebnis
     private func renderResultRow(result: GetVotingResultDTO, optionTextMap: [UInt8: String]) -> some View {
         Button(action: {
             if !voting.anonymous {
@@ -65,7 +67,7 @@ struct AbgeschlossenView: View {
                     selectedOption = nil
                 } else {
                     selectedOption = result.index
-                    loadIdentities(for: result.identities)
+                    loadIdentities(for: result.identities)  // Lade die Identitäten nur, wenn Chevron geklickt wird
                 }
             }
         }) {
@@ -77,7 +79,7 @@ struct AbgeschlossenView: View {
                     .font(.subheadline)
                     .foregroundColor(.gray)
 
-                // Zeige Pfeil nur bei nicht-anonymer Abstimmung
+                // Chevron zeigt an, ob Teilnehmer für eine Option angezeigt werden können
                 if !voting.anonymous {
                     Image(systemName: selectedOption == result.index ? "chevron.down" : "chevron.right")
                         .foregroundColor(.gray)
@@ -87,11 +89,15 @@ struct AbgeschlossenView: View {
         .padding()
         .background(Color(UIColor.systemBackground))
         .cornerRadius(8)
-        .disabled(voting.anonymous)  // Deaktiviere Button für anonyme Abstimmung
+        .disabled(voting.anonymous)  // Button für anonyme Abstimmungen deaktivieren
     }
 
+    // Zeigt die Liste der Teilnehmer an, falls die Abstimmung nicht anonym ist
     private func renderIdentities(for identities: [GetIdentityDTO]?) -> some View {
-        guard let identities = identities else { return AnyView(EmptyView()) }
+        guard let identities = identities, !identities.isEmpty else {
+            return AnyView(Text("Keine Teilnehmer sichtbar.").foregroundColor(.gray).padding(.leading, 8))
+        }
+
         return AnyView(
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(identities, id: \.id) { identity in
@@ -104,13 +110,13 @@ struct AbgeschlossenView: View {
                             .foregroundColor(.primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             .padding(.leading, 8)
         )
     }
 
+    // Lädt das Profilbild eines Teilnehmers oder zeigt Initialen an
     private func renderProfileImage(for identity: GetIdentityDTO) -> some View {
         if let imageData = identityImages[identity.id] ?? nil,
            let uiImage = UIImage(data: imageData) {
@@ -134,6 +140,7 @@ struct AbgeschlossenView: View {
         }
     }
 
+    // Ruft die Teilnehmerbilder ab, falls sie noch nicht geladen sind
     private func loadIdentities(for identities: [GetIdentityDTO]?) {
         guard let identities = identities else { return }
 
@@ -153,6 +160,7 @@ struct AbgeschlossenView: View {
         }
     }
 
+    // Erstellt Initialen aus einem Namen, falls kein Profilbild vorhanden ist
     private func initials(for name: String) -> String {
         let components = name.split(separator: " ")
         let initials = components.compactMap { $0.first }.prefix(2)

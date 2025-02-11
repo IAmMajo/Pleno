@@ -1,59 +1,27 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import MeetingServiceDTOs
 
 struct VotingListView: View {
-    @StateObject private var votingService = VotingService.shared
-    @State private var selectedVoting: GetVotingDTO?
-    @State private var showCreateVoting = false
-    @State private var filter: FilterType = .active
-    @State private var searchText: String = ""
-    @State private var alertMessage: AlertMessage?
-
-    let meetingId: UUID = UUID()
-
-    enum FilterType: String, CaseIterable {
-        case planning = "In Planung"
-        case active = "Aktiv"
-        case inactive = "Abgeschlossen"
-    }
-
-    struct AlertMessage: Identifiable {
-        let id = UUID()
-        let message: String
-    }
-
-    var filteredVotings: [GetVotingDTO] {
-        let filtered: [GetVotingDTO]
-        switch filter {
-        case .planning:
-            filtered = votingService.votings.filter { $0.startedAt == nil }
-        case .active:
-            filtered = votingService.votings.filter { $0.isOpen }
-        case .inactive:
-            filtered = votingService.votings.filter { !$0.isOpen && $0.startedAt != nil }
-        }
-        
-        // Sortiere basierend auf startedAt und closedAt, wobei nil als älteste behandelt wird
-        return filtered.sorted {
-            let date0 = $0.closedAt ?? $0.startedAt ?? Date.distantPast
-            let date1 = $1.closedAt ?? $1.startedAt ?? Date.distantPast
-            return date0 > date1
-        }
-    }
-
+    // ViewModel zur Verwaltung der Abstimmungen
+    @StateObject private var viewModel = VotingListViewModel()
 
     var body: some View {
         NavigationView {
             Group {
-                if let voting = selectedVoting {
+                // Wenn eine Abstimmung ausgewählt wurde, zeige die Detailansicht
+                if let voting = viewModel.selectedVoting {
                     VotingDetailView(
                         votingId: voting.id,
-                        onBack: { selectedVoting = nil },
-                        onDelete: { deleteVoting(votingId: voting.id) },
-                        onClose: { closeVoting(votingId: voting.id) },
-                        onOpen: { openVoting(votingId: voting.id) },
-                        onEdit: { editedVoting in editVoting(editedVoting) }
+                        onBack: { viewModel.selectedVoting = nil },
+                        onDelete: { viewModel.deleteVoting(votingId: voting.id) },
+                        onClose: { viewModel.closeVoting(votingId: voting.id) },
+                        onOpen: { viewModel.openVoting(votingId: voting.id) },
+                        onEdit: { editedVoting in viewModel.editVoting(editedVoting) }
                     )
+                
+                // Andernfalls zeige die Liste aller Abstimmungen
                 } else {
                     VStack(spacing: 10) {
                         filterPicker
@@ -65,31 +33,33 @@ struct VotingListView: View {
             .navigationTitle("Abstimmungen")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showCreateVoting = true }) {
+                    // Button zum Erstellen einer neuen Abstimmung
+                    Button(action: { viewModel.showCreateVoting = true }) {
                         Label("Erstellen", systemImage: "plus")
                     }
                 }
             }
-            .sheet(isPresented: $showCreateVoting) {
+            .sheet(isPresented: $viewModel.showCreateVoting) {
                 CreateVotingView(
                     meetingManager: MeetingManager(),
                     onCreate: { newVoting in
-                        votingService.votings.append(newVoting)
-                        loadVotings()
+                        viewModel.votings.append(newVoting)
+                        viewModel.loadVotings()
                     }
                 )
             }
-            .alert(item: $alertMessage) { alert in
+            .alert(item: $viewModel.alertMessage) { alert in
                 Alert(title: Text("Fehler"), message: Text(alert.message), dismissButton: .default(Text("OK")))
             }
-            .onAppear(perform: loadVotings)
+            .onAppear(perform: viewModel.loadVotings) // Lade Abstimmungen beim Start
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
 
+    // Filter für verschiedene Abstimmungsstatus (z. B. aktiv, in Planung, abgeschlossen)
     private var filterPicker: some View {
-        Picker("Filter", selection: $filter) {
-            ForEach(FilterType.allCases, id: \.self) { filter in
+        Picker("Filter", selection: $viewModel.filter) {
+            ForEach(VotingListViewModel.VotingFilterType.allCases, id: \.self) { filter in
                 Text(filter.rawValue).tag(filter)
             }
         }
@@ -97,12 +67,13 @@ struct VotingListView: View {
         .padding(.horizontal)
     }
 
+    // Suchleiste zur Filterung nach Abstimmungsfragen
     private var searchBar: some View {
         HStack {
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.gray)
-                TextField("Nach Frage suchen", text: $searchText)
+                TextField("Nach Frage suchen", text: $viewModel.searchText)
                     .textFieldStyle(PlainTextFieldStyle())
             }
             .padding(8)
@@ -112,10 +83,11 @@ struct VotingListView: View {
         .padding(.horizontal)
     }
 
+    // Liste aller Abstimmungen mit Statusanzeige
     private var votingList: some View {
         List {
-            ForEach(filteredVotings, id: \.id) { voting in
-                Button(action: { selectedVoting = voting }) {
+            ForEach(viewModel.filteredVotings, id: \.id) { voting in
+                Button(action: { viewModel.selectedVoting = voting }) {
                     VStack(alignment: .leading, spacing: 5) {
                         Text(voting.question)
                             .font(.headline)
@@ -125,9 +97,10 @@ struct VotingListView: View {
                     }
                 }
                 .swipeActions {
+                    // Löschen-Button für noch nicht gestartete Abstimmungen
                     if voting.startedAt == nil {
                         Button(role: .destructive) {
-                            deleteVoting(votingId: voting.id)
+                            viewModel.deleteVoting(votingId: voting.id)
                         } label: {
                             Label("Löschen", systemImage: "trash")
                         }
@@ -137,70 +110,4 @@ struct VotingListView: View {
         }
         .listStyle(PlainListStyle())
     }
-
-    private func loadVotings() {
-        votingService.fetchVotings { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let votings):
-                    votingService.votings = votings
-                case .failure(let error):
-                    alertMessage = AlertMessage(message: "Fehler beim Laden der Abstimmung: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-
-    private func deleteVoting(votingId: UUID) {
-        votingService.deleteVoting(votingId: votingId) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    votingService.votings.removeAll { $0.id == votingId }
-                case .failure(let error):
-                    alertMessage = AlertMessage(message: "Fehler beim Löschen: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-
-    private func closeVoting(votingId: UUID) {
-        votingService.closeVoting(votingId: votingId) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    loadVotings()
-                case .failure(let error):
-                    alertMessage = AlertMessage(message: "Fehler beim Schließen: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-
-    private func openVoting(votingId: UUID) {
-        votingService.openVoting(votingId: votingId) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    loadVotings()
-                case .failure(let error):
-                    alertMessage = AlertMessage(message: "Fehler beim Öffnen: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-
-    private func editVoting(_ editedVoting: GetVotingDTO) {
-        if let index = votingService.votings.firstIndex(where: { $0.id == editedVoting.id }) {
-            votingService.votings[index] = editedVoting
-        }
-    }
 }
-
-
-struct VotingListView_Previews: PreviewProvider {
-    static var previews: some View {
-        VotingListView()
-    }
-}
-

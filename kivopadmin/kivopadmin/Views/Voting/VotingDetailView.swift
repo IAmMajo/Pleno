@@ -1,105 +1,81 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import MeetingServiceDTOs
 
 struct VotingDetailView: View {
-    let votingId: UUID
-    let onBack: () -> Void
+    // ViewModel zur Verwaltung der Abstimmungsdetails
+    @StateObject private var viewModel: VotingDetailViewModel
+
+    // Callbacks für verschiedene Aktionen (z. B. Löschen, Schließen, Öffnen, Bearbeiten)
     let onDelete: () -> Void
     let onClose: () -> Void
     let onOpen: () -> Void
     let onEdit: (GetVotingDTO) -> Void
 
-    @State private var voting: GetVotingDTO?
-    @State private var votingResults: GetVotingResultsDTO?
-    @State private var isLoadingVoting = true
-    @State private var errorMessage: String?
+    // Initialisiert die View mit einer Abstimmungs-ID und den benötigten Funktionen
+    init(votingId: UUID, onBack: @escaping () -> Void, onDelete: @escaping () -> Void, onClose: @escaping () -> Void, onOpen: @escaping () -> Void, onEdit: @escaping (GetVotingDTO) -> Void) {
+        _viewModel = StateObject(wrappedValue: VotingDetailViewModel(votingId: votingId, onBack: onBack))
+        self.onDelete = onDelete
+        self.onClose = onClose
+        self.onOpen = onOpen
+        self.onEdit = onEdit
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            if isLoadingVoting {
+            // Ladeanzeige während die Abstimmung abgerufen wird
+            if viewModel.isLoadingVoting {
                 ProgressView("Abstimmung wird geladen...")
                     .padding()
-            } else if let voting = voting {
-                // Dynamische Auswahl der passenden View
+            
+            // Wenn die Abstimmung erfolgreich geladen wurde
+            } else if let voting = viewModel.voting {
+                
+                // Falls die Abstimmung noch nicht gestartet wurde, wird die "InPlanungView" angezeigt
                 if voting.startedAt == nil {
                     InPlanungView(
                         voting: voting,
                         onEdit: onEdit,
                         onDelete: {
-                            print("onDelete ausgelöst, kehre zur Liste zurück.") // Debugging
-                            onBack() // Benutzer zur ListView zurückleiten
+                            print("🛑 onDelete ausgelöst, kehre zur Liste zurück.")
+                            viewModel.onBack()
                         },
-                        onOpen:{
-                            print("onOpen ausgelöst, kehre zur Liste zurück.") // Debugging
-                            onBack() // Benutzer zur ListView zurückleiten
+                        onOpen: {
+                            print("🟢 onOpen ausgelöst, kehre zur Liste zurück.")
+                            viewModel.onBack()
                         },
-                        onReload: loadVoting
+                        onReload: viewModel.loadVoting
                     )
-
+                
+                // Falls die Abstimmung gerade läuft, wird die "AktivView" angezeigt
                 } else if voting.isOpen {
                     AktivView(
-                        voting: voting, // Das gesamte `GetVotingDTO`-Objekt übergeben
+                        voting: voting,
                         onBack: {
-                            print("Zurück zur Voting-Liste.") // Debugging
-                            onBack() // Navigation zur Voting-Liste
+                            print("⬅️ Zurück zur Voting-Liste.")
+                            viewModel.onBack()
                         }
                     )
-
+                
+                // Falls die Abstimmung beendet ist, wird die "AbgeschlossenView" mit den Ergebnissen angezeigt
                 } else {
-                    AbgeschlossenView(voting: voting, votingResults: votingResults)
+                    AbgeschlossenView(voting: voting, votingResults: viewModel.votingResults)
                 }
-            } else if let errorMessage = errorMessage {
-                FehlerView(errorMessage: errorMessage, onBack: onBack)
+            
+            // Falls ein Fehler beim Laden der Abstimmung auftritt, wird eine Fehleransicht angezeigt
+            } else if let errorMessage = viewModel.errorMessage {
+                FehlerView(errorMessage: errorMessage, onBack: viewModel.onBack)
             }
         }
-        .onAppear(perform: loadVoting)
         .navigationTitle("Details zur Abstimmung")
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: { onBack() }) {
+                Button(action: { viewModel.onBack() }) {
                     HStack {
                         Image(systemName: "chevron.left")
                         Text("Zurück")
                     }
-                }
-            }
-        }
-    }
-
-    private func loadVoting() {
-        print("Lade Abstimmung...") // Debugging
-        isLoadingVoting = true
-        errorMessage = nil
-
-        VotingService.shared.fetchVoting(byId: votingId) { result in
-            DispatchQueue.main.async {
-                isLoadingVoting = false
-                switch result {
-                case .success(let fetchedVoting):
-                    self.voting = fetchedVoting
-                    if fetchedVoting.startedAt != nil {
-                        print("Abstimmung ist gestartet, lade Ergebnisse...") // Debugging
-                        fetchVotingResults()
-                    } else {
-                        print("Abstimmung erfolgreich geladen.") // Debugging
-                    }
-                case .failure(let error):
-                    errorMessage = "Fehler beim Laden der Abstimmung: \(error.localizedDescription)"
-                    print("Fehler beim Laden der Abstimmung: \(error.localizedDescription)") // Debugging
-                }
-            }
-        }
-    }
-
-
-    private func fetchVotingResults() {
-        VotingService.shared.fetchVotingResults(votingId: votingId) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let results):
-                    self.votingResults = results
-                case .failure(let error):
-                    print("Fehler beim Abrufen der Ergebnisse: \(error.localizedDescription)")
                 }
             }
         }

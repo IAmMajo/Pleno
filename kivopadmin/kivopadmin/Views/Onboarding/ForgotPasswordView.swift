@@ -1,7 +1,8 @@
-
+// This file is licensed under the MIT-0 License.
 import SwiftUI
 
 struct ForgotPasswordView: View {
+    // Zustandsvariablen für die Benutzerinteraktion
     @State private var email: String = ""
     @State private var resetCode: String = ""
     @State private var newPassword: String = ""
@@ -12,7 +13,7 @@ struct ForgotPasswordView: View {
     @State private var isCodeSent: Bool = false
     @State private var navigateToMainPage: Bool = false
 
-
+    // Ermöglicht das Schließen der aktuellen Ansicht
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -20,7 +21,7 @@ struct ForgotPasswordView: View {
             VStack {
                 Spacer().frame(height: 40)
 
-                // Title
+                // Titel des Bildschirms (abhängig davon, ob der Code bereits gesendet wurde)
                 ZStack(alignment: .bottom) {
                     Text(isCodeSent ? "Passwort ändern" : "Passwort zurücksetzen")
                         .font(.title)
@@ -36,32 +37,32 @@ struct ForgotPasswordView: View {
                 .padding(.top, 40)
 
                 if !isCodeSent {
-                    // Email TextField
+                    // Eingabefeld für die E-Mail-Adresse
                     inputField(title: "E-Mail", text: $email)
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                 } else {
-                    // Reset Code TextField
+                    // Eingabefelder für den Reset-Code und das neue Passwort
                     inputField(title: "Reset-Code", text: $resetCode)
-                                        .textContentType(.oneTimeCode)
-                                        .keyboardType(.numberPad)                                  .onChange(of: resetCode) {
-                                        successMessage = nil // Entferne die grüne Nachricht, sobald ein Code eingegeben wird
-                                    }
+                        .textContentType(.oneTimeCode)
+                        .keyboardType(.numberPad)
+                        .onChange(of: resetCode) {
+                            successMessage = nil // Erfolgsnachricht entfernen, wenn der Nutzer eine Eingabe macht
+                        }
 
-                                // Neues Passwort TextField
-                                inputField(title: "Neues Passwort", text: $newPassword, isSecure: true)
-                                    .textContentType(.newPassword)
-                                    .onChange(of: newPassword) {
-                                        errorMessage = nil // Entferne Fehlernachrichten bei Passwortänderung
-                                    }
+                    inputField(title: "Neues Passwort", text: $newPassword, isSecure: true)
+                        .textContentType(.newPassword)
+                        .onChange(of: newPassword) {
+                            errorMessage = nil // Fehlermeldung entfernen, wenn das Passwort geändert wird
+                        }
 
-                                // Passwort bestätigen TextField
-                                inputField(title: "Passwort bestätigen", text: $confirmPassword, isSecure: true)
-                                    .onChange(of: confirmPassword) {
-                                        errorMessage = nil // Entferne Fehlernachrichten bei Bestätigung
-                                    }
-                    // Password Strength Check
+                    inputField(title: "Passwort bestätigen", text: $confirmPassword, isSecure: true)
+                        .onChange(of: confirmPassword) {
+                            errorMessage = nil // Fehlermeldung entfernen, wenn das Bestätigungspasswort geändert wird
+                        }
+
+                    // Prüft, ob das Passwort sicher genug ist
                     if !newPassword.isEmpty && confirmPassword.isEmpty {
                         if !isPasswordStrong(newPassword) {
                             Text("Das Passwort ist zu schwach. Bitte verwenden Sie mindestens 8 Zeichen, eine Zahl und ein Sonderzeichen.")
@@ -79,7 +80,7 @@ struct ForgotPasswordView: View {
                     }
                 }
 
-                // Error or Success Message
+                // Anzeige von Fehlermeldungen oder Erfolgsmeldungen
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
@@ -94,7 +95,7 @@ struct ForgotPasswordView: View {
 
                 Spacer()
 
-                // Submit Button
+                // Button zum Absenden des Formulars (je nach Zustand wird entweder eine E-Mail gesendet oder das Passwort geändert)
                 Button(action: {
                     if isCodeSent {
                         validateAndResetPassword()
@@ -126,7 +127,7 @@ struct ForgotPasswordView: View {
                 .padding(.top, 10)
                 .disabled(isLoading || (isCodeSent ? (resetCode.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty || !isPasswordStrong(newPassword)) : email.isEmpty))
 
-                // Back Button
+                // Button zum Zurückkehren zur vorherigen Ansicht
                 Button(action: {
                     dismiss()
                 }) {
@@ -144,11 +145,12 @@ struct ForgotPasswordView: View {
             .edgesIgnoringSafeArea(.all)
             .navigationBarBackButtonHidden()
             .navigationDestination(isPresented: $navigateToMainPage) {
-                            MainPage()
-                        }
+                MainPage()
+            }
         }
     }
 
+    // MARK: - Passwortänderung validieren und durchführen
     private func validateAndResetPassword() {
         guard newPassword == confirmPassword else {
             errorMessage = "Die Passwörter stimmen nicht überein."
@@ -166,11 +168,13 @@ struct ForgotPasswordView: View {
         }
     }
 
+    // MARK: - Prüft, ob das Passwort den Sicherheitsanforderungen entspricht
     private func isPasswordStrong(_ password: String) -> Bool {
         let regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}$"
         return NSPredicate(format: "SELF MATCHES %@", regex).evaluate(with: password)
     }
 
+    // MARK: - Handhabt API-Antworten und setzt Erfolg- oder Fehlermeldungen
     private func handleAPIResponse<T>(_ result: Result<T, Error>, onSuccess: @escaping (T) -> Void) {
         DispatchQueue.main.async {
             isLoading = false
@@ -183,6 +187,7 @@ struct ForgotPasswordView: View {
         }
     }
 
+    // MARK: - Eingabefeld für E-Mail, Code oder Passwort
     private func inputField(title: String, text: Binding<String>, isSecure: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
@@ -208,8 +213,7 @@ struct ForgotPasswordView: View {
     }
 }
 
-
-
+// MARK: - Vorschau für verschiedene Farbmodi
 struct ForgotPasswordView_Previews: PreviewProvider {
     static var previews: some View {
         ForgotPasswordView()

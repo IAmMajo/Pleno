@@ -1,18 +1,15 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import AuthServiceDTOs
 
 struct NutzerverwaltungView: View {
-    @State private var isUserPopupPresented = false
-    @State private var isPendingRequestPopupPresented = false
-    @State private var selectedUser: UserProfileDTO? = nil
-    @State private var pendingRequestsCount: Int = 0
-    @State private var users: [UserProfileDTO] = []
-    @State private var loadingUserID: UUID? = nil // ID des aktuell geladenen Benutzers
+    @StateObject private var viewModel = NutzerverwaltungViewModel()
 
     var body: some View {
         NavigationView {
             VStack(alignment: .center, spacing: 20) {
-                // Beitrittsverwaltung Section
+                // Sektion für die Verwaltung von Beitrittsanfragen
                 VStack(alignment: .leading, spacing: 10) {
                     Text("BEITRITTSVERWALTUNG")
                         .font(.caption)
@@ -25,7 +22,7 @@ struct NutzerverwaltungView: View {
 
                         Spacer()
 
-                        Text("\(pendingRequestsCount)") // Dynamische Anzeige
+                        Text("\(viewModel.pendingRequestsCount)")
                             .foregroundColor(.orange)
 
                         Image(systemName: "chevron.right")
@@ -33,28 +30,31 @@ struct NutzerverwaltungView: View {
                     }
                     .padding(.horizontal, 30)
                     .onTapGesture {
-                        isPendingRequestPopupPresented = true
+                        viewModel.isPendingRequestPopupPresented = true
                     }
-                    .sheet(isPresented: $isPendingRequestPopupPresented, onDismiss: {
-                        fetchAllData() // Daten aktualisieren nach Verlassen der Beitrittsverwaltung
-                    }) {
-                        PendingRequestsNavigationView(isPresented: $isPendingRequestPopupPresented, onListUpdate: {
-                            fetchPendingRequestsCount() // Anzahl der ausstehenden Anfragen live aktualisieren
-                        })
+                    .sheet(isPresented: $viewModel.isPendingRequestPopupPresented) {
+                        PendingRequestsNavigationView(
+                            isPresented: $viewModel.isPendingRequestPopupPresented,
+                            onListUpdate: {
+                                viewModel.fetchPendingRequestsCount()
+                            }
+                        )
                     }
                 }
 
-                // Nutzerübersicht Section
+                // Sektion zur Anzeige der aktuellen Nutzer
                 VStack(alignment: .leading, spacing: 10) {
                     Text("NUTZERÜBERSICHT")
                         .font(.caption)
                         .foregroundColor(.gray)
                         .padding(.horizontal, 30)
 
+                    // Horizontales ScrollView zur Anzeige der Nutzer mit Profilbildern
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 15) {
-                            ForEach(users.filter { $0.isActive == true }, id: \ .uid) { user in
+                            ForEach(viewModel.users, id: \.uid) { user in
                                 VStack {
+                                    // Falls ein Profilbild vorhanden ist, wird es angezeigt
                                     if let imageData = user.profileImage, let uiImage = UIImage(data: imageData) {
                                         Image(uiImage: uiImage)
                                             .resizable()
@@ -62,9 +62,10 @@ struct NutzerverwaltungView: View {
                                             .frame(width: 50, height: 50)
                                             .clipShape(Circle())
                                             .onTapGesture {
-                                                selectUser(user)
+                                                viewModel.selectUser(user)
                                             }
                                     } else {
+                                        // Falls kein Bild vorhanden ist, wird ein Platzhalter mit den Initialen des Nutzers angezeigt
                                         Circle()
                                             .fill(Color.gray)
                                             .frame(width: 50, height: 50)
@@ -73,7 +74,7 @@ struct NutzerverwaltungView: View {
                                                     .foregroundColor(.white)
                                             )
                                             .onTapGesture {
-                                                selectUser(user)
+                                                viewModel.selectUser(user)
                                             }
                                     }
                                     Text(user.name)
@@ -89,104 +90,32 @@ struct NutzerverwaltungView: View {
                 Spacer()
             }
             .navigationTitle("Nutzerverwaltung")
-            /*.toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { /* Aktion hier einfügen */ }) {
-                        Label("Aktion", systemImage: "plus")
-                    }
-                }
-            }*/
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(UIColor.systemBackground))
-            .sheet(isPresented: Binding(
-                get: { selectedUser != nil },
-                set: { if !$0 { selectedUser = nil } }
-            )) {
-                if let user = selectedUser {
+            .sheet(isPresented: $viewModel.isUserPopupPresented) {
+                if let user = viewModel.selectedUser {
+                    // Zeigt eine Detailansicht für einen Benutzer an, wenn einer ausgewählt wurde
                     UserPopupView(
-                        user: .constant(user),
-                        isPresented: Binding(
-                            get: { selectedUser != nil },
-                            set: { if !$0 { selectedUser = nil } }
+                        viewModel: UserPopupViewModel(
+                            user: user,
+                            onSave: {
+                                viewModel.fetchAllUsers()
+                                viewModel.isUserPopupPresented = false // PopUp schließen nach erfolgreichem Speichern
+                            },
+                            onDelete: {
+                                viewModel.fetchAllUsers()
+                                viewModel.isUserPopupPresented = false // PopUp schließen nach Löschung
+                            }
                         ),
-                        onSave: fetchAllUsers, // Nutzerliste neu laden
-                        onDelete: fetchAllUsers
+                        isPresented: $viewModel.isUserPopupPresented
                     )
                 } else {
+                    // Falls noch kein Benutzer geladen wurde, wird ein Ladeindikator angezeigt
                     ProgressView("Benutzer wird geladen...")
                 }
             }
             .onAppear {
-                fetchAllData() // Alle relevanten Daten beim Start laden
+                viewModel.fetchAllData() // Lädt alle relevanten Daten beim Öffnen der Ansicht
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
-    }
-
-    // Benutzer auswählen
-    private func selectUser(_ user: UserProfileDTO) {
-        print("🔍 Benutzer ausgewählt: \(user.name)")
-        guard loadingUserID != user.uid else {
-            print("🔄 Benutzer wird bereits geladen...")
-            return
-        }
-
-        loadingUserID = user.uid // Benutzer wird geladen markieren
-        selectedUser = nil // Vorherige Daten zurücksetzen
-        isUserPopupPresented = false // Sicherstellen, dass das Pop-up geschlossen ist
-
-        MainPageAPI.fetchUserByID(userID: user.uid) { result in
-            DispatchQueue.main.async {
-                self.loadingUserID = nil // Ladevorgang abgeschlossen
-                switch result {
-                case .success(let fetchedUser):
-                    self.selectedUser = fetchedUser // Benutzer setzen
-                    print("✅ Benutzer erfolgreich geladen: \(fetchedUser.name)")
-                    self.isUserPopupPresented = true // Popup öffnen
-                case .failure(let error):
-                    print("❌ Fehler beim Laden des Benutzers: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-
-    // Funktion: Alle Daten abrufen
-    private func fetchAllData() {
-        print("🔄 Nutzerverwaltung gestartet. Daten werden geladen...")
-        fetchAllUsers()
-        fetchPendingRequestsCount()
-    }
-
-    // Funktion: Benutzerliste laden
-    private func fetchAllUsers() {
-        print("🔄 Benutzer werden geladen...")
-        MainPageAPI.fetchAllUsers { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let fetchedUsers):
-                    users = fetchedUsers.filter { $0.isActive == true } // Filtere inaktive Benutzer
-                    print("✅ Benutzerliste aktualisiert. Anzahl: \(users.count)")
-                case .failure(let error):
-                    print("❌ Fehler beim Laden der Benutzer: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-
-    // Funktion: Anzahl ausstehender Anfragen abrufen
-    private func fetchPendingRequestsCount() {
-        print("🔄 Beitrittsanfragen werden geladen...")
-        MainPageAPI.fetchPendingUsers { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let users):
-                    pendingRequestsCount = users.filter { $0.isActive == false }.count
-                    print("✅ Anzahl ausstehender Anfragen: \(pendingRequestsCount)")
-                case .failure(let error):
-                    print("❌ Fehler beim Abrufen der Anzahl ausstehender Anfragen: \(error.localizedDescription)")
-                    pendingRequestsCount = 0
-                }
-            }
-        }
+        .navigationViewStyle(StackNavigationViewStyle()) // Stellt sicher, dass das Layout auf allen Geräten gut funktioniert
     }
 }

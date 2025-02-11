@@ -1,20 +1,24 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import AuthServiceDTOs
 
+// Ansicht für den Onboarding-Wartebildschirm.
+// Der Nutzer wartet auf die Bestätigungsmail und kann eine erneute Zustellung anfordern.
 struct Onboarding_Wait: View {
-    @Binding var email: String // Email wird übergeben
+    @Binding var email: String // E-Mail des Nutzers wird übergeben
     @State private var clubName: String = "Name des Vereins der manchmal auch sehr lange werden kann e.V."
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
     @State private var navigateToMainPage: Bool = false
-    @State private var resendTimer: Int = 30 // Countdown-Timer
-    @State private var canResendEmail: Bool = false // Steuerung des Buttons
+    @State private var resendTimer: Int = 30 // Countdown für erneutes Senden der E-Mail
+    @State private var canResendEmail: Bool = false // Steuerung des erneuten Sendens
 
     var body: some View {
         NavigationStack {
-            ScrollView{
+            ScrollView {
                 VStack(spacing: 20) {
-                    // Title
+                    // Titel
                     ZStack(alignment: .bottom) {
                         Text("Fast Fertig")
                             .font(.title)
@@ -27,7 +31,7 @@ struct Onboarding_Wait: View {
                             .offset(y: 5)
                     }
                     
-                    // Vereinslogo Placeholder
+                    // Vereinslogo (Platzhalter)
                     Circle()
                         .fill(Color.gray.opacity(0.3))
                         .frame(width: 150, height: 150)
@@ -49,7 +53,7 @@ struct Onboarding_Wait: View {
                     // Beschreibung
                     descriptionText
                     
-                    // Fehlermeldung
+                    // Fehlermeldung anzeigen, falls vorhanden
                     if let errorMessage = errorMessage {
                         Text(errorMessage)
                             .foregroundColor(.red)
@@ -58,7 +62,7 @@ struct Onboarding_Wait: View {
                             .padding(.horizontal, 24)
                     }
                     
-                    // Ladeindikator
+                    // Ladeindikator, falls Anmeldung überprüft wird
                     if isLoading {
                         ProgressView("Anmeldung wird überprüft...")
                             .padding()
@@ -66,7 +70,7 @@ struct Onboarding_Wait: View {
                     
                     Spacer(minLength: 150)
                     
-                    // Button für E-Mail erneut senden
+                    // Button für erneutes Senden der E-Mail mit Countdown
                     if !canResendEmail {
                         Text("E-Mail erneut senden (\(resendTimer)s)")
                             .foregroundColor(.gray)
@@ -91,17 +95,17 @@ struct Onboarding_Wait: View {
                     startResendTimer()
                 }
                 .navigationDestination(isPresented: $navigateToMainPage) {
-                    MainPage()
+                    MainPage() // Navigiert zur Hauptseite nach erfolgreichem Login
                 }
             }
             .background(Color(UIColor.systemGray6))
             .refreshable {
                 loginAttempt()
             }
-
         }
     }
 
+    // Beschreibender Text für den Bestätigungsprozess
     private var descriptionText: some View {
         VStack(alignment: .center, spacing: 24) {
             Text("Bitte klicke nun auf den ")
@@ -121,6 +125,7 @@ struct Onboarding_Wait: View {
         .padding(.horizontal, 40)
     }
 
+    // Versucht sich automatisch einzuloggen, falls die Bestätigung abgeschlossen wurde.
     private func loginAttempt() {
         isLoading = true
         errorMessage = nil
@@ -137,9 +142,9 @@ struct Onboarding_Wait: View {
                 isLoading = false
                 switch result {
                 case .success(let token):
-                    // Token speichern
+                    // Speichert das erhaltene Token für spätere API-Anfragen
                     UserDefaults.standard.set(token, forKey: "jwtToken")
-                    print("JWT-Token gespeichert: \(token)")
+                    print("✅ JWT-Token gespeichert: \(token)")
                     navigateToMainPage = true
                 case .failure(let error):
                     errorMessage = error.localizedDescription
@@ -148,7 +153,7 @@ struct Onboarding_Wait: View {
         }
     }
 
-
+    // Fordert eine erneute Bestätigungs-E-Mail an.
     private func resendVerificationEmail() {
         isLoading = true
 
@@ -164,6 +169,7 @@ struct Onboarding_Wait: View {
         }
     }
 
+    //Startet den Countdown-Timer für das erneute Senden der Bestätigungs-E-Mail.
     private func startResendTimer() {
         resendTimer = 30
         canResendEmail = false
@@ -178,6 +184,7 @@ struct Onboarding_Wait: View {
     }
 }
 
+// Vorschau der Onboarding-Warteansicht mit einer Beispiel-E-Mail
 struct Onboarding_Wait_Previews: PreviewProvider {
     @State static var testEmail: String = "test@example.com"
 

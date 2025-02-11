@@ -3,7 +3,7 @@
 //  KIVoP-ios
 //
 //
-
+// This file is licensed under the MIT-0 License.
 import Foundation
 import AuthServiceDTOs
 

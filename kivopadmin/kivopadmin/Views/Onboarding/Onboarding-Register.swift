@@ -1,20 +1,25 @@
+// This file is licensed under the MIT-0 License.
 import SwiftUI
 import AuthServiceDTOs
 
 struct Onboarding_Register: View {
+    // Zustandsvariablen für Benutzereingaben
     @State private var name: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
 
+    // Zustandsvariablen für Validierungsnachrichten
     @State private var passwordValidationMessage: String = ""
     @State private var confirmPasswordMessage: String = ""
-    
+
+    // Weitere UI-Steuerungsvariablen
     @State private var isLoading: Bool = false
     @State private var showPrivacyPolicy: Bool = false
     @State private var selectedImage: UIImage? = nil
     @State private var navigateToWaitingView: Bool = false
 
+    // Verweist auf den Anmeldestatus der App
     @Binding var isLoggedIn: Bool
 
     var body: some View {
@@ -22,14 +27,17 @@ struct Onboarding_Register: View {
             VStack {
                 Spacer().frame(height: 40)
 
+                // Titel für die Registrierungsseite
                 Text("Registrieren")
                     .font(.title)
                     .fontWeight(.bold)
                     .padding(.bottom, 40)
                     .padding(.top, 40)
 
+                // Sektion zur Anzeige und Auswahl eines Profilbilds
                 profileImageSection()
 
+                // Eingabefelder für Name, E-Mail und Passwörter
                 inputField(title: "Name", text: $name)
                 inputField(title: "E-Mail", text: $email)
                     .keyboardType(.emailAddress)
@@ -41,6 +49,7 @@ struct Onboarding_Register: View {
 
                 Spacer()
 
+                // Button zur Registrierung, öffnet zunächst die Datenschutzerklärung
                 Button(action: {
                     showPrivacyPolicy.toggle()
                 }) {
@@ -65,6 +74,7 @@ struct Onboarding_Register: View {
                 .padding(.bottom, 10)
                 .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty || !passwordValidationMessage.isEmpty || !confirmPasswordMessage.isEmpty)
 
+                // Navigationslink zum Login-Bildschirm
                 NavigationLink(destination: Onboarding_Login(isLoggedIn: $isLoggedIn)) {
                     Text("Zurück zum Login")
                         .foregroundColor(.blue)
@@ -80,6 +90,8 @@ struct Onboarding_Register: View {
             .background(Color(UIColor.systemGray6))
             .edgesIgnoringSafeArea(.all)
             .navigationBarBackButtonHidden(true)
+
+            // Sheet zur Anzeige der Datenschutzerklärung
             .sheet(isPresented: $showPrivacyPolicy) {
                 PrivacyPolicyView(
                     onAccept: {
@@ -91,12 +103,15 @@ struct Onboarding_Register: View {
                     }
                 )
             }
+
+            // Falls Registrierung erfolgreich, zur Warteansicht navigieren
             .navigationDestination(isPresented: $navigateToWaitingView) {
                 Onboarding_Wait(email: $email)
             }
         }
     }
 
+    // MARK: - Passwortfeld mit Validierung
     private func passwordField() -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text("PASSWORT")
@@ -127,6 +142,7 @@ struct Onboarding_Register: View {
         .padding(.bottom, 10)
     }
 
+    // MARK: - Bestätigungspasswortfeld mit Validierung
     private func confirmPasswordField() -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text("PASSWORT WIEDERHOLEN")
@@ -157,6 +173,7 @@ struct Onboarding_Register: View {
         .padding(.bottom, 10)
     }
 
+    // MARK: - Validierung des Passworts
     private func validatePassword() {
         let passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$"
         let predicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
@@ -168,6 +185,7 @@ struct Onboarding_Register: View {
         }
     }
 
+    // MARK: - Überprüfung, ob die Passwörter übereinstimmen
     private func validateConfirmPassword() {
         if confirmPassword == password {
             confirmPasswordMessage = ""
@@ -176,6 +194,7 @@ struct Onboarding_Register: View {
         }
     }
 
+    // MARK: - Registrierungsprozess starten
     private func registerUser() {
         isLoading = true
 
@@ -200,6 +219,7 @@ struct Onboarding_Register: View {
         }
     }
 
+    // MARK: - Eingabefeld-Komponente für wiederverwendbare Texteingaben
     private func inputField(title: String, text: Binding<String>) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
@@ -216,6 +236,7 @@ struct Onboarding_Register: View {
         .padding(.bottom, 10)
     }
 
+    // MARK: - Sektion für das Profilbild
     private func profileImageSection() -> some View {
         VStack {
             ZStack {
@@ -233,19 +254,9 @@ struct Onboarding_Register: View {
                 }
             }
             .padding(.bottom, 10)
-
-            NavigationLink(destination: Onboarding_ProfilePicture(selectedImage: $selectedImage)) {
-                Text("Bearbeiten")
-                    .foregroundColor(.blue)
-                    .font(.footnote)
-            }
-            .padding(.bottom, 30)
         }
     }
 }
-
-
-
 
     
     private func compressImage(_ image: UIImage) -> Data? {
@@ -256,7 +267,7 @@ struct Onboarding_Register: View {
             image.draw(in: CGRect(origin: .zero, size: targetSize))
         }
 
-        var compressionQuality: CGFloat = 0.9
+        var compressionQuality: CGFloat = 0.8
         var compressedData = resizedImage.jpegData(compressionQuality: compressionQuality)
 
         while let data = compressedData, data.count > 200 * 1024 && compressionQuality > 0.1 {

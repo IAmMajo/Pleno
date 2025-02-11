@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 import SwiftUI
 
 struct Onboarding: View {
@@ -33,14 +34,24 @@ struct Onboarding: View {
                             .frame(height: 300)
                         
                         VStack(spacing: 0) {
-                            Text("Mit ")
+                            Text("Mit")
                                 .font(.title3)
                                 .fontWeight(.regular) +
-                            Text("Pleno ")
+                            Text(" ")
+                                .font(.title3)
+                                .fontWeight(.regular) +
+                            Text("Pleno")
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(.blue) +
-                            Text("zu einer verbesserten ")
+                            Text(" ")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundColor(.blue) +
+                            Text("zu einer verbesserten")
+                                .font(.title3)
+                                .fontWeight(.regular) +
+                            Text(" ")
                                 .font(.title3)
                                 .fontWeight(.regular) +
                             Text("Vereinsplanung")
@@ -63,6 +74,9 @@ struct Onboarding: View {
                         
                         VStack {
                             Text("Verwalte ")
+                                .font(.title3)
+                                .fontWeight(.regular)
+                            + Text("Verwalte ")
                                 .font(.title3)
                                 .fontWeight(.regular)
                             + Text("Ratssitzungen, ")
