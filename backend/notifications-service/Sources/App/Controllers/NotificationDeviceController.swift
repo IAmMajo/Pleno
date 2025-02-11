@@ -46,27 +46,28 @@ struct NotificationDeviceController: RouteCollection {
         guard let userID = req.jwtPayload?.userID else {
           throw Abort(.unauthorized)
         }
-        let dto = try req.content.decode(RegisterNotificationDeviceDTO.self)
+        guard let dto = try? req.content.decode(RegisterNotificationDeviceDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected RegisterNotificationDeviceDTO.")
+        }
         let platform = Models.NotificationPlatform(rawValue: dto.platform.rawValue)!
 
-        var device = try await NotificationDevice
+        guard let device = try await NotificationDevice
             .query(on: req.db)
             .filter(\.$platform == platform)
             .filter(\.$deviceID == dto.deviceID)
             .first()
-        if device == nil {
-            device = NotificationDevice(
-                deviceID: dto.deviceID,
-                token: dto.token,
-                platform: platform,
-                userID: userID
-            )
-        } else {
-            device!.token = dto.token
-            device!.$user.id = userID
+        else {
+            try await NotificationDevice(
+               deviceID: dto.deviceID,
+               token: dto.token,
+               platform: platform,
+               userID: userID
+            ).save(on: req.db)
+           return .created
         }
-
-        try await device!.save(on: req.db)
+        device.token = dto.token
+        device.$user.id = userID
+        try await device.update(on: req.db)
         return .created
     }
 }

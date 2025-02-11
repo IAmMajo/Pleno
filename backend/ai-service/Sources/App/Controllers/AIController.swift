@@ -6,7 +6,7 @@ struct AIController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let openAPITag = TagObject(name: "AI")
         
-        routes.post("extend-record", ":lang", use: extendRecord).openAPI(
+        routes.put("extend-record", ":lang", use: extendRecord).openAPI(
             tags: openAPITag,
             summary: "Protokoll erweitern",
             description:
@@ -22,7 +22,7 @@ struct AIController: RouteCollection {
             responseContentType: .init(rawValue: "text/markdown"),
             responseDescription: "Erweitertes Protokoll"
         )
-        routes.post("generate-social-media-post", ":lang", use: generateSocialMediaPost).openAPI(
+        routes.put("generate-social-media-post", ":lang", use: generateSocialMediaPost).openAPI(
             tags: openAPITag,
             summary: "Social Media Post generieren",
             description:
@@ -42,8 +42,12 @@ struct AIController: RouteCollection {
 
     @Sendable
     func extendRecord(req: Request) async throws -> Response {
-        let lang = req.parameters.get("lang")!
-        let dto = try req.content.decode(AISendMessageDTO.self)
+        guard let lang = req.parameters.get("lang") else {
+            throw Abort(.badRequest, reason: "Missing request parameter! Expected lang.")
+        }
+        guard let dto = try? req.content.decode(AISendMessageDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected AISendMessageDTO.")
+        }
         return try await req.ai.getStreamedAIResponse(
             promptName: "extend-record",
             message: "Sprachcode \"\(lang)\":\n\n\(dto.content)",
@@ -53,8 +57,12 @@ struct AIController: RouteCollection {
 
     @Sendable
     func generateSocialMediaPost(req: Request) async throws -> Response {
-        let lang = req.parameters.get("lang")!
-        let dto = try req.content.decode(AISendMessageDTO.self)
+        guard let lang = req.parameters.get("lang") else {
+            throw Abort(.badRequest, reason: "Missing request parameter! Expected lang.")
+        }
+        guard let dto = try? req.content.decode(AISendMessageDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected AISendMessageDTO.")
+        }
         return try await req.ai.getStreamedAIResponse(
             promptName: "generate-social-media-post",
             message: "Sprachcode \"\(lang)\":\n\n\(dto.content)",

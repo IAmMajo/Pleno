@@ -43,6 +43,9 @@ public final class User: Model, Content, @unchecked Sendable {
     @Field(key: "is_push_notifications_active")
     public var isPushNotificationsActive: Bool
     
+    @Children(for: \.$user)
+    var notificationDevices: [NotificationDevice]
+    
     public init() { }
     
     // TODO temporarily every user is active by default until email verification works. Attention for the first user!
