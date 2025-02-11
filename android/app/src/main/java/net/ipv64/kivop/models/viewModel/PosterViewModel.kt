@@ -17,13 +17,17 @@ import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterSummaryResponseDTO
 import net.ipv64.kivop.models.Address
 import net.ipv64.kivop.services.api.OpenCageGeocoder.getAddressFromLatLngApi
 import net.ipv64.kivop.services.api.getPosterByIDApi
+import net.ipv64.kivop.services.api.getPosterImage
 import net.ipv64.kivop.services.api.getPosterLocationsByIDApi
+import net.ipv64.kivop.services.api.getPosterPositionImage
 import net.ipv64.kivop.services.api.getPosterSummaryByIDApi
 
 class PosterViewModel(private val posterId: String) : ViewModel() {
   var poster by mutableStateOf<PosterResponseDTO?>(null)
+  var posterImage by mutableStateOf<String?>(null)
   var posterSummary by mutableStateOf<PosterSummaryResponseDTO?>(null)
   var posterPositions by mutableStateOf<List<PosterPositionResponseDTO>>(emptyList())
+  var posterPositionsImages by mutableStateOf<Map<UUID, String?>>(emptyMap())
   var posterAddresses by mutableStateOf<Map<UUID, String>>(emptyMap())
 
   var isLoading by mutableStateOf(true)
@@ -51,6 +55,14 @@ class PosterViewModel(private val posterId: String) : ViewModel() {
         poster = posterDeferred.await()
         posterSummary = summaryDeferred.await()
         posterPositions = positionsDeferred.await()
+        posterPositions.forEach { poster ->
+          poster.id.let { id ->
+            viewModelScope.launch {
+              val imageUrl = fetchPosterPositionImage(id)
+              posterPositionsImages = posterPositionsImages + (id to imageUrl)
+            }
+          }
+        }
       } catch (e: Exception) {
         Log.i("PosterViewModel", "fetchPosters: $e")
       } finally {
@@ -59,6 +71,21 @@ class PosterViewModel(private val posterId: String) : ViewModel() {
     }
   }
 
+  private fun fetchPosterImage() {
+    viewModelScope.launch {
+      posterImage = getPosterImage(posterId)
+    }
+  }
+
+  private suspend fun fetchPosterPositionImage(posterId: UUID): String? {
+    return try {
+      getPosterPositionImage(posterId.toString())
+    } catch (e: Exception) {
+      Log.e("PostersViewModel", "Error fetching image for $posterId: $e")
+      null
+    }
+  }
+  
   suspend fun fetchAddress(lat: Double, long: Double): String? {
     val addressResponse = getAddressFromLatLngApi(lat, long)
     addressResponse?.let {
@@ -75,6 +102,7 @@ class PosterViewModel(private val posterId: String) : ViewModel() {
 
   init {
     fetchPosterData()
+    fetchPosterImage()
   }
 }
 

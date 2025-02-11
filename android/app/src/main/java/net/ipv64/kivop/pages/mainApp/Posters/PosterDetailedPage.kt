@@ -98,12 +98,12 @@ fun PosterDetailedPage(
 
   // Converts poster image into ByteArray - for displaying in AsyncImage
   val base64ImageByteArray = remember { mutableStateOf<ByteArray?>(null) }
-  LaunchedEffect(posterDetailedViewModel.poster?.image) {
+  LaunchedEffect(posterDetailedViewModel.posterImage) {
     Log.i("image", "image changed")
     withContext(Dispatchers.IO) {
-      if (posterDetailedViewModel.poster?.image != null) {
+      if (posterDetailedViewModel.posterImage != null) {
         val decodedImage =
-            posterDetailedViewModel.poster!!.image!!.substringAfter("base64").let {
+            posterDetailedViewModel.posterImage!!.substringAfter("base64").let {
               Base64.decode(it)
             }
         base64ImageByteArray.value = decodedImage
@@ -195,7 +195,7 @@ fun PosterDetailedPage(
                           }
                         } else {
                           // if the user is not responsible, just show the image or placeholder
-                          if (posterDetailedViewModel.poster?.image != null) {
+                          if (posterDetailedViewModel.posterImage != null) {
                             AsyncImage(
                                 model = base64ImageByteArray.value,
                                 contentDescription = "Poster_Image",

@@ -50,6 +50,7 @@ fun PostersListPage(navController: NavController) {
             if (poster != null) {
               PosterInfoCard(
                   poster = poster,
+                  image = postersViewModel.posterImages[poster.id],
                   summary = postersViewModel.posterSummaries[poster.id],
                   onPosterClick = { navController.navigate(Screen.Poster.rout + "/${poster.id}") })
               SpacerBetweenElements()
