@@ -1,9 +1,4 @@
-//
-//  FehlerView.swift
-//  kivopadmin
-//
-//  Created by Amine Ahamri on 01.12.24.
-//
+// This file is licensed under the MIT-0 License.
 
 import SwiftUI
 

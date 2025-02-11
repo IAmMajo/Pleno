@@ -1,37 +1,34 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import MeetingServiceDTOs
 
 struct CreateVotingView: View {
-    @Environment(\.presentationMode) var presentationMode
-    @State private var question = ""
-    @State private var description = ""
-    @State private var anonymous = false
-    @State private var options: [String] = [""] // Mindestens ein leeres Feld für Optionen
-    @State private var selectedMeetingId: UUID? = nil // Ausgewählte Meeting-ID
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var viewModel: CreateVotingViewModel
 
-    @ObservedObject var meetingManager: MeetingManager
-    var onCreate: (GetVotingDTO) -> Void
-
-    private let descriptionCharacterLimit = 300
+    init(meetingManager: MeetingManager, onCreate: @escaping (GetVotingDTO) -> Void) {
+        _viewModel = StateObject(wrappedValue: CreateVotingViewModel(meetingManager: meetingManager, onCreate: onCreate))
+    }
 
     var body: some View {
         NavigationView {
             Form {
                 // Meeting-Auswahl
                 Section(header: Text("Meeting auswählen")) {
-                    if !meetingManager.meetings.isEmpty {
+                    if !viewModel.meetingManager.meetings.isEmpty {
                         Menu {
-                            ForEach(meetingManager.meetings.filter { $0.status == .inSession }, id: \ .id) { meeting in
+                            ForEach(viewModel.meetingManager.meetings.filter { $0.status == .inSession }, id: \.id) { meeting in
                                 Button(action: {
-                                    selectedMeetingId = meeting.id
+                                    viewModel.selectedMeetingId = meeting.id
                                 }) {
                                     Text(meeting.name)
                                 }
                             }
                         } label: {
                             HStack {
-                                Text(selectedMeetingName())
-                                    .foregroundColor(selectedMeetingId == nil ? .gray : .primary)
+                                Text(viewModel.selectedMeetingName())
+                                    .foregroundColor(viewModel.selectedMeetingId == nil ? .gray : .primary)
                                 Spacer()
                                 Image(systemName: "chevron.down")
                                     .foregroundColor(.gray)
@@ -43,47 +40,47 @@ struct CreateVotingView: View {
                             .font(.subheadline)
                     }
                     
-                    if meetingManager.meetings.filter({ $0.status == .inSession }).isEmpty {
+                    if viewModel.meetingManager.meetings.filter({ $0.status == .inSession }).isEmpty {
                         Text("Keine aktiven Meetings verfügbar")
                             .foregroundColor(.red)
                             .font(.subheadline)
                     }
                 }
-                
+
                 // Frage
                 Section(header: Text("Frage")) {
-                    TextField("Frage eingeben", text: $question)
+                    TextField("Frage eingeben", text: $viewModel.question)
                         .autocapitalization(.sentences)
                 }
-                
+
                 // Beschreibung
                 Section(header: Text("Beschreibung")) {
-                    TextField("Beschreibung eingeben", text: $description)
+                    TextField("Beschreibung eingeben", text: $viewModel.description)
                         .autocapitalization(.sentences)
-                        .onChange(of: description) { _, newValue in
-                            if newValue.count > descriptionCharacterLimit {
-                                description = String(newValue.prefix(descriptionCharacterLimit))
+                        .onChange(of: viewModel.description) { _, newValue in
+                            if newValue.count > 300 {
+                                viewModel.description = String(newValue.prefix(300))
                             }
                         }
                 }
-                
+
                 // Anonyme Abstimmung
                 Section(header: Text("Anonym")) {
-                    Toggle("Anonyme Abstimmung", isOn: $anonymous)
+                    Toggle("Anonyme Abstimmung", isOn: $viewModel.anonymous)
                 }
-                
+
                 // Optionen
                 Section(header: Text("Optionen")) {
-                    ForEach($options.indices, id: \.self) { index in
+                    ForEach(viewModel.options.indices, id: \.self) { index in
                         HStack {
-                            TextField("Option \(index + 1)", text: $options[index])
-                                .onChange(of: options[index]) { _, newValue in
-                                    handleOptionChange(index: index, newValue: newValue)
+                            TextField("Option \(index + 1)", text: $viewModel.options[index])
+                                .onChange(of: viewModel.options[index]) { _, newValue in
+                                    viewModel.handleOptionChange(index: index, newValue: newValue)
                                 }
-                            
-                            if options.count > 1 && index != 0 {
+
+                            if viewModel.options.count > 1 && index != 0 {
                                 Button(action: {
-                                    removeOption(at: index)
+                                    viewModel.removeOption(at: index)
                                 }) {
                                     Image(systemName: "trash")
                                         .foregroundColor(.red)
@@ -93,103 +90,25 @@ struct CreateVotingView: View {
                     }
                 }
 
-
-
-
-
+                // Fehleranzeige
+                if let errorMessage = viewModel.errorMessage {
+                    Section {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                            .font(.footnote)
+                    }
+                }
             }
             .navigationTitle("Neue Abstimmung")
             .navigationBarItems(
                 leading: Button("Abbrechen") {
-                    presentationMode.wrappedValue.dismiss()
+                    dismiss()
                 },
                 trailing: Button("Erstellen") {
-                    createVoting()
+                    viewModel.createVoting(dismiss: dismiss)
                 }
-                .disabled(!isFormValid())
+                .disabled(!viewModel.isFormValid())
             )
-            .onAppear {
-                print("Meetings werden geladen...")
-                meetingManager.fetchAllMeetings()
-            }
         }
     }
-    
-    private func selectedMeetingName() -> String {
-        if let meeting = meetingManager.meetings.first(where: { $0.id == selectedMeetingId }) {
-            return meeting.name
-        }
-        return "Meeting auswählen"
-    }
-    
-    private func createVoting() {
-        guard let selectedMeetingId = selectedMeetingId else {
-            print("Fehler: Kein Meeting ausgewählt")
-            return
-        }
-        
-        print("Ausgewählte Meeting-ID: \(selectedMeetingId)")
-        
-        let validOptions = options.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
-        print("Gültige Optionen: \(validOptions)")
-        
-        let optionDTOs = validOptions.enumerated().map { GetVotingOptionDTO(index: UInt8($0.offset + 1), text: $0.element) }
-        print("OptionDTOs: \(optionDTOs)")
-        
-        let newVoting = CreateVotingDTO(
-            meetingId: selectedMeetingId,
-            question: question.trimmingCharacters(in: .whitespacesAndNewlines),
-            description: description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : description,
-            anonymous: anonymous,
-            options: optionDTOs
-        )
-        
-        print("CreateVotingDTO gesendet: \(newVoting)")
-        
-        VotingService.shared.createVoting(voting: newVoting) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let createdVoting):
-                    print("Erstellung erfolgreich: \(createdVoting)")
-                    onCreate(createdVoting)
-                    presentationMode.wrappedValue.dismiss()
-                case .failure(let error):
-                    print("Fehler beim Erstellen: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-    
-    private func isFormValid() -> Bool {
-        let isValid = !question.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !options.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.isEmpty &&
-        selectedMeetingId != nil
-        print("Formular gültig: \(isValid)")
-        return isValid
-    }
-    
-    private func handleOptionChange(index: Int, newValue: String) {
-        let trimmedValue = newValue.trimmingCharacters(in: .whitespaces)
-
-        // Stelle sicher, dass ein leeres Feld existiert, wenn das aktuelle Feld befüllt wird
-        if !trimmedValue.isEmpty && index == options.count - 1 {
-            options.append("")
-        }
-
-        // Entferne alle leeren Felder außer das letzte, um die UI sauber zu halten
-        if options.count > 1 {
-            options = options.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty || options.last == "" }
-        }
-    }
-
-    private func removeOption(at index: Int) {
-        // Stelle sicher, dass mindestens ein Eingabefeld bleibt
-        if options.count > 1 {
-            options.remove(at: index)
-        }
-    }
-
-
-
-
 }

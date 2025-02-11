@@ -1,9 +1,4 @@
-//
-//  DestructiveButtonStyle.swift
-//  kivopadmin
-//
-//  Created by Amine Ahamri on 10.01.25.
-//
+// This file is licensed under the MIT-0 License.
 
 
 import SwiftUI

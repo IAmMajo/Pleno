@@ -1,17 +1,12 @@
-//
-//  AbgeschlossenView.swift
-//  kivopadmin
-//
-//  Created by Amine Ahamri on 01.12.24.
-//
+// This file is licensed under the MIT-0 License.
 
 import SwiftUI
 import MeetingServiceDTOs
 
-
 struct AbgeschlossenView: View {
     let voting: GetVotingDTO
     let votingResults: GetVotingResultsDTO?
+    
     @State private var selectedOption: UInt8? = nil
     @State private var identityImages: [UUID: Data?] = [:]
 
@@ -48,7 +43,7 @@ struct AbgeschlossenView: View {
                 VStack {
                     renderResultRow(result: result, optionTextMap: optionTextMap)
 
-                    // Zeige die Identitäten nur, wenn die Abstimmung nicht anonym ist
+                    // Teilnehmer nur anzeigen, wenn die Abstimmung nicht anonym ist und das Chevron nach unten zeigt
                     if !voting.anonymous && selectedOption == result.index {
                         renderIdentities(for: result.identities)
                     }
@@ -65,7 +60,7 @@ struct AbgeschlossenView: View {
                     selectedOption = nil
                 } else {
                     selectedOption = result.index
-                    loadIdentities(for: result.identities)
+                    loadIdentities(for: result.identities)  // Lade Teilnehmerliste nur, wenn Chevron geklickt wird
                 }
             }
         }) {
@@ -77,7 +72,7 @@ struct AbgeschlossenView: View {
                     .font(.subheadline)
                     .foregroundColor(.gray)
 
-                // Zeige Pfeil nur bei nicht-anonymer Abstimmung
+                // Nur bei nicht-anonymer Abstimmung Chevron anzeigen
                 if !voting.anonymous {
                     Image(systemName: selectedOption == result.index ? "chevron.down" : "chevron.right")
                         .foregroundColor(.gray)
@@ -87,11 +82,14 @@ struct AbgeschlossenView: View {
         .padding()
         .background(Color(UIColor.systemBackground))
         .cornerRadius(8)
-        .disabled(voting.anonymous)  // Deaktiviere Button für anonyme Abstimmung
+        .disabled(voting.anonymous)  // Button für anonyme Abstimmungen deaktivieren
     }
 
     private func renderIdentities(for identities: [GetIdentityDTO]?) -> some View {
-        guard let identities = identities else { return AnyView(EmptyView()) }
+        guard let identities = identities, !identities.isEmpty else {
+            return AnyView(Text("Keine Teilnehmer sichtbar.").foregroundColor(.gray).padding(.leading, 8))
+        }
+
         return AnyView(
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(identities, id: \.id) { identity in
@@ -104,7 +102,6 @@ struct AbgeschlossenView: View {
                             .foregroundColor(.primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             .padding(.leading, 8)

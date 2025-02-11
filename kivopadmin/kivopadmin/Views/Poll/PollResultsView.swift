@@ -1,18 +1,19 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import PollServiceDTOs
 
 struct PollResultsView: View {
-    let pollId: UUID
-    @State private var pollResults: GetPollResultsDTO?
-    @State private var pollDetails: GetPollDTO?
-    @State private var isLoading = true
-    @State private var errorMessage: String?
-    @State private var selectedOptionIndex: UInt8?
+    @StateObject private var viewModel: PollResultsViewModel
+
+    init(pollId: UUID) {
+        _viewModel = StateObject(wrappedValue: PollResultsViewModel(pollId: pollId))
+    }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                if let poll = pollDetails, let results = pollResults {
+                if let poll = viewModel.pollDetails, let results = viewModel.pollResults {
                     Text(poll.question)
                         .font(.title2)
                         .fontWeight(.bold)
@@ -29,10 +30,10 @@ struct PollResultsView: View {
 
                     renderPieChart(for: results)
                     renderResultsList(for: results)
-                } else if isLoading {
+                } else if viewModel.isLoading {
                     ProgressView("Lade Ergebnisse...")
                         .padding()
-                } else if let errorMessage = errorMessage {
+                } else if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .padding()
@@ -40,10 +41,6 @@ struct PollResultsView: View {
             }
         }
         .navigationTitle("Umfrage Ergebnisse")
-        .onAppear {
-            fetchPollResults()
-            fetchPollDetails()
-        }
     }
 
     private func renderPieChart(for results: GetPollResultsDTO) -> some View {
@@ -59,7 +56,7 @@ struct PollResultsView: View {
                 VStack {
                     renderResultRow(result: result)
 
-                    if selectedOptionIndex == result.index {
+                    if viewModel.selectedOptionIndex == result.index {
                         renderIdentities(for: result.identities)
                     }
                 }
@@ -70,29 +67,31 @@ struct PollResultsView: View {
     }
 
     private func renderResultRow(result: GetPollResultDTO) -> some View {
-        Button(action: {
-            if selectedOptionIndex == result.index {
-                selectedOptionIndex = nil
-            } else {
-                selectedOptionIndex = result.index
-            }
-        }) {
-            HStack {
-                Text(result.text)
-                    .font(.headline)
-                Spacer()
-                Text("\(result.count) Stimmen (\(String(format: "%.1f", result.percentage))%)")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
+        HStack {
+            Text(result.text)
+                .font(.headline)
+            Spacer()
+            Text("\(result.count) Stimmen (\(String(format: "%.1f", result.percentage))%)")
+                .font(.subheadline)
+                .foregroundColor(.gray)
 
-                Image(systemName: selectedOptionIndex == result.index ? "chevron.down" : "chevron.right")
+            // Chevron nur anzeigen, wenn die Umfrage nicht anonym ist
+            if viewModel.pollDetails?.anonymous == false {
+                Image(systemName: viewModel.selectedOptionIndex == result.index ? "chevron.down" : "chevron.right")
                     .foregroundColor(.gray)
             }
         }
         .padding()
         .background(Color(UIColor.systemBackground))
         .cornerRadius(8)
+        // Button-Funktion nur, wenn nicht anonym
+        .onTapGesture {
+            if viewModel.pollDetails?.anonymous == false {
+                viewModel.toggleSelectedOption(result.index)
+            }
+        }
     }
+
 
     private func renderIdentities(for identities: [GetIdentityDTO]?) -> some View {
         guard let identities = identities, !identities.isEmpty else {
@@ -123,7 +122,7 @@ struct PollResultsView: View {
                 AsyncImage(url: imageUrl) { image in
                     image.resizable()
                 } placeholder: {
-                    Text(getInitials(from: identity.name))
+                    Text(viewModel.getInitials(from: identity.name))
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(width: 32, height: 32)
@@ -136,53 +135,11 @@ struct PollResultsView: View {
                     .fill(Color.gray)
                     .frame(width: 32, height: 32)
                     .overlay(
-                        Text(getInitials(from: identity.name))
+                        Text(viewModel.getInitials(from: identity.name))
                             .foregroundColor(.white)
                             .font(.caption)
                     )
             )
-        }
-    }
-
-    private func getInitials(from name: String) -> String {
-        let nameParts = name.split(separator: " ")
-        
-        if nameParts.count == 1 {
-            return String(nameParts.first!.prefix(2)).uppercased()
-        }
-
-        guard let firstInitial = nameParts.first?.prefix(1),
-              let lastInitial = nameParts.last?.prefix(1) else {
-            return "??"
-        }
-        
-        return "\(firstInitial)\(lastInitial)".uppercased()
-    }
-
-    private func fetchPollResults() {
-        PollAPI.shared.fetchPollResultsById(pollId: pollId) { result in
-            DispatchQueue.main.async {
-                isLoading = false
-                switch result {
-                case .success(let resultsData):
-                    pollResults = resultsData
-                case .failure(let error):
-                    errorMessage = "Fehler beim Laden der Ergebnisse: \(error.localizedDescription)"
-                }
-            }
-        }
-    }
-
-    private func fetchPollDetails() {
-        PollAPI.shared.fetchPollById(pollId: pollId) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let pollData):
-                    pollDetails = pollData
-                case .failure(let error):
-                    errorMessage = "Fehler beim Laden der Umfrage-Details: \(error.localizedDescription)"
-                }
-            }
         }
     }
 }

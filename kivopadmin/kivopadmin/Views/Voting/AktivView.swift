@@ -1,24 +1,21 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import MeetingServiceDTOs
 
 struct AktivView: View {
-    let voting: GetVotingDTO
-    let onBack: () -> Void
+    @StateObject private var viewModel: AktivViewModel
 
-    @StateObject private var webSocketService = WebSocketService()
-    @State private var isClosing = false
-    @State private var value: Int = 0
-    @State private var total: Int = 0
-    @State private var progress: Double = 0
-    @State private var showParticipationMessage = false
-    @State private var errorMessageDisplayed = false
+    init(voting: GetVotingDTO, onBack: @escaping () -> Void) {
+        _viewModel = StateObject(wrappedValue: AktivViewModel(voting: voting, onBack: onBack))
+    }
 
     var body: some View {
         VStack {
-            if voting.iVoted {
-                if webSocketService.liveStatus != nil {
-                    votingProgressView
-                } else if let errorMessage = webSocketService.errorMessage, !errorMessageDisplayed {
+            if viewModel.voting.iVoted {
+                if let liveStatus = viewModel.liveStatus {
+                    votingProgressView(liveStatus: liveStatus) // ❗ Parameter übergeben
+                } else if let errorMessage = viewModel.errorMessage {
                     errorView(errorMessage: errorMessage)
                 } else {
                     loadingView
@@ -27,50 +24,59 @@ struct AktivView: View {
                 participationWarningView
             }
 
+
+
+
             Spacer()
 
-            votingDetailsView
+            if viewModel.voting.iVoted {
+                votingDetailsView
+            }
 
             Spacer()
 
             closeVotingButton
         }
         .onAppear {
-            if voting.iVoted {
-                print("Verbinde mit Voting ID: \(voting.id)")
-                webSocketService.connect(to: voting.id)
+            if viewModel.voting.iVoted {
+                viewModel.connectWebSocket()
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    viewModel.onBack()
+                }
             }
         }
         .onDisappear {
-            print("Trenne WebSocket-Verbindung für Voting ID: \(voting.id)")
-            webSocketService.disconnect()
+            viewModel.disconnectWebSocket()
         }
-        .onChange(of: webSocketService.liveStatus) { _, newLiveStatus in
-            guard let newLiveStatus = newLiveStatus else { return }
-            updateProgress(liveStatus: newLiveStatus)
+        .onChange(of: viewModel.liveStatus) { _, _ in
+            viewModel.updateProgress()
         }
     }
 
-    private var votingProgressView: some View {
+
+    private func votingProgressView(liveStatus: String) -> some View {
         VStack {
             ZStack {
                 Circle()
                     .stroke(Color.blue.opacity(0.3), lineWidth: 35)
                 Circle()
-                    .trim(from: 0, to: progress)
+                    .trim(from: 0, to: viewModel.progress)
                     .stroke(Color.blue, style: StrokeStyle(lineWidth: 35, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                    .animation(.easeOut(duration: 0.8), value: progress)
-                Text("\(value)/\(total)")
+                    .animation(.easeOut(duration: 0.8), value: viewModel.progress)
+                Text("\(viewModel.value)/\(viewModel.total)")
                     .font(.system(size: 50))
                     .fontWeight(.bold)
                     .foregroundColor(Color.blue)
             }
             .padding(30)
 
-            Text(votingProgressText)
-                .font(.headline)
-                .foregroundColor(.gray)
+            if !liveStatus.isEmpty {
+                Text(liveStatus)
+                    .font(.headline)
+                    .foregroundColor(.gray)
+            }
         }
     }
 
@@ -102,46 +108,30 @@ struct AktivView: View {
     private var participationWarningView: some View {
         VStack {
             Spacer()
-            Text("Sie müssen zuerst an der Umfrage teilnehmen, um den Live-Stand zu sehen.")
+            Text("Sie müssen zuerst an der Abstimmung teilnehmen, um den Live-Stand zu sehen.")
                 .font(.headline)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.gray)
                 .padding()
             Spacer()
         }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                onBack()
-            }
-        }
     }
 
     private var votingDetailsView: some View {
         VStack(alignment: .center, spacing: 10) {
-            Text(voting.question)
+            Text(viewModel.voting.question)
                 .font(.title2)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity, alignment: .center)
-
-            if !voting.description.isEmpty {
-                Text(voting.description)
-                    .font(.body)
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity, alignment: .center)
-            }
         }
-        .frame(maxWidth: .infinity) // Sorgt dafür, dass VStack selbst zentriert wird
         .padding()
         .cornerRadius(10)
-        .padding([.leading, .trailing])
     }
 
-
     private var closeVotingButton: some View {
-        Button(action: closeVoting) {
-            if isClosing {
+        Button(action: viewModel.closeVoting) {
+            if viewModel.isClosing {
                 ProgressView()
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -158,54 +148,6 @@ struct AktivView: View {
             }
         }
         .padding()
-        .disabled(isClosing)
-    }
-
-    private var votingProgressText: String {
-        if value == 0 {
-            return "Noch keine Stimmen abgegeben."
-        } else if value == 1 {
-            return "Es hat \(value) von \(total) Personen abgestimmt."
-        } else if value < total {
-            return "Es haben \(value) von \(total) Personen abgestimmt."
-        } else {
-            return "Alle \(total) Personen haben abgestimmt."
-        }
-    }
-
-    private func updateProgress(liveStatus: String) {
-        let parts = liveStatus.split(separator: "/")
-        if let currentValue = Int(parts.first ?? ""), let totalValue = Int(parts.last ?? "") {
-            self.value = currentValue
-            self.total = totalValue
-            withAnimation(.easeOut(duration: 0.8)) {
-                self.progress = Double(currentValue) / Double(totalValue)
-            }
-        }
-    }
-
-    private func closeVoting() {
-        guard !isClosing else {
-            print("Warnung: closeVoting bereits in Bearbeitung.")
-            return
-        }
-
-        isClosing = true
-
-        print("Sende Anfrage zum Beenden der Umfrage mit ID: \(voting.id)")
-
-        VotingService.shared.closeVoting(votingId: voting.id) { result in
-            DispatchQueue.main.async {
-                self.isClosing = false
-                switch result {
-                case .success:
-                    print("Umfrage erfolgreich abgeschlossen: \(self.voting.id)")
-                    webSocketService.disconnect()
-                    onBack()
-                case .failure(let error):
-                    print("Fehler beim Abschließen: \(error)")
-                }
-            }
-        }
+        .disabled(viewModel.isClosing)
     }
 }
