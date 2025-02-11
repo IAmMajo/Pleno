@@ -1,15 +1,14 @@
-// This file is licensed under the MIT-0 License.
-
 import Foundation
 import SwiftUI
 
 class ClubSettingsViewModel: ObservableObject {
     @Published var settings: [ClubSetting] = []
     @Published var editedValues: [String: String] = [:]
-    @Published var showTooltip: Bool = false
-    @Published var tooltipDescription: String = ""
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String?
+    @Published var isLoading = false
+    @Published var showTooltip = false
+    @Published var tooltipDescription = ""
+
+    private let api = ClubSettingsAPI.shared
 
     // Sprachcodes mit Beschreibung
     let languageOptions = [
@@ -25,58 +24,76 @@ class ClubSettingsViewModel: ObservableObject {
         fetchSettings()
     }
 
-    // 🔹 Einstellungen abrufen
+    // MARK: - Einstellungen abrufen
     func fetchSettings() {
         isLoading = true
-        errorMessage = nil
-
-        ClubSettingsAPI.shared.fetchAllSettings { result in
+        api.fetchAllSettings { [weak self] result in
             DispatchQueue.main.async {
-                self.isLoading = false
+                self?.isLoading = false
                 switch result {
                 case .success(let fetchedSettings):
-                    self.settings = fetchedSettings
+                    self?.settings = fetchedSettings
+                    self?.syncEditedValues()
+                    print("✅ Erfolgreich abgerufen: \(fetchedSettings.count) Einstellungen")
                 case .failure(let error):
-                    self.errorMessage = "Fehler beim Laden der Einstellungen: \(error.localizedDescription)"
+                    print("❌ Fehler beim Abrufen der Einstellungen: \(error.localizedDescription)")
                 }
             }
         }
     }
 
-    // 🔹 Einzelne Einstellung aktualisieren
+    // MARK: - Änderungen zwischenspeichern
+    private func syncEditedValues() {
+        for setting in settings {
+            editedValues[setting.id] = setting.value
+        }
+    }
+
+    // MARK: - Eine einzelne Einstellung aktualisieren
     func updateSetting(_ setting: ClubSetting, newValue: String) {
-        ClubSettingsAPI.shared.updateSetting(id: setting.id, newValue: newValue) { result in
+        guard setting.value != newValue else { return }
+
+        api.updateSetting(id: setting.id, newValue: newValue) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let updatedSetting):
+                    print("✅ Einstellung aktualisiert: \(updatedSetting.key) → \(updatedSetting.value)")
                     if let index = self.settings.firstIndex(where: { $0.id == updatedSetting.id }) {
                         self.settings[index] = updatedSetting
                     }
                 case .failure(let error):
-                    self.errorMessage = "Fehler beim Speichern: \(error.localizedDescription)"
+                    print("❌ Fehler beim Aktualisieren: \(error.localizedDescription)")
                 }
             }
         }
     }
 
-    // 🔹 Alle geänderten Einstellungen speichern
+    // MARK: - Änderungen speichern
     func saveSettings() {
-        let updates = editedValues.map { SettingUpdate(id: $0.key, value: $0.value) }
+        let updates = settings.compactMap { setting -> SettingUpdate? in
+            guard let newValue = editedValues[setting.id], newValue != setting.value else { return nil }
+            return SettingUpdate(id: setting.id, value: newValue)
+        }
 
-        ClubSettingsAPI.shared.bulkUpdateSettings(updates: updates) { result in
+        guard !updates.isEmpty else {
+            print("⚠️ Keine Änderungen zum Speichern")
+            return
+        }
+
+        api.bulkUpdateSettings(updates: updates) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:
+                    print("✅ Alle Änderungen erfolgreich gespeichert")
                     self.fetchSettings() // Einstellungen neu laden
-                    self.editedValues.removeAll()
                 case .failure(let error):
-                    self.errorMessage = "Fehler beim Speichern: \(error.localizedDescription)"
+                    print("❌ Fehler beim Speichern: \(error.localizedDescription)")
                 }
             }
         }
     }
 
-    // 🔹 Sprache anzeigen (Name statt Code)
+    // MARK: - Sprache anzeigen
     func displayLanguage(for code: String) -> String {
         return languageOptions.first(where: { $0.0 == code })?.1 ?? code
     }

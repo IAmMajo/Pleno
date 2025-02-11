@@ -4,7 +4,9 @@ import Foundation
 import MeetingServiceDTOs
 import SwiftUI
 
+// ViewModel für die Live-Ansicht einer aktiven Abstimmung.
 class AktivViewModel: ObservableObject {
+    
     public let voting: GetVotingDTO
     
     @Published var liveStatus: String?
@@ -22,26 +24,30 @@ class AktivViewModel: ObservableObject {
         self.onBack = onBack
     }
 
+    // Baut eine WebSocket-Verbindung auf, um Live-Daten zur Abstimmung zu erhalten.
     func connectWebSocket() {
-        guard voting.iVoted else { return }
+        guard voting.iVoted else { return } // Verbindung nur herstellen, wenn der Nutzer abgestimmt hat
         webSocketService.connect(to: voting.id)
         webSocketService.$liveStatus
             .receive(on: DispatchQueue.main)
             .assign(to: &$liveStatus)
     }
 
+    // Trennt die WebSocket-Verbindung.
     func disconnectWebSocket() {
         webSocketService.disconnect()
     }
 
+    // Aktualisiert den Fortschritt der Abstimmung basierend auf den erhaltenen Live-Daten.
     func updateProgress() {
         guard let liveStatus = liveStatus else { return }
         let parts = liveStatus.split(separator: "/")
+        
         if let currentValue = Int(parts.first ?? ""), let totalValue = Int(parts.last ?? "") {
             self.value = currentValue
             self.total = totalValue
             
-            // ✅ `withAnimation` Problem gelöst (import SwiftUI und richtige Syntax)
+            // Aktualisiert den Fortschrittswert mit einer sanften Animation.
             DispatchQueue.main.async {
                 withAnimation(.easeOut(duration: 0.8)) {
                     self.progress = Double(currentValue) / Double(totalValue)
@@ -50,6 +56,7 @@ class AktivViewModel: ObservableObject {
         }
     }
 
+    // Beendet die Abstimmung und trennt die WebSocket-Verbindung.
     func closeVoting() {
         guard !isClosing else { return }
         isClosing = true
@@ -60,7 +67,7 @@ class AktivViewModel: ObservableObject {
                 switch result {
                 case .success:
                     self.webSocketService.disconnect()
-                    self.onBack()
+                    self.onBack() // Zurück zur vorherigen Ansicht
                 case .failure(let error):
                     self.errorMessage = "Fehler beim Schließen: \(error.localizedDescription)"
                 }

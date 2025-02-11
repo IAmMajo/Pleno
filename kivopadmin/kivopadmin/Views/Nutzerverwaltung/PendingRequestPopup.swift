@@ -1,4 +1,5 @@
 // This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import AuthServiceDTOs
 
@@ -6,7 +7,7 @@ struct PendingRequestPopup: View {
     @ObservedObject var viewModel: PendingRequestsViewModel
     var user: UserProfileDTO
 
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.presentationMode) var presentationMode // Ermöglicht das Schließen der Ansicht
 
     var body: some View {
         VStack {
@@ -39,6 +40,7 @@ struct PendingRequestPopup: View {
             }
             .padding()
 
+            // Zeigt eine Fehlermeldung an, falls vorhanden
             if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
@@ -47,6 +49,7 @@ struct PendingRequestPopup: View {
 
             Spacer()
 
+            // Buttons für Benutzeraktionen (Bestätigen/Ablehnen)
             VStack(spacing: 10) {
                 Button(action: {
                     viewModel.handleUserAction(userId: user.uid.uuidString, activate: true)
@@ -79,6 +82,7 @@ struct PendingRequestPopup: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    // Zeigt entweder das Profilbild des Nutzers oder einen Platzhalter mit Initialen an
     @ViewBuilder
     private func profileImageView() -> some View {
         if let imageData = user.profileImage, let uiImage = UIImage(data: imageData) {
@@ -98,6 +102,7 @@ struct PendingRequestPopup: View {
     }
 }
 
+// Extrahiert die Initialen aus dem Namen des Nutzers
 private func getInitials(from fullName: String) -> String {
     let components = fullName.split(separator: " ")
     let firstInitial = components.first?.first?.uppercased() ?? ""

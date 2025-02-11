@@ -54,7 +54,8 @@ class PollListViewModel: ObservableObject {
         pollToDelete = pollId
         showDeleteConfirmation = true
     }
-
+    
+    // Umfrage löschen
     func deletePoll() {
         guard let pollId = pollToDelete else { return }
         PollAPI.shared.deletePoll(byId: pollId) { result in

@@ -41,7 +41,7 @@ class UserPopupViewModel: ObservableObject {
         if editedName != user.name || profileImageData != user.profileImage {
             dispatchGroup.enter()
             
-            // 🔹 Konvertiere `Data?` in `String?`
+            // Konvertiere `Data?` in `String?`
             let updatedProfileImageString = profileImageData?.base64EncodedString()
 
             MainPageAPI.updateUserProfile(userId: user.uid.uuidString, name: editedName, profileImage: updatedProfileImageString) { result in

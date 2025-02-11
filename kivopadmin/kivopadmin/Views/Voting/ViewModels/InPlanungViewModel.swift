@@ -4,7 +4,11 @@ import SwiftUI
 import MeetingServiceDTOs
 
 class InPlanungViewModel: ObservableObject {
+    
+    // Gibt an, ob eine Aktion (z. B. Öffnen oder Löschen) gerade ausgeführt wird
     @Published var isProcessing = false
+    
+    // Speichert Fehlermeldungen für die UI
     @Published var errorMessage: String?
 
     let voting: GetVotingDTO
@@ -13,7 +17,12 @@ class InPlanungViewModel: ObservableObject {
     let onOpen: () -> Void
     let onReload: () -> Void
 
-    init(voting: GetVotingDTO, onEdit: @escaping (GetVotingDTO) -> Void, onDelete: @escaping () -> Void, onOpen: @escaping () -> Void, onReload: @escaping () -> Void) {
+    init(voting: GetVotingDTO,
+         onEdit: @escaping (GetVotingDTO) -> Void,
+         onDelete: @escaping () -> Void,
+         onOpen: @escaping () -> Void,
+         onReload: @escaping () -> Void) {
+        
         self.voting = voting
         self.onEdit = onEdit
         self.onDelete = onDelete
@@ -21,6 +30,7 @@ class InPlanungViewModel: ObservableObject {
         self.onReload = onReload
     }
 
+    // Öffnet eine geplante Abstimmung zur Teilnahme
     func openVoting() {
         guard !isProcessing else {
             print("⚠️ Warnung: openVoting bereits in Bearbeitung.")
@@ -45,6 +55,7 @@ class InPlanungViewModel: ObservableObject {
         }
     }
 
+    // Löscht eine geplante Abstimmung
     func deleteVoting() {
         guard !isProcessing else {
             print("⚠️ Warnung: deleteVoting bereits in Bearbeitung.")

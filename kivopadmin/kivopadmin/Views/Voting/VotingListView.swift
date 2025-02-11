@@ -4,11 +4,13 @@ import SwiftUI
 import MeetingServiceDTOs
 
 struct VotingListView: View {
+    // ViewModel zur Verwaltung der Abstimmungen
     @StateObject private var viewModel = VotingListViewModel()
 
     var body: some View {
         NavigationView {
             Group {
+                // Wenn eine Abstimmung ausgewählt wurde, zeige die Detailansicht
                 if let voting = viewModel.selectedVoting {
                     VotingDetailView(
                         votingId: voting.id,
@@ -18,6 +20,8 @@ struct VotingListView: View {
                         onOpen: { viewModel.openVoting(votingId: voting.id) },
                         onEdit: { editedVoting in viewModel.editVoting(editedVoting) }
                     )
+                
+                // Andernfalls zeige die Liste aller Abstimmungen
                 } else {
                     VStack(spacing: 10) {
                         filterPicker
@@ -29,6 +33,7 @@ struct VotingListView: View {
             .navigationTitle("Abstimmungen")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
+                    // Button zum Erstellen einer neuen Abstimmung
                     Button(action: { viewModel.showCreateVoting = true }) {
                         Label("Erstellen", systemImage: "plus")
                     }
@@ -46,11 +51,12 @@ struct VotingListView: View {
             .alert(item: $viewModel.alertMessage) { alert in
                 Alert(title: Text("Fehler"), message: Text(alert.message), dismissButton: .default(Text("OK")))
             }
-            .onAppear(perform: viewModel.loadVotings)
+            .onAppear(perform: viewModel.loadVotings) // Lade Abstimmungen beim Start
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
 
+    // Filter für verschiedene Abstimmungsstatus (z. B. aktiv, in Planung, abgeschlossen)
     private var filterPicker: some View {
         Picker("Filter", selection: $viewModel.filter) {
             ForEach(VotingListViewModel.VotingFilterType.allCases, id: \.self) { filter in
@@ -61,6 +67,7 @@ struct VotingListView: View {
         .padding(.horizontal)
     }
 
+    // Suchleiste zur Filterung nach Abstimmungsfragen
     private var searchBar: some View {
         HStack {
             HStack(spacing: 8) {
@@ -76,6 +83,7 @@ struct VotingListView: View {
         .padding(.horizontal)
     }
 
+    // Liste aller Abstimmungen mit Statusanzeige
     private var votingList: some View {
         List {
             ForEach(viewModel.filteredVotings, id: \.id) { voting in
@@ -89,6 +97,7 @@ struct VotingListView: View {
                     }
                 }
                 .swipeActions {
+                    // Löschen-Button für noch nicht gestartete Abstimmungen
                     if voting.startedAt == nil {
                         Button(role: .destructive) {
                             viewModel.deleteVoting(votingId: voting.id)

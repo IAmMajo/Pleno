@@ -1,14 +1,17 @@
 // This file is licensed under the MIT-0 License.
+
 import SwiftUI
 
 struct ClubsettingsMainView: View {
+    // ViewModel zur Verwaltung der Vereinseinstellungen
     @StateObject private var viewModel = ClubSettingsViewModel()
 
     var body: some View {
         NavigationStack {
             ZStack {
                 VStack(alignment: .leading, spacing: 20) {
-                    // Vereinsinformationen
+                    
+                    // Header mit Vereinsinformationen
                     HStack {
                         if let clubImage = UIImage(named: "ClubImage") {
                             Image(uiImage: clubImage)
@@ -21,7 +24,7 @@ struct ClubsettingsMainView: View {
                                 Circle()
                                     .fill(Color.gray.opacity(0.3))
                                     .frame(width: 80, height: 80)
-                                Text("VL")
+                                Text("VL") // Beispiel für Initialen des Vereins
                                     .font(.title)
                                     .bold()
                                     .foregroundColor(.white)
@@ -39,15 +42,18 @@ struct ClubsettingsMainView: View {
                     }
                     .padding(.bottom, 20)
                     
+                    // Titel für die Einstellungen
                     Text("Einstellungen")
                         .font(.headline)
                     
+                    // Ladeanzeige während der Datenabruf läuft
                     if viewModel.isLoading {
                         ProgressView("Lade Einstellungen...")
                             .padding()
                     } else {
                         ScrollView {
                             VStack(spacing: 20) {
+                                // Durchlaufen aller vorhandenen Einstellungen
                                 ForEach(viewModel.settings) { setting in
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
@@ -68,8 +74,9 @@ struct ClubsettingsMainView: View {
                                         
                                         Spacer()
 
-                                        // Dynamische Eingabe
-                                        if setting.datatype == "boolean" {
+                                        // Dynamische Verarbeitung der verschiedenen Einstellungstypen
+                                        switch setting.datatype.lowercased() {
+                                        case "boolean":
                                             Toggle(isOn: Binding(
                                                 get: { viewModel.editedValues[setting.id] == "true" || setting.value == "true" },
                                                 set: { newValue in
@@ -80,7 +87,8 @@ struct ClubsettingsMainView: View {
                                                 Text("")
                                             }
                                             .toggleStyle(SwitchToggleStyle(tint: .blue))
-                                        } else if setting.datatype == "integer" {
+
+                                        case "integer":
                                             Picker("", selection: Binding(
                                                 get: { Int(viewModel.editedValues[setting.id] ?? setting.value) ?? 0 },
                                                 set: { newValue in
@@ -94,7 +102,8 @@ struct ClubsettingsMainView: View {
                                             }
                                             .pickerStyle(.menu)
                                             .frame(width: 80)
-                                        } else if setting.datatype == "languageCode" {
+
+                                        case "languagecode":
                                             Menu {
                                                 ForEach(viewModel.languageOptions, id: \.0) { code, name in
                                                     Button("\(name) (\(code))") {
@@ -109,9 +118,10 @@ struct ClubsettingsMainView: View {
                                                     .background(Color.gray.opacity(0.1))
                                                     .cornerRadius(8)
                                             }
-                                        } else {
-                                            Text("Unsupported datatype")
-                                                .foregroundColor(.gray)
+                                        
+                                        default:
+                                            Text("⚠️ \(setting.datatype) nicht unterstützt")
+                                                .foregroundColor(.red)
                                         }
                                     }
                                     .padding()
@@ -127,7 +137,7 @@ struct ClubsettingsMainView: View {
                 .padding()
                 .navigationTitle("Vereinseinstellungen")
                 
-                // Floating Save Button
+                // Floating-Button zum Speichern der Änderungen
                 VStack {
                     Spacer()
                     HStack {

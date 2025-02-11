@@ -1,4 +1,5 @@
 // This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import AuthServiceDTOs
 
@@ -8,7 +9,7 @@ struct NutzerverwaltungView: View {
     var body: some View {
         NavigationView {
             VStack(alignment: .center, spacing: 20) {
-                // BEITRITTSVERWALTUNG
+                // Sektion für die Verwaltung von Beitrittsanfragen
                 VStack(alignment: .leading, spacing: 10) {
                     Text("BEITRITTSVERWALTUNG")
                         .font(.caption)
@@ -41,17 +42,19 @@ struct NutzerverwaltungView: View {
                     }
                 }
 
-                // NUTZERÜBERSICHT
+                // Sektion zur Anzeige der aktuellen Nutzer
                 VStack(alignment: .leading, spacing: 10) {
                     Text("NUTZERÜBERSICHT")
                         .font(.caption)
                         .foregroundColor(.gray)
                         .padding(.horizontal, 30)
 
+                    // Horizontales ScrollView zur Anzeige der Nutzer mit Profilbildern
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 15) {
                             ForEach(viewModel.users, id: \.uid) { user in
                                 VStack {
+                                    // Falls ein Profilbild vorhanden ist, wird es angezeigt
                                     if let imageData = user.profileImage, let uiImage = UIImage(data: imageData) {
                                         Image(uiImage: uiImage)
                                             .resizable()
@@ -62,6 +65,7 @@ struct NutzerverwaltungView: View {
                                                 viewModel.selectUser(user)
                                             }
                                     } else {
+                                        // Falls kein Bild vorhanden ist, wird ein Platzhalter mit den Initialen des Nutzers angezeigt
                                         Circle()
                                             .fill(Color.gray)
                                             .frame(width: 50, height: 50)
@@ -88,6 +92,7 @@ struct NutzerverwaltungView: View {
             .navigationTitle("Nutzerverwaltung")
             .sheet(isPresented: $viewModel.isUserPopupPresented) {
                 if let user = viewModel.selectedUser {
+                    // Zeigt eine Detailansicht für einen Benutzer an, wenn einer ausgewählt wurde
                     UserPopupView(
                         viewModel: UserPopupViewModel(
                             user: user,
@@ -103,13 +108,14 @@ struct NutzerverwaltungView: View {
                         isPresented: $viewModel.isUserPopupPresented
                     )
                 } else {
+                    // Falls noch kein Benutzer geladen wurde, wird ein Ladeindikator angezeigt
                     ProgressView("Benutzer wird geladen...")
                 }
             }
             .onAppear {
-                viewModel.fetchAllData()
+                viewModel.fetchAllData() // Lädt alle relevanten Daten beim Öffnen der Ansicht
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
+        .navigationViewStyle(StackNavigationViewStyle()) // Stellt sicher, dass das Layout auf allen Geräten gut funktioniert
     }
 }

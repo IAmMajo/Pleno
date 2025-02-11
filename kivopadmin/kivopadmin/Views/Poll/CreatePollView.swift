@@ -11,7 +11,7 @@ struct CreatePollView: View {
     var body: some View {
         NavigationView {
             Form {
-                // 🟢 Allgemeine Informationen
+                //Allgemeine Informationen
                 Section(header: Text("Allgemeine Informationen")) {
                     TextField("Frage", text: $viewModel.question)
                     TextField("Beschreibung", text: $viewModel.description)
@@ -22,7 +22,7 @@ struct CreatePollView: View {
                         }
                 }
 
-                // 🟢 Auswahlmöglichkeiten
+                //Auswahlmöglichkeiten
                 Section(header: Text("Auswahlmöglichkeiten")) {
                     ForEach(Array(viewModel.options.enumerated()), id: \.offset) { index, _ in
                         HStack {
@@ -40,13 +40,13 @@ struct CreatePollView: View {
                     }
                 }
 
-                // 🟢 Optionen
+                //Optionen
                 Section(header: Text("Optionen")) {
                     Toggle("Mehrfachauswahl erlauben", isOn: $viewModel.allowsMultipleSelections)
                     Toggle("Anonyme Umfrage", isOn: $viewModel.isAnonymous)
                 }
 
-                // 🟢 Abschlusszeit
+                //Abschlusszeit
                 Section(header: Text("Abschlusszeit")) {
                     HStack {
                         Text("Ende:")
@@ -76,7 +76,7 @@ struct CreatePollView: View {
                     }
                 }
 
-                // 🟢 Fehlermeldung
+                //Fehlermeldung
                 if let errorMessage = viewModel.errorMessage {
                     Section {
                         Text(errorMessage)

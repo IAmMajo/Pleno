@@ -3,11 +3,23 @@ import SwiftUI
 import MeetingServiceDTOs
 
 class EditVotingViewModel: ObservableObject {
+    
+    // Speichert die Frage der Abstimmung
     @Published var question: String
+    
+    // Optionale Beschreibung der Abstimmung
     @Published var description: String
+    
+    // Liste der Abstimmungsoptionen
     @Published var options: [String]
+    
+    // Gibt an, ob die Abstimmung anonym ist
     @Published var anonymous: Bool
+    
+    // Gibt an, ob die Änderungen gespeichert werden
     @Published var isSaving = false
+    
+    // Speichert mögliche Fehlermeldungen
     @Published var errorMessage: String?
 
     private let votingId: UUID
@@ -23,6 +35,7 @@ class EditVotingViewModel: ObservableObject {
         self.options = voting.options.map { $0.text }
         self.anonymous = voting.anonymous
 
+        // Fügt automatisch ein leeres Feld hinzu, falls das letzte Feld nicht leer ist
         if options.isEmpty || options.last?.trimmingCharacters(in: .whitespaces).isEmpty == false {
             options.append("")
         }
@@ -32,6 +45,7 @@ class EditVotingViewModel: ObservableObject {
         isSaving = true
         errorMessage = nil
 
+        // Filtert nur gültige Optionen heraus
         let filteredOptions = options.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
         let patchVoting = PatchVotingDTO(
@@ -43,6 +57,7 @@ class EditVotingViewModel: ObservableObject {
             }
         )
 
+        // Sendet die Änderungen an den Server
         VotingService.shared.patchVoting(votingId: votingId, patch: patchVoting) { result in
             DispatchQueue.main.async {
                 self.isSaving = false
@@ -50,7 +65,7 @@ class EditVotingViewModel: ObservableObject {
                 case .success:
                     let updatedVoting = GetVotingDTO(
                         id: self.votingId,
-                        meetingId: UUID(), // Beispiel, falls `meetingId` benötigt wird
+                        meetingId: UUID(),
                         question: self.question,
                         description: self.description,
                         isOpen: false,
@@ -71,10 +86,12 @@ class EditVotingViewModel: ObservableObject {
         }
     }
 
+    // Prüft, ob das Formular gültig ist (Frage vorhanden und mindestens eine gültige Option)
     func isFormValid() -> Bool {
         !question.isEmpty && options.contains { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     }
 
+    // Fügt neue Optionen hinzu, wenn nötig, und entfernt überflüssige leere Felder
     func handleOptionChange(index: Int, newValue: String) {
         let trimmedValue = newValue.trimmingCharacters(in: .whitespaces)
 
@@ -87,6 +104,7 @@ class EditVotingViewModel: ObservableObject {
         }
     }
 
+    // Entfernt eine Option aus der Liste, falls mindestens eine Option übrig bleibt
     func removeOption(at index: Int) {
         if options.count > 1 {
             options.remove(at: index)

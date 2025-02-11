@@ -1,11 +1,13 @@
 // This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import AuthServiceDTOs
 
 struct PendingRequestsNavigationView: View {
-    @Binding var isPresented: Bool
+    @Binding var isPresented: Bool // Steuert, ob die Ansicht angezeigt wird
     @StateObject private var viewModel: PendingRequestsViewModel
 
+    // Initialisiert die View mit einem optionalen Callback zur Aktualisierung der Liste
     init(isPresented: Binding<Bool>, onListUpdate: (() -> Void)? = nil) {
         self._isPresented = isPresented
         self._viewModel = StateObject(wrappedValue: PendingRequestsViewModel(onListUpdate: onListUpdate))
@@ -14,14 +16,19 @@ struct PendingRequestsNavigationView: View {
     var body: some View {
         NavigationStack {
             VStack {
+                // Ladeindikator während die Anfragen geladen werden
                 if viewModel.isLoading {
                     ProgressView("Lade Anfragen...")
                         .padding()
+                
+                // Fehlermeldung, falls das Laden fehlschlägt
                 } else if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .multilineTextAlignment(.center)
                         .padding()
+                
+                // Anzeige der Anfragen in einer Liste
                 } else {
                     List {
                         ForEach(viewModel.requests, id: \.uid.uuidString) { request in
@@ -54,6 +61,7 @@ struct PendingRequestsNavigationView: View {
             .navigationTitle("Beitrittsanfragen")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // Zurück-Button zur Schließung der Ansicht
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Zurück") {
                         isPresented = false
@@ -63,6 +71,7 @@ struct PendingRequestsNavigationView: View {
         }
     }
     
+    // Zeigt entweder das Profilbild oder ein Platzhalterbild mit Initialen an
     @ViewBuilder
     private func profileImagePreview(for request: UserProfileDTO) -> some View {
         if let imageData = request.profileImage, let uiImage = UIImage(data: imageData) {
@@ -82,7 +91,7 @@ struct PendingRequestsNavigationView: View {
     }
 }
 
-
+// Helferklasse für die Datumsformatierung
 struct DateFormatterHelper {
     static func formattedDate(from date: Date?) -> String {
         guard let date = date else { return "Unbekanntes Datum" }
@@ -94,6 +103,7 @@ struct DateFormatterHelper {
     }
 }
 
+// Extrahiert die Initialen aus dem Namen
 private func getInitials(from fullName: String) -> String {
     let components = fullName.split(separator: " ")
     let firstInitial = components.first?.first?.uppercased() ?? ""

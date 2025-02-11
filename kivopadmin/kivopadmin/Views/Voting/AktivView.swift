@@ -4,43 +4,48 @@ import SwiftUI
 import MeetingServiceDTOs
 
 struct AktivView: View {
+    // ViewModel für die Live-Abstimmung
     @StateObject private var viewModel: AktivViewModel
 
+    // Initialisiert die Ansicht mit einer Abstimmung und einer Rückkehr-Funktion
     init(voting: GetVotingDTO, onBack: @escaping () -> Void) {
         _viewModel = StateObject(wrappedValue: AktivViewModel(voting: voting, onBack: onBack))
     }
 
     var body: some View {
         VStack {
+            // Falls der Benutzer abgestimmt hat, wird der Live-Status angezeigt
             if viewModel.voting.iVoted {
                 if let liveStatus = viewModel.liveStatus {
-                    votingProgressView(liveStatus: liveStatus) // ❗ Parameter übergeben
+                    votingProgressView(liveStatus: liveStatus)
                 } else if let errorMessage = viewModel.errorMessage {
                     errorView(errorMessage: errorMessage)
                 } else {
                     loadingView
                 }
             } else {
+                // Falls der Benutzer nicht abgestimmt hat, erscheint eine Warnung
                 participationWarningView
             }
 
-
-
-
             Spacer()
 
+            // Abstimmungsdetails nur anzeigen, wenn der Benutzer abgestimmt hat
             if viewModel.voting.iVoted {
                 votingDetailsView
             }
 
             Spacer()
 
+            // Button zum Beenden der Abstimmung bleibt immer sichtbar
             closeVotingButton
         }
         .onAppear {
             if viewModel.voting.iVoted {
+                // WebSocket-Verbindung nur aufbauen, wenn der Benutzer abgestimmt hat
                 viewModel.connectWebSocket()
             } else {
+                // Falls der Benutzer nicht abgestimmt hat, nach 2 Sekunden zurücknavigieren
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                     viewModel.onBack()
                 }
@@ -54,7 +59,7 @@ struct AktivView: View {
         }
     }
 
-
+    // Zeigt den Abstimmungsfortschritt als Kreisdiagramm an
     private func votingProgressView(liveStatus: String) -> some View {
         VStack {
             ZStack {
@@ -80,6 +85,7 @@ struct AktivView: View {
         }
     }
 
+    // Lade-Ansicht für Echtzeit-Daten
     private var loadingView: some View {
         VStack {
             Spacer()
@@ -94,6 +100,7 @@ struct AktivView: View {
         }
     }
 
+    // Fehleranzeige, wenn Probleme beim Abrufen der Live-Daten auftreten
     private func errorView(errorMessage: String) -> some View {
         VStack {
             Spacer()
@@ -105,6 +112,7 @@ struct AktivView: View {
         }
     }
 
+    // Warnung, falls der Benutzer noch nicht abgestimmt hat
     private var participationWarningView: some View {
         VStack {
             Spacer()
@@ -117,6 +125,7 @@ struct AktivView: View {
         }
     }
 
+    // Zeigt die Frage der Abstimmung an
     private var votingDetailsView: some View {
         VStack(alignment: .center, spacing: 10) {
             Text(viewModel.voting.question)
@@ -129,6 +138,7 @@ struct AktivView: View {
         .cornerRadius(10)
     }
 
+    // Button zum Beenden der Abstimmung
     private var closeVotingButton: some View {
         Button(action: viewModel.closeVoting) {
             if viewModel.isClosing {

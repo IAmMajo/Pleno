@@ -3,7 +3,9 @@
 import SwiftUI
 import MeetingServiceDTOs
 
+// ViewModel zur Verwaltung der Anzeige von Abstimmungsergebnissen.
 class AbgeschlossenViewModel: ObservableObject {
+    
     let voting: GetVotingDTO
     let votingResults: GetVotingResultsDTO?
     
@@ -15,39 +17,34 @@ class AbgeschlossenViewModel: ObservableObject {
         self.votingResults = votingResults
     }
 
+    // Wechselt die Anzeige der Abstimmenden für eine Option (nur bei nicht-anonymer Abstimmung).
     func toggleSelection(for index: UInt8, identities: [GetIdentityDTO]?) {
         if !voting.anonymous {
-            if selectedOption == index {
-                selectedOption = nil
-            } else {
-                selectedOption = index
+            selectedOption = (selectedOption == index) ? nil : index
+            if selectedOption != nil {
                 loadIdentities(for: identities)
             }
         }
     }
 
-    func loadIdentities(for identities: [GetIdentityDTO]?) {
+    // Lädt die Profilbilder der Abstimmenden, falls noch nicht geladen.
+    private func loadIdentities(for identities: [GetIdentityDTO]?) {
         guard let identities = identities else { return }
 
-        for identity in identities {
-            if identityImages[identity.id] == nil {
-                VotingService.shared.fetchProfileImage(forIdentityId: identity.id) { result in
-                    DispatchQueue.main.async {
-                        switch result {
-                        case .success(let data):
-                            self.identityImages[identity.id] = data
-                        case .failure(let error):
-                            print("Fehler beim Abrufen des Profilbilds: \(error.localizedDescription)")
-                        }
+        for identity in identities where identityImages[identity.id] == nil {
+            VotingService.shared.fetchProfileImage(forIdentityId: identity.id) { result in
+                DispatchQueue.main.async {
+                    if case .success(let data) = result {
+                        self.identityImages[identity.id] = data
                     }
                 }
             }
         }
     }
 
+    // Erstellt Initialen aus einem Namen, z. B. "Max Mustermann" → "MM".
     func initials(for name: String) -> String {
-        let components = name.split(separator: " ")
-        let initials = components.compactMap { $0.first }.prefix(2)
+        let initials = name.split(separator: " ").compactMap { $0.first }.prefix(2)
         return String(initials).uppercased()
     }
 }
