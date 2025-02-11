@@ -91,11 +91,9 @@ struct EditPosterPosition: View {
             expiresAt: date
         )
         locationViewModel.patchPosterPosition(posterPositionId: posterPosition.id, posterPosition: patchUserPosterPosition, posterId: poster.id)
-        // Add the new object to the list
-        //createPosterPositions.append(newPosterPosition)
         
-        
-        
+        // Eine Sekunde warten, damit der Server die Daten empfangen und speichern kann
+        // Dann kann erneut ein GET Aufruf getätigt werden, wo die aktualisierten Daten mitgeliefert werden
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             locationViewModel.fetchPosterPositions(poster: poster)
         }

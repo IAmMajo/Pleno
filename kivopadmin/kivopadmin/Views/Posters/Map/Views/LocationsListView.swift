@@ -5,29 +5,6 @@ import PosterServiceDTOs
 struct LocationsListView: View {
     @EnvironmentObject private var locationViewModel: LocationsViewModel
     
-    func getDateStatusText(position: PosterPositionResponseDTO) -> (text: String, color: Color) {
-       let status = position.status
-       switch status {
-       case .hangs:
-          if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
-             return (text: "morgen überfällig", color: .orange)
-          } else {
-             return (text: "hängt", color: .blue)
-          }
-       case .takenDown:
-          return (text: "abgehängt", color: .green)
-       case .toHang:
-          return (text: "hängt noch nicht", color: Color(UIColor.secondaryLabel))
-       case .overdue:
-          return (text: "überfällig", color: .red)
-       case .damaged:
-           return (text: "beschädigt", color: .orange)
-       default:
-          return (text: "", color: Color(UIColor.secondaryLabel))
-       }
-    }
-
-    
     var body: some View {
         List {
             ForEach(locationViewModel.filteredPositions, id: \.position.id) { position in
@@ -64,9 +41,9 @@ extension LocationsListView {
 
             Text(position.address)
             Spacer()
-            Text(getDateStatusText(position: position.position).text)
+            Text(PosterHelper.getDateStatusText(position: position.position).text)
                .font(.caption)
-               .foregroundStyle(getDateStatusText(position: position.position).color)
+               .foregroundStyle(PosterHelper.getDateStatusText(position: position.position).color)
         }
     }
 

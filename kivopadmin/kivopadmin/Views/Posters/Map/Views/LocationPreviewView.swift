@@ -6,28 +6,6 @@ struct LocationPreviewView: View {
     @EnvironmentObject private var locationViewModel: LocationsViewModel
     let position: PosterPositionWithAddress
     
-    func getDateStatusText(position: PosterPositionResponseDTO) -> (text: String, color: Color) {
-        let status = position.status
-        switch status {
-        case .hangs:
-            if position.expiresAt < Calendar.current.date(byAdding: .day, value: 1, to: Date())! {
-                return (text: "morgen überfällig", color: .orange)
-            } else {
-                return (text: "hängt", color: .blue)
-            }
-        case .takenDown:
-            return (text: "abgehangen", color: .green)
-        case .toHang:
-            return (text: "hängt noch nicht", color: Color(UIColor.secondaryLabel))
-        case .overdue:
-            return (text: "überfällig", color: .red)
-        case .damaged:
-            return (text: "beschädigt", color: .orange)
-        default:
-            return (text: "", color: Color(UIColor.secondaryLabel))
-        }
-    }
-    
     var body: some View {
         ZStack{
             HStack(){
@@ -70,9 +48,9 @@ extension LocationPreviewView {
     private var titleSection: some View {
         VStack(alignment: .leading){
             Text(position.address).font(.title2).fontWeight(.bold)
-            Text(getDateStatusText(position: position.position).text)
+            Text(PosterHelper.getDateStatusText(position: position.position).text)
                .font(.headline)
-               .foregroundStyle(getDateStatusText(position: position.position).color)
+               .foregroundStyle(PosterHelper.getDateStatusText(position: position.position).color)
             if position.position.status != .takenDown {
                 Text("Ablaufdatum: \(DateTimeFormatter.formatDate(position.position.expiresAt))")
             }

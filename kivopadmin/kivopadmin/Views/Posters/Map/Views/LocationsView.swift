@@ -17,9 +17,9 @@ struct LocationsView: View {
     @State private var showUserSelectionSheet = false
     @State private var maxWidth2: CGFloat? = nil
     private var filterOptions: [PosterPositionStatus] = [.toHang, .hangs, .damaged, .overdue, .takenDown]
-
+    
     @ObservedObject var userManager = UserManager()
-
+    
     var poster: PosterResponseDTO
     let maxWidth: CGFloat = 700
     
@@ -45,48 +45,12 @@ struct LocationsView: View {
                     Spacer()
                     // Zeige die Adresse oder lade sie asynchron
                     VStack{
-
                         if isSearchActive {  // Wenn die Suche aktiv ist, zeigt das Textfeld an
-                            ZStack{
-                                TextField("Suche Adresse", text: $searchText, onCommit: {
-                                    performSearch()
-                                })
-                                .padding()
-                                .background(.thickMaterial).cornerRadius(10).shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 15)// Undurchsichtiger Hintergrund
-                                .foregroundColor(.primary)
-                                .padding()
-                                HStack {
-                                    Spacer()
-                                    Button(action: performSearch) {
-                                        Image(systemName: "magnifyingglass")
-                                            .padding()
-                                    }.padding(.trailing, 20)
-                                }
-                            }.frame(maxWidth: maxWidth)
-
+                            // Searchbar, um Karte zu einer Adresse zu bewegen
+                            searchBarSection
                         } else {
-                            VStack{
-                                Button(action: {
-                                    locationViewModel.toggleLocationsList()
-                                    withAnimation {
-                                        locationViewModel.isEditing = false
-                                    }
-                                }){
-                                    //Text(locationViewModel.selectedPosterPosition?.address ?? "Wählen Sie eine Position aus").foregroundColor(.primary).frame(height: 55).frame(maxWidth: .infinity)
-                                    Text(locationViewModel.selectedPosterPosition?.address ?? "Wählen Sie eine Position aus").foregroundColor(.primary).frame(height: 55).frame(maxWidth: .infinity)
-                                        .overlay(alignment: .leading){
-                                            Image(systemName: "arrow.down").font(.headline).foregroundColor(.primary).padding().rotationEffect(Angle(degrees: locationViewModel.showLocationsList ? 180 : 0))
-                                    }
-                                }
-
-                                if locationViewModel.showLocationsList{
-                                    LocationsListView()
-                                }
-
-                                
-                            }.background(.thickMaterial).cornerRadius(10).shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 15)
-                            .padding()
-                            .frame(maxWidth: maxWidth)
+                            // Dropdown Liste
+                            dropdownSection
                         }
                     }
                     Spacer()
@@ -95,17 +59,11 @@ struct LocationsView: View {
                         editButton
                         mapStyleButton
                     }
-
-
-                    
                 }
-
-                
-                    
-                
                 Spacer()
                 
-
+                // Untere Ansicht in der Karte (View: LocationPreviewView)
+                // nur sichtbar, wenn ein Marker angeklickt wird oder in der Dropdown Liste eine Auswahl getroffen wird
                 HStack{
                     ForEach(locationViewModel.posterPositionsWithAddresses, id: \.position.id){ position in
                         if locationViewModel.selectedPosterPosition == position {
@@ -116,13 +74,8 @@ struct LocationsView: View {
                                 .frame(maxWidth: .infinity)
                                 .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                         }
-                        
-                        
                     }
-                    
                 }
-
-                
             }
         }
         .sheet(item: $locationViewModel.sheetPosition, onDismiss: nil) { position in
@@ -137,7 +90,7 @@ struct LocationsView: View {
             userManager.fetchUsers()
         }
     }
-
+    
     
     private var mapLayer: some View {
         Map(coordinateRegion: $locationViewModel.mapLocation, annotationItems: locationViewModel.filteredPositions, annotationContent: { position in
@@ -153,6 +106,49 @@ struct LocationsView: View {
         }).mapStyle(locationViewModel.satelliteView ? .imagery : .standard)
     }
     
+    private var searchBarSection: some View {
+        ZStack{
+            TextField("Suche Adresse", text: $searchText, onCommit: {
+                performSearch()
+            })
+            .padding()
+            .background(.thickMaterial).cornerRadius(10).shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 15)// Undurchsichtiger Hintergrund
+            .foregroundColor(.primary)
+            .padding()
+            HStack {
+                Spacer()
+                Button(action: performSearch) {
+                    Image(systemName: "magnifyingglass")
+                        .padding()
+                }.padding(.trailing, 20)
+            }
+        }.frame(maxWidth: maxWidth)
+    }
+    
+    private var dropdownSection: some View {
+        VStack{
+            Button(action: {
+                locationViewModel.toggleLocationsList()
+                withAnimation {
+                    locationViewModel.isEditing = false
+                }
+            }){
+                //Text(locationViewModel.selectedPosterPosition?.address ?? "Wählen Sie eine Position aus").foregroundColor(.primary).frame(height: 55).frame(maxWidth: .infinity)
+                Text(locationViewModel.selectedPosterPosition?.address ?? "Wählen Sie eine Position aus").foregroundColor(.primary).frame(height: 55).frame(maxWidth: .infinity)
+                    .overlay(alignment: .leading){
+                        Image(systemName: "arrow.down").font(.headline).foregroundColor(.primary).padding().rotationEffect(Angle(degrees: locationViewModel.showLocationsList ? 180 : 0))
+                    }
+            }
+            
+            if locationViewModel.showLocationsList{
+                LocationsListView()
+            }
+            
+            
+        }.background(.thickMaterial).cornerRadius(10).shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 15)
+            .padding()
+            .frame(maxWidth: maxWidth)
+    }
     private var searchButton: some View {
         Button {
             withAnimation {
@@ -198,19 +194,17 @@ struct LocationsView: View {
                                 }
                             }
                         }) {
-                            let icon = getFilterIcon(for: option)
+                            let icon = PosterHelper.getFilterIcon(for: option)
                             Image(systemName: icon.symbol)
                                 .foregroundColor(icon.color)
                             Text(getSummaryCount(for: option))
                         }
                         .buttonStyle(.plain)
                         
-                       
+                        
                     }
-                    //Text(getSummaryCount(for: option))
-
                 }
-
+                
             }
         }
         .padding(8)
@@ -222,12 +216,12 @@ struct LocationsView: View {
     }
     private var editButton: some View {
         Button {
-
+            
             withAnimation {
                 locationViewModel.showLocationsList = false
                 locationViewModel.selectedPosterPosition = nil
                 locationViewModel.isEditing.toggle()  // Sichtbarkeit des Menüs umschalten
-                    
+                
             }
             
         } label: {
@@ -254,25 +248,7 @@ struct LocationsView: View {
                 .padding()
         }
     }
-
     
-    func getFilterIcon(for status: PosterPositionStatus) -> (symbol: String, color: Color) {
-        switch status {
-        case .toHang:
-            return ("xmark.circle", Color(UIColor.secondaryLabel))
-        case .hangs:
-            return ("photo.on.rectangle.angled", .blue)
-        case .overdue:
-            return ("exclamationmark.triangle", .red)
-        case .takenDown:
-            return ("checkmark.circle", .green)
-        case .damaged:
-            return ("burst", .orange)
-        default:
-            return ("questionmark.circle", .gray) // Fallback für unbekannte Status
-        }
-    }
-
     
     func getSummaryCount(for status: PosterPositionStatus) -> String {
         switch status {
@@ -290,8 +266,8 @@ struct LocationsView: View {
             return "?"
         }
     }
-
-
+    
+    
     
     
     private func performSearch() {
@@ -342,7 +318,7 @@ struct LocationsView: View {
                                 .labelsHidden()
                                 .cornerRadius(10)
                         }
-
+                        
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Benutzer auswählen")
                                 .font(.caption)
@@ -366,7 +342,7 @@ struct LocationsView: View {
                     Spacer()
                 }
             }
-
+            
             if locationViewModel.selectedUserNames != [] {
                 HStack{
                     Spacer()
@@ -385,12 +361,12 @@ struct LocationsView: View {
                     }
                 }
             }
-
             
             
-
-
-
+            
+            
+            
+            
         }
     }
     private func addLocation() {
@@ -404,11 +380,9 @@ struct LocationsView: View {
             expiresAt: expiresAt
         )
         locationViewModel.createPosterPosition(posterPosition: newPosterPosition, posterId: poster.id)
-        // Add the new object to the list
-        //createPosterPositions.append(newPosterPosition)
-        
-        
-        
+                
+        // Eine Sekunde warten, damit der Server die neuen Daten verarbeiten kann
+        // Dann kann erneut ein GET durchgeführt werden und die neusten Daten sind vorhanden
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             locationViewModel.fetchPosterPositions(poster: poster)
         }
