@@ -28,95 +28,24 @@ struct EventDetailView: View {
                     if let eventDetail = eventViewModel.eventDetail {
                         List {
                             // Event Description
-                            Section(header: Text("Beschreibung")) {
-                                if let description = eventDetail.description {
-                                    Text(description)
-                                } else {
-                                    Text("Keine Beschreibung verfügbar")
-                                        .italic()
-                                        .foregroundColor(.gray)
-                                }
-                            }
+                            descriptionSection(eventDetail: eventDetail)
 
                             // Event Dates
-                            Section(header: Text("Datum und Zeit")) {
-                                HStack {
-                                    Text("Start:")
-                                    Spacer()
-                                    Text("Am \(DateTimeFormatter.formatDate(eventDetail.starts)) um \(DateTimeFormatter.formatTime(eventDetail.starts))")
-                                }
-                                HStack {
-                                    Text("Ende:")
-                                    Spacer()
-                                    Text("Am \(DateTimeFormatter.formatDate(eventDetail.ends)) um \(DateTimeFormatter.formatTime(eventDetail.ends))")
-                                }
-                            }
+                            dateSection(eventDetail: eventDetail)
+                            
                             if address != "" {
-                                // Event Location
-                                Section(header: Text("Adresse")) {
-                                    Button(action: {
-                                        UIPasteboard.general.string = address // Text in die Zwischenablage kopieren
-                                    }) {
-                                        HStack{
-                                            Text(address)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                            Spacer()
-                                            Image(systemName: "doc.on.doc").foregroundColor(.blue)
-                                        }
-                                        
-                                    }.buttonStyle(PlainButtonStyle())
-
-                                }
-                                .onAppear {
-                                    updateAddress(for: CLLocationCoordinate2D(
-                                        latitude: Double(eventDetail.latitude),
-                                        longitude: Double(eventDetail.longitude)
-                                    ))
-                                }
-
-                                
+                                // Adresse des Events
+                                addressSection(eventDetail: eventDetail)
                             }
-
-
+                            
                             // Participants
-                            Section(header: Text("Teilnehmer")) {
-                                if eventDetail.participations.isEmpty {
-                                    Text("Keine Teilnehmer")
-                                        .italic()
-                                } else {
-                                    ForEach(eventDetail.participations, id: \.id) { participant in
-                                        Text("\(participant.name)")
-                                    }
-                                }
-                            }
+                            participantsSection(eventDetail: eventDetail)
 
                             // Users Without Feedback
-                            Section(header: Text("Teilnehmer ohne Feedback")) {
-                                if eventDetail.userWithoutFeedback.isEmpty {
-                                    Text("Keine Teilnehmer ohne Feedback")
-                                        .italic()
-                                } else {
-                                    ForEach(Array(eventDetail.userWithoutFeedback.enumerated()), id: \.offset) { index, user in
-                                        Text("\(user.name)")
-                                    }
-                                }
-                            }
+                            userWithoutFeedbackSection(eventDetail: eventDetail)
 
                             // Ride Information
-                            Section(header: Text("Fahrt-Informationen")) {
-                                Text("Interessiert an Mitfahrgelegenheiten: \(eventDetail.countRideInterested)")
-                                Text("Freie Plätze: \(eventDetail.countEmptySeats)")
-                            }
-                            if eventViewModel.eventRides.isEmpty == false {
-                                Section(header: Text("Eventfahrten")){
-                                    ForEach(eventViewModel.eventRides, id: \.id){ ride in
-                                        NavigationLink(destination: EventRideDetailView(rideId: ride.id)){
-                                            Text("Fahrer: \(ride.driverName)")
-                                        }
-                                        
-                                    }
-                                }
-                            }
+                            rideSection(eventDetail: eventDetail)
 
                         }
                         .navigationTitle(eventDetail.name)
@@ -154,6 +83,7 @@ struct EventDetailView: View {
 
     }
     
+    // Koordinaten zu Adresse übersetzen
     private func updateAddress(for coordinate: CLLocationCoordinate2D) {
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         geocoder.reverseGeocodeLocation(location) { placemarks, error in
@@ -179,4 +109,101 @@ struct EventDetailView: View {
     }
 }
 
+extension EventDetailView {
+    private func descriptionSection(eventDetail: GetEventDetailDTO) -> some View {
+        Section(header: Text("Beschreibung")) {
+            if let description = eventDetail.description {
+                Text(description)
+            } else {
+                Text("Keine Beschreibung verfügbar")
+                    .italic()
+                    .foregroundColor(.gray)
+            }
+        }
+        
+    }
+    
+    private func dateSection(eventDetail: GetEventDetailDTO) -> some View {
+        Section(header: Text("Datum und Zeit")) {
+            HStack {
+                Text("Start:")
+                Spacer()
+                Text("Am \(DateTimeFormatter.formatDate(eventDetail.starts)) um \(DateTimeFormatter.formatTime(eventDetail.starts))")
+            }
+            HStack {
+                Text("Ende:")
+                Spacer()
+                Text("Am \(DateTimeFormatter.formatDate(eventDetail.ends)) um \(DateTimeFormatter.formatTime(eventDetail.ends))")
+            }
+        }
+    }
+    
+    private func addressSection(eventDetail: GetEventDetailDTO) -> some View  {
+        Section(header: Text("Adresse")) {
+            Button(action: {
+                UIPasteboard.general.string = address // Text in die Zwischenablage kopieren
+            }) {
+                HStack{
+                    Text(address)
+                    .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    Image(systemName: "doc.on.doc").foregroundColor(.blue)
+                }
+                
+            }.buttonStyle(PlainButtonStyle())
+
+        }
+        .onAppear {
+            updateAddress(for: CLLocationCoordinate2D(
+                latitude: Double(eventDetail.latitude),
+                longitude: Double(eventDetail.longitude)
+            ))
+        }
+    }
+    
+    private func participantsSection(eventDetail: GetEventDetailDTO) -> some View {
+        Section(header: Text("Teilnehmer")) {
+            if eventDetail.participations.isEmpty {
+                Text("Keine Teilnehmer")
+                    .italic()
+            } else {
+                ForEach(eventDetail.participations, id: \.id) { participant in
+                    Text("\(participant.name)")
+                }
+            }
+        }
+    }
+    
+    private func userWithoutFeedbackSection(eventDetail: GetEventDetailDTO) -> some View {
+        Section(header: Text("Teilnehmer ohne Feedback")) {
+            if eventDetail.userWithoutFeedback.isEmpty {
+                Text("Keine Teilnehmer ohne Feedback")
+                    .italic()
+            } else {
+                ForEach(Array(eventDetail.userWithoutFeedback.enumerated()), id: \.offset) { index, user in
+                    Text("\(user.name)")
+                }
+            }
+        }
+    }
+    private func rideSection(eventDetail: GetEventDetailDTO) -> some View {
+        Group {
+            Section(header: Text("Fahrt-Informationen")) {
+                Text("Interessiert an Mitfahrgelegenheiten: \(eventDetail.countRideInterested)")
+                Text("Freie Plätze: \(eventDetail.countEmptySeats)")
+            }
+
+            if !eventViewModel.eventRides.isEmpty {
+                Section(header: Text("Eventfahrten")) {
+                    ForEach(eventViewModel.eventRides, id: \.id) { ride in
+                        NavigationLink(destination: EventRideDetailView(rideId: ride.id)) {
+                            Text("Fahrer: \(ride.driverName)")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
 

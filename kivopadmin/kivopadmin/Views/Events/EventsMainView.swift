@@ -18,9 +18,9 @@ struct EventsMainView: View {
    
     var filteredEvents: [GetEventDTO] {
         switch selectedTab {
-        case 0: // Aktuell
+        case 0: // Bevorstehende Events
             return eventViewModel.events.filter { $0.ends > Date() }
-        case 1: // Archiviert
+        case 1: // Zurückliegende Events
             return eventViewModel.events.filter { $0.ends <= Date() }
         default:
             return eventViewModel.events

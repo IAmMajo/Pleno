@@ -27,37 +27,9 @@ struct EditEventView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section(header: Text("Allgemeine Informationen")) {
-                    TextField("Titel", text: $title)
-                    TextField("Beschreibung", text: $description)
-                }
-                
-                Section(header: Text("Datum und Uhrzeit")) {
-                    DatePicker("Startdatum", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
-                    DatePicker("Enddatum", selection: $endDate, displayedComponents: [.date, .hourAndMinute])
-                }
-
-                Section(header: Text("Location Details")) {
-                    VStack(alignment: .leading) {
-                        NavigationLink(destination: SelectPlaceView(mapRegion: $mapRegion)) {
-                            Text(address) // Zeigt die Adresse an
-                        }
-                        .onAppear {
-                            updateAddress(for: mapRegion.center)
-                        }
-                    }
-                }
-
-                Button(action: saveEvent) {
-                    Text("Speichern")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(10)
-            }
+            // Formular, um das Event zu bearbeiten
+            editEventForm
+            
             .navigationTitle("Event \(eventDetail.name) bearbeiten")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {}
@@ -125,6 +97,42 @@ struct EditEventView: View {
             } else {
                 address = "Keine Adresse gefunden"
             }
+        }
+    }
+}
+
+extension EditEventView {
+    var editEventForm: some View {
+        Form {
+            Section(header: Text("Allgemeine Informationen")) {
+                TextField("Titel", text: $title)
+                TextField("Beschreibung", text: $description)
+            }
+            
+            Section(header: Text("Datum und Uhrzeit")) {
+                DatePicker("Startdatum", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
+                DatePicker("Enddatum", selection: $endDate, displayedComponents: [.date, .hourAndMinute])
+            }
+
+            Section(header: Text("Location Details")) {
+                VStack(alignment: .leading) {
+                    NavigationLink(destination: SelectPlaceView(mapRegion: $mapRegion)) {
+                        Text(address) // Zeigt die Adresse an
+                    }
+                    .onAppear {
+                        updateAddress(for: mapRegion.center)
+                    }
+                }
+            }
+
+            Button(action: saveEvent) {
+                Text("Speichern")
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+            .foregroundColor(.white)
+            .padding()
+            .background(Color.blue)
+            .cornerRadius(10)
         }
     }
 }

@@ -28,42 +28,13 @@ struct EventErstellenView: View {
     @State private var startDate = Date() // Startdatum
     @State private var endDate = Date()   // Enddatum
     
-    @StateObject private var locationManager = LocationManager() // MeetingManager
+    @StateObject private var locationManager = LocationManager()
     @EnvironmentObject private var eventViewModel: EventViewModel
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section(header: Text("Allgemeine Informationen")) {
-                    TextField("Titel", text: $title)
-                    TextField("Beschreibung", text: $description)
-                }
-                
-                Section(header: Text("Datum und Uhrzeit")) {
-                    DatePicker("Startdatum", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
-                    DatePicker("Enddatum", selection: $endDate, displayedComponents: [.date, .hourAndMinute])
-                }
-
-                Section(header: Text("Location Details")) {
-                    VStack(alignment: .leading) {
-                        NavigationLink(destination: SelectPlaceView(mapRegion: $mapRegion)) {
-                            Text(address) // Zeigt die Adresse an
-                        }
-                        .onAppear {
-                            updateAddress(for: mapRegion.center)
-                        }
-                    }
-                }
-
-                Button(action: saveEvent) {
-                    Text("Event erstellen")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(10)
-            }
+            // Formular, um Event zu erstellen
+            createEventForm
             .navigationTitle("Event erstellen")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {}
@@ -92,8 +63,6 @@ struct EventErstellenView: View {
             longitude: longitude
         )
         
-        //eventViewModel.addEvent(newEvent)
-        //print("Event erfolgreich erstellt: \(newEvent)")
         eventViewModel.createEvent(event: newEvent)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -123,6 +92,42 @@ struct EventErstellenView: View {
             } else {
                 address = "Keine Adresse gefunden"
             }
+        }
+    }
+}
+
+extension EventErstellenView{
+    private var createEventForm: some View {
+        Form {
+            Section(header: Text("Allgemeine Informationen")) {
+                TextField("Titel", text: $title)
+                TextField("Beschreibung", text: $description)
+            }
+            
+            Section(header: Text("Datum und Uhrzeit")) {
+                DatePicker("Startdatum", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
+                DatePicker("Enddatum", selection: $endDate, displayedComponents: [.date, .hourAndMinute])
+            }
+
+            Section(header: Text("Adresse auswählen")) {
+                VStack(alignment: .leading) {
+                    NavigationLink(destination: SelectPlaceView(mapRegion: $mapRegion)) {
+                        Text(address) // Zeigt die Adresse an
+                    }
+                    .onAppear {
+                        updateAddress(for: mapRegion.center)
+                    }
+                }
+            }
+
+            Button(action: saveEvent) {
+                Text("Event erstellen")
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+            .foregroundColor(.white)
+            .padding()
+            .background(Color.blue)
+            .cornerRadius(10)
         }
     }
 }
