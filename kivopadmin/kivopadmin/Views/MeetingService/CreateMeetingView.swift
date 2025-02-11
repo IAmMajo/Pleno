@@ -2,7 +2,11 @@ import SwiftUI
 import MeetingServiceDTOs
 
 struct CreateMeetingView: View {
+    
+    // Wenn der User einen Ort über den Picker auswählt, wird diese Variable verändert
     @State private var selectedLocationID: UUID?
+    
+    // Leere Variablen zum Erstellen einer Sitzung
     @State private var name: String = ""
     @State private var description: String = ""
     @State private var startDate: Date = Date()
@@ -13,19 +17,28 @@ struct CreateMeetingView: View {
     @State private var locationLetter: String = ""
     @State private var locationPostalCode: String = ""
     @State private var locationPlace: String = ""
+    
+    // Der User kann entscheiden, ob er dem System einen neuen Ort hinzufügen möchte oder einen bestehenden Ort wählt.
+    // Das geschieht in Abhängigkeit dieser Variable
     @State private var isAddingNewLocation = false
 
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var meetingManager : MeetingManager
-    @StateObject private var locationManager = LocationManager() // MeetingManager verwenden
+    
+    
+    @EnvironmentObject private var meetingManager : MeetingManager // MeetingManager für alle Interaktionen mit dem Server im Bezug auf Sitzungen
+    @StateObject private var locationManager = LocationManager() // LocationManager verwenden, um bestehende Orte vom Server zu holen
 
     var body: some View {
         NavigationStack {
             Form {
+                // Details zur Sitzung werden bestimmt
                 detailsSection
                 Section(header: Text("Ort")) {
+                    // Hier wird der Ort ausgewählt
                     placeSection
                 }
+                
+                // Button zum speichern
                 saveButton
             }
             .navigationTitle("Sitzung erstellen")
@@ -39,14 +52,19 @@ struct CreateMeetingView: View {
             }
         }
         .onAppear(){
+            // alle bestehenden Orte werden aus vom Server geholt
             locationManager.fetchLocations()
         }
         .onDisappear(){
+            // Wenn der User diese View verlässt, werden alle Sitzungen geladen
             meetingManager.fetchAllMeetings()
         }
     }
 
+    // Funktion zum speichern einer Sitzung
     private func saveMeeting() {
+        
+        // stellt sicher, dass der User eine Zahl eingegeben hat
         guard let durationUInt16 = UInt16(duration) else {
             meetingManager.errorMessage = "Invalid duration. Must be a number."
             return
@@ -67,6 +85,7 @@ struct CreateMeetingView: View {
             }
         }
 
+        // CreateLocationDTO wird befüllt
         let location = CreateLocationDTO(
             name: locationName,
             street: locationStreet.isEmpty ? nil : locationStreet,
@@ -76,6 +95,7 @@ struct CreateMeetingView: View {
             place: locationPlace.isEmpty ? nil : locationPlace
         )
 
+        // CreateMeetingDTO wird befüllt
         let meeting = CreateMeetingDTO(
             name: name,
             description: description.isEmpty ? nil : description,
@@ -84,11 +104,14 @@ struct CreateMeetingView: View {
             locationId: isAddingNewLocation ? nil : selectedLocationID,
             location: location//isAddingNewLocation ? location : nil
         )
-        print(meeting)
 
         // Meeting über MeetingManager erstellen
         meetingManager.createMeeting(meeting)
+        
+        // Formular wird geleert
         clearForm()
+        
+        // Sheet schließen
         dismiss()
     }
 
@@ -113,7 +136,8 @@ extension CreateMeetingView {
     private var placeSection: some View {
         VStack(alignment: .leading) {
             Toggle("Neuen Ort hinzufügen", isOn: $isAddingNewLocation)
-                                        
+                     
+            // Wenn ein neuer Ort hinzugefügt werden soll, erscheinen Eingabefelder für Ort, Straße, Hausnummer, Buchstabe, Postleitzahl und Stadt
             if isAddingNewLocation {
                 TextField("Name des Ortes", text: $locationName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -135,15 +159,16 @@ extension CreateMeetingView {
                 TextField("Stadt", text: $locationPlace)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
             } else {
+                // Wenn kein neuer Ort hinzugefügt werden soll
                 // Auswahl eines bestehenden Ortes über den Picker
                 if locationManager.isLoading {
-                    ProgressView("Loading locations...")
+                    ProgressView("Lade Orte...")
                 } else if let errorMessage = locationManager.errorMessage {
                     Text("Error: \(errorMessage)")
                         .foregroundColor(.red)
                         .multilineTextAlignment(.center)
                 } else if locationManager.locations.isEmpty {
-                    Text("No locations available.")
+                    Text("Keine Orte verfügbar")
                         .foregroundColor(.gray)
                 } else {
                     Picker("Name des Ortes", selection: $selectedLocationID) {
@@ -159,6 +184,7 @@ extension CreateMeetingView {
         }
     }
     
+    // Button um Sitzung zu speichern
     private var saveButton: some View {
         Section{
             Button(action: saveMeeting) {

@@ -2,19 +2,26 @@ import MeetingServiceDTOs
 import SwiftUI
 
 struct MeetingAdminView: View {
+    // ViewModel als EnvironmentObject
     @EnvironmentObject private var meetingManager : MeetingManager
     
+    // Standardmäßig werden beim Picker die bevorstehenden Sitzungen angezeigt
     @State private var selectedStatus: FilterType = .scheduled
+    
+    // Text der Suchleiste
     @State private var searchText: String = ""
+    
+    // Bool Variable für Create-Sheet
     @State private var showCreateMeeting = false
     
+    // Filter Typen für den Picker
     enum FilterType: String, CaseIterable {
         case scheduled = "In Planung"
         case inSession = "Aktiv"
         case completed = "Abgeschlossen"
     }
 
-    
+    // Je nach Auswahl des Pickers werden die Sitzungen angezeigt
     var filteredMeetings: [GetMeetingDTO] {
         switch selectedStatus {
         case .scheduled:
@@ -31,7 +38,7 @@ struct MeetingAdminView: View {
         NavigationStack {
             VStack {
                 if meetingManager.isLoading {
-                    ProgressView("Loading meetings...") // Ladeanzeige
+                    ProgressView("Lade Sitzungen...") // Ladeanzeige
                         .progressViewStyle(CircularProgressViewStyle())
                 } else if let errorMessage = meetingManager.errorMessage {
                     Text("Error: \(errorMessage)")
@@ -40,7 +47,7 @@ struct MeetingAdminView: View {
                     Text("Keine Sitzungen verfügbar")
                         .foregroundColor(.secondary)
                 } else {
-                    // Picker
+                    // Picker für Auswahl des Sitzungs-Status
                     Picker("Filter", selection: $selectedStatus) {
                         ForEach(FilterType.allCases, id: \.self) { filter in
                             Text(filter.rawValue).tag(filter)
@@ -95,7 +102,9 @@ extension MeetingAdminView {
     
     private var listView: some View {
         List {
+            // Schleife über alle Sitzungen
             ForEach(filteredMeetings, id: \.id) { meeting in
+                // Navigation zur Detailansicht 
                 NavigationLink(destination: MeetingDetailAdminView(meeting: meeting)) {
                     VStack(alignment: .leading, spacing: 5) {
                         Text(meeting.name)

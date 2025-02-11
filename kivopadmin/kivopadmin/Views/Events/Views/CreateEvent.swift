@@ -8,6 +8,8 @@ struct EventErstellenView: View {
     @State private var address: String = "Adresse wird geladen..."
     private let geocoder = CLGeocoder()
     @Environment(\.dismiss) var dismiss
+    
+    // Variablen für neues Event
     @State private var title: String = ""
     @State private var description: String = ""
     @State private var selectedItem: PhotosPickerItem? = nil
@@ -18,18 +20,19 @@ struct EventErstellenView: View {
     @State private var locationLetter: String = ""
     @State private var locationPostalCode: String = ""
     @State private var locationPlace: String = ""
-    @State private var isAddingNewLocation = false
-    @State private var selectedLocationID: UUID?
+    @State private var startDate = Date() // Startdatum
+    @State private var endDate = Date()   // Enddatum
+    
+    // Startwert für die Map
+    // Hier: Start in Datteln
     @State var mapRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
-    
-    @State private var startDate = Date() // Startdatum
-    @State private var endDate = Date()   // Enddatum
-    
-    @StateObject private var locationManager = LocationManager()
-    @EnvironmentObject private var eventViewModel: EventViewModel
+
+    // ViewModels
+    @StateObject private var locationManager = LocationManager() // LocationManager: Benötigt um gespeicherte Orte zu laden
+    @EnvironmentObject private var eventViewModel: EventViewModel // Event-ViewModel für alle Interaktionen mit dem Server
 
     var body: some View {
         NavigationStack {
@@ -37,23 +40,33 @@ struct EventErstellenView: View {
             createEventForm
             .navigationTitle("Event erstellen")
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {}
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Abbrechen") {
+                        dismiss()
+                    }
+                }
             }
         }
         .onAppear {
+            // Alle gespeicherten Orte fetchen
             locationManager.fetchLocations()
         }
     }
 
+    // Event speichern
     private func saveEvent() {
+        
+        // Titel ist erforderlich
         guard !title.isEmpty else {
             print("Titel ist erforderlich")
             return
         }
 
+        // Koordinaten auslesen
         let latitude = Float(mapRegion.center.latitude)
         let longitude = Float(mapRegion.center.longitude)
 
+        // CreateEventDTO erzeugen
         let newEvent = CreateEventDTO(
             name: title,
             description: description,
@@ -63,14 +76,19 @@ struct EventErstellenView: View {
             longitude: longitude
         )
         
+        // Event erstellen
         eventViewModel.createEvent(event: newEvent)
         
+        // Eine Sekunde warten, damit das Event im Backend angelegt werden kann
+        // Dann können alle Events gefetcht werden
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             eventViewModel.fetchEvents()
         }
         dismiss()
     }
 
+    
+    // Koordinaten in Adresse übersetzen
     private func updateAddress(for coordinate: CLLocationCoordinate2D) {
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         geocoder.reverseGeocodeLocation(location) { placemarks, error in
@@ -97,6 +115,8 @@ struct EventErstellenView: View {
 }
 
 extension EventErstellenView{
+    
+    // Formular zum erstellen des Events
     private var createEventForm: some View {
         Form {
             Section(header: Text("Allgemeine Informationen")) {
@@ -120,6 +140,7 @@ extension EventErstellenView{
                 }
             }
 
+            // Event speichern
             Button(action: saveEvent) {
                 Text("Event erstellen")
                     .frame(maxWidth: .infinity, alignment: .center)

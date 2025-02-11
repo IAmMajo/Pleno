@@ -7,23 +7,26 @@ import RideServiceDTOs
 struct EditEventView: View {
     @State var eventDetail: GetEventDetailDTO // Lokale Kopie des Events
     var eventId: UUID
+    
+    // Vorbereitung: Koordinaten zu Adresse
     @State private var address: String = "Adresse wird geladen..."
     private let geocoder = CLGeocoder()
+    
     @Environment(\.dismiss) var dismiss
+    
+    // Parameter zum Ändern des Events
     @State private var title: String = ""
     @State private var description: String = ""
-    @State private var isAddingNewLocation = false
-    @State private var selectedLocationID: UUID?
     @State var mapRegion = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
+        center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556), // Datteln
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
-    
     @State private var startDate = Date() // Startdatum
     @State private var endDate = Date()   // Enddatum
     
-    @StateObject private var locationManager = LocationManager() // MeetingManager
-    @EnvironmentObject private var eventViewModel: EventViewModel
+    // ViewModels
+    @StateObject private var locationManager = LocationManager() // LocationManager: Benötigt um gespeicherte Orte zu laden
+    @EnvironmentObject private var eventViewModel: EventViewModel // Event-ViewModel: Interaktionen mit dem Server
 
     var body: some View {
         NavigationStack {
@@ -37,6 +40,8 @@ struct EditEventView: View {
         }
         .onAppear {
             locationManager.fetchLocations()
+            
+            // Bei View-Aufruf werden die Variablen mit den bestehenden Werten des Events befüllt
             title = eventDetail.name
             description = eventDetail.description ?? ""
             startDate = eventDetail.starts
@@ -50,6 +55,7 @@ struct EditEventView: View {
         }
     }
 
+    // Event speichern
     private func saveEvent() {
         guard !title.isEmpty else {
             print("Titel ist erforderlich")
@@ -76,6 +82,8 @@ struct EditEventView: View {
         dismiss()
     }
 
+
+    // Koordinaten in Adresse übersetzen
     private func updateAddress(for coordinate: CLLocationCoordinate2D) {
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         geocoder.reverseGeocodeLocation(location) { placemarks, error in
@@ -103,6 +111,7 @@ struct EditEventView: View {
 
 extension EditEventView {
     var editEventForm: some View {
+        // Formular, um Event zu bearbeiten
         Form {
             Section(header: Text("Allgemeine Informationen")) {
                 TextField("Titel", text: $title)
@@ -125,6 +134,7 @@ extension EditEventView {
                 }
             }
 
+            // Button, um Event zu speichern
             Button(action: saveEvent) {
                 Text("Speichern")
                     .frame(maxWidth: .infinity, alignment: .center)

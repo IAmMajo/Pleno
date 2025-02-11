@@ -5,6 +5,8 @@ struct EditMeetingView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var meetingManager = MeetingManager()
 
+    
+    // Variablen, um Sitzung zu bearbeiten
     @State private var name: String
     @State private var description: String
     @State private var start: Date
@@ -16,8 +18,10 @@ struct EditMeetingView: View {
     @State private var locationPostalCode: String
     @State private var locationPlace: String
 
+    // MeetingId wird beim Aufruf der View mitgegeben
     let meetingId: UUID
 
+    // Initialiser, damit die erstellten Variablen mit den bestehenden Werten befüllt werden
     init(meeting: GetMeetingDTO) {
         self.meetingId = meeting.id
 
@@ -35,32 +39,18 @@ struct EditMeetingView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section(header: Text("Details zur Sitzung")) {
-                    TextField("Name der Sitzung", text: $name)
-                    TextField("Beschreibung", text: $description)
-                    DatePicker("Datum", selection: $start, displayedComponents: [.date, .hourAndMinute])
-                    TextField("Dauer (in Minutes)", text: $duration)
-                        .keyboardType(.numberPad)
-                }
-
-                Section(header: Text("Ort")) {
-                    TextField("Name des Ortes", text: $locationName)
-                    TextField("Straße", text: $locationStreet)
-                    TextField("Nummer", text: $locationNumber)
-                    TextField("Buchstabe", text: $locationLetter)
-                    TextField("Postleitzahl", text: $locationPostalCode)
-                    TextField("Stadt", text: $locationPlace)
-                }
-            }
+            // Formular, um Sitzung zu bearbeiten
+            formView
             .navigationTitle("Sitzung bearbeiten")
             .toolbar {
+                // Sitzung speichern
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Speichern") {
                         saveChanges()
                     }
                     .disabled(meetingManager.isLoading)
                 }
+                // Sitzung löschen
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Löschen") {
                         deleteMeeting()
@@ -72,20 +62,25 @@ struct EditMeetingView: View {
     }
 
     private func saveChanges() {
+        // Sicherstellen, dass die Dauer der Sitzung ein Int ist
         guard let durationUInt16 = UInt16(duration) else {
             meetingManager.errorMessage = "Invalid duration. Must be a number."
             return
         }
 
+        // Sicherstellen, dass der Name des Ortes der Sitzung gesetzt ist
         guard !locationName.isEmpty else {
             meetingManager.errorMessage = "Location name cannot be empty."
             return
         }
+        
+        // Sicherstellen, dass der Name der Sitzung gesetzt ist
         guard !name.isEmpty else {
             meetingManager.errorMessage = "Meeting name cannot be empty."
             return
         }
 
+        // CreateLocationDTO erstellen
         let updatedLocation = CreateLocationDTO(
             name: locationName.isEmpty ? "Unnamed Location" : locationName,
             street: locationStreet.isEmpty ? "" : locationStreet,
@@ -94,7 +89,8 @@ struct EditMeetingView: View {
             postalCode: locationPostalCode.isEmpty ? "" : locationPostalCode,
             place: locationPlace.isEmpty ? "" : locationPlace
         )
-
+        
+        // PatchMeetingDTO erstellen
         let patchDTO = PatchMeetingDTO(
             name: name.isEmpty ? "No Name Provided" : name,
             description: description.isEmpty ? "No Description Provided" : description,
@@ -103,15 +99,15 @@ struct EditMeetingView: View {
             location: updatedLocation
         )
 
+        // PatchMeetingDTO zum Server schicken, danach Sheet schließen
         meetingManager.updateMeeting(meetingId: meetingId, patchDTO: patchDTO) {
             dismiss()
         }
         dismiss()
     }
 
+    // Sitzung löschen
     private func deleteMeeting() {
-        //meetingManager.deleteMeeting(meetingId: meetingId)
-        
         meetingManager.deleteMeeting(meetingId: meetingId) { result in
             switch result {
             case .success:
@@ -123,4 +119,29 @@ struct EditMeetingView: View {
             }
         }
     }
+}
+
+extension EditMeetingView {
+    private var formView: some View {
+        // Formular, um alle Variablen bearbeiten zu können
+        Form {
+            Section(header: Text("Details zur Sitzung")) {
+                TextField("Name der Sitzung", text: $name)
+                TextField("Beschreibung", text: $description)
+                DatePicker("Datum", selection: $start, displayedComponents: [.date, .hourAndMinute])
+                TextField("Dauer (in Minutes)", text: $duration)
+                    .keyboardType(.numberPad)
+            }
+
+            Section(header: Text("Ort")) {
+                TextField("Name des Ortes", text: $locationName)
+                TextField("Straße", text: $locationStreet)
+                TextField("Nummer", text: $locationNumber)
+                TextField("Buchstabe", text: $locationLetter)
+                TextField("Postleitzahl", text: $locationPostalCode)
+                TextField("Stadt", text: $locationPlace)
+            }
+        }
+    }
+    
 }

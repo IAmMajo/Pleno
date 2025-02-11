@@ -6,17 +6,26 @@ import Foundation
 struct RecorderSelectionSheet: View {
     @Environment(\.dismiss) private var dismiss
 
+    // Liste aller Benutzer
     var users: [GetIdentityDTO]
+    
+    // Sprache des Protokolls
     var recordLang: String
+    
+    // ID der Sitzung
     var meetingId: UUID
 
+    // ausgewählter Benutzer für dieses Protokoll
     @Binding var selectedUser: UUID? // Speichert die Benutzer-ID
     @Binding var selectedUserName: String? // Speichert den Benutzernamen
+    
+    // ein lokale Kopie eines Protokolls um es mit Binding bearbeiten zu können
     @Binding var localRecordsRecord: GetRecordDTO
 
     @State private var searchText: String = "" // Das Suchfeld für die Benutzerliste
     @State private var filteredUsers: [GetIdentityDTO] = [] // Gefilterte Benutzer
 
+    // ViewModel für Protokolle
     @StateObject private var recordManager = RecordManager()
 
     var body: some View {
@@ -46,6 +55,7 @@ struct RecorderSelectionSheet: View {
         }
     }
 
+    // Liste mit allen Benutzern
     private var userSelectionSection: some View {
         Section(header: Text("Benutzer auswählen")) {
             ForEach(filteredUsers, id: \.id) { user in
@@ -58,6 +68,7 @@ struct RecorderSelectionSheet: View {
         HStack {
             Text(user.name)
             Spacer()
+            // Bei dem User, der ausgewählt ist, wird ein blauer Haken angezeigt
             if user.id == localRecordsRecord.identity.id {
                 Image(systemName: "checkmark")
                     .foregroundColor(.blue)
@@ -81,6 +92,7 @@ struct RecorderSelectionSheet: View {
         .textCase(nil)
     }
 
+    // Protokoll speichern
     private func saveRecord() {
         Task {
             let patchDTO = PatchRecordDTO(identityId: selectedUser)
@@ -88,6 +100,7 @@ struct RecorderSelectionSheet: View {
         }
     }
 
+    // Gefilterter User initialisieren
     private func initializeFilteredUsers() {
         filteredUsers = users // Zuerst alle Benutzer setzen
         let selectedUserId = localRecordsRecord.identity.id
@@ -107,6 +120,7 @@ struct RecorderSelectionSheet: View {
         }
     }
 
+    // User auswählen. Binding Variablen werden gesetzt
     private func selectUser(_ user: GetIdentityDTO) {
         selectedUser = user.id
         selectedUserName = user.name
@@ -115,54 +129,3 @@ struct RecorderSelectionSheet: View {
 }
 
 
-struct RecorderSelectionPreSheet: View {
-    @Environment(\.dismiss) private var dismiss
-
-    var users: [GetIdentityDTO]
-    var meetingId: UUID
-
-    @State private var selectedUser: UUID? = nil
-    @State private var selectedUserName: String? = nil
-    @Binding var localRecords: [GetRecordDTO]
-
-    @StateObject private var recordManager = RecordManager()
-    var attendanceManager: AttendanceManager
-
-    var body: some View {
-        if recordManager.isLoading {
-            ProgressView("Lade Protokolle...")
-                .progressViewStyle(CircularProgressViewStyle())
-        } else if let errorMessage = recordManager.errorMessage {
-            Text("Error: \(errorMessage)")
-                .foregroundColor(.red)
-        } else if localRecords.isEmpty {
-            Text("Keine Protokolle verfügbar.")
-                .foregroundColor(.secondary)
-        } else {
-            NavigationStack {
-                List {
-                    Section(header: Text("Protokoll auswählen")) {
-                        ForEach($localRecords, id: \.lang) { $record in
-                            NavigationLink(destination: RecorderSelectionSheet(
-                                users: attendanceManager.allParticipants(),
-                                recordLang: record.lang,
-                                meetingId: meetingId,
-                                selectedUser: $selectedUser,
-                                selectedUserName: $selectedUserName,
-                                localRecordsRecord: $record
-                            )) {
-                                HStack {
-                                    Text("Sprache:")
-                                    Text(record.lang).bold()
-                                    Spacer()
-                                    Text(record.identity.name ?? "Keiner")
-                                }
-                            }
-                        }
-                    }
-                }
-                .navigationTitle("Protokollantenauswahl")
-            }
-        }
-    }
-}

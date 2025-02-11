@@ -3480,6 +3480,9 @@
     "Keine Mitfahrer" : {
 
     },
+    "Keine Orte verfügbar" : {
+
+    },
     "Keine Protokolle verfügbar" : {
       "localizations" : {
         "de" : {
@@ -3763,6 +3766,9 @@
     "Lade Fahrtdetails..." : {
 
     },
+    "Lade Orte..." : {
+
+    },
     "Lade Profilbild..." : {
       "localizations" : {
         "de" : {
@@ -3808,6 +3814,9 @@
       }
     },
     "Lade Sammelposten..." : {
+
+    },
+    "Lade Sitzungen..." : {
 
     },
     "Lade Umfragen..." : {
@@ -4013,6 +4022,7 @@
       }
     },
     "Loading locations..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4813,6 +4823,7 @@
       }
     },
     "No locations available." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

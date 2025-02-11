@@ -5,7 +5,7 @@ import PosterServiceDTOs
 import AuthServiceDTOs
 
 
-
+// Karte, auf der ein Ort ausgewählt werden kann
 struct SelectPlaceMapView: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion
     var onRegionChange: (MKCoordinateRegion) -> Void
@@ -99,14 +99,7 @@ struct SelectPlaceView: View {
         
     }
     
-    private func zoomToLocation(latitude: Double, longitude: Double) {
-        let region = MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
-            span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-        )
-        mapRegion = region
-    }
-    
+    // Funktion für die Suche nach einem Ort
     private func performSearch() {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = searchText
@@ -121,6 +114,7 @@ struct SelectPlaceView: View {
             // Wähle das erste Ergebnis aus
             if let firstResult = response.mapItems.first {
                 let coordinate = firstResult.placemark.coordinate
+                // Karte auf das Suchergebnis einstellen
                 mapRegion = MKCoordinateRegion(
                     center: coordinate,
                     span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
@@ -128,6 +122,8 @@ struct SelectPlaceView: View {
             }
         }
     }
+    
+    // Funktion, um den User zu seinem Standort zu bringen
     private func centerOnUserLocation() {
         locationMapManager.requestLocation()
         if let userLocation = locationMapManager.currentLocation {

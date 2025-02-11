@@ -3,32 +3,42 @@ import MeetingServiceDTOs
 import AuthServiceDTOs
 
 struct MeetingDetailAdminView: View {
+    // Beim View Aufruf wird eine Sitzung übergeben
     var meeting: GetMeetingDTO
     
-    @State private var isMeetingActive = false // Status für Meeting
+    @State private var isMeetingActive = false // Status für Meeting, entscheidend für die Funktion, die durch den Button ausgelöst wird
     @State private var showConfirmationAlert = false // Alert anzeigen
-    @State private var actionType: ActionType = .start // Typ der Aktion (Starten oder Beenden)
-    @State var localRecords: [GetRecordDTO] = []
-    @State private var showRecorderSelectionSheet = false
-    @State private var recordLanguages: [String] = []
+    @State private var actionType: ActionType = .start // Typ der Aktion (Starten oder Beenden) -> wichtig für die Alert-Anzeige
     
-    @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
-    @StateObject private var recordManager = RecordManager() // RecordManager als StateObject
-    @StateObject private var votingManager = VotingManager() // RecordManager als StateObject
-    @StateObject private var attendanceManager = AttendanceManager() // RecordManager als StateObject
+    // Kopie des Arrays der Protokolle erstellen, um es bearbeiten zu können, um die Protokollanten zu ändern
+    @State var localRecords: [GetRecordDTO] = []
+    
+    // Sheet für die Auswahl der Protokollanten
+    @State private var showRecorderSelectionSheet = false
+    
+    // ViewModels für die Anzeige der verschiedenen Informationen über eine Sitzung
+    @StateObject private var meetingManager = MeetingManager()
+    @StateObject private var recordManager = RecordManager()
+    @StateObject private var votingManager = VotingManager()
+    @StateObject private var attendanceManager = AttendanceManager()
     @ObservedObject var userManager = UserManager()
+    
+    // AttandanceViewModel: Wird hier anders behandelt, da es aus der iOS-Anwendung kopiert wurde
     @StateObject private var viewModel = AttendanceViewModel()
     
+    // Fallunterscheidung ob eine Sitzung beendet oder gestartet werden soll
     enum ActionType {
         case start
         case end
     }
     
+    // Liefert alle unterschiedlichen Protokollanten einer Sitzung
     private var uniqueRecorders: String {
         let uniqueNames = Set(localRecords.compactMap { $0.identity.name })
         return uniqueNames.sorted().joined(separator: ", ") // Namen durch Komma trennen und sortieren
     }
     
+    // Liefert die Überschrift der Anzeige der Protokollanten (Einzahl/Mehrzahl)
     private var recorderLabel: String {
         let recorderCount = Set(localRecords.compactMap { $0.identity.name }).count
         return recorderCount > 1 ? "Protokollanten" : "Protokollant" // Mehrzahl oder Einzahl je nach Anzahl
@@ -41,12 +51,14 @@ struct MeetingDetailAdminView: View {
             VStack(alignment: .leading) {
                 nameSection
                 
+                // Teilnehmer-Information
                 attendanceInfoSection
                 
                 List {
                     // Adresse
                     locationSection
                     
+                    // Sitzungsleiter und Protokollanten
                     organizationSection
                     
                     // Beschreibung
@@ -55,13 +67,19 @@ struct MeetingDetailAdminView: View {
                             Text(meeting.description)
                         }
                     }
+                    
+                    // Status über eigene Teilnahme und Link zur Übersicht aller Teilnehmer
                     attendanceSection
+                    
+                    // Wenn das Meeting läuft oder beendet wurde, werden Protokolle und Abstimmungen angezeigt
                     if meeting.status != .scheduled {
                         // Protokolle
                         recordSection
                         // Abstimmugnen
                         votingSection
                     }
+                    
+                    // QR-Code anzeige
                     qrCodeSection
 
                 }
@@ -79,6 +97,7 @@ struct MeetingDetailAdminView: View {
                         }
                         showConfirmationAlert = true
                     }) {
+                        // Fallunterscheidung: Sitzung starten oder beenden?
                         Text(meeting.status == .inSession ? "Sitzung beenden" : "Sitzung starten")
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity)
@@ -91,6 +110,7 @@ struct MeetingDetailAdminView: View {
                 }
             }
             .toolbar {
+                // Wenn die Sitzung noch nicht angefangen hat, kann die Sitzung bearbeitet werden
                 if meeting.status == .scheduled {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         HStack {
@@ -105,6 +125,7 @@ struct MeetingDetailAdminView: View {
                 }
 
             }
+            // Nutzer muss das Beenden oder Starten der Sitzung bestätigen
             .alert(isPresented: $showConfirmationAlert) {
                 Alert(
                     title: Text(actionType == .start ? "Sitzung starten" : "Sitzung beenden"),
@@ -120,7 +141,9 @@ struct MeetingDetailAdminView: View {
                     secondaryButton: .cancel(Text("Abbrechen"))
                 )
             }
+            // Sheet, um den Protokollanten auszuwählen
             .sheet(isPresented: $showRecorderSelectionSheet) {
+                // Link zum Übersicht aller Sprachen, dort muss eine Sprache ausgewählt werden, woraufhin der Protokollant festgelegt werden kann
                 RecorderSelectionPreSheet(
                     users: attendanceManager.allParticipants(),
                     meetingId: meeting.id,
@@ -129,68 +152,23 @@ struct MeetingDetailAdminView: View {
                 )
             }
             .onAppear(){
-                updateMeeting { result in
-                    switch result {
-                    case .success(let meetingData):
-                        print("Meeting erfolgreich aktualisiert: \(meetingData)")
-                    case .failure(let error):
-                        print("Fehler beim Aktualisieren des Meetings: \(error.localizedDescription)")
-                    }
-                }
                 Task {
+                    // Funktion, um die beim Öffnen der View aufgerufen wird
                     await loadView()
-                    // Array mit allen verügbaren Sprachen, um allen Sprachen den gleichen Protokollanten zuzuordnen
-                    recordLanguages = recordManager.records.map { $0.lang }
-                    recordLanguages = Array(Set(recordLanguages)) // Entfernt Duplikate, falls nötig
                 }
             }
         }
     }
-    private func getLanguage(langCode: String) -> String {
-        let languages: [(name: String, code: String)] = [
-            ("Arabisch", "ar"),
-            ("Chinesisch", "zh"),
-            ("Dänisch", "da"),
-            ("Deutsch", "de"),
-            ("Englisch", "en"),
-            ("Französisch", "fr"),
-            ("Griechisch", "el"),
-            ("Hindi", "hi"),
-            ("Italienisch", "it"),
-            ("Japanisch", "ja"),
-            ("Koreanisch", "ko"),
-            ("Niederländisch", "nl"),
-            ("Norwegisch", "no"),
-            ("Polnisch", "pl"),
-            ("Portugiesisch", "pt"),
-            ("Rumänisch", "ro"), // Hinzugefügt
-            ("Russisch", "ru"),
-            ("Schwedisch", "sv"),
-            ("Spanisch", "es"),
-            ("Thai", "th"), // Hinzugefügt
-            ("Türkisch", "tr"),
-            ("Ungarisch", "hu")
-        ]
-
-
-        // Suche nach dem Kürzel und gib den Namen zurück
-        if let language = languages.first(where: { $0.code == langCode }) {
-            return language.name
-        }
-
-        // Standardwert, falls das Kürzel nicht gefunden wird
-        return langCode
-    }
     
     private func loadView() async {
         do {
-            // 1. Abrufen der Meeting-Daten für die Records
+            // 1. Abrufen der Meeting-Daten für die Protokolle
             recordManager.getRecordsMeeting(meetingId: meeting.id)
             
-            // 2. Abrufen der Voting-Daten für das Meeting
+            // 2. Abrufen der Abstimmungs-Daten für die Sitzung
             votingManager.getRecordsMeeting(meetingId: meeting.id)
             
-            // 3. Abrufen der Teilnehmer-Daten für das Meeting
+            // 3. Abrufen der Teilnehmer-Daten für die Sitzung
             attendanceManager.fetchAttendances(meetingId: meeting.id)
             
             // 4. Abrufen der Benutzer
@@ -228,19 +206,6 @@ struct MeetingDetailAdminView: View {
             }
         }
     }
-    
-    func updateMeeting(completion: @escaping (Result<GetMeetingDTO, Error>) -> Void) {
-        meetingManager.getSingleMeeting(meetingId: meeting.id) { result in
-            switch result {
-            case .success(let meetingData):
-                // Übergib die empfangenen Daten an den Completion-Handler
-                completion(.success(meetingData))
-            case .failure(let error):
-                // Übergib den Fehler an den Completion-Handler
-                completion(.failure(error))
-            }
-        }
-    }
 }
 
 extension MeetingDetailAdminView {
@@ -256,20 +221,26 @@ extension MeetingDetailAdminView {
     
     private var attendanceInfoSection: some View {
         HStack {
+            // Startzeit
             Text(meeting.start, style: .time)
+            
+            // Dauer der Sitzung
             if let duration = meeting.duration {
                 Text("(ca. \(duration) min.)")
                     .font(.caption)
                     .foregroundColor(.gray)
             }
             Spacer()
+            
+            // Personenanzahl anzeigen: Bsp: "6/9"
             HStack(spacing: 4) { // kleiner Abstand zwischen dem Symbol und der Personenanzahl
                 Image(systemName: "person.3.fill") // Symbol für eine Gruppe von Personen
                 if attendanceManager.isLoading {
-                    Text("Loading...")
+                    Text("Lädt...")
                 } else if let errorMessage = attendanceManager.errorMessage {
                     Text("Error: \(errorMessage)")
                 } else {
+                    // Zusammenfassung wird im ViewModel erstellt
                     Text(attendanceManager.attendanceSummary())
                         .font(.headline)
                 }
@@ -277,16 +248,19 @@ extension MeetingDetailAdminView {
         }.padding(.horizontal)
     }
     
+    // Abschnitt für die Adresse
     private var locationSection: some View {
         Group {
             if let location = meeting.location {
                 Section(header: Text("Adresse")) {
+                    // Adresse wird zusammengebaut
                     let address = """
                     \(location.street) \(location.number)\(location.letter)
                     \(location.postalCode ?? "") \(location.place ?? "")
                     """
                     Text(location.name)
                     if address != "" {
+                        // Adresse ist kopierbar
                         Button(action: {
                             UIPasteboard.general.string = address
                         }) {
@@ -302,10 +276,13 @@ extension MeetingDetailAdminView {
             }
         }
     }
+    // Sitzungsleiter und Protokollant
     private var organizationSection: some View {
         Group {
+            // Wird nur angezeigt, wenn die Sitzung läuft oder beendet wurde
             if meeting.status != .scheduled {
                 Section(header: Text("Organisation")) {
+                    // Sitzungsleiter
                     if let chair = meeting.chair {
                         HStack {
                             Image(systemName: "person.circle")
@@ -321,6 +298,7 @@ extension MeetingDetailAdminView {
                         }
                     }
                     
+                    // Protokollanten
                     if recordManager.isLoading {
                         ProgressView("Lade Protokolle...")
                             .progressViewStyle(CircularProgressViewStyle())
@@ -331,6 +309,7 @@ extension MeetingDetailAdminView {
                         Text("Keine Protokolle verfügbar")
                             .foregroundColor(.secondary)
                     } else {
+                        // bei Klick auf die Zeile wird das Sheet zum anpassen der Protokollanten angezeigt
                         Button(action: {
                             showRecorderSelectionSheet.toggle()
                         }) {
@@ -341,8 +320,8 @@ extension MeetingDetailAdminView {
                                         .frame(width: 30, height: 30)
                                         .foregroundColor(.gray)
                                     VStack(alignment: .leading) {
-                                        Text(uniqueRecorders)
-                                        Text(recorderLabel)
+                                        Text(uniqueRecorders) // unterschiedliche Protokollanten werden hier aufgelistet
+                                        Text(recorderLabel) // "Protokollant" oder "Protokollanten"
                                             .font(.caption)
                                             .foregroundColor(.gray)
                                     }
@@ -360,14 +339,17 @@ extension MeetingDetailAdminView {
             }
         }
     }
+    // Übersicht der Anwesenheiten
     private var attendanceSection: some View {
         Section(header: Text("Anwesenheit")){
+            // Link zur Übersicht über alle Teilnehmer
             NavigationLink(destination: viewModel.destinationView(for: meeting)) {
                 HStack{
                     Text("Anwesenheit")
                     Spacer()
                     
                     // Logik für die Symbolauswahl. Bei vergangenen Terminen gibt es kein Kalender Symbol. Wenn dort der Status noch nicht gesetzt ist, hat man am Meeting nicht teilgenommen.
+                    // Statusanzeige über eigene Teilnahme
                     Image(systemName: {
                         switch meeting.myAttendanceStatus {
                         case .accepted, .present:
@@ -394,6 +376,7 @@ extension MeetingDetailAdminView {
         }
     }
     
+    // Übersicht über alle Protokolle
     private var recordSection: some View {
         Section(header: Text("Protokolle")) {
             if recordManager.isLoading {
@@ -403,14 +386,15 @@ extension MeetingDetailAdminView {
                 Text("Error: \(errorMessage)")
                     .foregroundColor(.red)
             } else if recordManager.records.isEmpty {
-                Text("No records available.")
+                Text("Keine Protokolle verfügbar.")
                     .foregroundColor(.secondary)
             } else {
                 ForEach(recordManager.records, id: \.lang) { record in
                     NavigationLink(destination: MarkdownEditorView(meetingId: record.meetingId, lang: record.lang)) {
+                        // Protokoll mit Sprache anzeigen
                         HStack{
                             Text("Protokoll auf ")
-                            Text(getLanguage(langCode: record.lang)).bold()
+                            Text(LanguageManager.getLanguage(langCode: record.lang)).bold()
                         }
                     }
 
@@ -420,6 +404,7 @@ extension MeetingDetailAdminView {
         }
     }
     
+    // Übersicht über alle Abstimmungen, die in einer Sitzung durchgeführt wurden
     private var votingSection: some View {
         Section(header: Text("Abstimmungen")) {
             if votingManager.isLoading {
@@ -434,7 +419,7 @@ extension MeetingDetailAdminView {
             } else {
                 ForEach(votingManager.votings, id: \.id) { voting in
                     NavigationLink(destination: AktivView(voting: voting, onBack: {
-                        // Hier können Sie Aktionen definieren, die ausgeführt werden, wenn der Nutzer zurückgeht.
+                        // On Back wird von AktivView gefordet.
                         print("Zurück zur vorherigen Ansicht.")
                     })) {
                         Text("\(voting.question)")
@@ -444,6 +429,7 @@ extension MeetingDetailAdminView {
         }
     }
     
+    // QR Code Ansicht
     private var qrCodeSection: some View {
         Group {
             if let meetingCode = meeting.code {
