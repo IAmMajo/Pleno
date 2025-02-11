@@ -56,7 +56,7 @@ fun PosterInfoCard(
   val base64ImageByteArray = remember { mutableStateOf<ByteArray?>(null) }
   LaunchedEffect(image) {
     withContext(Dispatchers.IO) {
-      if (image != null){
+      if (image != null) {
         val decodedImage = image.substringAfter("base64").let { Base64.decode(it) }
         base64ImageByteArray.value = decodedImage
       }
@@ -73,24 +73,23 @@ fun PosterInfoCard(
               .padding(12.dp),
   ) {
     Row() {
-      //image Box
+      // image Box
       Box(
-        modifier =
-        Modifier.width(100.dp)
-          .aspectRatio(24f / 36f)
-          .background(Color.LightGray, shape = RoundedCornerShape(8.dp)),
-        contentAlignment = Alignment.Center
-      ){
-        //show loading indicator while image is loading
-        if (base64ImageByteArray.value == null){
-          CircularProgressIndicator()
-        }
-        //AsyncImage to load image from base64 string
-        AsyncImage(
-          model = base64ImageByteArray.value,
-          contentDescription = null,
-          )
-      }
+          modifier =
+              Modifier.width(100.dp)
+                  .aspectRatio(24f / 36f)
+                  .background(Color.LightGray, shape = RoundedCornerShape(8.dp)),
+          contentAlignment = Alignment.Center) {
+            // show loading indicator while image is loading
+            if (base64ImageByteArray.value == null) {
+              CircularProgressIndicator()
+            }
+            // AsyncImage to load image from base64 string
+            AsyncImage(
+                model = base64ImageByteArray.value,
+                contentDescription = null,
+            )
+          }
       Spacer(modifier = Modifier.width(12.dp))
       Column() {
         Text(text = poster.name, style = MaterialTheme.typography.headlineSmall)

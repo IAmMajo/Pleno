@@ -64,11 +64,11 @@ fun PosterPage(navController: NavController, posterID: String, userViewModel: Us
     posterViewModel.poster?.let { poster ->
       posterViewModel.posterSummary?.let { summary ->
         PosterInfoCard(
-          poster =poster,
-          image = posterViewModel.posterImage,
-          summary = summary,
-          clickable = false, 
-          showMaps = true)
+            poster = poster,
+            image = posterViewModel.posterImage,
+            summary = summary,
+            clickable = false,
+            showMaps = true)
       }
     }
     SpacerBetweenElements()
@@ -107,10 +107,10 @@ fun PosterPage(navController: NavController, posterID: String, userViewModel: Us
         // Poster Items under the Header
         items(items) { poster ->
           PosterLocationCard(
-              poster=poster,
+              poster = poster,
               image = posterViewModel.posterPositionsImages[poster.id],
               userViewModel = userViewModel,
-              address =  posterViewModel.posterAddresses[poster.id],
+              address = posterViewModel.posterAddresses[poster.id],
               onClick = {
                 navController.navigate(
                     Screen.PosterDetail.rout + "/${poster.posterId}/${poster.id}")

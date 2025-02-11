@@ -103,9 +103,7 @@ fun PosterDetailedPage(
     withContext(Dispatchers.IO) {
       if (posterDetailedViewModel.posterImage != null) {
         val decodedImage =
-            posterDetailedViewModel.posterImage!!.substringAfter("base64").let {
-              Base64.decode(it)
-            }
+            posterDetailedViewModel.posterImage!!.substringAfter("base64").let { Base64.decode(it) }
         base64ImageByteArray.value = decodedImage
       }
     }

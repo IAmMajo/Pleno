@@ -416,88 +416,85 @@ suspend fun putReportDamagePoster(locationID: String, base64: String): Boolean =
     }
 
 suspend fun getPosterPositionImage(locationID: String): String? =
-  withContext(Dispatchers.IO) {
-    val path = "posters/positions/$locationID/image"
+    withContext(Dispatchers.IO) {
+      val path = "posters/positions/$locationID/image"
 
-    val token = auth.getSessionToken()
+      val token = auth.getSessionToken()
 
-    if (token.isNullOrEmpty()) {
-      println("Fehler: Kein Token verfügbar")
-      return@withContext null
-    }
+      if (token.isNullOrEmpty()) {
+        println("Fehler: Kein Token verfügbar")
+        return@withContext null
+      }
 
+      val request =
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .get()
+              .build()
 
-    val request =
-      Request.Builder()
-        .url(BASE_URL + path)
-        .addHeader("Authorization", "Bearer $token")
-        .get()
-        .build()
+      return@withContext try {
+        val response = okHttpClient.newCall(request).execute()
+        if (response.isSuccessful) {
+          val responseBody = response.body?.bytes()
+          if (responseBody != null) {
+            var base64String = Base64.encodeToString(responseBody, Base64.DEFAULT)
+            // remove unwanted characters
+            base64String = base64String.replace("\n", "")
 
-    return@withContext try {
-      val response = okHttpClient.newCall(request).execute()
-      if (response.isSuccessful) {
-        val responseBody = response.body?.bytes()
-        if (responseBody != null) {
-          var base64String = Base64.encodeToString(responseBody, Base64.DEFAULT)
-          // remove unwanted characters
-          base64String = base64String.replace("\n", "")
-
-          return@withContext base64String
+            return@withContext base64String
+          } else {
+            println("Fehler: Leere Antwort erhalten.")
+            null
+          }
         } else {
-          println("Fehler: Leere Antwort erhalten.")
+          println("Fehler bei der Anfrage: ${response.message}")
           null
         }
-      } else {
-        println("Fehler bei der Anfrage: ${response.message}")
+      } catch (e: Exception) {
+        println("Fehler: ${e.message}")
         null
       }
-    } catch (e: Exception) {
-      println("Fehler: ${e.message}")
-      null
     }
-  }
 
 suspend fun getPosterImage(posterID: String): String? =
-  withContext(Dispatchers.IO) {
-    val path = "posters/$posterID/image"
+    withContext(Dispatchers.IO) {
+      val path = "posters/$posterID/image"
 
-    val token = auth.getSessionToken()
+      val token = auth.getSessionToken()
 
-    if (token.isNullOrEmpty()) {
-      println("Fehler: Kein Token verfügbar")
-      return@withContext null
-    }
+      if (token.isNullOrEmpty()) {
+        println("Fehler: Kein Token verfügbar")
+        return@withContext null
+      }
 
+      val request =
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .get()
+              .build()
 
-    val request =
-      Request.Builder()
-        .url(BASE_URL + path)
-        .addHeader("Authorization", "Bearer $token")
-        .get()
-        .build()
+      return@withContext try {
+        val response = okHttpClient.newCall(request).execute()
+        if (response.isSuccessful) {
+          val responseBody = response.body?.bytes()
+          if (responseBody != null) {
+            var base64String = Base64.encodeToString(responseBody, Base64.DEFAULT)
+            // remove unwanted characters
+            base64String = base64String.replace("\n", "")
 
-    return@withContext try {
-      val response = okHttpClient.newCall(request).execute()
-      if (response.isSuccessful) {
-        val responseBody = response.body?.bytes()
-        if (responseBody != null) {
-          var base64String = Base64.encodeToString(responseBody, Base64.DEFAULT)
-          // remove unwanted characters
-          base64String = base64String.replace("\n", "")
-
-          return@withContext base64String
+            return@withContext base64String
+          } else {
+            println("Fehler: Leere Antwort erhalten.")
+            null
+          }
         } else {
-          println("Fehler: Leere Antwort erhalten.")
+          println("Fehler bei der Anfrage: ${response.message}")
           null
         }
-      } else {
-        println("Fehler bei der Anfrage: ${response.message}")
+      } catch (e: Exception) {
+        println("Fehler: ${e.message}")
         null
       }
-    } catch (e: Exception) {
-      println("Fehler: ${e.message}")
-      null
     }
-  }
-

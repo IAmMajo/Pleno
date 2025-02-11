@@ -67,7 +67,7 @@ fun PosterLocationCard(
   val base64ImageByteArray = remember { mutableStateOf<ByteArray?>(null) }
   LaunchedEffect(image) {
     withContext(Dispatchers.IO) {
-      if (image != null){
+      if (image != null) {
         val decodedImage = image.substringAfter("base64").let { Base64.decode(it) }
         base64ImageByteArray.value = decodedImage
       }
@@ -88,31 +88,29 @@ fun PosterLocationCard(
               verticalAlignment = Alignment.CenterVertically,
           ) {
             Box(
-              Modifier.size(60.dp).clip(RoundedCornerShape(8.dp)).background(Primary_20),
-              contentAlignment = Alignment.Center
-            ){
-              if (image == null && poster.status == PosterPositionStatus.toHang) {
-                IconBox(
-                  icon = ImageVector.vectorResource(R.drawable.ic_image),
-                  height = 60.dp,
-                  backgroundColor = Primary_20,
-                  tint = Primary)
-              } else if (image == null) {
-                CircularProgressIndicator()
-              }
-              else {
-                AsyncImage(
-                  model = base64ImageByteArray.value,
-                  contentDescription = null,
-                  contentScale = ContentScale.Crop,
-                  modifier =
-                  Modifier.clip(shape = RoundedCornerShape(8.dp))
-                    .width(60.dp)
-                    .aspectRatio(1f)
-                    .background(Color.LightGray),
-                )
-              }
-            }
+                Modifier.size(60.dp).clip(RoundedCornerShape(8.dp)).background(Primary_20),
+                contentAlignment = Alignment.Center) {
+                  if (image == null && poster.status == PosterPositionStatus.toHang) {
+                    IconBox(
+                        icon = ImageVector.vectorResource(R.drawable.ic_image),
+                        height = 60.dp,
+                        backgroundColor = Primary_20,
+                        tint = Primary)
+                  } else if (image == null) {
+                    CircularProgressIndicator()
+                  } else {
+                    AsyncImage(
+                        model = base64ImageByteArray.value,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier =
+                            Modifier.clip(shape = RoundedCornerShape(8.dp))
+                                .width(60.dp)
+                                .aspectRatio(1f)
+                                .background(Color.LightGray),
+                    )
+                  }
+                }
             SpacerBetweenElements(8.dp)
             Column(modifier = Modifier.weight(1f)) {
               if (address != null) {

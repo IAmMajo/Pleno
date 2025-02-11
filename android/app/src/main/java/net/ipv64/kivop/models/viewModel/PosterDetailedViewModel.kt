@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import java.util.UUID
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterPositionResponseDTO
-import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterPositionStatus
 import net.ipv64.kivop.models.Address
 import net.ipv64.kivop.services.api.OpenCageGeocoder.getAddressFromLatLngApi
 import net.ipv64.kivop.services.api.getPosterLocationByIDApi
@@ -44,11 +43,9 @@ class PosterDetailedViewModel(private val posterId: String, private val location
       }
     }
   }
-  
+
   fun fetchPosterImage() {
-    viewModelScope.launch {
-      posterImage = getPosterPositionImage(locationId)
-    }
+    viewModelScope.launch { posterImage = getPosterPositionImage(locationId) }
   }
 
   suspend fun fetchAddress(lat: Double, long: Double): Address? {

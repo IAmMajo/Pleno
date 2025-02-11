@@ -6,9 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bumptech.glide.Glide.init
 import java.util.UUID
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterResponseDTO
 import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterSummaryResponseDTO

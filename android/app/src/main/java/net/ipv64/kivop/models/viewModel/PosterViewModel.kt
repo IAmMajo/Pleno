@@ -72,9 +72,7 @@ class PosterViewModel(private val posterId: String) : ViewModel() {
   }
 
   private fun fetchPosterImage() {
-    viewModelScope.launch {
-      posterImage = getPosterImage(posterId)
-    }
+    viewModelScope.launch { posterImage = getPosterImage(posterId) }
   }
 
   private suspend fun fetchPosterPositionImage(posterId: UUID): String? {
@@ -85,7 +83,7 @@ class PosterViewModel(private val posterId: String) : ViewModel() {
       null
     }
   }
-  
+
   suspend fun fetchAddress(lat: Double, long: Double): String? {
     val addressResponse = getAddressFromLatLngApi(lat, long)
     addressResponse?.let {
