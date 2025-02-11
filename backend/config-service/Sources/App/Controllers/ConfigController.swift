@@ -7,22 +7,9 @@ import ConfigServiceDTOs
 @preconcurrency import JWTKit
 
 struct ConfigController: RouteCollection{
-    let jwtSigner: JWTSigner
-    let authMiddleware: Middleware
-    let adminMiddleware: Middleware
-    
-    
-    init() throws {
-        guard let keyData = "Ganzgeheimespasswort".data(using: .utf8) else {
-            throw Abort(.internalServerError, reason: "Fehler beim Erstellen des JWT-Signers")
-        }
-        self.jwtSigner = JWTSigner.hs256(key: keyData)
-        self.authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
-        self.adminMiddleware = AdminMiddleware()
-    }
-    
-    
     func boot(routes: RoutesBuilder) throws {
+        let authMiddleware = AuthMiddleware(payloadType: JWTPayloadDTO.self)
+        let adminMiddleware = AdminMiddleware()
         
         let authProtected = routes.grouped(authMiddleware)
         let adminProtected = authProtected.grouped(adminMiddleware)
