@@ -8,7 +8,7 @@ struct EmailController: RouteCollection {
         let email = routes.grouped("internal", "email").groupedOpenAPI(
             tags: .init(name: "Intern", description: "Nur intern erreichbar.")
         )
-        email.post(use: send).openAPI(
+        email.put(use: send).openAPI(
             summary: "E-Mail senden",
             description: "Sendet eine E-Mail an einen Empfänger",
             body: .type(SendEmailDTO.self),
@@ -18,7 +18,9 @@ struct EmailController: RouteCollection {
     
     @Sendable
     func send(req: Request) async throws -> HTTPStatus {
-        let dto = try req.content.decode(SendEmailDTO.self)
+        guard let dto = try? req.content.decode(SendEmailDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected SendEmailDTO.")
+        }
         try await req.email.sendEmail(
             receiver: dto.receiver,
             subject: dto.subject,
@@ -26,6 +28,6 @@ struct EmailController: RouteCollection {
             template: dto.template,
             templateData: dto.templateData
         )
-        return .ok
+        return .noContent
     }
 }

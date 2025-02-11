@@ -14,7 +14,7 @@ struct NotificationController: RouteCollection {
         let notification = routes.grouped("internal", "notification").groupedOpenAPI(
             tags: .init(name: "Intern", description: "Nur intern erreichbar.")
         )
-        notification.post(use: send).openAPI(
+        notification.put(use: send).openAPI(
             summary: "Benachrichtigung senden",
             description: "Sendet eine Benachrichtigung an alle registrierten Geräte eines Users",
             body: .type(SendNotificationDTO.self),
@@ -24,20 +24,22 @@ struct NotificationController: RouteCollection {
     
     @Sendable
     func send(req: Request) async throws -> HTTPStatus {
-        let dto = try req.content.decode(SendNotificationDTO.self)
+        guard let dto = try? req.content.decode(SendNotificationDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected SendNotificationDTO.")
+        }
         guard let user = try await User.find(dto.userID, on: req.db) else {
-            throw Abort(.notFound, reason: "User not found")
+            throw Abort(.notFound)
         }
-        if (!user.isNotificationsActive) {
-            return .ok
+        guard user.isNotificationsActive else {
+            return .noContent
         }
-        if (!user.isPushNotificationsActive) {
+        guard user.isPushNotificationsActive else {
             try await req.email.sendEmail(
                 receiver: user.email,
                 subject: dto.subject,
                 message: dto.message
             )
-            return .ok
+            return .noContent
         }
         let devices = try await NotificationDevice
             .query(on: req.db)
@@ -45,13 +47,13 @@ struct NotificationController: RouteCollection {
             .all()
         let apnsTopic = Environment.get("APNS_TOPIC") ?? ""
         let ignoreIOS = req.apns.containers.container == nil || apnsTopic.isEmpty
-        if (ignoreIOS) {
+        if ignoreIOS {
             req.logger.error(
                 "Not sending notification to iOS devices because APNS configuration is missing"
             )
         }
         let ignoreAndroid = req.fcm.configuration == nil
-        if (ignoreAndroid) {
+        if ignoreAndroid {
             req.logger.error(
                 "Not sending notification to Android devices because Firebase Cloud Messaging configuration is missing"
             )
@@ -59,7 +61,7 @@ struct NotificationController: RouteCollection {
         var pushNotificationSent = false
         for device in devices {
             do {
-                if (device.platform == .ios && !ignoreIOS) {
+                if device.platform == .ios && !ignoreIOS {
                     try await req.apns.client.sendAlertNotification(
                         .init(
                             alert: .init(
@@ -94,25 +96,25 @@ struct NotificationController: RouteCollection {
                 }
             } catch {
                 let apnsError = error as? APNSError
-                if (
-                    apnsError?.reason == .badDeviceToken ||
-                    apnsError?.reason == .deviceTokenNotForTopic ||
-                    apnsError?.responseStatus == 410
-                ) {
+                guard
+                    apnsError?.reason != .badDeviceToken,
+                    apnsError?.reason != .deviceTokenNotForTopic,
+                    apnsError?.responseStatus != 410
+                else {
                     try await device.delete(on: req.db)
                     continue;
                 }
                 let googleError = error as? GoogleError
                 let googleErrorCode = googleError?.fcmError?.errorCode
-                if (googleErrorCode == .invalid || googleErrorCode == .unregistered) {
+                guard googleErrorCode != .invalid, googleErrorCode != .unregistered else {
                     try await device.delete(on: req.db)
                     continue;
                 }
                 req.logger.error("No notification was sent to a device because an error occured: \(error)")
             }
         }
-        if (pushNotificationSent) {
-            return .ok
+        guard !pushNotificationSent else {
+            return .noContent
         }
         try await req.email.sendEmail(
             receiver: user.email,
@@ -120,6 +122,6 @@ struct NotificationController: RouteCollection {
             message: dto.message,
             template: "push-notification-failed"
         )
-        return .ok
+        return .noContent
     }
 }

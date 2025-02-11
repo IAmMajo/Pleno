@@ -15,7 +15,7 @@ struct InternalController: RouteCollection {
                 statusCode: .ok
             )
         
-        routes.post("translate-record", ":lang", ":lang2", use: translateRecord).openAPI(
+        routes.put("translate-record", ":lang", ":lang2", use: translateRecord).openAPI(
             tags: openAPITag,
             summary: "Protokoll übersetzen",
             description: "Übersetzt ein Sitzungsprotokoll in eine andere Sprache.",
@@ -35,9 +35,15 @@ struct InternalController: RouteCollection {
     /// **POST** `/internal/translate-record/{lang}/{lang2}`
     @Sendable
     func translateRecord(req: Request) async throws -> AISendMessageDTO {
-        let lang = req.parameters.get("lang")!
-        let lang2 = req.parameters.get("lang2")!
-        let dto = try req.content.decode(AISendMessageDTO.self)
+        guard let lang = req.parameters.get("lang") else {
+            throw Abort(.badRequest, reason: "Missing request parameter! Expected lang.")
+        }
+        guard let lang2 = req.parameters.get("lang2") else {
+            throw Abort(.badRequest, reason: "Missing request parameter! Expected lang2.")
+        }
+        guard let dto = try? req.content.decode(AISendMessageDTO.self) else {
+            throw Abort(.badRequest, reason: "Invalid request body! Expected AISendMessageDTO.")
+        }
         let aiResponse = try await req.ai.getAIResponse(
             promptName: "translate-record",
             message: "\(lang) to \(lang2):\n\n\(dto.content)",

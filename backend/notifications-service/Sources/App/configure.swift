@@ -50,7 +50,7 @@ public func configure(_ app: Application) async throws {
     let apnsTeamID = Environment.get("APNS_TEAM_ID") ?? ""
     let apnsKeyID = Environment.get("APNS_KEY_ID") ?? ""
     let apnsPrivateKey = Environment.get("APNS_PRIVATE_KEY") ?? ""
-    if (!apnsTeamID.isEmpty && !apnsKeyID.isEmpty && !apnsPrivateKey.isEmpty) {
+    if !apnsTeamID.isEmpty && !apnsKeyID.isEmpty && !apnsPrivateKey.isEmpty {
         app.apns.containers.use(
             .init(
                 authenticationMethod: .jwt(
@@ -70,7 +70,7 @@ public func configure(_ app: Application) async throws {
     let fcmEmail = Environment.get("FCM_EMAIL") ?? ""
     let fcmProjectID = Environment.get("FCM_PROJECT_ID") ?? ""
     let fcmPrivateKey = Environment.get("FCM_PRIVATE_KEY") ?? ""
-    if (!fcmEmail.isEmpty && !fcmProjectID.isEmpty && !fcmPrivateKey.isEmpty) {
+    if !fcmEmail.isEmpty && !fcmProjectID.isEmpty && !fcmPrivateKey.isEmpty {
         app.fcm.configuration = .envServiceAccountKeyFields
     }
 

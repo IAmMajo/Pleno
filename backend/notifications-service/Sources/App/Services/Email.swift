@@ -15,7 +15,7 @@ struct Email {
         templateData: [String: String]? = nil
     ) async throws {
         let email = Environment.get("SMTP_EMAIL") ?? ""
-        if application.smtp.configuration.hostname.isEmpty || email.isEmpty {
+        guard !application.smtp.configuration.hostname.isEmpty, !email.isEmpty else {
             throw Abort(.internalServerError, reason: "SMTP configuration is missing")
         }
         var templateData = templateData ?? [:]
