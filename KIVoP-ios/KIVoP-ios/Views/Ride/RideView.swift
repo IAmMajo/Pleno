@@ -20,6 +20,8 @@ struct RideView: View {
                     }
                     .pickerStyle(.segmented)
                     .listRowBackground(Color.clear)
+                    // Alle Daten werden gruppiert
+                    // Je nach Gruppe wird eine andere View geladen um die Daten anzuzeigen
                     ForEach(viewModel.groupedData, id: \.key) { group in
                         Section(header: Text(group.key)
                             .padding(.leading, -5)
@@ -42,14 +44,10 @@ struct RideView: View {
                    }
                 }
                 .onAppear {
-                   Task {
-                       viewModel.fetchRides()
-                   }
+                   viewModel.fetchRides()
                 }
                 .refreshable {
-                    Task {
-                        viewModel.fetchRides()
-                    }
+                    viewModel.fetchRides()
                 }
             }
             .navigationTitle("Fahrgemeinschaften")

@@ -1,6 +1,7 @@
 import SwiftUI
 import MeetingServiceDTOs
 
+// Diese Komponente dient dazu die Profilbilder in den Fahrgemeinschaften anzuzeigen
 struct ProfilePictureRide: View {
     let name: String
     let id: UUID
@@ -11,15 +12,18 @@ struct ProfilePictureRide: View {
 
     var body: some View {
         VStack {
+            // Wenn Profilbild vorhanden ist wirdd as angezeigt
             if let profileImage = profileImage {
                 Image(uiImage: profileImage)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 50, height: 50)
                     .clipShape(Circle())
+            // Lageanzeige
             } else if isLoading {
                 ProgressView("Loading...")
                   .frame(maxWidth: 45, maxHeight: 45)
+            // Wenn kein Profilbild vorhanden ist, wird der shortName angezeigt
             } else {
                 Circle()
                     .fill(Color.gray)
@@ -37,6 +41,7 @@ struct ProfilePictureRide: View {
         }
     }
 
+    // Über den RideManager wird der API-Aufruf durchgeführt
     private func fetchUserImage() {
         Task {
             do {
