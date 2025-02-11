@@ -4,12 +4,22 @@ import PosterServiceDTOs
 import AuthServiceDTOs
 
 struct LocationDetailView: View {
+    // locationViewModel als EnvironmentObject
     @EnvironmentObject private var locationViewModel: LocationsViewModel
     
+    // Plakatposition mit Adresse wird beim Aufruf übergeben
     let position: PosterPositionWithAddress
+    
+    // alle User werden beim Aufruf übergeben
     var users: [UserProfileDTO]
+    
+    // der Sammelposten, zu dem die Plakatposition gehört, wird beim Aufruf übergeben
     var poster: PosterResponseDTO
+    
+    // Ablaufdatum
     @State private var date: Date = Date()
+    
+    // Bool Variable für Confirmation Alert
     @State private var showDeleteConfirmation = false
     
     var body: some View {
@@ -17,6 +27,7 @@ struct LocationDetailView: View {
             ScrollViewReader { proxy in // Hinzufügen des ScrollViewReaders
                 ScrollView {
                     VStack {
+                        // Bild des Plakates
                         imageSection
                             .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
 
@@ -41,6 +52,7 @@ struct LocationDetailView: View {
             }
         }
         .onAppear {
+            // Beim Aufruf der View wird das Verfallsdatum direkt der Variable date zugewiesen
             date = position.position.expiresAt
         }
     }
@@ -50,6 +62,8 @@ struct LocationDetailView: View {
 
 
 extension LocationDetailView {
+    
+    // Hier wird das Bild der Plakatposition angezeigt
     private var imageSection: some View {
         Group {
             if let imageData = position.image, // Unwrap optional Data
@@ -65,6 +79,7 @@ extension LocationDetailView {
         }
     }
     
+    // Die Überschrift einer Plakatposition ist die Adresse
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 8){
             Text(position.address).font(.largeTitle).fontWeight(.semibold)
@@ -73,14 +88,21 @@ extension LocationDetailView {
     
     private var bodySection: some View {
         VStack(alignment: .leading, spacing: 8){
+            // Statustext -> Bsp: "hängt noch nicht"
             Text(PosterHelper.getDateStatusText(position: position.position).text)
                .font(.headline)
                .foregroundStyle(PosterHelper.getDateStatusText(position: position.position).color)
+            
+            // Progressbar zur Anzeige des Status
             ProgressBarView(position: position.position)
-            NavigationLink(destination: EditPosterPosition(poster: poster,selectedUsers: position.position.responsibleUsers.map { $0.id }, posterPosition: position.position, date: $date)){
+            
+            // Link, um die Plakatposition zu bearbeiten
+            NavigationLink(destination: EditPosterPosition(poster: poster,posterPosition: position.position, selectedUsers: position.position.responsibleUsers.map { $0.id }, date: $date)){
                 Text("Plakatposition bearbeiten")
             }.padding(.vertical)
             Divider()
+            
+            // Ablaufdatum anzeigen
             HStack{
                 Text("Ablaufdatum:").font(.headline)
                 Spacer()
@@ -89,15 +111,13 @@ extension LocationDetailView {
             
             Divider()
             VStack(alignment: .leading){
-
+                // Verantwortliche Personen anzeigen
                 if position.position.responsibleUsers.count == 1 {
                     Text("Verantwortliche Person").font(.headline)
                 } else if position.position.responsibleUsers.count > 1 {
                     Text("Verantwortliche Personen").font(.headline)
                 }
-
                 
-
                 ForEach(position.position.responsibleUsers, id: \.id) { user in
                     Text(user.name)
                         .font(.body)
@@ -124,6 +144,7 @@ extension LocationDetailView {
         }
         .padding()
         .buttonStyle(.bordered)
+        // alert zum Bestätigen des Löschens
         .alert("Plakatposition löschen?", isPresented: $showDeleteConfirmation) {
             Button("Abbrechen", role: .cancel) {
                 // Benutzer hat das Löschen abgebrochen

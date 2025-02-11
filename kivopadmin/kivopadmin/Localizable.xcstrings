@@ -4891,6 +4891,7 @@
       }
     },
     "No records available." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

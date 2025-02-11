@@ -2,25 +2,45 @@ import SwiftUI
 import PosterServiceDTOs
 import MapKit
 
-
+// MainView für deinen Sammelposten (Karte)
 struct LocationsView: View {
+    // locationViewModel als EnvironmentObject
     @EnvironmentObject private var locationViewModel: LocationsViewModel
+    
+    // Startwert für die Karte -> Hier: Datteln
     @State private var mapRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
+    
+    // Bool Variable: Ist die Suche aktiviert?
     @State private var isSearchActive = false
+    
+    // Suchtext
     @State private var searchText = ""
+    
+    // Bool Variable, ob das Filter Menu gezeigt werden soll
     @State private var showMenu = false
+    
+    // Verfallsdatum
     @State private var expiresAt: Date = Date()
+    
+    // Verantwortliche User. Ist zunächst leer
     @State private var selectedUsers: [UUID] = []
+    
+    // Bool Variable für das User Selection Sheet
     @State private var showUserSelectionSheet = false
-    @State private var maxWidth2: CGFloat? = nil
+
+    // Optionen für den Filter, um nach Plakatpositionen zu suchen
     private var filterOptions: [PosterPositionStatus] = [.toHang, .hangs, .damaged, .overdue, .takenDown]
     
+    // ViewModel für die Nutzerverwaltung
     @ObservedObject var userManager = UserManager()
     
+    // Sammelposten
     var poster: PosterResponseDTO
+    
+    // Maximale Breite der Liste (oben) und der PlakatPosition (unten)
     let maxWidth: CGFloat = 700
     
     init(poster: PosterResponseDTO) {
@@ -29,14 +49,18 @@ struct LocationsView: View {
     
     var body: some View {
         ZStack {
+            // Karte
             mapLayer
                 .ignoresSafeArea()
+            
+            // Wenn der Benutzer Plakatpositionen hinzufügen will, wird editingView gezeigt
             if locationViewModel.isEditing{
                 editingView
             }
             VStack {
                 HStack(alignment: .top){
                     VStack{
+                        // Filter, um bestimmte Plakatpositionen zu zeigen
                         filterButton
                         if showMenu{
                             filterMenu
@@ -45,18 +69,24 @@ struct LocationsView: View {
                     Spacer()
                     // Zeige die Adresse oder lade sie asynchron
                     VStack{
-                        if isSearchActive {  // Wenn die Suche aktiv ist, zeigt das Textfeld an
+                        // Wenn die Suche aktiv ist, zeigt das Textfeld an
+                        if isSearchActive {
                             // Searchbar, um Karte zu einer Adresse zu bewegen
                             searchBarSection
                         } else {
-                            // Dropdown Liste
+                            // Dropdown Liste mit Plakatpositionen
                             dropdownSection
                         }
                     }
                     Spacer()
                     VStack{
+                        // Button, der die Suchfunktion auslöst
                         searchButton
+                        
+                        // Button, ob isEditing zu togglen
                         editButton
+                        
+                        // Button, um zwischen Satellitenansicht und normaler Ansicht zu wechseln
                         mapStyleButton
                     }
                 }
@@ -97,15 +127,20 @@ struct LocationsView: View {
             MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: position.position.latitude, longitude: position.position.longitude)){
                 LocationMapAnnotationView(position: position).scaleEffect(locationViewModel.selectedPosterPosition == position ? 1 : 0.6).shadow(radius: 10)
                     .onTapGesture {
+                        // Wenn eine Position ausgewählt wird, wird der Bearbeitungsmodus deaktiviert
                         withAnimation {
                             locationViewModel.isEditing = false
                         }
+                        
+                        // Wenn eine Position ausgewählt wird, wird sie angezeigt
                         locationViewModel.showNextLocation(location: position)
                     }
             }
+        // Fallunterscheidung: Satelliten View oder normale Ansicht
         }).mapStyle(locationViewModel.satelliteView ? .imagery : .standard)
     }
     
+    // Suchleiste
     private var searchBarSection: some View {
         ZStack{
             TextField("Suche Adresse", text: $searchText, onCommit: {
@@ -125,21 +160,23 @@ struct LocationsView: View {
         }.frame(maxWidth: maxWidth)
     }
     
+    // Dropdown Liste
     private var dropdownSection: some View {
         VStack{
             Button(action: {
                 locationViewModel.toggleLocationsList()
                 withAnimation {
+                    // Wenn die Liste ausgeklappt wird, wird der Bearbeitungsmodus deaktiviert
                     locationViewModel.isEditing = false
                 }
             }){
-                //Text(locationViewModel.selectedPosterPosition?.address ?? "Wählen Sie eine Position aus").foregroundColor(.primary).frame(height: 55).frame(maxWidth: .infinity)
+                // Ansicht der "Überschrift" der Liste
                 Text(locationViewModel.selectedPosterPosition?.address ?? "Wählen Sie eine Position aus").foregroundColor(.primary).frame(height: 55).frame(maxWidth: .infinity)
                     .overlay(alignment: .leading){
                         Image(systemName: "arrow.down").font(.headline).foregroundColor(.primary).padding().rotationEffect(Angle(degrees: locationViewModel.showLocationsList ? 180 : 0))
                     }
             }
-            
+            // Liste wird angezeigt, wenn showLocationsList true ist
             if locationViewModel.showLocationsList{
                 LocationsListView()
             }
@@ -149,6 +186,8 @@ struct LocationsView: View {
             .padding()
             .frame(maxWidth: maxWidth)
     }
+    
+    // Button, um die Suche nach einem Ort zu starten
     private var searchButton: some View {
         Button {
             withAnimation {
@@ -165,6 +204,8 @@ struct LocationsView: View {
             
         }
     }
+    
+    // Button, der das Filter Menu einblendet
     private var filterButton: some View {
         Button {
             withAnimation {
@@ -174,17 +215,21 @@ struct LocationsView: View {
             Image(systemName: "line.3.horizontal.decrease.circle").font(.headline).padding(16).foregroundColor(.primary).background(.thickMaterial).cornerRadius(10).shadow(radius: 4).padding()
         }
     }
+    
+    // FilterMenu, um nach einem bestimmten Status in der Karte zu filtern
     private var filterMenu: some View {
-        
         VStack(spacing: 20) {
+            // Für jede FilterOption wird ein Icon angezeigt
             ForEach(filterOptions, id: \.self) { option in
                 HStack{
                     ZStack{
+                        // ausgewählter Filter wird hervorgehoben
                         if option == locationViewModel.selectedFilter{
                             RoundedRectangle(cornerRadius: 8) // Abgerundete Ecken
                                 .fill(Color.gray.opacity(0.2)) // Farbe und Transparenz
                                 .frame(width: 60, height: 30)
                         }
+                        // Button, um Filter auszuwählen
                         Button(action: {
                             withAnimation {
                                 if option == locationViewModel.selectedFilter{
@@ -214,16 +259,14 @@ struct LocationsView: View {
         .shadow(radius: 4)
         
     }
+    // Button, um den Bearbeitungsmodus zu aktivieren
     private var editButton: some View {
         Button {
-            
             withAnimation {
                 locationViewModel.showLocationsList = false
                 locationViewModel.selectedPosterPosition = nil
                 locationViewModel.isEditing.toggle()  // Sichtbarkeit des Menüs umschalten
-                
             }
-            
         } label: {
             if locationViewModel.isEditing {
                 Image(systemName: "xmark.circle.fill").font(.headline).padding(16).foregroundColor(.red).background(.thickMaterial).cornerRadius(10).shadow(radius: 4).padding()
@@ -234,6 +277,7 @@ struct LocationsView: View {
         }
     }
     
+    // Button, um den Stil der Karte anzupassen
     private var mapStyleButton: some View {
         Button {
             locationViewModel.satelliteView.toggle()  // Umschalten der Kartenansicht
@@ -249,7 +293,7 @@ struct LocationsView: View {
         }
     }
     
-    
+    // liefert die Anzahl der PlakatPositionen nach Status
     func getSummaryCount(for status: PosterPositionStatus) -> String {
         switch status {
         case .toHang:
@@ -267,9 +311,7 @@ struct LocationsView: View {
         }
     }
     
-    
-    
-    
+    // Suche nach einem Ort
     private func performSearch() {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = searchText
@@ -284,6 +326,8 @@ struct LocationsView: View {
             // Wähle das erste Ergebnis aus
             if let firstResult = response.mapItems.first {
                 let coordinate = firstResult.placemark.coordinate
+                
+                // der user wird zu dem Ort geführt
                 locationViewModel.mapLocation = MKCoordinateRegion(
                     center: coordinate,
                     span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001)
@@ -291,45 +335,27 @@ struct LocationsView: View {
             }
         }
     }
+    
+    // Ansicht des Bearbeitungsmodus
     private var editingView: some View {
         ZStack{
             VStack {
                 Spacer()
-                ZStack {
-                    Rectangle()
-                        .frame(width: 1, height: 30)
-                        .foregroundColor(.blue)
-                    Rectangle()
-                        .frame(width: 30, height: 1)
-                        .foregroundColor(.blue)
-                }
+                // Fadenkreuz, genau auf der Mitte des Bildschirms
+                fadenkreuz
                 Spacer()
             }
             VStack{
                 Spacer()
                 HStack(alignment: .bottom){
                     VStack(alignment: .leading, spacing: 8) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Ablaufdatum")
-                                .font(.caption)
-                                .foregroundColor(.primary)
-                            DatePicker("Datum", selection: $expiresAt, displayedComponents: .date)
-                                .datePickerStyle(.compact)
-                                .labelsHidden()
-                                .cornerRadius(10)
-                        }
+                        // Auswahlmöglichkeit für das Ablaufdatum
+                        ablaufDatum
                         
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Benutzer auswählen")
-                                .font(.caption)
-                                .foregroundColor(.primary)
-                            Button(action: {
-                                showUserSelectionSheet.toggle()
-                            }) {
-                                Text("Benutzer auswählen")
-                                    .font(.headline).frame(width: 200, height: 45)
-                            }.buttonStyle(.bordered)
-                        }
+                        // Verantwortliche Personen anzeigen
+                        selectResponsibleUsers
+                        
+                        // Plakatposition hinzufügen
                         Button(action: addLocation) {
                             Text("Standort hinzufügen")
                                 .font(.headline).frame(width: 200, height: 45)
@@ -343,6 +369,7 @@ struct LocationsView: View {
                 }
             }
             
+            // Wenn Benutzer als Verantwortliche Personen ausgewählt wurden, erscheinen sie im unteren, rechten Bildschirmrand
             if locationViewModel.selectedUserNames != [] {
                 HStack{
                     Spacer()
@@ -361,24 +388,58 @@ struct LocationsView: View {
                     }
                 }
             }
-            
-            
-            
-            
-            
-            
         }
     }
+    private var fadenkreuz: some View {
+        ZStack {
+            Rectangle()
+                .frame(width: 1, height: 30)
+                .foregroundColor(.blue)
+            Rectangle()
+                .frame(width: 30, height: 1)
+                .foregroundColor(.blue)
+        }
+    }
+    
+    private var ablaufDatum: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Ablaufdatum")
+                .font(.caption)
+                .foregroundColor(.primary)
+            DatePicker("Datum", selection: $expiresAt, displayedComponents: .date)
+                .datePickerStyle(.compact)
+                .labelsHidden()
+                .cornerRadius(10)
+        }
+    }
+    
+    private var selectResponsibleUsers: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Benutzer auswählen")
+                .font(.caption)
+                .foregroundColor(.primary)
+            Button(action: {
+                showUserSelectionSheet.toggle()
+            }) {
+                Text("Benutzer auswählen")
+                    .font(.headline).frame(width: 200, height: 45)
+            }.buttonStyle(.bordered)
+        }
+    }
+    
+    // Plakatposition hinzufügen
     private func addLocation() {
         let currentLocation = locationViewModel.mapLocation.center
         
-        // Create a new CreatePosterPositionDTO object
+        // CreatePosterPositionDTO befüllen
         let newPosterPosition = CreatePosterPositionDTO(
             latitude: currentLocation.latitude,
             longitude: currentLocation.longitude,
             responsibleUsers: selectedUsers,
             expiresAt: expiresAt
         )
+        
+        // Positition an den Server schicken
         locationViewModel.createPosterPosition(posterPosition: newPosterPosition, posterId: poster.id)
                 
         // Eine Sekunde warten, damit der Server die neuen Daten verarbeiten kann

@@ -27,6 +27,7 @@ struct EditPosterView: View {
                 }
                 
                 Section(header: Text("Posterdesign")) {
+                    // Bild anzeigen, wenn schon eins vorhanden ist
                     if let imageData = imageData, let uiImage = UIImage(data: imageData) {
                         VStack {
                             Image(uiImage: uiImage)
@@ -36,6 +37,7 @@ struct EditPosterView: View {
                                 .cornerRadius(10)
                                 .padding(.bottom, 10)
                             
+                            // Bild entfernen
                             Button(action: {
                                 // Bild entfernen
                                 self.imageData = nil
@@ -45,6 +47,7 @@ struct EditPosterView: View {
                                     .foregroundColor(.red)
                             }
                         }
+                    // Bild auswählen, wenn noch keine Auswahl getroffen wurde
                     } else {
                         PhotosPicker(
                             selection: $selectedItem,
@@ -63,7 +66,7 @@ struct EditPosterView: View {
                         }
                     }
                 }
-                
+                // Button zum Speichern
                 Button(action: saveSammelposten) {
                     Text("Sammelposten speichern")
                         .frame(maxWidth: .infinity, alignment: .center)

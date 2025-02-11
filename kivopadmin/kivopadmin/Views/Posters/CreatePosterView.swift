@@ -4,10 +4,14 @@ import PhotosUI
 
 struct CreatePosterView: View {
     @Environment(\.dismiss) var dismiss
+    
+    // leere Variablen, um Sammelposten zu erstellen
     @State private var title: String = ""
     @State private var description: String = ""
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var imageData: Data? = nil // Optional Data für das Bild
+    
+    // ViewModel für Sammelposten
     @State var posterManager = PosterManager()
     
     var body: some View {
@@ -19,6 +23,7 @@ struct CreatePosterView: View {
                 }
                 
                 Section(header: Text("Posterdesign")) {
+                    // Bild für den Sammelposten
                     if let imageData = imageData, let uiImage = UIImage(data: imageData) {
                         VStack {
                             Image(uiImage: uiImage)
@@ -82,8 +87,9 @@ struct CreatePosterView: View {
             image: imageData
         )
         
-        //posterManager.createPoster(poster: newPoster)
         posterManager.createPoster(poster: newPoster)
+        
+        // Eine Sekunde warten, damit das Backend die Anfrage verarbeiten kann und der neue Sammelposten berücksichtigt werden kann.
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             posterManager.fetchPoster()
         }

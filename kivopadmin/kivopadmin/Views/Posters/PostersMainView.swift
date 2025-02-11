@@ -3,19 +3,21 @@ import PosterServiceDTOs
 import PhotosUI
 
 struct PostersMainView: View {
+    // locationViewModel wird hier initialisiert und an alle "Unter-Views" weitergegeben
     @StateObject private var locationViewModel = LocationsViewModel()
-    @State private var isPostenSheetPresented = false // Zustand für das Sheet
-    @State private var postersFiltered: [PosterResponseDTO] = []
     
+    // Bool für Sheet
+    @State private var isPostenSheetPresented = false
+    
+    // ViewModel für Sammelposten
+    @StateObject private var posterManager = PosterManager()
 
-    @StateObject private var posterManager = PosterManager() // MeetingManager als StateObject
-    
-    @State private var isLoading = false
-    @State private var error: String?
-    
+    // Suchtext
     @State private var searchText = ""
     
+    // Bool für Delete Confirmation
     @State private var showDeleteConfirmation = false
+    
     @State private var posterToDelete: UUID? // Die ID des Posters, das gelöscht werden soll
     @State private var isEditSheetPresented = false // Steuert das Sheet
     @State private var selectedPoster: PosterResponseDTO? // Das aktuell zu bearbeitende Poster
@@ -35,6 +37,7 @@ struct PostersMainView: View {
                     Text("Keine Sammelposten gefunden.")
                         .foregroundColor(.secondary)
                 } else {
+                    // Wenn die Sammelposten geladen wurden, wird die Liste angezeigt
                     listView()
                 }
             }
@@ -52,9 +55,12 @@ struct PostersMainView: View {
                 }
             }
         }
+        // Sheet um Sammelposten zu erstellen
         .sheet(isPresented: $isPostenSheetPresented) {
             CreatePosterView(posterManager: posterManager)
         }
+        
+        // Sheet um Sammelposten zu bearbeiten
         .sheet(isPresented: $isEditSheetPresented) {
             if let selectedPoster = selectedPoster {
                 EditPosterView(poster: selectedPoster)
@@ -63,6 +69,7 @@ struct PostersMainView: View {
         .onAppear(){
             posterManager.fetchPostersAndSummaries()
         }
+        // Confirmation Alert -> der Nutzer soll das Löschen bestätigen
         .alert("Sammelposten löschen", isPresented: $showDeleteConfirmation, actions: {
             Button("Löschen", role: .destructive) {
                 if let posterId = posterToDelete {
@@ -106,6 +113,7 @@ extension PostersMainView {
             ForEach(posterManager.postersWithSummaries, id: \.poster.id) { posterWithSummary in
                 PosterRowView(poster: posterWithSummary)
                     .listRowSeparator(.hidden)
+                    // SwipeAction um Sammelposten zu löschen
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         Button(role: .destructive) {
                             deletePoster(poster: posterWithSummary.poster)
@@ -118,12 +126,17 @@ extension PostersMainView {
     }
     
 }
+
+// Listenelement Anzeige
 struct PosterRowView: View {
+    // Sammelposten mit zugehöriger Zusammenfassung und Bild wird übergeben
     let poster: PosterWithSummary
     
     @StateObject private var locationViewModel = LocationsViewModel()
     
     var body: some View {
+        // Link zur Karte
+        // locationViewModel wird als EnvironmentObject gesetzt
         NavigationLink(destination: LocationsView(poster: poster.poster).environmentObject(locationViewModel)) {
             VStack {
                 HStack(spacing: 5) {

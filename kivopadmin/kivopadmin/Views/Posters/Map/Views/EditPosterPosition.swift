@@ -4,30 +4,48 @@ import MeetingServiceDTOs
 import PosterServiceDTOs
 
 struct EditPosterPosition: View {
+    
+    // locationViewModel als EnvironmentObject
     @EnvironmentObject private var locationViewModel: LocationsViewModel
+    
     @Environment(\.dismiss) var dismiss
+    
+    // es wird der Sammelposten, von dem eine Plakatposition bearbeitet werden soll, beim Aufruf der View mitgeliefert
     var poster: PosterResponseDTO
+    
+    // Plakatposition wird beim Aufruf der View mitgeliefert
+    var posterPosition: PosterPositionResponseDTO
+    
+    // alle Verantwortlichen Personen werden mitgeliefert
     @State var selectedUsers: [UUID]
+    
+    // Searchstring für Suchleiste
     @State private var searchText: String = ""
     
+    // ViewModel für die Benutzerverwaltung
     @ObservedObject var userManager = UserManager()
-    
-    var posterPosition: PosterPositionResponseDTO
+
+    // Ablaufdatum
     @Binding var date: Date
+    
     var body: some View {
         NavigationStack {
             HStack{
                 Text("Ablaufdatum")
                     .font(.headline)
                 Spacer()
+                // Picker zum auswählen des Ablaufdatums
                 DatePicker("", selection: $date)
                     .datePickerStyle(CompactDatePickerStyle())
             }.padding()
             List {
+                // Alle verfügbaren User werden aufgelistet
                 ForEach(filteredUsers, id: \.email) { user in
                     HStack {
                         Text(user.name) // Fallback, falls name nil ist
                         Spacer()
+                        // Verantwortliche Personen
+                        // Wenn im Array selectedUsers die Id vorhanden ist, wird der User mit einem blauen Haken markiert
                         if selectedUsers.contains(user.uid) {
                             Image(systemName: "checkmark")
                                 .foregroundColor(.blue)
@@ -35,6 +53,7 @@ struct EditPosterPosition: View {
                     }
                     .contentShape(Rectangle())
                     .onTapGesture {
+                        // Auswahl togglen
                         toggleSelection(for: user)
                     }
                 }
@@ -51,25 +70,30 @@ struct EditPosterPosition: View {
             }
         }
         .onAppear {
+            // beim Aufruf der View wird die Variable date mit dem tatsächlichen Verfallsdatum befüllt
             date = posterPosition.expiresAt
+            
+            // alle User laden
             userManager.fetchUsers()
         }
         .onDisappear {
+            // wenn die View verlassen wird, wird gespeichert
             save()
         }
     }
 
+    // gefilterte Benutzer auf Basis des Searchstrings
     private var filteredUsers: [UserProfileDTO] {
         if searchText.isEmpty {
             return userManager.users
         } else {
             return userManager.users.filter { user in
                 return user.name.localizedCaseInsensitiveContains(searchText)
-                return false
             }
         }
     }
-
+    
+    // Auswahl der Person togglen
     private func toggleSelection(for user: UserProfileDTO) {
         let uid = user.uid
         if let index = selectedUsers.firstIndex(of: uid) {
@@ -81,8 +105,8 @@ struct EditPosterPosition: View {
         }
     }
     
+    // Funktion zum speichern der Plakatposition
     private func save(){
-        
         // Create a new CreatePosterPositionDTO object
         let patchUserPosterPosition = CreatePosterPositionDTO(
             latitude: posterPosition.latitude,
