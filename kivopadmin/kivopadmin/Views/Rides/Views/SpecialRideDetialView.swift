@@ -1,5 +1,6 @@
 import SwiftUI
 import MapKit
+import RideServiceDTOs
 
 struct SpecialRideDetailView: View {
     @EnvironmentObject private var rideViewModel: RideViewModel
@@ -11,41 +12,15 @@ struct SpecialRideDetailView: View {
     var body: some View {
         List {
             if let rideDetail = rideViewModel.specialRideDetail {
-                Section(header: Text("Fahrtdetails")) {
-                    Text("Fahrt: \(rideDetail.name)")
-                    Text("Fahrer: \(rideDetail.driverName)")
-                    Text("Fahrzeug: \(rideDetail.vehicleDescription ?? "Keine Angabe")")
-                    Text("Startzeit: \(DateTimeFormatter.formatDate(rideDetail.starts)) um \(DateTimeFormatter.formatTime(rideDetail.starts))")
-                    Text("Endzeit: \(DateTimeFormatter.formatDate(rideDetail.ends)) um \(DateTimeFormatter.formatTime(rideDetail.ends))")
-                    Text("Freie Plätze: \(rideDetail.emptySeats)")
-                }
+                
+                // Details zur Fahrt
+                detailsSection(rideDetail: rideDetail)
 
-                Section(header: Text("Startort")) {
-                    Button(action: {
-                        UIPasteboard.general.string = address
-                    }) {
-                        HStack {
-                            Text("\(address)")
-                                .fixedSize(horizontal: false, vertical: true)
-                            Spacer()
-                            Image(systemName: "doc.on.doc").foregroundColor(.blue)
-                        }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-                .onAppear {
-                    updateAddress(for: CLLocationCoordinate2D(latitude: Double(rideDetail.startLatitude), longitude: Double(rideDetail.startLongitude)))
-                }
+                // Hier wird die Adresse angezeigt
+                placeSection(rideDetail: rideDetail)
 
-                Section(header: Text("Mitfahrer")) {
-                    if rideDetail.riders.isEmpty {
-                        Text("Keine Mitfahrer")
-                    } else {
-                        ForEach(rideDetail.riders, id: \.id) { rider in
-                            Text(rider.username)
-                        }
-                    }
-                }
+                // Mitfahrer
+                participantsSection(rideDetail: rideDetail)
             } else {
                 Text("Lade Fahrtdetails...")
                     .foregroundColor(.gray)
@@ -57,7 +32,7 @@ struct SpecialRideDetailView: View {
         }
     }
     
-    // 🗺️ Adresse für Koordinaten abrufen
+    // Adresse für Koordinaten abrufen
     private func updateAddress(for coordinate: CLLocationCoordinate2D) {
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         geocoder.reverseGeocodeLocation(location) { placemarks, error in
@@ -78,6 +53,51 @@ struct SpecialRideDetailView: View {
                 .joined(separator: ", ")
             } else {
                 address = "Keine Adresse gefunden"
+            }
+        }
+    }
+}
+
+extension SpecialRideDetailView{
+    
+    private func detailsSection(rideDetail: GetSpecialRideDetailDTO) -> some View {
+        Section(header: Text("Fahrtdetails")) {
+            Text("Fahrt: \(rideDetail.name)")
+            Text("Fahrer: \(rideDetail.driverName)")
+            Text("Fahrzeug: \(rideDetail.vehicleDescription ?? "Keine Angabe")")
+            Text("Startzeit: \(DateTimeFormatter.formatDate(rideDetail.starts)) um \(DateTimeFormatter.formatTime(rideDetail.starts))")
+            Text("Endzeit: \(DateTimeFormatter.formatDate(rideDetail.ends)) um \(DateTimeFormatter.formatTime(rideDetail.ends))")
+            Text("Freie Plätze: \(rideDetail.emptySeats)")
+        }
+    }
+    
+    private func placeSection(rideDetail: GetSpecialRideDetailDTO) -> some View {
+        Section(header: Text("Startort")) {
+            Button(action: {
+                UIPasteboard.general.string = address
+            }) {
+                HStack {
+                    Text("\(address)")
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    Image(systemName: "doc.on.doc").foregroundColor(.blue)
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+        .onAppear {
+            updateAddress(for: CLLocationCoordinate2D(latitude: Double(rideDetail.startLatitude), longitude: Double(rideDetail.startLongitude)))
+        }
+    }
+    
+    private func participantsSection(rideDetail: GetSpecialRideDetailDTO) -> some View {
+        Section(header: Text("Mitfahrer")) {
+            if rideDetail.riders.isEmpty {
+                Text("Keine Mitfahrer")
+            } else {
+                ForEach(rideDetail.riders, id: \.id) { rider in
+                    Text(rider.username)
+                }
             }
         }
     }

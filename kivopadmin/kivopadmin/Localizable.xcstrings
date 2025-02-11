@@ -119,6 +119,7 @@
       }
     },
     "(ca. 160 min.)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -461,6 +462,7 @@
       }
     },
     "8/12" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -483,6 +485,7 @@
       }
     },
     "18:06" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -505,6 +508,7 @@
       }
     },
     "21.01.2024" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -637,6 +641,7 @@
       }
     },
     "Abhängedatum:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1451,6 +1456,7 @@
       }
     },
     "Aufhängen\nbestätigen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3114,6 +3120,7 @@
       }
     },
     "Hello, World!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3158,6 +3165,7 @@
       }
     },
     "In der alten Turnhalle hinter dem Friedhof\nAltes Grab 5 b, 42069 Hölle" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3290,6 +3298,7 @@
       }
     },
     "Jahreshauptversammlung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5333,6 +5342,7 @@
       }
     },
     "Plakat %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5646,6 +5656,7 @@
       }
     },
     "Protokoll:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6622,6 +6633,7 @@
       }
     },
     "Unbekannter Status" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6666,6 +6678,7 @@
       }
     },
     "Verantwortliche %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

@@ -39,19 +39,12 @@ struct RecordsMainView: View {
                         .foregroundColor(.secondary)
                 } else {
                     // Searchbar
-                    HStack {
-                        HStack(spacing: 8) {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.gray)
-                            TextField("Nach Meeting suchen", text: $searchText)
-                                .textFieldStyle(PlainTextFieldStyle())
-                        }
-                        .padding(8)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-                    }
-                    .padding(.horizontal)
+                    searchbar
                     
+                    // Legende
+                    legende
+                    
+                    // Liste aller Sitzungen mit Protokollen
                     List {
                         ForEach(filteredMeetingsWithRecords, id: \.meeting.id) { meetingWithRecords in
                             MeetingRow(
@@ -73,6 +66,46 @@ struct RecordsMainView: View {
     }
 
 
+}
+
+extension RecordsMainView {
+    private var searchbar: some View {
+        HStack {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.gray)
+                TextField("Nach Meeting suchen", text: $searchText)
+                    .textFieldStyle(PlainTextFieldStyle())
+            }
+            .padding(8)
+            .background(Color(.systemGray6))
+            .cornerRadius(8)
+        }
+        .padding(.horizontal)
+    }
+    
+    private var legende: some View {
+        HStack{
+            Text("In Bearbeitung")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .padding(4)
+                .background(Color.orange.opacity(0.2))
+                .cornerRadius(4)
+            Text("Eingereicht")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .padding(4)
+                .background(Color.blue.opacity(0.2))
+                .cornerRadius(4)
+            Text("Veröffentlicht")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .padding(4)
+                .background(Color.green.opacity(0.2))
+                .cornerRadius(4)
+        }
+    }
 }
 
 
@@ -102,33 +135,6 @@ struct MeetingRow: View {
                 Text(meetingWithRecords.meeting.name)
                     .font(.headline)
                     .foregroundColor(.primary)
-                
-                Text({
-                    switch meetingWithRecords.records.first?.status {
-                    case .underway:
-                        return "In Bearbeitung"
-                    case .submitted:
-                        return "Eingereicht"
-                    case .approved:
-                        return "Veröffentlicht"
-                    case .none:
-                        return "Unbekannter Status"
-                    }
-                }()).font(.subheadline)
-                    .padding(4)
-                    .background({
-                        switch meetingWithRecords.records.first?.status {
-                        case .underway:
-                            return Color.orange.opacity(0.2)
-                        case .submitted:
-                            return Color.blue.opacity(0.2)
-                        case .approved:
-                            return Color.green.opacity(0.2)
-                        case .none:
-                            return Color.gray.opacity(0.2)
-                        }
-                    }())
-                    .cornerRadius(4)
 
                 
                 Spacer()
@@ -136,16 +142,24 @@ struct MeetingRow: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(meetingWithRecords.records, id: \.lang) { record in
-                            Text(getLanguage(langCode: record.lang))
+                            Text(LanguageManager.getLanguage(langCode: record.lang))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .padding(4)
-                                .background(Color.blue.opacity(0.2))
+                                .background(
+                                    (record.status == .underway) ? Color.orange.opacity(0.2) :
+                                    (record.status == .submitted) ? Color.blue.opacity(0.2) :
+                                    (record.status == .approved) ? Color.green.opacity(0.2) :
+                                    Color.gray.opacity(0.2)
+                                )
                                 .cornerRadius(4)
                         }
                     }
-                    .padding(.horizontal) // Optionales Padding für mehr Abstand an den Seiten
-                }
+                    .padding(.horizontal)
+                }.fixedSize(horizontal: true, vertical: false)
+
+
+
 
                 
                 Image(systemName: expandedMeetingID == meetingWithRecords.meeting.id ? "chevron.up" : "chevron.down")
@@ -160,43 +174,6 @@ struct MeetingRow: View {
 
     }
 
-    private func getLanguage(langCode: String) -> String {
-        let languages: [(name: String, code: String)] = [
-            ("Arabisch", "ar"),
-            ("Chinesisch", "zh"),
-            ("Dänisch", "da"),
-            ("Deutsch", "de"),
-            ("Englisch", "en"),
-            ("Französisch", "fr"),
-            ("Griechisch", "el"),
-            ("Hindi", "hi"),
-            ("Italienisch", "it"),
-            ("Japanisch", "ja"),
-            ("Koreanisch", "ko"),
-            ("Niederländisch", "nl"),
-            ("Norwegisch", "no"),
-            ("Polnisch", "pl"),
-            ("Portugiesisch", "pt"),
-            ("Rumänisch", "ro"), // Hinzugefügt
-            ("Russisch", "ru"),
-            ("Schwedisch", "sv"),
-            ("Spanisch", "es"),
-            ("Thai", "th"), // Hinzugefügt
-            ("Türkisch", "tr"),
-            ("Ungarisch", "hu")
-        ]
-
-
-        // Suche nach dem Kürzel und gib den Namen zurück
-        if let language = languages.first(where: { $0.code == langCode }) {
-            return language.name
-        }
-
-        // Standardwert, falls das Kürzel nicht gefunden wird
-        return langCode
-    }
-
-    
     private var DropdownView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 4) {
@@ -204,9 +181,15 @@ struct MeetingRow: View {
                     NavigationLink(destination: MarkdownEditorView(meetingId: meetingWithRecords.meeting.id, lang: record.lang)) {
                         HStack {
                             Text("Protokoll öffnen in")
-                            Text(getLanguage(langCode: record.lang))
+                            Text(LanguageManager.getLanguage(langCode: record.lang))
                                 .padding(4)
-                                .background(Color.blue.opacity(0.2))
+                                .foregroundColor(.secondary)
+                                .background(
+                                    (record.status == .underway) ? Color.orange.opacity(0.2) :
+                                    (record.status == .submitted) ? Color.blue.opacity(0.2) :
+                                    (record.status == .approved) ? Color.green.opacity(0.2) :
+                                    Color.gray.opacity(0.2)
+                                )
                                 .cornerRadius(4)
 
 
@@ -228,8 +211,3 @@ struct MeetingRow: View {
     }
 }
 
-
-
-#Preview {
-    RecordsMainView()
-}

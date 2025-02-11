@@ -4,42 +4,24 @@ import PhotosUI
 
 struct PostersMainView: View {
     @StateObject private var locationViewModel = LocationsViewModel()
-   @State private var isPostenSheetPresented = false // Zustand für das Sheet
+    @State private var isPostenSheetPresented = false // Zustand für das Sheet
     @State private var postersFiltered: [PosterResponseDTO] = []
-   
-   @StateObject private var postersViewModel = PostersViewModel()
+    
+
     @StateObject private var posterManager = PosterManager() // MeetingManager als StateObject
-   
-   @State private var isLoading = false
-   @State private var error: String?
-   
-   @State private var searchText = ""
+    
+    @State private var isLoading = false
+    @State private var error: String?
+    
+    @State private var searchText = ""
     
     @State private var showDeleteConfirmation = false
     @State private var posterToDelete: UUID? // Die ID des Posters, das gelöscht werden soll
     @State private var isEditSheetPresented = false // Steuert das Sheet
     @State private var selectedPoster: PosterResponseDTO? // Das aktuell zu bearbeitende Poster
-   
-   let numberOfPostersToHang = [1, 0, 4]
     
-   
-//   Calendar.current.isDateInTomorrow(yourDate)
-   
-   func getDateColor(status: Status) -> Color {
-      switch status {
-      case .hung:
-         return Color(UIColor.darkText)
-      case .takenDown:
-         return Color(UIColor.darkText)
-      case .notDisplayed:
-         return Color(UIColor.darkText)
-      case .expiresInOneDay:
-         return .orange
-      case .expired:
-         return .red
-      }
-   }
-   
+
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -54,11 +36,9 @@ struct PostersMainView: View {
                         .foregroundColor(.secondary)
                 } else {
                     listView()
-
-
                 }
             }
-
+            
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen")
             .navigationTitle("Plakate")
             .toolbar {
@@ -90,7 +70,7 @@ struct PostersMainView: View {
                     posterManager.deletePoster(posterId: posterId, completion: { _ in
                         print("Gelöscht")
                     })
-
+                    
                     // Lokale Liste nach kurzer Verzögerung aktualisieren
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         posterManager.fetchPoster()
@@ -102,13 +82,13 @@ struct PostersMainView: View {
                 posterToDelete = nil // Zurücksetzen
             }
         })
-
+        
     }
-
+    
     
     private func deletePoster(poster: PosterResponseDTO) {
         // API-Aufruf mit der ID des Posters
-
+        
         posterToDelete = poster.id
         showDeleteConfirmation = true
     }
@@ -116,8 +96,8 @@ struct PostersMainView: View {
         selectedPoster = poster
         isEditSheetPresented = true
     }
-
-
+    
+    
 }
 
 extension PostersMainView {
@@ -136,11 +116,11 @@ extension PostersMainView {
             }
         }
     }
-
+    
 }
 struct PosterRowView: View {
     let poster: PosterWithSummary
-
+    
     @StateObject private var locationViewModel = LocationsViewModel()
     
     var body: some View {
@@ -154,7 +134,7 @@ struct PosterRowView: View {
                             .frame(height: 100) // Höhe einstellen
                             .cornerRadius(10)
                     }
-
+                    
                     Spacer()
                     VStack(){
                         Text(poster.poster.name)
@@ -164,7 +144,7 @@ struct PosterRowView: View {
                             if let summary = poster.summary {
                                 CircularProgressView(poster: poster, status: .hangs).padding(.horizontal, 2)
                                 CircularProgressView(poster: poster, status: .takenDown).padding(.horizontal, 2)
-
+                                
                             }
                         }.padding(.horizontal, 6)
                             .padding(.top, 10)
@@ -183,8 +163,8 @@ struct PosterRowView: View {
                 .font(.caption)
                 .foregroundColor(.gray)
                 .lineLimit(2) // Verhindert Zeilenumbrüche
-
-
+            
+            
             
             Text("\(value)")
                 .font(.title2)
@@ -205,7 +185,7 @@ struct SammelpostenErstellenView: View {
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var imageData: Data? = nil // Optional Data für das Bild
     @State var posterManager = PosterManager()
-
+    
     var body: some View {
         NavigationView {
             Form {
@@ -213,7 +193,7 @@ struct SammelpostenErstellenView: View {
                     TextField("Titel", text: $title)
                     TextField("Beschreibung", text: $description)
                 }
-
+                
                 Section(header: Text("Posterdesign")) {
                     if let imageData = imageData, let uiImage = UIImage(data: imageData) {
                         VStack {
@@ -223,7 +203,7 @@ struct SammelpostenErstellenView: View {
                                 .frame(height: 200)
                                 .cornerRadius(10)
                                 .padding(.bottom, 10)
-
+                            
                             Button(action: {
                                 // Bild entfernen
                                 self.imageData = nil
@@ -251,7 +231,7 @@ struct SammelpostenErstellenView: View {
                         }
                     }
                 }
-
+                
                 Button(action: saveSammelposten) {
                     Text("Sammelposten erstellen")
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -264,14 +244,14 @@ struct SammelpostenErstellenView: View {
             .navigationTitle("Sammelposten erstellen")
         }
     }
-
+    
     // Funktion zum Speichern des Sammelpostens
     private func saveSammelposten() {
         guard !title.isEmpty, let imageData = imageData else {
             print("Titel oder Bild fehlt!")
             return
         }
-            
+        
         let newPoster = CreatePosterDTO(
             name: title,
             description: description,
@@ -296,13 +276,13 @@ struct SammelpostenBearbeitenView: View {
     @State private var title: String // Titel des Posters
     @State private var description: String // Beschreibung des Posters
     @State private var posterManager = PosterManager()
-
+    
     init(poster: PosterResponseDTO) {
         self.poster = poster
         _title = State(initialValue: poster.name) // Initialisiere den Titel
         _description = State(initialValue: poster.description ?? "") // Initialisiere die Beschreibung
     }
-
+    
     var body: some View {
         NavigationView {
             Form {
@@ -310,7 +290,7 @@ struct SammelpostenBearbeitenView: View {
                     TextField("Titel", text: $title)
                     TextField("Beschreibung", text: $description)
                 }
-
+                
                 Section(header: Text("Posterdesign")) {
                     if let imageData = imageData, let uiImage = UIImage(data: imageData) {
                         VStack {
@@ -320,7 +300,7 @@ struct SammelpostenBearbeitenView: View {
                                 .frame(height: 200)
                                 .cornerRadius(10)
                                 .padding(.bottom, 10)
-
+                            
                             Button(action: {
                                 // Bild entfernen
                                 self.imageData = nil
@@ -348,7 +328,7 @@ struct SammelpostenBearbeitenView: View {
                         }
                     }
                 }
-
+                
                 Button(action: saveSammelposten) {
                     Text("Sammelposten speichern")
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -361,7 +341,7 @@ struct SammelpostenBearbeitenView: View {
             .navigationTitle("Sammelposten bearbeiten")
         }
     }
-
+    
     // Funktion zum Speichern des Sammelpostens
     private func saveSammelposten() {
         guard !title.isEmpty else {

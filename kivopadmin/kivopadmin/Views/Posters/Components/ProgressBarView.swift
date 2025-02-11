@@ -68,7 +68,3 @@ struct ProgressBarView: View {
             }
     }
 }
-
-#Preview {
-//   ProgressBarView(status: Status.hung)
-}

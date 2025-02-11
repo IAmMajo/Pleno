@@ -47,7 +47,7 @@ struct MarkdownEditorView: View {
                         }
                     }
 
-                    if recordStatus == .underway {
+                    if (recordStatus == .underway && isEditing == false) {
                         Button(action: {
                             // Aktion für den Zustand "underway"
                             recordManager.submitRecordMeetingLang(meetingId: meetingId, lang: lang) { result in
@@ -75,7 +75,7 @@ struct MarkdownEditorView: View {
                                 .padding(.horizontal)
                         }
                         .padding(.bottom, 16)
-                    } else if recordStatus == .submitted {
+                    } else if (recordStatus == .submitted && isEditing == false){
                         Button(action: {
                             // Aktion für den Zustand "submitted"
                             recordManager.approveRecordMeetingLang(meetingId: meetingId, lang: lang) { result in
@@ -153,22 +153,22 @@ struct MarkdownEditorView: View {
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                                    if isEditing {
-                                        Button(action: {
-                                            isExtendSheetPresented.toggle()
-                                        }) {
-                                            Image(systemName: "wand.and.stars")
-                                                .foregroundColor(.blue)
-                                        }
-                                    } else {
-                                        Button(action: {
-                                            isSocialPostSheetPresented.toggle()
-                                        }) {
-                                            Image(systemName: "square.and.arrow.up")
-                                                .foregroundColor(.blue)
-                                        }
-                                    }
-                                }
+                    if isEditing {
+                        Button(action: {
+                            isExtendSheetPresented.toggle()
+                        }) {
+                            Image(systemName: "wand.and.stars")
+                                .foregroundColor(.blue)
+                        }
+                    } else {
+                        Button(action: {
+                            isSocialPostSheetPresented.toggle()
+                        }) {
+                            Image(systemName: "square.and.arrow.up")
+                                .foregroundColor(.blue)
+                        }
+                    }
+                }
             }
             .sheet(isPresented: $isExtendSheetPresented) {
                 ExtendRecordView(markdownText: $markdownText, lang: lang)
@@ -211,49 +211,14 @@ struct TranslationSheetView: View {
     var meetingId: UUID
     var lang1: String
     
-    //@State private var languages: [String] = []
-    let manager = LanguageManager()
-    
     @StateObject private var recordManager = RecordManager()
-    
-    private var languages: [(name: String, code: String)] {
-        let languages: [(name: String, code: String)] = [
-            ("Arabisch", "ar"),
-            ("Chinesisch", "zh"),
-            ("Dänisch", "da"),
-            ("Deutsch", "de"),
-            ("Englisch", "en"),
-            ("Französisch", "fr"),
-            ("Griechisch", "el"),
-            ("Hindi", "hi"),
-            ("Italienisch", "it"),
-            ("Japanisch", "ja"),
-            ("Koreanisch", "ko"),
-            ("Niederländisch", "nl"),
-            ("Norwegisch", "no"),
-            ("Polnisch", "pl"),
-            ("Portugiesisch", "pt"),
-            ("Rumänisch", "ro"), // Hinzugefügt
-            ("Russisch", "ru"),
-            ("Schwedisch", "sv"),
-            ("Spanisch", "es"),
-            ("Thai", "th"), // Hinzugefügt
-            ("Türkisch", "tr"),
-            ("Ungarisch", "hu")
-        ]
-        return languages
-    }
-
-
-    
-    //lazy var languages: [String] = Self.generateLanguages()
     
     var body: some View {
         NavigationStack {
             Form {
                 Section(header: Text("Sprache auswählen")) {
                     Picker("Sprache", selection: $lang2) {
-                        ForEach(languages, id: \.code) { language in
+                        ForEach(LanguageManager.getLanguages(), id: \.code) { language in
                             Text(language.name).tag(language.code) // Hier wird das Kürzel gespeichert
                         }
                     }
@@ -291,31 +256,6 @@ struct TranslationSheetView: View {
             }
         }
     }
-//    private func loadLanguages() {
-//        // Hole die lokalisierten Sprachcodes aus dem Bundle
-//        if let bundleLocalizations = Bundle.main.localizations as? [String] {
-//            // Optional: Sortiere und entferne nicht relevante Lokalisierungen
-//            languages = bundleLocalizations.filter { $0 != "Base" }.sorted()
-//        }
-//        
-//    }
-    
-//    static func generateLanguages() -> [String] {
-//        // Hole alle verfügbaren Lokalisierungen
-//        let appLocalizations = Bundle.main.localizations
-//        
-//        // Filtere eindeutige Sprachcodes
-//        let allLocales = Locale.availableIdentifiers
-//        let uniqueLanguages = Set(
-//            allLocales.compactMap { identifier in
-//                Locale(identifier: identifier).language.languageCode.identifier
-//            }
-//        )
-//        
-//        // Unterstützte Sprachen mit der App-Lokalisierung abgleichen
-//        let supportedLanguages = appLocalizations.filter { uniqueLanguages.contains($0) }
-//        return supportedLanguages.map { $0.uppercased() }
-//    }
 }
 
 
