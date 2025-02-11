@@ -13,6 +13,7 @@ import PosterServiceDTOs
 
 struct CircleImageView: View {
    let position: PosterPositionResponseDTO
+   let positionImage: UIImage?
    let isResponsible: Bool
    @Binding var currentCoordinates: CLLocationCoordinate2D?
    @State private var selectedImage: UIImage? = nil
@@ -98,9 +99,8 @@ struct CircleImageView: View {
                   }
             }
          } else if position.status == .damaged {
-            if let image = position.image {
-               let uiImage = UIImage(data: image)
-               Image(uiImage: uiImage!)
+            if let uiImage = positionImage {
+               Image(uiImage: uiImage)
                   .resizable()
                   .scaledToFill()
                   .frame(width: 165, height: 165)
@@ -110,7 +110,7 @@ struct CircleImageView: View {
                      showImage = true
                   }
                   .navigationDestination(isPresented: $showImage) {
-                     FullImageView(uiImage: uiImage!)
+                     FullImageView(uiImage: uiImage)
                   }
                   .overlay(alignment: .bottom) {
                      if isResponsible {
@@ -155,11 +155,15 @@ struct CircleImageView: View {
                      }
                   }
                   .mask(Circle())
+            } else {
+               ProgressView()
+                  .frame(width: 165, height: 165)
+                  .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
+                  .clipShape(Circle())
             }
          } else {
-            if let image = position.image {
-               let uiImage = UIImage(data: image)
-               Image(uiImage: uiImage!)
+            if let uiImage = positionImage {
+               Image(uiImage: uiImage)
                   .resizable()
                   .scaledToFill()
                   .frame(width: 165, height: 165)
@@ -169,8 +173,13 @@ struct CircleImageView: View {
                      showImage = true
                   }
                   .navigationDestination(isPresented: $showImage) {
-                     FullImageView(uiImage: uiImage!)
+                     FullImageView(uiImage: uiImage)
                   }
+            } else {
+               ProgressView()
+                  .frame(width: 165, height: 165)
+                  .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
+                  .clipShape(Circle())
             }
          }
       }

@@ -19,7 +19,8 @@ import MeetingServiceDTOs
 @MainActor
 class PostersViewModel: ObservableObject {
    // Published properties to update the UI when data changes
-    @Published var posters: [PosterResponseDTO] = []
+   @Published var posters: [PosterResponseDTO] = []
+   @Published var posterImages: [UUID: UIImage] = [:]
    @Published var filteredPosters: [FilteredPoster2] = [] // Filtered posters based on tab selection
     @Published var selectedTab: Int = 0 { // Handles tab switching (active vs archived posters)
        didSet {
@@ -48,6 +49,22 @@ class PostersViewModel: ObservableObject {
             print("Error fetching posters: \(error)")
         }
     }
+   
+   // Fetches the image for a specific poster and stores it inside posterImages
+   func fetchPosterImage(for posterId: UUID) {
+      Task {
+         do {
+            let imageData = try await PosterService.shared.fetchPosterImage(posterId: posterId)
+            if let image = UIImage(data: imageData) {
+               DispatchQueue.main.async {
+                  self.posterImages[posterId] = image
+               }
+            }
+         } catch {
+            print("Error loading image for poster \(posterId): \(error.localizedDescription)")
+         }
+      }
+   }
 
    // Fetches positions for each poster and updates the posterPositionsMap
     private func fetchPosterPositions() async {
@@ -112,10 +129,11 @@ class PostersViewModel: ObservableObject {
 // Fetches detailed data for a specific poster
 @MainActor
 class PosterDetailViewModel: ObservableObject {
-    @Published var poster: PosterResponseDTO?
-    @Published var positions: [PosterPositionResponseDTO] = []
-    @Published var isLoading = false
-    @Published var error: String?
+   @Published var poster: PosterResponseDTO?
+   @Published var posterImage: UIImage?
+   @Published var positions: [PosterPositionResponseDTO] = []
+   @Published var isLoading = false
+   @Published var error: String?
 
     private let posterId: UUID
 
@@ -137,6 +155,22 @@ class PosterDetailViewModel: ObservableObject {
         }
         isLoading = false
     }
+   
+   // Fetches the image for a specific poster and stores it inside posterImage
+   func fetchPosterImage(for posterId: UUID) {
+      Task {
+         do {
+            let imageData = try await PosterService.shared.fetchPosterImage(posterId: posterId)
+            if let image = UIImage(data: imageData) {
+               DispatchQueue.main.async {
+                  self.posterImage = image
+               }
+            }
+         } catch {
+            print("Error loading image for poster \(posterId): \(error.localizedDescription)")
+         }
+      }
+   }
 }
 
 // MARK: - Poster Position ViewModel
@@ -144,6 +178,7 @@ class PosterDetailViewModel: ObservableObject {
 @MainActor
 class PosterPositionViewModel: ObservableObject {
    @Published var position: PosterPositionResponseDTO?
+   @Published var positionImageData: Data?
    @Published var address: String?
    @Published var isLoading = false
    @Published var error: String?
@@ -173,6 +208,21 @@ class PosterPositionViewModel: ObservableObject {
         }
         isLoading = false
     }
+   
+   // Fetches the image for a specific poster and stores it inside posterImage
+   func fetchPositionImage(for posterId: UUID) {
+      Task {
+         do {
+            let imageData = try await PosterService.shared.fetchPositionImage(positionId: posterId)
+            DispatchQueue.main.async {
+               self.positionImageData = imageData
+            }
+            
+         } catch {
+            print("Error loading image for poster \(posterId): \(error.localizedDescription)")
+         }
+      }
+   }
    
    // Hang a position with an image, latitude and longitude
    func hangPosition(image: Data, latitude: Double?, longitude: Double?) async throws {

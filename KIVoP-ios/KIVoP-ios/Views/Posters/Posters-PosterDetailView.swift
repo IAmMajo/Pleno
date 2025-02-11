@@ -147,20 +147,33 @@ struct Posters_PosterDetailView: View {
                   }.padding(.top, 5)
                   
                   // Poster image
-                  if let uiImage = UIImage(data: poster.image) {
-                     Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        .frame(maxWidth: 200, maxHeight: 200)
-                        .foregroundStyle(.gray.opacity(0.5))
-                        .padding(.top, 10) .padding(.bottom, 10)
-                        .onTapGesture {
-                           showImage = true
-                        }
-                        .navigationDestination(isPresented: $showImage) {
-                           FullImageView(uiImage: uiImage)
-                        }
+                  ZStack {
+                     if let uiImage = viewModel.posterImage {
+                        Image(uiImage: uiImage)
+                           .resizable()
+                           .aspectRatio(contentMode: .fit)
+                           .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                           .frame(maxWidth: 200, maxHeight: 200)
+                           .foregroundStyle(.gray.opacity(0.5))
+                           .padding(.top, 10) .padding(.bottom, 10)
+                           .onTapGesture {
+                              showImage = true
+                           }
+                           .navigationDestination(isPresented: $showImage) {
+                              FullImageView(uiImage: uiImage)
+                           }
+                     } else {
+                        ProgressView()
+                           .frame(width: 200, height: 200)
+                           .background(.gray.opacity(0.5))
+                           .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                     }
+                  }
+                  .onAppear() {
+                     // loads the image of the poster asynchronous
+                     if viewModel.posterImage == nil {
+                        viewModel.fetchPosterImage(for: poster.id)
+                     }
                   }
                   
                   if !viewModel.positions.isEmpty {
@@ -292,6 +305,9 @@ struct Posters_PosterDetailView: View {
          }
          .refreshable {
             await viewModel.fetchPoster()
+            if let poster = viewModel.poster {
+               viewModel.fetchPosterImage(for: poster.id)
+            }
          }
 //         .overlay {
 //            if isLoading {

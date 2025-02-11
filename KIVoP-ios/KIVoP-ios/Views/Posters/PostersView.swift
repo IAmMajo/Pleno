@@ -83,21 +83,26 @@ struct PostersView: View {
                    ForEach(postersFiltered, id: \.poster.id) { item in
                       HStack {
                          // Poster image
-                         if let uiImage = UIImage(data: item.poster.image) {
-                            Image(uiImage: uiImage)
-                               .resizable()
-                               .aspectRatio(contentMode: .fit)
-                               .frame(width: 45, height: 45)
-                               .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
-                               .background(RoundedRectangle(cornerRadius: 5).fill(Color(uiImage.averageColor ?? .gray)))
-                         } else {
-                            Image(systemName: "text.rectangle.page.fill")
-                               .resizable()
-                               .frame(maxWidth: 45, maxHeight: 45)
-                               .aspectRatio(1, contentMode: .fit)
-                               .foregroundStyle(.gray.opacity(0.5))
-                               .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                               .padding(.trailing, 5)
+                         ZStack {
+                            if let uiImage = viewModel.posterImages[item.poster.id] {
+                               Image(uiImage: uiImage)
+                                  .resizable()
+                                  .aspectRatio(contentMode: .fit)
+                                  .frame(width: 45, height: 45)
+                                  .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                                  .background(RoundedRectangle(cornerRadius: 5).fill(Color(uiImage.averageColor ?? .gray)))
+                            } else {
+                               ProgressView()
+                                  .frame(width: 45, height: 45)
+                                  .background(.gray.opacity(0.2))
+                                  .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                            }
+                         }
+                         .onAppear() {
+                            // loads the image of the poster asynchronous
+                            if viewModel.posterImages[item.poster.id] == nil {
+                               viewModel.fetchPosterImage(for: item.poster.id)
+                            }
                          }
                          
                          // Poster details

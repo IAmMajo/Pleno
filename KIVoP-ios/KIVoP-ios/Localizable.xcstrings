@@ -105,6 +105,16 @@
         }
       }
     },
+    "%@° N, %@° E" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@° N, %2$@° E"
+          }
+        }
+      }
+    },
     "%f, %f" : {
       "localizations" : {
         "en" : {
@@ -301,7 +311,6 @@
       }
     },
     "abgehängt am %@" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -345,7 +354,6 @@
       }
     },
     "Abhängen bestätigen" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -356,7 +364,6 @@
       }
     },
     "Abhängen zurückziehen" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -367,7 +374,6 @@
       }
     },
     "Abhängen zurückziehen?" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -530,7 +536,6 @@
 
     },
     "ADRESSE IN DER NÄHE" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -576,7 +581,6 @@
       }
     },
     "Aktuell" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -811,7 +815,6 @@
       }
     },
     "Archiviert" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -832,7 +835,6 @@
       }
     },
     "aufgehängt am %@" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -891,7 +893,6 @@
       }
     },
     "behoben" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -912,7 +913,6 @@
       }
     },
     "Beschädigung" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -923,7 +923,6 @@
       }
     },
     "Beschädigung melden" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -934,7 +933,6 @@
       }
     },
     "Beschädigung melden?" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -974,7 +972,6 @@
 
     },
     "Bestätige mit einem Bild, dass das Plakat beschädigt wurde, oder es nicht mehr an der vorgesehenen Stelle hängt." : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -994,7 +991,6 @@
 
     },
     "Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt." : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1005,7 +1001,6 @@
       }
     },
     "Bist du sicher, dass du das Plakat abhängen möchtest?" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1402,6 +1397,9 @@
     "Fetching address..." : {
 
     },
+    "Filter" : {
+
+    },
     "Frage" : {
       "localizations" : {
         "en" : {
@@ -1567,6 +1565,9 @@
 
     },
     "In der alten Turnhalle hinter dem Friedhof\nAltes Grab 5 b, 42069 Hölle" : {
+
+    },
+    "In Zwischenablage kopiert" : {
 
     },
     "Informationen zur Fahrt" : {
@@ -1864,7 +1865,6 @@
       }
     },
     "Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2385,7 +2385,6 @@
       }
     },
     "Plakat abhängen?" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2396,7 +2395,6 @@
       }
     },
     "Plakate" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2866,8 +2864,10 @@
         }
       }
     },
+    "Unknown Action" : {
+
+    },
     "VERANTWORTLICHE (%lld)" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
