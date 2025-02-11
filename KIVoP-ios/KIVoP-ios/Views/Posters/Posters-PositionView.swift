@@ -19,10 +19,6 @@ struct Posters_PositionView: View {
    init(posterId: UUID, positionId: UUID) {
       _viewModel = StateObject(wrappedValue: PosterPositionViewModel(posterId: posterId, positionId: positionId))
    }
-   
-//   @State var name: String = "Name"
-//   @State var coordinate: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)
-   
    @State private var currentCoordinates: CLLocationCoordinate2D? = CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)
    
    @State private var myId: UUID?
