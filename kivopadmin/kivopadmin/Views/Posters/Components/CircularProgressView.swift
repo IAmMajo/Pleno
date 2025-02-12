@@ -1,9 +1,4 @@
-//
-//  CircularProgressView.swift
-//  KIVoP-ios
-//
-//  Created by Hanna Steffen on 11.12.24.
-//
+// This file is licensed under the MIT-0 License.
 
 import SwiftUI
 import PosterServiceDTOs

@@ -1,3 +1,5 @@
+// This file is licensed under the MIT-0 License.
+
 import RideServiceDTOs
 import SwiftUI
 import MapKit
