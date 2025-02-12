@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 import SwiftUI
 import Foundation
 import MapKit
@@ -7,19 +8,6 @@ struct EventRideDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var shouldShowDriversProfilePicture = false
     
-    // Vars um Standort zu kopieren
-    @State private var shareLocation = false
-    @State private var isGoogleMapsInstalled = false
-    @State private var isWazeInstalled = false
-    @State private var showMapOptions: Bool = false
-    @State private var setKoords: CLLocationCoordinate2D?
-    @State private var setAddress: String?
-    private func formattedShareText() -> String {
-       """
-       \(setAddress ?? "")
-       """
-    }
-    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -28,7 +16,8 @@ struct EventRideDetailView: View {
                     .edgesIgnoringSafeArea(.all)
                 // Inhalt
                 VStack {
-                    Text(viewModel.formattedDate(viewModel.eventRideDetail.starts))
+                    // Datum + Uhrzeit
+                    Text(viewModel.rideManager.formattedDate(viewModel.eventRideDetail.starts))
                         .padding(5)
                         .overlay(
                             RoundedRectangle(cornerRadius: 30)
@@ -36,7 +25,7 @@ struct EventRideDetailView: View {
                         )
                         .padding(.vertical)
                     
-                    // Wenn man Fahrer ist nie anzeigen
+                    // Wenn man requested hat wird das angezeigt
                     if !viewModel.eventRideDetail.isSelfDriver && viewModel.rider?.accepted == false {
                         Text("Du hast bereits angefragt mitgenommen zu werden.")
                             .font(.headline)
@@ -53,34 +42,38 @@ struct EventRideDetailView: View {
                             .multilineTextAlignment(.center)
                     }
 
-                    // Eventort
+                    // Karte mit Eventort
                     RideLocationView(selectedLocation: $viewModel.eventLocation)
                         .cornerRadius(10)
                         .frame(width: 350, height: 150)
                     Text(viewModel.eventAddress)
                         .foregroundColor(.blue)
+                        // Event Adresse onAppear berechnen
                         .onAppear {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                viewModel.getAddressFromCoordinates(latitude: viewModel.eventDetails.latitude, longitude: viewModel.eventDetails.longitude) { address in
+                                viewModel.rideManager.getAddressFromCoordinates(latitude: viewModel.eventDetails.latitude, longitude: viewModel.eventDetails.longitude) { address in
                                     if let address = address {
                                         viewModel.eventAddress = address
                                     }
                                 }
                             }
                         }
+                        // Adresse vom Event anzeigen lassen
                         .onTapGesture {
-                            showMapOptions = true
-                            setKoords = CLLocationCoordinate2D(
+                            viewModel.showMapOptions = true
+                            viewModel.setKoords = CLLocationCoordinate2D(
                                 latitude: CLLocationDegrees(viewModel.eventDetails.latitude),
                                 longitude: CLLocationDegrees(viewModel.eventDetails.longitude)
                             )
-                            setAddress = viewModel.eventAddress
+                            viewModel.setAddress = viewModel.eventAddress
                         }
+                    // Eventkoordinaten
                     Text("\(viewModel.eventDetails.latitude), \(viewModel.eventDetails.longitude)")
                         .font(.subheadline)
                         .foregroundColor(.gray)
 
                     List{
+                        // Anzeigen des Fahrers
                         Section(header: Text("Fahrer")){
                             HStack{
                                 // Leichte Verzögerung damit Daten geladen sind
@@ -88,16 +81,20 @@ struct EventRideDetailView: View {
                                     ProfilePictureRide(name: viewModel.eventRideDetail.driverName, id: viewModel.eventRideDetail.driverID)
                                 }
                                 VStack{
+                                    // Name des Fahrers
                                     Text(viewModel.eventRideDetail.driverName)
                                         .frame(maxWidth: .infinity, alignment: .leading)
+                                    // Adresse des Fahrers
                                     Text(viewModel.driverAddress)
                                         .font(.subheadline)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .foregroundColor(.gray)
+                                        // Profilbild mit leichter Verzögerung laden, da die benötigten Daten leicht verzögert gesetzt werden
+                                        // Adresse aus den Koordinaten berechnen
                                         .onAppear {
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                                 shouldShowDriversProfilePicture = true
-                                                viewModel.getAddressFromCoordinates(latitude: viewModel.eventRideDetail.latitude, longitude: viewModel.eventRideDetail.longitude) { address in
+                                                viewModel.rideManager.getAddressFromCoordinates(latitude: viewModel.eventRideDetail.latitude, longitude: viewModel.eventRideDetail.longitude) { address in
                                                     if let address = address {
                                                         viewModel.driverAddress = address
                                                     }
@@ -106,31 +103,35 @@ struct EventRideDetailView: View {
                                         }
                                 }
                                 Spacer()
+                                // Standort vom Fahrer anzeigen lassen
                                 Image(systemName: "square.and.arrow.up")
                                     .foregroundColor(.blue)
                                     .onTapGesture {
-                                        showMapOptions = true
-                                        setKoords = CLLocationCoordinate2D(
+                                        viewModel.showMapOptions = true
+                                        viewModel.setKoords = CLLocationCoordinate2D(
                                             latitude: CLLocationDegrees(viewModel.eventRideDetail.latitude),
                                             longitude: CLLocationDegrees(viewModel.eventRideDetail.longitude)
                                         )
-                                        setAddress = viewModel.driverAddress
+                                        viewModel.setAddress = viewModel.driverAddress
                                     }
                             }
                         }
 
+                        // Alle Akzeptierten Mitfahrer werden angezeigt
                         Section(header: Text("Mitfahrer (\(viewModel.acceptedRiders.count)/\(viewModel.eventRideDetail.emptySeats))")){
                             if viewModel.acceptedRiders.isEmpty {
                                 Text("Keine Mitfahrer")
                             } else {
-                                // Mitgenommen
+                                // Mitgenommene Mitfahrer
                                 ForEach(viewModel.acceptedRiders, id: \.id) { rider in
                                     HStack {
                                         // Profilbild
                                         ProfilePictureRide(name: rider.username, id: rider.userID)
                                         VStack{
+                                            // Name
                                             Text(rider.username)
                                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                            // Adresse ist nur für den Fahrer sichtbar
                                             if viewModel.eventRideDetail.isSelfDriver {
                                                 Text(viewModel.riderAddresses[rider.id] ?? "Lädt Adresse...")
                                                     .font(.subheadline)
@@ -139,22 +140,22 @@ struct EventRideDetailView: View {
                                             }
                                         }
                                         Spacer()
+                                        // Optionen für Standort kopieren und Mitfahrer löschen nur für den Fahrer
                                         if viewModel.eventRideDetail.isSelfDriver {
                                             Image(systemName: "square.and.arrow.up")
                                                 .foregroundColor(.blue)
                                                 .onTapGesture {
-                                                    showMapOptions = true
-                                                    setKoords = CLLocationCoordinate2D(
+                                                    viewModel.showMapOptions = true
+                                                    viewModel.setKoords = CLLocationCoordinate2D(
                                                         latitude: CLLocationDegrees(rider.latitude),
                                                         longitude: CLLocationDegrees(rider.longitude)
                                                     )
-                                                    setAddress = viewModel.riderAddresses[rider.id]
+                                                    viewModel.setAddress = viewModel.riderAddresses[rider.id]
                                                 }
                                             Image(systemName: "trash")
                                                 .foregroundColor(.red)
                                                 .onTapGesture {
                                                     // Mitfahrer löschen für den Fahrer
-                                                    viewModel.rider = rider
                                                     viewModel.showPassengerDeleteRequest = true
                                                 }
                                                 // Fahrer entfernt einen angenommenen Mitfahrer
@@ -164,9 +165,7 @@ struct EventRideDetailView: View {
                                                         message: Text("Möchten Sie die Person wirklich aus der Fahrgemeinschaft entfernen?"),
                                                         primaryButton: .destructive(Text("Entfernen")) {
                                                             // Aktion zum Löschen für den Fahrer
-                                                            viewModel.removeFromPassengers(rider: viewModel.rider!)
-                                                            viewModel.showPassengerDeleteRequest = false
-                                                            viewModel.fetchEventRideDetails()
+                                                            viewModel.removeFromPassengers(rider: rider)
                                                         },
                                                         secondaryButton: .cancel()
                                                     )
@@ -178,48 +177,43 @@ struct EventRideDetailView: View {
                         }
                         
                         if viewModel.requestedRiders.isEmpty || !viewModel.eventRideDetail.isSelfDriver {
-                        // Nichts wird angezeigt wenn es keine Requests gibt oder man nicht Fahrer ist
+                        // Nichts wird angezeigt wenn es keine offenen Requests gibt oder man nicht Fahrer ist
                         } else {
-                            // Anfragen
+                            // Alle Anfragen zu einer Eventfahrt
                             Section(header: Text("Anfragen zum Mitnehmen (\(viewModel.requestedRiders.count))")){
                                 ForEach(viewModel.requestedRiders, id: \.id) { rider in
                                     HStack {
                                         // Profilbild
                                         ProfilePictureRide(name: rider.username, id: rider.userID)
                                         VStack{
+                                            // Name des Mitfahrers
                                             Text(rider.username)
                                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                            if viewModel.eventRideDetail.isSelfDriver {
-                                                Text(viewModel.riderAddresses[rider.id] ?? "Lädt Adresse...")
-                                                    .font(.subheadline)
-                                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                                    .foregroundColor(.gray)
-                                            }
+                                            // Adresse des Mitfahrers
+                                            Text(viewModel.riderAddresses[rider.id] ?? "Lädt Adresse...")
+                                                .font(.subheadline)
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                .foregroundColor(.gray)
                                         }
                                         Spacer()
-                                        if viewModel.eventRideDetail.isSelfDriver {
-                                            Image(systemName: "plus.circle.fill")
-                                                .foregroundColor(.green)
-                                                .onTapGesture {
-                                                    // Akzeptieren für den Fahrer
-                                                    viewModel.rider = rider
-                                                    viewModel.showPassengerAddRequest = true
-                                                }
-                                                // Fahrer akzeptiert Request
-                                                .alert(isPresented: $viewModel.showPassengerAddRequest) {
-                                                    Alert(
-                                                        title: Text("Bestätigung"),
-                                                        message: Text("Möchten Sie die Person wirklich zu der Fahrgemeinschaft hinzufügen?"),
-                                                        primaryButton: .default(Text("Hinzufügen")) {
-                                                            // Aktion zum hinzufügen für den Fahrer
-                                                            viewModel.acceptRequestedRider(rider: viewModel.rider!)
-                                                            viewModel.showPassengerAddRequest = false
-                                                            viewModel.fetchEventRideDetails()
-                                                        },
-                                                        secondaryButton: .cancel()
-                                                    )
-                                                }
-                                        }
+                                        Image(systemName: "plus.circle.fill")
+                                            .foregroundColor(.green)
+                                            .onTapGesture {
+                                                // Akzeptieren für den Fahrer
+                                                viewModel.showPassengerAddRequest = true
+                                            }
+                                            // Fahrer akzeptiert Request
+                                            .alert(isPresented: $viewModel.showPassengerAddRequest) {
+                                                Alert(
+                                                    title: Text("Bestätigung"),
+                                                    message: Text("Möchten Sie die Person wirklich zu der Fahrgemeinschaft hinzufügen?"),
+                                                    primaryButton: .default(Text("Hinzufügen")) {
+                                                        // Aktion zum hinzufügen für den Fahrer
+                                                        viewModel.acceptRequestedRider(rider: rider)
+                                                    },
+                                                    secondaryButton: .cancel()
+                                                )
+                                            }
                                     }
                                 }
                             }
@@ -234,6 +228,8 @@ struct EventRideDetailView: View {
                         }
                     }
                     .listStyle(.insetGrouped)
+                    // Button für Aktionen zu der EventFahrt
+                    // Je nach Status des Nutzers wird eine andere Aktion angezeigt/ausgeführt
                     EventRideDecision(viewModel: viewModel )
                 }
             }
@@ -243,46 +239,40 @@ struct EventRideDetailView: View {
                }
             }
             .onAppear {
-               Task {
-                   viewModel.fetchEventRideDetails()
-                   viewModel.fetchEventDetails()
-                   viewModel.fetchEventRides()
-               }
+               viewModel.fetchAllUpdates()
             }
             .refreshable {
-                Task {
-                    viewModel.fetchEventRideDetails()
-                    viewModel.fetchEventDetails()
-                    viewModel.fetchEventRides()
-                }
+                viewModel.fetchAllUpdates()
             }
         }
-        .sheet(isPresented: $shareLocation) {
-            ShareSheet(activityItems: [formattedShareText()])
-               .presentationDetents([.medium, .large])
-               .presentationDragIndicator(.hidden)
-        }
-        .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $showMapOptions) {
+        // Dialog wenn der Nutzer den Standort kopieren möchte
+        .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $viewModel.showMapOptions) {
            Button("Öffnen mit Apple Maps") {
               NavigationAppHelper.shared.openInAppleMaps(
-                name: setAddress,
-                coordinate: setKoords!
+                name: viewModel.setAddress,
+                coordinate: viewModel.setKoords!
               )
            }
-           if isGoogleMapsInstalled {
+            if viewModel.isGoogleMapsInstalled {
               Button("Öffnen mit Google Maps") {
-                 NavigationAppHelper.shared.openInGoogleMaps(name: setAddress, coordinate: setKoords!)
+                  NavigationAppHelper.shared.openInGoogleMaps(name: viewModel.setAddress, coordinate: viewModel.setKoords!)
               }
            }
-           if isWazeInstalled {
+            if viewModel.isWazeInstalled {
               Button("Öffnen mit Waze") {
-                 NavigationAppHelper.shared.openInWaze(coordinate: setKoords!)
+                  NavigationAppHelper.shared.openInWaze(coordinate: viewModel.setKoords!)
               }
            }
            Button("Teilen...") {
-              shareLocation = true
+               viewModel.shareLocation = true
            }
            Button("Abbrechen", role: .cancel) {}
+        }
+        // Für die Zwischenablage
+        .sheet(isPresented: $viewModel.shareLocation) {
+            ShareSheet(activityItems: [viewModel.formattedShareText()])
+               .presentationDetents([.medium, .large])
+               .presentationDragIndicator(.hidden)
         }
         .navigationTitle(viewModel.eventRide.eventName)
         .navigationBarTitleDisplayMode(.inline)

@@ -1,6 +1,16 @@
+// This file is licensed under the MIT-0 License.
 import Foundation
 import CoreLocation
 import RideServiceDTOs
+
+// Generelles zu EventFahrten Logik
+// Zuerst muss der Nutzer sein Interesse am Event melden
+// Das geschieht in der Regel über die Event Ansicht
+// Falls der Nutzer jedoch Fahrten zu einem Event sehen möchte, zu dem er noch nicht zu gestimmt hat, gibt es die Abkürzung sich direkt über die EventFahrt als Interessiert für das Event zu melden
+// Das wird mit participateEvent() dargestellt
+// Bevor der Nutzer einer Fahrgemeinschaft beitreten kann muss er noch sein Interesse bekunden mitgenommen zu werden
+// Das wird mit requestInterestEventRide() abgebildet
+// Damit signalisiert der Nutzer das er mitgenommen werden möchte und legt seinen Abholort fest
 
 @MainActor
 class EventRideViewModel: ObservableObject {
@@ -20,559 +30,189 @@ class EventRideViewModel: ObservableObject {
     @Published var address: String = ""
     @Published var driverAddress: [UUID: String] = [:]
     
-    private let baseURL = "https://kivop.ipv64.net"
+    // Vars um Standort zu kopieren
+    @Published var shareLocation = false
+    @Published var isGoogleMapsInstalled = false
+    @Published var isWazeInstalled = false
+    @Published var showMapOptions: Bool = false
+    @Published var setKoords: CLLocationCoordinate2D?
+    @Published var setAddress: String?
+    func formattedShareText() -> String {
+       """
+       \(setAddress ?? "")
+       """
+    }
+    
+    @Published var rideManager = RideManager.shared
     
     init(event: GetEventDTO) {
         self.event = event
     }
     
-    // Weitere Details zum Event bekommen
-    func fetchEventDetails() {
-        guard let url = URL(string: "\(baseURL)/events/\(event.id)") else {
-            print("Invalid URL")
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        // Füge JWT Token zu den Headern hinzu
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            print("Unauthorized: No token found")
-            return
-        }
-        
-        DispatchQueue.main.async {
-            self.isLoading = true
-        }
-        
-        // Führe den Netzwerkaufruf aus
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            guard let self = self else { return }
-            
-            // Behandle Fehler
-            if let error = error {
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                }
-                print("Network error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                }
-                print("No data received from server")
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            
-            DispatchQueue.main.async {
-                do {
-                    // Decodieren der Antwort
-                    let decodedEventDetails = try decoder.decode(GetEventDetailDTO.self, from: data)
-                    self.eventDetails = decodedEventDetails
-                    self.isLoading = false
-                } catch {
-                    DispatchQueue.main.async {
-                        self.isLoading = false
-                    }
-                    print("JSON Decode Error: \(error.localizedDescription)")
-                }
-            }
-        }.resume()
+    // Alle benötigten Daten werden aktualisiert
+    func fetchAllUpdates() {
+        fetchEventDetails()
+        fetchEventRides()
+        fetchParticipation()
     }
     
-    // Alle Event Fahrten bekommen
     func fetchEventRides() {
-        guard let url = URL(string: "\(baseURL)/eventrides?byEventID=\(event.id)") else {
-            print("Invalid URL")
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        // Füge JWT Token zu den Headern hinzu
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            print("Unauthorized: No token found")
-            return
-        }
-        
-        // Setze den Ladevorgang auf true
-        DispatchQueue.main.async {
-            self.isLoading = true
-        }
-        
-        // Führe den Netzwerkaufruf aus
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            guard let self = self else { return }
-            
-            // Behandle Fehler
-            if let error = error {
+        Task {
+            do {
+                self.isLoading = true
+                
+                let fetchedRides = try await rideManager.fetchEventRidesByEvent(eventID: event.id)
+                
                 DispatchQueue.main.async {
-                    self.isLoading = false // Ladevorgang beendet, auch bei Fehlern
-                }
-                print("Network error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    self.isLoading = false // Ladevorgang beendet, keine Daten
-                }
-                print("No data received from server")
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-     
-            DispatchQueue.main.async {
-                do {
-                    // Decodieren der Antwort
-                    let decodedEventRides = try decoder.decode([GetEventRideDTO].self, from: data)
-                    self.eventRides = decodedEventRides
-                    self.isLoading = false // Ladevorgang erfolgreich beendet
+                    self.eventRides = fetchedRides
+                    self.isLoading = false
+                    
+                    // Adressen für alle Fahrer abrufen
                     for ride in self.eventRides {
-                        self.getAddressFromCoordinates(latitude: ride.latitude, longitude: ride.longitude) { address in
+                        self.rideManager.getAddressFromCoordinates(latitude: ride.latitude, longitude: ride.longitude) { address in
                             if let address = address {
-                                // Speichere die Adresse im Dictionary mit der Rider ID als Schlüssel
                                 self.driverAddress[ride.driverID] = address
                             }
                         }
                     }
-                } catch {
-                    DispatchQueue.main.async {
-                        self.isLoading = false // Ladevorgang beendet, aber mit JSON-Fehler
-                    }
-                    print("JSON Decode Error: \(error.localizedDescription)")
                 }
-            }
-        }.resume()
-    }
-    
-    func fetchParticipation() {
-        self.isLoading = true
-        
-        guard let url = URL(string: "\(baseURL)/eventrides/interested") else {
-            print("Invalid URL")
-            self.isLoading = false
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        // Füge JWT Token zu den Headern hinzu
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            print("Unauthorized: No token found")
-            return
-        }
-        
-        // Setze den Ladevorgang auf true
-        DispatchQueue.main.async {
-            self.isLoading = true
-        }
-        
-        // Führe den Netzwerkaufruf aus
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            guard let self = self else { return }
-            
-            // Behandle Fehler
-            if let error = error {
+            } catch {
                 DispatchQueue.main.async {
-                    self.isLoading = false // Ladevorgang beendet, auch bei Fehlern
-                }
-                print("Network error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    self.isLoading = false // Ladevorgang beendet, keine Daten
-                }
-                print("No data received from server")
-                return
-            }
-            
-            // Debugging: Zeige die Antwort als String
-//            if let jsonString = String(data: data, encoding: .utf8) {
-//                print("Server Response: \(jsonString)")
-//            }
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            
-            DispatchQueue.main.async {
-                do {
-                    // Decodieren der Antwort
-                    let decodedInterestedDTO = try decoder.decode([GetInterestedPartyDTO].self, from: data)
-                    self.interestedEvent = decodedInterestedDTO.first { $0.eventID == self.event.id}
                     self.isLoading = false
-                } catch {
-                    DispatchQueue.main.async {
-                        self.isLoading = false
-                    }
-                    print("JSON Decode Error: \(error.localizedDescription)")
+                    print("Fehler beim Abrufen der Event-Fahrten: \(error.localizedDescription)")
                 }
             }
-        }.resume()
+        }
     }
     
-    func participateEvent() {
-        self.isLoading = true
-        
-        guard let url = URL(string: "\(baseURL)/events/\(event.id)/participations") else {
-            print("Invalid URL")
-            self.isLoading = false
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Füge JWT Token hinzu oder beende bei Fehler
-        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
-            print("Unauthorized: No token found")
-            self.isLoading = false
-            return
-        }
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        let requestBody: [String: Any] = ["participates": true]
-        
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: requestBody, options: [])
-            request.httpBody = jsonData
-        } catch {
-            print("Fehler beim Serialisieren des JSON: \(error.localizedDescription)")
-            self.isLoading = false
-            return
-        }
-        
-        // Führe den Netzwerkaufruf aus
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            if let error = error {
-                print("Network error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received from server")
-                return
-            }
-            
-            // Debugging: Zeige die Antwort als String
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("Server Response: \(jsonString)")
-            }
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            
+    func fetchEventDetails() {
+        Task {
             do {
-                DispatchQueue.main.async { [weak self] in
-                    guard let self = self else { return }
+                self.isLoading = true
+
+                let fetchedDetails = try await rideManager.fetchEventDetails(eventID: event.id)
+
+                DispatchQueue.main.async {
+                    self.eventDetails = fetchedDetails
+                    self.isLoading = false
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    print("Fehler beim Abrufen der Event-Details: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    // Prüfen ob es ein Objekt gibt, welches bestätigt, dass der Nutzer am Event teilnimmt oder nicht
+    func fetchParticipation() {
+        Task {
+            do {
+                self.isLoading = true
+
+                let interestedParty = try await rideManager.fetchEventParticipation(eventID: event.id)
+
+                DispatchQueue.main.async {
+                    self.interestedEvent = interestedParty
+                    self.isLoading = false
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    print("Fehler beim Abrufen der Teilnahmeinformationen: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    // An Event teilnehmen
+    func participateEvent() {
+        isLoading = true
+        
+        Task {
+            do {
+                try await rideManager.participateEvent(eventID: event.id)
+                
+                DispatchQueue.main.async {
                     self.event.myState = .present
                     self.isLoading = false
                 }
+            } catch {
+                DispatchQueue.main.async {
+                    print("Fehler beim Teilnehmen am Event: \(error.localizedDescription)")
+                    self.isLoading = false
+                }
             }
-        }.resume()
+        }
     }
     
-    // Interesse zu einer Mitfahrtgelegenheit stellen (notwendig um an einer Fahrt teilzunehmen)
+    // Abholort erstellen
     func requestInterestEventRide() {
-        self.isLoading = true
+        isLoading = true
+        
+        Task {
+            do {
+                try await rideManager.requestInterestEventRide(
+                    eventID: event.id,
+                    latitude: requestLat,
+                    longitude: requestLong
+                )
 
-        guard let url = URL(string: "\(baseURL)/eventrides/interested") else {
-            print("Invalid URL")
-            self.isLoading = false
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST" // HTTP-Methode auf POST setzen
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Authorization Header hinzufügen
-        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
-            print("Unauthorized: No token found")
-            self.isLoading = false
-            return
-        }
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        // Request-Daten vorbereiten
-        let requestDTO = CreateInterestedPartyDTO(
-            eventID: event.id,
-            latitude: requestLat,
-            longitude: requestLong
-        )
-        
-        // Body als JSON konvertieren
-        do {
-            let jsonData = try JSONEncoder().encode(requestDTO)
-            request.httpBody = jsonData
-        } catch {
-            print("Error encoding request body: \(error.localizedDescription)")
-            self.isLoading = false
-            return
-        }
-        
-        // Netzwerkaufruf ausführen
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            guard let self = self else { return }
-            
-            // Fehlerbehandlung
-            if let error = error {
                 DispatchQueue.main.async {
+                    print("Interesse erfolgreich gesendet")
                     self.isLoading = false
                 }
-                print("Network error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let data = data else {
+            } catch {
                 DispatchQueue.main.async {
+                    print("Fehler beim Anfragen der Mitfahrt: \(error.localizedDescription)")
                     self.isLoading = false
                 }
-                print("No data received from server")
-                return
             }
-            
-            // Debugging: Zeige die Antwort als String
-//            if let jsonString = String(data: data, encoding: .utf8) {
-//                print("Server Response: \(jsonString)")
-//            }
-            
-            // Response überprüfen
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                }
-                print("Request failed with status code: \(String(describing: (response as? HTTPURLResponse)?.statusCode))")
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            
-            // Antwort dekodieren
-            DispatchQueue.main.async {
-                do {
-                    let _ = try decoder.decode(GetInterestedPartyDTO.self, from: data)
-                    self.isLoading = false
-                } catch {
-                    self.isLoading = false
-                    print("JSON Decode Error: \(error.localizedDescription)")
-                }
-            }
-        }.resume()
+        }
     }
     
-    // Standort für eine Mitfahrgelegenheit bearbeiten
-    func patchInterestEventRide(){
-        self.isLoading = true
+    // Abholort für eine Mitfahrgelegenheit bearbeiten
+    func patchInterestEventRide() {
+        Task {
+            do {
+                self.isLoading = true
 
-        guard let url = URL(string: "\(baseURL)/eventrides/interested/\(interestedEvent!.id)") else {
-            print("Invalid URL")
-            self.isLoading = false
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "PATCH" // HTTP-Methode auf POST setzen
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Authorization Header hinzufügen
-        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
-            print("Unauthorized: No token found")
-            self.isLoading = false
-            return
-        }
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        // Request-Daten vorbereiten
-        let requestDTO = PatchInterestedPartyDTO(
-            latitude: requestLat,
-            longitude: requestLong
-        )
-        
-        // Body als JSON konvertieren
-        do {
-            let jsonData = try JSONEncoder().encode(requestDTO)
-            request.httpBody = jsonData
-        } catch {
-            print("Error encoding request body: \(error.localizedDescription)")
-            self.isLoading = false
-            return
-        }
-        
-        // Netzwerkaufruf ausführen
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            guard let self = self else { return }
-            
-            // Fehlerbehandlung
-            if let error = error {
+                try await rideManager.patchInterestEventRide(
+                    eventID: interestedEvent!.id,
+                    latitude: requestLat,
+                    longitude: requestLong
+                )
+
                 DispatchQueue.main.async {
                     self.isLoading = false
                 }
-                print("Network error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let data = data else {
+            } catch {
                 DispatchQueue.main.async {
                     self.isLoading = false
-                }
-                print("No data received from server")
-                return
-            }
-            
-            // Debugging: Zeige die Antwort als String
-//            if let jsonString = String(data: data, encoding: .utf8) {
-//                print("Server Response: \(jsonString)")
-//            }
-            
-            // Response überprüfen
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                }
-                print("Request failed with status code: \(String(describing: (response as? HTTPURLResponse)?.statusCode))")
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            
-            // Antwort dekodieren
-            DispatchQueue.main.async {
-                do {
-                    let _ = try decoder.decode(GetInterestedPartyDTO.self, from: data)
-                    self.isLoading = false
-                } catch {
-                    self.isLoading = false
-                    print("JSON Decode Error: \(error.localizedDescription)")
+                    print("Fehler beim Patchen des Abholortes: \(error.localizedDescription)")
                 }
             }
-        }.resume()
+        }
     }
     
     // Interesse zu einer Mitfahrtgelegenheit löschen
     func deleteInterestEventRide() {
-        self.isLoading = true
+        Task {
+            do {
+                self.isLoading = true
 
-        guard let url = URL(string: "\(baseURL)/eventrides/interested/\(interestedEvent!.id)") else {
-            print("Invalid URL")
-            self.isLoading = false
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE" // HTTP-Methode auf DELETE setzen
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Authorization Header hinzufügen
-        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
-            print("Unauthorized: No token found")
-            self.isLoading = false
-            return
-        }
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        // Netzwerkaufruf ausführen
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            guard let self = self else { return }
-            
-            // Fehlerbehandlung
-            if let error = error {
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                }
-                print("Network error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let _ = data else {
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                }
-                print("No data received from server")
-                return
-            }
-            
-            // Debugging: Zeige die Antwort als String
-//            if let jsonString = String(data: data, encoding: .utf8) {
-//                print("Server Response: \(jsonString)")
-//            }
-            
-            // Response überprüfen
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 204 else {
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                }
-                print("Request failed with status code: \(String(describing: (response as? HTTPURLResponse)?.statusCode))")
-                return
-            }
-            
-            DispatchQueue.main.async {
-                self.isLoading = false
-            }
-        }.resume()
-    }
+                try await rideManager.deleteInterestEventRide(eventID: interestedEvent!.id)
 
-    
-    func getAddressFromCoordinates(latitude: Float, longitude: Float, completion: @escaping (String?) -> Void) {
-        let clLocation = CLLocation(latitude: Double(latitude), longitude: Double(longitude))
-        
-        CLGeocoder().reverseGeocodeLocation(clLocation) { placemarks, error in
-            if let error = error {
-                print("Geocoding error: \(error.localizedDescription)")
-                completion(nil)
-                return
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    print("Fehler beim Löschen des Interesses: \(error.localizedDescription)")
+                }
             }
-            
-            guard let placemark = placemarks?.first else {
-                completion(nil)
-                return
-            }
-            
-            var addressString = ""
-            if let name = placemark.name {
-                addressString += name
-            }
-            if let postalCode = placemark.postalCode {
-                addressString += ", \(postalCode)"
-            }
-            if let city = placemark.locality {
-                addressString += " \(city)"
-            }
-            
-            completion(addressString)
         }
-    }
-    
-    func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy - HH:mm 'Uhr'"
-        return formatter.string(from: date)
     }
 }

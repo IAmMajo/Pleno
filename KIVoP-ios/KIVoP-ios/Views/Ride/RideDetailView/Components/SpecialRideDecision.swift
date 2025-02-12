@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 import SwiftUI
 
 struct SpecialRideDecision: View {
@@ -6,8 +7,10 @@ struct SpecialRideDecision: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        // Logik für Button
-        // Als Fahrer - Fahrt löschen, Als Mitfahrer - Mitfahrt stornieren, sonst - Mitfahren beantragen
+        // Logik für den Button in der SpecialRideDetailView
+        // Als Fahrer - Fahrt löschen
+        // Als Mitfahrer - Mitfahrt stornieren
+        // sonst - Mitfahren beantragen
         if (viewModel.rideDetail.isSelfDriver){
             Button(action: {
                 viewModel.showDeleteRideAlert = true

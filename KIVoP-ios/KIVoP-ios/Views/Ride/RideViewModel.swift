@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 import Foundation
 import SwiftUI
 import RideServiceDTOs
@@ -10,160 +11,59 @@ class RideViewModel: ObservableObject {
     @Published var rides: [GetSpecialRideDTO] = []
     @Published var eventRides: [GetEventRideDTO] = []
     @Published var events: [EventWithAggregatedData] = []
-    private let baseURL = "https://kivop.ipv64.net"
     
+    @Published var rideManager = RideManager.shared
+    
+    // Funktion um alle Inhalte für die Übersicht (RideView) abzurufen
     func fetchRides(){
         fetchSpecialRides()
         fetchEvents()
+        fetchEventRides()
     }
     
+    // SpecialRides über den RideManager abfragen
     func fetchSpecialRides() {
-        // URL für die Route GET /specialrides
-        guard let url = URL(string: "\(baseURL)/specialrides") else {
-            print("Invalid URL")
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        // Füge JWT Token zu den Headern hinzu
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            print("Unauthorized: No token found")
-            return
-        }
-        
-        // Führe den Netzwerkaufruf aus
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            if let error = error {
-                print("Network error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received from server")
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            
-            do {
-                // Decodieren der Antwort in ein Array von GetSpecialRideDTO
-                let decodedRides = try decoder.decode([GetSpecialRideDTO].self, from: data)
-                
-                // Sicherstellen, dass die Updates im Main-Thread ausgeführt werden
-                DispatchQueue.main.async {
-                    self?.rides = []
-                    self?.rides = decodedRides // Array mit den Sonderfahrten speichern
+        isLoading = true
+        rideManager.fetchSpecialRides { [weak self] fetchedRides in
+            DispatchQueue.main.async {
+                if let fetchedRides = fetchedRides {
+                    self?.rides = fetchedRides  // Set the fetched rides
+                } else {
+                    self?.errorMessage = "Failed to load special rides."
                 }
-            } catch {
-                print("JSON Decode Error: \(error.localizedDescription)")
+                self?.isLoading = false  // Hide loading indicator
             }
-        }.resume()
+        }
     }
     
     // Fetch Events für die Auswahl im Array
     func fetchEvents() {
-        guard let url = URL(string: "\(baseURL)/events") else {
-            print("Invalid URL")
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        // Füge JWT Token zu den Headern hinzu
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            print("Unauthorized: No token found")
-            return
-        }
-        
-        // Führe den Netzwerkaufruf aus
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            if let error = error {
-                print("Network error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received from server")
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            
-            do {
-                // Decodieren der Antwort in ein Array von GetSpecialRideDTO
-                let decodedEvents = try decoder.decode([GetEventDTO].self, from: data)
-                DispatchQueue.main.async {
-                    self?.fetchEventRides {
-                        // Berechne und füge die aggregierten Daten hinzu
-                        self?.events = decodedEvents.map { event in
-                            let aggregatedData = self?.aggregatedData(for: event) ?? (.nothing, 0, 0, nil)
-                            return EventWithAggregatedData(event: event, allOpenRequests: aggregatedData.allOpenRequests, allAllocatedSeats: aggregatedData.allAllocatedSeats, allEmptySeats: aggregatedData.allEmptySeats, myState: aggregatedData.myState)
-                        }
-                    }
+        isLoading = true
+        rideManager.fetchEvents { [weak self] fetchedEvents in
+            DispatchQueue.main.async {
+                if let fetchedEvents = fetchedEvents {
+                    self?.events = fetchedEvents  // Setze die Events
+                } else {
+                    self?.errorMessage = "Failed to load events."
                 }
-            } catch {
-                print("JSON Decode Error: \(error.localizedDescription)")
+                self?.isLoading = false  // Ladeanzeige ausschalten
             }
-        }.resume()
+        }
     }
     
     // Fetch alle EventRides für die Auswahl im Array
-    func fetchEventRides(completion: @escaping () -> Void) {
-        guard let url = URL(string: "\(baseURL)/eventrides") else {
-            print("Invalid URL")
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        // Füge JWT Token zu den Headern hinzu
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            print("Unauthorized: No token found")
-            return
-        }
-        
-        // Führe den Netzwerkaufruf aus
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            if let error = error {
-                print("Network error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received from server")
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            
-            do {
-                // Decodieren der Antwort in ein Array von GetSpecialRideDTO
-                let decodedEventRides = try decoder.decode([GetEventRideDTO].self, from: data)
-                DispatchQueue.main.async {
-                    self?.eventRides = []
-                    self?.eventRides = decodedEventRides
-                    completion()
+    func fetchEventRides() {
+        isLoading = true
+        rideManager.fetchEventRides { [weak self] fetchedEventRides in
+            DispatchQueue.main.async {
+                if let fetchedEventRides = fetchedEventRides {
+                    self?.eventRides = fetchedEventRides  // Set the eventRides if fetched successfully
+                } else {
+                    self?.errorMessage = "Failed to load event rides."
                 }
-            } catch {
-                print("JSON Decode Error: \(error.localizedDescription)")
+                self?.isLoading = false  // Hide loading indicator
             }
-        }.resume()
+        }
     }
     
     // Gruppierung der Daten (Event oder Ride) nach Monat und Jahr
@@ -217,7 +117,10 @@ class RideViewModel: ObservableObject {
         }
     }
 
-
+    // Inhalte anhand vom ausgewählten Tab Filtern
+    // Tab 1 Events
+    // Tab 2 Sonderfahrten (bei denen noch Platz ist)
+    // Tab 3 Fahrten zu Events und Sonderfahrten (Mit denen der Nutezr interagiert hat)
     var filteredData: [Any] {
         switch selectedTab {
         case 0:
@@ -232,31 +135,9 @@ class RideViewModel: ObservableObject {
             return []
         }
     }
-    
-    // Berechnung der aggregierten Daten
-    func aggregatedData(for event: GetEventDTO) -> (myState: UsersRideState, allEmptySeats: UInt8, allAllocatedSeats: UInt8, allOpenRequests: UInt8?) {
-        let relevantEventRides = eventRides.filter { $0.eventID == event.id }
-        
-        let allEmptySeats = relevantEventRides.reduce(0) { $0 + $1.emptySeats }
-        let allAllocatedSeats = relevantEventRides.reduce(0) { $0 + $1.allocatedSeats }
-        
-        let allOpenRequests = relevantEventRides.reduce(0) { $0 + ($1.openRequests ?? 0) }
-        let allOpenRequestsUInt8: UInt8? = allOpenRequests > 0 ? UInt8(allOpenRequests) : nil
-        
-        let myState: UsersRideState
-        if relevantEventRides.contains(where: { $0.myState == .driver }) {
-            myState = .driver
-        } else if relevantEventRides.contains(where: { $0.myState == .accepted }) {
-            myState = .accepted
-        } else if relevantEventRides.contains(where: { $0.myState == .requested }) {
-            myState = .requested
-        } else {
-            myState = .nothing
-        }
-        return (myState, allEmptySeats, allAllocatedSeats, allOpenRequestsUInt8)
-    }
 }
 
+// Event mit modifizierten Daten
 struct EventWithAggregatedData {
     var event: GetEventDTO
     var allOpenRequests: UInt8?

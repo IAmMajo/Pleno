@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 import SwiftUI
 import RideServiceDTOs
 
@@ -5,13 +6,18 @@ struct EventList: View {
     var events: [EventWithAggregatedData]
     @ObservedObject var viewModel: RideViewModel
     
+    // Diese Komponente zeigt eine Liste von Events im Reiter "Events" an
+    // Hierbei werden aggregatedEvents verwendet, da hierbei die kummulierten Statistiken zu Eventfahrten drin stehen
     var body: some View {
         ForEach(events, id: \.event.id) { aggregatedEvent in
             NavigationLink(destination: EventRideView(viewModel: EventRideViewModel(event: aggregatedEvent.event))) {
                 HStack {
                     VStack(alignment: .leading) {
+                        // Name
+                        // Das Event selber ist aggregatedEvent.event
                         Text(aggregatedEvent.event.name)
                             .font(.headline)
+                        // Datum
                         Text(DateTimeFormatter.formatDate(aggregatedEvent.event.starts))
                             .font(.subheadline)
                             .foregroundColor(.gray)
@@ -26,14 +32,16 @@ struct EventList: View {
                             .padding(.trailing, 5)
                     }
                     
+                    // Zeigt die aggregierte Anzahl der belegten und freien Sitze an
                     HStack {
-                        // Zeige die aggregierten Werte für zugewiesene und leere Plätze
                         Text("\(aggregatedEvent.allAllocatedSeats) / \(aggregatedEvent.allEmptySeats)")
                         Image(systemName: "car.fill")
                     }
+                    // Farbgebung basierend auf dem Status des Nutzers
+                    // Es wird der höchste Status angezeigt
+                    // driver > accepted > requested
                     .foregroundColor(
                         {
-                            // Bestimme die Farbe basierend auf dem `myState`
                             switch aggregatedEvent.myState {
                             case .driver:
                                 return Color.blue

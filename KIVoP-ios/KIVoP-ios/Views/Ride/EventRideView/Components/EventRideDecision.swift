@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 import SwiftUI
 
 struct EventRideDecision: View {
@@ -5,8 +6,12 @@ struct EventRideDecision: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        // Logik für Button
-        // Als Fahrer - Fahrt löschen, Als Mitfahrer - Mitfahrt stornieren, sonst - Mitfahren beantragen
+        // Logik für den Button in der EventRideDetailView
+        // Als Fahrer - Fahrt löschen
+        // Als Mitfahrer - Mitfahrt stornieren
+        // sonst - Mitfahren beantragen
+        // Wenn bereits irgendwo im Event angenommen - Anfragen nicht möglich
+        // Wenn bereits irgendwo Fahrer - Anfragen nicht möglich
         if (viewModel.eventRideDetail.isSelfDriver){
             Button(action: {
                 viewModel.showDeleteRideAlert = true
