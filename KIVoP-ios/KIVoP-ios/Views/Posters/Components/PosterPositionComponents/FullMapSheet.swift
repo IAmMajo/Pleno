@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  FullMapView.swift
 //  KIVoP-ios
@@ -8,8 +9,10 @@
 import SwiftUI
 import MapKit
 
+// displays a full-screen map (with a poster position on it) with sharing and navigation options
 struct FullMapSheet: View {
    @Environment(\.dismiss) private var dismiss
+   let posterId: UUID
    let address: String
    let name: String
    let coordinate: CLLocationCoordinate2D
@@ -22,8 +25,10 @@ struct FullMapSheet: View {
    
    var body: some View {
       NavigationStack {
-         MapView(name: self.name, coordinate: self.coordinate)
+         // Displays the map with the given coordinates (of the poster position)
+         MapView(name: self.name, coordinate: self.coordinate, posterId: posterId)
             .onAppear {
+               // Check which navigation apps are installed on the device
                let installedApps = NavigationAppHelper.shared.checkInstalledApps()
                isGoogleMapsInstalled = installedApps.isGoogleMapsInstalled
                isWazeInstalled = installedApps.isWazeInstalled
@@ -32,11 +37,13 @@ struct FullMapSheet: View {
             .navigationTitle(name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+               // Close button (left side of the toolbar)
                ToolbarItem(placement: .navigationBarLeading) {
                   Button("Schließen") {
                      dismiss()
                   }
                }
+               // Share options button (right side of the toolbar)
                ToolbarItem(placement: .navigationBarTrailing) {
                   Button {
                      showMapOptions = true
@@ -47,6 +54,7 @@ struct FullMapSheet: View {
                   }
                }
             }
+         // MARK: - Confirmation Dialog (Map Options)
             .confirmationDialog("\(address)\n\(coordinate.latitude), \(coordinate.longitude)", isPresented: $showMapOptions, titleVisibility: .visible) {
                Button("Öffnen mit Apple Maps") {
                   NavigationAppHelper.shared.openInAppleMaps(
@@ -69,14 +77,17 @@ struct FullMapSheet: View {
                }
                Button("Abbrechen", role: .cancel) {}
             }
+         // MARK: - Share Sheet
             .sheet(isPresented: $shareLocation) {
                ShareSheet(activityItems: [formattedShareText()])
-                  .presentationDetents([.medium, .large])
-                  .presentationDragIndicator(.hidden)
+                  .presentationDetents([.medium, .large]) // Allows resizing the share sheet
+                  .presentationDragIndicator(.hidden) // Hides the drag indicator
             }
       }
    }
    
+   // MARK: - Helper Function
+   /// Formats the text to be shared when the share sheet is opened
    private func formattedShareText() -> String {
       """
       \(address)
@@ -85,7 +96,4 @@ struct FullMapSheet: View {
 }
 
 #Preview {
-   NavigationView {
-      FullMapSheet(address: "Am Grabstein 6, 50129 Cologne", name: "Am Grabstein 6", coordinate: CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446))
-   }
 }

@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  MapPositionsView.swift
 //  KIVoP-ios
@@ -9,32 +10,40 @@ import SwiftUI
 import MapKit
 import PosterServiceDTOs
 
+// represents a location with a unique ID, name, and geographical coordinates
 struct Location: Identifiable {
     let id = UUID()
     var name: String
     var coordinate: CLLocationCoordinate2D
 }
 
+// A SwiftUI view that displays multiple poster positions on a map
 struct MapPositionsView: View {
+   // The poster image to be displayed in map annotations
+   let posterImage: UIImage?
+   // A list of tuples containing a `Location` and its associated `PosterPositionResponseDTO`
     let locationsPositions: [(location: Location, position: PosterPositionResponseDTO)]
-//    let locations: [Location]
+   // Controls the camera position of the map
     @State private var position: MapCameraPosition
 
-    init(locationsPositions: [(location: Location, position: PosterPositionResponseDTO)]) {
-        var shiftedLocationsPositions: [(location: Location, position: PosterPositionResponseDTO)] = []
-       for item in locationsPositions {
-          shiftedLocationsPositions.append((
+   // MARK: - Initializer
+   // Initializes the map with locations and a poster image
+   init(posterImage: UIImage?, locationsPositions: [(location: Location, position: PosterPositionResponseDTO)]) {
+      self.posterImage = posterImage
+      
+      // Creates a shifted copy of the locationsPositions to avoid modifying the original data
+      var shiftedLocationsPositions: [(location: Location, position: PosterPositionResponseDTO)] = []
+      for item in locationsPositions {
+         shiftedLocationsPositions.append((
             location: Location(name: item.location.name, coordinate: CLLocationCoordinate2D(
                latitude: item.location.coordinate.latitude,
                longitude: item.location.coordinate.longitude)),
             position: item.position
-          ))
-        }
-        self.locationsPositions = shiftedLocationsPositions
-        
-//        // Temporary placeholder for `@State` initialization
-//        _position = State(initialValue: .automatic)
-       
+         ))
+      }
+      self.locationsPositions = shiftedLocationsPositions
+
+      // Sets an appropriate initial camera position based on available locations
        if let initialRegion = locationsPositions.isEmpty
             ? nil
             : MapPositionsView.calculateRegion(for: locationsPositions.map { $0.location.coordinate }) {
@@ -44,6 +53,8 @@ struct MapPositionsView: View {
        }
     }
    
+   // MARK: - Get Annotation Color
+   /// Determines the color of the annotation indicator based on the position's status
    func getColor(position: PosterPositionResponseDTO) -> Color {
       let status = position.status
       switch status {
@@ -64,8 +75,10 @@ struct MapPositionsView: View {
       }
    }
 
+   // MARK: - View Body
     var body: some View {
         Map(position: $position) {
+           // Loop through all locations and add annotations
             ForEach(locationsPositions, id: \.position.id) { item in
                Annotation(item.location.name, coordinate: item.location.coordinate) {
                    VStack {
@@ -74,24 +87,39 @@ struct MapPositionsView: View {
                             .fill(.background)
                             .shadow(radius: 5)
                             .overlay(
-                              Image("TestPosterImage")
-                                 .resizable()
-                                 .scaledToFit()
-                                 .clipShape(RoundedRectangle(cornerRadius: 3))
-                                 .frame(width: 35, height: 35)
+                              Group {
+                                 // display poster image inside the annotation
+                                 if let uiImage = posterImage {
+                                    Image(uiImage: uiImage)
+                                       .resizable()
+                                       .scaledToFit()
+                                       .clipShape(RoundedRectangle(cornerRadius: 3))
+                                       .frame(width: 35, height: 35)
+                                 } else {
+                                    // Display a loading indicator if the image is not available
+                                    ProgressView()
+                                       .frame(width: 35, height: 35)
+                                       .background(.gray.opacity(0.2))
+                                       .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
+                                 }
+                              }
                             )
-                            .frame(width: 52, height: 52)
+                            .frame(width: 52, height: 52) // Adjust outer circle size
                             .overlay(alignment: .bottom) {
+                               // Bottom indicator shape colored based on poster status
                                IndicatorShape()
                                   .fill(getColor(position: item.position))
                                   .frame(width: 15, height: 10)
                                   .offset(y: 5)
                             }
+                         
+                         // Outer stroke ring with color based on poster status
                          Circle()
                             .stroke(getColor(position: item.position), lineWidth: 4)
                             .frame(width: 52-4, height: 52-4)
                       }
                       
+                      // Display the location name under the annotation
                       Text(item.location.name)
                          .font(.caption2)
                          .bold()
@@ -112,13 +140,13 @@ struct MapPositionsView: View {
                          )
                          .padding(.top, 5)
                    }
-                   .offset(y: -18)
+                   .offset(y: -18) // Adjusts the vertical position of annotations, to make the IndicatorShape point to the location
                 }
                 .annotationTitles(.hidden)
             }
         }
         .onAppear {
-//            // Set the position dynamically on appear
+           // Dynamically adjust the map region when the view appears
            if !locationsPositions.isEmpty {
               let allCoordinates = locationsPositions.map { $0.location.coordinate }
               let region = MapPositionsView.calculateRegion(for: allCoordinates)
@@ -127,6 +155,8 @@ struct MapPositionsView: View {
         }
     }
 
+   // MARK: - Calculate Map Region
+   /// Computes a suitable map region that includes all given coordinates
     static func calculateRegion(for coordinates: [CLLocationCoordinate2D]) -> MKCoordinateRegion {
         let lats = coordinates.map { $0.latitude }
         let lons = coordinates.map { $0.longitude }
@@ -142,8 +172,6 @@ struct MapPositionsView: View {
         let span = MKCoordinateSpan(
             latitudeDelta: (maxLat - minLat) * 1.4,
             longitudeDelta: (maxLon - minLon) * 1.4
-//         latitudeDelta: max(maxLat - minLat, 0.01) * 1.4,
-//         longitudeDelta: max(maxLon - minLon, 0.01) * 1.4
         )
         return MKCoordinateRegion(center: center, span: span)
     }
@@ -157,6 +185,4 @@ struct MapPositionsView: View {
       Location(name: "Baumhaus 5", coordinate: CLLocationCoordinate2D(latitude: 51.494653516488205, longitude: 6.525307532716446)),
       Location(name: "Katerstraße 3", coordinate: CLLocationCoordinate2D(latitude: 51.495553516488205, longitude: 6.565227532716446))
    ]
-   
-//   MapPositionsView(locations: locations)
 }

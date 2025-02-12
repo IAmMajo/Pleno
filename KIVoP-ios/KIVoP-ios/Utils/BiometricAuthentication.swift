@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  BiometricAuthentication.swift
 //  KIVoP-ios

@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  PostersView.swift
 //  KIVoP-ios
@@ -5,43 +6,24 @@
 //  Created by Hanna Steffen on 09.12.24.
 //
 
+// This file defines the view that displays a list of all posters
+// It includes fetching posters and images, displays summary information of posters (filtered by active or archived posters), handles navigation
+
 import SwiftUI
 import PosterServiceDTOs
-
-struct FilteredPoster: Equatable {
-   let poster: PosterResponseDTO
-   let nextTakeDownPosition: PosterPositionResponseDTO
-   let tohangCount: Int
-   let expiredCount: Int
-   
-   static func == (lhs: FilteredPoster, rhs: FilteredPoster) -> Bool {
-      return lhs.poster.id == rhs.poster.id &&
-      lhs.nextTakeDownPosition.id == rhs.nextTakeDownPosition.id &&
-      lhs.tohangCount == rhs.tohangCount &&
-      lhs.expiredCount == rhs.expiredCount
-   }
-}
-
-struct FilteredPoster2: Equatable {
-   let poster: PosterResponseDTO
-   let posterSummary: PosterSummaryResponseDTO
-   
-   static func == (lhs: FilteredPoster2, rhs: FilteredPoster2) -> Bool {
-      return lhs.poster.id == rhs.poster.id
-   }
-}
 
 struct PostersView: View {
    @Environment(\.dismiss) var dismiss
    @Environment(\.colorScheme) var colorScheme
 
    @StateObject private var viewModel = PostersViewModel()
-   @State private var postersFiltered: [FilteredPoster2] = []
-   @State private var selectedPoster: PosterResponseDTO?
-   @State private var isShowingDetails: Bool = false
+   @State private var postersFiltered: [FilteredPoster] = [] // filtered FilteredPosters, based on searchText
+   @State private var selectedPoster: PosterResponseDTO? // selected poster to navigate to
+   @State private var isShowingDetails: Bool = false // for navigating to Posters-PosterDetailView
+   // viewModel status
    @State private var isLoading = false
    @State private var error: String?
-   
+   // text inside the searchbar
    @State private var searchText = ""
    
    // Determines color for next-take-down date of the poster
@@ -140,14 +122,15 @@ struct PostersView: View {
                       postersFiltered = viewModel.filteredPosters
                    }
                 }
-                .navigationDestination(isPresented: $isShowingDetails) { // navigate to PosterDetailView of selectedPoster
+                // navigate to PosterDetailView of selectedPoster
+                .navigationDestination(isPresented: $isShowingDetails) {
                    if let poster = selectedPoster {
                       Posters_PosterDetailView(posterId: poster.id)
                          .navigationTitle(poster.name)
                     }
                 }
                 
-                // Picker for current and archived posters
+                // Picker for active and archived posters
                 Picker("Filter", selection: $viewModel.selectedTab) {
                     Text("Aktuell").tag(0)
                     Text("Archiviert").tag(1)
@@ -171,7 +154,6 @@ struct PostersView: View {
              Task {
                 isLoading = true
                 await viewModel.fetchPosters()
-//                postersFiltered = viewModel.filteredPosters
                 isLoading = false
              }
           }
@@ -186,6 +168,7 @@ struct PostersView: View {
           
        }
        .background(Color(UIColor.secondarySystemBackground))
+       // searchbar: search poster names for searchText
        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen")
        .onChange(of: viewModel.filteredPosters) { old, newFilteredPosters in
           postersFiltered = newFilteredPosters
@@ -204,6 +187,7 @@ struct PostersView: View {
     }
 }
 
+// extension to get the averageColor of an UIImage (for the background of the poster images)
 extension UIImage {
    var averageColor: UIColor? {
       guard let inputImage = CIImage(image: self) else { return nil }

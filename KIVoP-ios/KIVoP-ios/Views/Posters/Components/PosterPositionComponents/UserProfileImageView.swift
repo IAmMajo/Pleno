@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  UserProfileImageView.swift
 //  KIVoP-ios
@@ -7,6 +8,9 @@
 
 import SwiftUI
 
+// A view that displays a user's profile image.
+// If the profile image is unavailable, it displays a default placeholder.
+// Fetches the image asynchronously from the `PosterService`.
 struct UserProfileImageView: View {
     let userId: UUID
     @State private var profileImage: UIImage?
@@ -15,17 +19,19 @@ struct UserProfileImageView: View {
 
     var body: some View {
         VStack {
+           // Profile Image Display
             if let profileImage = profileImage {
                 Image(uiImage: profileImage)
                   .resizable()
                   .frame(maxWidth: 45, maxHeight: 45)
                   .aspectRatio(1, contentMode: .fit)
                   .foregroundStyle(.gray.opacity(0.5))
-                  .clipShape(Circle() /*RoundedRectangle(cornerRadius: 6, style: .continuous)*/)
+                  .clipShape(Circle())
                   .padding(.trailing, 5)
             } else if isLoading {
                 ProgressView("Loading...")
                   .frame(maxWidth: 45, maxHeight: 45)
+               // Default Placeholder
             } else {
                Image(systemName: "person.crop.circle.fill")
                   .resizable()
@@ -39,7 +45,8 @@ struct UserProfileImageView: View {
             fetchProfileImage()
         }
     }
-
+   
+   // Fetches the user's profile image asynchronously.
     private func fetchProfileImage() {
         Task {
             do {
@@ -58,5 +65,4 @@ struct UserProfileImageView: View {
 }
 
 #Preview {
-//    UserProfileImageView()
 }

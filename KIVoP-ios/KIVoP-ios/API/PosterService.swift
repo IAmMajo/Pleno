@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  PosterService.swift
 //  KIVoP-ios
@@ -9,12 +10,18 @@ import Foundation
 import Combine
 import PosterServiceDTOs
 
+// A service class that manages network requests related to posters
 class PosterService: ObservableObject {
+   // Singleton instance of `PosterService` to be shared across the app
     static let shared = PosterService()
+   // Base URL for poster-related API endpoints
     private let baseURL = "https://kivop.ipv64.net/posters"
 
+   // Published array of posters, automatically updates UI when changed
     @Published var posters: [PosterResponseDTO] = []
     
+   // MARK: - Authorization Handling
+   /// Creates an authorized `URLRequest` with a JWT token
    private func createAuthorizedRequest(url: URL, method: String, contentType: String = "application/json") -> URLRequest? {
       var request = URLRequest(url: url)
       request.httpMethod = method
@@ -28,6 +35,9 @@ class PosterService: ObservableObject {
       return request
    }
    
+   // MARK: - Fetch Posters
+   
+   /// Fetches all posters
    func fetchPosters(completion: @escaping (Result<[PosterResponseDTO], Error>) -> Void) {
       guard let url = URL(string: baseURL) else {
          completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
@@ -63,6 +73,7 @@ class PosterService: ObservableObject {
       }.resume()
    }
    
+   /// Fetches a specific poster by its ID
    func fetchPoster(byId id: UUID, completion: @escaping (Result<PosterResponseDTO, Error>) -> Void) {
       guard let url = URL(string: "\(baseURL)/\(id)") else {
          completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
@@ -95,6 +106,7 @@ class PosterService: ObservableObject {
         }.resume()
     }
    
+   /// Fetches the image associated with a specific poster
    func fetchPosterImage(posterId: UUID) async throws -> Data {
       guard let url = URL(string: "\(baseURL)/\(posterId)/image") else {
          throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -119,6 +131,9 @@ class PosterService: ObservableObject {
       return decoder
    }
    
+   // MARK: - Fetch Poster Positions
+       
+   /// Fetches all positions for a specific poster
    func fetchPosterPositions(for posterId: UUID, completion: @escaping (Result<[PosterPositionResponseDTO], Error>) -> Void) {
       guard let url = URL(string: "\(baseURL)/\(posterId)/positions") else {
          completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
@@ -151,6 +166,7 @@ class PosterService: ObservableObject {
       }.resume()
    }
    
+   /// Fetches a specific positions for a specific poster
    func fetchPosterPosition(id: UUID, positionId: UUID, completion: @escaping (Result<PosterPositionResponseDTO, Error>) -> Void) {
       guard let url = URL(string: "\(baseURL)/\(id)/positions/\(positionId)") else {
          completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
@@ -183,6 +199,7 @@ class PosterService: ObservableObject {
       }.resume()
    }
    
+   /// Fetches the image associated with a specific position
    func fetchPositionImage(positionId: UUID) async throws -> Data {
       guard let url = URL(string: "\(baseURL)/positions/\(positionId)/image") else {
          throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -201,6 +218,9 @@ class PosterService: ObservableObject {
       return data
    }
    
+   // MARK: - Fetch Poster Summary
+   
+   /// Fetches a summary of all posters
    func fetchPostersSummary() async throws -> PosterSummaryResponseDTO {
       guard let url = URL(string: "\(baseURL)/summary") else {
          throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -225,6 +245,7 @@ class PosterService: ObservableObject {
       }
    }
    
+   /// Fetches a summary of a specific poster
    func fetchPosterSummary(for posterId: UUID) async throws -> PosterSummaryResponseDTO {
       guard let url = URL(string: "\(baseURL)/\(posterId)/summary") else {
          throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -249,6 +270,9 @@ class PosterService: ObservableObject {
       }
    }
    
+   // MARK: - Handle Positions (hang, take down, report damage)
+   
+   // hang a position
    func hangPosition(positionId: UUID, dto: HangPosterPositionDTO) async throws -> HangPosterPositionResponseDTO {
        guard let url = URL(string: "\(baseURL)/positions/\(positionId)/hang") else {
            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -276,6 +300,7 @@ class PosterService: ObservableObject {
        }
    }
    
+   //take down a position
    func takeDownPosition(positionId: UUID, dto: TakeDownPosterPositionDTO) async throws -> TakeDownPosterPositionResponseDTO {
        guard let url = URL(string: "\(baseURL)/positions/\(positionId)/take-down") else {
            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -303,6 +328,7 @@ class PosterService: ObservableObject {
        }
    }
    
+   // report damaged position
    func reportDamagedPosition(positionId: UUID, dto: ReportDamagedPosterPositionDTO) async throws -> PosterPositionResponseDTO {
       guard let url = URL(string: "\(baseURL)/positions/\(positionId)/report-damage") else {
          throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -337,6 +363,7 @@ class PosterService: ObservableObject {
       }
    }
    
+   // MARK: - Fetch profile image  of logged in user
    func fetchProfileImage(userId: UUID, completion: @escaping (Result<Data, Error>) -> Void) {
       let profileImageBaseURL = "https://kivop.ipv64.net/users/profile-image/user"
       guard let url = URL(string: "\(profileImageBaseURL)/\(userId.uuidString)") else {
@@ -363,7 +390,7 @@ class PosterService: ObservableObject {
          completion(.success(data))
       }.resume()
    }
-   
+   /// fetches profile image asynchronous
    func fetchProfileImageAsync(userId: UUID) async throws -> Data {
       try await withCheckedThrowingContinuation { continuation in
          fetchProfileImage(userId: userId) { result in
@@ -377,6 +404,8 @@ class PosterService: ObservableObject {
       }
    }
 }
+
+// MARK: - Extensions for Async/Await Wrappers
 
 extension PosterService {
    func fetchPostersAsync() async throws -> [PosterResponseDTO] {

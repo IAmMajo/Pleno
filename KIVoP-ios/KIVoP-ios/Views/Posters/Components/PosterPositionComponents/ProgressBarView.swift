@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  ProgressBarView.swift
 //  KIVoP-ios
@@ -8,9 +9,11 @@
 import SwiftUI
 import PosterServiceDTOs
 
+// A progress bar view that visually represents the status of a position
 struct ProgressBarView: View {
    let position: PosterPositionResponseDTO
    
+   /// Determines the progress bar width based on the position's status
    var value: CGFloat {
       let status = position.status
       switch status {
@@ -28,14 +31,16 @@ struct ProgressBarView: View {
    }
    
     var body: some View {
+       // ProgressBar background in gray
        Rectangle()
            .fill(.gray.opacity(0.3))
            .frame(maxWidth: .infinity, maxHeight: 15)
            .overlay(
             HStack {
+               // displays progress in blue
                RoundedRectangle(cornerRadius: 25)
                   .fill(.blue)
-                  .frame(width: value)
+                  .frame(width: value) // Dynamic width based on `value`
                Spacer()
             }
            )
@@ -44,5 +49,4 @@ struct ProgressBarView: View {
 }
 
 #Preview {
-//   ProgressBarView(status: Status.hung)
 }

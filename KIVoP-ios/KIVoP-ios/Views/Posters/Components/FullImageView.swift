@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  ImageView.swift
 //  KIVoP-ios
@@ -7,127 +8,40 @@
 
 import SwiftUI
 
+// A view that displays an image with zoom and drag functionalities.
 struct FullImageView: View {
-   @Environment(\.dismiss) private var dismiss
-   @State private var currentZoom = 0.0
-   @State private var totalZoom = 1.0
-   @State private var dragOffset = CGSize.zero
-   @State private var accumulatedOffset = CGSize.zero
-
-   let uiImage: UIImage
+   // MARK: - Environment & State Variables
+       
+       /// Handles dismissing the view when the close button is tapped.
+       @Environment(\.dismiss) private var dismiss
+       
+       /// The amount of zoom currently being applied.
+       @State private var currentZoom = 0.0
+       
+       /// The accumulated zoom level from previous gestures.
+       @State private var totalZoom = 1.0
+       
+       /// The offset from dragging the image.
+       @State private var dragOffset = CGSize.zero
+       
+       /// The total accumulated offset (drag position).
+       @State private var accumulatedOffset = CGSize.zero
+       
+       /// The image being displayed.
+       let uiImage: UIImage
    
+   // MARK: - Body
    var body: some View {
-//      GeometryReader { geometry in
-////                 let imageSize = geometry.size
-////                 let scaledImageSize = CGSize(
-////                     width: imageSize.width * totalZoom,
-////                     height: imageSize.height * totalZoom
-////                 )
-////                 let maxXOffset = max((scaledImageSize.width - imageSize.width) / 2, 0)
-////                 let maxYOffset = max((scaledImageSize.height - imageSize.height) / 2, 0)
-//         let screenSize = geometry.size
-//         let imageSize = uiImage.size
-//         let aspectRatio = imageSize.width / imageSize.height
-//
-//         // Calculate the initial image frame
-//         let initialImageWidth = screenSize.width
-//         let initialImageHeight = initialImageWidth / aspectRatio
-//
-//         let scaledImageSize = CGSize(
-//             width: initialImageWidth * totalZoom,
-//             height: initialImageHeight * totalZoom
-//         )
-//
-//         // Calculate the maximum offset to prevent dragging beyond bounds
-//         let maxXOffset = max((scaledImageSize.width - screenSize.width) / 2, 0)
-//         let maxYOffset = max((scaledImageSize.height - screenSize.height) / 2, 0)
-//
-//         // Calculate initial centering offset
-//         let initialOffsetX = (screenSize.width - scaledImageSize.width) / 2
-//         let initialOffsetY = (screenSize.height - scaledImageSize.height) / 2
-//      Image(uiImage: uiImage)
-//         .resizable()
-//         .scaledToFit()
-//         .scaleEffect(currentZoom + totalZoom)
-////         .offset(x: dragOffset.width + accumulatedOffset.width, y: dragOffset.height + accumulatedOffset.height)
-//         .offset(
-////             x: clamp(dragOffset.width + accumulatedOffset.width, -maxXOffset, maxXOffset),
-////             y: clamp(dragOffset.height + accumulatedOffset.height, -maxYOffset, maxYOffset)
-//             x: initialOffsetX + clamp(dragOffset.width + accumulatedOffset.width, -maxXOffset, maxXOffset),
-//             y: initialOffsetY + clamp(dragOffset.height + accumulatedOffset.height, -maxYOffset, maxYOffset)
-//         )
-////         .onAppear {
-////             // Reset offsets to ensure centering on view load
-////             dragOffset = .zero
-////             accumulatedOffset = .zero
-////         }
-//         .gesture(
-//            SimultaneousGesture(
-//               MagnifyGesture()
-//                  .onChanged { value in
-//                     currentZoom = (value.magnification - 1) * totalZoom
-//                  }
-//                  .onEnded { value in
-//                     totalZoom = totalZoom + currentZoom
-////                     totalZoom = min(max(1.0, totalZoom), 5.0)
-//                     currentZoom = 0
-//                     if totalZoom < 1.0 {
-//                        withAnimation(.easeOut(duration: 0.3)) {
-//                           totalZoom = 1.0
-//                        }
-//                     } else if totalZoom > 5.0 {
-//                        withAnimation(.easeIn(duration: 0.1)) {
-//                           totalZoom = 5.0
-//                        }
-//                     }
-//                  },
-//               DragGesture()
-//                  .onChanged { value in
-//                     dragOffset = value.translation
-//                  }
-//                  .onEnded { value in
-////                     accumulatedOffset.width += value.translation.width
-////                     accumulatedOffset.height += value.translation.height
-//                     accumulatedOffset.width = clamp(accumulatedOffset.width + value.translation.width, -maxXOffset, maxXOffset)
-//                     accumulatedOffset.height = clamp(accumulatedOffset.height + value.translation.height, -maxYOffset, maxYOffset)
-//                     
-//                     // Keep the image within bounds
-//                     dragOffset = .zero
-//                  }
-//            )
-//         )
-//         .accessibilityZoomAction { action in
-//            if action.direction == .zoomIn {
-//               totalZoom += 1
-//            } else {
-//               totalZoom -= 1
-//            }
-//         }
-//         .navigationBarBackButtonHidden(true)
-//         .toolbar {
-//            ToolbarItem(placement: .navigationBarLeading) {
-//               Button {
-//                  dismiss()
-//               } label: {
-//                  HStack {
-//                     Text("Schließen")
-//                  }
-//               }
-//            }
-//         }
-//   }
-      
-      
       GeometryReader { geometry in
           let screenSize = geometry.size
           let imageSize = uiImage.size
           let aspectRatio = imageSize.width / imageSize.height
 
-          // Calculate the initial image dimensions
+         // Initial dimensions for the image
           let initialImageWidth = screenSize.width
           let initialImageHeight = initialImageWidth / aspectRatio
 
-          // Scaled image size based on zoom level
+         // Calculate the scaled image size based on zoom level
           let scaledImageSize = CGSize(
               width: initialImageWidth * totalZoom,
               height: initialImageHeight * totalZoom
@@ -137,6 +51,7 @@ struct FullImageView: View {
           let maxXOffset = max((scaledImageSize.width - screenSize.width) / 2, 0)
           let maxYOffset = max((scaledImageSize.height - screenSize.height) / 2, 0)
 
+         // MARK: - Display Image
           Image(uiImage: uiImage)
               .resizable()
               .scaledToFit()
@@ -147,6 +62,7 @@ struct FullImageView: View {
               )
               .gesture(
                   SimultaneousGesture(
+                     // MARK: - Zoom Gesture (Pinch to Zoom)
                       MagnificationGesture()
                           .onChanged { value in
                               currentZoom = (value - 1) * totalZoom
@@ -170,6 +86,7 @@ struct FullImageView: View {
                               accumulatedOffset.width = clamp(accumulatedOffset.width * (scaledImageSize.width / (initialImageWidth * totalZoom)), -maxXOffset, maxXOffset)
                               accumulatedOffset.height = clamp(accumulatedOffset.height * (scaledImageSize.height / (initialImageHeight * totalZoom)), -maxYOffset, maxYOffset)
                           },
+                      // MARK: - Drag Gesture (Pan to Move)
                       DragGesture()
                           .onChanged { value in
                               dragOffset = value.translation
@@ -188,6 +105,7 @@ struct FullImageView: View {
                   dragOffset = .zero
               }
               .accessibilityZoomAction { action in
+                 // Accessibility support for zooming in & out
                   if action.direction == .zoomIn {
                       totalZoom += 1
                   } else {
@@ -207,86 +125,13 @@ struct FullImageView: View {
                   }
               }
       }
-      
-//      GeometryReader { geometry in
-//                 let screenSize = geometry.size
-//                 let imageSize = uiImage.size
-//                 let aspectRatio = imageSize.width / imageSize.height
-//
-//                 // Calculate the initial image frame
-//                 let initialImageWidth = screenSize.width
-//                 let initialImageHeight = initialImageWidth / aspectRatio
-//
-//                 let scaledImageSize = CGSize(
-//                     width: initialImageWidth * totalZoom,
-//                     height: initialImageHeight * totalZoom
-//                 )
-//
-//                 // Calculate the maximum offset to prevent dragging beyond bounds
-//                 let maxXOffset = max((scaledImageSize.width - screenSize.width) / 2, 0)
-//                 let maxYOffset = max((scaledImageSize.height - screenSize.height) / 2, 0)
-//
-//                 // Calculate initial centering offset
-//                 let initialOffsetX = (screenSize.width - scaledImageSize.width) / 2
-//                 let initialOffsetY = (screenSize.height - scaledImageSize.height) / 2
-//
-//                 Image(uiImage: uiImage)
-//                     .resizable()
-//                     .scaledToFit()
-//                     .scaleEffect(totalZoom)
-//                     .offset(
-//                         x: initialOffsetX + clamp(dragOffset.width + accumulatedOffset.width, -maxXOffset, maxXOffset),
-//                         y: initialOffsetY + clamp(dragOffset.height + accumulatedOffset.height, -maxYOffset, maxYOffset)
-//                     )
-//                     .onAppear {
-//                         // Reset offsets to ensure centering on view load
-//                         dragOffset = .zero
-//                         accumulatedOffset = .zero
-//                     }
-//                     .gesture(
-//                         SimultaneousGesture(
-//                             MagnificationGesture()
-//                                 .onChanged { value in
-//                                     currentZoom = (value - 1) * totalZoom
-//                                     totalZoom = min(max(1.0, totalZoom + currentZoom), 5.0) // Limit zoom from 1x to 5x
-//                                 }
-//                                 .onEnded { _ in
-//                                     totalZoom = min(max(1.0, totalZoom), 5.0)
-//                                     currentZoom = 0
-//                                 },
-//                             DragGesture()
-//                                 .onChanged { value in
-//                                     dragOffset = value.translation
-//                                 }
-//                                 .onEnded { value in
-//                                     accumulatedOffset.width = clamp(accumulatedOffset.width + value.translation.width, -maxXOffset, maxXOffset)
-//                                     accumulatedOffset.height = clamp(accumulatedOffset.height + value.translation.height, -maxYOffset, maxYOffset)
-//                                     dragOffset = .zero
-//                                 }
-//                         )
-//                     )
-//                     .navigationBarBackButtonHidden(true)
-//                     .toolbar {
-//                         ToolbarItem(placement: .navigationBarLeading) {
-//                             Button {
-//                                 dismiss()
-//                             } label: {
-//                                 HStack {
-//                                     Text("Schließen")
-//                                 }
-//                             }
-//                         }
-//                     }
-//             }
-         
-         }
-
-         // Helper function to clamp a value between a minimum and maximum
-         private func clamp(_ value: CGFloat, _ minValue: CGFloat, _ maxValue: CGFloat) -> CGFloat {
-             return min(max(value, minValue), maxValue)
-         }
+   }
+   
+   // Helper function to clamp a value between a minimum and maximum
+   private func clamp(_ value: CGFloat, _ minValue: CGFloat, _ maxValue: CGFloat) -> CGFloat {
+      return min(max(value, minValue), maxValue)
+   }
 }
 
 #Preview {
-//   FullImageView(image: "TestPositionImage")
 }

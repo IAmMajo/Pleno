@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  FunctionHelper.swift
 //  KIVoP-ios
@@ -11,6 +12,7 @@ import SwiftUICore
 import UIKit
 
 struct DateColorHelper {
+   // returns color to display for a positions expiresAt date
   static func getDateColor(position: PosterPositionResponseDTO) -> Color {
       let status = position.status
       switch status {
