@@ -12,16 +12,21 @@ import MapKit
 import PollServiceDTOs
 import SwiftUICore
 
+/// ViewModel responsible for fetching and managing polls
+/// Conforms to `ObservableObject` to allow SwiftUI to react to state changes
 @MainActor
 class PollsViewModel: ObservableObject {
+   // Holds a list of polls with their respective UI symbols
    @Published var polls: [(poll: GetPollDTO, symbol: (status: String, color: Color))] = []
    
+   // Initializes the ViewModel and immediately fetches polls asynchronously
     init() {
         Task {
             await fetchPolls()
         }
     }
 
+   // Fetches all polls asynchronously from the `PollAPI` service
    func fetchPolls() async {
       PollAPI.shared.fetchAllPolls { [weak self] result in
          DispatchQueue.main.async {
@@ -29,7 +34,7 @@ class PollsViewModel: ObservableObject {
             switch result {
             case .success(let polls):
                self.polls = polls.map { poll in
-                  (poll: poll, symbol: self.getSymbol(poll: poll))
+                  (poll: poll, symbol: self.getSymbol(poll: poll)) // Assigns a UI symbol for each poll
                }
             case .failure(let error):
                print("Error loading polls: \(error.localizedDescription)")
@@ -38,112 +43,22 @@ class PollsViewModel: ObservableObject {
       }
    }
    
+   // Determines the appropriate UI symbol and color for a poll's status
+   // - Returns: A tuple containing the system symbol name and color
    func getSymbol(poll: GetPollDTO) -> (status: String, color: Color) {
       if poll.iVoted {
-         return ("checkmark", .blue)
+         return ("checkmark", .blue) // User has already voted
       } else if poll.isOpen {
-         return ("exclamationmark.arrow.trianglehead.counterclockwise.rotate.90", .orange)
+         return ("exclamationmark.arrow.trianglehead.counterclockwise.rotate.90", .orange) // Poll is still open
       } else {
-         return ("", .black)
+         return ("", .black) // Poll is closed and user did not vote
       }
    }
    
 }
 
 
-
-public struct Poll: Identifiable, Codable, Hashable {
-   public let id: UUID
-   public let question: String
-   public let description: String
-   public let multipleSelection: Bool
-   public var isOpen: Bool
-   public var startedAt: Date?
-   public var expirationDate: Date
-   public var options: [PollOption]
-}
-
-public struct PollOption: Codable, Hashable {
-   public let index: UInt8
-   public var text: String
-}
-
-public struct PollResults: Codable, Hashable {
-   public var votingId: UUID
-   public var myVote: UInt8? // Index 0: Abstention | nil: did not vote at all
-   public var totalCount: UInt
-   public var results: [PollResult]
-}
-
-public struct PollResult: Identifiable, Codable, Hashable {
-   public var id = UUID()
-   public var index: UInt8 // Index 0: Abstention
-   public var count: UInt
-   public var percentage: Double
-   public var identities: [GetIdentityDTO]?
-}
-
-
-
-var mockPolls: [Poll] {
-   return [
-      Poll(
-         id: UUID(),
-         question: "Welche Brötchen soll es fürs Frühstück geben?",
-         description: "Für das gemeinschaftliche Frühstücken soll eine Brötchenwahl stattfinden, damit vorher genug eingekauft werden kann.",
-         multipleSelection: true,
-         isOpen: true,
-         startedAt: Calendar.current.date(byAdding: .day, value: -1, to: Date())!,
-         expirationDate: Calendar.current.date(byAdding: .day, value: +10, to: Date())!,
-         options: mockPollOptions1
-      ),
-      Poll(
-         id: UUID(),
-         question: "Welche Option sollen gewählt werden?",
-         description: "Dies ist die Beschreibung einer Umfrage ohne Mehrfachauswahl.",
-         multipleSelection: false,
-         isOpen: true,
-         startedAt: Calendar.current.date(byAdding: .day, value: -7, to: Date())!,
-         expirationDate: Calendar.current.date(byAdding: .hour, value: +10, to: Date())!,
-         options: mockPollOptions2
-      ),
-      Poll(
-         id: UUID(),
-         question: "Welche Optionen sollen gewählt werden?",
-         description: "Dies ist die Beschreibung einer Umfrage mit Mehrfachauswahl.",
-         multipleSelection: true,
-         isOpen: false,
-         startedAt: Calendar.current.date(byAdding: .day, value: -15, to: Date())!,
-         expirationDate: Calendar.current.date(byAdding: .day, value: -5, to: Date())!,
-         options: mockPollOptions2
-      )
-   ]
-}
-
-let mockPollOptions1: [PollOption] = [
-   PollOption(index: 0, text: "Enthaltung"),
-   PollOption(index: 1, text: "Weizenbrötchen"),
-   PollOption(index: 2, text: "Vollkornbrötchen"),
-   PollOption(index: 3, text: "Milchbrötchen"),
-]
-
-let mockPollOptions2: [PollOption] = [
-   PollOption(index: 0, text: "Enthaltung"),
-   PollOption(index: 1, text: "Option1"),
-   PollOption(index: 2, text: "Option2"),
-   PollOption(index: 3, text: "Option3"),
-   PollOption(index: 4, text: "Option4"),
-]
-
-
-//var mockPollResults: PollResults {
-//   return PollResults(
-//      votingId: mockVotings[0].id,
-//      myVote: nil, // Index 0: Abstention | nil: did not vote at all
-//      totalCount: 50,
-//      results: [mockPollResult1, mockPollResult2, mockPollResult3, mockPollResult4]
-//   )
-//}
+// MARK: - mock data for preview and testing
 
 var mockPollResults: GetPollResultsDTO {
    return GetPollResultsDTO(
@@ -160,55 +75,6 @@ var mockPollResult0: GetPollResultDTO {
       text: "Option",
       count: 5,
       percentage: 10,
-      identities: []
-   )
-}
-
-var mockPollResult1: PollResult {
-   return PollResult(
-      index: 0, // Index 0: Abstention
-      count: 2,
-      percentage: 2,
-      identities: []
-   )
-}
-var mockPollResult2: PollResult {
-   return PollResult(
-      index: 1, // Index 0: Abstention
-      count: 8,
-      percentage: 8,
-      identities: []
-   )
-}
-var mockPollResult3: PollResult {
-   return PollResult(
-      index: 2, // Index 0: Abstention
-      count: 10,
-      percentage: 10,
-      identities: [/*mockIdentity1*/]
-   )
-}
-var mockPollResult4: PollResult {
-   return PollResult(
-      index: 3, // Index 0: Abstention
-      count: 30,
-      percentage: 30,
-      identities: [/*mockIdentity1, mockIdentity2*/]
-   )
-}
-var mockPollResult5: PollResult {
-   return PollResult(
-      index: 4, // Index 0: Abstention
-      count: 30,
-      percentage: 30,
-      identities: []
-   )
-}
-var mockPollResult6: PollResult {
-   return PollResult(
-      index: 5, // Index 0: Abstention
-      count: 30,
-      percentage: 30,
       identities: []
    )
 }

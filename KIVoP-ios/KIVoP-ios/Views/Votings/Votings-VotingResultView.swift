@@ -10,35 +10,42 @@ import SwiftUI
 import LocalAuthentication
 import MeetingServiceDTOs
 
+/// A view displaying the results of a voting process, including live status and vote breakdown
 struct Votings_VotingResultView: View {
-   @Environment(\.colorScheme) var colorScheme
-   @StateObject private var webSocketService = WebSocketService()
-   @StateObject private var meetingViewModel = MeetingViewModel()
    
-   let voting: GetVotingDTO
-   @State var votingResults: GetVotingResultsDTO
-   @State var meetingName = ""
+   // MARK: - Environment & State Variables
+   @Environment(\.colorScheme) var colorScheme
+   @StateObject private var webSocketService = WebSocketService() // Handles live updates via WebSockets
+   @StateObject private var meetingViewModel = MeetingViewModel() // Fetches meeting-related data
+   
+   let voting: GetVotingDTO // The voting object containing question and options
+   @State var votingResults: GetVotingResultsDTO // Stores the results of the voting
+   @State var meetingName = "" // Holds the meeting name associated with the voting
    
    @State private var isLoading = false
    @State private var error: String?
-   @State private var resultsLoaded: Bool = false
-   @State private var isLiveStatusAvailable: Bool = false
+   @State private var resultsLoaded: Bool = false // Tracks if results have been loaded successfully
+   @State private var isLiveStatusAvailable: Bool = false // Checks if a live voting session is still active
    
-   @State var optionTextMap: [UInt8: String] = [:]
+   @State var optionTextMap: [UInt8: String] = [:] // Maps option indices to their respective texts
    
+   // MARK: - Initializer
+   /// Initializes the view with a specific voting object
    init(voting: GetVotingDTO) {
       self.voting = voting
-      self.votingResults = mockVotingResults
+      self.votingResults = mockVotingResults // Mock data for initialization
    }
    
+   // MARK: - Body
     var body: some View {
        ScrollView {
+          // if voting is still open (WebSocket connection is successful) or voting results loaded display live status or results
           if (isLiveStatusAvailable || resultsLoaded) {
              VStack {
                 ZStack {
                    if isLiveStatusAvailable {
+                      // Displays a live voting status view, using the WebSocket, if voting is still open
                       VotingLiveStatusView(votingId: voting.id) {
-                         // Handle WebSocket error
                          Task {
                             self.isLiveStatusAvailable = false
                             await loadVotingResults(voting: voting)
@@ -46,6 +53,7 @@ struct Votings_VotingResultView: View {
                       }
                       .padding(.vertical) .padding(.top, -5)
                    } else {
+                      // Shows a pie chart with voting results
                       PieChartView(optionTextMap: optionTextMap, votingResults: votingResults)
                          .padding(.vertical)
                          .padding(.horizontal)
@@ -55,6 +63,7 @@ struct Votings_VotingResultView: View {
                 .cornerRadius(10)
                 .padding() .padding(.top, -8)
 
+                // Meeting name
                 HStack {
                    Image(systemName: "person.bust.fill")
                    Text(meetingName)
@@ -64,12 +73,14 @@ struct Votings_VotingResultView: View {
                 .foregroundStyle(Color(UIColor.secondaryLabel))
                 .padding(.leading).padding(.bottom, 1)
                 
+                // Voting question
                 Text(voting.question)
                    .font(.title2)
                    .fontWeight(.bold)
                    .frame(maxWidth: .infinity, alignment: .leading)
                    .padding(.leading).padding(.trailing)
                    
+                // Voting description
                 if !voting.description.isEmpty {
                    ZStack {
                       Text(voting.description)
@@ -81,6 +92,7 @@ struct Votings_VotingResultView: View {
                    .padding(.horizontal)
                 }
                 
+                // Shows a message if the voting is still open and the user has voted
                 if isLiveStatusAvailable {
                    ZStack {
                       HStack {
@@ -95,8 +107,10 @@ struct Votings_VotingResultView: View {
                       .cornerRadius(10)
                       .padding(.horizontal) .padding(.top)
                 } else if votingResults.totalCount != 0 {
+                   // Displays the voting results list if votes have been cast (and voting is closed)
                    VotingResultList(results: votingResults, optionTextMap: optionTextMap)
                 } else {
+                   // Shows a message if no one has voted (and voting is closed)
                    ZStack {
                       HStack {
                          Image(systemName: "info.circle.fill")
@@ -128,6 +142,7 @@ struct Votings_VotingResultView: View {
              await loadVotingResults(voting: voting)
           }
        }
+       // check if live status is available (voting is open) and load voting results if it isn't
        .onAppear {
           Task {
              isLoading = true
@@ -135,9 +150,9 @@ struct Votings_VotingResultView: View {
              if !isLiveStatusAvailable {
                 await loadVotingResults(voting: voting)
              }
-             await loadMeetingName(voting: voting)
+             await loadMeetingName(voting: voting) // load meeting name of voting
           }
-          fillOptionTextMap(voting: voting)
+          fillOptionTextMap(voting: voting) // fill the option-text map
           isLoading = false
        }
        .navigationTitle(isLiveStatusAvailable ? "Live-Status" : "Abstimmungs-Ergebnis")
@@ -145,15 +160,9 @@ struct Votings_VotingResultView: View {
        .background(Color(UIColor.secondarySystemBackground))
     }
    
+   // MARK: - Helper Functions
    
-   private func getIdentities(result: GetVotingResultDTO) -> [GetIdentityDTO] {
-      if let identities = result.identities {
-         return identities
-      } else {
-         return []
-      }
-   }
-   
+   /// Checks if a live voting session is available via WebSocket
    private func isLiveStatusAvailable(votingId: UUID) async -> Bool {
       await withCheckedContinuation { continuation in
          webSocketService.connect(to: votingId)
@@ -176,6 +185,7 @@ struct Votings_VotingResultView: View {
       }
    }
 
+   /// Loads voting results
    private func loadVotingResults(voting: GetVotingDTO) async {
       VotingService.shared.fetchVotingResults(votingId: voting.id) { result in
          DispatchQueue.main.async {
@@ -190,6 +200,7 @@ struct Votings_VotingResultView: View {
       }
    }
    
+   /// Loads the meeting name for the voting
    private func loadMeetingName(voting: GetVotingDTO) async {
       do {
          let meeting = try await meetingViewModel.fetchMeeting(byId: voting.meetingId)
@@ -199,10 +210,7 @@ struct Votings_VotingResultView: View {
       }
    }
    
-   func getColor (index: UInt8) -> Color {
-      return colorMapping[index] ?? .gray
-   }
-   
+   /// Fills the map with voting option texts
    func fillOptionTextMap(voting: GetVotingDTO) {
       for option in voting.options {
          optionTextMap[option.index] = option.text
@@ -210,36 +218,38 @@ struct Votings_VotingResultView: View {
       optionTextMap[0] = "Enthaltung"
    }
 
-// für Mock-Daten
-//   func getMeetingName(voting: GetVotingDTO) -> String {
-//      return votingsView.getMeeting(meetingID: voting.meetingId).name
-//   }
-
 }
 
+// MARK: - Voting Result List
+
+/// A view displaying the list of voting results.
+/// Shows each option, its vote count/percentage, and expandable details if identities are available
 struct VotingResultList: View {
    @Environment(\.colorScheme) var colorScheme
-   @State private var isCount = false
+   @State private var isCount = false // Toggles between displaying vote count vs. percentage
    let results: GetVotingResultsDTO
-   let optionTextMap: [UInt8: String]
+   let optionTextMap: [UInt8: String] // Maps option indices to their respective text values
    
+   /// Retrieves the color for each voting option based on index
    func getColor(index: UInt8) -> Color {
       return colorMapping[index] ?? .gray
    }
    
    var body: some View {
       VStack(alignment: .leading, spacing: 7) {
+         // Header: Total Votes & Toggle Switch
          HStack {
             Text("Stimmen (\(results.totalCount))")
                .foregroundStyle(Color(UIColor.secondaryLabel))
                .padding(.leading, 32)
             Spacer()
-            Toggle(isOn: $isCount) {
+            Toggle(isOn: $isCount) { // Toggle to switch between count and percentage view
             }
-            .toggleStyle(ImageToggleStyle())
+            .toggleStyle(ImageToggleStyle()) // Custom toggle switch
             .padding(.trailing, 32) .padding(.bottom, 1)
          }
          
+         // List of Voting Options
          VStack {
             ForEach(results.results, id: \.id) { result in
                VotingResultRow(
@@ -251,6 +261,7 @@ struct VotingResultList: View {
                )
                .padding(.vertical, 6)
                
+               // Add a divider between voting options
                if result.id != results.results.last?.id {
                   Divider()
                      .padding(.vertical, 2)
@@ -267,21 +278,27 @@ struct VotingResultList: View {
    }
 }
 
+/// A row displaying an individual voting result
+/// Shows the option name, count/percentage, and user identities (if available)
 struct VotingResultRow: View {
-   @State private var isCollapsed: Bool = true
-   let votingResults: GetVotingResultsDTO
-   let result: GetVotingResultDTO
-   let optionText: String
-   let getColor: (UInt8) -> Color
-   @Binding var isCount: Bool
+   @State private var isCollapsed: Bool = true // Controls visibility of the identity list
+   let votingResults: GetVotingResultsDTO // Contains all voting results
+   let result: GetVotingResultDTO // Individual voting option result
+   let optionText: String // The text for this option
+   let getColor: (UInt8) -> Color // Function to retrieve color based on option index
+   @Binding var isCount: Bool // Binds to toggle switch to show vote count or percentage
    
    var body: some View {
       VStack {
          HStack {
+            // shows if the user has voted for this option
+            // Color-coded checkmark if the user voted for this option
             Image(systemName: votingResults.myVote == result.index ? "checkmark.circle.fill" : "circle.fill")
                .foregroundStyle(getColor(result.index))
+            // option name
             Text(optionText)
             Spacer()
+            // vote count / percentage
             if isCount {
                Text("\(result.count)")
                   .opacity(0.6)
@@ -290,12 +307,14 @@ struct VotingResultRow: View {
                   .opacity(0.6)
             }
             
+            // Expand/Collapse Button (if identities exist)
             if let identities = result.identities, !identities.isEmpty {
                Image(systemName: isCollapsed ? "chevron.forward" : "chevron.down")
                   .foregroundStyle(.blue)
             }
          }
-         .contentShape(Rectangle())
+         .contentShape(Rectangle()) // Increases tap area
+         // expand/collapse identity list on tap
          .onTapGesture {
             if let identities = result.identities, !identities.isEmpty {
                withAnimation(.easeInOut(duration: 0.3)) {
@@ -304,16 +323,19 @@ struct VotingResultRow: View {
             }
          }
          
+         //  Expanded Identity List (if applicable)
          if !isCollapsed, let identities = result.identities {
             VStack(alignment: .leading) {
                Divider()
                   .padding(.vertical, 4)
+               // Display each voter identity
                ForEach(identities, id: \.id) { identity in
                   HStack {
-                     Image(systemName: "checkmark.circle.fill")
+                     Image(systemName: "checkmark.circle.fill") // Voter checkmark
                         .foregroundStyle(getColor(result.index).opacity(0.55).mix(with: .gray, by: 0.1))
-                     Text(identity.name)
+                     Text(identity.name) // Voter's name
                   }
+                  // Add divider between identity names
                   if identity.id != identities.last?.id {
                      Divider()
                         .padding(.top, 2) .padding(.bottom, 4)
@@ -327,43 +349,47 @@ struct VotingResultRow: View {
                   removal: .opacity.animation(.easeOut(duration: 0.1))
                )
             )
-            .animation(.easeInOut(duration: 0.5), value: isCollapsed) // Controls the movement
+            .animation(.easeInOut(duration: 0.5), value: isCollapsed) // Controls animation
          }
       }
    }
 }
 
+/// A custom toggle switch to switch between percentage and count view
 struct ImageToggleStyle: ToggleStyle {
-   var percentImage = "percent"
-   var countImage = "numbers"
+   var percentImage = "percent" // Icon for percentage
+   var countImage = "numbers" // Icon for count view
    
    func makeBody(configuration: Configuration) -> some View {
       HStack {
-         RoundedRectangle(cornerRadius: 28)
+         RoundedRectangle(cornerRadius: 28) // Background of the toggle
             .fill(configuration.isOn ? Color(.systemGray3).mix(with: .blue, by: 0.4) : Color(.systemGray3).mix(with: .blue, by: 0.4))
             .overlay {
                Circle()
-                  .fill(.white)
+                  .fill(.white) // Foreground of the toggle
                   .padding(3)
                   .overlay {
-                     Image(systemName: configuration.isOn ? countImage : percentImage)
+                     Image(systemName: configuration.isOn ? countImage : percentImage) // Display icon based on state
                         .resizable()
                         .scaledToFit()
                         .frame(width: 12)
                         .foregroundColor(configuration.isOn ? Color(.systemGray5).mix(with: .blue, by: 0.8) : Color(.systemGray4).mix(with: .blue, by: 0.5))
                   }
-                  .offset(x: configuration.isOn ? 10 : -10)
+                  .offset(x: configuration.isOn ? 10 : -10) // Moves the circle left/right
             }
             .frame(width: 42, height: 26)
             .onTapGesture {
                withAnimation(.spring()) {
-                  configuration.isOn.toggle()
+                  configuration.isOn.toggle() // Switch toggle state
                }
             }
       }
    }
 }
 
+// MARK: - Extensions
+
+/// Enables `GetIdentityDTO` to be used in SwiftUI lists and comparisons
 extension GetIdentityDTO: @retroactive Identifiable {}
 extension GetIdentityDTO: @retroactive Equatable {}
 extension GetIdentityDTO: @retroactive Hashable {

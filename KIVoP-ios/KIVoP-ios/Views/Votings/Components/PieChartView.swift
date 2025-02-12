@@ -10,36 +10,10 @@ import SwiftUI
 import Charts
 import MeetingServiceDTOs
 
-//func getModifiedColor(of color: Color) -> Color {
-//   let uiColor = UIColor(color)
-//   var hue: CGFloat = 0
-//   var saturation: CGFloat = 0
-//   var brightness: CGFloat = 0
-//   var alpha: CGFloat = 0
-//   
-//   if uiColor.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha) {
-//      return Color(hue: hue, saturation: 0.78, brightness: 0.85)
-//   } else {
-//      return Color.black
-//   }
-//}
 
-//let colorMapping: [UInt8: Color] = [
-//   0: .gray.opacity(0.8),
-//   1: getModifiedColor(of: .red),
-//   2: getModifiedColor(of: .green),
-//   3: getModifiedColor(of: .blue),
-//   4: getModifiedColor(of: .purple),
-//   5: getModifiedColor(of: .pink),
-//   6: getModifiedColor(of: .cyan),
-//   7: getModifiedColor(of: .orange),
-//   8: getModifiedColor(of: .indigo),
-//   9: getModifiedColor(of: .teal),
-//   10: getModifiedColor(of: .yellow),
-//   11: getModifiedColor(of: .mint),
-//   12: getModifiedColor(of: .brown),
-//]
+// MARK: - Color Mapping for Pie Chart Segments
 
+/// colorMapping with default colors
 //let colorMapping: [UInt8: Color] = [
 //   0: .blue,
 //   1: .green,
@@ -55,6 +29,7 @@ import MeetingServiceDTOs
 //   11: .brown,
 //]
 
+/// A dictionary that maps voting option indices (`UInt8`) to specific colors
 let colorMapping: [UInt8: Color] = [
    0: Color(hex: 0xf0d176),
    1: Color(hex: 0xfffb3a),
@@ -70,46 +45,56 @@ let colorMapping: [UInt8: Color] = [
    11: Color(hex: 0x80150d),
 ]
 
+// MARK: - PieChartView Component
+
+/// A SwiftUI view that displays voting results as a pie chart
 struct PieChartView: View {
 
-   let optionTextMap: [UInt8: String]
-   let votingResults: GetVotingResultsDTO
+   let optionTextMap: [UInt8: String] // A dictionary mapping voting option indices to their respective text descriptions
+   let votingResults: GetVotingResultsDTO // The voting results data, which contains the vote counts
 
    var body: some View {
       VStack {
          if votingResults.totalCount != 0 {
+            // MARK: - Pie Chart Visualization
             Chart(votingResults.results, id: \.index) { result in
                SectorMark(
-                  angle: .value("Count", result.count),
-                  //            innerRadius: .ratio(0.5),
-                  angularInset: 4
+                  angle: .value("Count", result.count), // Defines the segment size based on vote count
+                  angularInset: 4 // Adds spacing between segments
                )
-               .cornerRadius(6)
-               .foregroundStyle(colorMapping[result.index] ?? .black)
-               //         .foregroundStyle(by: .value("Option", optionTextMap[result.index] ?? ""))
+               .cornerRadius(6) // Smooths segment edges
+               .foregroundStyle(colorMapping[result.index] ?? .black) // Assigns color from mapping
             }
             .scaledToFit()
-            //         .chartLegend(alignment: .center, spacing: 16)
          } else {
+            // MARK: - Placeholder when No Votes are Cast
             Image(systemName: "chart.pie.fill")
                .resizable()
                .scaledToFit()
                .foregroundStyle(Color(UIColor.secondaryLabel).opacity(0.5))
          }
          
-         let colorArray = colorMapping
-             .sorted(by: { $0.key < $1.key }) // Sort by key
-             .map { $0.value } // Extract values
-         let textArray = optionTextMap
-            .sorted(by: { $0.key < $1.key })
-            .map { $0.value }
+         // MARK: - Generating Legend Colors & Texts
          
+         /// Creates an array of colors sorted by their option indices
+         let colorArray = colorMapping
+             .sorted(by: { $0.key < $1.key }) // Sort colors by index
+             .map { $0.value } // Extract color values
+         
+         /// Creates an array of option text sorted by their indices
+         let textArray = optionTextMap
+            .sorted(by: { $0.key < $1.key }) // Sort labels by index
+            .map { $0.value } // Extract text labels
+         
+         // MARK: - Wrapped Layout for Pie Chart Legend
          WrappedLayoutView(items: textArray, colors: colorArray)
             .padding(.top, 8)
       }
    }
 }
 
+// MARK: - Hex Color Extension
+/// Extension to initialize `Color` using a hexadecimal value
 extension Color {
    init(hex: Int, opacity: Double = 1) {
       self.init(

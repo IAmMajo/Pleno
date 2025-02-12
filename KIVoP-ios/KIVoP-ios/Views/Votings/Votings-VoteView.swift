@@ -9,42 +9,44 @@
 import SwiftUI
 import MeetingServiceDTOs
 
+/// A view that allows the user to cast their vote in a voting process
 struct Votings_VoteView: View {
       
    let voting: GetVotingDTO
-//   let votingResults: GetVotingResultsDTO
-   
    @State private var isLoading = false
    @State private var error: String?
 
-   @State private var selection: GetVotingOptionDTO?
-   @State private var showingAlert = false
+   @State private var selection: GetVotingOptionDTO? // Stores the user's selected voting option
+   @State private var showingAlert = false // Controls the confirmation alert when voting
    
    @Environment(\.dismiss) private var dismiss
    @Environment(\.colorScheme) var colorScheme
    
-//   var onNavigate: (GetVotingResultsDTO) -> Void
-   var onNavigate: () -> Void
+   var onNavigate: () -> Void // Closure to handle navigation after a successful vote
    
 
    var body: some View {
          NavigationStack {
             VStack {
+               // Voting question
                Text(voting.question)
                   .font(.title)
                   .fontWeight(.semibold)
                   .padding(.top).padding(.bottom, 2)
                   .padding(.leading).padding(.trailing)
                Divider()
+               // Voting description
                if !voting.description.isEmpty {
                   Text(voting.description)
                      .frame(maxWidth: .infinity, alignment: .center)
                      .padding(.leading).padding(.top, 2).padding(.trailing)
                }
                
+               // Voting Options List
                List(voting.options, id: \.self, selection: $selection) { option in
-                  if option.index != 0 {
+                  if option.index != 0 { // Skips abstention option in the list
                      if selection == option {
+                        // Selected option is highlighted with a filled checkmark
                         Button(action: {}) {
                            HStack {
                               Image(systemName: "checkmark.circle.fill")
@@ -54,6 +56,7 @@ struct Votings_VoteView: View {
                         }
                         .listRowBackground(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
                      } else {
+                        // Non-selected options show an empty circle
                         HStack {
                            Image(systemName: "circle")
                               .foregroundColor(.gray)
@@ -63,6 +66,7 @@ struct Votings_VoteView: View {
                   }
                }
                
+               // MARK: - Error Message Display (if any)
                if error != nil {
                   VStack(alignment: .center, spacing: 8) {
                      Text("Abstimmen nicht möglich")
@@ -76,40 +80,31 @@ struct Votings_VoteView: View {
                   .padding(.horizontal)
                }
                
+               // MARK: - Vote Button
                Button {
                   showingAlert = true
                } label: {
-                  Text(selection != nil ? "Abstimmen" : "Enthalten")
+                  Text(selection != nil ? "Abstimmen" : "Enthalten") // Changes button text based on selection
                      .foregroundStyle(Color(UIColor.systemBackground))
                      .frame(maxWidth: .infinity)
                }
-               .background(selection != nil ? Color.blue : Color.gray)
+               .background(selection != nil ? Color.blue : Color.gray) // Changes button color based on selection
                .cornerRadius(10)
                .padding()
                .buttonStyle(.bordered)
                .controlSize(.large)
+               // MARK: - Voting Confirmation Alert
                .alert(isPresented:$showingAlert) {
                   Alert(
                      title: Text("Möchtest du wirklich abstimmen?"),
                      message: Text("Du kannst deine Wahl danach nicht mehr ändern!"),
                      primaryButton: .default(Text("Abstimmen")) {
                         Task {
+                           // authenticate user via FaceID
                            await BiometricAuth.executeIfSuccessfulAuth {
                               print("Successful Auth!")
-                              VotingService.shared.castVote(votingID: voting.id, index: selection != nil ? selection!.index : 0) { result in
-                                  DispatchQueue.main.async {
-                                      switch result {
-                                      case .success:
-                                         print("Vote cast successfully!")
-                                         dismiss()
-                                         onNavigate()
-//                                         onNavigate(updateMyVote(selection: selection ?? nil))
-                                      case .failure(let error):
-                                         print("Failed to cast vote: \(error.localizedDescription)")
-                                         self.error = error.localizedDescription
-                                      }
-                                  }
-                              }
+                              // submit vote if authentication was successful
+                              submitVote()
                            } otherwise: {
                               print("Failed Auth!")
                            }
@@ -128,6 +123,26 @@ struct Votings_VoteView: View {
 
          }
          .navigationBarTitleDisplayMode(.inline)
+   }
+   
+   // MARK: - Helper Functions
+      
+   /// Submits the selected vote and handles response
+   private func submitVote() {
+      // cast vote
+      VotingService.shared.castVote(votingID: voting.id, index: selection != nil ? selection!.index : 0) { result in
+         DispatchQueue.main.async {
+            switch result {
+            case .success:
+               print("Vote cast successfully!")
+               dismiss() // Dismisses the voting view
+               onNavigate() // Navigates to the voting results
+            case .failure(let error):
+               print("Failed to cast vote: \(error.localizedDescription)")
+               self.error = error.localizedDescription // Displays the error message
+            }
+         }
+      }
    }
 }
 

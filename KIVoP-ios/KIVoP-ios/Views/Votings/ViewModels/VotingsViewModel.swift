@@ -12,11 +12,17 @@ import MapKit
 import MeetingServiceDTOs
 import SwiftUICore
 
+/// `VotingsViewModel` is responsible for managing the votings in the app
+/// It fetches voting data, organizes it by meetings, and provides symbols for UI representation
 @MainActor
 class VotingsViewModel: ObservableObject {
+   // MARK: - Properties
+       
+   /// ViewModel for fetching meetings
    @ObservedObject private var meetingViewModel = MeetingViewModel()
+   /// Stores all fetched votings
    @Published var votings: [GetVotingDTO] = []
-   // Ein Array aus Tupeln (meetingName, [(VotingsOfMeeting, ListSymbols)])
+   /// Stores votings grouped by meeting names along with their UI symbols
    @Published var groupedVotings: [(
       meetingName: String,
       votings: [(
@@ -25,39 +31,49 @@ class VotingsViewModel: ObservableObject {
       )]
    )] = []
    
+   /// Maps meetings to their corresponding votings
    private var meetingVotingsMap: [GetMeetingDTO: [GetVotingDTO]] = [:]
 
+   // MARK: - Initialization
+   /// Initializes the ViewModel and starts fetching votings asynchronously
     init() {
         Task {
             await fetchVotings()
         }
     }
-
+   
+   // MARK: - Fetching Votings
+   /// Fetches all votings asynchronously from `VotingService`
     func fetchVotings() async {
         do {
            let fetchedVotings = try await VotingService.shared.fetchVotings()
             self.votings = fetchedVotings
-           await fetchMeetings()
+           await fetchMeetings() // fetch meetings after votings are fetched
         } catch {
             print("Error fetching Votings: \(error)")
         }
     }
 
+   // MARK: - Fetching Meetings
+   /// Fetches meetings for each voting and maps them to their corresponding votings
    private func fetchMeetings() async {
       for voting in votings {
          do {
             let meeting = try await meetingViewModel.fetchMeeting(byId: voting.meetingId)
+            // Filters out votings that have a valid `startedAt` date before adding them to the map
             meetingVotingsMap[meeting] = votings.filter { $0.meetingId == meeting.id && $0.startedAt != nil}
          } catch {
             print("Error fetching meeting: \(error.localizedDescription)")
          }
       }
-      groupeVotings()
+      groupeVotings() // group votings after fetching meetings
    }
    
+   // MARK: - Grouping Votings
+   /// Groups votings by their meeting, sorts meetings by start date, and assigns UI symbols
    func groupeVotings() {
       groupedVotings = meetingVotingsMap
-         .sorted { $0.key.start > $1.key.start } // Sort meetings by start date
+         .sorted { $0.key.start > $1.key.start } // Sorts meetings by start date (most recent first)
          .map { meeting, votings in
             let sortedVotings = votings
                .sorted { ($0.startedAt ?? Date.distantPast) > ($1.startedAt ?? Date.distantPast) } // Sort votings by startedAt
@@ -66,19 +82,22 @@ class VotingsViewModel: ObservableObject {
                (voting: voting, symbol: getSymbol(voting: voting))
             }
             
+            // If the meeting is ongoing, prepend "Aktuelle Sitzung" to the name
             let meetingName = meeting.status == .inSession ? "Aktuelle Sitzung (\(meeting.name))" : meeting.name
             
             return (meetingName: meetingName, votings: votingWithSymbols)
          }
    }
    
+   // MARK: - Voting Symbols
+   /// Determines the appropriate UI symbol and color for a voting status
    func getSymbol(voting: GetVotingDTO) -> (status: String, color: Color) {
       if voting.iVoted {
-         return ("checkmark", .blue)
+         return ("checkmark", .blue) // User has voted
       } else if voting.isOpen {
-         return ("exclamationmark.arrow.trianglehead.counterclockwise.rotate.90", .orange)
+         return ("exclamationmark.arrow.trianglehead.counterclockwise.rotate.90", .orange) // Voting is still open and user hasn't voted
       } else {
-         return ("", .black)
+         return ("", .black) // Voting is closed and user did not vote
       }
    }
    
@@ -86,6 +105,7 @@ class VotingsViewModel: ObservableObject {
 
 
 
+// MARK: - Mock Data (Used for Previews & Testing)
 
 var mockVotings: [GetVotingDTO] {
    return [

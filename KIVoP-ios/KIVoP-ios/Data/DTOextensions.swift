@@ -11,19 +11,24 @@ import MeetingServiceDTOs
 import PosterServiceDTOs
 import PollServiceDTOs
 
-// Extension der DTOs
-extension GetMeetingDTO: @retroactive Identifiable {}
-extension GetMeetingDTO: @retroactive Equatable {}
-extension GetMeetingDTO: @retroactive Hashable {
+
+// MARK: - Extensions for Data Transfer Objects (DTOs)
+// These extensions add additional capabilities to DTOs used in the app
+
+// MARK: - GetMeetingDTO Extensions
+extension GetMeetingDTO: @retroactive Identifiable {} // Enables identification using `id`
+extension GetMeetingDTO: @retroactive Equatable {} // Allows equality comparison
+extension GetMeetingDTO: @retroactive Hashable { // Enables hashing for use in Sets or Dictionaries
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        hasher.combine(id) // Uses `id` as the unique hash value
     }
     public static func == (lhs: GetMeetingDTO, rhs: GetMeetingDTO) -> Bool {
-        return lhs.id == rhs.id
+        return lhs.id == rhs.id // Compares objects based on `id`
     }
 }
-extension GetMeetingDTO: @retroactive @unchecked Sendable {}
+extension GetMeetingDTO: @retroactive @unchecked Sendable {}  // Allows safe use in concurrency without strict checks
 
+// MARK: - GetVotingDTO Extensions
 extension GetVotingDTO: @retroactive Identifiable {}
 extension GetVotingDTO: @retroactive Equatable {}
 extension GetVotingDTO: @retroactive Hashable {
@@ -34,8 +39,11 @@ extension GetVotingDTO: @retroactive Hashable {
         return lhs.id == rhs.id
     }
 }
+
 extension GetVotingDTO: @unchecked @retroactive Sendable {}
 
+
+// MARK: - GetVotingOptionDTO Extensions
 extension GetVotingOptionDTO: @retroactive Identifiable {
    public var id: UInt8 {
       self.index
@@ -52,6 +60,7 @@ extension GetVotingOptionDTO: @retroactive Hashable {
     }
 }
 
+// MARK: - Voting Results Extensions
 extension GetVotingResultsDTO: @retroactive @unchecked Sendable {}
 
 extension GetVotingResultDTO: @retroactive Identifiable {
@@ -70,8 +79,11 @@ extension GetVotingResultDTO: @retroactive Hashable {
    }
 }
 
+// MARK: - CreateVotingDTO Extensions
 extension CreateVotingDTO: @retroactive @unchecked Sendable {}
 
+
+// MARK: - Poster DTO Extensions
 extension PosterResponseDTO: @retroactive Identifiable {}
 extension PosterResponseDTO: @retroactive @unchecked Sendable {}
 extension PosterPositionResponseDTO: @retroactive @unchecked Sendable {}
@@ -83,6 +95,7 @@ extension TakeDownPosterPositionResponseDTO: @retroactive @unchecked Sendable {}
 extension ReportDamagedPosterPositionDTO: @retroactive @unchecked Sendable {}
 extension PosterSummaryResponseDTO: @retroactive @unchecked Sendable {}
 
+// MARK: - Poll DTO Extensions
 extension GetPollDTO: @retroactive Identifiable {}
 extension GetPollDTO: @retroactive Equatable {}
 extension GetPollDTO: @retroactive Hashable {
@@ -94,6 +107,7 @@ extension GetPollDTO: @retroactive Hashable {
     }
 }
 
+// MARK: - GetPollVotingOptionDTO Extensions
 extension GetPollVotingOptionDTO: @retroactive Identifiable {
    public var id: UInt8 {
       self.index
@@ -110,6 +124,7 @@ extension GetPollVotingOptionDTO: @retroactive Hashable {
     }
 }
 
+// MARK: - GetPollResultDTO Extensions
 extension GetPollResultDTO: @retroactive Identifiable {
    public var id: UInt8 {
       self.index
