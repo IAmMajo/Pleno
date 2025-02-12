@@ -200,6 +200,7 @@
 
     },
     "10" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1217,6 +1218,9 @@
     "E-Mail senden" : {
 
     },
+    "Editor" : {
+
+    },
     "Einführung überspringen" : {
       "localizations" : {
         "de" : {
@@ -1692,9 +1696,6 @@
         }
       }
     },
-    "Keine aktuelle Sitzung verfügbar" : {
-
-    },
     "Keine anstehenden Sitzungen." : {
 
     },
@@ -1707,7 +1708,13 @@
     "Keine Protokollanten gefunden." : {
 
     },
+    "Keine Protokolle verfügbar." : {
+
+    },
     "Keine Sitzung verfügbar" : {
+
+    },
+    "Keine Sitzungen und Protokolle verfügbar." : {
 
     },
     "Keine Teilnehmer sichtbar." : {
@@ -2077,9 +2084,6 @@
         }
       }
     },
-    "Neu laden" : {
-
-    },
     "Neue Event Fahrt" : {
 
     },
@@ -2140,9 +2144,6 @@
 
     },
     "No poster data available." : {
-
-    },
-    "No records available." : {
 
     },
     "oder" : {
