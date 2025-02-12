@@ -1,9 +1,14 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import RideServiceDTOs
 
 struct EventRidesView: View {
+    // ViewModel wird als EnvironmentObject übergeben
     @EnvironmentObject private var rideViewModel: RideViewModel
-    @State private var searchText = "" // Suchtext für die Suche
+    
+    // Suchtext
+    @State private var searchText = ""
 
     var filteredRides: [GetEventRideDTO] {
         rideViewModel.eventRides
@@ -15,6 +20,7 @@ struct EventRidesView: View {
         NavigationStack {
             List {
                 ForEach(filteredRides, id: \.id) { eventRide in
+                    // Link zur Detailansicht; Das ViewModel wird als EnvironmentObject mitgegeben
                     NavigationLink(destination: EventRideDetailView(rideId: eventRide.id).environmentObject(rideViewModel)) {
                         Text("\(eventRide.eventName) am \(DateTimeFormatter.formatDate(eventRide.starts))")
                     }

@@ -1,3 +1,5 @@
+// This file is licensed under the MIT-0 License.
+
 import CoreLocation
 
 class LocationMapManager: NSObject, ObservableObject, CLLocationManagerDelegate {

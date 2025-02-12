@@ -1,3 +1,5 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import MarkdownUI
 import MeetingServiceDTOs
@@ -5,17 +7,28 @@ import Foundation
 
 struct MarkdownEditorView: View {
     @Environment(\.dismiss) private var dismiss
+    
+    // Bool Variable: Steuert den Bearbeitungsmodus
     @State private var isEditing: Bool = false
+    
+    // Angezeigter markdownText: Zunächst leer, wird mit API-Aufruf befüllt
     @State private var markdownText: String = ""
+    
+    // Variablen für AI-Service
     @State private var isTranslationSheetPresented = false // Zustand für das Sheet
     @State private var isExtendSheetPresented = false // Zustand für das AI-Feature
     @State private var isSocialPostSheetPresented = false
     
-    
+    // Variable für den Zustand des Protokolls: standardmäßig auf "underway"
     @State private var recordStatus: RecordStatus = .underway
+    
+    // ID der Sitzung, wird beim View-Aufruf übergeben
     var meetingId: UUID
+
+    // Sprache des Protokolls: wird benötigt um das Protokoll vom Server zu holen
     var lang: String
     
+    // ViewModel
     @StateObject private var recordManager = RecordManager()
     
     var body: some View {
@@ -23,6 +36,7 @@ struct MarkdownEditorView: View {
             VStack(spacing: 0) {
                 ZStack(alignment: .bottom) {
                     VStack {
+                        // In Abhängigkeit von isEditing wird der Texteditor aktiviert
                         if isEditing {
                             // Markdown-Editor aktiv
                             TextEditor(text: $markdownText)
@@ -44,8 +58,11 @@ struct MarkdownEditorView: View {
                         }
                     }
                     
+                    // wenn ein Protokoll noch nicht eingereicht wurde und der Bearbeitungsmodus deaktiviert ist, wird der Button zum Einreichen angezeigt
                     if (recordStatus == .underway && isEditing == false) {
                         submitButton
+                        
+                    // Wenn das Protokoll eingereicht wurde und der Bearbeitungsmodus deaktiviert ist, wird der Button zum veröffentlichen angezeigt
                     } else if (recordStatus == .submitted && isEditing == false){
                         approveButton
                     }
@@ -54,6 +71,7 @@ struct MarkdownEditorView: View {
                 .animation(.easeInOut, value: isEditing) // Animation bei Statuswechsel
             }
             .toolbar {
+                // Löschen
                 ToolbarItem(placement: .navigationBarTrailing) {
                     deleteButton
                 }
@@ -61,10 +79,11 @@ struct MarkdownEditorView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     translateButton
                 }
-                
+                // Speichern
                 ToolbarItem(placement: .navigationBarTrailing) {
                     saveButton
                 }
+                // Bearbeiten
                 ToolbarItem(placement: .navigationBarTrailing) {
                     editButton
                 }
@@ -89,6 +108,7 @@ struct MarkdownEditorView: View {
                 
             }
         }
+        // Sheet zum Übersetzen
         .sheet(isPresented: $isTranslationSheetPresented) {
             TranslationSheetView(meetingId: meetingId, lang1: lang) // Ansicht für das Sheet
         }
@@ -104,6 +124,7 @@ struct MarkdownEditorView: View {
 }
 
 extension MarkdownEditorView{
+    // Button zum Einreichen
     private var submitButton: some View {
         Button(action: {
             // Aktion für den Zustand "underway"
@@ -133,7 +154,7 @@ extension MarkdownEditorView{
         }
         .padding(.bottom, 16)
     }
-    
+    // Button zum Veröffentlichen
     private var approveButton: some View {
         Button(action: {
             // Aktion für den Zustand "submitted"
@@ -164,6 +185,7 @@ extension MarkdownEditorView{
         .padding(.bottom, 16)
     }
     
+    // Button zum löschen
     private var deleteButton: some View {
         Button(action: {
             recordManager.deleteRecordMeetingLang(meetingId: meetingId, lang: lang) { result in
@@ -186,6 +208,7 @@ extension MarkdownEditorView{
         }
     }
     
+    // Button, um den Bearbeitungsmodus zu togglen
     private var editButton: some View {
         if isEditing {
             Button(action: {
@@ -204,6 +227,7 @@ extension MarkdownEditorView{
         }
     }
     
+    // Button, um die Änderungen zu speichern
     private var saveButton: some View {
         Button(action: {
             if isEditing{
@@ -215,6 +239,7 @@ extension MarkdownEditorView{
         }
     }
     
+    // Button, um das Translation-Sheet aufzurufen
     private var translateButton: some View {
         Button(action: {
             isTranslationSheetPresented.toggle()

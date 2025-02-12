@@ -1,15 +1,21 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import MeetingServiceDTOs
 
 struct RecordsMainView: View {
     @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
     
+    // Suchtext für die Suchfunktion
     @State private var searchText: String = ""
-    @State private var showCreateMeeting = false
+
+    // ViewModel für die Protokolle
     @StateObject private var recordManager = RecordManager()
+    
+    // ID der Sitzung, die in der Ansicht ausgeklappt ist
     @State private var expandedMeetingID: UUID?
 
-    // Berechnete Eigenschaft für die gefilterten Meetings basierend auf dem Suchtext
+    // Gibt die Sitzung mit Protokollen basierend auf dem Suchtext zurück
     var filteredMeetingsWithRecords: [MeetingWithRecords] {
         guard !searchText.isEmpty else {
             return sortedMeetings
@@ -19,6 +25,7 @@ struct RecordsMainView: View {
         }
     }
 
+    // Sortiert die Sitzungen nach Datum in absteigender Reihenfolge
     var sortedMeetings: [MeetingWithRecords] {
         recordManager.meetingsWithRecords.sorted { meeting1, meeting2 in
             meeting2.meeting.start < meeting1.meeting.start // Absteigende Reihenfolge
@@ -29,13 +36,13 @@ struct RecordsMainView: View {
         NavigationStack {
             VStack {
                 if recordManager.isLoading {
-                    ProgressView("Loading meetings...") // Ladeanzeige
+                    ProgressView("Lade Protokolle...") // Ladeanzeige
                         .progressViewStyle(CircularProgressViewStyle())
                 } else if let errorMessage = recordManager.errorMessage {
-                    Text("Error: \(errorMessage)")
+                    Text("Fehler: \(errorMessage)")
                         .foregroundColor(.red)
                 } else if recordManager.meetingsWithRecords.isEmpty {
-                    Text("No meetings available.")
+                    Text("Keine Protokolle verfügbar")
                         .foregroundColor(.secondary)
                 } else {
                     // Searchbar
@@ -69,6 +76,7 @@ struct RecordsMainView: View {
 }
 
 extension RecordsMainView {
+    // Searchbar
     private var searchbar: some View {
         HStack {
             HStack(spacing: 8) {
@@ -84,6 +92,7 @@ extension RecordsMainView {
         .padding(.horizontal)
     }
     
+    // Legende, die die Farben der unterschiedlichen Status anzeigt
     private var legende: some View {
         HStack{
             Text("In Bearbeitung")
@@ -109,7 +118,7 @@ extension RecordsMainView {
 }
 
 
-
+// Anzeige eines Listenzeile
 struct MeetingRow: View {
     let meetingWithRecords: MeetingWithRecords
     @Binding var expandedMeetingID: UUID?
@@ -129,6 +138,7 @@ struct MeetingRow: View {
         .buttonStyle(PlainButtonStyle())
     }
 
+    // Header der Zeile: -> Aufbau: Name der Sitzung + verfügbare Sprachen
     private var HeaderView: some View {
         VStack(alignment: .leading) {
             HStack {
@@ -158,15 +168,13 @@ struct MeetingRow: View {
                     .padding(.horizontal)
                 }.fixedSize(horizontal: true, vertical: false)
 
-
-
-
                 
                 Image(systemName: expandedMeetingID == meetingWithRecords.meeting.id ? "chevron.up" : "chevron.down")
                     .foregroundColor(.blue)
             }
             .padding(.bottom, 4)
             
+            // Startdatum der Sitzung
             Text("Datum: \(DateTimeFormatter.formatDate(meetingWithRecords.meeting.start))")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
@@ -174,9 +182,11 @@ struct MeetingRow: View {
 
     }
 
+    // Dropdown Menu
     private var DropdownView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 4) {
+                // Schleife über alle verfügbaren Sprachen
                 ForEach(meetingWithRecords.records, id: \.lang) { record in
                     NavigationLink(destination: MarkdownEditorView(meetingId: meetingWithRecords.meeting.id, lang: record.lang)) {
                         HStack {
@@ -185,6 +195,7 @@ struct MeetingRow: View {
                                 .padding(4)
                                 .foregroundColor(.secondary)
                                 .background(
+                                    // In Abhängigkeit des Status hat die Sprache eine andere Hintergrundfarbe
                                     (record.status == .underway) ? Color.orange.opacity(0.2) :
                                     (record.status == .submitted) ? Color.blue.opacity(0.2) :
                                     (record.status == .approved) ? Color.green.opacity(0.2) :
@@ -202,6 +213,7 @@ struct MeetingRow: View {
         .frame(maxHeight: 200)
     }
 
+    // Funktion die die ausgeklappte Sitzung verwaltet
     private func toggleExpansion() {
         if expandedMeetingID == meetingWithRecords.meeting.id {
             expandedMeetingID = nil

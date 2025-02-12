@@ -1,16 +1,23 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import MapKit
 import RideServiceDTOs
 
 struct SpecialRideDetailView: View {
+    // ViewModel wird als EnvironmentObject geladen
     @EnvironmentObject private var rideViewModel: RideViewModel
+    
+    // Id der Fahrt
     var rideId: UUID
     
+    // Vorbereitungen, um Koordinaten in Adressen zu übersetzen
     private let geocoder = CLGeocoder()
     @State private var address: String = "Adresse wird geladen..."
     
     var body: some View {
         List {
+            // Wird angezeigt, wenn ein Details zu einer Fahrt geladen wurden
             if let rideDetail = rideViewModel.specialRideDetail {
                 
                 // Details zur Fahrt
@@ -59,7 +66,7 @@ struct SpecialRideDetailView: View {
 }
 
 extension SpecialRideDetailView{
-    
+    // Details zur Sonderfahrt
     private func detailsSection(rideDetail: GetSpecialRideDetailDTO) -> some View {
         Section(header: Text("Fahrtdetails")) {
             Text("Fahrt: \(rideDetail.name)")
@@ -71,6 +78,7 @@ extension SpecialRideDetailView{
         }
     }
     
+    // Angaben zum Ort
     private func placeSection(rideDetail: GetSpecialRideDetailDTO) -> some View {
         Section(header: Text("Startort")) {
             Button(action: {
@@ -90,6 +98,7 @@ extension SpecialRideDetailView{
         }
     }
     
+    // Mitfahrer
     private func participantsSection(rideDetail: GetSpecialRideDetailDTO) -> some View {
         Section(header: Text("Mitfahrer")) {
             if rideDetail.riders.isEmpty {

@@ -1,9 +1,4 @@
-//
-//  PieChartView.swift
-//  KIVoP-ios
-//
-//  Created by Hanna Steffen on 13.11.24.
-//
+// This file is licensed under the MIT-0 License.
 
 import Foundation
 

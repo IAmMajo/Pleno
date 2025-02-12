@@ -1,3 +1,5 @@
+// This file is licensed under the MIT-0 License.
+
 import Combine
 import Foundation
 import MeetingServiceDTOs
@@ -31,15 +33,14 @@ class AttendanceManager: ObservableObject {
             return
         }
 
-        // Setze isLoading auf true, um den Start des Ladevorgangs anzuzeigen
         DispatchQueue.main.async {
             self.isLoading = true
-            self.errorMessage = nil // Zurücksetzen der Fehlermeldung
+            self.errorMessage = nil
         }
 
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                self?.isLoading = false // Ladevorgang abgeschlossen
+                self?.isLoading = false
             }
 
             if let error = error {
@@ -47,6 +48,14 @@ class AttendanceManager: ObservableObject {
                     self?.errorMessage = "Network error: \(error.localizedDescription)"
                 }
                 print("Network error: \(error.localizedDescription)")
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                DispatchQueue.main.async {
+                    self?.errorMessage = "Invalid response from server"
+                }
+                print("Invalid response from server")
                 return
             }
 
@@ -58,21 +67,33 @@ class AttendanceManager: ObservableObject {
                 return
             }
 
-            // Debugging: JSON-String anzeigen
-            if let jsonString = String(data: data, encoding: .utf8) {
-                //print("Server Response: \(jsonString)")
-            }
-
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             decoder.keyDecodingStrategy = .convertFromSnakeCase
 
+            // Wenn der HTTP-Status nicht 2xx ist, versuche, eine Fehlermeldung aus dem JSON zu lesen
+            if !(200...299).contains(httpResponse.statusCode) {
+                do {
+                    let errorResponse = try decoder.decode(ErrorResponse.self, from: data)
+                    DispatchQueue.main.async {
+                        self?.errorMessage = errorResponse.reason
+                    }
+                    print("Server error: \(errorResponse.reason)")
+                } catch {
+                    DispatchQueue.main.async {
+                        self?.errorMessage = "Server error: \(httpResponse.statusCode)"
+                    }
+                    print("Server error with status code: \(httpResponse.statusCode)")
+                }
+                return
+            }
+
+            // Erfolgreiches Dekodieren der Attendance-Daten
             do {
-                // Dekodieren der JSON-Daten in ein Array von `GetAttendanceDTO`
                 let decodedAttendances = try decoder.decode([GetAttendanceDTO].self, from: data)
                 DispatchQueue.main.async {
-                    self?.attendances = decodedAttendances // Aktualisiere das @Published-Array
-                    self?.errorMessage = nil // Erfolgreiches Dekodieren
+                    self?.attendances = decodedAttendances
+                    self?.errorMessage = nil
                 }
             } catch {
                 DispatchQueue.main.async {
@@ -82,6 +103,8 @@ class AttendanceManager: ObservableObject {
             }
         }.resume()
     }
+
+
     // Funktion mit Rückgabewert
     func fetchAttendances2(meetingId: UUID) async throws -> [GetAttendanceDTO] {
         guard let url = URL(string: "\(baseURL)/meetings/\(meetingId.uuidString)/attendances") else {
@@ -99,23 +122,38 @@ class AttendanceManager: ObservableObject {
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
-        // Überprüfen, ob die Antwort gültig ist
-        if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
-            throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Server responded with status code: \(httpResponse.statusCode)"])
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Invalid response from server"])
         }
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 
+        // Überprüfen, ob der Server eine Fehlermeldung gesendet hat (Statuscode nicht 2xx)
+        if !(200...299).contains(httpResponse.statusCode) {
+            do {
+                let errorResponse = try decoder.decode(ErrorResponse.self, from: data)
+                throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: errorResponse.reason])
+            } catch {
+                throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Server error: \(httpResponse.statusCode)"])
+            }
+        }
+
+        // Falls keine Fehler, versuche die Attendance-Daten zu dekodieren
         do {
-            // Dekodieren der JSON-Daten in ein Array von `GetAttendanceDTO`
-            let decodedAttendances = try decoder.decode([GetAttendanceDTO].self, from: data)
-            return decodedAttendances
+            return try decoder.decode([GetAttendanceDTO].self, from: data)
         } catch {
             throw URLError(.cannotDecodeContentData, userInfo: [NSLocalizedDescriptionKey: "JSON Decode Error: \(error.localizedDescription)"])
         }
     }
+
+    // Fehlerstruktur für das JSON-Fehlermodell
+    struct ErrorResponse: Codable {
+        let error: Bool
+        let reason: String
+    }
+
 }
 extension AttendanceManager {
     /// Gibt die Anzahl der Teilnehmer und die Gesamtzahl der Personen in einem Meeting zurück

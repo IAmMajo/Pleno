@@ -1,21 +1,31 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
 import RideServiceDTOs
 import MapKit
 
 struct EventRideDetailView: View {
+    
+    // ViewModel als EnvironmentObject
     @EnvironmentObject private var rideViewModel: RideViewModel
+    
+    // ID der Fahrt wird beim View-Aufruf übergeben
     var rideId: UUID
     
+    // Vorbereitungen, um Koordinaten in eine Adresse zu übersetzen
     private let geocoder = CLGeocoder()
     @State private var address: String = "Adresse wird geladen..."
     
     var body: some View {
         List {
             if let rideDetail = rideViewModel.eventRideDetail {
+                // Details zur Event-Fahrt
                 detailsSection(rideDetail: rideDetail)
 
+                // Angaben zur Adresse
                 placeSection(rideDetail: rideDetail)
 
+                // Angaben zu Mitfahrern
                 participationsSection(rideDetail: rideDetail)
             } else {
                 Text("Lade Fahrtdetails...")
@@ -24,6 +34,7 @@ struct EventRideDetailView: View {
         }
         .navigationTitle("Fahrt-Details")
         .onAppear {
+            // Bei View-Aufruf wird die Event Fahrt vom Server geladen
             rideViewModel.fetchEventRideDetail(eventRideId: rideId)
         }
     }
@@ -55,6 +66,7 @@ struct EventRideDetailView: View {
 }
 
 extension EventRideDetailView {
+    // Details zur Event Fahrt
     private func detailsSection(rideDetail: GetEventRideDetailDTO) -> some View {
         Section(header: Text("Fahrtdetails")) {
             Text("Event: \(rideDetail.eventName)")
@@ -65,6 +77,7 @@ extension EventRideDetailView {
         }
     }
     
+    // Angaben zum Ort
     private func placeSection(rideDetail: GetEventRideDetailDTO) -> some View {
         Section(header: Text("Startort")) {
             Button(action: {
@@ -80,9 +93,12 @@ extension EventRideDetailView {
             }.buttonStyle(PlainButtonStyle())
         }
         .onAppear {
+            // Sobald diese Section geladen wird, wird die Adresse aktualisiert
             updateAddress(for: CLLocationCoordinate2D(latitude: Double(rideDetail.latitude), longitude: Double(rideDetail.longitude)))
         }
     }
+    
+    // Angaben zu Mitfahrern
     private func participationsSection(rideDetail: GetEventRideDetailDTO) -> some View {
         Section(header: Text("Mitfahrer")) {
             if rideDetail.riders.isEmpty {

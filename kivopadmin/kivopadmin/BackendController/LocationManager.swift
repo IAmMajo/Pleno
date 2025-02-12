@@ -1,3 +1,5 @@
+// This file is licensed under the MIT-0 License.
+
 import Combine
 import MeetingServiceDTOs
 import Foundation
@@ -15,6 +17,7 @@ class LocationManager: ObservableObject {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
+
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         } else {
@@ -26,46 +29,49 @@ class LocationManager: ObservableObject {
 
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                do{
-                    self?.isLoading = false
-                    
-                    if let error = error {
-                        self?.errorMessage = "Network error: \(error.localizedDescription)"
-                        return
+                self?.isLoading = false
+
+                if let error = error {
+                    self?.errorMessage = "Network error: \(error.localizedDescription)"
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    self?.errorMessage = "Invalid response from server."
+                    return
+                }
+
+                guard let data = data else {
+                    self?.errorMessage = "No data received."
+                    return
+                }
+
+                let decoder = JSONDecoder()
+
+                // Prüfen, ob der Server eine Fehlermeldung geschickt hat
+                if !(200...299).contains(httpResponse.statusCode) {
+                    do {
+                        let errorResponse = try decoder.decode(ErrorResponse.self, from: data)
+                        self?.errorMessage = errorResponse.reason
+                        print("Server error: \(errorResponse.reason)")
+                    } catch {
+                        self?.errorMessage = "Server error: \(httpResponse.statusCode)"
+                        print("Failed to decode error response")
                     }
-                    
-                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                        self?.errorMessage = "Invalid server response."
-                        return
-                    }
-                    
-                    guard let data = data else {
-                        self?.errorMessage = "No data received."
-                        return
-                    }
-                    
-                    // Debug JSON
-                    //print(String(data: data, encoding: .utf8) ?? "Invalid JSON")
-                    
-                    let decoder = JSONDecoder()
-                    
-                    // Falls du mit Date-Formaten arbeitest, musst du das Datumsformat konfigurieren:
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-                    decoder.dateDecodingStrategy = .formatted(formatter)
-                    
-                    // Dekodiere die Daten
+                    return
+                }
+
+                // Erfolgreiches Dekodieren der Locations
+                do {
                     self?.locations = try decoder.decode([GetLocationDTO].self, from: data)
-
-
-                }catch {
+                    self?.errorMessage = nil // Reset Fehler, falls zuvor einer gesetzt wurde
+                } catch {
                     self?.errorMessage = "Failed to decode locations: \(error.localizedDescription)"
                     print("Decoding error: \(error)")
                 }
-
-
             }
         }.resume()
     }
+
 }
 

@@ -1,6 +1,7 @@
 import SwiftUI
 import AuthServiceDTOs
 
+// verfügbare Views für die Seitenleiste
 enum Pages: Hashable {
     case vereinseinstellungen, nutzerverwaltung, abstimmungen, sitzungen, protokolle, plakatpositionen, umfragen, events, fahrgemeinschaften
 }
@@ -8,10 +9,10 @@ enum Pages: Hashable {
 struct MainPage: View {
     @State private var name: String = ""
     @State private var shortName: String = "V"
-    @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
 
-    @StateObject private var meetingManager = MeetingManager() // MeetingManager als StateObject
+    // ViewModel für die Sitzungen. Wird in der Mainpage erstellt, damit die "UnterViews" auf dem gleichen ViewModel arbeiten können
+    @StateObject private var meetingManager = MeetingManager()
     @State private var page: Pages = .nutzerverwaltung
     
     private var User: String {
@@ -32,6 +33,8 @@ struct MainPage: View {
                     VotingListView()
                 }
                 Tab("Sitzungen", systemImage: "calendar.badge.clock", value: .sitzungen) {
+                    // Tab für die Sitzungen; der meetingManager wird als EnvironmentObject mitgegeben
+                    // Dann arbeiten die Sitzungs-Views auf dem gleichen ViewModel wie die Übersicht über laufende Sitzungen (blaue Boxen unten links)
                     MeetingAdminView().environmentObject(meetingManager)
                 }
                 Tab("Protokolle", systemImage: "doc.text", value: .protokolle) {
@@ -51,12 +54,13 @@ struct MainPage: View {
                 }
 
 
-            }.tabViewStyle(.sidebarAdaptable)
+            }.tabViewStyle(.sidebarAdaptable) // TabView kann als Sidebar angezeigt werden
             .tabViewSidebarBottomBar{
+                // Ansicht über laufende Sitzungen
+                // MeetingManager wird als EnvironmentObject mitgegeben
+                // Sitzungsviews und CurrentMeetingBottomView arbeiten auf dem gleichen ViewModel, somit wird CurrentMeetingBottomView sofort aktualisiert, wenn Sitzungen gestartet oder beendet werden
                 CurrentMeetingBottomView().environmentObject(meetingManager)
-                    .padding(.vertical, 70).refreshable{
-                        meetingManager.fetchAllMeetings()
-                    }
+                    .padding(.vertical, 70)
             }
             // Header mit Begrüßung
             .tabViewSidebarHeader {
@@ -90,18 +94,6 @@ struct MainPage: View {
             meetingManager.fetchAllMeetings()
         }
     }
-    
-    func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
-    }
-
-    func formattedTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
-    }
 
     // MARK: - API-Logik
     private func loadUserProfile() {
@@ -116,18 +108,6 @@ struct MainPage: View {
                 }
             }
         }
-    }
-
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
-    }
-
-    private func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
     }
 }
 
