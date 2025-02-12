@@ -12,40 +12,40 @@ struct MeetingDetailsView: View {
         NavigationStack {
             VStack(spacing: 16) {
                 // Kopfbereich
-//                VStack(alignment: .leading, spacing: 8) {
-//                    HStack {
-//                        Button(action: {
-//                            // Aktion für den Zurück-Knopf
-//                        }) {
-//                            HStack {
-//                                NavigationLink(destination: ProtokollView()) {
-//                        Image(systemName: "chevron.left")
-//                                        .foregroundColor(.blue)
-//                                    Text("Zurück")
-//                                        .foregroundColor(.blue)
-//                                }
-//                            }
-//                        }
-//                        Spacer()
-//                        Text("21.01.2024")
-//                            .font(.headline)
-//                            .bold()
-//                        Spacer()
-//                            Button(action: {
-//                                // Navigation zu MeetingDetailsView
-//                            }) {
-//                                NavigationLink(destination: MarkdownEditorView()) {
-//                                HStack {
-//                                    Text("Editor")
-//                                        .foregroundColor(.blue)
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//                .padding()
-//                .background(Color.white)
-//                .shadow(radius: 2)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Button(action: {
+                            // Aktion für den Zurück-Knopf
+                        }) {
+                            HStack {
+                                //NavigationLink(destination: ProtokollView()) {
+                        Image(systemName: "chevron.left")
+                                        .foregroundColor(.blue)
+                                    Text("Zurück")
+                                        .foregroundColor(.blue)
+                                //}
+                            }
+                        }
+                        Spacer()
+                        Text("21.01.2024")
+                            .font(.headline)
+                            .bold()
+                        Spacer()
+                            Button(action: {
+                                // Navigation zu MeetingDetailsView
+                            }) {
+                                //NavigationLink(destination: MarkdownEditorView()) {
+                                HStack {
+                                    Text("Editor")
+                                        .foregroundColor(.blue)
+                                //}
+                            }
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.white)
+                .shadow(radius: 2)
 
                 // Körperbereich (scrollbar)
                 ScrollView {
@@ -148,8 +148,4 @@ struct MeetingDetailsView: View {
     }
 }
 
-struct MeetingDetailsView_Previews: PreviewProvider {
-    static var previews: some View {
-        MeetingDetailsView()
-    }
-}
+

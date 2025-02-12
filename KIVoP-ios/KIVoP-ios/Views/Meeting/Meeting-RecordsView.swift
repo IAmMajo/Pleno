@@ -1,9 +1,13 @@
 import SwiftUI
 import MeetingServiceDTOs
 
+// Auswahl View auf welches Protokoll der User geleitet werden möchte
 struct MeetingRecordsView: View {
+    // Sitzung wird mitgeliefert
     var meeting: GetMeetingDTO
-    @StateObject private var recordManager = RecordManager() // RecordManager als StateObject
+    
+    // RecordManager als ViewModel
+    @StateObject private var recordManager = RecordManager()
     
     var body: some View {
         NavigationStack {
@@ -15,12 +19,14 @@ struct MeetingRecordsView: View {
                     Text("Error: \(errorMessage)")
                         .foregroundColor(.red)
                 } else if recordManager.records.isEmpty {
-                    Text("No records available.")
+                    Text("Keine Protokolle verfügbar.")
                         .foregroundColor(.secondary)
+                // Wenn viewmodel geladen hat
                 } else {
                     ForEach(recordManager.records, id: \.lang) { record in
+                        // Link zum Markdown Editor wo das Protokoll ggf. angeschaut werden kann
                         NavigationLink(destination: MarkdownEditorView(meetingId: record.meetingId, lang: record.lang)) {
-                            Text("Protokoll: \(getLanguage(langCode: record.lang))")
+                            Text("Protokoll: \(LanguageManager.getLanguage(langCode: record.lang))")
                         }
                     }
                 }
@@ -30,41 +36,5 @@ struct MeetingRecordsView: View {
         .onAppear(){
             recordManager.getRecordsMeeting(meetingId: meeting.id)
         }
-    }
-
-    private func getLanguage(langCode: String) -> String {
-        let languages: [(name: String, code: String)] = [
-            ("Arabisch", "ar"),
-            ("Chinesisch", "zh"),
-            ("Dänisch", "da"),
-            ("Deutsch", "de"),
-            ("Englisch", "en"),
-            ("Französisch", "fr"),
-            ("Griechisch", "el"),
-            ("Hindi", "hi"),
-            ("Italienisch", "it"),
-            ("Japanisch", "ja"),
-            ("Koreanisch", "ko"),
-            ("Niederländisch", "nl"),
-            ("Norwegisch", "no"),
-            ("Polnisch", "pl"),
-            ("Portugiesisch", "pt"),
-            ("Rumänisch", "ro"), // Hinzugefügt
-            ("Russisch", "ru"),
-            ("Schwedisch", "sv"),
-            ("Spanisch", "es"),
-            ("Thai", "th"), // Hinzugefügt
-            ("Türkisch", "tr"),
-            ("Ungarisch", "hu")
-        ]
-
-
-        // Suche nach dem Kürzel und gib den Namen zurück
-        if let language = languages.first(where: { $0.code == langCode }) {
-            return language.name
-        }
-
-        // Standardwert, falls das Kürzel nicht gefunden wird
-        return langCode
     }
 }

@@ -8,15 +8,26 @@ struct MeetingWithRecords {
     var records: [GetRecordDTO]
 }
 
+// ViewModel für die Protokolle
 class RecordManager: ObservableObject {
+    // Anzeige, ob das ViewModel noch lädt
     @Published var isLoading: Bool = false
+    
+    // Potentielle Error Message
     @Published var errorMessage: String? = nil
 
+    // Array mit Sitzungen und zugehörigen Protokollen
     @Published var meetingsWithRecords: [MeetingWithRecords] = []
 
+    // Array mit Protokollen
     @Published var records: [GetRecordDTO] = [] // Records-Array
+    
+    // Speichern eines einzelnen Protokolls
+    @Published var record: GetRecordDTO?
 
+    // Funktion, die alle Sitzungen mit zugehörigen Protokollen lädt
     func getAllMeetingsWithRecords() {
+        errorMessage = nil
         var meetings: [GetMeetingDTO] = [] // Meetings-Array
 
         guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
@@ -79,11 +90,11 @@ class RecordManager: ObservableObject {
                     for meeting in filteredMeetings {
                         dispatchGroup.enter() // Betritt die Gruppe für jede Meeting-Abfrage
 
-                        // Korrigierter Aufruf der Funktion getRecordsMeeting mit Completion-Handler
+                        // Aufruf der Funktion getRecordsMeeting2 mit Completion-Handler
                         self?.getRecordsMeeting2(meetingId: meeting.id, completion: { records in
                             meetingsWithRecords.append(MeetingWithRecords(meeting: meeting, records: records))
                             dispatchGroup.leave() // Verlässt die Gruppe nach dem Abrufen der Records
-                                                    })
+                        })
                     }
                     
                     // Warten auf alle asynchronen Aufrufe
@@ -100,9 +111,11 @@ class RecordManager: ObservableObject {
         }.resume()
     }
 
-    // getRecordsMeeting muss den Completion-Handler verwenden
+    // getRecordsMeeting2 muss den Completion-Handler verwenden
     // Diese Funktion wird für die Fuktion getAllMeetingsWithRecords() benötigt
+    // lädt Protokolle zu einer bestimmten Sitzung
     func getRecordsMeeting2(meetingId: UUID, completion: @escaping ([GetRecordDTO]) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records") else {
             print("Invalid URL")
             completion([]) // Rückgabe eines leeren Arrays im Fehlerfall
@@ -148,8 +161,9 @@ class RecordManager: ObservableObject {
         }.resume()
     }
     
-
+    // Lädt Protokolle zu einer bestimmten Sitzung
     func getRecordsMeeting(meetingId: UUID) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records") else {
             DispatchQueue.main.async {
                 self.errorMessage = "Invalid URL"
@@ -223,9 +237,9 @@ class RecordManager: ObservableObject {
         }.resume()
     }
     
-    @Published var record: GetRecordDTO? // Speichern eines einzelnen Records
-
+    // Lädt ein einzelnes Protokoll in Abhängigkeit der Sprache und der Sitzung
     func getRecordMeetingLang(meetingId: UUID, lang: String) async {
+        errorMessage = nil
         // Erstelle die URL für die Anfrage
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records/\(lang)") else {
             print("Invalid URL")
@@ -275,8 +289,9 @@ class RecordManager: ObservableObject {
         }.resume()
     }
 
-    
+    // Protokoll updaten
     func patchRecordMeetingLang(patchRecordDTO: PatchRecordDTO, meetingId: UUID, lang: String) async {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records/\(lang)") else {
             print("Invalid URL")
             return
@@ -332,88 +347,10 @@ class RecordManager: ObservableObject {
         }
     }
     
-    func deleteRecordMeetingLang(meetingId: UUID, lang: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records/\(lang)") else {
-            print("Invalid URL")
-            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            print("Unauthorized: No token found")
-            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unauthorized: No token found"])))
-            return
-        }
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error)) // Netzwerkfehler
-                return
-            }
-
-            if let httpResponse = response as? HTTPURLResponse {
-                if (200...299).contains(httpResponse.statusCode) {
-                    completion(.success(())) // Erfolg
-                } else {
-                    let errorMessage = String(data: data ?? Data(), encoding: .utf8) ?? "Unbekannter Fehler"
-                    let error = NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])
-                    completion(.failure(error)) // Serverfehler
-                }
-            } else {
-                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unerwartete Antwort"])))
-            }
-        }
-        task.resume()
-    }
     
-    func translateRecordMeetingLang(meetingId: UUID, lang1: String, lang2: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records/\(lang1)/translate/\(lang2)") else {
-            print("Invalid URL")
-            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            print("Unauthorized: No token found")
-            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unauthorized: No token found"])))
-            return
-        }
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error)) // Netzwerkfehler
-                return
-            }
-
-            if let httpResponse = response as? HTTPURLResponse {
-                if (200...299).contains(httpResponse.statusCode) {
-                    completion(.success(())) // Erfolg
-                } else {
-                    let errorMessage = String(data: data ?? Data(), encoding: .utf8) ?? "Unbekannter Fehler"
-                    let error = NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])
-                    completion(.failure(error)) // Serverfehler
-                }
-            } else {
-                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unerwartete Antwort"])))
-            }
-        }
-        task.resume()
-    }
-
-
+    // Protokoll einreichen
     func submitRecordMeetingLang(meetingId: UUID, lang: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records/\(lang)/submit") else {
             print("Invalid URL")
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))

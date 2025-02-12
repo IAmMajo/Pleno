@@ -1,9 +1,10 @@
 import CoreLocation
 
+
 class LocationMapManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
     
-    // Veröffentliche die aktuelle Position, damit SwiftUI auf Änderungen reagieren kann
+    // Position des Nutzers
     @Published var currentLocation: CLLocation?
 
     override init() {
