@@ -25,15 +25,24 @@ struct MeetingAdminView: View {
 
     // Je nach Auswahl des Pickers werden die Sitzungen angezeigt
     var filteredMeetings: [GetMeetingDTO] {
-        switch selectedStatus {
-        case .scheduled:
-            return meetingManager.meetings.filter { $0.status == .scheduled }
-        case .inSession:
-            return meetingManager.meetings.filter { $0.status == .inSession }
-        case .completed:
-            return meetingManager.meetings.filter { $0.status == .completed }
-        }
+        meetingManager.meetings
+            .filter { meeting in
+                switch selectedStatus {
+                case .scheduled:
+                    return meeting.status == .scheduled
+                case .inSession:
+                    return meeting.status == .inSession
+                case .completed:
+                    return meeting.status == .completed
+                }
+            }
+            .filter { meeting in
+                searchText.isEmpty || meeting.name.localizedCaseInsensitiveContains(searchText)
+            }
     }
+
+
+
 
 
     var body: some View {
