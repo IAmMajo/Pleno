@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 import SwiftUI
 import MapKit
 
@@ -48,7 +49,7 @@ struct RideDetailView: View {
                         // asyncAfter, damit der Standort vorhanden ist, bevor die Funktion aufgerufen wird
                         .onAppear {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                viewModel.getAddressFromCoordinates(latitude: viewModel.rideDetail.destinationLatitude, longitude: viewModel.rideDetail.destinationLongitude) { address in
+                                viewModel.rideManager.getAddressFromCoordinates(latitude: viewModel.rideDetail.destinationLatitude, longitude: viewModel.rideDetail.destinationLongitude) { address in
                                     if let address = address {
                                         viewModel.destinationAddress = address
                                     }
@@ -93,7 +94,7 @@ struct RideDetailView: View {
                                         .onAppear {
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                                 viewModel.shouldShowDriversProfilePicture = true
-                                                viewModel.getAddressFromCoordinates(latitude: viewModel.rideDetail.startLatitude, longitude: viewModel.rideDetail.startLongitude) { address in
+                                                viewModel.rideManager.getAddressFromCoordinates(latitude: viewModel.rideDetail.startLatitude, longitude: viewModel.rideDetail.startLongitude) { address in
                                                     if let address = address {
                                                         viewModel.driverAddress = address
                                                     }

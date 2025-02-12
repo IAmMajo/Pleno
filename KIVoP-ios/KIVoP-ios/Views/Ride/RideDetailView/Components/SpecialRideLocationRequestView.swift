@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 import SwiftUI
 import MapKit
 
@@ -49,7 +50,7 @@ struct SpecialRideLocationRequestView: View {
                 // Wenn sich der Standort auf der Karte ändert (auf Standort hinzufügen geklickt wird), wird dieser übernommen
                 .onChange(of: viewModel.requestedLocation) {
                     if let location = viewModel.requestedLocation {
-                        viewModel.getAddressFromCoordinates(latitude: Float(location.latitude), longitude: Float(location.longitude)) { address in
+                        viewModel.rideManager.getAddressFromCoordinates(latitude: Float(location.latitude), longitude: Float(location.longitude)) { address in
                             if let address = address {
                                 viewModel.requestedAdress = address
                             }

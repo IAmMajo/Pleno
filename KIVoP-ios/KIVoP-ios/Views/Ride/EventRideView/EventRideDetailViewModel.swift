@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 import Foundation
 import CoreLocation
 import MapKit
@@ -19,10 +20,25 @@ class EventRideDetailViewModel: ObservableObject {
     @Published var showDeleteRideRequest: Bool = false // Wenn ein Mitfahrer seinen Request zurücknehmen will
     @Published var showRiderDeleteRequest: Bool = false // Wenn ein Mitfahrer seine Fahrt löschen will
     @Published var driverAddress: String = ""
-    @Published var riderAddresses: [UUID: String] = [:] // Um die Adressen für die Mitfahrer zu berechnen
+    @Published var riderAddresses: [UUID: String] = [:] // Um die Adressen für die Mitfahrer zu berechnen, dabei wird eine Map verwendet, um auch mehrere Adressen gut berechnen zu können
     @Published var eventAddress: String = ""
     @Published var eventLocation: CLLocationCoordinate2D?
     @Published var driverLocation: CLLocationCoordinate2D?
+    
+    // Vars um Standort zu kopieren
+    @Published var shareLocation = false
+    @Published var isGoogleMapsInstalled = false
+    @Published var isWazeInstalled = false
+    @Published var showMapOptions: Bool = false
+    @Published var setKoords: CLLocationCoordinate2D?
+    @Published var setAddress: String?
+    func formattedShareText() -> String {
+       """
+       \(setAddress ?? "")
+       """
+    }
+    
+    @Published var rideManager = RideManager.shared
     
     var rider: GetRiderDTO?
     
@@ -30,6 +46,7 @@ class EventRideDetailViewModel: ObservableObject {
     
     init(eventRide: GetEventRideDTO) {
         self.eventRide = eventRide
+        // leeres Objekt erstellen, um Fehler zu vermeiden
         self.eventDetails = GetEventDetailDTO(
             id: UUID(),
             name: "",
@@ -42,6 +59,7 @@ class EventRideDetailViewModel: ObservableObject {
             countRideInterested: 0,
             countEmptySeats: 0
         )
+        // leeres Objekt erstellen, um Fehler zu vermeiden
         self.eventRideDetail = GetEventRideDetailDTO(
             id: UUID(),
             eventID: UUID(),
@@ -57,196 +75,95 @@ class EventRideDetailViewModel: ObservableObject {
         )
     }
     
+    // Event Details über den RideManager abfragen
     func fetchEventDetails() {
-        isLoading = true
-        
-        // Überprüfen und URL erstellen
-        guard let url = URL(string: "\(baseURL)/events/\(eventRide.eventID)") else {
-            print("Invalid URL")
-            isLoading = false
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        // JWT-Token zu den Headern hinzufügen
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            print("Unauthorized: No token found")
-            isLoading = false
-            return
-        }
-        
-        // Netzwerkaufruf starten
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            // Schwache Referenz sicherstellen
-            guard let self = self else { return }
-            
-            // Fehlerprüfung
-            if let error = error {
-                print("Network error: \(error.localizedDescription)")
+        Task {
+            do {
+                self.isLoading = true
+
+                let fetchedDetails = try await rideManager.fetchEventDetails(eventID: eventRide.eventID)
+                
                 DispatchQueue.main.async {
-                    self.isLoading = false
-                }
-                return
-            }
-            
-            // Datenprüfung
-            guard let data = data else {
-                print("No data received from server")
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                }
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            
-            DispatchQueue.main.async {
-                do {
-                    // Decodieren der Antwort in ein Array von GetSpecialRideDTO
-                    let decodedEventDetails = try decoder.decode(GetEventDetailDTO.self, from: data)
-                    self.eventDetails = decodedEventDetails
+                    self.eventDetails = fetchedDetails
                     self.eventLocation = CLLocationCoordinate2D(latitude: CLLocationDegrees(self.eventDetails.latitude) , longitude: CLLocationDegrees(self.eventDetails.longitude))
-                } catch {
-                    print("JSON Decode Error: \(error.localizedDescription)")
+                    
+                    self.isLoading = false
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    print("Fehler beim Abrufen der Event-Details: \(error.localizedDescription)")
                 }
             }
-        }.resume()
+        }
     }
     
+    // Details zur EventFahrt abfragen
     func fetchEventRideDetails() {
         Task {
             do {
                 self.isLoading = true
                 
-                guard let url = URL(string: "\(baseURL)/eventrides/\(eventRide.id)") else {
-                    throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
-                }
+                // Abruf der Details über den RideManager
+                let details = try await rideManager.fetchEventRideDetails(eventRideID: eventRide.id)
                 
-                var request = URLRequest(url: url)
-                request.httpMethod = "GET"
-                
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    errorMessage = "Unauthorized: Token not found."
-                    self.isLoading = false
-                    return
-                }
-                
-                let (data, response) = try await URLSession.shared.data(for: request)
-                
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    throw NSError(domain: "Failed to fetch ride details", code: 500, userInfo: nil)
-                }
-                
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    
-                    DispatchQueue.main.async {
-                        do {
-                            // Dekodiere ein einzelnes Objekt anstelle eines Arrays
-                            let fetchedEventRideDetail = try decoder.decode(GetEventRideDetailDTO.self, from: data)
-                            self.eventRideDetail = fetchedEventRideDetail
-                            self.acceptedRiders = self.eventRideDetail.riders.filter { $0.accepted }
-                            self.requestedRiders = self.eventRideDetail.riders.filter { !$0.accepted }
-                            self.rider = self.eventRideDetail.riders.first(where: { $0.itsMe })
-                            self.isLoading = false
-                            self.driverLocation = CLLocationCoordinate2D(latitude: CLLocationDegrees(self.eventRideDetail.latitude) , longitude: CLLocationDegrees(self.eventRideDetail.longitude))
-                            // Durchlaufe alle Fahrer und rufe die Adresse für jedes Fahrer-Standort ab
-                            for rider in self.eventRideDetail.riders {
-                                self.getAddressFromCoordinates(latitude: rider.latitude, longitude: rider.longitude) { address in
-                                    if let address = address {
-                                        // Speichere die Adresse im Dictionary mit der Rider ID als Schlüssel
-                                        self.riderAddresses[rider.id] = address
-                                    }
-                                }
+                // UI-Updates im Hauptthread durchführen
+                DispatchQueue.main.async {
+                    self.eventRideDetail = details
+                    // Aufteilen der Rider in akzeptierte und angeforderte
+                    self.acceptedRiders = details.riders.filter { $0.accepted }
+                    self.requestedRiders = details.riders.filter { !$0.accepted }
+                    // Eigener Rider (falls vorhanden) ermitteln
+                    self.rider = details.riders.first(where: { $0.itsMe })
+                    // Setze die Position des Fahrers (Startposition)
+                    self.driverLocation = CLLocationCoordinate2D(
+                        latitude: CLLocationDegrees(details.latitude),
+                        longitude: CLLocationDegrees(details.longitude)
+                    )
+                    // Für jeden Rider wird die Adresse ermittelt
+                    for rider in details.riders {
+                        self.rideManager.getAddressFromCoordinates(latitude: rider.latitude, longitude: rider.longitude) { address in
+                            if let address = address {
+                                self.riderAddresses[rider.id] = address
                             }
-                        } catch {
-                            print("Fehler beim Dekodieren der Ride Details: \(error.localizedDescription)")
-                            self.isLoading = false
                         }
                     }
+                    self.isLoading = false
                 }
             } catch {
                 DispatchQueue.main.async {
                     self.isLoading = false
+                    print("Fehler beim Abrufen der Event Ride Details: \(error.localizedDescription)")
                 }
             }
         }
     }
     
-    // Prüfen ob ich schon wo .accepted bin
+    // Die Abfrage aller Eventrides ist notwendig um zu prüfen, ob der Nutzer schon bei einer Fahrt zu dem Event akzeptiert wurde
     func fetchEventRides() {
-        guard let url = URL(string: "\(baseURL)/eventrides?byEventID=\(eventRide.eventID)") else {
-            print("Invalid URL")
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        // Füge JWT Token zu den Headern hinzu
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            print("Unauthorized: No token found")
-            return
-        }
-        
-        // Setze den Ladevorgang auf true
-        DispatchQueue.main.async {
-            self.isLoading = true
-        }
-        
-        // Führe den Netzwerkaufruf aus
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            guard let self = self else { return }
-            
-            // Behandle Fehler
-            if let error = error {
+        Task {
+            do {
+                self.isLoading = true
+                
+                // Abruf der Event-Fahrten über den RideManager
+                let eventRides = try await rideManager.fetchEventRidesByEvent(eventID: eventRide.eventID)
+                
                 DispatchQueue.main.async {
-                    self.isLoading = false // Ladevorgang beendet, auch bei Fehlern
-                }
-                print("Network error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    self.isLoading = false // Ladevorgang beendet, keine Daten
-                }
-                print("No data received from server")
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-     
-            DispatchQueue.main.async {
-                do {
-                    // Decodieren der Antwort
-                    let decodedEventRides = try decoder.decode([GetEventRideDTO].self, from: data)
-                    if let _ = decodedEventRides.first(where: { $0.myState == .driver }) {
+                    // Überprüfe, ob ein Ride mit myState .driver existiert
+                    if let _ = eventRides.first(where: { $0.myState == .driver }) {
                         self.alreadyAccepted = "driver"
-                    } else if let _ = decodedEventRides.first(where: { $0.myState == .accepted }) {
+                    } else if let _ = eventRides.first(where: { $0.myState == .accepted }) {
                         self.alreadyAccepted = "accepted"
                     }
-                } catch {
-                    DispatchQueue.main.async {
-                        self.isLoading = false // Ladevorgang beendet, aber mit JSON-Fehler
-                    }
-                    print("JSON Decode Error: \(error.localizedDescription)")
+                    self.isLoading = false
                 }
+            } catch {
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                }
+                print("Fehler beim Abrufen der Event-Fahrten: \(error.localizedDescription)")
             }
-        }.resume()
+        }
     }
     
     // Fahrer löscht die Fahrt
@@ -254,44 +171,19 @@ class EventRideDetailViewModel: ObservableObject {
         Task {
             do {
                 self.isLoading = true
-                
-                // Hier verwenden wir die URL, die mit der speziellen rideID kombiniert wird
-                guard let url = URL(string: "\(baseURL)/eventrides/\(eventRide.id)") else {
-                    throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
-                }
-                
-                var request = URLRequest(url: url)
-                request.httpMethod = "DELETE" // Setze die HTTP-Methode auf DELETE
-                
-                // Authorization Header hinzufügen
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    errorMessage = "Unauthorized: Token not found."
-                    self.isLoading = false
-                    return
-                }
-                
-                // Führe die Anfrage aus
-                let (_, response) = try await URLSession.shared.data(for: request)
-                
-                // Überprüfe die Antwort auf den Statuscode 204
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 204 else {
-                    throw NSError(domain: "Failed to delete ride", code: 500, userInfo: nil)
-                }
+                // Aufruf der deleteRide-Methode im RideManager
+                try await rideManager.deleteRide(rideID: eventRide.id)
                 
                 DispatchQueue.main.async {
-                    // Erfolgreiches Löschen
+                    // Erfolgreiches Löschen: Entferne den eigenen Rider aus der Liste
                     if let index = self.requestedRiders.firstIndex(where: { $0.itsMe }) {
                         self.requestedRiders.remove(at: index)
                     }
                     self.isLoading = false
                 }
-                
             } catch {
                 DispatchQueue.main.async {
                     self.isLoading = false
-                    // Fehlerbehandlung hier
                     print("Fehler beim Löschen der Fahrt: \(error.localizedDescription)")
                 }
             }
@@ -304,45 +196,18 @@ class EventRideDetailViewModel: ObservableObject {
             do {
                 self.isLoading = true
                 
-                guard let url = URL(string: "\(baseURL)/eventrides/\(eventRide.id)/requests") else {
-                    throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
-                }
+                // Aufruf der asynchronen Methode im RideManager
+                let fetchedRider = try await rideManager.requestEventRide(eventRideID: eventRide.id)
                 
-                var request = URLRequest(url: url)
-                request.httpMethod = "POST"
-                request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-                
-                // Authorization Header hinzufügen
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    errorMessage = "Unauthorized: Token not found."
-                    self.isLoading = false
-                    return
-                }
-                
-                // Führe die Anfrage aus
-                let (data, response) = try await URLSession.shared.data(for: request)
-                
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
-                    throw NSError(domain: "Failed to request ride", code: 500, userInfo: nil)
-                }
-                
-                // JSON-Antwort dekodieren
-                let decoder = JSONDecoder()
-                let fetchedRider = try decoder.decode(GetRiderDTO.self, from: data)
-                
-                // Rider zur Liste hinzufügen
+                // UI-Updates im Hauptthread durchführen
                 DispatchQueue.main.async {
                     self.requestedRiders.append(fetchedRider)
                     self.rider = fetchedRider
                     self.isLoading = false
                 }
-                
             } catch {
                 DispatchQueue.main.async {
                     self.isLoading = false
-                    // Fehlerbehandlung hier
                     print("Fehler beim Anfordern der Fahrt: \(error.localizedDescription)")
                 }
             }
@@ -353,58 +218,15 @@ class EventRideDetailViewModel: ObservableObject {
     func acceptRequestedRider(rider: GetRiderDTO) {
         Task {
             do {
-                self.isLoading = true // Ladezustand aktivieren
+                self.isLoading = true
                 
-                // Erstelle die URL mit der riderId
-                guard let url = URL(string: "\(baseURL)/eventrides/requests/\(rider.id)") else {
-                    print("Ungültige URL")
-                    self.isLoading = false
-                    return
-                }
+                // API-Aufruf über den RideManager
+                let updatedRider = try await rideManager.acceptRequestedRider(riderID: rider.id)
                 
-                var request = URLRequest(url: url)
-                request.httpMethod = "PATCH" // Setze die HTTP-Methode auf PATCH
-                request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-                
-                // Authorization Header hinzufügen
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    errorMessage = "Unauthorized: Token not found."
-                    self.isLoading = false
-                    return
-                }
-                
-                // Der Body für den Request
-                let body: [String: Any] = [
-                    "accepted": true
-                ]
-                
-                do {
-                    let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
-                    request.httpBody = jsonData
-                } catch {
-                    print("Fehler beim Erstellen des JSON-Bodys: \(error.localizedDescription)")
-                    self.isLoading = false
-                    return
-                }
-                
-                // Führe die Anfrage aus
-                let (data, response) = try await URLSession.shared.data(for: request)
-                
-                // Überprüfe die Antwort auf den Statuscode 200 (OK)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    throw NSError(domain: "Failed to accept requested rider", code: 500, userInfo: nil)
-                }
-                
-                // JSON-Dekodierung
-                let decoder = JSONDecoder()
-                let updatedRider = try decoder.decode(GetRiderDTO.self, from: data)
-                
-                // Erfolgreiche Bearbeitung
                 DispatchQueue.main.async {
                     self.isLoading = false
                     
+                    // Aktualisiere die Listen: Entferne den Rider aus den angefragten und füge ihn den akzeptierten hinzu
                     if let index = self.requestedRiders.firstIndex(where: { $0.id == rider.id }) {
                         self.acceptedRiders.append(updatedRider)
                         self.requestedRiders.remove(at: index)
@@ -423,67 +245,24 @@ class EventRideDetailViewModel: ObservableObject {
     func removeFromPassengers(rider: GetRiderDTO) {
         Task {
             do {
-                self.isLoading = true // Ladezustand aktivieren
+                self.isLoading = true
                 
-                // Erstelle die URL mit der riderId
-                guard let url = URL(string: "\(baseURL)/eventrides/requests/\(rider.id)") else {
-                    print("Ungültige URL")
-                    self.isLoading = false
-                    return
-                }
+                // API-Aufruf: Mitfahrer zurücksetzen (accepted = false)
+                let updatedRider = try await rideManager.removeFromPassengers(riderID: rider.id)
                 
-                var request = URLRequest(url: url)
-                request.httpMethod = "PATCH" // Setze die HTTP-Methode auf PATCH
-                request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-                
-                // Authorization Header hinzufügen
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    errorMessage = "Unauthorized: Token not found."
-                    self.isLoading = false
-                    return
-                }
-                
-                // Der Body für den Request
-                let body: [String: Any] = [
-                    "accepted": false
-                ]
-                
-                do {
-                    let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
-                    request.httpBody = jsonData
-                } catch {
-                    print("Fehler beim Erstellen des JSON-Bodys: \(error.localizedDescription)")
-                    self.isLoading = false
-                    return
-                }
-                
-                // Führe die Anfrage aus
-                let (data, response) = try await URLSession.shared.data(for: request)
-                
-                // Überprüfe die Antwort auf den Statuscode 200 (OK)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    throw NSError(domain: "Failed to accept requested rider", code: 500, userInfo: nil)
-                }
-                
-                // JSON-Dekodierung
-                let decoder = JSONDecoder()
-                let updatedRider = try decoder.decode(GetRiderDTO.self, from: data)
-                
-                // Erfolgreiche Bearbeitung
                 DispatchQueue.main.async {
                     self.isLoading = false
                     
-                    if let index = self.requestedRiders.firstIndex(where: { $0.id == rider.id }) {
-                        self.acceptedRiders.append(updatedRider)
-                        self.requestedRiders.remove(at: index)
+                    // Aus der Liste der akzeptierten Mitfahrer entfernen und in die Liste der angefragten Mitfahrer einfügen
+                    if let index = self.acceptedRiders.firstIndex(where: { $0.id == rider.id }) {
+                        self.acceptedRiders.remove(at: index)
+                        self.requestedRiders.append(updatedRider)
                     }
                 }
             } catch {
                 DispatchQueue.main.async {
                     self.isLoading = false
-                    print("Fehler beim Akzeptieren des angefragten Mitfahrers: \(error.localizedDescription)")
+                    print("Fehler beim Entfernen des Mitfahrers: \(error.localizedDescription)")
                 }
             }
         }
@@ -537,43 +316,5 @@ class EventRideDetailViewModel: ObservableObject {
                 }
             }
         }
-    }
-
-    
-    // Funktion um Adressen zu generieren
-    func getAddressFromCoordinates(latitude: Float, longitude: Float, completion: @escaping (String?) -> Void) {
-        let clLocation = CLLocation(latitude: Double(latitude), longitude: Double(longitude))
-        
-        CLGeocoder().reverseGeocodeLocation(clLocation) { placemarks, error in
-            if let error = error {
-                print("Geocoding error: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-            
-            guard let placemark = placemarks?.first else {
-                completion(nil)
-                return
-            }
-            
-            var addressString = ""
-            if let name = placemark.name {
-                addressString += name
-            }
-            if let postalCode = placemark.postalCode {
-                addressString += ", \(postalCode)"
-            }
-            if let city = placemark.locality {
-                addressString += " \(city)"
-            }
-
-            completion(addressString)
-        }
-    }
-    
-    func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy - HH:mm 'Uhr'"
-        return formatter.string(from: date)
     }
 }

@@ -1,22 +1,10 @@
+// This file is licensed under the MIT-0 License.
 import SwiftUI
 import CoreLocation
 
 // Das ist die Übersicht von einem Event, in der alle Fahrten zu einem Event angezeigt werden.
 struct EventRideView: View {
     @StateObject var viewModel: EventRideViewModel
-    
-    // Vars um Standort zu kopieren
-    @State private var shareLocation = false
-    @State private var isGoogleMapsInstalled = false
-    @State private var isWazeInstalled = false
-    @State private var showMapOptions: Bool = false
-    @State private var setKoords: CLLocationCoordinate2D?
-    @State private var setAddress: String?
-    private func formattedShareText() -> String {
-       """
-       \(setAddress ?? "")
-       """
-    }
     
     var body: some View {
         NavigationStack{
@@ -26,7 +14,8 @@ struct EventRideView: View {
                     .edgesIgnoringSafeArea(.all)
                 // Inhalt
                 VStack{
-                    Text(viewModel.formattedDate(viewModel.event.starts))
+                    // Datum vom Event
+                    Text(viewModel.rideManager.formattedDate(viewModel.event.starts))
                         .padding(5)
                         .overlay(
                             RoundedRectangle(cornerRadius: 30)
@@ -35,37 +24,43 @@ struct EventRideView: View {
                         .padding(.vertical)
                     
                     List {
+                        // Event Informationen
                         if (viewModel.eventDetails != nil){
                             Section(header: Text("Event Informationen")){
                                 Text(viewModel.eventDetails?.description ?? "Keine Beschreibung zu diesem Event vorhanden.")
                             }
+                            // Adresse vom Ziel zum Event
                             Section(header: Text("Adresse")){
                                 VStack(alignment: .center){
                                     Text(viewModel.address)
                                         .foregroundColor(.blue)
+                                        // Dialog um die Adresse zu kopieren oder zu öffnen
                                         .onTapGesture {
-                                            showMapOptions = true
-                                            setKoords = CLLocationCoordinate2D(
+                                            viewModel.showMapOptions = true
+                                            viewModel.setKoords = CLLocationCoordinate2D(
                                                 latitude: CLLocationDegrees(viewModel.eventDetails!.latitude),
                                                 longitude: CLLocationDegrees(viewModel.eventDetails!.longitude)
                                             )
-                                            setAddress = viewModel.address
+                                            viewModel.setAddress = viewModel.address
                                         }
                                     Divider()
                                         .background(Color.gray)
                                         .padding(.bottom, 10)
+                                    // Koordinaten
                                     Text("\(viewModel.eventDetails!.latitude), \(viewModel.eventDetails!.longitude)")
                                 }
                                 .frame(maxWidth: .infinity)
                             }
+                            // Adresse wird ermittelt
                             .onAppear(){
-                                viewModel.getAddressFromCoordinates(latitude: viewModel.eventDetails!.latitude, longitude: viewModel.eventDetails!.longitude) { address in
+                                viewModel.rideManager.getAddressFromCoordinates(latitude: viewModel.eventDetails!.latitude, longitude: viewModel.eventDetails!.longitude) { address in
                                     if let address = address {
                                         viewModel.address = address
                                     }
                                 }
                             }
                         }
+                        // Wenn der Nutzer dem Event noch nicht zugesagt hat, kann er auch nicht an einer Fahrgemeinschaft teilnehmen
                         if (viewModel.event.myState != .present){
                             Text("Du hast dem ausgewählten Event nicht zugesagt, und kannst daher keiner Fahrgemeinschaft beitreten.")
                                 .padding(.horizontal)
@@ -81,6 +76,7 @@ struct EventRideView: View {
                             }
                             .padding(.horizontal)
                             .buttonStyle(PlainButtonStyle())
+                        // Wenn der Nutzer nicht Fahrer bei dem Event ist, oder seinen Abholort noch nicht festgelegt hat, muss er das erst tun bevor er die Fahrten sehen kann
                         } else if viewModel.interestedEvent == nil && !viewModel.eventRides.contains(where: { $0.myState == .driver }) {
                             Text("Bevor du einer Eventfahrt beitreten kannst, musst du deinen Standort festlegen. Dieser kann später noch über das Symbol oben rechts geändert werden.")
                                 .multilineTextAlignment(.center)
@@ -104,26 +100,32 @@ struct EventRideView: View {
                                     ForEach( viewModel.eventRides.filter { $0.emptySeats - $0.allocatedSeats > 0 }, id: \.id ) { ride in
                                         NavigationLink(destination: EventRideDetailView(viewModel: EventRideDetailViewModel(eventRide: ride))) {
                                             HStack {
+                                                // Profilbild des Fahrers
                                                 ProfilePictureRide(name: ride.driverName, id: ride.driverID)
                                                 VStack{
+                                                    // Name des Fahrers
                                                     Text(ride.driverName)
                                                         .frame(maxWidth: .infinity, alignment: .leading)
+                                                    // Adresse des Fahrers
                                                     Text(viewModel.driverAddress[ride.driverID] ?? "Lädt Adresse...")
                                                         .font(.subheadline)
                                                         .frame(maxWidth: .infinity, alignment: .leading)
                                                         .foregroundColor(.gray)
                                                 }
                                                 Spacer()
+                                                // Offene Requests zu einer Fahrt (falls vorhanden)
                                                 if let openRequests = ride.openRequests, openRequests > 0 {
                                                     Image(systemName: "\(openRequests).circle.fill")
                                                         .aspectRatio(1, contentMode: .fit)
                                                         .foregroundStyle(.orange)
                                                         .padding(.trailing, 5)
                                                 }
+                                                // belegte/freie Plätze
                                                 HStack{
                                                     Text("\(ride.allocatedSeats) / \(ride.emptySeats)")
                                                     Image(systemName: "car.fill" )
                                                 }
+                                                // Status des Nutzers bei der Eventfahrt
                                                 .foregroundColor(
                                                     {
                                                         switch ride.myState {
@@ -139,15 +141,16 @@ struct EventRideView: View {
                                                     }()
                                                 )
                                                 .font(.system(size: 15))
+                                                // Dialog um Standort des Fahrers zu öffen/kopieren
                                                 Image(systemName: "square.and.arrow.up")
                                                     .foregroundColor(.blue)
                                                     .onTapGesture {
-                                                        showMapOptions = true
-                                                        setKoords = CLLocationCoordinate2D(
+                                                        viewModel.showMapOptions = true
+                                                        viewModel.setKoords = CLLocationCoordinate2D(
                                                             latitude: CLLocationDegrees(ride.latitude),
                                                             longitude: CLLocationDegrees(ride.longitude)
                                                         )
-                                                        setAddress = viewModel.driverAddress[ride.driverID]
+                                                        viewModel.setAddress = viewModel.driverAddress[ride.driverID]
                                                     }
                                             }
                                         }
@@ -166,55 +169,51 @@ struct EventRideView: View {
                     }
                 }
                 .onAppear {
-                    Task {
-                        viewModel.fetchEventDetails()
-                        viewModel.fetchEventRides()
-                        viewModel.fetchParticipation()
-                    }
+                    viewModel.fetchAllUpadtes()
                 }
                 .refreshable {
-                    Task {
-                        viewModel.fetchEventDetails()
-                        viewModel.fetchEventRides()
-                        viewModel.fetchParticipation()
-                    }
+                    viewModel.fetchAllUpadtes()
                 }
             }
         }
-        .sheet(isPresented: $shareLocation) {
-            ShareSheet(activityItems: [formattedShareText()])
-               .presentationDetents([.medium, .large])
-               .presentationDragIndicator(.hidden)
-        }
-        .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $showMapOptions) {
+        // Dialog für den Standort
+        .confirmationDialog("Standort außerhalb der Anwendung öffnen?", isPresented: $viewModel.showMapOptions) {
            Button("Öffnen mit Apple Maps") {
               NavigationAppHelper.shared.openInAppleMaps(
-                name: setAddress,
-                coordinate: setKoords!
+                name: viewModel.setAddress,
+                coordinate: viewModel.setKoords!
               )
            }
-           if isGoogleMapsInstalled {
+            if viewModel.isGoogleMapsInstalled {
               Button("Öffnen mit Google Maps") {
-                 NavigationAppHelper.shared.openInGoogleMaps(name: setAddress, coordinate: setKoords!)
+                  NavigationAppHelper.shared.openInGoogleMaps(name: viewModel.setAddress, coordinate: viewModel.setKoords!)
               }
            }
-           if isWazeInstalled {
+            if viewModel.isWazeInstalled {
               Button("Öffnen mit Waze") {
-                 NavigationAppHelper.shared.openInWaze(coordinate: setKoords!)
+                  NavigationAppHelper.shared.openInWaze(coordinate: viewModel.setKoords!)
               }
            }
            Button("Teilen...") {
-              shareLocation = true
+               viewModel.shareLocation = true
            }
            Button("Abbrechen", role: .cancel) {}
         }
+        // sheet für die Zwischenablage (Nur der Text für die Adresse)
+        .sheet(isPresented: $viewModel.shareLocation) {
+            ShareSheet(activityItems: [viewModel.formattedShareText()])
+               .presentationDetents([.medium, .large])
+               .presentationDragIndicator(.hidden)
+        }
         .navigationTitle(viewModel.event.name)
         .navigationBarTitleDisplayMode(.inline)
+        // Abholort für das Event bearbeiten
         .toolbar {
             if !viewModel.eventRides.contains(where: { $0.myState == .driver }) {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Image(systemName: "location.circle.fill")
                         .foregroundColor(.blue)
+                        // Wenn der Nutzer vorher noch keinen Standort festgelegt hatte, setzt er hier seinen Abholort initial
                         .onTapGesture {
                             if viewModel.interestedEvent != nil {
                                 viewModel.editInterestEvent = true
@@ -224,8 +223,7 @@ struct EventRideView: View {
                 }
             }
         }
-        
-        // .sheet() für die Location Request (Wenn ich der Fahrt Zusage muss ich meine Location setzen)
+        // .sheet() für die Location Request (Wenn ich dem Event Zusage muss ich meine Location setzen)
         .sheet(isPresented: $viewModel.showLocationRequest, onDismiss: {
             viewModel.fetchParticipation()
             viewModel.editInterestEvent = false

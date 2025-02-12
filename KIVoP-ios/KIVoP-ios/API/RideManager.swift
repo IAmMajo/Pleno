@@ -1,10 +1,14 @@
+// This file is licensed under the MIT-0 License.
 import Foundation
+import CoreLocation
 import RideServiceDTOs
 
 class RideManager: ObservableObject {
     static let shared = RideManager()
     var eventRides: [GetEventRideDTO] = []
     private let baseURL = "https://kivop.ipv64.net"
+    
+    // MARK: - SpecialRideFunktionen
     
     // Funktion zum abrufen der SpecialRides
     func fetchSpecialRides(completion: @escaping ([GetSpecialRideDTO]?) -> Void) {
@@ -58,7 +62,7 @@ class RideManager: ObservableObject {
     
     // Funktion zum Abrufen der Details für SpecialRides
     func fetchRideDetails(for rideID: UUID) async throws -> GetSpecialRideDetailDTO {
-        guard let url = URL(string: "https://kivop.ipv64.net/specialrides/\(rideID)") else {
+        guard let url = URL(string: "\(baseURL)/specialrides/\(rideID)") else {
             throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
         }
 
@@ -85,7 +89,7 @@ class RideManager: ObservableObject {
     
     // Funktion zum Löschen einer Sonderfahrt
     func deleteSpecialRide(rideID: UUID) async throws {
-        guard let url = URL(string: "https://kivop.ipv64.net/specialrides/\(rideID)") else {
+        guard let url = URL(string: "\(baseURL)/specialrides/\(rideID)") else {
             throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
         }
 
@@ -106,7 +110,7 @@ class RideManager: ObservableObject {
     
     // Funktion zum Anfragen bei einer SonderFahrt
     func requestSpecialRide(rideID: UUID, latitude: Float, longitude: Float) async throws -> GetRiderDTO {
-        guard let url = URL(string: "https://kivop.ipv64.net/specialrides/\(rideID)/requests") else {
+        guard let url = URL(string: "\(baseURL)/specialrides/\(rideID)/requests") else {
             throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
         }
 
@@ -146,7 +150,7 @@ class RideManager: ObservableObject {
     
     // Funktion zum Löschen einer Anfrage bei einer SonderFahrt
     func deleteSpecialRideRequestedSeat(riderID: UUID) async throws {
-        guard let url = URL(string: "https://kivop.ipv64.net/specialrides/requests/\(riderID)") else {
+        guard let url = URL(string: "\(baseURL)/specialrides/requests/\(riderID)") else {
             throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
         }
 
@@ -214,7 +218,7 @@ class RideManager: ObservableObject {
     
     // Funktion zum Ablehnen eines angefragten Mitfahrers durch den Fahrer - SpecialRides
     func removeFromSpecialPassengers(riderID: UUID, longitude: Float, latitude: Float) async throws -> GetRiderDTO {
-        guard let url = URL(string: "https://kivop.ipv64.net/specialrides/requests/\(riderID)") else {
+        guard let url = URL(string: "\(baseURL)/specialrides/requests/\(riderID)") else {
             throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
         }
 
@@ -255,6 +259,8 @@ class RideManager: ObservableObject {
         let updatedRider = try decoder.decode(GetRiderDTO.self, from: data)
         return updatedRider
     }
+    
+    // MARK: - Event Funktionen
     
     // Funktion zum Abrufen der Events
     func fetchEvents(completion: @escaping ([EventWithAggregatedData]?) -> Void) {
@@ -325,7 +331,7 @@ class RideManager: ObservableObject {
         }.resume()
     }
     
-    // Funktion zum Abrufen der EventRides
+    // Funktion zum Abrufen aller EventRides zu allen Events
     func fetchEventRides(completion: @escaping ([GetEventRideDTO]?) -> Void) {
         guard let url = URL(string: "\(baseURL)/eventrides") else {
             print("Invalid URL")
@@ -370,7 +376,6 @@ class RideManager: ObservableObject {
                 DispatchQueue.main.async {
                     self?.eventRides = decodedEventRides  // Store the fetched rides
                     completion(decodedEventRides)         // Return the rides to the caller
-                    print("Ride Manger: \(self?.eventRides)")
                 }
             } catch {
                 print("JSON Decode Error: \(error.localizedDescription)")
@@ -380,6 +385,454 @@ class RideManager: ObservableObject {
             }
         }.resume()
     }
+    
+    // MARK: - Event Details
+    
+    // Alle Event Rides für ein bestimmtes Event
+    func fetchEventRidesByEvent(eventID: UUID) async throws -> [GetEventRideDTO] {
+        guard let url = URL(string: "\(baseURL)/eventrides?byEventID=\(eventID)") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        // Füge JWT-Token zu den Headern hinzu
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found.", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        // Führe den Netzwerkaufruf aus
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        // Überprüfe die Antwort auf Statuscode 200 (OK)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "Failed to fetch event rides", code: 500, userInfo: nil)
+        }
+
+        // JSON-Dekodierung
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        return try decoder.decode([GetEventRideDTO].self, from: data)
+    }
+
+    // EventDetails abfragen
+    func fetchEventDetails(eventID: UUID) async throws -> GetEventDetailDTO {
+        guard let url = URL(string: "\(baseURL)/events/\(eventID)") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        // JWT-Token hinzufügen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found.", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        // Netzwerkaufruf ausführen
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        // Überprüfe die Antwort auf Statuscode 200 (OK)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "Failed to fetch event details", code: 500, userInfo: nil)
+        }
+
+        // JSON-Dekodierung
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        return try decoder.decode(GetEventDetailDTO.self, from: data)
+    }
+
+    // Teilnahme am Event abfragen
+    // Anhand des JWT wird ein Array mit allen EventParticipations vom jeweiligen Nutzer zurückgegeben
+    // Wenn es eins gibt was zum Event passt wird dieses zurückgegeben
+    // Wenn nicht wird nil returnt
+    func fetchEventParticipation(eventID: UUID) async throws -> GetInterestedPartyDTO? {
+        guard let url = URL(string: "\(baseURL)/eventrides/interested") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        // JWT-Token hinzufügen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found.", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        // Netzwerkaufruf ausführen
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        // Überprüfe die Antwort auf Statuscode 200 (OK)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "Failed to fetch participation status", code: 500, userInfo: nil)
+        }
+
+        // JSON-Dekodierung
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        let interestedList = try decoder.decode([GetInterestedPartyDTO].self, from: data)
+
+        // Rückgabe des passenden Objekts für das Event
+        return interestedList.first { $0.eventID == eventID }
+    }
+
+    // An einem Event teilnehmen
+    // (Wird benötigt um an Eventfahrten teilzunehmen)
+    func participateEvent(eventID: UUID) async throws {
+        guard let url = URL(string: "\(baseURL)/events/\(eventID)/participations") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found.", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let requestBody: [String: Any] = ["participates": true]
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
+            throw NSError(domain: "Failed to participate in event", code: 500, userInfo: nil)
+        }
+
+        // Debugging: Antwort als String ausgeben
+        if let jsonString = String(data: data, encoding: .utf8) {
+            print("Server Response: \(jsonString)")
+        }
+    }
+    
+    // Abholort für ein Event festlegen
+    func requestInterestEventRide(eventID: UUID, latitude: Float, longitude: Float) async throws {
+        guard let url = URL(string: "\(baseURL)/eventrides/interested") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found.", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let requestDTO = CreateInterestedPartyDTO(eventID: eventID, latitude: latitude, longitude: longitude)
+        request.httpBody = try JSONEncoder().encode(requestDTO)
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
+            throw NSError(domain: "Request failed", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: nil)
+        }
+    }
+    
+    // Abholort für ein Event bearbeiten
+    func patchInterestEventRide(eventID: UUID, latitude: Float, longitude: Float) async throws {
+        guard let url = URL(string: "\(baseURL)/eventrides/interested/\(eventID)") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // JWT-Token hinzufügen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found.", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        // Body-Daten vorbereiten
+        let requestDTO = PatchInterestedPartyDTO(latitude: latitude, longitude: longitude)
+        do {
+            request.httpBody = try JSONEncoder().encode(requestDTO)
+        } catch {
+            throw NSError(domain: "Error encoding request body", code: 500, userInfo: nil)
+        }
+
+        // Netzwerkaufruf ausführen
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        // Überprüfe die Antwort auf Statuscode 200 (OK)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "Failed to patch interest event ride", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: nil)
+        }
+
+        // JSON-Dekodierung (optional, falls die Antwort weiterverarbeitet werden soll)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        _ = try decoder.decode(GetInterestedPartyDTO.self, from: data)
+    }
+
+    // Abholort für ein Event entfernen
+    func deleteInterestEventRide(eventID: UUID) async throws {
+        guard let url = URL(string: "\(baseURL)/eventrides/interested/\(eventID)") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // JWT-Token hinzufügen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found.", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        // Netzwerkaufruf ausführen
+        let (_, response) = try await URLSession.shared.data(for: request)
+
+        // Überprüfe die Antwort auf Statuscode 204 (No Content)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 204 else {
+            throw NSError(domain: "Failed to delete interest event ride", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: nil)
+        }
+    }
+
+    // MARK: - EventRide Funktionalität
+    
+    // Details zu einer EventFahrt abfragen
+    func fetchEventRideDetails(eventRideID: UUID) async throws -> GetEventRideDetailDTO {
+        // URL mit der eventRide-ID erstellen
+        guard let url = URL(string: "\(baseURL)/eventrides/\(eventRideID)") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        // JWT-Token zum Header hinzufügen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found.", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Netzwerkaufruf mit async/await
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        // Überprüfe, ob der Statuscode 200 (OK) vorliegt
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "Failed to fetch ride details", code: 500, userInfo: nil)
+        }
+        
+        // JSON-Dekodierung
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        
+        return try decoder.decode(GetEventRideDetailDTO.self, from: data)
+    }
+    
+    // Fahrt löschen
+    func deleteRide(rideID: UUID) async throws {
+        // Erstelle die URL mit der rideID
+        guard let url = URL(string: "\(baseURL)/eventrides/\(rideID)") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        
+        // Authorization Header hinzufügen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Führe den Netzwerkaufruf aus
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        // Überprüfe die Antwort auf den Statuscode 204 (No Content)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 204 else {
+            throw NSError(domain: "Failed to delete ride", code: 500, userInfo: nil)
+        }
+    }
+    
+    // Nutzer fragt einen Sitzplatz an
+    func requestEventRide(eventRideID: UUID) async throws -> GetRiderDTO {
+        // URL mit der eventRide-ID und dem Endpunkt "/requests" erstellen
+        guard let url = URL(string: "\(baseURL)/eventrides/\(eventRideID)/requests") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Authorization Header hinzufügen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found.", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Führe den Netzwerkaufruf mit async/await aus
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        // Überprüfe, ob der Statuscode 201 (Created) vorliegt
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
+            throw NSError(domain: "Failed to request ride", code: 500, userInfo: nil)
+        }
+        
+        // JSON-Dekodierung der Antwort in ein GetRiderDTO-Objekt
+        let decoder = JSONDecoder()
+        return try decoder.decode(GetRiderDTO.self, from: data)
+    }
+
+    // Fahrer nimmt einen Mitfahrer an
+    func acceptRequestedRider(riderID: UUID) async throws -> GetRiderDTO {
+        // Erstelle die URL anhand der riderID
+        guard let url = URL(string: "\(baseURL)/eventrides/requests/\(riderID)") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"  // HTTP-Methode PATCH verwenden
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Authorization Header hinzufügen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found.", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Erstelle den Body für den Request
+        let body: [String: Any] = [
+            "accepted": true
+        ]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+        } catch {
+            throw NSError(domain: "Error creating JSON body", code: 500, userInfo: nil)
+        }
+        
+        // Führe den Netzwerkaufruf aus
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        // Überprüfe die Antwort: Statuscode 200 (OK) erwarten
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "Failed to accept requested rider", code: 500, userInfo: nil)
+        }
+        
+        // Dekodiere die Antwort in ein GetRiderDTO-Objekt
+        let decoder = JSONDecoder()
+        return try decoder.decode(GetRiderDTO.self, from: data)
+    }
+
+    // Fahrer entfernt einen Mitfahrer wieder (Dieser bekommt wieder den Status requested)
+    func removeFromPassengers(riderID: UUID) async throws -> GetRiderDTO {
+        // Erstelle die URL anhand der riderID
+        guard let url = URL(string: "\(baseURL)/eventrides/requests/\(riderID)") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"  // HTTP-Methode PATCH
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Authorization Header hinzufügen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found.", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Request-Body: Setze "accepted" auf false, um den Status zurückzusetzen
+        let body: [String: Any] = ["accepted": false]
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+        } catch {
+            throw NSError(domain: "Error creating JSON body", code: 500, userInfo: nil)
+        }
+        
+        // Führe den Netzwerkaufruf aus
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        // Überprüfe, ob der Statuscode 200 (OK) zurückgegeben wurde
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "Failed to remove rider from passengers", code: 500, userInfo: nil)
+        }
+        
+        // Dekodiere die Antwort in ein GetRiderDTO-Objekt
+        let decoder = JSONDecoder()
+        return try decoder.decode(GetRiderDTO.self, from: data)
+    }
+    
+    // Mitfahrer gibt seinen Platz wieder frei
+    func deleteRideRequestedSeat(riderID: UUID) async throws {
+        // Erstelle die URL anhand der riderID
+        guard let url = URL(string: "\(baseURL)/eventrides/requests/\(riderID)") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"  // HTTP-Methode DELETE verwenden
+        
+        // Authorization Header hinzufügen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: Token not found.", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Führe den Netzwerkaufruf aus
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        // Überprüfe, ob der Statuscode 204 (No Content) vorliegt
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 204 else {
+            throw NSError(domain: "Failed to delete ride request", code: 500, userInfo: nil)
+        }
+    }
+    
+    // MARK: - Berechnung von Adressen
+    
+    // Funktion um Adressen zu generieren
+    func getAddressFromCoordinates(latitude: Float, longitude: Float, completion: @escaping (String?) -> Void) {
+        let clLocation = CLLocation(latitude: Double(latitude), longitude: Double(longitude))
+        
+        CLGeocoder().reverseGeocodeLocation(clLocation) { placemarks, error in
+            if let error = error {
+                print("Geocoding error: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+            
+            guard let placemark = placemarks?.first else {
+                completion(nil)
+                return
+            }
+            
+            var addressString = ""
+            if let name = placemark.name {
+                addressString += name
+            }
+            if let postalCode = placemark.postalCode {
+                addressString += ", \(postalCode)"
+            }
+            if let city = placemark.locality {
+                addressString += " \(city)"
+            }
+            completion(addressString)
+        }
+    }
+    
+    // MARK: - Ride Übersicht
     
     // Berechnung der aggregierten Daten für ein Event
     // Zeigt an, wie viele freie/belegte Plätze es gibt und ermittelt den höchsten Status des Nutzers
@@ -410,6 +863,8 @@ class RideManager: ObservableObject {
         return (myState, UInt8(allEmptySeats), UInt8(allAllocatedSeats), allOpenRequestsUInt8)
     }
     
+    // MARK: - Generelle Ride Funktionen
+    
     // Authorizierung für die Profilbilder
     private func createAuthorizedRequest(url: URL, method: String, contentType: String = "application/json") -> URLRequest? {
        var request = URLRequest(url: url)
@@ -426,7 +881,7 @@ class RideManager: ObservableObject {
     
     // Fetch ProfilePictures by Id
     func fetchUserImage(userId: UUID, completion: @escaping (Result<Data, Error>) -> Void) {
-       let profileImageBaseURL = "https://kivop.ipv64.net/users/profile-image/user"
+       let profileImageBaseURL = "\(baseURL)/users/profile-image/user"
        guard let url = URL(string: "\(profileImageBaseURL)/\(userId.uuidString)") else {
           completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
           return

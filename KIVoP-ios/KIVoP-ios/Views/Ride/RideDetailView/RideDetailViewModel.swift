@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 import Foundation
 import CoreLocation
 import MapKit
@@ -46,7 +47,6 @@ class RideDetailViewModel: ObservableObject {
        """
     }
     
-    private let baseURL = "https://kivop.ipv64.net"
     var ride: GetSpecialRideDTO
     var rider: GetRiderDTO?
     
@@ -78,7 +78,7 @@ class RideDetailViewModel: ObservableObject {
         Task {
             do {
                 self.isLoading = true
-                let fetchedRideDetail = try await RideManager.shared.fetchRideDetails(for: ride.id)
+                let fetchedRideDetail = try await rideManager.fetchRideDetails(for: ride.id)
 
                 DispatchQueue.main.async {
                     self.rideDetail = fetchedRideDetail
@@ -89,7 +89,7 @@ class RideDetailViewModel: ObservableObject {
                     self.startLocation = CLLocationCoordinate2D(latitude: CLLocationDegrees(self.rideDetail.startLatitude), longitude: CLLocationDegrees(self.rideDetail.startLongitude))
                     // Durchlaufe alle Fahrer und rufe die Adresse für jedes Fahrer-Standort ab
                     for rider in self.rideDetail.riders {
-                        self.getAddressFromCoordinates(latitude: rider.latitude, longitude: rider.longitude) { address in
+                        self.rideManager.getAddressFromCoordinates(latitude: rider.latitude, longitude: rider.longitude) { address in
                             if let address = address {
                                 // Speichere die Adresse im Dictionary mit der Rider ID als Schlüssel
                                 self.riderAddresses[rider.id] = address
@@ -113,7 +113,7 @@ class RideDetailViewModel: ObservableObject {
             do {
                 self.isLoading = true
                 // Löschanfrage an den RideManager
-                try await RideManager.shared.deleteSpecialRide(rideID: ride.id)
+                try await rideManager.deleteSpecialRide(rideID: ride.id)
                 self.isLoading = false
                 
             } catch {
@@ -132,7 +132,7 @@ class RideDetailViewModel: ObservableObject {
                 self.isLoading = true
 
                 // Anforderung der Fahrt über den RideManager
-                let fetchedRider = try await RideManager.shared.requestSpecialRide(rideID: ride.id, latitude: requestLat, longitude: requestLong)
+                let fetchedRider = try await rideManager.requestSpecialRide(rideID: ride.id, latitude: requestLat, longitude: requestLong)
 
                 DispatchQueue.main.async {
                     // Füge den Rider zur Liste der angeforderten Fahrer hinzu
@@ -157,7 +157,7 @@ class RideDetailViewModel: ObservableObject {
                 self.isLoading = true
 
                 // Lösche die Anfrage über den RideManager
-                try await RideManager.shared.deleteSpecialRideRequestedSeat(riderID: rider.id)
+                try await rideManager.deleteSpecialRideRequestedSeat(riderID: rider.id)
 
                 DispatchQueue.main.async {
                     // Erfolgreiches Löschen: Entferne den Rider aus den Listen
@@ -182,7 +182,7 @@ class RideDetailViewModel: ObservableObject {
                 self.isLoading = true  // Ladezustand aktivieren
 
                 // Akzeptiere den angefragten Mitfahrer durch den RideManager
-                let updatedRider = try await RideManager.shared.acceptRequestedSpecialRider(riderID: rider.id, longitude: rider.longitude, latitude: rider.latitude)
+                let updatedRider = try await rideManager.acceptRequestedSpecialRider(riderID: rider.id, longitude: rider.longitude, latitude: rider.latitude)
 
                 DispatchQueue.main.async {
                     // Ladezustand deaktivieren
@@ -211,7 +211,7 @@ class RideDetailViewModel: ObservableObject {
                 self.isLoading = true  // Ladezustand aktivieren
 
                 // Entferne den Mitfahrer und setze ihn auf "requested"
-                let updatedRider = try await RideManager.shared.removeFromSpecialPassengers(riderID: rider.id, longitude: rider.longitude, latitude: rider.latitude)
+                let updatedRider = try await rideManager.removeFromSpecialPassengers(riderID: rider.id, longitude: rider.longitude, latitude: rider.latitude)
 
                 DispatchQueue.main.async {
                     // Ladezustand deaktivieren
@@ -230,36 +230,6 @@ class RideDetailViewModel: ObservableObject {
                     self.errorMessage = "Fehler beim Entfernen des Mitfahrers: \(error.localizedDescription)"
                 }
             }
-        }
-    }
-    
-    func getAddressFromCoordinates(latitude: Float, longitude: Float, completion: @escaping (String?) -> Void) {
-        let clLocation = CLLocation(latitude: Double(latitude), longitude: Double(longitude))
-        
-        CLGeocoder().reverseGeocodeLocation(clLocation) { placemarks, error in
-            if let error = error {
-                print("Geocoding error: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-            
-            guard let placemark = placemarks?.first else {
-                completion(nil)
-                return
-            }
-            
-            var addressString = ""
-            if let name = placemark.name {
-                addressString += name
-            }
-            if let postalCode = placemark.postalCode {
-                addressString += ", \(postalCode)"
-            }
-            if let city = placemark.locality {
-                addressString += " \(city)"
-            }
-            
-            completion(addressString)
         }
     }
 
