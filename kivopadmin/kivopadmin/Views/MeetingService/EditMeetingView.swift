@@ -64,25 +64,22 @@ struct EditMeetingView: View {
     private func saveChanges() {
         // Sicherstellen, dass die Dauer der Sitzung ein Int ist
         guard let durationUInt16 = UInt16(duration) else {
-            meetingManager.errorMessage = "Invalid duration. Must be a number."
             return
         }
 
         // Sicherstellen, dass der Name des Ortes der Sitzung gesetzt ist
         guard !locationName.isEmpty else {
-            meetingManager.errorMessage = "Location name cannot be empty."
             return
         }
         
         // Sicherstellen, dass der Name der Sitzung gesetzt ist
         guard !name.isEmpty else {
-            meetingManager.errorMessage = "Meeting name cannot be empty."
             return
         }
 
         // CreateLocationDTO erstellen
         let updatedLocation = CreateLocationDTO(
-            name: locationName.isEmpty ? "Unnamed Location" : locationName,
+            name: locationName,
             street: locationStreet.isEmpty ? "" : locationStreet,
             number: locationNumber.isEmpty ? "" : locationNumber,
             letter: locationLetter.isEmpty ? "" : locationLetter,
