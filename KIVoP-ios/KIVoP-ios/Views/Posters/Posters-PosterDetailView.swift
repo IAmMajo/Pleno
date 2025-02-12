@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  PosterDetailView.swift
 //  KIVoP-ios
@@ -109,12 +110,14 @@ struct Posters_PosterDetailView: View {
       }
    }
    
+   // Calculates how many positions of how many not taken down positions have the status .hangs
    private func hangsTotalMap(positions: [PosterPositionResponseDTO]) -> [Int: Int] {
       let hangsCount = positions.filter { $0.status != .takenDown && $0.status != .toHang }.count
       let notTakenDownCount = positions.filter { $0.status != .takenDown }.count
        return [hangsCount: notTakenDownCount]
    }
    
+   // Calculates how many positions of all positions are taken down
    private func takenDownTotalMap(positions: [PosterPositionResponseDTO]) -> [Int: Int] {
       let takenDownCount = positions.filter { $0.status == .takenDown }.count
       let positionsCount = positions.count
@@ -154,7 +157,7 @@ struct Posters_PosterDetailView: View {
                            .aspectRatio(contentMode: .fit)
                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                            .frame(maxWidth: 200, maxHeight: 200)
-                           .foregroundStyle(.gray.opacity(0.5))
+                           .foregroundStyle(.gray.opacity(0.2))
                            .padding(.top, 10) .padding(.bottom, 10)
                            .onTapGesture {
                               showImage = true
@@ -165,7 +168,7 @@ struct Posters_PosterDetailView: View {
                      } else {
                         ProgressView()
                            .frame(width: 200, height: 200)
-                           .background(.gray.opacity(0.5))
+                           .background(.gray.opacity(0.2))
                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                      }
                   }
@@ -176,6 +179,7 @@ struct Posters_PosterDetailView: View {
                      }
                   }
                   
+                  // displays circular progress views of all hanging and taken-down positions of the poster
                   if !viewModel.positions.isEmpty {
                      let hangsTotalMap = hangsTotalMap(positions: viewModel.positions)
                      let takenDownTotalMap = takenDownTotalMap(positions: viewModel.positions)
@@ -204,6 +208,7 @@ struct Posters_PosterDetailView: View {
                      }
                   }
                   
+                  // poster description
                   VStack (alignment: .leading, spacing: 6) {
                      Text("BESCHREIBUNG")
                         .font(.footnote)
@@ -220,24 +225,24 @@ struct Posters_PosterDetailView: View {
                   }
                   .padding(.vertical)
                   
-                  
+                  // displays all positions (and their status) of the poster on a map
                   Rectangle()
                      .frame(height: 215)
                      .overlay(
                         VStack {
-                           MapPositionsView(locationsPositions: locationsPositions(positions: viewModel.positions))
+                           MapPositionsView(posterImage: viewModel.posterImage ?? nil, locationsPositions: locationsPositions(positions: viewModel.positions))
                               .onTapGesture {
                                  isShowingFullMapSheet = true
                               }
                               .sheet(isPresented: $isShowingFullMapSheet) {
-                                 FullMapPositionsSheet(locationsPositions: locationsPositions(positions: viewModel.positions), poster: poster)
+                                 FullMapPositionsSheet(locationsPositions: locationsPositions(positions: viewModel.positions), poster: poster, posterImage: viewModel.posterImage ?? nil)
                               }
                         }
                      )
                      .cornerRadius(10)
                      .padding(.horizontal)
                   
-                  
+                  // displays all poster positions with some information
                   VStack (alignment: .leading, spacing: 6) {
                      Text("STANDORTE (\(viewModel.positions.count))")
                         .font(.footnote)
@@ -247,6 +252,7 @@ struct Posters_PosterDetailView: View {
                         VStack {
                            ForEach (viewModel.positions, id: \.id) { position in
                               HStack {
+                                 // position adress
                                  VStack {
                                     if let address = addresses[position.id] {
                                        Text("\(address)")
@@ -259,6 +265,7 @@ struct Posters_PosterDetailView: View {
                                           }
                                     }
                                     
+                                    // take-down/expiresAt date of the position
                                     Text("\(DateTimeFormatter.formatDate(position.expiresAt))")
                                        .frame(maxWidth: .infinity, alignment: .leading)
                                        .font(.callout)
@@ -266,12 +273,13 @@ struct Posters_PosterDetailView: View {
                                     
                                  }
                                  Spacer()
+                                 // position status
                                  Text(getDateStatusText(position: position).text)
                                     .font(.caption)
                                     .foregroundStyle(getDateStatusText(position: position).color)
                               }
                               .contentShape(Rectangle())
-                              .onTapGesture {
+                              .onTapGesture { // on tap: navigate to selected position
                                  selectedPosition = position
                                  isShowingPosition = true
                               }
@@ -290,10 +298,6 @@ struct Posters_PosterDetailView: View {
                   }
                   .padding(.vertical)
                }
-            } else if viewModel.isLoading {
-//               ProgressView("Loading...")
-//                  .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                  .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
             } else if let error = viewModel.error {
                Text("Error: \(error)")
                   .foregroundColor(.red)
@@ -309,15 +313,8 @@ struct Posters_PosterDetailView: View {
                viewModel.fetchPosterImage(for: poster.id)
             }
          }
-//         .overlay {
-//            if isLoading {
-//               ProgressView("Loading...")
-//            } else if let error = error {
-//               Text("Error: \(error)")
-//                  .foregroundColor(.red)
-//            }
-//         }
          .navigationBarTitleDisplayMode(.inline)
+         // navigating to selected position
          .navigationDestination(isPresented: $isShowingPosition) {
             if let position = selectedPosition {
                if let address = addresses[position.id] {
@@ -342,7 +339,5 @@ struct Posters_PosterDetailView: View {
 }
 
 #Preview {
-   //   @StateObject private var postersViewModel = PostersViewModel()
    
-   //   Posters_PosterDetailView(poster: mockPosters[0])
 }

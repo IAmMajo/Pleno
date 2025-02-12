@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  FullMapPositionsView.swift
 //  KIVoP-ios
@@ -9,16 +10,27 @@ import SwiftUI
 import PosterServiceDTOs
 import MapKit
 
+// A full-screen map view displaying all poster locations with interactive annotations
 struct FullMapPositionsSheet: View {
-   let locationsPositions: [(location: Location, position: PosterPositionResponseDTO)]
-   let poster: PosterResponseDTO
+   // MARK: - Properties
+      
+      /// A list of locations and their associated poster positions
+      let locationsPositions: [(location: Location, position: PosterPositionResponseDTO)]
+      /// The poster being displayed
+      let poster: PosterResponseDTO
+      /// The image of the poster
+      let posterImage: UIImage?
+      /// Controls whether the position detail view is displayed
+      @State var isShowingPosition: Bool = false
+      /// Controls whether the overlay with details of a selected location is shown
+      @State var isShowingOverlay: Bool = false
+      /// Stores the selected location and position when tapping on an annotation
+      @State var selectedLocationPosition: (location: Location, position: PosterPositionResponseDTO)? = nil
+      /// Environment variable to dismiss the view
+      @Environment(\.dismiss) var dismiss
    
-   @State var isShowingPosition: Bool = false
-   @State var isShowingOverlay: Bool = false
-   @State var selectedLocationPosition: (location: Location, position: PosterPositionResponseDTO)? = nil
-   
-   @Environment(\.dismiss) var dismiss
-   
+   // MARK: - Status Helper
+   /// Determines the text and color representation of a position's status
    func getTextColor(position: PosterPositionResponseDTO) -> (text: String, color: Color) {
       let status = position.status
       switch status {
@@ -39,9 +51,11 @@ struct FullMapPositionsSheet: View {
       }
    }
    
+   // MARK: - Body
    var body: some View {
       NavigationStack {
       Map(){
+         // Loop through all locations and add annotations
          ForEach(locationsPositions, id: \.position.id) { item in
             Annotation(item.location.name, coordinate: item.location.coordinate) {
                VStack {
@@ -50,28 +64,41 @@ struct FullMapPositionsSheet: View {
                         .fill(.background)
                         .shadow(radius: 5)
                         .overlay(
-                           Image("TestPosterImage")
-                              .resizable()
-                              .scaledToFit()
-                              .clipShape(RoundedRectangle(cornerRadius: 3))
-                              .frame(width: 35, height: 35)
+                           Group {
+                              if let uiImage = posterImage {
+                                 Image(uiImage: uiImage) // The poster image displayed in the annotation
+                                    .resizable()
+                                    .scaledToFit()
+                                    .clipShape(RoundedRectangle(cornerRadius: 3))
+                                    .frame(width: 35, height: 35)
+                              } else {
+                                 ProgressView()
+                                    .frame(width: 35, height: 35)
+                                    .background(.gray.opacity(0.2))
+                                    .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
+                              }
+                           }
                         )
                         .frame(width: 52, height: 52)
                         .overlay(alignment: .bottom) {
+                           // Indicator shape with color representing status
                            IndicatorShape()
                               .fill(getTextColor(position: item.position).color)
                               .frame(width: 15, height: 10)
                               .offset(y: 5)
                         }
+                     // Status border ring with matching color
                      Circle()
                         .stroke(getTextColor(position: item.position).color, lineWidth: 4)
                         .frame(width: 52-4, height: 52-4)
                   }
                   .onTapGesture {
+                     // Show the overlay when the annotation is tapped
                      isShowingOverlay = true
                      selectedLocationPosition = item
                   }
                   
+                  // Location name label under the annotation
                   Text(item.location.name)
                      .font(.caption2)
                      .bold()
@@ -92,37 +119,43 @@ struct FullMapPositionsSheet: View {
                      )
                      .padding(.top, 5)
                }
-               .offset(y: -18)
+               .offset(y: -18) // Adjusts the vertical position of annotations, to make the IndicatorShape point to the location
             }
             .annotationTitles(.hidden)
          }
       }
+         // MARK: - Overlay for Selected Location Details
       .overlay(alignment: .bottom) {
          if isShowingOverlay {
             if let item = selectedLocationPosition {
                HStack {
+                  // location and position information
                   VStack(alignment: .leading, spacing: 4) {
+                     // name of location
                      Text(item.location.name)
                         .font(.title3)
                         .fontWeight(.bold)
+                     // status of position with matching color
                      Text(getTextColor(position: item.position).text)
                         .foregroundStyle(getTextColor(position: item.position).color)
                         .fontWeight(.semibold)
+                     // positions expiresAt date
                      Text("Abhängedatum: \(DateTimeFormatter.formatDate(item.position.expiresAt))")
                   }
                   
                   Spacer()
                   
+                  // close and navigate to position details options
                   VStack(alignment: .trailing, spacing: 5) {
-//                     VStack(alignment: .trailing, spacing: 2) {
-                        Button {
-                           isShowingOverlay = false
-                        } label: {
-                           Image(systemName: "xmark")
-                              .foregroundStyle(.gray)
-                        }
-//                     }
+                     // button to close the overlay
+                     Button {
+                        isShowingOverlay = false
+                     } label: {
+                        Image(systemName: "xmark")
+                           .foregroundStyle(.gray)
+                     }
                      Spacer()
+                     // button to navigate to details view of position
                      Button {
                         isShowingPosition = true
                      } label: {
@@ -140,12 +173,14 @@ struct FullMapPositionsSheet: View {
             }
          }
       }
+      // MARK: - Navigation to Position Details View
       .navigationDestination(isPresented: $isShowingPosition) {
          if let item = selectedLocationPosition {
             Posters_PositionView(posterId: poster.id, positionId: item.position.id)
                .navigationTitle(item.location.name)
          }
       }
+      // MARK: - Navigation Bar Settings
       .navigationTitle("Alle Standorte")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
@@ -160,5 +195,4 @@ struct FullMapPositionsSheet: View {
 }
 
 #Preview {
-//    FullMapPositionsSheet()
 }

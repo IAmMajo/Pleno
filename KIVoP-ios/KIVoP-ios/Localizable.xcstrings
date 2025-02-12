@@ -586,7 +586,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Current"
+            "value" : "Active"
           }
         }
       }
@@ -1572,7 +1572,14 @@
 
     },
     "In Zwischenablage kopiert" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copied to Clipboard"
+          }
+        }
+      }
     },
     "Informationen zur Fahrt" : {
 

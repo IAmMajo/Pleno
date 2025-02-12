@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  PosterDetailViewModel.swift
 //  KIVoP-ios
@@ -14,6 +15,15 @@ import PosterServiceDTOs
 import MapKit
 import MeetingServiceDTOs
 
+struct FilteredPoster: Equatable {
+   let poster: PosterResponseDTO
+   let posterSummary: PosterSummaryResponseDTO
+   
+   static func == (lhs: FilteredPoster, rhs: FilteredPoster) -> Bool {
+      return lhs.poster.id == rhs.poster.id
+   }
+}
+
 // MARK: - Posters ViewModel
 // This view model handles fetching posters, filtering them based on statuses, and sorting them
 @MainActor
@@ -21,7 +31,7 @@ class PostersViewModel: ObservableObject {
    // Published properties to update the UI when data changes
    @Published var posters: [PosterResponseDTO] = []
    @Published var posterImages: [UUID: UIImage] = [:]
-   @Published var filteredPosters: [FilteredPoster2] = [] // Filtered posters based on tab selection
+   @Published var filteredPosters: [FilteredPoster] = [] // Filtered posters based on tab selection
     @Published var selectedTab: Int = 0 { // Handles tab switching (active vs archived posters)
        didSet {
           Task {
@@ -81,7 +91,7 @@ class PostersViewModel: ObservableObject {
    
    // Filters posters based on their statuses and sorting criteria
    private func filterPosters() async {
-      var updatedFilteredPosters: [FilteredPoster2] = []
+      var updatedFilteredPosters: [FilteredPoster] = []
       
       for poster in posters {
          guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { continue }
@@ -98,7 +108,7 @@ class PostersViewModel: ObservableObject {
             // Include posters in the appropriate tab (0 = active, 1 = archived)
             switch selectedTab {
             case 0 where !isArchived, 1 where isArchived:
-               updatedFilteredPosters.append(FilteredPoster2(poster: poster, posterSummary: posterSummary))
+               updatedFilteredPosters.append(FilteredPoster(poster: poster, posterSummary: posterSummary))
             default:
                continue
             }
@@ -209,7 +219,7 @@ class PosterPositionViewModel: ObservableObject {
         isLoading = false
     }
    
-   // Fetches the image for a specific poster and stores it inside posterImage
+   // Fetches the image for a specific position and stores it inside positionImageData
    func fetchPositionImage(for posterId: UUID) {
       Task {
          do {
