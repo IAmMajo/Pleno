@@ -25,6 +25,15 @@ struct PostersMainView: View {
     @State private var selectedPoster: PosterResponseDTO? // Das aktuell zu bearbeitende Poster
     
 
+    var filteredPosters: [PosterWithSummary] {
+        if searchText.isEmpty {
+            return posterManager.postersWithSummaries
+        } else {
+            return posterManager.postersWithSummaries.filter {
+                $0.poster.name.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
     
     var body: some View {
         NavigationStack {
@@ -40,7 +49,8 @@ struct PostersMainView: View {
                         .foregroundColor(.secondary)
                 } else {
                     // Wenn die Sammelposten geladen wurden, wird die Liste angezeigt
-                    listView()
+                    //listView()
+                    forEachPoster
                 }
             }
             
@@ -110,67 +120,61 @@ struct PostersMainView: View {
 }
 
 extension PostersMainView {
-    private func listView() -> some View {
-        List {
-            ForEach(posterManager.postersWithSummaries, id: \.poster.id) { posterWithSummary in
-                PosterRowView(poster: posterWithSummary)
-                    .listRowSeparator(.hidden)
-                    // SwipeAction um Sammelposten zu löschen
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button(role: .destructive) {
-                            deletePoster(poster: posterWithSummary.poster)
-                        } label: {
-                            Label("Löschen", systemImage: "trash")
-                        }
-                    }
-            }
-        }
-    }
-    
-}
-
-// Listenelement Anzeige
-struct PosterRowView: View {
-    // Sammelposten mit zugehöriger Zusammenfassung und Bild wird übergeben
-    let poster: PosterWithSummary
-    
-    @StateObject private var locationViewModel = LocationsViewModel()
-    
-    var body: some View {
-        // Link zur Karte
-        // locationViewModel wird als EnvironmentObject gesetzt
-        NavigationLink(destination: LocationsView(poster: poster.poster).environmentObject(locationViewModel)) {
-            VStack {
-                HStack(spacing: 5) {
-                    if let imageData = poster.image, let uiImage = UIImage(data: imageData) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 100) // Höhe einstellen
-                            .cornerRadius(10)
-                    }
-                    
-                    Spacer()
-                    VStack(){
-                        Text(poster.poster.name)
-                            .font(.title)
-                        
-                        HStack() {
-                            if let summary = poster.summary {
-                                CircularProgressView(poster: poster, status: .hangs).padding(.horizontal, 2)
-                                CircularProgressView(poster: poster, status: .takenDown).padding(.horizontal, 2)
-                                
+    private var forEachPoster: some View {
+        let columns = [GridItem(.flexible()), GridItem(.flexible())] // Zwei Spalten
+        
+        return
+        ScrollView{
+            LazyVGrid(columns: columns, spacing: 16) {
+                
+                ForEach(filteredPosters, id: \.poster.id) { posterWithSummary in
+                    NavigationLink(destination: LocationsView(poster: posterWithSummary.poster).environmentObject(locationViewModel)) {
+                        posterListElement(poster: posterWithSummary)// Deine Poster-View hier einfügen
+                            .frame(maxWidth: .infinity)
+                            .padding(4)
+                            .contextMenu { // Kontextmenü für langes Drücken
+                                Button(role: .destructive) {
+                                    deletePoster(poster: posterWithSummary.poster)
+                                } label: {
+                                    Label("Löschen", systemImage: "trash")
+                                }
                             }
-                        }.padding(.horizontal, 6)
-                            .padding(.top, 10)
                     }
-                    Spacer()
                 }
-                Divider() // Dieser Divider nimmt die gesamte Breite der Zelle ein
-                    .padding(.vertical, 5) // Optional: Abstand über und unter dem Divider
-            }
+            }.padding(.horizontal)
         }
     }
+    
+    private func posterListElement(poster: PosterWithSummary) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(.ultraThickMaterial)
+            
+            HStack(spacing: 5) {
+                if let imageData = poster.image, let uiImage = UIImage(data: imageData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 140) // Höhe einstellen
+                        .cornerRadius(10)
+                        .padding(.leading)
+                }
+                Spacer()
+                VStack(alignment: .trailing){
+                    Text(poster.poster.name)
+                        .font(.title2)
+                    Spacer()
+                    VStack(alignment: .trailing) {
+                        if let summary = poster.summary {
+                            CircularProgressView(poster: poster, status: .hangs).padding(.horizontal, 2)
+                            CircularProgressView(poster: poster, status: .takenDown).padding(.horizontal, 2)
+                            
+                        }
+                    }.padding(.horizontal, 6)
+                }.padding(.trailing)
+
+            }.padding(.vertical)
+        }
+    }
+    
 }
-
-
