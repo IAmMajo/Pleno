@@ -116,9 +116,7 @@ fun MeetingsListPage(navController: NavController, meetingsViewModel: MeetingsVi
       }
 
   // Layout mit Tabs und aktuellen Meetings
-  Column(
-      modifier = Modifier.padding(18.dp)
-  ) {
+  Column(modifier = Modifier.padding(18.dp)) {
     SpacerTopBar()
     // Aktuelle Meetings anzeigen
     //    LazyColumn(

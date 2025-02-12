@@ -26,18 +26,18 @@ enum class TextFieldStatus {
 
 @Composable
 fun DebouncedTextFieldCustomInputField(
-  label: String,
-  labelColor: Color = Background_prime,
-  placeholder: String,
-  modifier: Modifier = Modifier,
-  isPasswort: Boolean = false,
-  singleLine: Boolean = true,
-  lines: Int = 1,
-  value: String,
-  backgroundColor: Color = Background_prime,
-  status: () -> TextFieldStatus = { TextFieldStatus.nothing },
-  onValueChange: (String) -> Unit,
-  onDebouncedChange: (String) -> Unit
+    label: String,
+    labelColor: Color = Background_prime,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    isPasswort: Boolean = false,
+    singleLine: Boolean = true,
+    lines: Int = 1,
+    value: String,
+    backgroundColor: Color = Background_prime,
+    status: () -> TextFieldStatus = { TextFieldStatus.nothing },
+    onValueChange: (String) -> Unit,
+    onDebouncedChange: (String) -> Unit
 ) {
   LaunchedEffect(value) {
     delay(2000)
@@ -62,8 +62,14 @@ fun DebouncedTextFieldCustomInputField(
                       focusedContainerColor = backgroundColor,
                       unfocusedContainerColor = backgroundColor,
                       disabledContainerColor = backgroundColor,
-                      unfocusedBorderColor = if (status() == TextFieldStatus.pending) Color.Yellow else if (status() == TextFieldStatus.done) Color.Green else backgroundColor,
-                      focusedBorderColor = if (status() == TextFieldStatus.pending) Color.Yellow else if (status() == TextFieldStatus.done) Color.Green else backgroundColor,
+                      unfocusedBorderColor =
+                          if (status() == TextFieldStatus.pending) Color.Yellow
+                          else if (status() == TextFieldStatus.done) Color.Green
+                          else backgroundColor,
+                      focusedBorderColor =
+                          if (status() == TextFieldStatus.pending) Color.Yellow
+                          else if (status() == TextFieldStatus.done) Color.Green
+                          else backgroundColor,
                       focusedTextColor = Text_prime,
                       unfocusedTextColor = Text_prime),
               singleLine = singleLine,

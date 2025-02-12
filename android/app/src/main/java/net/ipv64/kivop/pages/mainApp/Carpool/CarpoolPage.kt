@@ -74,9 +74,11 @@ fun CarpoolPage(
             text = carpool.name,
             style = MaterialTheme.typography.headlineMedium,
             color = Text_prime_light)
-        val latLngStart = LatLng(carpool.startLatitude.toDouble(), carpool.startLongitude.toDouble())
-        val latLngEnd = LatLng(carpool.destinationLatitude.toDouble(), carpool.destinationLongitude.toDouble())
-        MapDoubleMarker(Modifier.padding(vertical = 12.dp),latLngStart, latLngEnd)
+        val latLngStart =
+            LatLng(carpool.startLatitude.toDouble(), carpool.startLongitude.toDouble())
+        val latLngEnd =
+            LatLng(carpool.destinationLatitude.toDouble(), carpool.destinationLongitude.toDouble())
+        MapDoubleMarker(Modifier.padding(vertical = 12.dp), latLngStart, latLngEnd)
       }
     }
     // content Column

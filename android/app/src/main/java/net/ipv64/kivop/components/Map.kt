@@ -49,124 +49,117 @@ fun MapSingleMarker(markerPosition: LatLng) {
 }
 
 @Composable
-fun MapDoubleMarker(modifier: Modifier = Modifier,markerPositionStart: LatLng,markerPositionEnd: LatLng) {
+fun MapDoubleMarker(
+    modifier: Modifier = Modifier,
+    markerPositionStart: LatLng,
+    markerPositionEnd: LatLng
+) {
   val markerStateStart = rememberMarkerState(position = markerPositionStart)
   val markerStateEnd = rememberMarkerState(position = markerPositionEnd)
   val cameraPositionState = rememberCameraPositionState {
     position = CameraPosition.fromLatLngZoom(markerPositionStart, 15f)
   }
-  //Set bounds for camera with Start and Destination coordinates. aka sets camera to fit all markers with a padding of 130
+  // Set bounds for camera with Start and Destination coordinates. aka sets camera to fit all
+  // markers with a padding of 130
   LaunchedEffect(markerStateStart, markerStateEnd) {
-    val bounds = LatLngBounds.builder()
-      .include(markerPositionStart)
-      .include(markerPositionEnd)
-      .build()
-    
+    val bounds =
+        LatLngBounds.builder().include(markerPositionStart).include(markerPositionEnd).build()
+
     cameraPositionState.animate(
-      update = CameraUpdateFactory.newLatLngBounds(bounds, 130),
+        update = CameraUpdateFactory.newLatLngBounds(bounds, 130),
     )
   }
-  
+
   GoogleMap(
-    modifier = Modifier.fillMaxSize().then(modifier),
-    cameraPositionState = cameraPositionState,
-    properties = MapProperties(),
-    uiSettings =
-    MapUiSettings(
-      zoomControlsEnabled = false,
-      zoomGesturesEnabled = false,
-      scrollGesturesEnabled = false,
-      scrollGesturesEnabledDuringRotateOrZoom = false,
-      mapToolbarEnabled = false,
-    )) {
-    Marker(
-      title = "Start",
-      state = markerStateStart,
-    )
-    Marker(
-      title = "Ziel",
-      state = markerStateEnd,
-    )
-  }
+      modifier = Modifier.fillMaxSize().then(modifier),
+      cameraPositionState = cameraPositionState,
+      properties = MapProperties(),
+      uiSettings =
+          MapUiSettings(
+              zoomControlsEnabled = false,
+              zoomGesturesEnabled = false,
+              scrollGesturesEnabled = false,
+              scrollGesturesEnabledDuringRotateOrZoom = false,
+              mapToolbarEnabled = false,
+          )) {
+        Marker(
+            title = "Start",
+            state = markerStateStart,
+        )
+        Marker(
+            title = "Ziel",
+            state = markerStateEnd,
+        )
+      }
 }
 
 @Composable
 fun MapDynamicTwoMarker(
-  modifier: Modifier = Modifier,
-  markerPositionStart: LatLng?,
-  markerPositionEnd: LatLng?,
-  currentLocation: LatLng
+    modifier: Modifier = Modifier,
+    markerPositionStart: LatLng?,
+    markerPositionEnd: LatLng?,
+    currentLocation: LatLng
 ) {
   val cameraPositionState = rememberCameraPositionState {
     position = CameraPosition.fromLatLngZoom(currentLocation, 15f)
   }
-  
+
   val mapSize = remember { mutableStateOf(IntSize(0, 0)) } // Track map dimensions
 
   val markerStateStart = remember { mutableStateOf<MarkerState?>(null) }
   val markerStateEnd = remember { mutableStateOf<MarkerState?>(null) }
-  
+
   LaunchedEffect(markerPositionStart) {
     markerStateStart.value = markerPositionStart?.let { MarkerState(position = it) }
-    if (markerPositionStart != null && markerPositionEnd == null){
+    if (markerPositionStart != null && markerPositionEnd == null) {
       cameraPositionState.animate(
-        update = CameraUpdateFactory.newLatLng(markerPositionStart),
-        durationMs = 1000
-      )
+          update = CameraUpdateFactory.newLatLng(markerPositionStart), durationMs = 1000)
     }
   }
   LaunchedEffect(markerPositionEnd) {
     markerStateEnd.value = markerPositionEnd?.let { MarkerState(position = it) }
-    if (markerPositionEnd != null && markerPositionStart == null){
+    if (markerPositionEnd != null && markerPositionStart == null) {
       cameraPositionState.animate(
-        update = CameraUpdateFactory.newLatLng(markerPositionEnd),
-        durationMs = 1000
-      )
+          update = CameraUpdateFactory.newLatLng(markerPositionEnd), durationMs = 1000)
     }
   }
-  
+
   Box(
-    modifier = Modifier
-      .fillMaxSize()
-      .onSizeChanged { newSize -> mapSize.value = newSize } // Capture map size
-  ) {
-    GoogleMap(
-      modifier = Modifier.fillMaxSize().then(modifier).clip(shape = RoundedCornerShape(8.dp)),
-      cameraPositionState = cameraPositionState,
-      properties = MapProperties(),
-      uiSettings = MapUiSettings(
-        zoomControlsEnabled = false,
-        zoomGesturesEnabled = false,
-        scrollGesturesEnabled = false,
-        scrollGesturesEnabledDuringRotateOrZoom = false,
-        mapToolbarEnabled = false,
-      )
-    ) {
-      markerStateStart.value?.let {
-        Marker(title = "Start", state = it)
+      modifier =
+          Modifier.fillMaxSize().onSizeChanged { newSize ->
+            mapSize.value = newSize
+          } // Capture map size
+      ) {
+        GoogleMap(
+            modifier = Modifier.fillMaxSize().then(modifier).clip(shape = RoundedCornerShape(8.dp)),
+            cameraPositionState = cameraPositionState,
+            properties = MapProperties(),
+            uiSettings =
+                MapUiSettings(
+                    zoomControlsEnabled = false,
+                    zoomGesturesEnabled = false,
+                    scrollGesturesEnabled = false,
+                    scrollGesturesEnabledDuringRotateOrZoom = false,
+                    mapToolbarEnabled = false,
+                )) {
+              markerStateStart.value?.let { Marker(title = "Start", state = it) }
+              markerStateEnd.value?.let { Marker(title = "Ziel", state = it) }
+            }
       }
-      markerStateEnd.value?.let {
-        Marker(title = "Ziel", state = it)
-      }
-    }
-  }
 
   // Move camera when positions & map size are available
   LaunchedEffect(markerPositionStart, markerPositionEnd, mapSize.value) {
     if (markerPositionStart != null && markerPositionEnd != null && mapSize.value.width > 0) {
-      val bounds = LatLngBounds.builder()
-        .include(markerPositionStart)
-        .include(markerPositionEnd)
-        .build()
+      val bounds =
+          LatLngBounds.builder().include(markerPositionStart).include(markerPositionEnd).build()
 
       val width = mapSize.value.width
       val height = mapSize.value.height
       val padding = (height * 0.2).toInt() // 20% of height as padding
 
       cameraPositionState.animate(
-        update = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding),
-        durationMs = 1000
-      )
+          update = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding),
+          durationMs = 1000)
     }
   }
 }

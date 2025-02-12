@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
@@ -81,15 +80,14 @@ fun GenerateTabs(tabs: List<String>, tabContents: List<@Composable (() -> Unit)?
           }
         }
 
-    HorizontalPager(
-        count = tabs.size, state = pagerState , verticalAlignment = Alignment.Top) {
-            page ->
-          if (page < 0 || page >= tabContents.size) {
-            Text(text = "Kein Inhalt in diesem Tab")
-          } else {
-            tabContents[page]?.invoke()
-          }
-        }
+    HorizontalPager(count = tabs.size, state = pagerState, verticalAlignment = Alignment.Top) { page
+      ->
+      if (page < 0 || page >= tabContents.size) {
+        Text(text = "Kein Inhalt in diesem Tab")
+      } else {
+        tabContents[page]?.invoke()
+      }
+    }
   }
 }
 

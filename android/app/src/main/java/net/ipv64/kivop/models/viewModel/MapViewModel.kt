@@ -23,22 +23,24 @@ class MapViewModel : ViewModel() {
   fun fetchStartCoordinates() {
     viewModelScope.launch(Dispatchers.IO) {
       val result = OpenCageGeocoder.getCoordinates(startAddress)
-      startCoordinates = if (result != null){
-        LatLng(result.first, result.second)
-      }else{
-        null
-      }
+      startCoordinates =
+          if (result != null) {
+            LatLng(result.first, result.second)
+          } else {
+            null
+          }
     }
   }
 
   fun fetchDestinationCoordinates() {
     viewModelScope.launch(Dispatchers.IO) {
       val result = OpenCageGeocoder.getCoordinates(destinationAddress)
-      destinationCoordinates = if (result != null){
-        LatLng(result.first, result.second)
-      }else{
-        null
-      }
+      destinationCoordinates =
+          if (result != null) {
+            LatLng(result.first, result.second)
+          } else {
+            null
+          }
     }
   }
 

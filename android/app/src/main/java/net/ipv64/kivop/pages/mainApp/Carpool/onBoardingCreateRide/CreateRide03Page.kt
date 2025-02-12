@@ -127,22 +127,25 @@ fun CreateRide03Page(
                     }
                   })
               LaunchedEffect(mapViewModel.startCoordinates, mapViewModel.destinationCoordinates) {
-                createSpecialRideViewModel.startLatitude = mapViewModel.startCoordinates?.latitude?.toFloat()
-                createSpecialRideViewModel.startLongitude = mapViewModel.startCoordinates?.longitude?.toFloat()
+                createSpecialRideViewModel.startLatitude =
+                    mapViewModel.startCoordinates?.latitude?.toFloat()
+                createSpecialRideViewModel.startLongitude =
+                    mapViewModel.startCoordinates?.longitude?.toFloat()
               }
               LaunchedEffect(mapViewModel.destinationCoordinates) {
-                createSpecialRideViewModel.destinationLatitude = mapViewModel.destinationCoordinates?.latitude?.toFloat()
-                createSpecialRideViewModel.destinationLongitude = mapViewModel.destinationCoordinates?.longitude?.toFloat()
+                createSpecialRideViewModel.destinationLatitude =
+                    mapViewModel.destinationCoordinates?.latitude?.toFloat()
+                createSpecialRideViewModel.destinationLongitude =
+                    mapViewModel.destinationCoordinates?.longitude?.toFloat()
               }
             }
             SpacerBetweenElements(16.dp)
-            if (mapViewModel.currentLocation != null){
+            if (mapViewModel.currentLocation != null) {
               MapDynamicTwoMarker(
-                modifier = Modifier.padding(bottom = 38.dp),
-                markerPositionStart = mapViewModel.startCoordinates,
-                markerPositionEnd = mapViewModel.destinationCoordinates,
-                currentLocation = mapViewModel.currentLocation!!
-              )
+                  modifier = Modifier.padding(bottom = 38.dp),
+                  markerPositionStart = mapViewModel.startCoordinates,
+                  markerPositionEnd = mapViewModel.destinationCoordinates,
+                  currentLocation = mapViewModel.currentLocation!!)
             }
           }
         }
@@ -174,7 +177,9 @@ fun CreateRide03Page(
               Button(
                   modifier = Modifier.fillMaxWidth(),
                   onClick = {
-                    Log.i("CreateRide03Page", "onClick: ${createSpecialRideViewModel.startLatitude}, ${createSpecialRideViewModel.startLongitude}, ${createSpecialRideViewModel.destinationLatitude}, ${createSpecialRideViewModel.destinationLongitude}")
+                    Log.i(
+                        "CreateRide03Page",
+                        "onClick: ${createSpecialRideViewModel.startLatitude}, ${createSpecialRideViewModel.startLongitude}, ${createSpecialRideViewModel.destinationLatitude}, ${createSpecialRideViewModel.destinationLongitude}")
                     if (createSpecialRideViewModel.starts != null &&
                         createSpecialRideViewModel.ends != null &&
                         createSpecialRideViewModel.startLatitude != null &&
