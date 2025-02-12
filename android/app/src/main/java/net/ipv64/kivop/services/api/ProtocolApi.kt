@@ -1,11 +1,13 @@
 package net.ipv64.kivop.services.api
-
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+
 import kotlinx.coroutines.withContext
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetRecordDTO
@@ -18,6 +20,8 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.json.JSONObject
+import java.util.UUID
+
 
 // ToDO LIste
 suspend fun getProtocolsApi(id: String): List<GetRecordDTO> =
@@ -182,3 +186,84 @@ suspend fun patchProtocol(id: String, lang: String, content: String): Response? 
     }
   }
 }
+
+
+
+
+suspend fun postExtendProtocol(content: String, lang: String): Flow<String> = flow {
+  val path = "ai/extend-record/$lang"
+  val token = auth.getSessionToken()
+
+  if (token.isNullOrEmpty()) {
+    Log.e("Fehler", "Kein Token verfügbar")
+    return@flow
+  }
+
+  val jsonBody = JSONObject().apply { put("content", content) }
+  val request = Request.Builder()
+    .url(BASE_URL + path)
+    .put(jsonBody.toString().toRequestBody("application/json".toMediaTypeOrNull()))
+    .addHeader("Authorization", "Bearer $token")
+    .build()
+
+
+  try {
+    okHttpClient.newCall(request).execute().use { response ->
+      if (!response.isSuccessful) {
+        Log.e("Fehler", "Request fehlgeschlagen: ${response.message} (Code: ${response.code})")
+        return@flow
+      }
+
+      response.body?.charStream()?.use { reader ->
+        reader.useLines { lines ->
+          for (line in lines) {
+            emit(line)
+          }
+        }
+      }
+    }
+  } catch (e: Exception) {
+    Log.e("Fehler", "Exception beim Request: ${e.message}", e)
+  }
+}.flowOn(Dispatchers.IO)
+
+
+
+
+suspend fun postGenerateSocialMediaPost(content: String, lang: String): Flow<String> = flow {
+  val path = "ai/generate-social-media-post/$lang"
+  val token = auth.getSessionToken()
+
+  if (token.isNullOrEmpty()) {
+    Log.e("Fehler", "Kein Token verfügbar")
+    return@flow
+  }
+
+  val jsonBody = JSONObject().apply { put("content", content) }
+  val request = Request.Builder()
+    .url(BASE_URL + path)
+    .put(jsonBody.toString().toRequestBody("application/json".toMediaTypeOrNull()))
+    .addHeader("Authorization", "Bearer $token")
+    .build()
+
+
+  try {
+    okHttpClient.newCall(request).execute().use { response ->
+      if (!response.isSuccessful) {
+        Log.e("Fehler", "Request fehlgeschlagen: ${response.message} (Code: ${response.code})")
+        return@flow
+      }
+
+      response.body?.charStream()?.use { reader ->
+        reader.useLines { lines ->
+          for (line in lines) {
+            emit(line)
+          }
+        }
+      }
+    }
+  } catch (e: Exception) {
+    Log.e("Fehler", "Exception beim Request: ${e.message}", e)
+  }
+}.flowOn(Dispatchers.IO)
+

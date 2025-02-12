@@ -167,7 +167,7 @@ fun PopCameraPermission(
 
   Log.i("PermissionState", "PermissionState: ${permissionState.status}")
 
-  // 🚀 Berechtigungsanfrage direkt ausführen, wenn notwendig
+  // Berechtigungsanfrage direkt ausführen, wenn notwendig
   LaunchedEffect(permissionState.status) {
     if (!permissionState.status.isGranted) {
       permissionState.launchPermissionRequest() // Android-Standardanfrage immer direkt starten
