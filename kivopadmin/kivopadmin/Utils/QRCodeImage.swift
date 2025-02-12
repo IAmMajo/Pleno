@@ -1,9 +1,4 @@
-//
-//  QRCodeImage.swift
-//  kivopadmin
-//
-//  Created by Lennart Guggenberger on 10.12.24.
-//
+// This file is licensed under the MIT-0 License.
 
 import SwiftUI
 import CoreImage.CIFilterBuiltins
