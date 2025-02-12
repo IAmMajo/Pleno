@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -43,6 +45,7 @@ import net.ipv64.kivop.ui.theme.Text_secondary
 @Composable
 fun PosterInfoCard(
     poster: PosterResponseDTO,
+    image: String? = null,
     summary: PosterSummaryResponseDTO?,
     showMaps: Boolean = true,
     clickable: Boolean = true,
@@ -51,10 +54,12 @@ fun PosterInfoCard(
 ) {
   // Format image string
   val base64ImageByteArray = remember { mutableStateOf<ByteArray?>(null) }
-  LaunchedEffect(poster.image) {
+  LaunchedEffect(image) {
     withContext(Dispatchers.IO) {
-      val decodedImage = poster.image.substringAfter("base64").let { Base64.decode(it) }
-      base64ImageByteArray.value = decodedImage
+      if (image != null) {
+        val decodedImage = image.substringAfter("base64").let { Base64.decode(it) }
+        base64ImageByteArray.value = decodedImage
+      }
     }
   }
   val clickableModifier = if (clickable) Modifier.clickable { onPosterClick() } else Modifier
@@ -68,14 +73,23 @@ fun PosterInfoCard(
               .padding(12.dp),
   ) {
     Row() {
-      AsyncImage(
-          model = base64ImageByteArray.value,
-          contentDescription = null,
+      // image Box
+      Box(
           modifier =
               Modifier.width(100.dp)
                   .aspectRatio(24f / 36f)
                   .background(Color.LightGray, shape = RoundedCornerShape(8.dp)),
-      )
+          contentAlignment = Alignment.Center) {
+            // show loading indicator while image is loading
+            if (base64ImageByteArray.value == null) {
+              CircularProgressIndicator()
+            }
+            // AsyncImage to load image from base64 string
+            AsyncImage(
+                model = base64ImageByteArray.value,
+                contentDescription = null,
+            )
+          }
       Spacer(modifier = Modifier.width(12.dp))
       Column() {
         Text(text = poster.name, style = MaterialTheme.typography.headlineSmall)

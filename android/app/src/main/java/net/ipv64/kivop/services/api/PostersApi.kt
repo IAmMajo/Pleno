@@ -1,5 +1,6 @@
 package net.ipv64.kivop.services.api
 
+import android.util.Base64
 import android.util.Log
 import com.example.kivopandriod.services.stringToLocalDateTime
 import com.google.gson.Gson
@@ -50,8 +51,7 @@ suspend fun getPostersApi(): List<PosterResponseDTO> =
               val id = poster.get("id").asString.let { UUID.fromString(it) }
               val name = poster.get("name").asString
               val description = poster.get("description").asString
-              val image = poster.get("image").asString
-              PosterResponseDTO(id, name, description, image)
+              PosterResponseDTO(id, name, description)
             }
           } else {
             println("Fehler: Leere Antwort erhalten.")
@@ -94,9 +94,8 @@ suspend fun getPosterByIDApi(id: String): PosterResponseDTO? =
             val id = poster.get("id").asString.let { UUID.fromString(it) }
             val name = poster.get("name").asString
             val description = poster.get("description").asString
-            val image = poster.get("image").asString
 
-            PosterResponseDTO(id, name, description, image)
+            PosterResponseDTO(id, name, description)
           } else {
             println("Fehler: Leere Antwort erhalten.")
             null
@@ -196,7 +195,6 @@ suspend fun getPosterLocationsByIDApi(posterID: String): List<PosterPositionResp
               val removedBy = posterPosition.get("removedBy")?.asString
               val removedAt =
                   posterPosition.get("removedAt")?.asString?.let { stringToLocalDateTime(it) }
-              val image = posterPosition.get("image")?.asString
               val responsibleUsersArray = posterPosition.get("responsibleUsers").asJsonArray
               val responsibleUsers =
                   responsibleUsersArray.map { user ->
@@ -218,7 +216,6 @@ suspend fun getPosterLocationsByIDApi(posterID: String): List<PosterPositionResp
                   expiresAt,
                   removedBy,
                   removedAt,
-                  image,
                   responsibleUsers,
                   status,
               )
@@ -276,7 +273,6 @@ suspend fun getPosterLocationByIDApi(
             val removedBy = posterLocation.get("removedBy")?.asString
             val removedAt =
                 posterLocation.get("removedAt")?.asString?.let { stringToLocalDateTime(it) }
-            val image = posterLocation.get("image")?.asString
             val responsibleUsersArray = posterLocation.get("responsibleUsers").asJsonArray
             val responsibleUsers =
                 responsibleUsersArray.map { user ->
@@ -298,7 +294,6 @@ suspend fun getPosterLocationByIDApi(
                 expiresAt,
                 removedBy,
                 removedAt,
-                image,
                 responsibleUsers,
                 status,
             )
@@ -417,5 +412,89 @@ suspend fun putReportDamagePoster(locationID: String, base64: String): Boolean =
       } catch (e: Exception) {
         Log.e("put", "Fehler: ${e.message}")
         false
+      }
+    }
+
+suspend fun getPosterPositionImage(locationID: String): String? =
+    withContext(Dispatchers.IO) {
+      val path = "posters/positions/$locationID/image"
+
+      val token = auth.getSessionToken()
+
+      if (token.isNullOrEmpty()) {
+        println("Fehler: Kein Token verfügbar")
+        return@withContext null
+      }
+
+      val request =
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .get()
+              .build()
+
+      return@withContext try {
+        val response = okHttpClient.newCall(request).execute()
+        if (response.isSuccessful) {
+          val responseBody = response.body?.bytes()
+          if (responseBody != null) {
+            var base64String = Base64.encodeToString(responseBody, Base64.DEFAULT)
+            // remove unwanted characters
+            base64String = base64String.replace("\n", "")
+
+            return@withContext base64String
+          } else {
+            println("Fehler: Leere Antwort erhalten.")
+            null
+          }
+        } else {
+          println("Fehler bei der Anfrage: ${response.message}")
+          null
+        }
+      } catch (e: Exception) {
+        println("Fehler: ${e.message}")
+        null
+      }
+    }
+
+suspend fun getPosterImage(posterID: String): String? =
+    withContext(Dispatchers.IO) {
+      val path = "posters/$posterID/image"
+
+      val token = auth.getSessionToken()
+
+      if (token.isNullOrEmpty()) {
+        println("Fehler: Kein Token verfügbar")
+        return@withContext null
+      }
+
+      val request =
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .get()
+              .build()
+
+      return@withContext try {
+        val response = okHttpClient.newCall(request).execute()
+        if (response.isSuccessful) {
+          val responseBody = response.body?.bytes()
+          if (responseBody != null) {
+            var base64String = Base64.encodeToString(responseBody, Base64.DEFAULT)
+            // remove unwanted characters
+            base64String = base64String.replace("\n", "")
+
+            return@withContext base64String
+          } else {
+            println("Fehler: Leere Antwort erhalten.")
+            null
+          }
+        } else {
+          println("Fehler bei der Anfrage: ${response.message}")
+          null
+        }
+      } catch (e: Exception) {
+        println("Fehler: ${e.message}")
+        null
       }
     }

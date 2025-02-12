@@ -10,10 +10,10 @@ import androidx.lifecycle.viewModelScope
 import java.util.UUID
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterPositionResponseDTO
-import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterPositionStatus
 import net.ipv64.kivop.models.Address
 import net.ipv64.kivop.services.api.OpenCageGeocoder.getAddressFromLatLngApi
 import net.ipv64.kivop.services.api.getPosterLocationByIDApi
+import net.ipv64.kivop.services.api.getPosterPositionImage
 import net.ipv64.kivop.services.api.getProfileImage
 import net.ipv64.kivop.services.api.putHangPoster
 import net.ipv64.kivop.services.api.putReportDamagePoster
@@ -22,6 +22,7 @@ import net.ipv64.kivop.services.api.putTakeDownPoster
 class PosterDetailedViewModel(private val posterId: String, private val locationId: String) :
     ViewModel() {
   var poster by mutableStateOf<PosterPositionResponseDTO?>(null)
+  var posterImage by mutableStateOf<String?>(null)
   var posterAddress by mutableStateOf<Address?>(null)
   var userImages by mutableStateOf<Map<UUID, String?>>(emptyMap())
 
@@ -41,6 +42,10 @@ class PosterDetailedViewModel(private val posterId: String, private val location
         isLoading = false
       }
     }
+  }
+
+  fun fetchPosterImage() {
+    viewModelScope.launch { posterImage = getPosterPositionImage(locationId) }
   }
 
   suspend fun fetchAddress(lat: Double, long: Double): Address? {
@@ -69,7 +74,7 @@ class PosterDetailedViewModel(private val posterId: String, private val location
   suspend fun hangPoster(base64: String): Boolean {
     Log.i("test", "PosterDetailedPage: $base64")
     if (putHangPoster(poster?.id.toString(), base64)) {
-      poster = poster?.copy(status = PosterPositionStatus.hangs, image = base64)
+      posterImage = base64
       return true
     }
     return false
@@ -78,7 +83,7 @@ class PosterDetailedViewModel(private val posterId: String, private val location
   suspend fun takeOffPoster(base64: String): Boolean {
     Log.i("test", "PosterDetailedPage: $base64")
     if (putTakeDownPoster(poster?.id.toString(), base64)) {
-      poster = poster?.copy(status = PosterPositionStatus.takenDown, image = base64)
+      posterImage = base64
       return true
     }
     return false
@@ -87,7 +92,7 @@ class PosterDetailedViewModel(private val posterId: String, private val location
   suspend fun reportDamage(base64: String): Boolean {
     Log.i("test", "PosterDetailedPage: $base64")
     if (putReportDamagePoster(poster?.id.toString(), base64)) {
-      poster = poster?.copy(status = PosterPositionStatus.damaged, image = base64)
+      posterImage = base64
       return true
     }
     return false
@@ -95,6 +100,7 @@ class PosterDetailedViewModel(private val posterId: String, private val location
 
   init {
     fetchPosterData()
+    fetchPosterImage()
   }
 }
 

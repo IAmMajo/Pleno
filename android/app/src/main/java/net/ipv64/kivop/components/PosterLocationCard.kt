@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,15 +59,18 @@ import net.ipv64.kivop.ui.theme.Text_prime_light
 @Composable
 fun PosterLocationCard(
     poster: PosterPositionResponseDTO,
+    image: String? = null,
     userViewModel: UserViewModel,
     address: String? = null,
     onClick: () -> Unit
 ) {
   val base64ImageByteArray = remember { mutableStateOf<ByteArray?>(null) }
-  LaunchedEffect(poster.image) {
+  LaunchedEffect(image) {
     withContext(Dispatchers.IO) {
-      val decodedImage = poster.image?.substringAfter("base64")?.let { Base64.decode(it) }
-      base64ImageByteArray.value = decodedImage
+      if (image != null) {
+        val decodedImage = image.substringAfter("base64").let { Base64.decode(it) }
+        base64ImageByteArray.value = decodedImage
+      }
     }
   }
 
@@ -83,24 +87,30 @@ fun PosterLocationCard(
               modifier = Modifier.fillMaxWidth(),
               verticalAlignment = Alignment.CenterVertically,
           ) {
-            if (poster.image == null) {
-              IconBox(
-                  icon = ImageVector.vectorResource(R.drawable.ic_image),
-                  height = 60.dp,
-                  backgroundColor = Primary_20,
-                  tint = Primary)
-            } else {
-              AsyncImage(
-                  model = base64ImageByteArray.value,
-                  contentDescription = null,
-                  contentScale = ContentScale.Crop,
-                  modifier =
-                      Modifier.clip(shape = RoundedCornerShape(8.dp))
-                          .width(60.dp)
-                          .aspectRatio(1f)
-                          .background(Color.LightGray),
-              )
-            }
+            Box(
+                Modifier.size(60.dp).clip(RoundedCornerShape(8.dp)).background(Primary_20),
+                contentAlignment = Alignment.Center) {
+                  if (image == null && poster.status == PosterPositionStatus.toHang) {
+                    IconBox(
+                        icon = ImageVector.vectorResource(R.drawable.ic_image),
+                        height = 60.dp,
+                        backgroundColor = Primary_20,
+                        tint = Primary)
+                  } else if (image == null) {
+                    CircularProgressIndicator()
+                  } else {
+                    AsyncImage(
+                        model = base64ImageByteArray.value,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier =
+                            Modifier.clip(shape = RoundedCornerShape(8.dp))
+                                .width(60.dp)
+                                .aspectRatio(1f)
+                                .background(Color.LightGray),
+                    )
+                  }
+                }
             SpacerBetweenElements(8.dp)
             Column(modifier = Modifier.weight(1f)) {
               if (address != null) {
@@ -211,7 +221,6 @@ fun PosterLocationCardPreview() {
               expiresAt = LocalDateTime.now(),
               removedBy = null,
               removedAt = null,
-              image = null,
               responsibleUsers =
                   List(size = 3, init = { ResponsibleUsersDTO(UUID.randomUUID(), "Test") }),
               status = PosterPositionStatus.hangs,
