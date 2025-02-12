@@ -7,36 +7,59 @@ import SwiftUI
 // ViewModel für die Live-Ansicht einer aktiven Abstimmung.
 class AktivViewModel: ObservableObject {
     
+    // Die aktuelle Abstimmung, für die das Live-Tracking aktiv ist.
     public let voting: GetVotingDTO
     
+    // Live-Status der Abstimmung (z. B. "1 von 3 hat abgestimmt").
     @Published var liveStatus: String?
+    
+    // Fehlermeldung, falls beim Laden oder Beenden der Abstimmung etwas schiefgeht.
     @Published var errorMessage: String?
+    
+    // Status, ob die Abstimmung gerade geschlossen wird (um doppelte Anfragen zu vermeiden).
     @Published var isClosing = false
+    
+    // Fortschritt der Abstimmung (zwischen 0 und 1).
     @Published var progress: Double = 0
+    
+    // Anzahl der bisherigen Stimmen.
     @Published var value: Int = 0
+    
+    // Gesamtanzahl der möglichen Stimmen.
     @Published var total: Int = 0
     
+    // Aktion, die ausgeführt wird, wenn die Abstimmung geschlossen oder verlassen wird.
     let onBack: () -> Void
+    
+    // WebSocket-Service für die Live-Übertragung der Abstimmungsdaten.
     private let webSocketService = WebSocketService()
 
+    // Initialisiert das ViewModel mit einer bestimmten Abstimmung.
     init(voting: GetVotingDTO, onBack: @escaping () -> Void) {
         self.voting = voting
         self.onBack = onBack
     }
 
-    // Baut eine WebSocket-Verbindung auf, um Live-Daten zur Abstimmung zu erhalten.
+    // MARK: - WebSocket-Verbindung
+
+    /// Baut eine WebSocket-Verbindung auf, um Live-Daten zur Abstimmung zu erhalten.
     func connectWebSocket() {
-        guard voting.iVoted else { return } // Verbindung nur herstellen, wenn der Nutzer abgestimmt hat
+        // Verbindung nur herstellen, wenn der Nutzer selbst abgestimmt hat.
+        guard voting.iVoted else { return }
         webSocketService.connect(to: voting.id)
+        
+        // Reagiert auf Live-Updates der Abstimmung.
         webSocketService.$liveStatus
             .receive(on: DispatchQueue.main)
             .assign(to: &$liveStatus)
     }
 
-    // Trennt die WebSocket-Verbindung.
+    // Trennt die WebSocket-Verbindung, wenn sie nicht mehr benötigt wird.
     func disconnectWebSocket() {
         webSocketService.disconnect()
     }
+
+    // MARK: - Live-Datenverarbeitung
 
     // Aktualisiert den Fortschritt der Abstimmung basierend auf den erhaltenen Live-Daten.
     func updateProgress() {
@@ -53,11 +76,21 @@ class AktivViewModel: ObservableObject {
                     self.progress = Double(currentValue) / Double(totalValue)
                 }
             }
+
+            // 🟢 Setzt den `liveStatus`-Text in das gewünschte Format:
+            // - "1 von 3 hat abgestimmt" für Singular
+            // - "2 von 3 haben abgestimmt" für Plural
+            DispatchQueue.main.async {
+                self.liveStatus = "\(currentValue) von \(totalValue) \(currentValue == 1 ? "hat" : "haben") abgestimmt"
+            }
         }
     }
 
+    // MARK: - Abstimmung beenden
+
     // Beendet die Abstimmung und trennt die WebSocket-Verbindung.
     func closeVoting() {
+        // Falls die Abstimmung bereits geschlossen wird, keine doppelte Anfrage senden.
         guard !isClosing else { return }
         isClosing = true
 
@@ -67,7 +100,7 @@ class AktivViewModel: ObservableObject {
                 switch result {
                 case .success:
                     self.webSocketService.disconnect()
-                    self.onBack() // Zurück zur vorherigen Ansicht
+                    self.onBack() // Zurück zur vorherigen Ansicht wechseln.
                 case .failure(let error):
                     self.errorMessage = "Fehler beim Schließen: \(error.localizedDescription)"
                 }

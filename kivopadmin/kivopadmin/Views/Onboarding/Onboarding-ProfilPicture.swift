@@ -2,14 +2,16 @@
 import SwiftUI
 import UIKit
 
+// Ansicht für die Auswahl eines Profilbildes während des Onboardings.
 struct Onboarding_ProfilePicture: View {
-    @Binding var selectedImage: UIImage?
-    @State private var showImagePicker = false
-    @State private var imagePickerType: ImagePickerType? // Optional, um das Sheet korrekt zu kontrollieren
+    @Binding var selectedImage: UIImage? // Das ausgewählte Bild wird nach außen weitergegeben
+    @State private var showImagePicker = false // Steuert die Anzeige des Image Pickers
+    @State private var imagePickerType: ImagePickerType? // Optional, um den Typ der Bildauswahl zu kontrollieren
 
     var body: some View {
         NavigationStack {
             ZStack {
+                // Hintergrundfarbe der Ansicht
                 Color(UIColor.systemBackground)
                     .edgesIgnoringSafeArea(.all)
 
@@ -21,18 +23,18 @@ struct Onboarding_ProfilePicture: View {
                                 .resizable()
                                 .scaledToFill()
                                 .frame(width: 200, height: 200)
-                                .clipShape(Circle())
+                                .clipShape(Circle()) // Bild in Kreisform zuschneiden
                         } else {
                             Circle()
                                 .fill(Color.gray.opacity(0.3))
-                                .frame(width: 200, height: 200)
+                                .frame(width: 200, height: 200) // Platzhalter, falls kein Bild vorhanden ist
                         }
                     }
 
-                    // Kamera- und Galerie-Aktionen
+                    // Auswahlmöglichkeiten für Kamera oder Galerie
                     HStack(spacing: 50) {
                         Button(action: {
-                            imagePickerType = ImagePickerType(type: .camera)
+                            imagePickerType = ImagePickerType(type: .camera) // Kamera als Quelle setzen
                         }) {
                             VStack {
                                 Image(systemName: "camera.fill")
@@ -50,7 +52,7 @@ struct Onboarding_ProfilePicture: View {
                         }
 
                         Button(action: {
-                            imagePickerType = ImagePickerType(type: .photoLibrary)
+                            imagePickerType = ImagePickerType(type: .photoLibrary) // Galerie als Quelle setzen
                         }) {
                             VStack {
                                 Image(systemName: "photo.fill.on.rectangle.fill")
@@ -70,37 +72,39 @@ struct Onboarding_ProfilePicture: View {
                 }
                 .padding()
             }
+            // Präsentiert das ImagePicker-Modal basierend auf dem ausgewählten Typ (Kamera oder Galerie)
             .sheet(item: $imagePickerType) { pickerType in
                 ImagePicker(selectedImage: $selectedImage, sourceType: pickerType.type)
             }
         }
     }
 
-    // MARK: - Wrapper für SourceType
+    // MARK: - Hilfsstruktur zur Speicherung des Quelltyps für den ImagePicker
     struct ImagePickerType: Identifiable {
-        let id = UUID()
-        let type: UIImagePickerController.SourceType
+        let id = UUID() // Eindeutige Identifikation für das Sheet
+        let type: UIImagePickerController.SourceType // Kamera oder Galerie
     }
 
-    // MARK: - ImagePicker
+    // MARK: - ImagePicker: Wrapper für die native UIImagePickerController-Nutzung
     struct ImagePicker: UIViewControllerRepresentable {
-        @Binding var selectedImage: UIImage?
-        var sourceType: UIImagePickerController.SourceType
+        @Binding var selectedImage: UIImage? // Übergibt das ausgewählte Bild zurück
+        var sourceType: UIImagePickerController.SourceType // Typ der Bildquelle
 
         func makeUIViewController(context: Context) -> UIImagePickerController {
             let picker = UIImagePickerController()
             picker.delegate = context.coordinator
             picker.sourceType = sourceType
-            picker.allowsEditing = true
+            picker.allowsEditing = true // Ermöglicht die Bearbeitung des Bildes
             return picker
         }
 
         func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
 
         func makeCoordinator() -> Coordinator {
-            Coordinator(self)
+            Coordinator(self) // Erstellt einen Koordinator zur Verarbeitung der Bildauswahl
         }
 
+        // MARK: - Koordinator zur Handhabung der Bildauswahl
         class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
             let parent: ImagePicker
 
@@ -108,13 +112,15 @@ struct Onboarding_ProfilePicture: View {
                 self.parent = parent
             }
 
+            // Methode wird aufgerufen, wenn ein Bild ausgewählt wurde
             func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
                 if let image = info[.editedImage] as? UIImage ?? info[.originalImage] as? UIImage {
-                    parent.selectedImage = image
+                    parent.selectedImage = image // Speichert das ausgewählte Bild
                 }
-                picker.dismiss(animated: true)
+                picker.dismiss(animated: true) // Schließt den Picker
             }
 
+            // Methode wird aufgerufen, wenn der Benutzer den Picker abbricht
             func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
                 picker.dismiss(animated: true)
             }

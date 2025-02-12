@@ -1,11 +1,3 @@
-//
-//  ClubSetting.swift
-//  kivopadmin
-//
-//  Created by Amine Ahamri on 11.02.25.
-//
-
-
 import Foundation
 
 struct ClubSetting: Identifiable, Codable {

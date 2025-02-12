@@ -149,12 +149,13 @@ struct Onboarding_Login: View {
             }
         }
     }
-
+    // Speichert die Anmeldedaten sicher in der Keychain.
     private func saveCredentialsToKeychain() {
         KeychainHelper.save(key: "email", value: email)
         KeychainHelper.save(key: "password", value: password)
     }
 
+    // Versucht automatisch eine Anmeldung mit gespeicherten Keychain-Daten.
     private func attemptLoginWithKeychain() {
         if let savedEmail = KeychainHelper.load(key: "email"),
            let savedPassword = KeychainHelper.load(key: "password") {
@@ -164,6 +165,7 @@ struct Onboarding_Login: View {
         }
     }
 
+    // Startet FaceID / TouchID zur Authentifizierung, falls aktiviert.
     private func triggerFaceID() {
         guard isKeychainAvailable, !faceIDTriggered, isActive else { return }
         faceIDTriggered = true
@@ -176,6 +178,7 @@ struct Onboarding_Login: View {
         }
     }
 
+    // Überprüft, ob Anmeldedaten in der Keychain gespeichert sind.
     private func checkKeychainAvailability() {
         isKeychainAvailable = KeychainHelper.load(key: "email") != nil && KeychainHelper.load(key: "password") != nil
         if isKeychainAvailable {
@@ -185,6 +188,7 @@ struct Onboarding_Login: View {
         }
     }
 
+    // Erstellt ein wiederverwendbares Eingabefeld für Text und sichere Eingaben.
     private func inputField(title: String, text: Binding<String>, isSecure: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
