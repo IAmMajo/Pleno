@@ -3,7 +3,6 @@ package net.ipv64.kivop.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ModalBottomSheetDefaults.properties
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -92,7 +91,7 @@ fun MapDoubleMarker(modifier: Modifier = Modifier,markerPositionStart: LatLng,ma
 }
 
 @Composable
-fun MapDynamic(
+fun MapDynamicTwoMarker(
   modifier: Modifier = Modifier,
   markerPositionStart: LatLng?,
   markerPositionEnd: LatLng?,

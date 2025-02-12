@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.components.DebouncedTextFieldCustomInputField
-import net.ipv64.kivop.components.MapDynamic
+import net.ipv64.kivop.components.MapDynamicTwoMarker
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.components.TextFieldStatus
@@ -137,7 +137,7 @@ fun CreateRide03Page(
             }
             SpacerBetweenElements(16.dp)
             if (mapViewModel.currentLocation != null){
-              MapDynamic(
+              MapDynamicTwoMarker(
                 modifier = Modifier.padding(bottom = 38.dp),
                 markerPositionStart = mapViewModel.startCoordinates,
                 markerPositionEnd = mapViewModel.destinationCoordinates,
