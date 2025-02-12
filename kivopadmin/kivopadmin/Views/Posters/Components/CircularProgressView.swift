@@ -52,38 +52,37 @@ struct CircularProgressView: View {
                     .font(.subheadline)
                     .foregroundStyle(.black.opacity(0.6))
             }
-            
+            if status != .hangs {
+                Text("Abgehangen")
+                    .font(.subheadline)
+                    .foregroundStyle(.black.opacity(0.6))
+            }
             ZStack {
                 Circle()
                     .stroke(
                         .gray.opacity(0.3),
-                        lineWidth: 7
+                        lineWidth: 4
                     )
                 Circle()
                     .trim(from: 0, to: progress)
                     .stroke(
                         getColor,
                         style: StrokeStyle(
-                            lineWidth: 7,
+                            lineWidth: 4,
                             lineCap: .round
                         )
                     )
                     .rotationEffect(.degrees(-90))
                     .overlay(
                         Text(overlayText)
-                            .font(.system(size: 14))
+                            .font(.system(size: 10))
                             .fontWeight(.semibold)
                             .foregroundStyle(Color(UIColor.label).opacity(0.6).mix(with: getColor, by: 0.6))
                     )
 
             }
-            .frame(maxWidth: 35, maxHeight: 35)
+            .frame(maxWidth: 25, maxHeight: 35)
             .padding(.bottom, 5)
-            if status != .hangs {
-                Text("Abgehangen")
-                    .font(.subheadline)
-                    .foregroundStyle(.black.opacity(0.6))
-            } 
         }
 
 

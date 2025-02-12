@@ -4,6 +4,9 @@
     "" : {
 
     },
+    " " : {
+
+    },
     "   **Newsletterdaten**\n\nWenn Sie den auf der App angebotenen Newsletter beziehen möchten, benötigen wir von Ihnen eine E-Mail-Adresse sowie Informationen, welche uns die Überprüfung gestatten, dass Sie der Inhaber der angegebenen E-Mail-Adresse sind und mit dem Empfang des Newsletters einverstanden sind. Weitere Daten werden nicht bzw. nur auf freiwilliger Basis erhoben. Diese Daten verwenden wir ausschließlich für den Versand der angeforderten Informationen und geben diese nicht an Dritte weiter.\n\nDie Verarbeitung der in das Newsletteranmeldeformular eingegebenen Daten erfolgt ausschließlich auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Die erteilte Einwilligung zur Speicherung der Daten, der E-Mail-Adresse sowie deren Nutzung zum Versand des Newsletters können Sie jederzeit widerrufen, etwa über den „Austragen“-Link im Newsletter. Die Rechtmäßigkeit der bereits erfolgten Datenverarbeitungsvorgänge bleibt vom Widerruf unberührt.\n\nDie von Ihnen zum Zwecke des Newsletter-Bezugs bei uns hinterlegten Daten werden von uns bis zu Ihrer Austragung aus dem Newsletter bei uns gespeichert und nach der Abbestellung des Newsletters oder nach Zweckfortfall aus der Newsletterverteilerliste gelöscht. Wir behalten uns vor, E-Mail-Adressen aus unserem Newsletterverteiler nach eigenem Ermessen im Rahmen unseres berechtigten Interesses nach Art. 6 Abs. 1 lit. f DSGVO zu löschen oder zu sperren.\n\nDaten, die zu anderen Zwecken bei uns gespeichert wurden, bleiben hiervon unberührt." : {
       "localizations" : {
         "de" : {
@@ -304,6 +307,9 @@
           }
         }
       }
+    },
+    "⚠️ %@ nicht unterstützt" : {
+
     },
     "1. Datenschutz auf einen Blick" : {
       "localizations" : {
@@ -906,6 +912,7 @@
       }
     },
     "Admin:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1261,6 +1268,7 @@
       }
     },
     "Änderungen speichern" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1657,7 +1665,11 @@
         }
       }
     },
+    "Benutzername" : {
+
+    },
     "Benutzername:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1680,6 +1692,7 @@
       }
     },
     "Benutzernamen eingeben" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1834,6 +1847,7 @@
       }
     },
     "Bild löschen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2410,6 +2424,7 @@
       }
     },
     "E-Mail:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2432,6 +2447,7 @@
       }
     },
     "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2897,6 +2913,7 @@
       }
     },
     "Fehler beim Speichern der Änderungen." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2917,6 +2934,9 @@
           }
         }
       }
+    },
+    "Fehler beim Speichern." : {
+
     },
     "Fehler: %@" : {
       "localizations" : {
@@ -3719,6 +3739,9 @@
         }
       }
     },
+    "Lade Einstellungen..." : {
+
+    },
     "Lade Ergebnisse..." : {
       "localizations" : {
         "de" : {
@@ -4334,7 +4357,11 @@
         }
       }
     },
+    "Mit" : {
+
+    },
     "Mit " : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4426,6 +4453,7 @@
       }
     },
     "Möchten Sie dieses Konto wirklich löschen?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4493,6 +4521,9 @@
           }
         }
       }
+    },
+    "Möchtest du dieses Konto wirklich löschen?" : {
+
     },
     "Nach Frage suchen" : {
       "localizations" : {
@@ -4605,6 +4636,7 @@
       }
     },
     "Name bearbeiten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5493,7 +5525,7 @@
         }
       }
     },
-    "Pleno " : {
+    "Pleno" : {
 
     },
     "Positionen" : {
@@ -5785,6 +5817,7 @@
       }
     },
     "Rolle" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5917,7 +5950,11 @@
         }
       }
     },
+    "Sie müssen zuerst an der Abstimmung teilnehmen, um den Live-Stand zu sehen." : {
+
+    },
     "Sie müssen zuerst an der Umfrage teilnehmen, um den Live-Stand zu sehen." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6674,6 +6711,7 @@
       }
     },
     "Unsupported datatype" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7009,6 +7047,7 @@
       }
     },
     "WIP" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7031,6 +7070,7 @@
       }
     },
     "WIP bearbeiten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7096,7 +7136,11 @@
         }
       }
     },
+    "zu einer verbesserten" : {
+
+    },
     "zu einer verbesserten " : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
