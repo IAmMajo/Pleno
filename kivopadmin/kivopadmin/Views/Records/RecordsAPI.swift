@@ -18,7 +18,7 @@ class RecordsAPI {
         guard let url = URL(string: "https://kivop.ipv64.net/ai/" + endpoint) else { return }
         
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         let requestBody: [String: String] = ["content": content]
