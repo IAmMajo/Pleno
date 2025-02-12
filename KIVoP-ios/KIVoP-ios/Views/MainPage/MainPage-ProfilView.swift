@@ -1,200 +1,165 @@
+// This file is licensed under the MIT-0 License.
+
 import SwiftUI
-import AuthServiceDTOs
 
 struct MainPage_ProfilView: View {
-    // Benutzerinformationen
-    @State private var name: String = ""
-    @State private var shortName: String = "??"
-    @State private var profileImage: UIImage? = nil
-
-    // Vereinsinformationen (gehardcoded)
-    private let clubName: String = "Name des Vereins der manchmal auch sehr lange werden kann e.V."
-    private let clubShortName: String = "VL"
-
-    // UI-Zustände
-    @State private var showSignOutConfirmation = false
-    @State private var showDeleteAccountAlert = false
-    @State private var navigateToLogin = false
-    @State private var isLoading = true
-    @State private var errorMessage: String? = nil
+    @StateObject private var viewModel = MainPageProfilViewModel() // ViewModel zur Verwaltung der Profildaten
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
                 Spacer().frame(height: 10)
 
-                // Vereinslogo und Name
-                VStack {
-                    Circle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 80, height: 80)
-                        .overlay(Text(clubShortName).font(.title).foregroundColor(.white))
-
-                    Text(clubName)
-                        .font(.subheadline)
-                        .bold()
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 5)
-
-                    Divider()
-                        .padding(.vertical, 10)
-                }
-                .padding(.horizontal)
-
-                // Profilbild oder ShortName anzeigen
-                VStack {
-                    if let profileImage = profileImage {
-                        Image(uiImage: profileImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 80, height: 80)
-                            .clipShape(Circle())
-                    } else {
-                        Circle()
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(width: 80, height: 80)
-                            .overlay(Text(shortName).font(.title).foregroundColor(.white))
-                    }
-
-                    NavigationLink(destination: MainPage_ProfilView_ProfilPicture()) {
-                        Text("Bearbeiten")
-                            .font(.footnote)
-                            .foregroundColor(.accentColor)
-                    }
-                }
-
-                // Benutzerinformationen
-                VStack(alignment: .leading, spacing: 10) {
-                    NavigationLink(destination: MainPage_ProfilView_Name()) {
-                        HStack {
-                            Text("Name")
-                            Spacer()
-                            Text(name.isEmpty ? "Lade Benutzername..." : name)
-                                .foregroundColor(Color.secondary)
-                        }
-                    }
-                    .padding()
-                    .background(Color(UIColor.systemBackground).opacity(0.8))
-                    .cornerRadius(10)
-
-                    Text("PASSWORT")
-                        .font(.footnote)
-                        .foregroundColor(Color.secondary)
-                        .padding(.top, 10)
-
-                    NavigationLink(destination: MainPage_ProfilView_Password()) {
-                        HStack {
-                            Text("Passwort ändern")
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(Color.secondary)
-                        }
-                        .padding()
-                        .background(Color(UIColor.systemBackground).opacity(0.8))
-                        .cornerRadius(10)
-                    }
-
-                    Text("AKTIONEN")
-                        .font(.footnote)
-                        .foregroundColor(Color.secondary)
-                        .padding(.top, 20)
-
-                    // Abmelden-Button
-                    Button(action: {
-                        showSignOutConfirmation = true
-                    }) {
-                        Text("Abmelden")
-                            .foregroundColor(.red)
-                            .frame(maxWidth: .infinity)
-                            .padding(15)
-                            .background(Color(UIColor.systemBackground).opacity(0.8))
-                            .cornerRadius(10)
-                    }
-                    .confirmationDialog("Wirklich abmelden?", isPresented: $showSignOutConfirmation, titleVisibility: .visible) {
-                        Button("Abmelden", role: .destructive) {
-                            MainPageAPI.logoutUser()
-                            navigateToLogin = true
-                        }
-                        Button("Abbrechen", role: .cancel) {}
-                    }
-
-                    Spacer().frame(height: 10)
-
-                    // Account löschen-Button
-                    Button(action: {
-                        showDeleteAccountAlert = true
-                    }) {
-                        Text("Account löschen")
-                            .frame(maxWidth: .infinity)
-                            .padding(15)
-                            .background(Color.red)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                    .alert("Möchtest du deinen Account wirklich löschen?", isPresented: $showDeleteAccountAlert) {
-                        Button("Abbrechen", role: .cancel) {}
-                        Button("Löschen", role: .destructive) {
-                            MainPageAPI.deleteUserAccount { result in
-                                DispatchQueue.main.async {
-                                    if case .success = result {
-                                        KeychainHelper.delete(key: "username")
-                                        KeychainHelper.delete(key: "password")
-                                        MainPageAPI.logoutUser()
-                                        navigateToLogin = true
-                                    } else if case .failure(let error) = result {
-                                        errorMessage = "Fehler: \(error.localizedDescription)"
-                                    }
-                                }
-                            }
-                        }
-                    } message: {
-                        Text("Du kannst deine Wahl danach nicht mehr ändern!")
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.top, 20)
+                clubInfoSection // Zeigt Vereinsinformationen an
+                profileImageSection // Zeigt Profilbild oder Initialen an
+                userInfoSection // Zeigt Benutzerinformationen (Name, Passwort ändern) an
+                actionButtons // Enthält Buttons zum Abmelden und Account-Löschen
 
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(UIColor.systemGroupedBackground))
-            .navigationBarTitle(name.isEmpty ? "Profil" : name, displayMode: .inline)
+            .navigationBarTitle(viewModel.name.isEmpty ? "Profil" : viewModel.name, displayMode: .inline)
             .toolbarBackground(Color(UIColor.systemBackground), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .navigationDestination(isPresented: $navigateToLogin) {
-                Onboarding_Login()
+            .navigationDestination(isPresented: $viewModel.navigateToLogin) {
+                Onboarding_Login() // Navigiert nach dem Logout zum Login-Bildschirm
             }
             .onAppear {
-                loadUserProfile()
+                viewModel.loadUserProfile() // Lädt das Benutzerprofil beim Öffnen der Seite
             }
         }
     }
 
-    // MARK: - Daten laden
-    func loadUserProfile() {
-        MainPageAPI.fetchUserProfile { result in
-            DispatchQueue.main.async {
-                self.isLoading = false
-                switch result {
-                case .success(let profile):
-                    self.name = profile.name
-                    self.shortName = MainPageAPI.calculateShortName(from: profile.name)
-                    if let imageData = profile.profileImage {
-                        self.profileImage = UIImage(data: imageData)
-                    } else {
-                        self.profileImage = nil
-                    }
+    // MARK: - Vereinsinformationen anzeigen
+    private var clubInfoSection: some View {
+        VStack {
+            // Kreis für das Vereinslogo oder Kürzel
+            Circle()
+                .fill(Color.gray.opacity(0.2))
+                .frame(width: 80, height: 80)
+                .overlay(Text(viewModel.clubShortName).font(.title).foregroundColor(.white))
 
-                case .failure(let error):
-                    self.errorMessage = "Fehler: \(error.localizedDescription)"
+            // Vereinsname
+            Text(viewModel.clubName)
+                .font(.subheadline)
+                .bold()
+                .multilineTextAlignment(.center)
+                .padding(.top, 5)
+
+            Divider()
+                .padding(.vertical, 10)
+        }
+        .padding(.horizontal)
+    }
+
+    // MARK: - Profilbild oder Initialen anzeigen
+    private var profileImageSection: some View {
+        VStack {
+            // Zeigt entweder das Profilbild oder einen Platzhalter mit Initialen
+            if let profileImage = viewModel.profileImage {
+                Image(uiImage: profileImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 80, height: 80)
+                    .clipShape(Circle())
+            } else {
+                Circle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(width: 80, height: 80)
+                    .overlay(Text(viewModel.shortName).font(.title).foregroundColor(.white))
+            }
+
+            // Button zur Bearbeitung des Profilbildes
+            NavigationLink(destination: MainPage_ProfilView_ProfilPicture()) {
+                Text("Bearbeiten")
+                    .font(.footnote)
+                    .foregroundColor(.accentColor)
+            }
+        }
+    }
+
+    // MARK: - Benutzerinformationen anzeigen
+    private var userInfoSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            // Navigation zur Namensänderung
+            NavigationLink(destination: MainPage_ProfilView_Name()) {
+                HStack {
+                    Text("Name")
+                    Spacer()
+                    Text(viewModel.name.isEmpty ? "Lade Benutzername..." : viewModel.name)
+                        .foregroundColor(Color.secondary)
                 }
             }
-        }
-    }
-}
+            .padding()
+            .background(Color(UIColor.systemBackground).opacity(0.8))
+            .cornerRadius(10)
 
-struct MainPage_ProfilView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainPage_ProfilView()
+            // Passwort ändern Abschnitt
+            Text("PASSWORT")
+                .font(.footnote)
+                .foregroundColor(Color.secondary)
+                .padding(.top, 10)
+
+            NavigationLink(destination: MainPage_ProfilView_Password()) {
+                HStack {
+                    Text("Passwort ändern")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(Color.secondary)
+                }
+                .padding()
+                .background(Color(UIColor.systemBackground).opacity(0.8))
+                .cornerRadius(10)
+            }
+        }
+        .padding(.horizontal)
+        .padding(.top, 20)
+    }
+
+    // MARK: - Aktionen für Abmelden und Account löschen
+    private var actionButtons: some View {
+        VStack {
+            // Abmelden-Button mit Bestätigungsdialog
+            Button(action: {
+                viewModel.showSignOutConfirmation = true
+            }) {
+                Text("Abmelden")
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity)
+                    .padding(15)
+                    .background(Color(UIColor.systemBackground).opacity(0.8))
+                    .cornerRadius(10)
+            }
+            .confirmationDialog("Wirklich abmelden?", isPresented: $viewModel.showSignOutConfirmation, titleVisibility: .visible) {
+                Button("Abmelden", role: .destructive) {
+                    viewModel.signOut()
+                }
+                Button("Abbrechen", role: .cancel) {}
+            }
+
+            Spacer().frame(height: 10)
+
+            // Account löschen-Button mit Warnmeldung
+            Button(action: {
+                viewModel.showDeleteAccountAlert = true
+            }) {
+                Text("Account löschen")
+                    .frame(maxWidth: .infinity)
+                    .padding(15)
+                    .background(Color.red)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .alert("Möchtest du deinen Account wirklich löschen?", isPresented: $viewModel.showDeleteAccountAlert) {
+                Button("Abbrechen", role: .cancel) {}
+                Button("Löschen", role: .destructive) {
+                    viewModel.deleteAccount()
+                }
+            } message: {
+                Text("Du kannst deine Wahl danach nicht mehr ändern!")
+            }
+        }
+        .padding(.horizontal)
     }
 }
