@@ -140,7 +140,7 @@ extension MeetingDetailView {
                 .fontWeight(.bold) // Macht den Text fett
                 .foregroundColor(.primary) // Setzt die Farbe auf die primäre Farbe des Themas
                 .padding()
-        } // Fügt etwas Abstand um den Text hinzu
+        }
     }
     
     private func meetingHeader(meeting: GetMeetingDTO) -> some View {

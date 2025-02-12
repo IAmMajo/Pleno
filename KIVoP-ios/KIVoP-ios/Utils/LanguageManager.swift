@@ -2,6 +2,7 @@
 
 import Foundation
 
+// Wird für die Protokolle benötigt.
 struct LanguageManager {
     static func getLanguages() -> [(name: String, code: String)] {
         let languages: [(name: String, code: String)] = [
@@ -31,6 +32,7 @@ struct LanguageManager {
         return languages
     }
     
+    // Übersetzt einen Sprachcode in eine ausgeschriebene Sprache
     static func getLanguage(langCode: String) -> String {
         let languages: [(name: String, code: String)] = [
             ("Arabisch", "ar"),
