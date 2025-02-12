@@ -30,12 +30,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.kivopandriod.components.CallToConfirmRideRequest
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.BackPressed.isBackPressed
 import net.ipv64.kivop.R
 import net.ipv64.kivop.components.CustomButton
 import net.ipv64.kivop.components.DebouncedTextFieldCustomInputField
 import net.ipv64.kivop.components.IconBoxClickable
+import net.ipv64.kivop.components.MapDoubleMarker
 import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.SpacerTopBar
 import net.ipv64.kivop.models.ButtonStyle
@@ -72,6 +74,9 @@ fun CarpoolPage(
             text = carpool.name,
             style = MaterialTheme.typography.headlineMedium,
             color = Text_prime_light)
+        val latLngStart = LatLng(carpool.startLatitude.toDouble(), carpool.startLongitude.toDouble())
+        val latLngEnd = LatLng(carpool.destinationLatitude.toDouble(), carpool.destinationLongitude.toDouble())
+        MapDoubleMarker(Modifier.padding(vertical = 12.dp),latLngStart, latLngEnd)
       }
     }
     // content Column

@@ -7,14 +7,9 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -23,21 +18,27 @@ import net.ipv64.kivop.ui.theme.TextStyles
 import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_tertiary
 
+enum class TextFieldStatus {
+  nothing,
+  pending,
+  done,
+}
+
 @Composable
 fun DebouncedTextFieldCustomInputField(
-    label: String,
-    labelColor: Color = Background_prime,
-    placeholder: String,
-    modifier: Modifier = Modifier,
-    isPasswort: Boolean = false,
-    singleLine: Boolean = true,
-    lines: Int = 1,
-    value: String,
-    backgroundColor: Color = Background_prime,
-    onValueChange: (String) -> Unit,
-    onDebouncedChange: (String) -> Unit
+  label: String,
+  labelColor: Color = Background_prime,
+  placeholder: String,
+  modifier: Modifier = Modifier,
+  isPasswort: Boolean = false,
+  singleLine: Boolean = true,
+  lines: Int = 1,
+  value: String,
+  backgroundColor: Color = Background_prime,
+  status: () -> TextFieldStatus = { TextFieldStatus.nothing },
+  onValueChange: (String) -> Unit,
+  onDebouncedChange: (String) -> Unit
 ) {
-  val textState = remember { mutableStateOf(TextFieldValue()) }
   LaunchedEffect(value) {
     delay(2000)
     onDebouncedChange(value) // Call function after user stops typing
@@ -61,8 +62,8 @@ fun DebouncedTextFieldCustomInputField(
                       focusedContainerColor = backgroundColor,
                       unfocusedContainerColor = backgroundColor,
                       disabledContainerColor = backgroundColor,
-                      unfocusedBorderColor = backgroundColor,
-                      focusedBorderColor = backgroundColor,
+                      unfocusedBorderColor = if (status() == TextFieldStatus.pending) Color.Yellow else if (status() == TextFieldStatus.done) Color.Green else backgroundColor,
+                      focusedBorderColor = if (status() == TextFieldStatus.pending) Color.Yellow else if (status() == TextFieldStatus.done) Color.Green else backgroundColor,
                       focusedTextColor = Text_prime,
                       unfocusedTextColor = Text_prime),
               singleLine = singleLine,

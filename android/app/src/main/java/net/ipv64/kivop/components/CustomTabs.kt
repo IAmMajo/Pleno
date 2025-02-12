@@ -47,7 +47,7 @@ fun GenerateTabs(tabs: List<String>, tabContents: List<@Composable (() -> Unit)?
   Column {
     ScrollableTabRow(
         selectedTabIndex = pagerState.currentPage,
-        edgePadding = 16.dp,
+        edgePadding = 0.dp,
         contentColor = Color.Transparent,
         containerColor = Color.Transparent,
         divider = {},
@@ -82,7 +82,7 @@ fun GenerateTabs(tabs: List<String>, tabContents: List<@Composable (() -> Unit)?
         }
 
     HorizontalPager(
-        count = tabs.size, state = pagerState, modifier = Modifier.fillMaxSize().padding(18.dp)) {
+        count = tabs.size, state = pagerState , verticalAlignment = Alignment.Top) {
             page ->
           if (page < 0 || page >= tabContents.size) {
             Text(text = "Kein Inhalt in diesem Tab")
