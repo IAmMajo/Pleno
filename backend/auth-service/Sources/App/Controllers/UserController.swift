@@ -432,7 +432,7 @@ struct UserController: RouteCollection {
             message: "Verifizierungslink: \(verifyLink)"
         )
         
-        let response = try await req.client.post("http://notifications-service/internal/email") { request in
+        let response = try await req.client.put("http://notifications-service/internal/email") { request in
             try request.content.encode(emailData)
         }
         
@@ -487,7 +487,7 @@ struct UserController: RouteCollection {
                 message: "Verifizierungslink: \(verifyLink)"
             )
             
-            _ = try await req.client.post("http://notifications-service/internal/email", content: emailData)
+            _ = try await req.client.put("http://notifications-service/internal/email", content: emailData)
     
             return Response(status: .ok, body: .init(string: "If the email exists, a new verification email has been sent."))
         } else {
@@ -510,7 +510,7 @@ struct UserController: RouteCollection {
                 message: "Verifizierungslink: \(verifyLink)"
             )
             
-            _ = try await req.client.post("http://notifications-service/internal/email", content: emailData)
+            _ = try await req.client.put("http://notifications-service/internal/email", content: emailData)
             
             return Response(status: .ok, body: .init(string: "If the email exists, a new verification email has been sent."))
         }
@@ -823,7 +823,7 @@ struct UserController: RouteCollection {
             message: "Einmal-Code: \(tokenEntry.token)"
         )
         
-        let response = try await req.client.post("http://notifications-service/internal/email") { request in
+        let response = try await req.client.put("http://notifications-service/internal/email") { request in
             try request.content.encode(emailData)
         }
         

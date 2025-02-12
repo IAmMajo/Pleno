@@ -222,7 +222,7 @@ struct RecordController: RouteCollection {
             throw Abort(.conflict, reason: "Cannot create a new, translated record, since there is already one for the language '\(lang2)'.")
         }
         
-        guard let aiServiceResponse: AISendMessageDTO = try? await req.client.post("http://ai-service/internal/translate-record/\(lang)/\(lang2)", content: AISendMessageDTO(content: record.content)).content.decode(AISendMessageDTO.self) else {
+        guard let aiServiceResponse: AISendMessageDTO = try? await req.client.put("http://ai-service/internal/translate-record/\(lang)/\(lang2)", content: AISendMessageDTO(content: record.content)).content.decode(AISendMessageDTO.self) else {
             throw Abort(.serviceUnavailable, reason: "Failed to contact the AI service.")
         }
         
