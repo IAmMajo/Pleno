@@ -73,10 +73,10 @@ struct Onboarding: View {
                             .frame(height: 300)
                         
                         VStack {
-                            Text("Verwalte ")
+                            Text("Verwalte")
                                 .font(.title3)
                                 .fontWeight(.regular)
-                            + Text("Verwalte ")
+                            + Text(" ")
                                 .font(.title3)
                                 .fontWeight(.regular)
                             + Text("Ratssitzungen, ")
@@ -93,7 +93,7 @@ struct Onboarding: View {
                             + Text("oder plane deine nächste ")
                                 .font(.title3)
                                 .fontWeight(.regular)
-                            + Text(" Vereinsreise...")
+                            + Text("Vereinsreise...")
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(.blue)
