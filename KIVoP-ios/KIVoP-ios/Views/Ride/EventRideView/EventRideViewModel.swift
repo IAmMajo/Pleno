@@ -50,7 +50,7 @@ class EventRideViewModel: ObservableObject {
     }
     
     // Alle benötigten Daten werden aktualisiert
-    func fetchAllUpadtes() {
+    func fetchAllUpdates() {
         fetchEventDetails()
         fetchEventRides()
         fetchParticipation()

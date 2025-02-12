@@ -11,7 +11,6 @@ class RideViewModel: ObservableObject {
     @Published var rides: [GetSpecialRideDTO] = []
     @Published var eventRides: [GetEventRideDTO] = []
     @Published var events: [EventWithAggregatedData] = []
-    private let baseURL = "https://kivop.ipv64.net"
     
     @Published var rideManager = RideManager.shared
     

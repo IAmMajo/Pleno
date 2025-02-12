@@ -1,6 +1,7 @@
 // This file is licensed under the MIT-0 License.
 import SwiftUI
 
+// View zum erstellen von EventRides (Wird in der NewRideView angezeigt)
 struct CreateEventRideView: View {
     @ObservedObject var viewModel: EditRideViewModel
     @Environment(\.dismiss) private var dismiss
@@ -9,6 +10,7 @@ struct CreateEventRideView: View {
     var body: some View {
         VStack {
             List {
+                // Event auswählen, zudem eine Fahrt angelegt werden soll
                 Section(header: Text("Event auswählen")){
                     Picker("", selection: $viewModel.selectedEventId) {
                         Text("Wählen Sie ein Event").tag(nil as UUID?)
@@ -30,6 +32,7 @@ struct CreateEventRideView: View {
                         }
                     }
                 }
+                // Alle Infos zum ausgewählten Event
                 if let eventDetails = viewModel.eventDetails {
                     Section(header: Text("Details zum Event")) {
                         Text(eventDetails.name)
@@ -49,7 +52,7 @@ struct CreateEventRideView: View {
                         Text(viewModel.dstAddress)
                             .onAppear{
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                    viewModel.getAddressFromCoordinates(latitude: eventDetails.latitude, longitude: eventDetails.longitude) { address in
+                                    viewModel.rideManager.getAddressFromCoordinates(latitude: eventDetails.latitude, longitude: eventDetails.longitude) { address in
                                         if let address = address {
                                             viewModel.dstAddress = address
                                         }
@@ -62,7 +65,7 @@ struct CreateEventRideView: View {
                     Text("Bitte ein Event auswählen.")
                 }
                 
-                // Wenn ich nicht am ausgewählten teilnehme, hab ich die Möglichkeit dran teilzunehmen
+                // Wenn der Nutzer noch nicht am Event teilnimmt, muss dieser erst teilnehmen, bevor er eine Fahrt zu dem Event erstellen kann
                 if let event = viewModel.events.first(where: { $0.id == viewModel.selectedEventId }) {
                     if event.myState == .present {
                         // Speichern freigeben
@@ -70,7 +73,7 @@ struct CreateEventRideView: View {
                         Text("Du hast dem ausgewählten Event nicht zugesagt, und kannst daher keine Fahrgemeinschaft anbieten.")
                             .padding(.horizontal)
                         Button(action: {
-                            viewModel.participateEvent(eventId: viewModel.selectedEventId!)
+                            viewModel.participateEvent(eventID: viewModel.selectedEventId!)
                         }){
                             Text("Jetzt teilnehmen")
                                 .frame(maxWidth: .infinity)
@@ -84,14 +87,19 @@ struct CreateEventRideView: View {
                     }
                 }
                 
+                // Wenn ich noch nicht Fahrer bei einer Fahrt in dem Event bin, kann ich nun die Infos zur Fahrt ausfüllen
+                // Ansonsten wird eine Meldung angezeigt, dass man bereits eine Fahrt zu diesem Event hat, und es ist nicht möglich eine weitere Fahrt anzulegen
                 if viewModel.eventRide?.myState != .driver {
                     Section(header: Text("Startort")){
                         HStack{
+                            // Karte, die die ausgewählte Position anzeigt.
+                            // Beim drücken auf die Karte, wird ein sheet zum Auswählen der Startposition geöffnet
                             Button(action: {
                                 DispatchQueue.main.async {
                                     viewModel.showingLocation.toggle()
                                 }
                             }) {
+                                // Map, die nur die Position anzeigt
                                 RideLocationView(selectedLocation: $viewModel.location)
                                     .cornerRadius(10)
                                     .frame(width: 100, height: 150)
@@ -100,6 +108,7 @@ struct CreateEventRideView: View {
                                     .padding(.leading, -20)
                             }
                             VStack{
+                                // Addresse
                                 if(viewModel.address != ""){
                                     Text(viewModel.address)
                                         .padding(.top, 10)
@@ -108,6 +117,7 @@ struct CreateEventRideView: View {
                                         .padding(.top, 10)
                                 }
                                 Spacer()
+                                // Koordinaten
                                 if(viewModel.location != nil){
                                     Divider()
                                         .background(Color.gray)
@@ -116,21 +126,23 @@ struct CreateEventRideView: View {
                                         .padding(.bottom, 10)
                                 }
                             }
+                            // Berechnen der Adresse
                             .onAppear {
                                 if viewModel.rideDetail.startLatitude != 0 && viewModel.rideDetail.startLatitude != 0 {
-                                    viewModel.getAddressFromCoordinates(latitude: viewModel.rideDetail.startLatitude, longitude: viewModel.rideDetail.startLongitude) { address in
+                                    viewModel.rideManager.getAddressFromCoordinates(latitude: viewModel.rideDetail.startLatitude, longitude: viewModel.rideDetail.startLongitude) { address in
                                         if let address = address {
                                             viewModel.address = address
                                         }
                                     }
                                 }
                             }
+                            // Aktualisieren der Koordinaten und der Adresse vom sheet zur Standortauswahl
                             .sheet(isPresented: $viewModel.showingLocation, onDismiss: {
                                 if let location = viewModel.location {
                                     let latitude = Float(location.latitude)
                                     let longitude = Float(location.longitude)
                                     
-                                    viewModel.getAddressFromCoordinates(latitude: latitude, longitude: longitude) { address in
+                                    viewModel.rideManager.getAddressFromCoordinates(latitude: latitude, longitude: longitude) { address in
                                         if let address = address {
                                             viewModel.address = address
                                         }
@@ -138,14 +150,16 @@ struct CreateEventRideView: View {
                                 }
                                 
                             }) {
-                                // Sheet Inhalt
+                                // Standortauswahl
                                 SelectRideLocationView(selectedLocation: $viewModel.location)
                             }
                         }
                     }
+                    // Abfahrtszeit
                     Section(header: Text("Abfahrtszeit")){
                         DatePicker("Startzeit", selection: $viewModel.starts, displayedComponents: [.date, .hourAndMinute])
                     }
+                    // Informationen zum AUto + Sitzplätze
                     Section(header: Text("Auto und Sitzplätze")) {
                         HStack {
                             ZStack(alignment: .topLeading){
@@ -165,6 +179,7 @@ struct CreateEventRideView: View {
                             
                             HStack {
                                 // Picker für die Auswahl der freien Sitze
+                                // Auch 0 Plätze sind möglich
                                 Picker("",selection: $viewModel.emptySeats) {
                                     Text("Freie Plätze").tag(nil as Int?).foregroundColor(.gray)
                                     ForEach(0..<100) { number in
@@ -177,6 +192,7 @@ struct CreateEventRideView: View {
                             .frame(width: UIScreen.main.bounds.width * 0.4)
                         }
                     }
+                    // Optionale Hinweise für Mitfahrer
                     Section(header: Text("Hinweise")){
                         ZStack(alignment: .topLeading) {
                             // Placeholder Text
@@ -206,6 +222,7 @@ struct CreateEventRideView: View {
     }
 }
 
+// Um die Zeit vom Event so anzuzeigen als wäre es ein richtiger Picker (Wie im Prototyp)
 extension DateFormatter {
     static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()

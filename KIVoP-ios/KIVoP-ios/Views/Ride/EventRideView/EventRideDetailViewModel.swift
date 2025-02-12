@@ -42,8 +42,6 @@ class EventRideDetailViewModel: ObservableObject {
     
     var rider: GetRiderDTO?
     
-    private let baseURL = "https://kivop.ipv64.net"
-    
     init(eventRide: GetEventRideDTO) {
         self.eventRide = eventRide
         // leeres Objekt erstellen, um Fehler zu vermeiden
@@ -73,6 +71,13 @@ class EventRideDetailViewModel: ObservableObject {
             emptySeats: 0,
             riders: []
         )
+    }
+    
+    // Updateing all needed Values
+    func fetchAllUpdates() {
+        fetchEventRideDetails()
+        fetchEventDetails()
+        fetchEventRides()
     }
     
     // Event Details über den RideManager abfragen
@@ -274,44 +279,19 @@ class EventRideDetailViewModel: ObservableObject {
             do {
                 self.isLoading = true
                 
-                // Erstelle die URL mit der requestID
-                guard let url = URL(string: "\(baseURL)/eventrides/requests/\(rider.id)") else {
-                    print("Ungültige URL")
-                    self.isLoading = false
-                    return
-                }
+                // Aufruf der asynchronen Methode im RideManager
+                try await rideManager.deleteRideRequestedSeat(riderID: rider.id)
                 
-                var request = URLRequest(url: url)
-                request.httpMethod = "DELETE" // Setze die HTTP-Methode auf DELETE
-                
-                // Authorization Header hinzufügen
-                if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-                    request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                } else {
-                    errorMessage = "Unauthorized: Token not found."
-                    self.isLoading = false
-                    return
-                }
-                
-                // Führe die Anfrage aus
-                let (_, response) = try await URLSession.shared.data(for: request)
-                
-                // Überprüfe die Antwort auf den Statuscode 204 (No Content)
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 204 else {
-                    throw NSError(domain: "Failed to delete ride request", code: 500, userInfo: nil)
-                }
-                
+                // UI-Updates im Hauptthread durchführen
                 DispatchQueue.main.async {
-                    // Erfolgreiches Löschen der Anfrage
-                    self.requestedRiders.removeAll(where: { $0.id == rider.id })
-                    self.acceptedRiders.removeAll(where: { $0.id == rider.id }) 
+                    // Entferne den Mitfahrer aus beiden Listen
+                    self.requestedRiders.removeAll { $0.id == rider.id }
+                    self.acceptedRiders.removeAll { $0.id == rider.id }
                     self.isLoading = false
                 }
-                
             } catch {
                 DispatchQueue.main.async {
                     self.isLoading = false
-                    // Fehlerbehandlung
                     print("Fehler beim Löschen der Anfrage: \(error.localizedDescription)")
                 }
             }

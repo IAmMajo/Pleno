@@ -1,11 +1,13 @@
 // This file is licensed under the MIT-0 License.
 import SwiftUI
-import MapKit
 
 struct EditSpecialRideView: View {
     @ObservedObject var viewModel: EditRideViewModel
     @Environment(\.dismiss) private var dismiss
 
+    // View zum Bearbeiten der SpecialRides
+    // Funktioniert wie die CreateView, abgesehen von:
+    // - Die Sitzplätze können nicht unter die Anzahl an bereits besetzten Plätzen gesetzt werden.
     var body: some View {
         VStack {
             List {
@@ -34,6 +36,7 @@ struct EditSpecialRideView: View {
                     DatePicker("Startzeit", selection: $viewModel.rideDetail.starts, displayedComponents: [.date, .hourAndMinute])
                 }
                 
+                // Komponente zum anzeigen der Standortdetails und auswählen von neuen Standorten
                 LocationPickerView(viewModel: viewModel)
                 
                 Section(header: Text("Auto und Sitzplätze")) {
@@ -58,12 +61,13 @@ struct EditSpecialRideView: View {
                         
                         HStack {
                             // Picker für die Auswahl der freien Sitze
+                            // Anzahl kann nicht kleiner sein als bereits akzeptierte Fahrer
                             Picker("", selection: $viewModel.rideDetail.emptySeats) {
                                 
                                 let acceptedRiders = viewModel.rideDetail.riders.filter { $0.accepted }
                                 
                                 ForEach(acceptedRiders.count..<min(100, 256), id: \.self) { number in
-                                    if number >= viewModel.eventRideDetail.riders.count && number <= 100 {
+                                    if number >= acceptedRiders.count && number <= 100 {
                                         Text("\(number)").tag(UInt8(number))
                                     }
                                 }
@@ -81,6 +85,7 @@ struct EditSpecialRideView: View {
             .navigationBarBackButtonHidden(true)
             .toolbar{
                 // Speichern Button
+                // Identische Logik wie beim anlegen neuer Fahrten
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         if viewModel.isFormValid {

@@ -239,14 +239,10 @@ struct EventRideDetailView: View {
                }
             }
             .onAppear {
-               viewModel.fetchEventRideDetails()
-               viewModel.fetchEventDetails()
-               viewModel.fetchEventRides()
+               viewModel.fetchAllUpdates()
             }
             .refreshable {
-                viewModel.fetchEventRideDetails()
-                viewModel.fetchEventDetails()
-                viewModel.fetchEventRides()
+                viewModel.fetchAllUpdates()
             }
         }
         // Dialog wenn der Nutzer den Standort kopieren möchte

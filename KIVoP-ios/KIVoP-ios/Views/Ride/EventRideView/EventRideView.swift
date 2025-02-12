@@ -169,10 +169,10 @@ struct EventRideView: View {
                     }
                 }
                 .onAppear {
-                    viewModel.fetchAllUpadtes()
+                    viewModel.fetchAllUpdates()
                 }
                 .refreshable {
-                    viewModel.fetchAllUpadtes()
+                    viewModel.fetchAllUpdates()
                 }
             }
         }

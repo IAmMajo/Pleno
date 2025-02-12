@@ -61,6 +61,7 @@ class RideManager: ObservableObject {
     }
     
     // Funktion zum Abrufen der Details für SpecialRides
+    @MainActor
     func fetchRideDetails(for rideID: UUID) async throws -> GetSpecialRideDetailDTO {
         guard let url = URL(string: "\(baseURL)/specialrides/\(rideID)") else {
             throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -109,6 +110,7 @@ class RideManager: ObservableObject {
     }
     
     // Funktion zum Anfragen bei einer SonderFahrt
+    @MainActor
     func requestSpecialRide(rideID: UUID, latitude: Float, longitude: Float) async throws -> GetRiderDTO {
         guard let url = URL(string: "\(baseURL)/specialrides/\(rideID)/requests") else {
             throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -173,6 +175,7 @@ class RideManager: ObservableObject {
     }
     
     // Funktion zum Akzeptieren eines angefragten Mitfahrers durch den Fahrer - SpecialRides
+    @MainActor
     func acceptRequestedSpecialRider(riderID: UUID, longitude: Float, latitude: Float) async throws -> GetRiderDTO {
         guard let url = URL(string: "https://kivop.ipv64.net/specialrides/requests/\(riderID)") else {
             throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -217,6 +220,7 @@ class RideManager: ObservableObject {
     }
     
     // Funktion zum Ablehnen eines angefragten Mitfahrers durch den Fahrer - SpecialRides
+    @MainActor
     func removeFromSpecialPassengers(riderID: UUID, longitude: Float, latitude: Float) async throws -> GetRiderDTO {
         guard let url = URL(string: "\(baseURL)/specialrides/requests/\(riderID)") else {
             throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -387,8 +391,8 @@ class RideManager: ObservableObject {
     }
     
     // MARK: - Event Details
-    
     // Alle Event Rides für ein bestimmtes Event
+    @MainActor
     func fetchEventRidesByEvent(eventID: UUID) async throws -> [GetEventRideDTO] {
         guard let url = URL(string: "\(baseURL)/eventrides?byEventID=\(eventID)") else {
             throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -420,6 +424,7 @@ class RideManager: ObservableObject {
     }
 
     // EventDetails abfragen
+    @MainActor
     func fetchEventDetails(eventID: UUID) async throws -> GetEventDetailDTO {
         guard let url = URL(string: "\(baseURL)/events/\(eventID)") else {
             throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -454,6 +459,7 @@ class RideManager: ObservableObject {
     // Anhand des JWT wird ein Array mit allen EventParticipations vom jeweiligen Nutzer zurückgegeben
     // Wenn es eins gibt was zum Event passt wird dieses zurückgegeben
     // Wenn nicht wird nil returnt
+    @MainActor
     func fetchEventParticipation(eventID: UUID) async throws -> GetInterestedPartyDTO? {
         guard let url = URL(string: "\(baseURL)/eventrides/interested") else {
             throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
@@ -609,8 +615,8 @@ class RideManager: ObservableObject {
     }
 
     // MARK: - EventRide Funktionalität
-    
     // Details zu einer EventFahrt abfragen
+    @MainActor
     func fetchEventRideDetails(eventRideID: UUID) async throws -> GetEventRideDetailDTO {
         // URL mit der eventRide-ID erstellen
         guard let url = URL(string: "\(baseURL)/eventrides/\(eventRideID)") else {
@@ -667,6 +673,7 @@ class RideManager: ObservableObject {
     }
     
     // Nutzer fragt einen Sitzplatz an
+    @MainActor
     func requestEventRide(eventRideID: UUID) async throws -> GetRiderDTO {
         // URL mit der eventRide-ID und dem Endpunkt "/requests" erstellen
         guard let url = URL(string: "\(baseURL)/eventrides/\(eventRideID)/requests") else {
@@ -697,6 +704,7 @@ class RideManager: ObservableObject {
     }
 
     // Fahrer nimmt einen Mitfahrer an
+    @MainActor
     func acceptRequestedRider(riderID: UUID) async throws -> GetRiderDTO {
         // Erstelle die URL anhand der riderID
         guard let url = URL(string: "\(baseURL)/eventrides/requests/\(riderID)") else {
@@ -738,6 +746,7 @@ class RideManager: ObservableObject {
     }
 
     // Fahrer entfernt einen Mitfahrer wieder (Dieser bekommt wieder den Status requested)
+    @MainActor
     func removeFromPassengers(riderID: UUID) async throws -> GetRiderDTO {
         // Erstelle die URL anhand der riderID
         guard let url = URL(string: "\(baseURL)/eventrides/requests/\(riderID)") else {
@@ -800,8 +809,194 @@ class RideManager: ObservableObject {
         }
     }
     
-    // MARK: - Berechnung von Adressen
+    // MARK: - API Calls erstellen und bearbeiten von Fahrten
+    // Sonderfahrt erstellen
+    @MainActor
+    func createSpecialRide(_ specialRideDTO: CreateSpecialRideDTO) async throws -> GetSpecialRideDetailDTO {
+        guard let url = URL(string: "\(baseURL)/specialrides") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Füge JWT-Token hinzu oder wirf Fehler
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: No token found", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        
+        // Setze den Request-Body mit den DTO-Daten
+        request.httpBody = try encoder.encode(specialRideDTO)
+        
+        // Führe den Netzwerkaufruf aus
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        // Überprüfe die HTTP-Antwort
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
+            throw NSError(domain: "Failed to create special ride", code: 500, userInfo: nil)
+        }
+        
+        // JSON-Dekodierung
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
+        return try decoder.decode(GetSpecialRideDetailDTO.self, from: data)
+    }
+
+    // Sonderfahrt bearbeiten
+    @MainActor
+    func editSpecialRide(_ specialRideDTO: PatchSpecialRideDTO, rideID: UUID) async throws -> GetSpecialRideDetailDTO {
+        // Erstelle die URL mit der rideID
+        guard let url = URL(string: "\(baseURL)/specialrides/\(rideID)") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // JWT-Token zum Header hinzufügen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: No token found", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        // JSON-Kodierung des DTO
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        request.httpBody = try encoder.encode(specialRideDTO)
+
+        // Führe die Netzwerkabfrage aus
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        // Überprüfe den HTTP-Statuscode
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "Failed to update ride", code: 500, userInfo: nil)
+        }
+
+        // JSON-Dekodierung der Antwort
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        return try decoder.decode(GetSpecialRideDetailDTO.self, from: data)
+    }
+
+    // Eventfahrt erstellen
+    @MainActor
+    func createEventRide(_ eventRideDTO: CreateEventRideDTO) async throws -> GetEventRideDetailDTO {
+        // Erstelle die URL für die Event-Fahrt
+        guard let url = URL(string: "\(baseURL)/eventrides") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // JWT-Token hinzufügen oder Fehler werfen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: No token found", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        // JSON-Kodierung des DTO
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        request.httpBody = try encoder.encode(eventRideDTO)
+
+        // Führe die Anfrage aus
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        // Überprüfe den HTTP-Statuscode (201 = Created)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
+            throw NSError(domain: "Failed to create event ride", code: 500, userInfo: nil)
+        }
+
+        // JSON-Dekodierung der Antwort
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        return try decoder.decode(GetEventRideDetailDTO.self, from: data)
+    }
+
+    // Eventfahrt bearbeiten
+    @MainActor
+    func editEventRide(_ eventRideDTO: PatchEventRideDTO, rideID: UUID) async throws -> GetEventRideDetailDTO {
+        // Erstelle die URL für die Event-Fahrt
+        guard let url = URL(string: "\(baseURL)/eventrides/\(rideID)") else {
+            throw NSError(domain: "Invalid URL", code: 400, userInfo: nil)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // JWT-Token hinzufügen oder Fehler werfen
+        guard let token = UserDefaults.standard.string(forKey: "jwtToken") else {
+            throw NSError(domain: "Unauthorized: No token found", code: 401, userInfo: nil)
+        }
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        // JSON-Kodierung des DTO
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        request.httpBody = try encoder.encode(eventRideDTO)
+
+        // Führe die Anfrage aus
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        // Überprüfe den HTTP-Statuscode (200 = OK)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "Failed to update event ride", code: 500, userInfo: nil)
+        }
+
+        // JSON-Dekodierung der Antwort
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
+        return try decoder.decode(GetEventRideDetailDTO.self, from: data)
+    }
     
+    // MARK: - Ride Übersicht
+    // Berechnung der aggregierten Daten für ein Event
+    // Zeigt an, wie viele freie/belegte Plätze es gibt und ermittelt den höchsten Status des Nutzers
+    // Status-Priorität: Fahrer > Mitfahrer (accepted) > Angefragt (requested)
+    func aggregatedData(for event: GetEventDTO) -> (myState: UsersRideState, allEmptySeats: UInt8, allAllocatedSeats: UInt8, allOpenRequests: UInt8?) {
+        // Filtere die EventRides, die zu diesem Event gehören
+        let relevantEventRides = eventRides.filter { $0.eventID == event.id }
+        
+        // Aggregiere die leeren und belegten Plätze
+        let allEmptySeats = relevantEventRides.reduce(0) { $0 + $1.emptySeats }
+        let allAllocatedSeats = relevantEventRides.reduce(0) { $0 + $1.allocatedSeats }
+        
+        // Aggregiere die offenen Anfragen (Optional)
+        let allOpenRequests = relevantEventRides.reduce(0) { $0 + ($1.openRequests ?? 0) }
+        let allOpenRequestsUInt8: UInt8? = allOpenRequests > 0 ? UInt8(allOpenRequests) : nil
+        
+        // Bestimme den höchsten Status des Nutzers
+        let myState: UsersRideState
+        if relevantEventRides.contains(where: { $0.myState == .driver }) {
+            myState = .driver
+        } else if relevantEventRides.contains(where: { $0.myState == .accepted }) {
+            myState = .accepted
+        } else if relevantEventRides.contains(where: { $0.myState == .requested }) {
+            myState = .requested
+        } else {
+            myState = .nothing
+        }
+        return (myState, UInt8(allEmptySeats), UInt8(allAllocatedSeats), allOpenRequestsUInt8)
+    }
+    
+    // MARK: - Berechnung von Adressen
     // Funktion um Adressen zu generieren
     func getAddressFromCoordinates(latitude: Float, longitude: Float, completion: @escaping (String?) -> Void) {
         let clLocation = CLLocation(latitude: Double(latitude), longitude: Double(longitude))
@@ -832,39 +1027,15 @@ class RideManager: ObservableObject {
         }
     }
     
-    // MARK: - Ride Übersicht
-    
-    // Berechnung der aggregierten Daten für ein Event
-    // Zeigt an, wie viele freie/belegte Plätze es gibt und ermittelt den höchsten Status des Nutzers
-    // Status-Priorität: Fahrer > Mitfahrer (accepted) > Angefragt (requested)
-    func aggregatedData(for event: GetEventDTO) -> (myState: UsersRideState, allEmptySeats: UInt8, allAllocatedSeats: UInt8, allOpenRequests: UInt8?) {
-        // Filtere die EventRides, die zu diesem Event gehören
-        let relevantEventRides = eventRides.filter { $0.eventID == event.id }
-        
-        // Aggregiere die leeren und belegten Plätze
-        let allEmptySeats = relevantEventRides.reduce(0) { $0 + $1.emptySeats }
-        let allAllocatedSeats = relevantEventRides.reduce(0) { $0 + $1.allocatedSeats }
-        
-        // Aggregiere die offenen Anfragen (Optional)
-        let allOpenRequests = relevantEventRides.reduce(0) { $0 + ($1.openRequests ?? 0) }
-        let allOpenRequestsUInt8: UInt8? = allOpenRequests > 0 ? UInt8(allOpenRequests) : nil
-        
-        // Bestimme den höchsten Status des Nutzers
-        let myState: UsersRideState
-        if relevantEventRides.contains(where: { $0.myState == .driver }) {
-            myState = .driver
-        } else if relevantEventRides.contains(where: { $0.myState == .accepted }) {
-            myState = .accepted
-        } else if relevantEventRides.contains(where: { $0.myState == .requested }) {
-            myState = .requested
-        } else {
-            myState = .nothing
-        }
-        return (myState, UInt8(allEmptySeats), UInt8(allAllocatedSeats), allOpenRequestsUInt8)
+    // MARK: - Generelle Ride Funktionen
+    // Date formatieren
+    func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy - HH:mm 'Uhr'"
+        return formatter.string(from: date)
     }
     
-    // MARK: - Generelle Ride Funktionen
-    
+    // MARK: - Profilbilder
     // Authorizierung für die Profilbilder
     private func createAuthorizedRequest(url: URL, method: String, contentType: String = "application/json") -> URLRequest? {
        var request = URLRequest(url: url)
@@ -918,12 +1089,5 @@ class RideManager: ObservableObject {
              }
           }
        }
-    }
-    
-    // Date formatieren
-    func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy - HH:mm 'Uhr'"
-        return formatter.string(from: date)
     }
 }

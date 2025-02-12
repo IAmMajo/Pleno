@@ -1,7 +1,10 @@
 // This file is licensed under the MIT-0 License.
 import SwiftUI
 
-struct NewRideView: View {  
+// Diese View beinhaltet entweder den Inhalt um eine neue SonderFahrt anzulegen oder um eine neue EventFahrt anzulegen
+// Dazu wird wenn die View erscheint der SelectionAlert geöffnet, und der Nutzer wählt zwischen den beiden Optionen
+// Anhand dessen wird die jeweilige View geöffnet
+struct NewRideView: View {
     @ObservedObject var viewModel: EditRideViewModel
     @ObservedObject var rideViewModel: RideViewModel
     @State var showingSaveAlert = false
@@ -33,6 +36,9 @@ struct NewRideView: View {
             }
             .toolbar {
                 // Speichern Button
+                // Wenn EventFahrt wird erst geprüft, ob der Nutzer am Event teilnimmt. Wenn nicht kommt die Meldung, dass er erst teilnehmen muss bevor er speichern kann
+                // Sonst wird geprüft ob alle Felder ausgefüllt sind
+                // Wenn ja -> speichern -> schließen -> Reiter "Meine Fahrten", wenn nein -> Fehlermeldung, Nutzer kann die Fahrt bearbeiten
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         if viewModel.selectedOption == "EventFahrt",
@@ -57,7 +63,9 @@ struct NewRideView: View {
                                 primaryButton: .default(Text("Ja"), action: {
                                     viewModel.saveRide()
                                     rideViewModel.selectedTab = 2
-                                    dismiss()
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                        dismiss()
+                                    }
                                 }),
                                 secondaryButton: .cancel()
                             )

@@ -1,7 +1,7 @@
 // This file is licensed under the MIT-0 License.
 import SwiftUI
-import MapKit
 
+// View zum erstellen von SpecialRides (Wird in der NewRideView angezeigt)
 struct CreateSpecialRideView: View {
     @ObservedObject var viewModel: EditRideViewModel
     @Environment(\.dismiss) private var dismiss
@@ -31,8 +31,10 @@ struct CreateSpecialRideView: View {
                     DatePicker("Startzeit", selection: $viewModel.starts, displayedComponents: [.date, .hourAndMinute])
                 }
 
+                // Die View enthält die Komponenten um die Location und DestinationLocation zu wählen und anzuzeigen
                 LocationPickerView(viewModel: viewModel)
                 
+                // Informationen zum Auto
                 Section(header: Text("Auto und Sitzplätze")) {
                     HStack {
                         ZStack(alignment: .topLeading){
@@ -52,6 +54,7 @@ struct CreateSpecialRideView: View {
                         
                         HStack {
                             // Picker für die Auswahl der freien Sitze
+                            // Auch 0 ist möglich
                             Picker("",selection: $viewModel.emptySeats) {
                                 Text("Freie Plätze").tag(nil as Int?).foregroundColor(.gray)
                                 ForEach(0..<100) { number in
