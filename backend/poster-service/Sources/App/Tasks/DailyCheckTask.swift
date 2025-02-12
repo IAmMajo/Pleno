@@ -108,7 +108,7 @@ struct DailyCheckTask: LifecycleHandler {
                         var headers = HTTPHeaders()
                         headers.add(name: .contentType, value: "application/json")
                         
-                        let response = try await app.client.post("http://notifications-service/internal/email") { request in
+                        let response = try await app.client.put("http://notifications-service/internal/email") { request in
                             request.headers = headers
                             request.body = .init(data: jsonData)
                         }
