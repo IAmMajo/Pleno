@@ -11,6 +11,10 @@ struct EventDetailView: View {
     // ViewModel als Environment-Object
     @EnvironmentObject private var eventViewModel: EventViewModel
     
+    // ViewModel wird einmalig initialisiert und zu jeder "Unterview" mitgegeben
+    // Wird benötigt, um auf Eventfahrt zu verweisen
+    @StateObject private var rideViewModel = RideViewModel()
+    
     // Event-ID wird beim View-Aufruf übergeben
     var eventId: UUID
     
@@ -212,7 +216,7 @@ extension EventDetailView {
                 Section(header: Text("Eventfahrten")) {
                     // Schleife über alle zugehörigen Fahrten
                     ForEach(eventViewModel.eventRides, id: \.id) { ride in
-                        NavigationLink(destination: EventRideDetailView(rideId: ride.id)) {
+                        NavigationLink(destination: EventRideDetailView(rideId: ride.id).environmentObject(rideViewModel)) {
                             Text("Fahrer: \(ride.driverName)")
                         }
                     }

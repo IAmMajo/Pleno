@@ -131,7 +131,9 @@ struct LocationsView: View {
             // Annotationen für Standorte hinzufügen
             ForEach(locationViewModel.filteredPositions) { position in
                 // Marker in der Karte
-                Annotation(position.address, coordinate: CLLocationCoordinate2D(latitude: position.position.latitude, longitude: position.position.longitude)) {
+                // Alternativer Aufruf:  Annotation(position.address, coordinate: CLLocationCoordinate2D(latitude: position.position.latitude, longitude: position.position.longitude))
+                // -> Würde unter einem Marker die Adresse als Beschriftung anzeigen
+                Annotation("", coordinate: CLLocationCoordinate2D(latitude: position.position.latitude, longitude: position.position.longitude)) {
                     // Ansicht der Marker
                     LocationMapAnnotationView(position: position)
                         .scaleEffect(locationViewModel.selectedPosterPosition == position ? 1 : 0.6)

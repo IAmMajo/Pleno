@@ -7,76 +7,52 @@ import PosterServiceDTOs
 
 struct EditPosterView: View {
     @Environment(\.dismiss) var dismiss
-    var poster: PosterResponseDTO // Übergabe des Posters zur Bearbeitung
+
+    // Sammelposten wird beim Aufruf übergeben
+    var poster: PosterResponseDTO
+    
+    // Aktuelles Bild wird beim Aufruf übergeben
+    var image: Data
+    
+    // Variablen für hochgeladenes Bild
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var imageData: Data? = nil // Optional Data für das Bild
     @State private var title: String // Titel des Posters
     @State private var description: String // Beschreibung des Posters
-    @State private var posterManager = PosterManager()
     
-    init(poster: PosterResponseDTO) {
+    // ViewModel als EnvironmentObject
+    @EnvironmentObject private var posterManager: PosterManager
+    
+    // Initialisierer, um beim Aufruf die Werte zuzuweisen
+    init(poster: PosterResponseDTO, image: Data) {
         self.poster = poster
-        _title = State(initialValue: poster.name) // Initialisiere den Titel
-        _description = State(initialValue: poster.description ?? "") // Initialisiere die Beschreibung
+        self.image = image
+        _title = State(initialValue: poster.name)
+        _description = State(initialValue: poster.description ?? "")
+        _imageData = State(initialValue: image) // Richtig: State korrekt initialisieren
     }
+
     
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Allgemeine Informationen")) {
-                    TextField("Titel", text: $title)
-                    TextField("Beschreibung", text: $description)
-                }
+                // Hier können Name und Beschreibung angepasst werden
+                titleDescription
                 
+                // Hier wird das Foto angepasst
                 Section(header: Text("Posterdesign")) {
+                    
                     // Bild anzeigen, wenn schon eins vorhanden ist
                     if let imageData = imageData, let uiImage = UIImage(data: imageData) {
-                        VStack {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 200)
-                                .cornerRadius(10)
-                                .padding(.bottom, 10)
-                            
-                            // Bild entfernen
-                            Button(action: {
-                                // Bild entfernen
-                                self.imageData = nil
-                                self.selectedItem = nil
-                            }) {
-                                Text("Bild entfernen")
-                                    .foregroundColor(.red)
-                            }
-                        }
+                        existingImage(uiImage: uiImage)
+                        
                     // Bild auswählen, wenn noch keine Auswahl getroffen wurde
                     } else {
-                        PhotosPicker(
-                            selection: $selectedItem,
-                            matching: .images,
-                            photoLibrary: .shared()
-                        ) {
-                            Text("Bild hochladen")
-                                .foregroundColor(.blue)
-                        }
-                        .onChange(of: selectedItem) { newItem in
-                            Task {
-                                if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                                    self.imageData = data
-                                }
-                            }
-                        }
+                        newImage
                     }
                 }
                 // Button zum Speichern
-                Button(action: saveSammelposten) {
-                    Text("Sammelposten speichern")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(10)
+                saveButton
             }
             .navigationTitle("Sammelposten bearbeiten")
         }
@@ -89,6 +65,7 @@ struct EditPosterView: View {
             return
         }
         
+        // DTO befüllen
         let updatedPoster = CreatePosterDTO(
             name: title,
             description: description,
@@ -97,5 +74,73 @@ struct EditPosterView: View {
         
         // API-Aufruf zur Aktualisierung des Posters
         posterManager.patchPoster(poster: updatedPoster, posterId: poster.id)
+        
+        // kurz warten, um die Sammelposten erneut zu laden
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            posterManager.fetchPostersAndSummaries()
+        }
+        dismiss()
+    }
+}
+
+extension EditPosterView {
+    private var titleDescription: some View {
+        Section(header: Text("Allgemeine Informationen")) {
+            TextField("Titel", text: $title)
+            TextField("Beschreibung", text: $description)
+        }
+    }
+    
+    // Bild anzeigen
+    private func existingImage(uiImage: UIImage) -> some View {
+        VStack {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFit()
+                .frame(height: 200)
+                .cornerRadius(10)
+                .padding(.bottom, 10)
+            
+            // Bild entfernen
+            Button(action: {
+                // Bild entfernen
+                self.imageData = nil
+                self.selectedItem = nil
+            }) {
+                Text("Bild entfernen")
+                    .foregroundColor(.red)
+            }
+        }
+    }
+    
+    // neues Bild hochladen
+    private var newImage: some View {
+        PhotosPicker(
+            selection: $selectedItem,
+            matching: .images,
+            photoLibrary: .shared()
+        ) {
+            Text("Bild hochladen")
+                .foregroundColor(.blue)
+        }
+        .onChange(of: selectedItem) {
+            Task {
+                if let selectedItem, let data = try? await selectedItem.loadTransferable(type: Data.self) {
+                    imageData = data
+                }
+            }
+        }
+    }
+    
+    // Button zum speichern
+    private var saveButton: some View {
+        Button(action: saveSammelposten) {
+            Text("Sammelposten speichern")
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
+        .foregroundColor(.white)
+        .padding()
+        .background(Color.blue)
+        .cornerRadius(10)
     }
 }

@@ -23,6 +23,7 @@ struct PostersMainView: View {
     @State private var posterToDelete: UUID? // Die ID des Posters, das gelöscht werden soll
     @State private var isEditSheetPresented = false // Steuert das Sheet
     @State private var selectedPoster: PosterResponseDTO? // Das aktuell zu bearbeitende Poster
+    @State private var selectedPosterImage: Data? // Das aktuell zu bearbeitende Poster
     
 
     var filteredPosters: [PosterWithSummary] {
@@ -49,11 +50,9 @@ struct PostersMainView: View {
                         .foregroundColor(.secondary)
                 } else {
                     // Wenn die Sammelposten geladen wurden, wird die Liste angezeigt
-                    //listView()
                     forEachPoster
                 }
             }
-            
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen")
             .navigationTitle("Plakate")
             .toolbar {
@@ -74,8 +73,15 @@ struct PostersMainView: View {
         
         // Sheet um Sammelposten zu bearbeiten
         .sheet(isPresented: $isEditSheetPresented) {
-            if let selectedPoster = selectedPoster {
-                EditPosterView(poster: selectedPoster)
+            if let poster = selectedPoster, let image = selectedPosterImage {
+                EditPosterView(poster: poster, image: image).environmentObject(posterManager)
+            } else {
+                Text("Lade Poster...") // Dummy-View als Platzhalter
+            }
+        }
+        .onChange(of: selectedPosterImage) { newValue in
+            if newValue != nil {
+                isEditSheetPresented = true
             }
         }
         .onAppear(){
@@ -132,6 +138,18 @@ extension PostersMainView {
                             .frame(maxWidth: .infinity)
                             .padding(4)
                             .contextMenu { // Kontextmenü für langes Drücken
+                                if let imageData = posterWithSummary.image {
+                                    Button {
+                                        selectedPoster = posterWithSummary.poster
+                                        selectedPosterImage = imageData
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            isEditSheetPresented = true
+                                        }
+                                    } label: {
+                                        Label("Bearbeiten", systemImage: "pencil")
+                                    }
+                                }
+
                                 Button(role: .destructive) {
                                     deletePoster(poster: posterWithSummary.poster)
                                 } label: {

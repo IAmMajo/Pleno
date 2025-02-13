@@ -19,10 +19,17 @@ struct EventRidesView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(filteredRides, id: \.id) { eventRide in
-                    // Link zur Detailansicht; Das ViewModel wird als EnvironmentObject mitgegeben
-                    NavigationLink(destination: EventRideDetailView(rideId: eventRide.id).environmentObject(rideViewModel)) {
-                        Text("\(eventRide.eventName) am \(DateTimeFormatter.formatDate(eventRide.starts))")
+                // Unterscheidung, ob Fahrten vorhanden sind
+                if filteredRides.isEmpty {
+                    Section {
+                        Text("Keine Fahrten vorhanden.")
+                            .foregroundColor(.gray)
+                    }
+                } else {
+                    ForEach(filteredRides, id: \.id) { eventRide in
+                        NavigationLink(destination: EventRideDetailView(rideId: eventRide.id).environmentObject(rideViewModel)) {
+                            Text("\(eventRide.eventName) am \(DateTimeFormatter.formatDate(eventRide.starts))")
+                        }
                     }
                 }
             }
