@@ -436,7 +436,7 @@ struct UserController: RouteCollection {
             try request.content.encode(emailData)
         }
         
-        guard response.status == .ok else {
+        guard response.status == .noContent else {
             throw Abort(.internalServerError, reason: "Failed to send email: \(response.status)")
         }
         
@@ -827,7 +827,7 @@ struct UserController: RouteCollection {
             try request.content.encode(emailData)
         }
         
-        guard response.status == .ok else {
+        guard response.status == .noContent else {
             throw Abort(.internalServerError, reason: "Failed to send email: \(response.status)")
         }
         return Response(status: .ok, body: .init(string: "If the email exists, a reset code has been sent."))
