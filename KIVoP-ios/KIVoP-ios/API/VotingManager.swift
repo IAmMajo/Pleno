@@ -21,6 +21,7 @@ class VotingManager: ObservableObject {
 
     // Lädt alle Abstimmungen
     func getVotingsMeeting(meetingId: UUID) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/votings") else {
             DispatchQueue.main.async {
                 self.errorMessage = "Invalid URL"
