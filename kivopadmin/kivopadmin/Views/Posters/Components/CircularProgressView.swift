@@ -18,11 +18,13 @@ struct CircularProgressView: View {
         let totalTasks = totalHangs + toHang
 
         if status == .hangs {
-            let denominator = totalTasks + max(takenDown, 1) // Verhindert Division durch 0
-            return (totalHangs + takenDown) / denominator
+            let denominator = totalTasks + takenDown
+            return denominator == 0 ? 0 : (totalHangs + takenDown) / denominator
         } else {
-            return takenDown / (totalTasks + takenDown)
+            let denominator = totalTasks + takenDown
+            return denominator == 0 ? 0 : takenDown / denominator
         }
+
     }
 
     
