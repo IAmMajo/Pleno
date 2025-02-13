@@ -12,7 +12,9 @@ class AttendanceManager: ObservableObject {
 
     private let baseURL = "https://kivop.ipv64.net"
 
+    // Alle Anwesenheiten zu einer Sitzung laden
     func fetchAttendances(meetingId: UUID) {
+        errorMessage = nil
         guard let url = URL(string: "\(baseURL)/meetings/\(meetingId.uuidString)/attendances") else {
             DispatchQueue.main.async {
                 self.errorMessage = "Invalid URL"
@@ -88,6 +90,7 @@ class AttendanceManager: ObservableObject {
     
     @MainActor // Um die Anwesenheiten in der AttendancePlannungView korrekt zur Laufzeit zu aktualisieren
     func fetchAttendances2(meetingId: UUID) async throws -> [GetAttendanceDTO] {
+        errorMessage = nil
         guard let url = URL(string: "\(baseURL)/meetings/\(meetingId.uuidString)/attendances") else {
             throw URLError(.badURL, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
         }

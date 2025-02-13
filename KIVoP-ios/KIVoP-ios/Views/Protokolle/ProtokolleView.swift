@@ -162,7 +162,7 @@ extension RecordsMainView {
                         }
 
                         // Optional: Zeige das Startdatum des Meetings
-                        Text("Start: \(meetingWithRecords.meeting.start.formatted(date: .abbreviated, time: .shortened))")
+                        Text("\(DateTimeFormatter.formatDate(meetingWithRecords.meeting.start))")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
 
@@ -217,7 +217,9 @@ extension RecordsMainView {
                         .cornerRadius(4)
                 }
             }
-            .padding(.horizontal) // Optionales Padding für mehr Abstand an den Seiten
+            .padding(.horizontal)
         }
+        .frame(maxWidth: 150)
+        .fixedSize(horizontal: true, vertical: false)
     }
 }
