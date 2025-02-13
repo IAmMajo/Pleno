@@ -11,19 +11,19 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "   **Newsletterdaten**\n\nWenn Sie den auf der App angebotenen Newsletter beziehen möchten, benötigen wir von Ihnen eine E-Mail-Adresse sowie Informationen, welche uns die Überprüfung gestatten, dass Sie der Inhaber der angegebenen E-Mail-Adresse sind und mit dem Empfang des Newsletters einverstanden sind. Weitere Daten werden nicht bzw. nur auf freiwilliger Basis erhoben. Diese Daten verwenden wir ausschließlich für den Versand der angeforderten Informationen und geben diese nicht an Dritte weiter.\n\nDie Verarbeitung der in das Newsletteranmeldeformular eingegebenen Daten erfolgt ausschließlich auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Die erteilte Einwilligung zur Speicherung der Daten, der E-Mail-Adresse sowie deren Nutzung zum Versand des Newsletters können Sie jederzeit widerrufen, etwa über den „Austragen“-Link im Newsletter. Die Rechtmäßigkeit der bereits erfolgten Datenverarbeitungsvorgänge bleibt vom Widerruf unberührt.\n\nDie von Ihnen zum Zwecke des Newsletter-Bezugs bei uns hinterlegten Daten werden von uns bis zu Ihrer Austragung aus dem Newsletter bei uns gespeichert und nach der Abbestellung des Newsletters oder nach Zweckfortfall aus der Newsletterverteilerliste gelöscht. Wir behalten uns vor, E-Mail-Adressen aus unserem Newsletterverteiler nach eigenem Ermessen im Rahmen unseres berechtigten Interesses nach Art. 6 Abs. 1 lit. f DSGVO zu löschen oder zu sperren.\n\nDaten, die zu anderen Zwecken bei uns gespeichert wurden, bleiben hiervon unberührt."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "** newsletter data **\n\nIf you would like to obtain the newsletter offered on the app, we need an email address from you and information that allows us to check that you are the owner of the specified email address and agree to the receipt of the newsletter.Further data is not collected or only collected on a voluntary basis. We only use this data to send the requested information and do not pass it on to third parties.\n\nThe data entered in the newsletter registration form is processed exclusively on the basis of your consent (Art. 6 Para. 1 lit. a GDPR).You can revoke the consent to the storage of the data, the email address and its use to send the newsletter at any time, for example via the \"Hire\" link in the newsletter. The legality of the data processing processes that have already taken place remains unaffected by the revocation.\n\nThe data you have stored for the purpose of the newsletter cover will be saved by us until your edition from the newsletter and, after the newsletter has been canceled or after a purpose, from the newsletter list list. We reserve the right to delete or block email addresses from our newsletter distributor at our own discretion within the framework of our legitimate interest in accordance with Art. 6 Para. 1 lit. f GDPR.\n\nData that we have stored for other purposes remain unaffected."
+            "value" : "** Newsletter data **\n\nIf you would like to obtain the newsletter offered on the app, we need an email address from you and information that allows us to check that you are the owner of the specified email address and agree to the receipt of the newsletter.Further data is not collected or only collected on a voluntary basis. We only use this data to send the requested information and do not pass it on to third parties.\n\nThe data entered in the newsletter registration form is processed exclusively on the basis of your consent (Art. 6 Para. 1 lit. a GDPR).You can revoke the consent to the storage of the data, the email address and its use to send the newsletter at any time, for example via the \"Hire\" link in the newsletter. The legality of the data processing processes that have already taken place remains unaffected by the revocation.\n\nThe data you have stored for the purpose of the newsletter cover will be saved by us until your edition from the newsletter and, after the newsletter has been canceled or after a purpose, from the newsletter list list. We reserve the right to delete or block email addresses from our newsletter distributor at our own discretion within the framework of our legitimate interest in accordance with Art. 6 Para. 1 lit. f GDPR.\n\nData that we have stored for other purposes remain unaffected."
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "** Bülten Verileri **\n\nUygulamada sunulan bülteni almak istiyorsanız, sizden bir e -posta adresine ve belirtilen e -posta adresinin sahibi olduğunuzu ve bültenin alınmasını kabul etmemizi sağlayan bilgilere ihtiyacımız var.Daha fazla veri toplanmaz veya yalnızca gönüllü olarak toplanmaz. Bu verileri yalnızca istenen bilgileri göndermek ve üçüncü taraflara aktarmamak için kullanırız.\n\nBülten kayıt formuna girilen veriler yalnızca onayınıza göre işlenir (Madde 6 para. 1 Lit. A GDPR).Verilerin depolanmasına, e -posta adresine ve bültenin herhangi bir zamanda gönderilmesi için kullanımı, örneğin bültendeki \"Kiralama\" bağlantısı aracılığıyla rızayı iptal edebilirsiniz. Zaten gerçekleşmiş olan veri işleme işlemlerinin yasallığı, iptalten etkilenmez.\n\nBülten kapağının amacı için sakladığınız veriler, bültenden baskınız olana kadar ve bülten iptal edildikten sonra veya bir amaçtan sonra bülten listesinden kaydedilecektir. Bülteni distribütörümüzden e -posta adreslerini ART'a göre meşru ilgimizle saklama hakkını saklı tutuyoruz.\n\nBaşka amaçlar için sakladığımız veriler etkilenmez."
           }
         }
@@ -74,7 +74,27 @@
       }
     },
     " Vereinsreise..." : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Vereinsreise..."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Club trip..."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernek gezisi..."
+          }
+        }
+      }
     },
     "- %@" : {
       "extractionState" : "stale",
@@ -234,10 +254,22 @@
     },
     "%@ am %@" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ am %@"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ am %2$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ tarihinde %@"
           }
         }
       }
@@ -309,7 +341,26 @@
       }
     },
     "⚠️ %@ nicht unterstützt" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ %@ nicht unterstützt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ %@ not supported"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ %@ desteklenmiyor"
+          }
+        }
+      }
     },
     "1. Datenschutz auf einen Blick" : {
       "localizations" : {
@@ -979,7 +1030,26 @@
       }
     },
     "Adresse auswählen" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresse auswählen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select address"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adres seçin"
+          }
+        }
+      }
     },
     "Adresse suchen" : {
       "localizations" : {
@@ -1666,7 +1736,26 @@
       }
     },
     "Benutzername" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benutzername"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Username"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanıcı adı"
+          }
+        }
+      }
     },
     "Benutzername:" : {
       "extractionState" : "stale",
@@ -2090,7 +2179,26 @@
       }
     },
     "Datum und Zeit" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datum und Zeit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date and Time"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarih ve saat"
+          }
+        }
+      }
     },
     "Datum: %@" : {
       "localizations" : {
@@ -2625,10 +2733,22 @@
     },
     "Endzeit: %@ um %@" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Endzeit: %@ um %@"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Endzeit: %1$@ um %2$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son zaman: %@ da %@"
           }
         }
       }
@@ -2659,19 +2779,19 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "erstelle "
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "create"
+            "value" : "create "
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "yaratmak"
           }
         }
@@ -2744,7 +2864,26 @@
       }
     },
     "Event %@ bearbeiten" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Event %@ bearbeiten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit event %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkinlik %@ düzenle"
+          }
+        }
+      }
     },
     "Event erstellen" : {
       "localizations" : {
@@ -2769,13 +2908,70 @@
       }
     },
     "Event löschen?" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Event löschen?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete event?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkinliği sil?"
+          }
+        }
+      }
     },
     "Event: %@" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Event: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Event: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkinlik: %@"
+          }
+        }
+      }
     },
     "Eventfahrten" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eventfahrten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Event trips"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkinlik sürüşleri"
+          }
+        }
+      }
     },
     "Events" : {
       "localizations" : {
@@ -2800,16 +2996,92 @@
       }
     },
     "Fahrer: %@" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrer: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Driver: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sürücü: %@"
+          }
+        }
+      }
     },
     "Fahrgemeinschaften" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrgemeinschaften"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carpooling"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Araç paylaşımı"
+          }
+        }
+      }
     },
     "Fahrt-Details" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrt-Details"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ride Details"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yolculuk Detayları"
+          }
+        }
+      }
     },
     "Fahrt-Informationen" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrt-Informationen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drive Information"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yolculuk Bilgileri"
+          }
+        }
+      }
     },
     "Fahrt-Informationen:" : {
       "extractionState" : "stale",
@@ -2835,16 +3107,92 @@
       }
     },
     "Fahrt: %@" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrt: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drive: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yolculuk: %@"
+          }
+        }
+      }
     },
     "Fahrtdetails" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrtdetails"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Travel Details"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yolculuk detayları"
+          }
+        }
+      }
     },
     "Fahrttyp auswählen" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrttyp auswählen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select ride type"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yolculuk türünü seçin"
+          }
+        }
+      }
     },
     "Fahrzeug: %@" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrzeug: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vehicle: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Araç: %@"
+          }
+        }
+      }
     },
     "Fast Fertig" : {
       "localizations" : {
@@ -2936,7 +3284,26 @@
       }
     },
     "Fehler beim Speichern." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehler beim Speichern."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error in saving."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydetme hatası."
+          }
+        }
+      }
     },
     "Fehler: %@" : {
       "localizations" : {
@@ -3071,7 +3438,26 @@
       }
     },
     "Freie Plätze: %u" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freie Plätze: %u"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Available seats: %u"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boş yerler: %u"
+          }
+        }
+      }
     },
     "Galerie" : {
       "localizations" : {
@@ -3096,7 +3482,26 @@
       }
     },
     "Generierter Social-Media-Post" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generierter Social-Media-Post"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generated social media post"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üretilen Sosyal Medya Gönderisi"
+          }
+        }
+      }
     },
     "Hallo %@" : {
       "localizations" : {
@@ -3498,10 +3903,48 @@
       }
     },
     "Keine Mitfahrer" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Mitfahrer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No passengers"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yolcu yok"
+          }
+        }
+      }
     },
     "Keine Orte verfügbar" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Orte verfügbar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No locations available"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mevcut yer yok"
+          }
+        }
+      }
     },
     "Keine Protokolle verfügbar" : {
       "localizations" : {
@@ -3548,7 +3991,26 @@
       }
     },
     "Keine Sammelposten gefunden." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Sammelposten gefunden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No collection posts found."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiçbir toplu gönderi bulunamadı."
+          }
+        }
+      }
     },
     "Keine Sitzung verfügbar" : {
       "localizations" : {
@@ -3573,7 +4035,26 @@
       }
     },
     "Keine Sitzungen verfügbar" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Sitzungen verfügbar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No sessions available"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiç oturum mevcut değil"
+          }
+        }
+      }
     },
     "Keine Teilnehmer" : {
       "localizations" : {
@@ -3598,7 +4079,26 @@
       }
     },
     "Keine Teilnehmer ohne Feedback" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Teilnehmer ohne Feedback"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No participants without feedback"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geri bildirim olmadan katılımcı yok"
+          }
+        }
+      }
     },
     "Keine Teilnehmer sichtbar." : {
       "localizations" : {
@@ -3645,10 +4145,48 @@
       }
     },
     "KI-generierte Verbesserung" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KI-generierte Verbesserung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI-generated improvement"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yapay zeka tarafından oluşturulan iyileştirme"
+          }
+        }
+      }
     },
     "KI-Vorschlag" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KI-Vorschlag"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI Suggestion"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yapay Zeka Önerisi"
+          }
+        }
+      }
     },
     "KIVoP " : {
       "extractionState" : "stale",
@@ -3740,7 +4278,26 @@
       }
     },
     "Lade Einstellungen..." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lade Einstellungen..."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading settings..."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar yükleniyor..."
+          }
+        }
+      }
     },
     "Lade Ergebnisse..." : {
       "localizations" : {
@@ -3787,10 +4344,48 @@
       }
     },
     "Lade Fahrtdetails..." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lade Fahrtdetails..."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading journey details..."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yolculuk detayları yükleniyor..."
+          }
+        }
+      }
     },
     "Lade Orte..." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lade Orte..."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading places..."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yerler yükleniyor..."
+          }
+        }
+      }
     },
     "Lade Profilbild..." : {
       "localizations" : {
@@ -3837,10 +4432,48 @@
       }
     },
     "Lade Sammelposten..." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lade Sammelposten..."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading bulk posts..."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toplu mesajları yüklüyor..."
+          }
+        }
+      }
     },
     "Lade Sitzungen..." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lade Sitzungen..."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading sessions..."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturumlar yükleniyor..."
+          }
+        }
+      }
     },
     "Lade Umfragen..." : {
       "localizations" : {
@@ -4358,7 +4991,26 @@
       }
     },
     "Mit" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ile"
+          }
+        }
+      }
     },
     "Mit " : {
       "extractionState" : "stale",
@@ -4384,7 +5036,26 @@
       }
     },
     "Mitfahrer" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitfahrer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passenger"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Araba arkadaşı"
+          }
+        }
+      }
     },
     "Mitglieder" : {
       "localizations" : {
@@ -4476,7 +5147,26 @@
       }
     },
     "Möchtest du das Event '%@' wirklich löschen?" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Möchtest du das Event '%@' wirklich löschen?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do you really want to delete the event '%@'?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@' etkinliğini gerçekten silmek istiyor musunuz?"
+          }
+        }
+      }
     },
     "Möchtest du deinen Account wirklich löschen?" : {
       "localizations" : {
@@ -4523,7 +5213,26 @@
       }
     },
     "Möchtest du dieses Konto wirklich löschen?" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Möchtest du dieses Konto wirklich löschen?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do you really want to delete this account?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu hesabı gerçekten silmek istiyor musunuz?"
+          }
+        }
+      }
     },
     "Nach Frage suchen" : {
       "localizations" : {
@@ -5062,19 +5771,19 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "oder plane deine nächste "
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Or plan your next"
+            "value" : " or plan your next "
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "or plan your next"
           }
         }
@@ -5213,7 +5922,26 @@
       }
     },
     "Originaltext" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Originaltext"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Original text"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özgün metin"
+          }
+        }
+      }
     },
     "Ort" : {
       "localizations" : {
@@ -5526,7 +6254,26 @@
       }
     },
     "Pleno" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Pleno"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pleno"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Tam"
+          }
+        }
+      }
     },
     "Positionen" : {
       "extractionState" : "stale",
@@ -5776,19 +6523,19 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Ratssitzungen, "
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Council meetings,"
+            "value" : "Council meetings, "
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Konsey toplantıları,"
           }
         }
@@ -5951,7 +6698,26 @@
       }
     },
     "Sie müssen zuerst an der Abstimmung teilnehmen, um den Live-Stand zu sehen." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sie müssen zuerst an der Abstimmung teilnehmen, um den Live-Stand zu sehen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You must first participate in the voting to see the live status."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı sonuçları görmek için önce oylamaya katılmanız gerekiyor."
+          }
+        }
+      }
     },
     "Sie müssen zuerst an der Umfrage teilnehmen, um den Live-Stand zu sehen." : {
       "extractionState" : "stale",
@@ -6153,7 +6919,26 @@
       }
     },
     "Spezialfahrt-Details" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spezialfahrt-Details"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Special Trip Details"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel Seyahat Detayları"
+          }
+        }
+      }
     },
     "Sprache" : {
       "localizations" : {
@@ -6332,14 +7117,45 @@
       }
     },
     "Startort" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startort"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlangıç noktası"
+          }
+        }
+      }
     },
     "Startzeit: %@ um %@" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startzeit: %@ um %@"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Startzeit: %1$@ um %2$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlama saati: %@, %@'de"
           }
         }
       }
@@ -6433,7 +7249,26 @@
       }
     },
     "Teilen" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teilen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paylaşmak"
+          }
+        }
+      }
     },
     "Teilnahme bestätigen" : {
       "localizations" : {
@@ -6480,10 +7315,48 @@
       }
     },
     "Teilnehmer" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teilnehmer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Participant"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Katılımcı"
+          }
+        }
+      }
     },
     "Teilnehmer ohne Feedback" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teilnehmer ohne Feedback"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Participants without feedback"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geri bildirim olmadan katılımcılar"
+          }
+        }
+      }
     },
     "Teilnehmer:" : {
       "extractionState" : "stale",
@@ -6553,7 +7426,26 @@
       }
     },
     "Übernehmen" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übernehmen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take over"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üstlenmek"
+          }
+        }
+      }
     },
     "Übersetzen" : {
       "localizations" : {
@@ -6867,7 +7759,6 @@
       }
     },
     "Vereinsreise..." : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6955,7 +7846,18 @@
         }
       }
     },
+    "Verwalte" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage"
+          }
+        }
+      }
+    },
     "Verwalte " : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6978,7 +7880,26 @@
       }
     },
     "Verwerfen" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwerfen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reddetmek"
+          }
+        }
+      }
     },
     "VL" : {
       "localizations" : {
@@ -7137,7 +8058,26 @@
       }
     },
     "zu einer verbesserten" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zu einer verbesserten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "to an improved"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "daha iyi bir hale"
+          }
+        }
+      }
     },
     "zu einer verbesserten " : {
       "extractionState" : "stale",
@@ -7163,7 +8103,26 @@
       }
     },
     "Zukünftige Fahrten" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zukünftige Fahrten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Future Trips"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelecek seyahatler"
+          }
+        }
+      }
     },
     "Zur Plakat Position" : {
       "extractionState" : "stale",
