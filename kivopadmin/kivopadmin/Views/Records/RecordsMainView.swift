@@ -94,26 +94,42 @@ extension RecordsMainView {
     
     // Legende, die die Farben der unterschiedlichen Status anzeigt
     private var legende: some View {
-        HStack{
-            Text("In Bearbeitung")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .padding(4)
-                .background(Color.orange.opacity(0.2))
-                .cornerRadius(4)
-            Text("Eingereicht")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .padding(4)
-                .background(Color.blue.opacity(0.2))
-                .cornerRadius(4)
-            Text("Veröffentlicht")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .padding(4)
-                .background(Color.green.opacity(0.2))
-                .cornerRadius(4)
+        ZStack {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(.ultraThickMaterial)
+                .frame(maxWidth: .infinity, maxHeight: 40) // Passt sich an
+
+            HStack {
+                Text("Legende")
+                
+                Spacer()
+
+                HStack {
+                    Text("In Bearbeitung: \(recordManager.recordsNotApproved)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(4)
+                        .background(Color.orange.opacity(0.2))
+                        .cornerRadius(4)
+                    Text("Eingereicht: \(recordManager.recordsNotSubmitted)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(4)
+                        .background(Color.blue.opacity(0.2))
+                        .cornerRadius(4)
+                    Text("Veröffentlicht: \(recordManager.recordsApproved)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(4)
+                        .background(Color.green.opacity(0.2))
+                        .cornerRadius(4)
+                }
+            }
+            .padding(10) // Abstand innerhalb des Rechtecks
         }
+        .frame(maxWidth: .infinity) // ZStack soll sich über die volle Breite erstrecken
+        .padding(.horizontal) // Abstand zur Bildschirmkante
+
     }
 }
 

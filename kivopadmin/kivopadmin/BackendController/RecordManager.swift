@@ -10,17 +10,28 @@ struct MeetingWithRecords {
     var records: [GetRecordDTO]
 }
 
+// ViewModel für die Protokolle
 class RecordManager: ObservableObject {
+    // Gibt den Zustand des ViewModels an
     @Published var isLoading: Bool = false
+    
+    // Potentielle Fehlermeldung
     @Published var errorMessage: String? = nil
 
+    // Array mit allen Sitzungen und zugehörigen Protokollen
     @Published var meetingsWithRecords: [MeetingWithRecords] = []
     
+    // Anzahl der Protokolle, die noch nicht veröffentlicht wurden
     @Published var recordsNotApproved: Int = 0
-
+    @Published var recordsNotSubmitted: Int = 0
+    @Published var recordsApproved: Int = 0
+    @Published var record: GetRecordDTO? // Speichern eines einzelnen Records
     @Published var records: [GetRecordDTO] = [] // Records-Array
 
+    // Funktion, die alle Sitzungen mit zugehörigen Protokollen lädt
     func getAllMeetingsWithRecords() {
+        errorMessage = nil
+        
         var meetings: [GetMeetingDTO] = [] // Meetings-Array
 
         guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
@@ -93,12 +104,20 @@ class RecordManager: ObservableObject {
                     // Warten auf alle asynchronen Aufrufe
                     dispatchGroup.notify(queue: .main) {
                         self?.meetingsWithRecords = meetingsWithRecords
+                        let notSubmittedRecordsCount = meetingsWithRecords.flatMap { $0.records }
+                            .filter { $0.status == .underway } // Filtere nach 'underway' Status
+                            .count
                         let submittedRecordsCount = meetingsWithRecords.flatMap { $0.records }
                             .filter { $0.status == .submitted } // Filtere nach 'submitted' Status
                             .count
+                        
+                        let approvedRecordsCount = meetingsWithRecords.flatMap { $0.records }
+                            .filter { $0.status == .approved } // Filtere nach 'submitted' Status
+                            .count
 
-                        // Setze die Zählung von nicht genehmigten Records (submitted)
                         self?.recordsNotApproved = submittedRecordsCount
+                        self?.recordsNotSubmitted = notSubmittedRecordsCount
+                        self?.recordsApproved = approvedRecordsCount
                     }
                     
                     
@@ -112,9 +131,10 @@ class RecordManager: ObservableObject {
         }.resume()
     }
 
-    // getRecordsMeeting muss den Completion-Handler verwenden
+    // getRecordsMeeting2 muss den Completion-Handler verwenden
     // Diese Funktion wird für die Fuktion getAllMeetingsWithRecords() benötigt
     func getRecordsMeeting2(meetingId: UUID, completion: @escaping ([GetRecordDTO]) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records") else {
             print("Invalid URL")
             completion([]) // Rückgabe eines leeren Arrays im Fehlerfall
@@ -160,8 +180,9 @@ class RecordManager: ObservableObject {
         }.resume()
     }
     
-
+    // Lädt Protokolle zu einer Sitzung
     func getRecordsMeeting(meetingId: UUID) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records") else {
             DispatchQueue.main.async {
                 self.errorMessage = "Invalid URL"
@@ -235,9 +256,11 @@ class RecordManager: ObservableObject {
         }.resume()
     }
     
-    @Published var record: GetRecordDTO? // Speichern eines einzelnen Records
 
+
+    // Lädt ein spezifisches Protokoll
     func getRecordMeetingLang(meetingId: UUID, lang: String) async {
+        errorMessage = nil
         // Erstelle die URL für die Anfrage
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records/\(lang)") else {
             print("Invalid URL")
@@ -287,8 +310,9 @@ class RecordManager: ObservableObject {
         }.resume()
     }
 
-    
+    // Aktualisiert ein Protokoll
     func patchRecordMeetingLang(patchRecordDTO: PatchRecordDTO, meetingId: UUID, lang: String) async {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records/\(lang)") else {
             print("Invalid URL")
             return
@@ -344,7 +368,9 @@ class RecordManager: ObservableObject {
         }
     }
     
+    // Löscht ein Protokoll
     func deleteRecordMeetingLang(meetingId: UUID, lang: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records/\(lang)") else {
             print("Invalid URL")
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
@@ -384,7 +410,9 @@ class RecordManager: ObservableObject {
         task.resume()
     }
     
+    // Übersetzt ein Protokoll
     func translateRecordMeetingLang(meetingId: UUID, lang1: String, lang2: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records/\(lang1)/translate/\(lang2)") else {
             print("Invalid URL")
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
@@ -424,8 +452,9 @@ class RecordManager: ObservableObject {
         task.resume()
     }
 
-
+    // Protokoll einreichen
     func submitRecordMeetingLang(meetingId: UUID, lang: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records/\(lang)/submit") else {
             print("Invalid URL")
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
@@ -465,7 +494,9 @@ class RecordManager: ObservableObject {
         task.resume()
     }
     
+    // Protokoll veröffentlichen
     func approveRecordMeetingLang(meetingId: UUID, lang: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/records/\(lang)/approve") else {
             print("Invalid URL")
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))

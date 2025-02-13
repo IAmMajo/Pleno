@@ -76,7 +76,7 @@ struct EditPosterPosition: View {
             date = posterPosition.expiresAt
             
             // alle User laden
-            userManager.fetchUsers()
+            userManager.fetchActiveUsers()
         }
         .onDisappear {
             // wenn die View verlassen wird, wird gespeichert

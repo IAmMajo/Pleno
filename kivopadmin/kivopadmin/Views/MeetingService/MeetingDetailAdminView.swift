@@ -6,7 +6,9 @@ import AuthServiceDTOs
 
 struct MeetingDetailAdminView: View {
     // Beim View Aufruf wird eine Sitzung übergeben
-    var meeting: GetMeetingDTO
+    @State var meeting: GetMeetingDTO
+    
+    @State private var sitzung: GetMeetingDTO? = nil
     
     @State private var isMeetingActive = false // Status für Meeting, entscheidend für die Funktion, die durch den Button ausgelöst wird
     @State private var showConfirmationAlert = false // Alert anzeigen
@@ -17,6 +19,9 @@ struct MeetingDetailAdminView: View {
     
     // Sheet für die Auswahl der Protokollanten
     @State private var showRecorderSelectionSheet = false
+    
+    // Sheet für das Bearbeiten der Sitzung
+    @State private var showEditMeetingSheet = false
     
     // ViewModels für die Anzeige der verschiedenen Informationen über eine Sitzung
     @StateObject private var meetingManager = MeetingManager()
@@ -66,7 +71,7 @@ struct MeetingDetailAdminView: View {
                     // Beschreibung
                     Section(header: Text("Beschreibung")) {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(meeting.description)
+                            Text(meetingManager.selectedMeeting?.description ?? "")
                         }
                     }
                     
@@ -117,9 +122,10 @@ struct MeetingDetailAdminView: View {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         HStack {
                             // Bearbeitungsbutton
-                            NavigationLink(destination: EditMeetingView(meeting: meeting)) {
-                                Text("Bearbeiten")
-                                    .foregroundColor(.blue)
+                            Button(action: {
+                                showEditMeetingSheet.toggle()
+                            }) {
+                                Text("Sitzung bearbeiten")
                             }
                             Text(DateTimeFormatter.formatDate(meeting.start))
                         }
@@ -153,10 +159,27 @@ struct MeetingDetailAdminView: View {
                     attendanceManager: attendanceManager
                 )
             }
+            // Sheet, um die Sitzung zu bearbeiten
+            .sheet(isPresented: $showEditMeetingSheet) {
+                EditMeetingView(meeting: meeting)
+                    .onDisappear {
+                        // Lokale Liste nach kurzer Verzögerung aktualisieren
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            meetingManager.getSingleMeeting(meetingId: meeting.id)
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            self.meeting = meetingManager.selectedMeeting!
+                        }
+                    }
+
+            }
             .onAppear(){
                 Task {
                     // Funktion, um die beim Öffnen der View aufgerufen wird
                     await loadView()
+                    if meetingManager.selectedMeeting != nil {
+                        self.meeting = meetingManager.selectedMeeting!
+                    }
                 }
             }
         }
@@ -164,17 +187,18 @@ struct MeetingDetailAdminView: View {
     
     private func loadView() async {
         do {
+            meetingManager.getSingleMeeting(meetingId: meeting.id)
             // 1. Abrufen der Meeting-Daten für die Protokolle
             recordManager.getRecordsMeeting(meetingId: meeting.id)
             
             // 2. Abrufen der Abstimmungs-Daten für die Sitzung
-            votingManager.getRecordsMeeting(meetingId: meeting.id)
+            votingManager.getVotingsMeeting(meetingId: meeting.id)
             
             // 3. Abrufen der Teilnehmer-Daten für die Sitzung
             attendanceManager.fetchAttendances(meetingId: meeting.id)
             
             // 4. Abrufen der Benutzer
-            userManager.fetchUsers()
+            userManager.fetchActiveUsers()
         }
     }
 
@@ -213,7 +237,7 @@ struct MeetingDetailAdminView: View {
 extension MeetingDetailAdminView {
     private var nameSection: some View {
         VStack {
-            Text(meeting.name)
+            Text(meetingManager.selectedMeeting?.name ?? "")
                 .font(.title)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
@@ -224,10 +248,15 @@ extension MeetingDetailAdminView {
     private var attendanceInfoSection: some View {
         HStack {
             // Startzeit
-            Text(meeting.start, style: .time)
+            if let startDate = meetingManager.selectedMeeting?.start {
+                Text(startDate, style: .time)
+            } else {
+                Text("...")
+            }
+
             
             // Dauer der Sitzung
-            if let duration = meeting.duration {
+            if let duration = meetingManager.selectedMeeting?.duration {
                 Text("(ca. \(duration) min.)")
                     .font(.caption)
                     .foregroundColor(.gray)
@@ -253,7 +282,7 @@ extension MeetingDetailAdminView {
     // Abschnitt für die Adresse
     private var locationSection: some View {
         Group {
-            if let location = meeting.location {
+            if let location = meetingManager.selectedMeeting?.location {
                 Section(header: Text("Adresse")) {
                     // Adresse wird zusammengebaut
                     let address = """

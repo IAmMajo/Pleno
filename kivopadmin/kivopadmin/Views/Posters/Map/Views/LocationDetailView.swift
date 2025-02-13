@@ -152,7 +152,7 @@ extension LocationDetailView {
             }
             Button("Löschen", role: .destructive) {
                 // Benutzer hat bestätigt, die Position zu löschen
-                locationViewModel.deleteSignlePosterPosition(
+                locationViewModel.deleteSinglePosterPosition(
                     positionId: position.position.id
                 ) {
                     locationViewModel.fetchPosterPositions(poster: poster)

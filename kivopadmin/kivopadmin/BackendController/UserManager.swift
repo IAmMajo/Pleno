@@ -5,11 +5,16 @@ import AuthServiceDTOs
 import Foundation
 import MeetingServiceDTOs
 
-
+// ViewModel, um Nutzer abzurufen
 class UserManager: ObservableObject {
     @Published var users: [UserProfileDTO] = [] // Beobachtbare Benutzerliste
+    
+    var userIdentity: GetIdentityDTO?
+    
+    var user: UserProfileDTO?
 
-    func fetchUsers() {
+    // Funktion, die aktive Nutzer filtert
+    func fetchActiveUsers() {
         // Abrufen der Benutzerprofile (siehe vorherige Implementierung)
         fetchUsers { [weak self] result in
             DispatchQueue.main.async {
@@ -25,6 +30,7 @@ class UserManager: ObservableObject {
         }
     }
 
+    // Funtkion, die alle Nutzer vom Server lädt (auch die, die noch nicht vom Admin angenommen wurden)
     private func fetchUsers(completion: @escaping (Result<[UserProfileDTO], Error>) -> Void) {
         guard let url = URL(string: "https://kivop.ipv64.net/users") else {
             //completion(.failure(APIError.invalidURL))
@@ -66,8 +72,8 @@ class UserManager: ObservableObject {
             }
         }.resume()
     }
-    
-    var user: UserProfileDTO?
+
+    // Lädt einen Benutzer zu seiner Id
     func getUser(userId: UUID){
         // Erstelle die URL für die Anfrage
         guard let url = URL(string: "https://kivop.ipv64.net/users/\(userId)") else {
@@ -117,7 +123,8 @@ class UserManager: ObservableObject {
             }
         }.resume()
     }
-    var userIdentity: GetIdentityDTO?
+
+    // Lädt die Identität eines Benutzers
     func getUserIdentity(userId: UUID) async {
         // Erstelle die URL für die Anfrage
         guard let url = URL(string: "https://kivop.ipv64.net/users/identities/\(userId)") else {
@@ -167,6 +174,4 @@ class UserManager: ObservableObject {
             print("Fehler beim Abrufen der Benutzeridentität: \(error.localizedDescription)")
         }
     }
-
-    
 }

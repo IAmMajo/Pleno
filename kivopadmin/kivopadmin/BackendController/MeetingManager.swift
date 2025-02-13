@@ -4,11 +4,26 @@ import Combine
 import Foundation
 import MeetingServiceDTOs
 
+// ViewModel für Sitzungen
 class MeetingManager: ObservableObject {
+    // Gibt den Zustand des ViewModels an
     @Published var isLoading: Bool = false
+    
+    // Potentielle Fehlermeldung
     @Published var errorMessage: String? = nil
+    
+    // Array mit allen Sitzungen
+    @Published var meetings: [GetMeetingDTO] = []
+    
+    // Aktuelle Sitzung
+    @Published var currentMeeting: GetMeetingDTO?
+    
+    // Ausgewählte Sitzung
+    @Published var selectedMeeting: GetMeetingDTO?
 
+    // Erstellt eine Sitzung
     func createMeeting(_ meeting: CreateMeetingDTO) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
             self.errorMessage = "Invalid URL."
             return
@@ -78,13 +93,9 @@ class MeetingManager: ObservableObject {
         }.resume()
     }
 
-    
-    
-    //
-    @Published var meetings: [GetMeetingDTO] = [] // Meetings-Array
-    @Published var currentMeeting: GetMeetingDTO?  // Meetings-Array
-    
+    // Lädt alle Sitzungen
     func fetchAllMeetings() {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
             errorMessage = "Invalid URL."
             return
@@ -152,7 +163,7 @@ class MeetingManager: ObservableObject {
         }.resume()
     }
 
-    
+    // Gibt alle Sitzungen zurück, die aktuell laufen
     func getCurrentMeeting() {
         // Überprüfen, ob es Meetings gibt
         guard !meetings.isEmpty else {
@@ -168,8 +179,9 @@ class MeetingManager: ObservableObject {
         }
     }
 
-    
+    // Aktualisiert eine Sitzung
     func updateMeeting(meetingId: UUID, patchDTO: PatchMeetingDTO, completion: @escaping () -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)") else {
             self.errorMessage = "Invalid URL."
             return
@@ -247,9 +259,79 @@ class MeetingManager: ObservableObject {
             }
         }.resume()
     }
-
     
+    // Lädt eine einzelne Sitzung
+    func getSingleMeeting(meetingId: UUID) {
+        errorMessage = nil
+        guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId)") else {
+            errorMessage = "Invalid URL."
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+
+        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            errorMessage = "Unauthorized: Token not found."
+            return
+        }
+
+        isLoading = true
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+
+                if let error = error {
+                    self?.errorMessage = "Network error: \(error.localizedDescription)"
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    self?.errorMessage = "Invalid response from server."
+                    return
+                }
+
+                guard let data = data else {
+                    self?.errorMessage = "No data received."
+                    return
+                }
+
+                let decoder = JSONDecoder()
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+                decoder.dateDecodingStrategy = .formatted(formatter)
+
+                // Prüfen, ob der Server eine Fehlermeldung geschickt hat
+                if !(200...299).contains(httpResponse.statusCode) {
+                    do {
+                        let errorResponse = try decoder.decode(ErrorResponse.self, from: data)
+                        self?.errorMessage = errorResponse.reason
+                        print("Server error: \(errorResponse.reason)")
+                    } catch {
+                        self?.errorMessage = "Server error: \(httpResponse.statusCode)"
+                        print("Failed to decode error response")
+                    }
+                    return
+                }
+
+                // Erfolgreiches Dekodieren der Meetings
+                do {
+                    self?.selectedMeeting = try decoder.decode(GetMeetingDTO.self, from: data)
+                    self?.errorMessage = nil // Falls vorher ein Fehler gesetzt war, wird er zurückgesetzt
+                } catch {
+                    self?.errorMessage = "Failed to decode meetings: \(error.localizedDescription)"
+                    print("Decoding error: \(error)")
+                }
+            }
+        }.resume()
+    }
+
+    // Löscht eine Sitzung
     func deleteMeeting(meetingId: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)") else {
             DispatchQueue.main.async {
                 completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
@@ -306,7 +388,9 @@ class MeetingManager: ObservableObject {
         }.resume()
     }
 
+    // Startet eine Sitzung
     func startMeeting(meetingId: UUID, completion: @escaping (Result<Data, Error>) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/begin") else {
             DispatchQueue.main.async {
                 completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
@@ -369,8 +453,9 @@ class MeetingManager: ObservableObject {
         }.resume()
     }
 
-
+    // Beendet eine Sitzung
     func endMeeting(meetingId: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/end") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
             return

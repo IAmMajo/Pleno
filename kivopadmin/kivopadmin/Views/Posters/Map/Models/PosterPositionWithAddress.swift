@@ -4,6 +4,7 @@ import Foundation
 import PosterServiceDTOs
 import SwiftUI
 
+// Eigene Datenstruktur, die eine Plakatposition mit der zugehörigen Adresse und dem zugehörigen Bild vereint
 struct PosterPositionWithAddress: Equatable, Identifiable {
     let position: PosterPositionResponseDTO
     let address: String

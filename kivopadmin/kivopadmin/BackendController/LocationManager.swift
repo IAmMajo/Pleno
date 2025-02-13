@@ -4,12 +4,20 @@ import Combine
 import MeetingServiceDTOs
 import Foundation
 
+// ViewModel für Orte
 class LocationManager: ObservableObject {
-    @Published var locations: [GetLocationDTO] = [] // Beobachtbare Benutzerliste
+    // Array mit verfügbaren Orten aus der Datenbank
+    @Published var locations: [GetLocationDTO] = []
+    
+    // Gibt den Zustand des ViewModels an
     @Published var isLoading: Bool = false
+    
+    // Potentielle Fehlermeldung
     @Published var errorMessage: String? = nil
 
+    // Lädt alle Orte, die in der Datenbank vorhanden sind
     func fetchLocations() {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/locations") else {
             errorMessage = "Invalid URL."
             return
