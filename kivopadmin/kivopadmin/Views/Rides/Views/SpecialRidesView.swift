@@ -9,14 +9,23 @@ struct SpecialRidesView: View {
     
     var body: some View {
         NavigationStack{
-            List{
-                ForEach(rideViewModel.specialRides, id: \.id){ specialRide in
-                    // Link zur Detailansicht; ViewModel wird als EnvironmentObject mitgegeben
-                    NavigationLink(destination: SpecialRideDetailView(rideId: specialRide.id).environmentObject(rideViewModel)){
-                        Text(specialRide.name)
+            List {
+                // Unterscheidung, ob Fahrten vorhanden sind
+                if rideViewModel.specialRides.isEmpty {
+                    Section {
+                        Text("Keine Fahrten vorhanden.")
+                            .foregroundColor(.gray)
+                    }
+                } else {
+                    ForEach(rideViewModel.specialRides, id: \.id) { specialRide in
+                        // Link zur Detailansicht; ViewModel wird als EnvironmentObject mitgegeben
+                        NavigationLink(destination: SpecialRideDetailView(rideId: specialRide.id).environmentObject(rideViewModel)) {
+                            Text(specialRide.name)
+                        }
                     }
                 }
             }
+            .navigationTitle("Besondere Fahrten")
         }
     }
 }

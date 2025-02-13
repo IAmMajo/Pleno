@@ -3,10 +3,12 @@
 import SwiftUI
 import PosterServiceDTOs
 
+// Gibt an, wie viele Plakate aufgehangen oder noch abzuhängen sind
 struct CircularProgressView: View {
     let poster: PosterWithSummary
     let status: PosterPositionStatus
     
+    // Berechnung, wie viel Prozent abgeschlossen sind
     var progress: Double {
         let hangs = Double(poster.summary?.hangs ?? 0)
         let overdue = Double(poster.summary?.overdue ?? 0)
@@ -28,12 +30,13 @@ struct CircularProgressView: View {
     }
 
     
-    
+    // Farbe des Kreises und der Schrift in Abhängigkeit des Status
     var getColor: Color {
         return status == .hangs ? .blue : .green
     }
     
     var body: some View {
+        // Summary auslesen
         let hangs = poster.summary?.hangs ?? 0
         let overdue = poster.summary?.overdue ?? 0
         let damaged = poster.summary?.damaged ?? 0
@@ -52,12 +55,12 @@ struct CircularProgressView: View {
             if status == .hangs {
                 Text("Aufgehangen")
                     .font(.subheadline)
-                    .foregroundStyle(.black.opacity(0.6))
+                    .foregroundStyle(.primary)
             }
             if status != .hangs {
                 Text("Abgehangen")
                     .font(.subheadline)
-                    .foregroundStyle(.black.opacity(0.6))
+                    .foregroundStyle(.primary)
             }
             ZStack {
                 Circle()
