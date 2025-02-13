@@ -3,7 +3,6 @@ package net.ipv64.kivop.components
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,7 +19,11 @@ import net.ipv64.kivop.ui.theme.Text_prime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MarkdownEditorTab(editableMarkdown: String, onMarkdownChange: (String) -> Unit,modifier: Modifier) {
+fun MarkdownEditorTab(
+    editableMarkdown: String,
+    onMarkdownChange: (String) -> Unit,
+    modifier: Modifier
+) {
   Column(modifier = modifier) {
     TextField(
         value = editableMarkdown,
@@ -28,17 +31,16 @@ fun MarkdownEditorTab(editableMarkdown: String, onMarkdownChange: (String) -> Un
           Log.d("MarkdownEditor", "TextField changed: $newValue")
           onMarkdownChange(newValue)
         },
-        modifier =
-            Modifier.background(color = Color.Transparent).fillMaxSize(),
+        modifier = Modifier.background(color = Color.Transparent).fillMaxSize(),
         colors =
             TextFieldDefaults.colors(
                 focusedTextColor = Text_prime,
                 unfocusedTextColor = Text_prime,
-                focusedContainerColor = Color.Transparent, 
+                focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
                 disabledContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent, 
-                unfocusedIndicatorColor = Color.Transparent, 
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
             ),
     )
   }
@@ -47,7 +49,10 @@ fun MarkdownEditorTab(editableMarkdown: String, onMarkdownChange: (String) -> Un
 @Composable
 fun MarkdownPreviewTab(markdown: String, modifier: Modifier) {
   Log.d("MarkdownPreview", "Markdown content: $markdown")
-  Column(modifier = modifier,horizontalAlignment = Alignment.Start) {
-    Markdown(modifier = Modifier.fillMaxWidth().padding(8.dp), markdown = markdown, fontColor = Text_prime)
+  Column(modifier = modifier, horizontalAlignment = Alignment.Start) {
+    Markdown(
+        modifier = Modifier.fillMaxWidth().padding(8.dp),
+        markdown = markdown,
+        fontColor = Text_prime)
   }
 }

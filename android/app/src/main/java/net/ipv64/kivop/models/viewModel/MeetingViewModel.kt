@@ -22,7 +22,6 @@ import net.ipv64.kivop.models.getVotings
 import net.ipv64.kivop.services.api.getAttendances
 import net.ipv64.kivop.services.api.getMeetingByID
 import net.ipv64.kivop.services.api.getProtocolsApi
-import net.ipv64.kivop.services.api.postExtendProtocol
 import net.ipv64.kivop.services.api.postGenerateSocialMediaPost
 import net.ipv64.kivop.services.api.putAttend
 import net.ipv64.kivop.services.api.putPlanAttendance
@@ -60,7 +59,6 @@ class MeetingViewModel(private val meetingId: String) : ViewModel() {
   fun clearLines() {
     _lines.value = emptyList() // Liste zurücksetzen
   }
-
 
   fun fetchMeeting() {
     viewModelScope.launch {

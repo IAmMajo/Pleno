@@ -9,13 +9,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import net.ipv64.kivop.services.api.postExtendProtocol
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetRecordDTO
 import net.ipv64.kivop.services.api.getProtocolApi
 import net.ipv64.kivop.services.api.patchProtocol
+import net.ipv64.kivop.services.api.postExtendProtocol
 
 class ProtocolViewModel(private val meetingId: String, private val protocolLang: String) :
     ViewModel() {
@@ -28,7 +26,6 @@ class ProtocolViewModel(private val meetingId: String, private val protocolLang:
   // Lokaler State für bearbeitbaren Markdown-Text
   private var _editableMarkdown = mutableStateOf("")
   var editableMarkdown: State<String> = _editableMarkdown
-
 
   // Privates StateFlow, in dem wir die Zeilen sammeln
   private val _lines = MutableStateFlow(emptyList<String>())
@@ -71,18 +68,16 @@ class ProtocolViewModel(private val meetingId: String, private val protocolLang:
     }
   }
 
-
   fun startExtendProtocol(content: String, lang: String) {
     Log.d("ProtocolStart", "startExtendProtocol called")
-    viewModelScope.launch(Dispatchers.Main) { 
+    viewModelScope.launch(Dispatchers.Main) {
       postExtendProtocol(content, lang).collect { line ->
         _lines.value = _lines.value + line
         Log.d("ProtocolViewModel", "Neue Zeile: $line")
       }
     }
   }
-  
-  
+
   fun startSocialMediaPost(content: String, lang: String) {
     Log.d("ProtocolStart", "startExtendProtocol called")
     viewModelScope.launch(Dispatchers.Main) {
@@ -92,17 +87,11 @@ class ProtocolViewModel(private val meetingId: String, private val protocolLang:
       }
     }
   }
-  
 }
 
-
-
-
-
-
-  class ProtocolViewModelFactory(
-  private val meetingId: String,
-  private val protocolLang: String,
+class ProtocolViewModelFactory(
+    private val meetingId: String,
+    private val protocolLang: String,
 ) : ViewModelProvider.Factory {
 
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
