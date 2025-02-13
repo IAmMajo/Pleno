@@ -5,88 +5,133 @@ import SwiftUI
 import MapKit
 
 class LocationsViewModel: ObservableObject {
-    @Published var uiImage: Data? = nil
+    // Aktuelle Position in der Karte
+    @Published var mapCameraPosition: MapCameraPosition = .region(
+        MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: 48.137154, longitude: 11.576124),
+            span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+        )
+    )
+    // Ausgewählte Benutzer, die für ein Plakat verantwortlich sind
+    // Sichtbar beim Hinzufügen einer Position unten rechts
     @Published var selectedUserNames: [String] = []
+    
+    // Bearbeitungsmodus
     @Published var isEditing = false
+    
+    // Bool, die angibt, ob die Adresse geladen wird
     @Published var isLoading: Bool = false
+    
+    // Bool Variable für die Satellitenansicht
     @Published var satelliteView: Bool = false
+    
+    // Variable für die Summary über einen Sammelposten
     @Published var summary: PosterSummaryResponseDTO? = nil
+    
+    // Variable für potentielle Fehler bei Fetch Befehlen
     @Published var errorMessage: String? = nil
+    
+    // Bool, die angibt, ob die Liste ausgeklappt ist
     @Published var showLocationsList: Bool = false
+    
+    // Bool, die angibt, ob das Sheet für eine Plakatposition geöffnet ist
     @Published var sheetPosition: PosterPositionWithAddress? = nil
-    @Published var selectedPosterPosition: PosterPositionWithAddress? // Aktuell ausgewählte Position
+    
+    // In dieser Variable wird die ausgewählte Plakatposition gespeichert
+    @Published var selectedPosterPosition: PosterPositionWithAddress?
+    
+    // Diese Variable gibt den ausgewählten Filter an
     @Published var selectedFilter: PosterPositionStatus? = nil {
         didSet {
             applyFilter()
         }
     }
 
-
+    // Variable mit allen Plakatpositionen mit zugehörigen Adressen
     @Published var posterPositionsWithAddresses: [PosterPositionWithAddress] = [] {
         didSet {
             applyFilter()
         }
     }
 
+    // Variable mit allen Plakatpositionen gefiltert nach ausgewähltem Filter
     @Published var filteredPositions: [PosterPositionWithAddress] = []
 
-    @Published var mapLocation: MKCoordinateRegion = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
-        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-    )
-
+    // Gibt den Zoom der Karte an
     let mapSpan = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
 
     // Initialisierung der Karte mit einem Standardwert
     init() {
-        self.mapLocation = MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
-            span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+        self.mapCameraPosition = .region(
+            MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: 51.6542, longitude: 7.3556),
+                span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+            )
         )
     }
 
-
+    // Liste ausklappen
     func toggleLocationsList(){
         withAnimation(.easeInOut){
             showLocationsList.toggle()
         }
     }
+    
+    // Wird aufgerufen, wenn der "nächste" Button gedrückt wurde
     func nextButtonPressed(){
+        // aktueller Index im Array
         guard let currentIndex = posterPositionsWithAddresses.firstIndex(where: { $0 == selectedPosterPosition }) else {
             return
         }
         
+        // nächsten Index auswählen
         let nextIndex = currentIndex + 1
+        
+        
         guard filteredPositions.indices.contains(nextIndex) else {
             guard let firstPosition = filteredPositions.first else { return }
+            // nächste Plakatposition aufrufen
             showNextLocation(location: firstPosition)
             return
         }
         
+        // nächste Plakatposition aufrufen
         let nextPosition = filteredPositions[nextIndex]
         showNextLocation(location: nextPosition)
     }
+    
+    // Funktion, die die nächste Plakatposition aufruft
     func showNextLocation(location: PosterPositionWithAddress){
         withAnimation(.easeInOut){
-            mapLocation = MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: location.position.latitude, longitude: location.position.longitude),
-                span: mapSpan
+            // Karte wird auf die neue Position gesetzt
+            mapCameraPosition = .region(
+                MKCoordinateRegion(
+                    center: CLLocationCoordinate2D(latitude: location.position.latitude, longitude: location.position.longitude),
+                    span: mapSpan
+                )
             )
+            // die Variable für das ausgewählte Plakat wird aktualisiert
             selectedPosterPosition = location
+            
+            // Liste wird wieder eingeklappt
             showLocationsList = false
         }
     }
     
+    // Funktion, um den Standort der Karte zu aktualsieren
     func updateMapLocation(location: PosterPositionWithAddress) {
         withAnimation(.easeInOut) {
-            mapLocation = MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: location.position.latitude, longitude: location.position.longitude),
-                span: mapSpan
+            mapCameraPosition = .region(
+                MKCoordinateRegion(
+                    center: CLLocationCoordinate2D(latitude: location.position.latitude, longitude: location.position.longitude),
+                    span: mapSpan
+                )
             )
             selectedPosterPosition = location // Aktuelle Position setzen
         }
     }
 
+    // Wählt die nächste Plakatposition aus
     func selectPosterPosition(at index: Int) {
         // Sicherstellen, dass der Index gültig ist
         guard index >= 0 && index < filteredPositions.count else {
@@ -97,7 +142,7 @@ class LocationsViewModel: ObservableObject {
         updateMapLocation(location: selectedPosition) // Karte und Auswahl aktualisieren
     }
 
-    
+    // den gesetzten Filter nach Status anwenden
     private func applyFilter() {
         guard let selectedFilter = selectedFilter else {
             // Wenn kein Filter gesetzt ist, alle Positionen zurückgeben
@@ -108,7 +153,7 @@ class LocationsViewModel: ObservableObject {
         filteredPositions = posterPositionsWithAddresses.filter { $0.position.status == selectedFilter }
     }
 
-
+    // Koordinaten in Adressen übersetzen
     func getAddressFromCoordinates(latitude: Double, longitude: Double, completion: @escaping (String?) -> Void) {
         let geocoder = CLGeocoder()
         let location = CLLocation(latitude: latitude, longitude: longitude)
@@ -129,6 +174,7 @@ class LocationsViewModel: ObservableObject {
         }
     }
 
+    // Funktion, um den Plakatpositionen eine Adresse hinzuzufügen
     private func generateAddresses(for positions: [PosterPositionResponseDTO]) {
         var positionsWithAddresses: [PosterPositionWithAddress] = []
         let dispatchGroup = DispatchGroup() // Für Synchronisierung mehrerer Anfragen
@@ -158,6 +204,8 @@ class LocationsViewModel: ObservableObject {
         }
 
     }
+    
+    // Funktion, um die Bilder der Plakatpositionen zu laden
     func fetchImagesForPositions() {
         let dispatchGroup = DispatchGroup()
 
@@ -182,7 +230,7 @@ class LocationsViewModel: ObservableObject {
         }
     }
 
-
+    // alle Plakatpositionen laden
     func fetchPosterPositions(poster: PosterResponseDTO) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/positions") else {
             errorMessage = "Invalid URL."
@@ -235,6 +283,8 @@ class LocationsViewModel: ObservableObject {
             }
         }.resume()
     }
+    
+    // Bild einer Plakatposition laden
     func fetchPosterPositionImage(posterPositionId: UUID, completion: @escaping (Data?) -> Void) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/positions/\(posterPositionId)/image") else {
             completion(nil)
@@ -262,7 +312,7 @@ class LocationsViewModel: ObservableObject {
     }
 
 
-    
+    // Summary über einen Sammelposten laden
     func fetchPosterSummary(poster: PosterResponseDTO) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/summary") else {
             errorMessage = "Invalid URL."
@@ -314,6 +364,7 @@ class LocationsViewModel: ObservableObject {
         }.resume()
     }
 
+    // Plakatposition erstellen
     func createPosterPosition(posterPosition: CreatePosterPositionDTO, posterId: UUID) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions") else {
             self.errorMessage = "Invalid URL."
@@ -385,6 +436,8 @@ class LocationsViewModel: ObservableObject {
         
 
     }
+    
+    // Plakatposition aktualisieren
     func patchPosterPosition(posterPositionId: UUID, posterPosition: CreatePosterPositionDTO, posterId: UUID) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions/\(posterPositionId)") else {
             self.errorMessage = "Invalid URL."
@@ -457,7 +510,8 @@ class LocationsViewModel: ObservableObject {
 
     }
     
-    func deleteSignlePosterPosition(positionId: UUID, completion: @escaping () -> Void) {
+    // Plakatposition löschen
+    func deleteSinglePosterPosition(positionId: UUID, completion: @escaping () -> Void) {
         guard let url = URL(string: "https://kivop.ipv64.net/posters/positions/\(positionId)") else {
             self.errorMessage = "Invalid URL."
             return

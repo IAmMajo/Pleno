@@ -32,6 +32,9 @@ struct LocationsView: View {
     
     // Bool Variable für das User Selection Sheet
     @State private var showUserSelectionSheet = false
+    
+    // Variable für den aktuellen Standort
+    @State private var currentLocation: CLLocationCoordinate2D?
 
     // Optionen für den Filter, um nach Plakatpositionen zu suchen
     private var filterOptions: [PosterPositionStatus] = [.toHang, .hangs, .damaged, .overdue, .takenDown]
@@ -53,7 +56,6 @@ struct LocationsView: View {
         ZStack {
             // Karte
             mapLayer
-                .ignoresSafeArea()
             
             // Wenn der Benutzer Plakatpositionen hinzufügen will, wird editingView gezeigt
             if locationViewModel.isEditing{
@@ -125,22 +127,34 @@ struct LocationsView: View {
     
     
     private var mapLayer: some View {
-        Map(coordinateRegion: $locationViewModel.mapLocation, annotationItems: locationViewModel.filteredPositions, annotationContent: { position in
-            MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: position.position.latitude, longitude: position.position.longitude)){
-                LocationMapAnnotationView(position: position).scaleEffect(locationViewModel.selectedPosterPosition == position ? 1 : 0.6).shadow(radius: 10)
-                    .onTapGesture {
-                        // Wenn eine Position ausgewählt wird, wird der Bearbeitungsmodus deaktiviert
-                        withAnimation {
-                            locationViewModel.isEditing = false
+        Map(position: $locationViewModel.mapCameraPosition) {
+            // Annotationen für Standorte hinzufügen
+            ForEach(locationViewModel.filteredPositions) { position in
+                // Marker in der Karte
+                Annotation(position.address, coordinate: CLLocationCoordinate2D(latitude: position.position.latitude, longitude: position.position.longitude)) {
+                    // Ansicht der Marker
+                    LocationMapAnnotationView(position: position)
+                        .scaleEffect(locationViewModel.selectedPosterPosition == position ? 1 : 0.6)
+                        .shadow(radius: 10)
+                        // Aktionen, wenn auf einen Marker geklickt wird
+                        .onTapGesture {
+                            withAnimation {
+                                locationViewModel.isEditing = false
+                            }
+                            locationViewModel.showNextLocation(location: position)
                         }
-                        
-                        // Wenn eine Position ausgewählt wird, wird sie angezeigt
-                        locationViewModel.showNextLocation(location: position)
-                    }
+                }
             }
-        // Fallunterscheidung: Satelliten View oder normale Ansicht
-        }).mapStyle(locationViewModel.satelliteView ? .imagery : .standard)
+        }
+        // Satelliten- oder normale Ansicht
+        .mapStyle(locationViewModel.satelliteView ? .imagery : .standard)
+        // Standort aktualisieren wenn der Nutzer die Karte bewergt
+        // Wird für addLocation() benötigt, wo der aktuelle Standort ausgelesen wird
+        .onMapCameraChange { mapCameraUpdateContext in
+            currentLocation = mapCameraUpdateContext.camera.centerCoordinate
+        }
     }
+
     
     // Suchleiste
     private var searchBarSection: some View {
@@ -313,7 +327,7 @@ struct LocationsView: View {
         }
     }
     
-    // Suche nach einem Ort
+    // Suche nach einem Ort/Adresse
     private func performSearch() {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = searchText
@@ -330,9 +344,11 @@ struct LocationsView: View {
                 let coordinate = firstResult.placemark.coordinate
                 
                 // der user wird zu dem Ort geführt
-                locationViewModel.mapLocation = MKCoordinateRegion(
-                    center: coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001)
+                locationViewModel.mapCameraPosition = .region(
+                    MKCoordinateRegion(
+                        center: coordinate,
+                        span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001)
+                    )
                 )
             }
         }
@@ -431,24 +447,27 @@ struct LocationsView: View {
     
     // Plakatposition hinzufügen
     private func addLocation() {
-        let currentLocation = locationViewModel.mapLocation.center
         
         // CreatePosterPositionDTO befüllen
-        let newPosterPosition = CreatePosterPositionDTO(
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-            responsibleUsers: selectedUsers,
-            expiresAt: expiresAt
-        )
-        
-        // Positition an den Server schicken
-        locationViewModel.createPosterPosition(posterPosition: newPosterPosition, posterId: poster.id)
-                
-        // Eine Sekunde warten, damit der Server die neuen Daten verarbeiten kann
-        // Dann kann erneut ein GET durchgeführt werden und die neusten Daten sind vorhanden
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            locationViewModel.fetchPosterPositions(poster: poster)
+        if let currentLocation = currentLocation {
+            let newPosterPosition = CreatePosterPositionDTO(
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+                responsibleUsers: selectedUsers,
+                expiresAt: expiresAt
+            )
+            
+            // Positition an den Server schicken
+            locationViewModel.createPosterPosition(posterPosition: newPosterPosition, posterId: poster.id)
+                    
+            // Eine Sekunde warten, damit der Server die neuen Daten verarbeiten kann
+            // Dann kann erneut ein GET durchgeführt werden und die neusten Daten sind vorhanden
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                locationViewModel.fetchPosterPositions(poster: poster)
+            }
         }
+        
+
     }
 }
 
