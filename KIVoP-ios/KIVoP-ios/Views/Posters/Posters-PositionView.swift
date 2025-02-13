@@ -18,7 +18,7 @@ import PosterServiceDTOs
 struct Posters_PositionView: View {
    
    let posterId: UUID
-   @StateObject private var viewModel: PosterPositionViewModel
+   @StateObject private var viewModel: PosterPositionViewModel /// ViewModel responsible for managing poster position data
    
    // Initialize the ViewModel with poster and position IDs
    init(posterId: UUID, positionId: UUID) {

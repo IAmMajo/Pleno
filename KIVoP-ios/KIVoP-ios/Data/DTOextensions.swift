@@ -140,3 +140,4 @@ extension GetPollResultDTO: @retroactive Hashable {
       return lhs.index == rhs.index // Compare instances based on `index`
    }
 }
+

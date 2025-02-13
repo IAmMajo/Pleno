@@ -10,6 +10,8 @@ import SwiftUI
 import Charts
 import PollServiceDTOs
 
+// MARK: - Color Mapping for Pie Chart Segments
+/// A dictionary that maps voting option indices (`UInt8`) to specific colors
 let colorMappingPoll: [UInt8: Color] = [
    0: Color(.clear),
    1: Color(hex: 0xfffb3a),
@@ -25,40 +27,48 @@ let colorMappingPoll: [UInt8: Color] = [
    11: Color(hex: 0x80150d),
 ]
 
+// MARK: - PieChartView Component
+
+/// A SwiftUI view that displays poll results as a pie chart
 struct PollPieChartView: View {
-   let optionTextMap: [UInt8: String]
-   let pollResults: GetPollResultsDTO
+   let optionTextMap: [UInt8: String] // A dictionary mapping poll option indices to their respective text descriptions
+   let pollResults: GetPollResultsDTO // The poll results data, which contains the vote counts
 
    var body: some View {
       VStack {
          if pollResults.totalCount != 0 {
+            // MARK: - Pie Chart Visualization
             Chart(pollResults.results, id: \.index) { result in
                SectorMark(
-                  angle: .value("Count", result.count),
-                  //            innerRadius: .ratio(0.5),
-                  angularInset: 4
+                  angle: .value("Count", result.count), // Defines the segment size based on vote count
+                  angularInset: 4 // Adds spacing between segments
                )
-               .cornerRadius(6)
-               .foregroundStyle(colorMappingPoll[result.index] ?? .black)
-   //                     .foregroundStyle(by: .value("Option", optionTextMap[result.index] ?? ""))
+               .cornerRadius(6) // Smooths segment edges
+               .foregroundStyle(colorMappingPoll[result.index] ?? .black) // Assigns color from mapping
             }
             .scaledToFit()
    //         .chartLegend(alignment: .center, spacing: 16)
          } else {
+            // MARK: - Placeholder when No Votes are Cast
             Image(systemName: "chart.pie.fill")
                .resizable()
                .scaledToFit()
                .foregroundStyle(Color(UIColor.secondaryLabel).opacity(0.5))
          }
          
+         // MARK: - Generating Legend Colors & Texts
+         
+         /// Creates an array of colors sorted by their option indices
          let colorArray = colorMappingPoll
-             .sorted(by: { $0.key < $1.key }) // Sort by key
-             .map { $0.value } // Extract values
+             .sorted(by: { $0.key < $1.key }) // Sort colors by index
+             .map { $0.value } // Extract color values
          
+         /// Creates an array of option text sorted by their indices
          let textArray = optionTextMap
-            .sorted(by: { $0.key < $1.key })
-            .map { $0.value }
+            .sorted(by: { $0.key < $1.key }) // Sort labels by index
+            .map { $0.value } // Extract text labels
          
+         // MARK: - Wrapped Layout for Pie Chart Legend
          WrappedLayoutView(items: textArray, colors: colorArray)
             .padding(.top, 8)
       }
