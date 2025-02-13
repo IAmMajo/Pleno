@@ -7,6 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetAttendanceDTO
@@ -19,6 +22,8 @@ import net.ipv64.kivop.models.getVotings
 import net.ipv64.kivop.services.api.getAttendances
 import net.ipv64.kivop.services.api.getMeetingByID
 import net.ipv64.kivop.services.api.getProtocolsApi
+import net.ipv64.kivop.services.api.postExtendProtocol
+import net.ipv64.kivop.services.api.postGenerateSocialMediaPost
 import net.ipv64.kivop.services.api.putAttend
 import net.ipv64.kivop.services.api.putPlanAttendance
 
@@ -45,6 +50,17 @@ class MeetingViewModel(private val meetingId: String) : ViewModel() {
   var isAbsentVisible by mutableStateOf(true)
   var isAcceptedVisible by mutableStateOf(true)
   var isAttendanceVisible by mutableStateOf(false)
+
+  // Privates StateFlow, in dem wir die Zeilen sammeln
+  private val _lines = MutableStateFlow(emptyList<String>())
+
+  // Öffentliches (Read-Only) StateFlow
+  val lines = _lines.asStateFlow()
+
+  fun clearLines() {
+    _lines.value = emptyList() // Liste zurücksetzen
+  }
+
 
   fun fetchMeeting() {
     viewModelScope.launch {
@@ -112,6 +128,16 @@ class MeetingViewModel(private val meetingId: String) : ViewModel() {
         presentList = responseItems.filter { it.status == AttendanceStatus.present }
         absentList = responseItems.filter { it.status == AttendanceStatus.absent }
         acceptedList = responseItems.filter { it.status == AttendanceStatus.accepted }
+      }
+    }
+  }
+
+  fun startSocialMediaPost(content: String, lang: String) {
+    Log.d("ProtocolStart", "startExtendProtocol called")
+    viewModelScope.launch(Dispatchers.Main) {
+      postGenerateSocialMediaPost(content, lang).collect { line ->
+        _lines.value = _lines.value + line
+        Log.d("ProtocolViewModel", "Neue Zeile: $line")
       }
     }
   }
