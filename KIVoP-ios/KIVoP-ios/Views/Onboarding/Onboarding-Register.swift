@@ -24,89 +24,95 @@ struct Onboarding_Register: View {
     
     var body: some View {
         NavigationStack {
-            VStack {
-                Spacer().frame(height: 40)
-                
-                // Titel der Registrierungsseite
-                Text("Registrieren")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .padding(.bottom, 40)
-                    .padding(.top, 40)
-                
-                // Sektion für das Profilbild
-                profileImageSection()
-                
-                // Eingabefelder für Name, E-Mail und Passwörter
-                inputField(title: "Name", text: $name)
-                inputField(title: "E-Mail", text: $email)
-                    .keyboardType(.emailAddress)
-                    .autocapitalization(.none)
-                    .disableAutocorrection(true)
-                
-                passwordField()
-                confirmPasswordField()
-                
-                Spacer()
-                
-                // Datenschutz-Hinweis vor Registrierung
-                Button(action: {
-                    showPrivacyPolicy.toggle()
-                }) {
-                    if isLoading {
-                        ProgressView()
+            ZStack{
+                Color(UIColor.systemGray6)
+                    .edgesIgnoringSafeArea(.all)
+                VStack {
+                    
+                    Spacer().frame(height: 40)
+                    
+                    // Titel der Registrierungsseite
+                    Text("Registrieren")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding(.bottom, 40)
+                        .padding(.top, 40)
+                    
+                    // Sektion für das Profilbild
+                    profileImageSection()
+                    
+                    // Eingabefelder für Name, E-Mail und Passwörter
+                    inputField(title: "Name", text: $name)
+                    inputField(title: "E-Mail", text: $email)
+                        .keyboardType(.emailAddress)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                    
+                    passwordField()
+                    confirmPasswordField()
+                    
+                    Spacer()
+                    
+                    // Datenschutz-Hinweis vor Registrierung
+                    Button(action: {
+                        showPrivacyPolicy.toggle()
+                    }) {
+                        if isLoading {
+                            ProgressView()
+                                .frame(height: 44)
+                                .frame(maxWidth: .infinity)
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        } else {
+                            Text("Registrieren")
+                                .foregroundColor(.white)
+                                .frame(height: 44)
+                                .frame(maxWidth: .infinity)
+                                .background(Color.blue)
+                                .cornerRadius(10)
+                                .fontWeight(.bold)
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 10)
+                    // Button deaktiviert, falls Eingaben ungültig oder unvollständig sind
+                    .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty || !passwordValidationMessage.isEmpty || !confirmPasswordValidationMessage.isEmpty)
+                    
+                    // Navigation zurück zur Login-Seite
+                    NavigationLink(destination: Onboarding_Login()) {
+                        Text("Zurück zum Login")
+                            .foregroundColor(.blue)
                             .frame(height: 44)
                             .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    } else {
-                        Text("Registrieren")
-                            .foregroundColor(.white)
-                            .frame(height: 44)
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
+                            .background(Color(UIColor.systemGray5))
                             .cornerRadius(10)
                             .fontWeight(.bold)
                     }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 20)
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 10)
-                // Button deaktiviert, falls Eingaben ungültig oder unvollständig sind
-                .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty || !passwordValidationMessage.isEmpty || !confirmPasswordValidationMessage.isEmpty)
+                .safeAreaInset(edge: .bottom) {
+                    Color(.secondarySystemBackground) // Passt sich an den Dark Mode an
+                        .frame(height: 20)
+                }
                 
-                // Navigation zurück zur Login-Seite
-                NavigationLink(destination: Onboarding_Login()) {
-                    Text("Zurück zum Login")
-                        .foregroundColor(.blue)
-                        .frame(height: 44)
-                        .frame(maxWidth: .infinity)
-                        .background(Color(UIColor.systemGray5))
-                        .cornerRadius(10)
-                        .fontWeight(.bold)
+                .background(Color(UIColor.systemGray6))
+                .edgesIgnoringSafeArea(.all) // Deckt die gesamte Ansicht ab
+                .ignoresSafeArea()
+                .navigationBarBackButtonHidden(true)
+                // Falls Registrierung erfolgreich war, zur Onboarding-Warteansicht wechseln
+                .navigationDestination(isPresented: $registrationSuccessful) {
+                    Onboarding_Wait(email: $email)
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 20)
-            }
-            .safeAreaInset(edge: .bottom) {
-                Color(.secondarySystemBackground) // Passt sich an den Dark Mode an
-                    .frame(height: 20)
-            }
-
-            .background(Color(UIColor.systemGray6))
-            .ignoresSafeArea()
-            .navigationBarBackButtonHidden(true)
-            // Falls Registrierung erfolgreich war, zur Onboarding-Warteansicht wechseln
-            .navigationDestination(isPresented: $registrationSuccessful) {
-                Onboarding_Wait(email: $email)
-            }
-            // Datenschutzerklärung als Sheet anzeigen
-            .sheet(isPresented: $showPrivacyPolicy) {
-                PrivacyPolicyView(onAccept: {
-                    registerUser()
-                }, onCancel: {
-                    showPrivacyPolicy = false
-                })
+                // Datenschutzerklärung als Sheet anzeigen
+                .sheet(isPresented: $showPrivacyPolicy) {
+                    PrivacyPolicyView(onAccept: {
+                        registerUser()
+                    }, onCancel: {
+                        showPrivacyPolicy = false
+                    })
+                }
             }
         }
     }
