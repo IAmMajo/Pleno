@@ -4,14 +4,23 @@ import Combine
 import Foundation
 import MeetingServiceDTOs
 
+
+// ViewModel für Anwesenheiten
 class AttendanceManager: ObservableObject {
+    // Gibt den Zustand des ViewModels an
     @Published var isLoading: Bool = false
+    
+    // Variable für Potentielle Fehlermeldungen
     @Published var errorMessage: String? = nil
+    
+    // Array mit allen Teilnehmern einer Sitzung
     @Published var attendances: [GetAttendanceDTO] = [] // Records-Array
 
     private let baseURL = "https://kivop.ipv64.net"
 
+    // Lädt Anwesenheiten für eine Sitzung
     func fetchAttendances(meetingId: UUID) {
+        errorMessage = nil
         guard let url = URL(string: "\(baseURL)/meetings/\(meetingId.uuidString)/attendances") else {
             DispatchQueue.main.async {
                 self.errorMessage = "Invalid URL"
@@ -104,9 +113,10 @@ class AttendanceManager: ObservableObject {
         }.resume()
     }
 
-
+    // Lädt Anwesenheiten für eine Sitzung
     // Funktion mit Rückgabewert
     func fetchAttendances2(meetingId: UUID) async throws -> [GetAttendanceDTO] {
+        errorMessage = nil
         guard let url = URL(string: "\(baseURL)/meetings/\(meetingId.uuidString)/attendances") else {
             throw URLError(.badURL, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
         }
@@ -148,26 +158,21 @@ class AttendanceManager: ObservableObject {
         }
     }
 
-    // Fehlerstruktur für das JSON-Fehlermodell
-    struct ErrorResponse: Codable {
-        let error: Bool
-        let reason: String
-    }
-
 }
 extension AttendanceManager {
-    /// Gibt die Anzahl der Teilnehmer und die Gesamtzahl der Personen in einem Meeting zurück
+    // Gibt die Anzahl der Teilnehmer und die Gesamtzahl der Personen in einem Meeting zurück
     func attendanceSummary() -> String {
         let total = attendances.count
         let presentCount = attendances.filter { $0.status == .present }.count
         return "\(presentCount)/\(total)"
     }
     
+    // Gibt die Anzahl der Teilnehmer wieder
     func numberOfParticipants() -> Int {
         return attendances.filter { $0.status == .present }.count
     }
     
-    /// Gibt ein Array aller teilnehmenden Personen zurück
+    // Gibt ein Array aller teilnehmenden Personen zurück
     func allParticipants() -> [GetIdentityDTO] {
         return attendances.filter { $0.status == .present }.map { $0.identity }
     }

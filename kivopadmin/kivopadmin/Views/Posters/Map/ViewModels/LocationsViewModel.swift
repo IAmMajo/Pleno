@@ -232,6 +232,7 @@ class LocationsViewModel: ObservableObject {
 
     // alle Plakatpositionen laden
     func fetchPosterPositions(poster: PosterResponseDTO) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/positions") else {
             errorMessage = "Invalid URL."
             return
@@ -286,6 +287,7 @@ class LocationsViewModel: ObservableObject {
     
     // Bild einer Plakatposition laden
     func fetchPosterPositionImage(posterPositionId: UUID, completion: @escaping (Data?) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/posters/positions/\(posterPositionId)/image") else {
             completion(nil)
             return
@@ -314,6 +316,7 @@ class LocationsViewModel: ObservableObject {
 
     // Summary über einen Sammelposten laden
     func fetchPosterSummary(poster: PosterResponseDTO) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/summary") else {
             errorMessage = "Invalid URL."
             return
@@ -366,6 +369,7 @@ class LocationsViewModel: ObservableObject {
 
     // Plakatposition erstellen
     func createPosterPosition(posterPosition: CreatePosterPositionDTO, posterId: UUID) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions") else {
             self.errorMessage = "Invalid URL."
             return
@@ -439,6 +443,7 @@ class LocationsViewModel: ObservableObject {
     
     // Plakatposition aktualisieren
     func patchPosterPosition(posterPositionId: UUID, posterPosition: CreatePosterPositionDTO, posterId: UUID) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/positions/\(posterPositionId)") else {
             self.errorMessage = "Invalid URL."
             return
@@ -512,6 +517,7 @@ class LocationsViewModel: ObservableObject {
     
     // Plakatposition löschen
     func deleteSinglePosterPosition(positionId: UUID, completion: @escaping () -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/posters/positions/\(positionId)") else {
             self.errorMessage = "Invalid URL."
             return

@@ -168,13 +168,13 @@ struct MeetingDetailAdminView: View {
             recordManager.getRecordsMeeting(meetingId: meeting.id)
             
             // 2. Abrufen der Abstimmungs-Daten für die Sitzung
-            votingManager.getRecordsMeeting(meetingId: meeting.id)
+            votingManager.getVotingsMeeting(meetingId: meeting.id)
             
             // 3. Abrufen der Teilnehmer-Daten für die Sitzung
             attendanceManager.fetchAttendances(meetingId: meeting.id)
             
             // 4. Abrufen der Benutzer
-            userManager.fetchUsers()
+            userManager.fetchActiveUsers()
         }
     }
 

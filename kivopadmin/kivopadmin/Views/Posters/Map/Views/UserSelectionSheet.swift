@@ -58,7 +58,7 @@ struct UserSelectionSheet: View {
         }
         .onAppear {
             // User laden bei ViewAufruf
-            userManager.fetchUsers()
+            userManager.fetchActiveUsers()
             
             // lokale Kopie der ausgewählten UserNames
             localSelectedUserNames = locationViewModel.selectedUserNames

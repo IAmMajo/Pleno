@@ -5,34 +5,36 @@ import PosterServiceDTOs
 import Foundation
 import CoreLocation
 
+// Datenstruktur, die Sammelposten mit der zugehörigen Summary und dem Bild verbindet
 struct PosterWithSummary {
     var poster: PosterResponseDTO
     var summary: PosterSummaryResponseDTO?
     var image: Data?
 }
 
-
+// ViewModel für Sammelposten
 class PosterManager: ObservableObject {
-    @Published var posterPositions: [PosterPositionResponseDTO] = []
+    // Array mit allen Sammelposten
     @Published var posters: [PosterResponseDTO] = []
-    @Published var posterPositionsHangs: [PosterPositionResponseDTO] = []
-    @Published var posterPositionsToHang: [PosterPositionResponseDTO] = []
-    @Published var posterPositionsOverdue: [PosterPositionResponseDTO] = []
-    @Published var posterPositionsTakendown: [PosterPositionResponseDTO] = []
+    
+    // Gibt den Zustand des ViewModels an
     @Published var isLoading: Bool = false
+    
+    // Potentielle Fehlermeldung
     @Published var errorMessage: String? = nil
-    @Published var poster: PosterResponseDTO?
-
-    @Published var posterPosition: PosterPositionResponseDTO?
+    
+    // Array mit allen Sammelposten und gehörigen Summaries und Bild
     @Published var postersWithSummaries: [PosterWithSummary] = []
-
-
+    
+    
+    // Lädt alle Sammenposten
     func fetchPoster() {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/posters") else {
             errorMessage = "Invalid URL."
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
@@ -41,9 +43,9 @@ class PosterManager: ObservableObject {
             errorMessage = "Unauthorized: Token not found."
             return
         }
-
+        
         isLoading = true
-
+        
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
                 do{
@@ -76,25 +78,26 @@ class PosterManager: ObservableObject {
                         print(self?.posters)
                     }
                     
-
-
+                    
+                    
                 }catch {
                     self?.errorMessage = "Failed to decode positions: \(error.localizedDescription)"
                     print("Decoding error: \(error)")
                 }
-
-
+                
+                
             }
         }.resume()
     }
     
-
+    // Lädt alle Sammelposten mit Summaries
     func fetchPostersAndSummaries() {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/posters") else {
             errorMessage = "Invalid URL."
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
@@ -103,9 +106,9 @@ class PosterManager: ObservableObject {
             errorMessage = "Unauthorized: Token not found."
             return
         }
-
+        
         isLoading = true
-
+        
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
                 do {
@@ -125,7 +128,7 @@ class PosterManager: ObservableObject {
                         self?.errorMessage = "No data received."
                         return
                     }
-
+                    
                     let decoder = JSONDecoder()
                     let fetchedPosters = try decoder.decode([PosterResponseDTO].self, from: data)
                     
@@ -148,14 +151,16 @@ class PosterManager: ObservableObject {
             }
         }.resume()
     }
-
-
+    
+    
+    // Lädt das Bild zu einem Sammelposten
     func fetchPosterImage(posterId: UUID, completion: @escaping (Data?) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)/image") else {
             completion(nil)
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
@@ -164,7 +169,7 @@ class PosterManager: ObservableObject {
             completion(nil)
             return
         }
-
+        
         URLSession.shared.dataTask(with: request) { data, _, error in
             DispatchQueue.main.async {
                 if let data = data, error == nil {
@@ -176,6 +181,7 @@ class PosterManager: ObservableObject {
         }.resume()
     }
     func fetchPosterSummary(poster: PosterResponseDTO, index: Int) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(poster.id)/summary") else {
             errorMessage = "Invalid URL."
             return
@@ -189,7 +195,7 @@ class PosterManager: ObservableObject {
             errorMessage = "Unauthorized: Token not found."
             return
         }
-
+        
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
                 do {
@@ -222,17 +228,19 @@ class PosterManager: ObservableObject {
             }
         }.resume()
     }
-
+    
+    // Erstellt einen Sammelposten
     func createPoster(poster: CreatePosterDTO) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/posters") else {
             errorMessage = "Invalid URL."
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
+        
         // Authentifizierung hinzufügen
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -240,7 +248,7 @@ class PosterManager: ObservableObject {
             self.errorMessage = "Unauthorized: Token not found."
             return
         }
-
+        
         // JSON-Body direkt aus dem Poster-Objekt erstellen
         do {
             let jsonData = try JSONEncoder().encode(poster) // Poster als JSON kodieren
@@ -249,24 +257,24 @@ class PosterManager: ObservableObject {
             self.errorMessage = "Failed to encode Poster: \(error.localizedDescription)"
             return
         }
-
+        
         isLoading = true
-
+        
         // Netzwerkaufruf starten
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
                 self?.isLoading = false
-
+                
                 if let error = error {
                     self?.errorMessage = "Network error: \(error.localizedDescription)"
                     return
                 }
-
+                
                 guard let httpResponse = response as? HTTPURLResponse else {
                     self?.errorMessage = "Unexpected response format."
                     return
                 }
-
+                
                 if !(200...299).contains(httpResponse.statusCode) {
                     self?.errorMessage = "Server error: \(httpResponse.statusCode) - \(HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode))"
                     if let data = data, let responseText = String(data: data, encoding: .utf8) {
@@ -274,27 +282,29 @@ class PosterManager: ObservableObject {
                     }
                     return
                 }
-
+                
                 // Erfolg: Daten verarbeiten
                 if let data = data {
                     print("Success: \(String(data: data, encoding: .utf8) ?? "No response data")")
                 }
-
+                
                 self?.errorMessage = nil // Erfolgreich
             }
         }.resume()
     }
     
+    // Aktualisert einen Sammelposten
     func patchPoster(poster: CreatePosterDTO, posterId: UUID) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)") else {
             errorMessage = "Invalid URL."
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
+        
         // Authentifizierung hinzufügen
         if let token = UserDefaults.standard.string(forKey: "jwtToken") {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -302,7 +312,7 @@ class PosterManager: ObservableObject {
             self.errorMessage = "Unauthorized: Token not found."
             return
         }
-
+        
         // JSON-Body direkt aus dem Poster-Objekt erstellen
         do {
             let jsonData = try JSONEncoder().encode(poster) // Poster als JSON kodieren
@@ -311,24 +321,24 @@ class PosterManager: ObservableObject {
             self.errorMessage = "Failed to encode Poster: \(error.localizedDescription)"
             return
         }
-
+        
         isLoading = true
-
+        
         // Netzwerkaufruf starten
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
                 self?.isLoading = false
-
+                
                 if let error = error {
                     self?.errorMessage = "Network error: \(error.localizedDescription)"
                     return
                 }
-
+                
                 guard let httpResponse = response as? HTTPURLResponse else {
                     self?.errorMessage = "Unexpected response format."
                     return
                 }
-
+                
                 if !(200...299).contains(httpResponse.statusCode) {
                     self?.errorMessage = "Server error: \(httpResponse.statusCode) - \(HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode))"
                     if let data = data, let responseText = String(data: data, encoding: .utf8) {
@@ -336,88 +346,20 @@ class PosterManager: ObservableObject {
                     }
                     return
                 }
-
+                
                 // Erfolg: Daten verarbeiten
                 if let data = data {
                     print("Success: \(String(data: data, encoding: .utf8) ?? "No response data")")
                 }
-
+                
                 self?.errorMessage = nil // Erfolgreich
             }
         }.resume()
     }
-
-
-
-
-
-
     
-    
-    func deletePosters(posters: [DeleteDTO], completion: @escaping () -> Void) {
-        guard let url = URL(string: "https://kivop.ipv64.net/posters/batch") else {
-            self.errorMessage = "Invalid URL."
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        // Authentifizierung hinzufügen
-        if let token = UserDefaults.standard.string(forKey: "jwtToken") {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            self.errorMessage = "Unauthorized: Token not found."
-            return
-        }
-
-        // JSON-Daten in den Body der Anfrage schreiben
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601 // Datumsformatierung
-
-        do {
-            let jsonData = try encoder.encode(posters)
-            request.httpBody = jsonData
-
-            // JSON-Daten loggen (optional für Debugging)
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("JSON Payload for PATCH: \(jsonString)")
-            }
-        } catch {
-            self.errorMessage = "Failed to encode data: \(error.localizedDescription)"
-            return
-        }
-
-        isLoading = true
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                self?.isLoading = false
-
-                if let error = error {
-                    self?.errorMessage = "Network error: \(error.localizedDescription)"
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    self?.errorMessage = "Unexpected response format."
-                    return
-                }
-
-                if !(200...299).contains(httpResponse.statusCode) {
-                    self?.errorMessage = "Server error: \(httpResponse.statusCode) - \(HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode))"
-                    if let data = data, let responseText = String(data: data, encoding: .utf8) {
-                        print("Server Response: \(responseText)")
-                    }
-                    return
-                }
-
-            }
-        }.resume()
-    }
-    
+    // Löscht einen Sammelposten
     func deletePoster(posterId: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
+        errorMessage = nil
         // Erstellen der URL mit der Meeting-ID
         guard let url = URL(string: "https://kivop.ipv64.net/posters/\(posterId)") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
@@ -453,12 +395,5 @@ class PosterManager: ObservableObject {
                 completion(.failure(error))
             }
         }.resume()
-        
-        
     }
-    
-
-
-    
-
 }

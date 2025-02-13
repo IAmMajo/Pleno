@@ -4,11 +4,23 @@ import Combine
 import Foundation
 import MeetingServiceDTOs
 
+// ViewModel für Sitzungen
 class MeetingManager: ObservableObject {
+    // Gibt den Zustand des ViewModels an
     @Published var isLoading: Bool = false
+    
+    // Potentielle Fehlermeldung
     @Published var errorMessage: String? = nil
+    
+    // Array mit allen Sitzungen
+    @Published var meetings: [GetMeetingDTO] = []
+    
+    // Aktuelle Sitzung
+    @Published var currentMeeting: GetMeetingDTO?
 
+    // Erstellt eine Sitzung
     func createMeeting(_ meeting: CreateMeetingDTO) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
             self.errorMessage = "Invalid URL."
             return
@@ -78,13 +90,9 @@ class MeetingManager: ObservableObject {
         }.resume()
     }
 
-    
-    
-    //
-    @Published var meetings: [GetMeetingDTO] = [] // Meetings-Array
-    @Published var currentMeeting: GetMeetingDTO?  // Meetings-Array
-    
+    // Lädt alle Sitzungen
     func fetchAllMeetings() {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings") else {
             errorMessage = "Invalid URL."
             return
@@ -152,7 +160,7 @@ class MeetingManager: ObservableObject {
         }.resume()
     }
 
-    
+    // Gibt alle Sitzungen zurück, die aktuell laufen
     func getCurrentMeeting() {
         // Überprüfen, ob es Meetings gibt
         guard !meetings.isEmpty else {
@@ -168,8 +176,9 @@ class MeetingManager: ObservableObject {
         }
     }
 
-    
+    // Aktualisiert eine Sitzung
     func updateMeeting(meetingId: UUID, patchDTO: PatchMeetingDTO, completion: @escaping () -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)") else {
             self.errorMessage = "Invalid URL."
             return
@@ -248,8 +257,9 @@ class MeetingManager: ObservableObject {
         }.resume()
     }
 
-    
+    // Löscht eine Sitzung
     func deleteMeeting(meetingId: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)") else {
             DispatchQueue.main.async {
                 completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
@@ -306,7 +316,9 @@ class MeetingManager: ObservableObject {
         }.resume()
     }
 
+    // Startet eine Sitzung
     func startMeeting(meetingId: UUID, completion: @escaping (Result<Data, Error>) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/begin") else {
             DispatchQueue.main.async {
                 completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
@@ -369,8 +381,9 @@ class MeetingManager: ObservableObject {
         }.resume()
     }
 
-
+    // Beendet eine Sitzung
     func endMeeting(meetingId: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/end") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 1, userInfo: nil)))
             return

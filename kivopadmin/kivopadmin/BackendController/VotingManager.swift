@@ -4,8 +4,8 @@ import Combine
 import Foundation
 import MeetingServiceDTOs
 
-// Neue Struktur für Meetings mit zugehörigen Records
 
+// ViewModel für Abstimmungen (im Bezug auf Sitzungen)
 class VotingManager: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
@@ -13,9 +13,9 @@ class VotingManager: ObservableObject {
 
     @Published var votings: [GetVotingDTO] = [] // Records-Array
 
-    
-
-    func getRecordsMeeting(meetingId: UUID) {
+    // Lädt die Abstimmungen zu einer Sitzung
+    func getVotingsMeeting(meetingId: UUID) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/votings") else {
             DispatchQueue.main.async {
                 self.errorMessage = "Invalid URL"
@@ -88,7 +88,5 @@ class VotingManager: ObservableObject {
             }
         }.resume()
     }
-    
-  
 }
 

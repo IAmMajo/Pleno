@@ -121,7 +121,7 @@ struct LocationsView: View {
         .onAppear{
             locationViewModel.fetchPosterPositions(poster: poster)
             locationViewModel.fetchPosterSummary(poster: poster)
-            userManager.fetchUsers()
+            userManager.fetchActiveUsers()
         }
     }
     
