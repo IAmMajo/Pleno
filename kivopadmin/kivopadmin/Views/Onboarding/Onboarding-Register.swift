@@ -236,7 +236,7 @@ struct Onboarding_Register: View {
         .padding(.bottom, 10)
     }
 
-    // MARK: - Sektion für das Profilbild
+    // MARK: - Profilbild-Sektion mit "Bearbeiten"-Link
     private func profileImageSection() -> some View {
         VStack {
             ZStack {
@@ -253,8 +253,16 @@ struct Onboarding_Register: View {
                         .overlay(Text("Profilbild").foregroundColor(.gray))
                 }
             }
-            .padding(.bottom, 10)
+            .padding(.bottom, 5)
+
+            NavigationLink(destination: Onboarding_ProfilePicture(selectedImage: $selectedImage)) {
+                Text("Bearbeiten")
+                    .foregroundColor(.blue)
+                    .font(.footnote)
+                    .underline()
+            }
         }
+        .padding(.vertical, 10)
     }
 }
 
