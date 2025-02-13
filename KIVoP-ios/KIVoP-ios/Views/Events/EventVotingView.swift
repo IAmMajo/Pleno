@@ -25,7 +25,7 @@ struct EventVotingView: View {
                 EventDescriptionSection(details: details)
                 EventLocationSection(address: $address, selectedLocation: $selectedLocation, details: details)
                 CarpoolSection(event: event)
-                ParticipationSection(details: details, onParticipate: handleParticipation)
+                ParticipationSection(details: details, onParticipate: createParticipation, onUpdateParticipation: patchParticipation)
                 ParticipantListSection(details: details)
             }
             .padding(.vertical)
@@ -120,7 +120,7 @@ struct EventVotingView: View {
         }
     }
     
-    func handleParticipation(_ dto: CreateEventParticipationDTO) {
+    func createParticipation(_ dto: CreateEventParticipationDTO) {
             guard let url = URL(string: "\(baseURL)/events/\(eventID)/participation") else {
                 print("Invalid URL")
                 return
@@ -153,6 +153,49 @@ struct EventVotingView: View {
                     print("Participation updated successfully")
                 } else {
                     print("Failed to update participation")
+                }
+            }.resume()
+        }
+    func patchParticipation(_ dto: PatchEventParticipationDTO) {
+            guard let participant = details?.participations.first(where: { $0.itsMe }) else {
+                print("No valid participant found")
+                return
+            }
+            let participantID = participant.id
+            
+            guard let url = URL(string: "\(baseURL)/events/participations/\(participantID)") else {
+                print("Invalid URL")
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "PATCH"
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+                request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            } else {
+                print("Unauthorized: No token found")
+                return
+            }
+
+            do {
+                let jsonData = try JSONEncoder().encode(dto)
+                request.httpBody = jsonData
+            } catch {
+                print("JSON Encode Error: \(error.localizedDescription)")
+                return
+            }
+
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("Network error: \(error.localizedDescription)")
+                    return
+                }
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                    print("Participation status updated successfully")
+                } else {
+                    print("Failed to update participation status")
                 }
             }.resume()
         }
@@ -258,6 +301,7 @@ struct CarpoolSection: View {
 struct ParticipationSection: View {
     let details: GetEventDetailDTO?
     let onParticipate: (CreateEventParticipationDTO) -> Void
+    let onUpdateParticipation: (PatchEventParticipationDTO) -> Void
 
     var body: some View {
         VStack(spacing: 20) {
@@ -268,10 +312,10 @@ struct ParticipationSection: View {
             
             HStack(spacing: 50) {
                 ActionButton(title: "Ja", color: .blue) {
-                    onParticipate(CreateEventParticipationDTO(participates: true))
+                    handleParticipation(participates: true)
                 }
                 ActionButton(title: "Nein", color: .gray) {
-                    onParticipate(CreateEventParticipationDTO(participates: false))
+                    handleParticipation(participates: false)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -279,6 +323,16 @@ struct ParticipationSection: View {
             ParticipationStats(details: details)
         }
         .padding(.horizontal)
+    }
+
+    private func handleParticipation(participates: Bool) {
+        if let participant = details?.participations.first(where: { $0.itsMe }) {
+            // Update bestehende Teilnahme mit Bool-Wert
+            onUpdateParticipation(PatchEventParticipationDTO(participates: participates))
+        } else {
+            // Neue Teilnahme erstellen mit Bool-Wert
+            onParticipate(CreateEventParticipationDTO(participates: participates))
+        }
     }
 }
 
