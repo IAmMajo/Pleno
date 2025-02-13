@@ -93,6 +93,7 @@ extension RecordsMainView {
     }
     
     // Legende, die die Farben der unterschiedlichen Status anzeigt
+    // Mit Übersicht über den Status aller Protokolle
     private var legende: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
@@ -100,7 +101,7 @@ extension RecordsMainView {
                 .frame(maxWidth: .infinity, maxHeight: 40) // Passt sich an
 
             HStack {
-                Text("Legende")
+                Text("Übersicht")
                 
                 Spacer()
 

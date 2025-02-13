@@ -2,6 +2,8 @@
 
 import CoreLocation
 
+// ViewModel für die Auswahl des eigenen Standorts
+// bei Events verwendet
 class LocationMapManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
     

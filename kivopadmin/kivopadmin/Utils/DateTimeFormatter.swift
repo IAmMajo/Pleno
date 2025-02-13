@@ -2,6 +2,7 @@
 
 import Foundation
 
+// Funktionen um ein einheitliches Datums- und Zeitformat einzustellen
 struct DateTimeFormatter {
    
    static func formatDate(_ date: Date) -> String {

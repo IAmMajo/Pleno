@@ -2,6 +2,8 @@
 
 import Foundation
 
+// Für die Protokolle:
+// Funktionen die, Sprachcodes und ausgeschriebenen Sprachen verwalten
 struct LanguageManager {
     static func getLanguages() -> [(name: String, code: String)] {
         let languages: [(name: String, code: String)] = [
