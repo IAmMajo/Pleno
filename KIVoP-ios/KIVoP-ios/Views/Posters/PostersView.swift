@@ -16,7 +16,7 @@ struct PostersView: View {
    @Environment(\.dismiss) var dismiss
    @Environment(\.colorScheme) var colorScheme
 
-   @StateObject private var viewModel = PostersViewModel()
+   @StateObject private var viewModel = PostersViewModel() /// ViewModel responsible for managing poster data
    @State private var postersFiltered: [FilteredPoster] = [] // filtered FilteredPosters, based on searchText
    @State private var selectedPoster: PosterResponseDTO? // selected poster to navigate to
    @State private var isShowingDetails: Bool = false // for navigating to Posters-PosterDetailView
@@ -116,6 +116,7 @@ struct PostersView: View {
                    }
                 }
                 .padding(.top, 20)
+                // pull-to-refresh
                 .refreshable {
                    Task {
                       await viewModel.fetchPosters()
@@ -150,6 +151,7 @@ struct PostersView: View {
           }
           .navigationTitle("Plakate")
           .navigationBarTitleDisplayMode(.inline)
+          // fetch posters on appear
           .onAppear {
              Task {
                 isLoading = true
