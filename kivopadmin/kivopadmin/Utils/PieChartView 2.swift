@@ -2,7 +2,7 @@
 //  PieChartView 2.swift
 //  kivopadmin
 //
-//  Created by Amine Ahamri on 19.01.25.
+//  PieChart für Umfragen
 //
 
 
