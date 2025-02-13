@@ -312,10 +312,18 @@ struct ParticipationSection: View {
             
             HStack(spacing: 50) {
                 ActionButton(title: "Ja", color: .blue) {
-                    handleParticipation(participates: true)
+                    if (details?.participations.first(where: { $0.itsMe })) != nil {
+                        onUpdateParticipation(PatchEventParticipationDTO(participates: true))
+                    } else {
+                        onParticipate(CreateEventParticipationDTO(participates: true))
+                    }
                 }
                 ActionButton(title: "Nein", color: .gray) {
-                    handleParticipation(participates: false)
+                    if (details?.participations.first(where: { $0.itsMe })) != nil {
+                        onUpdateParticipation(PatchEventParticipationDTO(participates: false))
+                    } else {
+                        onParticipate(CreateEventParticipationDTO(participates: false))
+                    }
                 }
             }
             .frame(maxWidth: .infinity)
@@ -323,16 +331,6 @@ struct ParticipationSection: View {
             ParticipationStats(details: details)
         }
         .padding(.horizontal)
-    }
-
-    private func handleParticipation(participates: Bool) {
-        if let participant = details?.participations.first(where: { $0.itsMe }) {
-            // Update bestehende Teilnahme mit Bool-Wert
-            onUpdateParticipation(PatchEventParticipationDTO(participates: participates))
-        } else {
-            // Neue Teilnahme erstellen mit Bool-Wert
-            onParticipate(CreateEventParticipationDTO(participates: participates))
-        }
     }
 }
 
