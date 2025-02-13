@@ -107,7 +107,6 @@ struct PostersMainView: View {
     
     private func deletePoster(poster: PosterResponseDTO) {
         // API-Aufruf mit der ID des Posters
-        
         posterToDelete = poster.id
         showDeleteConfirmation = true
     }

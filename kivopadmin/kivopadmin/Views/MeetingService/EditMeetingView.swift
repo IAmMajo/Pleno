@@ -20,6 +20,15 @@ struct EditMeetingView: View {
     @State private var locationPostalCode: String
     @State private var locationPlace: String
 
+    // Wenn der User einen Ort über den Picker auswählt, wird diese Variable verändert
+    @State private var selectedLocationID: UUID?
+    
+    // Der User kann entscheiden, ob er dem System einen neuen Ort hinzufügen möchte oder einen bestehenden Ort wählt.
+    // Das geschieht in Abhängigkeit dieser Variable
+    @State private var isAddingNewLocation = false
+    
+    @StateObject private var locationManager = LocationManager() // LocationManager verwenden, um bestehende Orte vom Server zu holen
+    
     // MeetingId wird beim Aufruf der View mitgegeben
     let meetingId: UUID
 
@@ -61,6 +70,9 @@ struct EditMeetingView: View {
                 }
             }
         }
+        .onAppear(){
+            locationManager.fetchLocations()
+        }
     }
 
     private func saveChanges() {
@@ -79,15 +91,20 @@ struct EditMeetingView: View {
             return
         }
 
-        // CreateLocationDTO erstellen
-        let updatedLocation = CreateLocationDTO(
-            name: locationName,
-            street: locationStreet.isEmpty ? "" : locationStreet,
-            number: locationNumber.isEmpty ? "" : locationNumber,
-            letter: locationLetter.isEmpty ? "" : locationLetter,
-            postalCode: locationPostalCode.isEmpty ? "" : locationPostalCode,
-            place: locationPlace.isEmpty ? "" : locationPlace
-        )
+        if isAddingNewLocation {
+            // Wenn ein neuer Ort hinzugefügt wird
+            guard !locationName.isEmpty else {
+                meetingManager.errorMessage = "Location name is required for a new location."
+                return
+            }
+        } else {
+            // Wenn ein bestehender Ort ausgewählt wurde
+            if let selectedLocation = locationManager.locations.first(where: { $0.id == selectedLocationID }) {
+                locationName = selectedLocation.name
+            } else {
+                locationName = "" // Standardwert, wenn keine Location ausgewählt wurde
+            }
+        }
         
         // PatchMeetingDTO erstellen
         let patchDTO = PatchMeetingDTO(
@@ -95,7 +112,15 @@ struct EditMeetingView: View {
             description: description.isEmpty ? "No Description Provided" : description,
             start: start,
             duration: durationUInt16,
-            location: updatedLocation
+            locationId: isAddingNewLocation ? nil : selectedLocationID,
+            location: CreateLocationDTO(
+                name: locationName,
+                street: locationStreet,
+                number: locationNumber,
+                letter: locationLetter,
+                postalCode: locationPostalCode,
+                place: locationPlace
+            )
         )
 
         // PatchMeetingDTO zum Server schicken, danach Sheet schließen
@@ -132,13 +157,61 @@ extension EditMeetingView {
                     .keyboardType(.numberPad)
             }
 
-            Section(header: Text("Ort")) {
+            placeSection
+        }
+    }
+    private var placeSection: some View {
+        VStack(alignment: .leading) {
+            Toggle("Neuen Ort hinzufügen", isOn: $isAddingNewLocation)
+                     
+            // Wenn ein neuer Ort hinzugefügt werden soll, erscheinen Eingabefelder für Ort, Straße, Hausnummer, Buchstabe, Postleitzahl und Stadt
+            if isAddingNewLocation {
                 TextField("Name des Ortes", text: $locationName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                // Eingabefelder für einen neuen Ort
                 TextField("Straße", text: $locationStreet)
-                TextField("Nummer", text: $locationNumber)
-                TextField("Buchstabe", text: $locationLetter)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                HStack {
+                    TextField("Hausnummer", text: $locationNumber)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
+                    TextField("Buchstabe (optional)", text: $locationLetter)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                }
+                
                 TextField("Postleitzahl", text: $locationPostalCode)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
                 TextField("Stadt", text: $locationPlace)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            } else {
+                // Wenn kein neuer Ort hinzugefügt werden soll
+                // Auswahl eines bestehenden Ortes über den Picker
+                if locationManager.isLoading {
+                    ProgressView("Lade Orte...")
+                } else if let errorMessage = locationManager.errorMessage {
+                    Text("Error: \(errorMessage)")
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                } else if locationManager.locations.isEmpty {
+                    Text("Keine Orte verfügbar")
+                        .foregroundColor(.gray)
+                } else {
+                    Picker("Name des Ortes", selection: $selectedLocationID) {
+                        Text("Keine Auswahl").tag(nil as UUID?) // Option für "keine Auswahl"
+                        
+                        ForEach(locationManager.locations, id: \.id) { location in
+                            Text(location.name).tag(location.id as UUID?)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                    .onAppear {
+                        if let matchingLocation = locationManager.locations.first(where: { $0.name == locationName }) {
+                            selectedLocationID = matchingLocation.id
+                        }
+                    }
+                }
             }
         }
     }

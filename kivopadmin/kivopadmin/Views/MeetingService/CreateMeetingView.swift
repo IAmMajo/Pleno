@@ -104,7 +104,7 @@ struct CreateMeetingView: View {
             start: startDate,
             duration: durationUInt16,
             locationId: isAddingNewLocation ? nil : selectedLocationID,
-            location: location//isAddingNewLocation ? location : nil
+            location: location
         )
 
         // Meeting über MeetingManager erstellen
