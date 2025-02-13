@@ -4,46 +4,46 @@ import SwiftUI
 import MeetingServiceDTOs
 
 class CreateVotingViewModel: ObservableObject {
-    
-    // Speichert die eingegebene Frage für die Abstimmung
     @Published var question: String = ""
-    
-    // Optionale Beschreibung der Abstimmung
     @Published var description: String = ""
-    
-    // Gibt an, ob die Abstimmung anonym sein soll
     @Published var anonymous: Bool = false
-    
-    // Liste der Abstimmungsoptionen, beginnt mit einem leeren Eintrag
     @Published var options: [String] = [""]
-    
-    // Speichert die ID des ausgewählten Meetings
     @Published var selectedMeetingId: UUID? = nil
-    
-    // Enthält eine Fehlermeldung, falls etwas schiefgeht
     @Published var errorMessage: String?
-    
+
+    // Speichert die geladenen Sitzungen
+    @Published var meetings: [GetMeetingDTO] = []
+    @Published var isLoaded: Bool = false
+
     let meetingManager: MeetingManager
     let onCreate: (GetVotingDTO) -> Void
-    
+
     init(meetingManager: MeetingManager, onCreate: @escaping (GetVotingDTO) -> Void) {
         self.meetingManager = meetingManager
         self.onCreate = onCreate
         fetchMeetings()
     }
 
-    // Lädt alle verfügbaren Meetings
     func fetchMeetings() {
+        isLoaded = false  //Warten, bis Sitzungen fertig geladen sind
         meetingManager.fetchAllMeetings()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.meetings = self.meetingManager.meetings
+            self.isLoaded = true  // Sitzungen sind geladen
+            print("[DEBUG] Meetings geladen: \(self.meetings.count)")
+        }
     }
 
-    // Gibt den Namen des ausgewählten Meetings zurück oder eine Standardnachricht
     func selectedMeetingName() -> String {
-        if let meeting = meetingManager.meetings.first(where: { $0.id == selectedMeetingId }) {
+        if let meeting = meetings.first(where: { $0.id == selectedMeetingId }) {
             return meeting.name
         }
-        return "Meeting auswählen"
+        return "Sitzung auswählen"
     }
+
+
+
 
     // Prüft, ob das Formular gültig ist (Frage vorhanden, mindestens eine gültige Option, Meeting ausgewählt)
     func isFormValid() -> Bool {
