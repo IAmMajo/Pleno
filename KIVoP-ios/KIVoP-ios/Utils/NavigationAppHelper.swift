@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  NavigationAppHelper.swift
 //  KIVoP-ios
@@ -9,11 +10,15 @@ import Foundation
 import UIKit
 import MapKit
 
+// A helper class that provides navigation options for Apple Maps, Google Maps, and Waze
 class NavigationAppHelper {
-   static let shared = NavigationAppHelper()
+   static let shared = NavigationAppHelper() /// Shared singleton instance of `NavigationAppHelper`
    
+   /// Private initializer to enforce singleton usage
    private init() {}
    
+   // MARK: - Checking Installed Navigation Apps
+   /// Checks if Google Maps and Waze are installed on the device
    func checkInstalledApps() -> (isGoogleMapsInstalled: Bool, isWazeInstalled: Bool) {
       var isGoogleMapsInstalled = false
       var isWazeInstalled = false
@@ -28,12 +33,16 @@ class NavigationAppHelper {
       return (isGoogleMapsInstalled, isWazeInstalled)
    }
    
+   // MARK: - Open Locations in Navigation Apps
+   
+   /// Opens a location in Apple Maps
    func openInAppleMaps(name: String?, coordinate: CLLocationCoordinate2D) {
       let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
       mapItem.name = name
       mapItem.openInMaps()
    }
    
+   /// Opens a location in Google Maps if installed
    func openInGoogleMaps(name: String?, coordinate: CLLocationCoordinate2D) {
        var urlString = "comgooglemaps://?q=\(coordinate.latitude),\(coordinate.longitude)"
        if let name = name, !name.isEmpty {
@@ -46,6 +55,7 @@ class NavigationAppHelper {
        }
    }
    
+   /// Opens a location in Waze if installed
    func openInWaze(coordinate: CLLocationCoordinate2D) {
       let urlString = "waze://?ll=\(coordinate.latitude),\(coordinate.longitude)&navigate=yes"
       if let url = URL(string: urlString) {

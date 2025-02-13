@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  PosterDetailViewModel.swift
 //  KIVoP-ios
@@ -5,18 +6,33 @@
 //  Created by Hanna Steffen on 20.01.25.
 //
 
+// This file defines the view models used for handling posters and their associated positions
+// It includes fetching, filtering, and sorting posters based on various conditions
+
 import Foundation
 import Combine
 import PosterServiceDTOs
 import MapKit
 import MeetingServiceDTOs
 
+struct FilteredPoster: Equatable {
+   let poster: PosterResponseDTO
+   let posterSummary: PosterSummaryResponseDTO
+   
+   static func == (lhs: FilteredPoster, rhs: FilteredPoster) -> Bool {
+      return lhs.poster.id == rhs.poster.id
+   }
+}
+
+// MARK: - Posters ViewModel
+// This view model handles fetching posters, filtering them based on statuses, and sorting them
 @MainActor
 class PostersViewModel: ObservableObject {
-    @Published var posters: [PosterResponseDTO] = []
-//   @Published var filteredPosters: [(poster: PosterResponseDTO, nextTakeDownPosition: PosterPositionResponseDTO, tohangCount: Int, expiredCount: Int)] = []
-   @Published var filteredPosters: [FilteredPoster2] = []
-    @Published var selectedTab: Int = 0 {
+   // Published properties to update the UI when data changes
+   @Published var posters: [PosterResponseDTO] = []
+   @Published var posterImages: [UUID: UIImage] = [:]
+   @Published var filteredPosters: [FilteredPoster] = [] // Filtered posters based on tab selection
+    @Published var selectedTab: Int = 0 { // Handles tab switching (active vs archived posters)
        didSet {
           Task {
              await filterPosters()
@@ -24,14 +40,16 @@ class PostersViewModel: ObservableObject {
        }
     }
 
+   // Dictionary to store poster positions mapped by poster ID
     private var posterPositionsMap: [UUID: [PosterPositionResponseDTO]] = [:]
 
     init() {
         Task {
-            await fetchPosters()
+            await fetchPosters() // Fetch posters when the view model is initialized
         }
     }
 
+   // Asynchronously fetches posters from the API and stores them in the posters array
     func fetchPosters() async {
         do {
             let fetchedPosters = try await PosterService.shared.fetchPostersAsync()
@@ -41,7 +59,24 @@ class PostersViewModel: ObservableObject {
             print("Error fetching posters: \(error)")
         }
     }
+   
+   // Fetches the image for a specific poster and stores it inside posterImages
+   func fetchPosterImage(for posterId: UUID) {
+      Task {
+         do {
+            let imageData = try await PosterService.shared.fetchPosterImage(posterId: posterId)
+            if let image = UIImage(data: imageData) {
+               DispatchQueue.main.async {
+                  self.posterImages[posterId] = image
+               }
+            }
+         } catch {
+            print("Error loading image for poster \(posterId): \(error.localizedDescription)")
+         }
+      }
+   }
 
+   // Fetches positions for each poster and updates the posterPositionsMap
     private func fetchPosterPositions() async {
         for poster in posters {
             do {
@@ -51,11 +86,12 @@ class PostersViewModel: ObservableObject {
                 print("Error fetching positions for poster \(poster.id): \(error)")
             }
         }
-        await filterPosters()
+        await filterPosters() // Once positions are fetched, filter posters
     }
    
+   // Filters posters based on their statuses and sorting criteria
    private func filterPosters() async {
-      var updatedFilteredPosters: [FilteredPoster2] = []
+      var updatedFilteredPosters: [FilteredPoster] = []
       
       for poster in posters {
          guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { continue }
@@ -63,26 +99,25 @@ class PostersViewModel: ObservableObject {
          do {
             let posterSummary = try await PosterService.shared.fetchPosterSummary(for: poster.id)
             
-            // Check if the poster is archived
+            // Determine if the poster is archived (all positions are taken down and expired since 3 days)
             let isArchived = positions.allSatisfy { position in
                position.status == .takenDown &&
                position.expiresAt <= Calendar.current.date(byAdding: .day, value: -3, to: Date())!
             }
             
+            // Include posters in the appropriate tab (0 = active, 1 = archived)
             switch selectedTab {
             case 0 where !isArchived, 1 where isArchived:
-               updatedFilteredPosters.append(FilteredPoster2(poster: poster, posterSummary: posterSummary))
+               updatedFilteredPosters.append(FilteredPoster(poster: poster, posterSummary: posterSummary))
             default:
                continue
             }
          } catch {
             print("Error fetching posterSummary: \(error)")
-            // Fallback to mock data if fetching fails
-//            updatedFilteredPosters.append(FilteredPoster2(poster: poster, posterSummary: mockPosterSummary))
          }
       }
       
-      // Sorting logic after fetching all summaries
+      // Sort posters by their next take-down date or overdue/hangs status
       filteredPosters = updatedFilteredPosters.sorted {
          if $0.posterSummary.hangs > 0 || $0.posterSummary.overdue > 0 {
             if $1.posterSummary.hangs > 0 || $1.posterSummary.overdue > 0 {
@@ -96,84 +131,19 @@ class PostersViewModel: ObservableObject {
             return $0.posterSummary.nextTakeDown ?? Date() < $1.posterSummary.nextTakeDown ?? Date()
          }
       }
-      
-   
-//   private func filterPosters() {
-//       filteredPosters = posters.compactMap { poster in
-//           guard let positions = posterPositionsMap[poster.id], !positions.isEmpty else { return nil }
-//           
-//           // Count the number of positions with specific statuses
-//          let tohangCount = positions.filter { $0.status == .toHang }.count
-//          let expiredCount = positions.filter { $0.status == .overdue }.count
-//          
-//          // Find the position with the earliest `expiresAt`
-////          guard let nextTakeDownPosition = positions.min(by: { $0.expiresAt < $1.expiresAt }) else { return nil }
-//          let nextTakeDownPositionDTO: PosterPositionResponseDTO?
-//          // Reinitialization of nextTakeDownPosition to earliest expired position
-//          if expiredCount > 0 {
-//             let expiredPosition = positions.filter { $0.status == .overdue }
-//             nextTakeDownPositionDTO = expiredPosition.min(by: { $0.expiresAt < $1.expiresAt })
-//          } else {
-//             nextTakeDownPositionDTO = positions.min(by: { $0.expiresAt < $1.expiresAt })
-//          }
-//          guard let nextTakeDownPosition = nextTakeDownPositionDTO else { return nil }
-//          
-//           // Check if the poster is archived
-//           let isArchived = positions.allSatisfy { position in
-//              position.status == .takenDown &&
-//               position.expiresAt <= Calendar.current.date(byAdding: .day, value: -3, to: Date())!
-//           }
-//           
-//           switch selectedTab {
-//           case 0:
-//               // Include only non-archived posters for the "Aktuell" tab
-//               if !isArchived {
-//                   return FilteredPoster(
-//                       poster: poster,
-//                       nextTakeDownPosition: nextTakeDownPosition,
-//                       tohangCount: tohangCount,
-//                       expiredCount: expiredCount
-//                   )
-//               }
-//           case 1:
-//               // Include only archived posters for the "Archiviert" tab
-//               if isArchived {
-//                   return FilteredPoster(
-//                       poster: poster,
-//                       nextTakeDownPosition: nextTakeDownPosition,
-//                       tohangCount: tohangCount,
-//                       expiredCount: expiredCount
-//                   )
-//               }
-//           default:
-//               break
-//           }
-//           return nil
-//       }
-//       .sorted {
-//           // Custom sorting: prioritize .hangs and .overdue, then by `expiresAt`
-//          if $0.nextTakeDownPosition.status == .hangs || $0.nextTakeDownPosition.status == .overdue {
-//             if $1.nextTakeDownPosition.status == .hangs || $1.nextTakeDownPosition.status == .overdue {
-//                   return $0.nextTakeDownPosition.expiresAt < $1.nextTakeDownPosition.expiresAt
-//               } else {
-//                   return true
-//               }
-//          } else if $1.nextTakeDownPosition.status == .hangs || $1.nextTakeDownPosition.status == .overdue {
-//               return false
-//           } else {
-//               return $0.nextTakeDownPosition.expiresAt < $1.nextTakeDownPosition.expiresAt
-//           }
-//       }
+
    }
 }
 
-
+// MARK: - Poster Detail ViewModel
+// Fetches detailed data for a specific poster
 @MainActor
 class PosterDetailViewModel: ObservableObject {
-    @Published var poster: PosterResponseDTO?
-    @Published var positions: [PosterPositionResponseDTO] = []
-    @Published var isLoading = false
-    @Published var error: String?
+   @Published var poster: PosterResponseDTO?
+   @Published var posterImage: UIImage?
+   @Published var positions: [PosterPositionResponseDTO] = []
+   @Published var isLoading = false
+   @Published var error: String?
 
     private let posterId: UUID
 
@@ -181,6 +151,7 @@ class PosterDetailViewModel: ObservableObject {
         self.posterId = posterId
     }
 
+   // Fetches detailed poster information and positions
     func fetchPoster() async {
         isLoading = true
         error = nil
@@ -194,12 +165,30 @@ class PosterDetailViewModel: ObservableObject {
         }
         isLoading = false
     }
+   
+   // Fetches the image for a specific poster and stores it inside posterImage
+   func fetchPosterImage(for posterId: UUID) {
+      Task {
+         do {
+            let imageData = try await PosterService.shared.fetchPosterImage(posterId: posterId)
+            if let image = UIImage(data: imageData) {
+               DispatchQueue.main.async {
+                  self.posterImage = image
+               }
+            }
+         } catch {
+            print("Error loading image for poster \(posterId): \(error.localizedDescription)")
+         }
+      }
+   }
 }
 
-
+// MARK: - Poster Position ViewModel
+// Handles fetching and updating position details for a specific poster position
 @MainActor
 class PosterPositionViewModel: ObservableObject {
    @Published var position: PosterPositionResponseDTO?
+   @Published var positionImageData: Data?
    @Published var address: String?
    @Published var isLoading = false
    @Published var error: String?
@@ -211,7 +200,8 @@ class PosterPositionViewModel: ObservableObject {
       self.posterId = posterId
       self.positionId = positionId
    }
-
+   
+   // Fetches the position details and reverse geocodes the address
     func fetchPosition() async {
         isLoading = true
         error = nil
@@ -229,6 +219,22 @@ class PosterPositionViewModel: ObservableObject {
         isLoading = false
     }
    
+   // Fetches the image for a specific position and stores it inside positionImageData
+   func fetchPositionImage(for posterId: UUID) {
+      Task {
+         do {
+            let imageData = try await PosterService.shared.fetchPositionImage(positionId: posterId)
+            DispatchQueue.main.async {
+               self.positionImageData = imageData
+            }
+            
+         } catch {
+            print("Error loading image for poster \(posterId): \(error.localizedDescription)")
+         }
+      }
+   }
+   
+   // Hang a position with an image, latitude and longitude
    func hangPosition(image: Data, latitude: Double?, longitude: Double?) async throws {
        guard let position = position else { throw NSError(domain: "Position not found", code: 404, userInfo: nil) }
 
@@ -241,6 +247,7 @@ class PosterPositionViewModel: ObservableObject {
        _ = try await PosterService.shared.hangPosition(positionId: position.id, dto: hangDTO)
    }
    
+   // Take down a position with an image
    func takeDownPosition(image: Data) async throws {
        guard let position = position else { throw NSError(domain: "Position not found", code: 404, userInfo: nil) }
 
@@ -248,6 +255,7 @@ class PosterPositionViewModel: ObservableObject {
        _ = try await PosterService.shared.takeDownPosition(positionId: position.id, dto: takeDownDTO)
    }
    
+   // Report a damaged position with an image
    func reportDamagedPosition(image: Data) async throws {
       guard let position = position else { throw NSError(domain: "Position not found", code: 404, userInfo: nil) }
       
@@ -255,6 +263,7 @@ class PosterPositionViewModel: ObservableObject {
       _ = try await PosterService.shared.reportDamagedPosition(positionId: position.id, dto: damagedDTO)
    }
 
+   // Reverse geocoding function to fetch an address from coordinates
     private func fetchAddress(latitude: Double, longitude: Double) async {
         let geocoder = CLGeocoder()
         let location = CLLocation(latitude: latitude, longitude: longitude)
@@ -288,6 +297,7 @@ class PosterPositionViewModel: ObservableObject {
 
 
 
+// MARK: - mock-data for preview and testing
 
 let mockIdentity1: GetIdentityDTO = GetIdentityDTO(id: UUID(), name: "Heinz-Peters")
 let mockIdentity2: GetIdentityDTO = GetIdentityDTO(id: UUID(), name: "Franz")

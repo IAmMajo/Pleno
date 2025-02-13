@@ -2,15 +2,16 @@ import Combine
 import Foundation
 import MeetingServiceDTOs
 
-
+// Neue Struktur für Votings mit den Ergebnissen
 public struct CombinedVotingData: Codable {
     public var voting: GetVotingDTO
     public var votingResult: GetVotingResultsDTO
 }
 
 
-// Neue Struktur für Meetings mit zugehörigen Records
 
+// ViewModel für die Abstimmungen
+// !! Wird nur innerhalb der MeetingDetailView verwendet, um auf Abstimmungen zu verweisen
 class VotingManager: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
@@ -18,7 +19,9 @@ class VotingManager: ObservableObject {
     @Published var votings: [GetVotingDTO] = []
     @Published var combinedData: [CombinedVotingData] = []
 
+    // Lädt alle Abstimmungen
     func getVotingsMeeting(meetingId: UUID) {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId.uuidString)/votings") else {
             DispatchQueue.main.async {
                 self.errorMessage = "Invalid URL"
@@ -78,6 +81,7 @@ class VotingManager: ObservableObject {
                 let decodedVotings = try decoder.decode([GetVotingDTO].self, from: data)
                 DispatchQueue.main.async {
                     self?.votings = decodedVotings
+                    // Aufruf zur Funktion, um die Ergebnisse einer Abstimmung zu laden
                     self?.fetchResultsForVotings()
                 }
             } catch {
@@ -89,6 +93,7 @@ class VotingManager: ObservableObject {
         }.resume()
     }
     
+    // Lädt die Ergebnisse zu jeder Abstimmung und speichert sie ab
     private func fetchResultsForVotings() {
         let group = DispatchGroup()
         var combinedResults: [CombinedVotingData] = []

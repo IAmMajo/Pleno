@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  PollsView.swift
 //  KIVoP-ios
@@ -11,20 +12,30 @@ import SwiftUI
 import Combine
 import PollServiceDTOs
 
+// A view displaying all polls, allowing users to vote or view results
 struct PollsView: View {
+   
+   // MARK: - ViewModel & State Variables
+   
+   /// ViewModel responsible for managing poll data
    @StateObject var viewModel = PollsViewModel()
+   /// Stores the displayed list of polls after filtering/searching
    @State var pollsFiltered: [(poll: GetPollDTO, symbol: (status: String, color: Color))] = []
    
-   @State private var searchText = ""
-   @State private var selectedPoll: GetPollDTO?
-   @State private var isShowingCreatePollSheet = false
-   @State private var shouldRefreshPolls = false
-   @State private var isShowingVoteSheet = false
-   @State private var navigateToResultView = false
-   @State private var isLoading = false
-   @State private var error: String?
+   @State private var searchText = "" /// Holds the search input text
+   @State private var selectedPoll: GetPollDTO? /// Stores the selected poll when tapped
+   @State private var isShowingCreatePollSheet = false /// Controls whether the "Create Poll" sheet is displayed
+   @State private var shouldRefreshPolls = false /// Indicates whether polls should be refreshed after creating a new one
+   @State private var isShowingVoteSheet = false /// Controls whether the voting sheet is displayed
+   @State private var navigateToResultView = false /// Controls navigation to the poll results view
+   @State private var isLoading = false /// Indicates whether data is currently loading
+   @State private var error: String? /// Stores an error message if fetching data fails
    
+   // MARK: - Helper Functions
+   
+   /// Determines the color based on how close a poll is to closing (with closing date)
    func getDateColor(date: Date) -> Color {
+      // returns orange if the poll closes within a day, otherwise secondary label color
       if date < Calendar.current.date(byAdding: .day, value: +1, to: Date())! && date > Date.now {
          return .orange
       } else {
@@ -32,6 +43,7 @@ struct PollsView: View {
       }
    }
    
+   // MARK: - Body
    var body: some View {
       if isLoading {
          ProgressView("Loading...")
@@ -40,89 +52,42 @@ struct PollsView: View {
          List {
             // Active polls section
             let activePolls = pollsFiltered
-               .filter { $0.poll.isOpen}
-               .sorted { $0.poll.startedAt > $1.poll.startedAt }
-            
+               .filter { $0.poll.isOpen} // Filters for open polls
+               .sorted { $0.poll.startedAt > $1.poll.startedAt } // Sorts by start date (newest first)
+             
             if !activePolls.isEmpty {
                Section(header: Text("Aktiv")) {
                   ForEach(activePolls, id: \.poll.id) { item in
-                     HStack {
-                        VStack(alignment: .leading) {
-                           Text(item.poll.question)
-                              .frame(maxWidth: .infinity, alignment: .leading)
-                           
-                           Text("\(DateTimeFormatter.formatDate(item.poll.closedAt))")
-                              .frame(maxWidth: .infinity, alignment: .leading)
-                              .font(.callout)
-                              .foregroundStyle(getDateColor(date: item.poll.closedAt))
-                        }
-                        
-                        if !item.symbol.status.isEmpty {
-                           Image(systemName: item.symbol.status)
-                              .foregroundColor(item.symbol.color)
-                        }
-                     }
-                     .contentShape(Rectangle())
-                     .onTapGesture {
-                        selectedPoll = item.poll
-                        if item.poll.isOpen && !item.poll.iVoted {
-                           isShowingVoteSheet = true
-                        } else {
-                           navigateToResultView = true
-                        }
-                     }
+                     pollRow(for: item) // Displays each poll row
                   }
                }
             }
             // Completed polls section
             let completedPolls = pollsFiltered
-               .filter { !$0.poll.isOpen}
-               .sorted { $0.poll.startedAt > $1.poll.startedAt }
+               .filter { !$0.poll.isOpen} // Filters for closed polls
+               .sorted { $0.poll.startedAt > $1.poll.startedAt } // Sorts by start date (newest first)
             
             if !completedPolls.isEmpty {
                Section(header: Text("Abgeschlossen")) {
                   ForEach(completedPolls, id: \.poll.id) { item in
-                     HStack {
-                        VStack(alignment: .leading) {
-                           Text(item.poll.question)
-                              .frame(maxWidth: .infinity, alignment: .leading)
-                           
-                           Text("\(DateTimeFormatter.formatDate(item.poll.closedAt))")
-                              .frame(maxWidth: .infinity, alignment: .leading)
-                              .font(.callout)
-                              .foregroundStyle(getDateColor(date: item.poll.closedAt))
-                        }
-                        
-                        if !item.symbol.status.isEmpty {
-                           Image(systemName: item.symbol.status)
-                              .foregroundColor(item.symbol.color)
-                        }
-                     }
-                     .contentShape(Rectangle())
-                     .onTapGesture {
-                        selectedPoll = item.poll
-                        if item.poll.isOpen && !item.poll.iVoted {
-                           isShowingVoteSheet = true
-                        } else {
-                           navigateToResultView = true
-                        }
-                     }
+                     pollRow(for: item)
                   }
                }
             }
          }
+         /// pull-to-refresh the polls list
          .refreshable {
-            await viewModel.fetchPolls()
-            pollsFiltered = viewModel.polls
+            await fetchPolls()
          }
+         /// Fetches polls when the view appears
          .onAppear {
             Task {
                isLoading = true
-               await viewModel.fetchPolls()
-               pollsFiltered = viewModel.polls
+               await fetchPolls()
                isLoading = false
             }
          }
+         /// Listens for updates in `viewModel.polls` and updates the displayed polls list
          .onReceive(viewModel.$polls) { newPolls in
              pollsFiltered = newPolls
          }
@@ -136,21 +101,24 @@ struct PollsView: View {
                }
             }
          }
+         /// Opens a sheet for creating a new poll
          .sheet(isPresented: $isShowingCreatePollSheet, onDismiss: {
              if shouldRefreshPolls {
-                 shouldRefreshPolls = false
+                 shouldRefreshPolls = false // Resets the refresh flag
                  Task {
                      await viewModel.fetchPolls()
-                     pollsFiltered = viewModel.polls
+                     pollsFiltered = viewModel.polls // Fetches updated polls after creation
                  }
              }
          }) {
+            /// Presents the create poll view and ensures refresh after saving
              Polls_CreatePollView(onSave: {
-                 shouldRefreshPolls = true
-                 isShowingCreatePollSheet = false
+                 shouldRefreshPolls = true // Marks that a refresh is needed
+                 isShowingCreatePollSheet = false // Dismisses the sheet
              })
-             .interactiveDismissDisabled()
+             .interactiveDismissDisabled() // Prevents accidental dismissal
          }
+         /// Opens a voting sheet when a poll is selected
          .sheet(isPresented: $isShowingVoteSheet) {
             if let poll = selectedPoll {
                Polls_VoteView(poll: poll) {
@@ -160,10 +128,11 @@ struct PollsView: View {
                      pollsFiltered = viewModel.polls
                      isLoading = false
                   }
-                  navigateToResultView = true
+                  navigateToResultView = true // Navigates to results after voting
                }
             }
          }
+         /// Navigates to the poll results view when a poll is selected
          .navigationDestination(isPresented: $navigateToResultView) {
             if let poll = selectedPoll {
                Polls_PollResultView(poll: poll)
@@ -173,6 +142,7 @@ struct PollsView: View {
             if isLoading { ProgressView("Loading...") }
             if let error = error { Text("Error: \(error)").foregroundColor(.red) }
          }
+         /// Adds a search bar to filter polls question by searchText
          .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen")
          .onChange(of: searchText) { old, newValue in
             if searchText.isEmpty {
@@ -186,31 +156,49 @@ struct PollsView: View {
       }
       
    }
+   
+   // MARK: - Fetch Polls
+   /// Fetches polls from the ViewModel and updates the displayed list
+   private func fetchPolls() async {
+      await viewModel.fetchPolls()
+      pollsFiltered = viewModel.polls
+   }
+   
+   // MARK: - Poll Row View
+   /// Creates a poll row that can be tapped to vote or view results
+   /// - Parameter item: A tuple containing the poll and its UI symbol
+   /// - Returns: A view representing a single poll entry
+   private func pollRow(for item: (poll: GetPollDTO, symbol: (status: String, color: Color))) -> some View {
+      HStack {
+         VStack(alignment: .leading) {
+            // Poll question
+            Text(item.poll.question)
+               .frame(maxWidth: .infinity, alignment: .leading)
+            
+            // Poll closedAt date
+            Text("\(DateTimeFormatter.formatDate(item.poll.closedAt))")
+               .frame(maxWidth: .infinity, alignment: .leading)
+               .font(.callout)
+               .foregroundStyle(getDateColor(date: item.poll.closedAt))
+         }
+         
+         // Status Symbol
+         if !item.symbol.status.isEmpty {
+            Image(systemName: item.symbol.status)
+               .foregroundColor(item.symbol.color)
+         }
+      }
+      .contentShape(Rectangle()) // Expands tappable area
+      .onTapGesture {
+         selectedPoll = item.poll
+         if item.poll.isOpen && !item.poll.iVoted {
+            isShowingVoteSheet = true
+         } else {
+            navigateToResultView = true
+         }
+      }
+   }
 }
-
-//struct PollRowView: View {
-//    @ObservedObject var viewModel: PollViewModel
-//
-//    var body: some View {
-//       HStack {
-//          VStack {
-//             Text(viewModel.pollDTO.question)
-//                .frame(maxWidth: .infinity, alignment: .leading)
-//             
-//             Text("\(DateTimeFormatter.formatDate(viewModel.pollDTO.expirationDate))")
-//                .frame(maxWidth: .infinity, alignment: .leading)
-//                .font(.callout)
-//                .foregroundStyle(getDateColor(date: viewModel.pollDTO.expirationDate))
-//          }
-//          if !viewModel.statusSymbol.isEmpty {
-//             Image(systemName: viewModel.statusSymbol)
-//                .foregroundColor(viewModel.symbolColor)
-//          }
-//       }
-//       .contentShape(Rectangle())
-//    }
-//}
-
 
 #Preview {
    NavigationStack {

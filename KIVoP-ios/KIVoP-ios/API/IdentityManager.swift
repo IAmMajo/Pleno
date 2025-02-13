@@ -10,10 +10,9 @@ class IdentityManager: ObservableObject {
 
     @Published var identity: UUID?
 
-
-
-    
+    // Eigene Identität des Users laden
     func getMyIdentity() {
+        errorMessage = nil
         guard let url = URL(string: "https://kivop.ipv64.net/users/identities") else {
             DispatchQueue.main.async {
                 self.errorMessage = "Invalid URL"

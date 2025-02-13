@@ -1,3 +1,4 @@
+// This file is licensed under the MIT-0 License.
 //
 //  VotingService.swift
 //  KIVoP-ios
@@ -9,13 +10,19 @@ import Foundation
 import Combine
 import MeetingServiceDTOs
 
+/// A singleton service responsible for handling API calls related to votings and meetings
+/// Conforms to `ObservableObject` to allow SwiftUI views to react to state changes
 class VotingService: ObservableObject {
-    static let shared = VotingService()
-    private let baseURL = "https://kivop.ipv64.net/meetings/votings/"
+   // MARK: - Properties
+       
+    static let shared = VotingService() /// Shared singleton instance of `VotingService`
+    private let baseURL = "https://kivop.ipv64.net/meetings/votings/" /// Base URL for all voting-related API requests
     
-   @Published var votings: [GetVotingDTO] = []
-   @Published var meetings: [GetMeetingDTO] = []
+   @Published var votings: [GetVotingDTO] = [] /// Holds a list of votings retrieved from the API
+   @Published var meetings: [GetMeetingDTO] = [] /// Holds a list of meetings retrieved from the API
    
+   // MARK: - Private Helper: Create Authorized Requests
+   /// Creates an authorized URL request by adding the JWT token to the headers
    private func createAuthorizedRequest(url: URL, method: String, contentType: String = "application/json") -> URLRequest? {
       var request = URLRequest(url: url)
       request.httpMethod = method
@@ -29,6 +36,9 @@ class VotingService: ObservableObject {
       return request
    }
    
+   // MARK: - Votings
+   
+   /// Fetch all Votings
     func fetchVotings(completion: @escaping (Result<[GetVotingDTO], Error>) -> Void) {
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/votings") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
@@ -68,6 +78,7 @@ class VotingService: ObservableObject {
         }.resume()
     }
    
+   /// Fetch Voting byId
    func fetchVoting(byId votingId: UUID, completion: @escaping (Result<GetVotingDTO, Error>) -> Void) {
        guard let url = URL(string: "https://kivop.ipv64.net/meetings/votings/\(votingId)") else {
            completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
@@ -114,6 +125,7 @@ class VotingService: ObservableObject {
        }.resume()
    }
     
+   // MARK: - Fetch Voting Results
     func fetchVotingResults(votingId: UUID, completion: @escaping (Result<GetVotingResultsDTO, Error>) -> Void) {
         guard let url = URL(string: "https://kivop.ipv64.net/meetings/votings/\(votingId)/results") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
@@ -153,6 +165,8 @@ class VotingService: ObservableObject {
         }.resume()
     }
    
+   //MARK: - Cast Vote
+   /// Casts a vote in a specific voting session
    func castVote(votingID: UUID, index: UInt8, completion: @escaping (Result<Void, Error>) -> Void) {
        // Construct the URL
        let urlString = "https://kivop.ipv64.net/meetings/votings/\(votingID)/vote/\(index)"
@@ -219,9 +233,8 @@ class VotingService: ObservableObject {
       }.resume()
    }
    
-   
-   //Meeting
-   
+   // MARK: - Meeting
+   /// Fetch Meeting by Id
    func fetchMeeting(byId meetingId: UUID, completion: @escaping (Result<GetMeetingDTO, Error>) -> Void) {
        guard let url = URL(string: "https://kivop.ipv64.net/meetings/\(meetingId)") else {
            completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
@@ -262,6 +275,7 @@ class VotingService: ObservableObject {
    }
 }
 
+// MARK: - Async Fetching Extension
 extension VotingService {
     func fetchVotings() async throws -> [GetVotingDTO] {
         return try await withCheckedThrowingContinuation { continuation in

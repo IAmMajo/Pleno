@@ -1,13 +1,18 @@
+// This file is licensed under the MIT-0 License.
 import SwiftUI
-import MapKit
 
 struct EditEventRideView: View {
     @StateObject var viewModel: EditRideViewModel
     @Environment(\.dismiss) private var dismiss
     
+    // View zum Bearbeiten der EventRides
+    // Funktioniert wie die CreateView, abgesehen von:
+    // - Das Event für das man die Fahrt anbietet lässt sich nicht mehr ändern
+    // - Die Sitzplätze können nicht unter die Anzahl an bereits besetzten Plätzen gesetzt werden.
     var body: some View {
         VStack {
             List {
+                // Details zum Event
                 if let eventDetails = viewModel.eventDetails {
                     Section(header: Text("Details zum Event")) {
                         Text(eventDetails.name)
@@ -27,7 +32,7 @@ struct EditEventRideView: View {
                         Text(viewModel.dstAddress)
                             .onAppear{
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                    viewModel.getAddressFromCoordinates(latitude: eventDetails.latitude, longitude: eventDetails.longitude) { address in
+                                    viewModel.rideManager.getAddressFromCoordinates(latitude: eventDetails.latitude, longitude: eventDetails.longitude) { address in
                                         if let address = address {
                                             viewModel.dstAddress = address
                                         }
@@ -38,6 +43,7 @@ struct EditEventRideView: View {
                     }
                 }
                 
+                // Startort - lässt sich selbst ändern
                 Section(header: Text("Startort")){
                     HStack{
                         Button(action: {
@@ -71,7 +77,7 @@ struct EditEventRideView: View {
                         }
                         .onAppear {
                             if viewModel.eventRideDetail.latitude != 0 && viewModel.eventRideDetail.longitude != 0 {
-                                viewModel.getAddressFromCoordinates(latitude: viewModel.eventRideDetail.latitude, longitude: viewModel.eventRideDetail.longitude) { address in
+                                viewModel.rideManager.getAddressFromCoordinates(latitude: viewModel.eventRideDetail.latitude, longitude: viewModel.eventRideDetail.longitude) { address in
                                     if let address = address {
                                         viewModel.address = address
                                     }
@@ -83,7 +89,7 @@ struct EditEventRideView: View {
                                 let latitude = Float(location.latitude)
                                 let longitude = Float(location.longitude)
                                 
-                                viewModel.getAddressFromCoordinates(latitude: latitude, longitude: longitude) { address in
+                                viewModel.rideManager.getAddressFromCoordinates(latitude: latitude, longitude: longitude) { address in
                                     if let address = address {
                                         viewModel.address = address
                                     }
@@ -121,12 +127,13 @@ struct EditEventRideView: View {
                         
                         HStack {
                             // Picker für die Auswahl der freien Sitze
+                            // kann nicht kleiner sein, als die anzahl der Fahrer die man mitnimmt
                             Picker("",selection: $viewModel.eventRideDetail.emptySeats) {
                                 
                                 let acceptedRiders = viewModel.eventRideDetail.riders.filter { $0.accepted }
                                 
                                 ForEach(acceptedRiders.count..<min(100, 256), id: \.self) { number in
-                                    if number >= viewModel.eventRideDetail.riders.count && number <= 100 {
+                                    if number >= acceptedRiders.count && number <= 100 {
                                         Text("\(number)").tag(UInt8(number))
                                     }
                                 }
@@ -137,6 +144,7 @@ struct EditEventRideView: View {
                         .frame(width: UIScreen.main.bounds.width * 0.4)
                     }
                 }
+                // Optionale Hinweise
                 Section(header: Text("Hinweise")){
                     ZStack(alignment: .topLeading) {
                         // Placeholder Text
@@ -163,9 +171,11 @@ struct EditEventRideView: View {
             .navigationTitle(viewModel.eventRideDetail.eventName)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
+            // Event Details werden onAppear geholt
             .onAppear(){
                 viewModel.fetchEventDetails(eventID: viewModel.eventRideDetail.eventID)
             }
+            // Speichern Button mit identischer Logik wie für neue Fahrten
             .toolbar{
                 // Speichern Button
                 ToolbarItem(placement: .navigationBarTrailing) {
