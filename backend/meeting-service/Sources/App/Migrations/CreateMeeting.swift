@@ -15,8 +15,8 @@ struct CreateMeeting: AsyncMigration {
             .field("status", meetingStatus, .required, .sql(.default("scheduled")))
             .field("start", .datetime, .required)
             .field("duration", .uint16)
-            .field("location_id", .uuid, .references(Location.schema, .id))
-            .field("chair_id", .uuid, .references(Identity.schema, .id)) // TODO: Überprüfen: .references zu 'attendances'?
+            .field("location_id", .uuid, .references(Location.schema, .id, onDelete: .setNull))
+            .field("chair_id", .uuid, .references(Identity.schema, .id, onDelete: .setNull))
             .field("code", .string)
             .create()
     }

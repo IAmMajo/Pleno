@@ -9,9 +9,9 @@ struct CreateRecord: AsyncMigration {
             .case("approved")
             .create()
         try await database.schema(Record.schema)
-            .field("meeting_id", .uuid, .required, .references(Meeting.schema, .id))
+            .field("meeting_id", .uuid, .required, .references(Meeting.schema, .id, onDelete: .cascade))
             .field("lang", .string, .required)
-            .field("identity_id", .uuid, .required, .references(Identity.schema, .id)) // TODO: Überprüfen: .references zu 'attendances'?
+            .field("identity_id", .uuid, .required, .references(Identity.schema, .id, onDelete: .cascade))
             .field("status", recordStatus, .required, .sql(.default("underway")))
             .field("content", .string, .required, .sql(.default("")))
             .compositeIdentifier(over: "meeting_id", "lang")
