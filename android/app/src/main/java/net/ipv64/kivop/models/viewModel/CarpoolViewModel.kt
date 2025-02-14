@@ -50,15 +50,16 @@ class CarpoolViewModel(private val carpoolId: String) : ViewModel() {
 
   var addressInputField by mutableStateOf("")
   var myLocation by mutableStateOf<Pair<Double, Double>?>(null)
-
+  
+  // Gibt zurück wie viele User für die Farhgemeinschaft akzeptiert wurden
   fun calcRidersSize() {
     ridersSize = carpool?.riders?.count { it.accepted } ?: 0
   }
-
+  // Prüft ob es noch Platz für weitere riders gibt
   fun canAcceptMoreRiders(): Boolean {
     return ridersSize < (carpool?.emptySeats?.toInt() ?: 0)
   }
-
+  // Hollt die Daten für die Detailansicht und sortiert die Riders nach Accepted
   fun fetchCarpool() {
     viewModelScope.launch {
       val response = getCarpoolApi(carpoolId)
@@ -70,9 +71,10 @@ class CarpoolViewModel(private val carpoolId: String) : ViewModel() {
       }
     }
   }
-
+  // Fragt an einer Fahrgemeinscht beizutreten
   suspend fun postRequest(): Boolean? {
     if (me == null) {
+      // Erstellt neuen User Rider fürs UI wird nicht an den server geschickt
       me =
           GetRiderDTO(
               id = UUID.randomUUID(),
@@ -83,9 +85,10 @@ class CarpoolViewModel(private val carpoolId: String) : ViewModel() {
               accepted = false,
               itsMe = true)
     }
+    // Schickt die anfrage an den server
     return myLocation?.let { postRequestSpecialRideApi(carpoolId, it) }
   }
-
+  // Akzeptiert oder lehnt den Rider ab
   suspend fun patchAcceptRequest(riderId: UUID, accepted: Boolean): Boolean {
     return patchAcceptRiderRequest(riderId.toString(), accepted)
   }
@@ -93,7 +96,7 @@ class CarpoolViewModel(private val carpoolId: String) : ViewModel() {
   suspend fun deleteRequest(riderId: UUID): Boolean {
     return deleteRiderRequest(riderId.toString())
   }
-
+  // Convertiert Koordinaten in Adresse
   suspend fun fetchAddress(lat: Double, long: Double): String? {
     val addressResponse = getAddressFromLatLngApi(lat, long)
     addressResponse?.let {
@@ -107,7 +110,7 @@ class CarpoolViewModel(private val carpoolId: String) : ViewModel() {
     }
     return null
   }
-
+  
   fun fetchAddress() {
     viewModelScope.launch {
       val startAddressResponse =
