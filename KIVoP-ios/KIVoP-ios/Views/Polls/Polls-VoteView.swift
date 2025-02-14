@@ -127,7 +127,7 @@ struct Polls_VoteView: View {
                dismiss() // Dismisses the voting view
                onNavigate() // Navigates to the results page
             case .failure(let error):
-               self.error = "Fehler beim Voten für die Umfrage: \(error.localizedDescription)"
+               self.error = NSLocalizedString("Fehler: \(error.localizedDescription)", comment: "")
             }
          }
       }

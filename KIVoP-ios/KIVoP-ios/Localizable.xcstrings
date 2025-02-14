@@ -4,9 +4,6 @@
     "" : {
 
     },
-    " " : {
-
-    },
     "   **Newsletterdaten**\n\nWenn Sie den auf der App angebotenen Newsletter beziehen möchten, benötigen wir von Ihnen eine E-Mail-Adresse sowie Informationen, welche uns die Überprüfung gestatten, dass Sie der Inhaber der angegebenen E-Mail-Adresse sind und mit dem Empfang des Newsletters einverstanden sind. Weitere Daten werden nicht bzw. nur auf freiwilliger Basis erhoben. Diese Daten verwenden wir ausschließlich für den Versand der angeforderten Informationen und geben diese nicht an Dritte weiter.\n\nDie Verarbeitung der in das Newsletteranmeldeformular eingegebenen Daten erfolgt ausschließlich auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Die erteilte Einwilligung zur Speicherung der Daten, der E-Mail-Adresse sowie deren Nutzung zum Versand des Newsletters können Sie jederzeit widerrufen, etwa über den „Austragen“-Link im Newsletter. Die Rechtmäßigkeit der bereits erfolgten Datenverarbeitungsvorgänge bleibt vom Widerruf unberührt.\n\nDie von Ihnen zum Zwecke des Newsletter-Bezugs bei uns hinterlegten Daten werden von uns bis zu Ihrer Austragung aus dem Newsletter bei uns gespeichert und nach der Abbestellung des Newsletters oder nach Zweckfortfall aus der Newsletterverteilerliste gelöscht. Wir behalten uns vor, E-Mail-Adressen aus unserem Newsletterverteiler nach eigenem Ermessen im Rahmen unseres berechtigten Interesses nach Art. 6 Abs. 1 lit. f DSGVO zu löschen oder zu sperren.\n\nDaten, die zu anderen Zwecken bei uns gespeichert wurden, bleiben hiervon unberührt." : {
       "localizations" : {
         "de" : {
@@ -50,6 +47,9 @@
           }
         }
       }
+    },
+    " deines Vereins dich aufnehmen." : {
+
     },
     " in der Bestätigungs-Mail." : {
       "localizations" : {
@@ -141,7 +141,6 @@
       }
     },
     "(ca. 160 min.)" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -207,6 +206,9 @@
         }
       }
     },
+    "%.2f%%" : {
+
+    },
     "%@" : {
       "localizations" : {
         "de" : {
@@ -229,7 +231,28 @@
         }
       }
     },
+    "%@\n%lf, %lf" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@\n%2$lf, %3$lf"
+          }
+        }
+      }
+    },
+    "%@ - %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ - %2$@"
+          }
+        }
+      }
+    },
     "%@ (%@)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -251,7 +274,18 @@
         }
       }
     },
+    "%@ %@, %@ Uhr" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@, %3$@ o'clock"
+          }
+        }
+      }
+    },
     "%@ am %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -269,6 +303,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ tarihinde %@"
+          }
+        }
+      }
+    },
+    "%@° N, %@° E" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@° N, %2$@° E"
+          }
+        }
+      }
+    },
+    "%f, %f" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$f, %2$f"
+          }
+        }
+      }
+    },
+    "%lf, %lf" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lf, %2$lf"
           }
         }
       }
@@ -317,29 +381,53 @@
         }
       }
     },
+    "%llu" : {
+
+    },
     "%llu Stimmen (%@%%)" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "%llu Stimmen (%@%%)"
           }
         },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$llu Stimmen (%2$@%%)"
+            "state" : "translated",
+            "value" : "%1$llu votes (%2$@%%)"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "%llu oyu (%@%%)"
           }
         }
       }
     },
+    "%llu Stimmen von %llu Personen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$llu votes from %2$llu people"
+          }
+        }
+      }
+    },
+    "%u / %u" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$u / %2$u"
+          }
+        }
+      }
+    },
     "⚠️ %@ nicht unterstützt" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -518,7 +606,6 @@
       }
     },
     "8/12" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -541,7 +628,6 @@
       }
     },
     "18:06" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -564,7 +650,6 @@
       }
     },
     "21.01.2024" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -608,7 +693,11 @@
         }
       }
     },
+    "Abfahrtszeit" : {
+
+    },
     "Abgehangen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -626,6 +715,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Asılı"
+          }
+        }
+      }
+    },
+    "abgehängt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "taken-down"
+          }
+        }
+      }
+    },
+    "Abgehängt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taken-down"
+          }
+        }
+      }
+    },
+    "abgehängt am %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taken-down on %@"
           }
         }
       }
@@ -653,6 +772,7 @@
       }
     },
     "Abgeschlossen (%lld)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -678,7 +798,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Abgeschlossen am: %@"
           }
         },
@@ -690,36 +810,76 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Tamamlandı: %@"
           }
         }
       }
     },
     "Abhängedatum:" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Abhängedatum:"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Depreciation:"
+            "value" : "Take-down Date:"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Amortisman:"
           }
         }
       }
     },
+    "Abhängedatum: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take-down Date: %@"
+          }
+        }
+      }
+    },
+    "Abhängen bestätigen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm Take-down"
+          }
+        }
+      }
+    },
+    "Abhängen zurückziehen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo Take-down"
+          }
+        }
+      }
+    },
+    "Abhängen zurückziehen?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo Take-down?"
+          }
+        }
+      }
+    },
     "Ablaufdatum" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -742,6 +902,7 @@
       }
     },
     "Ablaufdatum:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -764,6 +925,7 @@
       }
     },
     "Ablaufdatum: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -786,6 +948,7 @@
       }
     },
     "Ablehnen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -833,25 +996,46 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Abschlusszeit"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Final hours"
+            "value" : "Closing Time"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Son saatler"
           }
         }
       }
     },
+    "Abstimmen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vote"
+          }
+        }
+      }
+    },
+    "Abstimmen nicht möglich" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voting not possible"
+          }
+        }
+      }
+    },
     "Abstimmung bearbeiten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -874,6 +1058,7 @@
       }
     },
     "Abstimmung beenden" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -896,6 +1081,7 @@
       }
     },
     "Abstimmung wird geladen..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -921,23 +1107,26 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Abstimmungen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voting"
+            "value" : "Votings"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Oylama"
           }
         }
       }
+    },
+    "Abstimmungs-Ergebnis" : {
+
     },
     "Account löschen" : {
       "localizations" : {
@@ -960,6 +1149,29 @@
           }
         }
       }
+    },
+    "Achte beim Aufnehmen des Bildes darauf, dass das Plakat sowie der Hintergrund und die Umgebung gut zu erkennen sind." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When taking the picture, make sure that the poster as well as the background and the surrounding area can be clearly seen."
+          }
+        }
+      }
+    },
+    "Achtung, du kannst das Bild später nicht mehr ändern. Ist das Plakat und seine Umgebung gut zu erkennen und das Bild nicht verwackelt?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attention, you won't be able to change the image later. Is the poster and its surroundings clearly visible, and is the image not blurry?"
+          }
+        }
+      }
+    },
+    "Add Item" : {
+
     },
     "Admin:" : {
       "extractionState" : "stale",
@@ -985,6 +1197,7 @@
       }
     },
     "Administrator" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1029,6 +1242,7 @@
       }
     },
     "Adresse auswählen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1046,6 +1260,19 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adres seçin"
+          }
+        }
+      }
+    },
+    "Adresse bestätigen" : {
+
+    },
+    "ADRESSE IN DER NÄHE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ADDRESS NEARBY"
           }
         }
       }
@@ -1073,6 +1300,7 @@
       }
     },
     "AKTIONEN" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1117,6 +1345,7 @@
       }
     },
     "Aktiv (%lld)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1142,19 +1371,19 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Aktuell"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Current"
+            "value" : "Active"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Akım"
           }
         }
@@ -1182,6 +1411,9 @@
         }
       }
     },
+    "Aktuelle" : {
+
+    },
     "AKTUELLE SITZUNG" : {
       "localizations" : {
         "de" : {
@@ -1203,6 +1435,9 @@
           }
         }
       }
+    },
+    "Aktuelle Sitzungen" : {
+
     },
     "Aktuelles Passwort" : {
       "localizations" : {
@@ -1270,6 +1505,29 @@
         }
       }
     },
+    "Alle nicht gespeicherten Änderungen gehen verloren!" : {
+
+    },
+    "Alle Standorte" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All locations"
+          }
+        }
+      }
+    },
+    "Alles im Blick?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Is everything visible?"
+          }
+        }
+      }
+    },
     "Allgemeine Informationen" : {
       "localizations" : {
         "de" : {
@@ -1293,6 +1551,7 @@
       }
     },
     "Am %@ um %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1315,6 +1574,7 @@
       }
     },
     "Ändern" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1359,6 +1619,12 @@
         }
       }
     },
+    "Anfrage zurücknehmen" : {
+
+    },
+    "Anfragen zum Mitnehmen (%lld)" : {
+
+    },
     "Anmeldung wird überprüft..." : {
       "localizations" : {
         "de" : {
@@ -1382,6 +1648,7 @@
       }
     },
     "Anonym" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1404,6 +1671,7 @@
       }
     },
     "Anonyme Abstimmung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1426,26 +1694,46 @@
       }
     },
     "Anonyme Umfrage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Anonyme Umfrage"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anonymous survey"
+            "value" : "Anonymous poll"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Anonim anket"
           }
         }
       }
+    },
+    "Anonymisierung aktivieren" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable anonymization"
+          }
+        }
+      }
+    },
+    "Anschließend kann der " : {
+
+    },
+    "Anstehend" : {
+
+    },
+    "Anstehende Sitzungen" : {
+
     },
     "Anstehende Termine" : {
       "localizations" : {
@@ -1514,6 +1802,7 @@
       }
     },
     "Aufgehangen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1535,30 +1824,50 @@
         }
       }
     },
+    "Aufgehängt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hung"
+          }
+        }
+      }
+    },
+    "aufgehängt am %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hung on %@"
+          }
+        }
+      }
+    },
     "Aufhängen\nbestätigen" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Aufhängen\nbestätigen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "hanging\nconfirm"
+            "value" : "Confirm\nHanging"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "asılı\nonaylamak"
           }
         }
       }
     },
     "Ausstehend" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1579,6 +1888,9 @@
           }
         }
       }
+    },
+    "Auswahl" : {
+
     },
     "Auswahlmöglichkeiten" : {
       "localizations" : {
@@ -1602,6 +1914,9 @@
         }
       }
     },
+    "Auto und Sitzplätze" : {
+
+    },
     "Bearbeiten" : {
       "localizations" : {
         "de" : {
@@ -1624,7 +1939,18 @@
         }
       }
     },
+    "behoben" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fixed"
+          }
+        }
+      }
+    },
     "Beitrittsanfrage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1647,6 +1973,7 @@
       }
     },
     "Beitrittsanfragen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1669,6 +1996,7 @@
       }
     },
     "BEITRITTSVERWALTUNG" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1691,6 +2019,7 @@
       }
     },
     "Benutzer auswählen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1713,6 +2042,7 @@
       }
     },
     "Benutzer wird geladen..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1735,6 +2065,7 @@
       }
     },
     "Benutzername" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1802,6 +2133,46 @@
         }
       }
     },
+    "beschädigt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "damaged"
+          }
+        }
+      }
+    },
+    "Beschädigung" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Damage"
+          }
+        }
+      }
+    },
+    "Beschädigung melden" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report damage"
+          }
+        }
+      }
+    },
+    "Beschädigung melden?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report damage?"
+          }
+        }
+      }
+    },
     "Beschreibung" : {
       "localizations" : {
         "de" : {
@@ -1824,7 +2195,18 @@
         }
       }
     },
+    "BESCHREIBUNG" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DESCRIPTION"
+          }
+        }
+      }
+    },
     "Beschreibung (optional)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1846,7 +2228,11 @@
         }
       }
     },
+    "Beschreibung Auto" : {
+
+    },
     "Beschreibung eingeben" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1864,6 +2250,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Açıklama girin"
+          }
+        }
+      }
+    },
+    "Beschreibung oder weitere Infos zu deiner Fahrt" : {
+
+    },
+    "Beschreibung zur Fahrt: " : {
+
+    },
+    "Bestätige mit einem Bild, dass das Plakat beschädigt wurde, oder es nicht mehr an der vorgesehenen Stelle hängt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm with a picture that the poster was damaged or it is no longer hanging in the intended place."
           }
         }
       }
@@ -1890,7 +2292,14 @@
         }
       }
     },
+    "Bestätigung" : {
+
+    },
+    "Bevor du einer Eventfahrt beitreten kannst, musst du deinen Standort festlegen. Dieser kann später noch über das Symbol oben rechts geändert werden." : {
+
+    },
     "Bild entfernen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1913,6 +2322,7 @@
       }
     },
     "Bild hochladen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1957,6 +2367,32 @@
         }
       }
     },
+    "Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to undo the take-down? The poster will then be considered as hung again."
+          }
+        }
+      }
+    },
+    "Bist du sicher, dass du das Plakat abhängen möchtest?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to take down the poster?"
+          }
+        }
+      }
+    },
+    "Bitte ein Event auswählen." : {
+
+    },
+    "Bitte füllen Sie alle Felder aus. Das Startdatum muss außerdem in der Zukunft liegen." : {
+
+    },
     "Bitte klicke nun auf den " : {
       "localizations" : {
         "de" : {
@@ -1979,7 +2415,20 @@
         }
       }
     },
+    "Bitte überprüfe und bestätige die Adresse von der du abgeholt werden möchtest" : {
+
+    },
+    "Bitte wähle, ob du eine Event Fahrt oder eine Sonderfahrt anlegen möchtest." : {
+
+    },
+    "Bitte wählen Sie einen Startort aus." : {
+
+    },
+    "Bitte wählen Sie einen Zielort aus." : {
+
+    },
     "Buchstabe" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2002,6 +2451,7 @@
       }
     },
     "Buchstabe (optional)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2068,6 +2518,7 @@
       }
     },
     "Das Event konnte nicht geladen werden." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2090,6 +2541,7 @@
       }
     },
     "Das Passwort ist zu schwach. Bitte verwenden Sie mindestens 8 Zeichen, eine Zahl und ein Sonderzeichen." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2110,6 +2562,12 @@
           }
         }
       }
+    },
+    "Das Passwort ist zu schwach. Mind. 8 Zeichen, 1 Zahl, 1 Sonderzeichen." : {
+
+    },
+    "Das Protokoll wurde noch nicht veröffentlicht." : {
+
     },
     "Datenschutzerklärung" : {
       "localizations" : {
@@ -2134,6 +2592,7 @@
       }
     },
     "Datum" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2178,6 +2637,7 @@
       }
     },
     "Datum und Zeit" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2200,6 +2660,7 @@
       }
     },
     "Datum: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2222,6 +2683,7 @@
       }
     },
     "Dauer (in Minuten)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2244,6 +2706,7 @@
       }
     },
     "Dauer (in Minutes)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2287,6 +2750,12 @@
         }
       }
     },
+    "Deine Fahrt wird dann veröffentlicht und andere können dieser beitreten." : {
+
+    },
+    "Deine gesamten Änderungen gehen verloren!" : {
+
+    },
     "Details" : {
       "localizations" : {
         "de" : {
@@ -2308,6 +2777,9 @@
           }
         }
       }
+    },
+    "Details der Fahrt" : {
+
     },
     "Details für den Marker" : {
       "extractionState" : "stale",
@@ -2332,7 +2804,11 @@
         }
       }
     },
+    "Details zum Event" : {
+
+    },
     "Details zur Abstimmung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2355,6 +2831,7 @@
       }
     },
     "Details zur Sitzung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2372,6 +2849,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oturumla ilgili ayrıntılar"
+          }
+        }
+      }
+    },
+    "Die Abstimmung läuft noch. Du hast bereits abgestimmt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The voting is still in progress. You have already voted."
+          }
+        }
+      }
+    },
+    "Die Abstimmungsergebnisse konnten nicht geladen werden" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The voting results could not be loaded."
           }
         }
       }
@@ -2402,25 +2899,26 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Dies ist nur eine vorläufige Umfrage, um festzustellen, wie viele Mitglieder kommen."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This is only a preliminary survey to determine how many members come."
+            "value" : "This is only a preliminary poll to determine how many members come."
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Bu sadece kaç üyenin geldiğini belirlemek için bir ön ankettir."
           }
         }
       }
     },
     "Diese Aktion kann nicht rückgängig gemacht werden." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2441,6 +2939,21 @@
           }
         }
       }
+    },
+    "Du bietest eine andere Fahrgemeinschaft an. Daher kannst du nicht an einer anderen Fahrt teilnehmen!" : {
+
+    },
+    "Du bist bereits Fahrer bei diesem Event, und kannst keine weitere Fahrgemeinschaft anlegen." : {
+
+    },
+    "Du hast bereits angefragt mitgenommen zu werden." : {
+
+    },
+    "Du hast dem ausgewählten Event nicht zugesagt, und kannst daher keine Fahrgemeinschaft anbieten." : {
+
+    },
+    "Du hast dem ausgewählten Event nicht zugesagt, und kannst daher keiner Fahrgemeinschaft beitreten." : {
+
     },
     "Du kannst deine Wahl danach nicht mehr ändern!" : {
       "localizations" : {
@@ -2463,6 +2976,9 @@
           }
         }
       }
+    },
+    "Du wirst schon von jemandem mitgenommen." : {
+
     },
     "E-Mail erneut senden" : {
       "localizations" : {
@@ -2553,6 +3069,9 @@
         }
       }
     },
+    "Editor" : {
+
+    },
     "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2599,6 +3118,7 @@
       }
     },
     "Eingereicht" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2643,6 +3163,7 @@
       }
     },
     "Einstellungen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2665,6 +3186,7 @@
       }
     },
     "Enddatum" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2690,19 +3212,19 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Ende:"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "End:"
+            "value" : "Closes at:"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Son:"
           }
         }
@@ -2731,6 +3253,7 @@
       }
     },
     "Endzeit: %@ um %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2748,6 +3271,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Son zaman: %@ da %@"
+          }
+        }
+      }
+    },
+    "Entfernen" : {
+
+    },
+    "Enthalten" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abstain"
+          }
+        }
+      }
+    },
+    "Erneut aufnehmen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retake picture"
           }
         }
       }
@@ -2819,6 +3365,7 @@
       }
     },
     "Erstellt am" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2841,6 +3388,7 @@
       }
     },
     "Erstellt am: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2862,7 +3410,24 @@
         }
       }
     },
+    "Es haben %lld von %lld Personen abgestimmt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld out of %2$lld people have voted."
+          }
+        }
+      }
+    },
+    "Es wurden noch keine Fahrgemeinschaften zu diesem Event angelegt." : {
+
+    },
+    "Es wurden noch keine Protokolle veröffentlicht." : {
+
+    },
     "Event %@ bearbeiten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2884,7 +3449,14 @@
         }
       }
     },
+    "Event auswählen" : {
+
+    },
+    "Event Beschreibung" : {
+
+    },
     "Event erstellen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2906,7 +3478,14 @@
         }
       }
     },
+    "Event Fahrt" : {
+
+    },
+    "Event Informationen" : {
+
+    },
     "Event löschen?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2929,6 +3508,7 @@
       }
     },
     "Event: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2951,6 +3531,7 @@
       }
     },
     "Eventfahrten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2994,7 +3575,11 @@
         }
       }
     },
+    "Fahrer" : {
+
+    },
     "Fahrer: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3015,6 +3600,9 @@
           }
         }
       }
+    },
+    "Fahrgemeinschaft" : {
+
     },
     "Fahrgemeinschaften" : {
       "localizations" : {
@@ -3038,7 +3626,14 @@
         }
       }
     },
+    "Fahrgemeinschaften ansehen" : {
+
+    },
+    "Fahrt löschen" : {
+
+    },
     "Fahrt-Details" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3061,6 +3656,7 @@
       }
     },
     "Fahrt-Informationen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3106,6 +3702,7 @@
       }
     },
     "Fahrt: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3128,6 +3725,7 @@
       }
     },
     "Fahrtdetails" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3149,7 +3747,11 @@
         }
       }
     },
+    "Fahrten" : {
+
+    },
     "Fahrttyp auswählen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3172,6 +3774,7 @@
       }
     },
     "Fahrzeug: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3219,25 +3822,26 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Fehler"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mistake"
+            "value" : "Error"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Hata"
           }
         }
       }
     },
     "Fehler beim Laden der Daten: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3283,6 +3887,7 @@
       }
     },
     "Fehler beim Speichern." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3308,25 +3913,26 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Fehler: %@"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mistake: %@"
+            "value" : "Error: %@"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Mistake: %@"
           }
         }
       }
     },
     "Fertig" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3347,6 +3953,9 @@
           }
         }
       }
+    },
+    "Fetching address..." : {
+
     },
     "Filter" : {
       "localizations" : {
@@ -3374,25 +3983,26 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Frage"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ask"
+            "value" : "Question"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Sormak"
           }
         }
       }
     },
     "Frage eingeben" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3414,7 +4024,14 @@
         }
       }
     },
+    "Franz" : {
+
+    },
+    "Freie Plätze" : {
+
+    },
     "Freie Plätze: %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3437,6 +4054,7 @@
       }
     },
     "Freie Plätze: %u" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3454,6 +4072,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Boş yerler: %u"
+          }
+        }
+      }
+    },
+    "Freigeben" : {
+
+    },
+    "Für diese Abstimmung hat keiner abgestimmt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No one has voted in this voting."
+          }
+        }
+      }
+    },
+    "Für diese Umfrage hat keiner abgestimmt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No one has voted in this poll."
           }
         }
       }
@@ -3481,6 +4122,7 @@
       }
     },
     "Generierter Social-Media-Post" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3502,7 +4144,18 @@
         }
       }
     },
+    "Geschlossen:" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closed at:"
+          }
+        }
+      }
+    },
     "Hallo %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3524,7 +4177,41 @@
         }
       }
     },
+    "Hallo, %@" : {
+
+    },
+    "hängt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hangs"
+          }
+        }
+      }
+    },
+    "hängt (überfällig)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hangs (overdue)"
+          }
+        }
+      }
+    },
+    "hängt noch nicht" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "not hung yet"
+          }
+        }
+      }
+    },
     "Hausnummer" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3545,6 +4232,9 @@
           }
         }
       }
+    },
+    "Heinz-Peters" : {
+
     },
     "Hello, World!" : {
       "extractionState" : "stale",
@@ -3569,7 +4259,23 @@
         }
       }
     },
+    "Hiermit bestätigst du, dass du von dieser Adresse abgeholt werden möchtest und an dieser Fahrgemeinschaft teilnimmst" : {
+
+    },
+    "Hiermit bestätigst du, dass du von dieser Adresse abgeholt werden möchtest." : {
+
+    },
+    "Hinweis" : {
+
+    },
+    "Hinweise" : {
+
+    },
+    "Hinzufügen" : {
+
+    },
     "In Bearbeitung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3592,7 +4298,6 @@
       }
     },
     "In der alten Turnhalle hinter dem Friedhof\nAltes Grab 5 b, 42069 Hölle" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3615,6 +4320,7 @@
       }
     },
     "In Planung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3636,7 +4342,18 @@
         }
       }
     },
+    "In Zwischenablage kopiert" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copied to Clipboard"
+          }
+        }
+      }
+    },
     "Info" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3659,6 +4376,7 @@
       }
     },
     "info@meinverein.de" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3680,7 +4398,14 @@
         }
       }
     },
+    "Informationen zur Fahrt" : {
+
+    },
+    "Interesse entfernen" : {
+
+    },
     "Interessiert an Mitfahrgelegenheiten: %lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3698,6 +4423,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Carpooling ile ilgileniyor: %lld"
+          }
+        }
+      }
+    },
+    "ist beschädigt oder fehlt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "is damaged or missing"
+          }
+        }
+      }
+    },
+    "Ist das beschädigte, oder fehlende Plakat und seine Umgebung gut zu erkennen und das Bild nicht verwackelt?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Is the damaged or missing poster and its surroundings clearly visible, and is the image not blurry?"
           }
         }
       }
@@ -3725,7 +4470,6 @@
       }
     },
     "Jahreshauptversammlung" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3746,6 +4490,15 @@
           }
         }
       }
+    },
+    "Jetzt Abholort angeben." : {
+
+    },
+    "Jetzt teilnehmen" : {
+
+    },
+    "Jetzt zusagen!" : {
+
     },
     "Kamera" : {
       "localizations" : {
@@ -3814,6 +4567,7 @@
       }
     },
     "Keine Abstimmungsergebnisse verfügbar." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3836,6 +4590,7 @@
       }
     },
     "Keine aktiven Meetings verfügbar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3857,7 +4612,11 @@
         }
       }
     },
+    "Keine anstehenden Sitzungen." : {
+
+    },
     "Keine Auswahl" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3880,6 +4639,7 @@
       }
     },
     "Keine Beschreibung verfügbar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3900,6 +4660,9 @@
           }
         }
       }
+    },
+    "Keine Fahrzeugbeschreibung vorhanden." : {
+
     },
     "Keine Mitfahrer" : {
       "localizations" : {
@@ -3924,6 +4687,7 @@
       }
     },
     "Keine Orte verfügbar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3945,7 +4709,11 @@
         }
       }
     },
+    "Keine Protokollanten gefunden." : {
+
+    },
     "Keine Protokolle verfügbar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3990,6 +4758,7 @@
       }
     },
     "Keine Sammelposten gefunden." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4033,7 +4802,11 @@
         }
       }
     },
+    "Keine Sitzungen und Protokolle verfügbar." : {
+
+    },
     "Keine Sitzungen verfügbar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4056,6 +4829,7 @@
       }
     },
     "Keine Teilnehmer" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4078,6 +4852,7 @@
       }
     },
     "Keine Teilnehmer ohne Feedback" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4143,7 +4918,14 @@
         }
       }
     },
+    "Keine vergangenen Sitzungen." : {
+
+    },
+    "Keins vorhanden" : {
+
+    },
     "KI-generierte Verbesserung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4166,6 +4948,7 @@
       }
     },
     "KI-Vorschlag" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4211,6 +4994,7 @@
       }
     },
     "Konto löschen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4255,6 +5039,7 @@
       }
     },
     "Lade Anfragen..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4277,6 +5062,7 @@
       }
     },
     "Lade Einstellungen..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4321,6 +5107,7 @@
       }
     },
     "Lade Event..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4343,6 +5130,7 @@
       }
     },
     "Lade Fahrtdetails..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4365,6 +5153,7 @@
       }
     },
     "Lade Orte..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4408,6 +5197,9 @@
         }
       }
     },
+    "Lade Protokollanten..." : {
+
+    },
     "Lade Protokolle..." : {
       "localizations" : {
         "de" : {
@@ -4431,6 +5223,7 @@
       }
     },
     "Lade Sammelposten..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4453,6 +5246,7 @@
       }
     },
     "Lade Sitzungen..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4478,19 +5272,19 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Lade Umfragen..."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Charge surveys ..."
+            "value" : "Load polls..."
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Ücret anketleri ..."
           }
         }
@@ -4676,6 +5470,9 @@
         }
       }
     },
+    "Live-Status" : {
+
+    },
     "Loading locations..." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4700,7 +5497,6 @@
       }
     },
     "Loading meetings..." : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4723,7 +5519,6 @@
       }
     },
     "Loading..." : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4746,6 +5541,7 @@
       }
     },
     "Location Details" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4857,7 +5653,18 @@
         }
       }
     },
+    "Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take a photo of the hung poster now and confirm its position."
+          }
+        }
+      }
+    },
     "Meeting auswählen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4880,6 +5687,7 @@
       }
     },
     "Meeting-Code" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4902,6 +5710,7 @@
       }
     },
     "Meetings werden geladen..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4946,6 +5755,7 @@
       }
     },
     "Mein Verein" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4966,6 +5776,9 @@
           }
         }
       }
+    },
+    "Meine Fahrten" : {
+
     },
     "Meine Position" : {
       "localizations" : {
@@ -4990,6 +5803,7 @@
       }
     },
     "Mit" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5012,7 +5826,6 @@
       }
     },
     "Mit " : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5035,6 +5848,7 @@
       }
     },
     "Mitfahrer" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5055,6 +5869,22 @@
           }
         }
       }
+    },
+    "Mitfahrer (%lld/%u)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mitfahrer (%1$lld/%2$u)"
+          }
+        }
+      }
+    },
+    "Mitfahrt anfragen" : {
+
+    },
+    "Mitfahrt löschen" : {
+
     },
     "Mitglieder" : {
       "localizations" : {
@@ -5078,7 +5908,20 @@
         }
       }
     },
+    "Möchten Sie die Anfrage wirklich löschen?" : {
+
+    },
+    "Möchten Sie die Fahrt wirklich löschen?" : {
+
+    },
+    "Möchten Sie die Person wirklich aus der Fahrgemeinschaft entfernen?" : {
+
+    },
+    "Möchten Sie die Person wirklich zu der Fahrgemeinschaft hinzufügen?" : {
+
+    },
     "Möchten Sie die Sitzung wirklich beenden?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5101,6 +5944,7 @@
       }
     },
     "Möchten Sie die Sitzung wirklich starten?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5145,7 +5989,11 @@
         }
       }
     },
+    "Möchten Sie Ihren Platz wirklich wieder freigeben?" : {
+
+    },
     "Möchtest du das Event '%@' wirklich löschen?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5190,28 +6038,30 @@
       }
     },
     "Möchtest du diese Umfrage wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Möchtest du diese Umfrage wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Do you really want to delete this survey?This action cannot be reversed."
+            "value" : "Do you really want to delete this poll? This action cannot be reversed."
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Bu anketi gerçekten silmek istiyor musunuz?Bu eylem tersine çevrilemez."
           }
         }
       }
     },
     "Möchtest du dieses Konto wirklich löschen?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5233,7 +6083,34 @@
         }
       }
     },
+    "Möchtest du wirklich abstimmen?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to vote?"
+          }
+        }
+      }
+    },
+    "Möchtest du wirklich speichern?" : {
+
+    },
+    "Möchtest du wirklich zurück?" : {
+
+    },
+    "morgen überfällig" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "overdue tomorrow"
+          }
+        }
+      }
+    },
     "Nach Frage suchen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5278,6 +6155,7 @@
       }
     },
     "Nach Sitzung suchen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5300,6 +6178,7 @@
       }
     },
     "Nächste" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5366,7 +6245,11 @@
         }
       }
     },
+    "Name der Fahrt" : {
+
+    },
     "Name der Sitzung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5389,6 +6272,7 @@
       }
     },
     "Name des Ortes" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5455,6 +6339,7 @@
       }
     },
     "Neue Abstimmung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5476,7 +6361,17 @@
         }
       }
     },
+    "Neue Event Fahrt" : {
+
+    },
+    "Neue Fahrt" : {
+
+    },
+    "Neue Fahrt anbieten" : {
+
+    },
     "Neuen Ort hinzufügen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5588,7 +6483,6 @@
       }
     },
     "No meetings available." : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5609,6 +6503,9 @@
           }
         }
       }
+    },
+    "No poster data available." : {
+
     },
     "No posters available." : {
       "extractionState" : "stale",
@@ -5657,6 +6554,7 @@
       }
     },
     "Nummer" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5679,6 +6577,7 @@
       }
     },
     "Nutzer werden hier angezeigt, wenn sie an der Sitzung teilnehmen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5701,6 +6600,7 @@
       }
     },
     "NUTZERÜBERSICHT" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5723,6 +6623,7 @@
       }
     },
     "Nutzerverwaltung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5788,6 +6689,36 @@
         }
       }
     },
+    "Öffnen mit Apple Maps" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open with Apple Maps"
+          }
+        }
+      }
+    },
+    "Öffnen mit Google Maps" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open with Google Maps"
+          }
+        }
+      }
+    },
+    "Öffnen mit Waze" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open with Waze"
+          }
+        }
+      }
+    },
     "OK" : {
       "localizations" : {
         "de" : {
@@ -5811,6 +6742,7 @@
       }
     },
     "Option" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5855,6 +6787,7 @@
       }
     },
     "Option %u:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5920,7 +6853,11 @@
         }
       }
     },
+    "Organisator" : {
+
+    },
     "Originaltext" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5960,6 +6897,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Konum"
+          }
+        }
+      }
+    },
+    "Passt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got it"
+          }
+        }
+      }
+    },
+    "Passt alles?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything visible?"
           }
         }
       }
@@ -6119,7 +7076,6 @@
       }
     },
     "Plakat %@" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6141,29 +7097,40 @@
         }
       }
     },
+    "Plakat abhängen?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take down poster?"
+          }
+        }
+      }
+    },
     "Plakate" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Plakate"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "posters"
+            "value" : "Posters"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "posters"
           }
         }
       }
     },
     "Plakatposition bearbeiten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6209,6 +7176,7 @@
       }
     },
     "Plakatposition löschen?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6231,6 +7199,7 @@
       }
     },
     "Plakatpositionen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6253,6 +7222,7 @@
       }
     },
     "Pleno" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6273,6 +7243,9 @@
           }
         }
       }
+    },
+    "Pleno " : {
+
     },
     "Positionen" : {
       "extractionState" : "stale",
@@ -6298,6 +7271,7 @@
       }
     },
     "Posterdesign" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6320,6 +7294,7 @@
       }
     },
     "Postleitzahl" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6363,6 +7338,9 @@
         }
       }
     },
+    "Profil und Vereinsinformationen" : {
+
+    },
     "Profilbild" : {
       "localizations" : {
         "de" : {
@@ -6386,6 +7364,7 @@
       }
     },
     "Protokoll auf " : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6408,6 +7387,7 @@
       }
     },
     "Protokoll auswählen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6452,7 +7432,6 @@
       }
     },
     "Protokoll:" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6474,7 +7453,14 @@
         }
       }
     },
+    "Protokoll: %@" : {
+
+    },
+    "Protokollant" : {
+
+    },
     "Protokollantenauswahl" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6517,6 +7503,9 @@
           }
         }
       }
+    },
+    "Protokolle zu %@" : {
+
     },
     "Ratssitzungen, " : {
       "localizations" : {
@@ -6586,6 +7575,7 @@
       }
     },
     "Sammelposten bearbeiten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6608,6 +7598,7 @@
       }
     },
     "Sammelposten erstellen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6630,6 +7621,7 @@
       }
     },
     "Sammelposten löschen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6652,6 +7644,7 @@
       }
     },
     "Sammelposten speichern" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6669,6 +7662,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toplama öğelerini kaydedin"
+          }
+        }
+      }
+    },
+    "Schließen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        }
+      }
+    },
+    "Schließt:" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closes at:"
           }
         }
       }
@@ -6696,7 +7709,11 @@
         }
       }
     },
+    "Sie müssen erst am Event teilnehmen, bevor Sie an der Fahrgemeinschaft teilnehmen" : {
+
+    },
     "Sie müssen zuerst an der Abstimmung teilnehmen, um den Live-Stand zu sehen." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6741,7 +7758,11 @@
         }
       }
     },
+    "Sitzung" : {
+
+    },
     "Sitzung am %@ um %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6764,6 +7785,7 @@
       }
     },
     "Sitzung bearbeiten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6786,6 +7808,7 @@
       }
     },
     "Sitzung beenden" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6808,6 +7831,7 @@
       }
     },
     "Sitzung erstellen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6830,6 +7854,7 @@
       }
     },
     "Sitzung starten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6895,6 +7920,12 @@
         }
       }
     },
+    "Sonderfahrt" : {
+
+    },
+    "Sonderfahrten" : {
+
+    },
     "Speichern" : {
       "localizations" : {
         "de" : {
@@ -6918,6 +7949,7 @@
       }
     },
     "Spezialfahrt-Details" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6940,6 +7972,7 @@
       }
     },
     "Sprache" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6962,6 +7995,7 @@
       }
     },
     "Sprache auswählen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6984,6 +8018,7 @@
       }
     },
     "Sprache:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7006,6 +8041,7 @@
       }
     },
     "Stadt" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7028,6 +8064,7 @@
       }
     },
     "Standort auswählen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7048,6 +8085,9 @@
           }
         }
       }
+    },
+    "Standort außerhalb der Anwendung öffnen?" : {
+
     },
     "Standort hinzufügen" : {
       "localizations" : {
@@ -7071,7 +8111,18 @@
         }
       }
     },
+    "STANDORTE (%lld)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LOCATIONS (%lld)"
+          }
+        }
+      }
+    },
     "Start:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7094,6 +8145,7 @@
       }
     },
     "Startdatum" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7137,7 +8189,11 @@
         }
       }
     },
+    "Startzeit" : {
+
+    },
     "Startzeit: %@ um %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7160,28 +8216,40 @@
       }
     },
     "Stimmen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Stimmen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voices"
+            "value" : "Votes"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Sesler"
           }
         }
       }
     },
+    "Stimmen (%llu)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votes (%llu)"
+          }
+        }
+      }
+    },
     "Straße" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7204,6 +8272,7 @@
       }
     },
     "Suche Adresse" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7229,25 +8298,26 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Suchen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seek"
+            "value" : "Search"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Aramak"
           }
         }
       }
     },
     "Teilen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7265,6 +8335,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Paylaşmak"
+          }
+        }
+      }
+    },
+    "Teilen..." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share…"
           }
         }
       }
@@ -7314,6 +8394,7 @@
       }
     },
     "Teilnehmer" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7336,6 +8417,7 @@
       }
     },
     "Teilnehmer ohne Feedback" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7403,6 +8485,7 @@
       }
     },
     "Titel" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7424,7 +8507,18 @@
         }
       }
     },
+    "überfällig" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "overdue"
+          }
+        }
+      }
+    },
     "Übernehmen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7447,6 +8541,7 @@
       }
     },
     "Übersetzen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7468,23 +8563,26 @@
         }
       }
     },
+    "Umfrage Details" : {
+
+    },
     "Umfrage Ergebnisse" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Umfrage Ergebnisse"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Survey results"
+            "value" : "Poll Results"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Anket sonuçları"
           }
         }
@@ -7494,63 +8592,67 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Umfrage erstellen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Create a survey"
+            "value" : "Create a poll"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Create a survey"
           }
         }
       }
     },
     "Umfrage löschen?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Umfrage löschen?"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Delete survey?"
+            "value" : "Delete poll?"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Sil anket?"
           }
         }
       }
     },
+    "Umfrage-Ergebnis" : {
+
+    },
     "Umfragen" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Umfragen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "surveys"
+            "value" : "Polls"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "surveys"
           }
         }
@@ -7601,6 +8703,9 @@
         }
       }
     },
+    "Unknown Action" : {
+
+    },
     "Unsupported datatype" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -7620,6 +8725,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Desteklenmeyen veri türü"
+          }
+        }
+      }
+    },
+    "VERANTWORTLICHE (%lld)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RESPONSIBLE (%lld)"
           }
         }
       }
@@ -7648,6 +8763,7 @@
       }
     },
     "Verantwortliche Person" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7670,6 +8786,7 @@
       }
     },
     "Verantwortliche Personen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7692,6 +8809,7 @@
       }
     },
     "Vereinseinstellungen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7780,6 +8898,15 @@
         }
       }
     },
+    "Vergangen" : {
+
+    },
+    "Vergangene" : {
+
+    },
+    "Vergangene Sitzungen" : {
+
+    },
     "Vergangene Termine" : {
       "localizations" : {
         "de" : {
@@ -7803,6 +8930,7 @@
       }
     },
     "Veröffentlichen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7825,6 +8953,7 @@
       }
     },
     "Veröffentlicht" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7842,6 +8971,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Published"
+          }
+        }
+      }
+    },
+    "Verstanden" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got it"
           }
         }
       }
@@ -7869,6 +9008,7 @@
       }
     },
     "Verwerfen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7891,6 +9031,7 @@
       }
     },
     "VL" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7912,7 +9053,14 @@
         }
       }
     },
+    "Wähle die Art der Fahrt" : {
+
+    },
+    "Wählen Sie ein Event" : {
+
+    },
     "Warte auf Echtzeit-Daten..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7955,6 +9103,9 @@
           }
         }
       }
+    },
+    "Willst du an dem Event teilnehmen?" : {
+
     },
     "WIP" : {
       "extractionState" : "stale",
@@ -8046,7 +9197,11 @@
         }
       }
     },
+    "Zielort" : {
+
+    },
     "zu einer verbesserten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -8069,7 +9224,6 @@
       }
     },
     "zu einer verbesserten " : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -8092,6 +9246,7 @@
       }
     },
     "Zukünftige Fahrten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -8112,6 +9267,9 @@
           }
         }
       }
+    },
+    "Zur aktuellen Sitzung" : {
+
     },
     "Zur Plakat Position" : {
       "extractionState" : "stale",
