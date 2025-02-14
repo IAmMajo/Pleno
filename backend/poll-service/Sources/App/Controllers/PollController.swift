@@ -29,9 +29,6 @@ struct PollController: RouteCollection {
                 
                 adminRoutes.delete(use: deletePoll)
                     .openAPI(tags: openAPITag, summary: "Eine Umfrage löschen", description: "Umfragen könne nur durch einen Admin gelöscht werden. Löscht ebenfalls alle zugehörigen Optionen und Stimmen.", path: .type(Poll.IDValue.self), statusCode: .noContent, auth: AdminMiddleware.schemeObject)
-                
-                //                            adminRoutes.put("close", use: closePoll)
-                //                                .openAPI(tags: openAPITag, summary: "Eine Umfrage schließen", path: .type(Poll.IDValue.self), response: .type(GetPollDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AdminMiddleware.schemeObject)
             }
             singlePollRoutes.put("vote", ":index", use: voteOnPoll)
                 .openAPI(tags: openAPITag, summary: "Für eine Option bei einer Umfrage abstimmen.", description: "Wenn die Umfrage mehrere Stimmen erlaubt, können diese in der Form `.../vote/1,3,4` abgegeben werden.", path: .all(of: .type(Poll.IDValue.self), .type(String.self)), response: .type(GetPollResultsDTO.self), responseContentType: .application(.json), statusCode: .ok, auth: AuthMiddleware.schemeObject)
@@ -103,12 +100,6 @@ struct PollController: RouteCollection {
     
     /// **DELETE** `/polls/{id}`
     @Sendable func deletePoll(req: Request) async throws -> HTTPStatus {
-        guard let isAdmin = req.jwtPayload?.isAdmin else {
-            throw Abort(.unauthorized)
-        }
-        guard isAdmin else {
-            throw Abort(.forbidden)
-        }
         guard let poll = try await Poll.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -117,33 +108,6 @@ struct PollController: RouteCollection {
         
         return .noContent
     }
-    
-    /// **PUT** `/polls/{id}/close`
-    //@Sendable func closePoll(req: Request) async throws -> GetPollDTO {
-    //    guard let voting = try await Poll.find(req.parameters.get("id"), on: req.db) else {
-    //        throw Abort(.notFound)
-    //    }
-    //    guard voting.isOpen && voting.startedAt != nil && voting.closedAt == nil else {
-    //        throw Abort(.badRequest, reason: "Only votings which are currently open can be closed.")
-    //    }
-    //    guard let userId = req.jwtPayload?.userID else {
-    //        throw Abort(.unauthorized)
-    //    }
-    //
-    //    voting.closedAt = .now
-    //    voting.isOpen = false
-    //
-    //    try await voting.update(on: req.db)
-    //
-    //    let clientWebSocketContainer = try self.votingClientWebSocketContainer.getClientWebSocketContainer(votingId: voting.requireID())
-    //    try await clientWebSocketContainer.sendBinary(
-    //        JSONEncoder().encode(voting.toGetPollResultsDTO(db: req.db, userId: userId))
-    //    )
-    //    try await clientWebSocketContainer.closeAllConnections()
-    //
-    //    try await voting.$votingOptions.load(on: req.db)
-    //    return try voting.toGetPollDTO()
-    //}
     
     /// **PUT** `/polls/{id}/vote/{index}`
     @Sendable func voteOnPoll(req: Request) async throws -> GetPollResultsDTO {
