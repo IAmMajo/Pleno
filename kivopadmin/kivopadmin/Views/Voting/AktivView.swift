@@ -1,89 +1,164 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
 import SwiftUI
 import MeetingServiceDTOs
 
 struct AktivView: View {
-    let voting: GetVotingDTO
-    let votingResults: GetVotingResultsDTO?
-    let onBack: () -> Void
+    // ViewModel für die Live-Abstimmung
+    @StateObject private var viewModel: AktivViewModel
 
-    @State private var isClosing = false
-    @State private var errorMessage: String?
-
-    var totalVotes: Int {
-        guard let results = votingResults?.results else { return 0 }
-        return results.reduce(0) { $0 + Int($1.total) }
-    }
-
-    var optionTextMap: [UInt8: String] {
-        Dictionary(uniqueKeysWithValues: voting.options.map { ($0.index, $0.text) })
+    // Initialisiert die Ansicht mit einer Abstimmung und einer Rückkehr-Funktion
+    init(voting: GetVotingDTO, onBack: @escaping () -> Void) {
+        _viewModel = StateObject(wrappedValue: AktivViewModel(voting: voting, onBack: onBack))
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                // Frage anzeigen
-                Text(voting.question)
-                    .font(.title)
-                    .bold()
-                    .padding()
-
-                // Beschreibung anzeigen (falls vorhanden)
-                if !voting.description.isEmpty {
-                    Text(voting.description)
-                        .font(.body)
-                        .foregroundColor(.gray)
-                        .padding([.leading, .trailing])
-                }
-
-                if let results = votingResults, !results.results.isEmpty {
-                    // Grafische Ergebnisse (Pie Chart)
-                    Text("Ergebnisse")
-                        .font(.headline)
-                        .padding(.top)
-
-                    PieChartView(optionTextMap: optionTextMap, votingResults: results)
-                        .frame(height: 200)
-                        .padding()
-
-                    // Tabellarische Ergebnisse
-                    VStack(alignment: .leading, spacing: 8) {
-                        TableView2(results: results.results, optionTextMap: optionTextMap, totalVotes: totalVotes)
-                    }
-                    .padding([.leading, .trailing])
+        VStack {
+            // Falls der Benutzer abgestimmt hat, wird der Live-Status angezeigt
+            if viewModel.voting.iVoted {
+                if let liveStatus = viewModel.liveStatus {
+                    votingProgressView(liveStatus: liveStatus)
+                } else if let errorMessage = viewModel.errorMessage {
+                    errorView(errorMessage: errorMessage)
                 } else {
-                    // Optionen in moderner Tabelle anzeigen
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Auswahlmöglichkeiten")
-                            .font(.headline)
-                            .padding(.bottom, 8)
-
-                        TableView(options: voting.options)
-                    }
-                    .padding([.leading, .trailing])
-
-                    Text("Keine Ergebnisse verfügbar.")
-                        .foregroundColor(.gray)
-                        .padding()
+                    loadingView
                 }
+            } else {
+                // Falls der Benutzer nicht abgestimmt hat, erscheint eine Warnung
+                participationWarningView
+            }
 
-                // Fehlermeldung anzeigen
-                if let errorMessage = errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.subheadline)
-                        .padding()
+            Spacer()
+
+            // Abstimmungsdetails nur anzeigen, wenn der Benutzer abgestimmt hat
+            if viewModel.voting.iVoted {
+                votingDetailsView
+            }
+
+            Spacer()
+
+            // Button zum Beenden der Abstimmung bleibt immer sichtbar
+            closeVotingButton
+        }
+        .onAppear {
+            if viewModel.voting.iVoted {
+                // WebSocket-Verbindung nur aufbauen, wenn der Benutzer abgestimmt hat
+                viewModel.connectWebSocket()
+            } else {
+                // Falls der Benutzer nicht abgestimmt hat, nach 2 Sekunden zurücknavigieren
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    viewModel.onBack()
                 }
-
-                // Umfrage abschließen
-                actionButton(title: "Umfrage abschließen", icon: "checkmark", color: .orange, action: closeVoting)
             }
         }
-        .background(Color.white)
+        .onDisappear {
+            viewModel.disconnectWebSocket()
+        }
+        .onChange(of: viewModel.liveStatus) { _, _ in
+            viewModel.updateProgress()
+        }
     }
 
-    private func actionButton(title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            if isClosing {
+    // Zeigt den Abstimmungsfortschritt als Kreisdiagramm an
+    private func votingProgressView(liveStatus: String) -> some View {
+        VStack {
+            ZStack {
+                Circle()
+                    .stroke(Color.blue.opacity(0.3), lineWidth: 35)
+                Circle()
+                    .trim(from: 0, to: viewModel.progress)
+                    .stroke(Color.blue, style: StrokeStyle(lineWidth: 35, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .animation(.easeOut(duration: 0.8), value: viewModel.progress)
+                Text("\(viewModel.value)/\(viewModel.total)")
+                    .font(.system(size: 50))
+                    .fontWeight(.bold)
+                    .foregroundColor(Color.blue)
+            }
+            .padding(30)
+
+            if !liveStatus.isEmpty {
+                Text(liveStatus)
+                    .font(.headline)
+                    .foregroundColor(.gray)
+            }
+        }
+    }
+
+    // Lade-Ansicht für Echtzeit-Daten
+    private var loadingView: some View {
+        VStack {
+            Spacer()
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                .scaleEffect(2)
+                .padding()
+            Text("Warte auf Echtzeit-Daten...")
+                .foregroundColor(.gray)
+                .padding()
+            Spacer()
+        }
+    }
+
+    // Fehleranzeige, wenn Probleme beim Abrufen der Live-Daten auftreten
+    private func errorView(errorMessage: String) -> some View {
+        VStack {
+            Spacer()
+            Text("Fehler beim Laden der Daten: \(errorMessage)")
+                .foregroundColor(.red)
+                .multilineTextAlignment(.center)
+                .padding()
+            Spacer()
+        }
+    }
+
+    // Warnung, falls der Benutzer noch nicht abgestimmt hat
+    private var participationWarningView: some View {
+        VStack {
+            Spacer()
+            Text("Sie müssen zuerst an der Abstimmung teilnehmen, um den Live-Stand zu sehen.")
+                .font(.headline)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.gray)
+                .padding()
+            Spacer()
+        }
+    }
+
+    // Zeigt die Frage der Abstimmung an
+    private var votingDetailsView: some View {
+        VStack(alignment: .center, spacing: 10) {
+            Text(viewModel.voting.question)
+                .font(.title2)
+                .fontWeight(.bold)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
+        .padding()
+        .cornerRadius(10)
+    }
+
+    // Button zum Beenden der Abstimmung
+    private var closeVotingButton: some View {
+        Button(action: viewModel.closeVoting) {
+            if viewModel.isClosing {
                 ProgressView()
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -91,71 +166,15 @@ struct AktivView: View {
                     .foregroundColor(.white)
                     .cornerRadius(8)
             } else {
-                Label(title, systemImage: icon)
+                Text("Abstimmung beenden")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(color)
+                    .background(Color.orange)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
         }
-        .padding(.horizontal)
-        .disabled(isClosing)
-    }
-
-    private func closeVoting() {
-        guard !isClosing else {
-            print("Warnung: closeVoting bereits in Bearbeitung.")
-            return
-        }
-
-        isClosing = true
-        errorMessage = nil
-
-        VotingService.shared.closeVoting(votingId: voting.id) { result in
-            DispatchQueue.main.async {
-                self.isClosing = false
-                switch result {
-                case .success:
-                    print("Umfrage erfolgreich abgeschlossen: \(self.voting.id)")
-                    onBack() // Zurück zur Voting-Liste navigieren
-                case .failure(let error):
-                    self.errorMessage = "Fehler beim Abschließen der Umfrage: \(error.localizedDescription)"
-                    print("Fehler beim Abschließen: \(error)")
-                }
-            }
-        }
+        .padding()
+        .disabled(viewModel.isClosing)
     }
 }
-
-// MARK: - TableView2 Component
-struct TableView2: View {
-    let results: [GetVotingResultDTO]?
-    let optionTextMap: [UInt8: String]?
-    let totalVotes: Int?
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let results = results, let optionTextMap = optionTextMap, let totalVotes = totalVotes {
-                ForEach(results, id: \ .index) { result in
-                    HStack {
-                        Text(optionTextMap[result.index] ?? "Enthaltung")
-                            .font(.body)
-                            .bold()
-                        Spacer()
-                        Text("\(result.total) Stimmen (\(percentage(for: result, totalVotes: totalVotes))%)")
-                            .font(.body)
-                    }
-                    Divider()
-                }
-            }
-        }
-    }
-
-    private func percentage(for result: GetVotingResultDTO, totalVotes: Int) -> String {
-        guard totalVotes > 0 else { return "0" }
-        let percent = Double(result.total) / Double(totalVotes) * 100
-        return String(format: "%.1f", percent)
-    }
-}
-

@@ -1,26 +1,62 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
 import SwiftUI
 import MeetingServiceDTOs
 
 struct CurrentMeetingBottomView: View {
-    @StateObject private var meetingManager = MeetingManager()
-    @State private var activeMeetingID: UUID? // UUID statt GetMeetingDTO, um Hashable zu sein
+    // Variable für die Sitzung, die gerade angezeigt wird
+    @State private var activeMeetingID: UUID?
     
-    @StateObject private var attendanceManager = AttendanceManager() // RecordManager als StateObject
+    // ViewModel für alle Sitzungen; wird als EnvironmentObject mitgegeben
+    @EnvironmentObject private var meetingManager : MeetingManager
+    
+    // ViewModel für die Anwesenheiten
+    @StateObject private var attendanceManager = AttendanceManager()
+    
+    // Array für alle Anwesenheiten
+    @State private var attendanceData: [UUID: [GetAttendanceDTO]] = [:]
+    
+    // Variablen für die API für jede Sitzung
+    @State private var loadingStates: [UUID: Bool] = [:]
+    @State private var errorMessages: [UUID: String] = [:]
     
     var body: some View {
         Group {
             if let currentMeeting = meetingManager.currentMeeting {
                 VStack {
-                    ScrollView(.horizontal) {
-                        HStack {
-                            filteredMeetingsView
+                    // Wenn mehr als eine Sitzung läuft, wird "paging Control" angezeigt (die Punkte unter den aktiven Sitzungen)
+                    if meetingManager.meetings.filter { $0.status == .inSession }.count > 1 {
+                        ScrollView(.horizontal) {
+                            HStack {
+                                filteredMeetingsView
+                            }
+                            .scrollTargetLayout()
                         }
-                        .scrollTargetLayout()
+                        .scrollTargetBehavior(.viewAligned)
+                        .scrollPosition(id: $activeMeetingID) // Verwende nur die ID für die Scroll-Position
+                        .scrollIndicators(.never)
+                        pagingControl
+                    } else {
+                        // Zeige das einzelne Meeting ohne ScrollView an
+                        filteredMeetingsView
                     }
-                    .scrollTargetBehavior(.viewAligned)
-                    .scrollPosition(id: $activeMeetingID) // Verwende nur die ID für die Scroll-Position
-                    .scrollIndicators(.never)
-                    pagingControl
                 }
                 .onAppear {
                     // Setze die erste Sitzung mit Status 'inSession' als aktive Sitzung
@@ -35,10 +71,12 @@ struct CurrentMeetingBottomView: View {
             }
         }
         .onAppear {
+            // Wenn die View aufgerufen wird, werden alle Sitzungen geladen
             meetingManager.fetchAllMeetings()
         }
     }
     
+    // Es werden nur die Sitzungen berücksichtigt, die gerade laufen
     private var filteredMeetingsView: some View {
         ForEach(meetingManager.meetings.filter { $0.status == .inSession }, id: \.id) { meeting in
             meetingView(for: meeting)
@@ -47,52 +85,47 @@ struct CurrentMeetingBottomView: View {
 
     }
 
+    // Ansicht einer "Sitzungs-Box"
     private func meetingView(for meeting: GetMeetingDTO) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(meeting.name)
                 .font(.headline)
                 .foregroundColor(.white)
-            
+
             HStack {
                 Image(systemName: "calendar")
                     .foregroundColor(.white)
                 Text(DateTimeFormatter.formatDate(meeting.start)) // Beispiel: Datum
                     .foregroundColor(.white)
-                
+
                 Spacer()
-                
-                HStack(spacing: 4) { // kleiner Abstand zwischen dem Symbol und der Personenanzahl
-                    if attendanceManager.isLoading {
-                        Text("Loading...")
-                    } else if let errorMessage = attendanceManager.errorMessage {
-                        Text("Error: \(errorMessage)")
+
+                HStack(spacing: 4) {
+                    if loadingStates[meeting.id] == true {
+                        Text("Lädt...")
+                    } else if let errorMessage = errorMessages[meeting.id] {
+                        Text("Fehler: \(errorMessage)")
+                    // Teilnehmeranzahl wird aus dem ViewModel geladen
+                    } else if let attendances = attendanceData[meeting.id] {
+                        Text("\(attendances.filter { $0.status == .present }.count)")
+                            .foregroundStyle(.white)
                     } else {
-                        Text("\(attendanceManager.numberOfParticipants())")
+                        Text("No Data")
                             .foregroundStyle(.white)
                     }
                     Image(systemName: "person.3.fill").foregroundStyle(.white) // Symbol für eine Gruppe von Personen
                 }
             }
-            
+
             HStack {
                 Image(systemName: "clock")
                     .foregroundColor(.white)
                 Text(DateTimeFormatter.formatTime(meeting.start)) // Beispiel: Uhrzeit
                     .foregroundColor(.white)
-                
+
                 Spacer()
             }
-            
-//            NavigationLink(destination: MeetingDetailView(meeting: meeting)) {
-//                Text("Zur aktuellen Sitzung")
-//                    .font(.footnote)
-//                    .fontWeight(.bold)
-//                    .padding()
-//                    .frame(maxWidth: .infinity)
-//                    .background(Color(UIColor.systemBackground))
-//                    .foregroundColor(.accentColor)
-//                    .cornerRadius(10)
-//            }
+
 
         }
         .padding()
@@ -100,16 +133,20 @@ struct CurrentMeetingBottomView: View {
         .cornerRadius(15)
         .padding(.horizontal, 12)
         .padding(.bottom, 20)
-        .onAppear(){
-            attendanceManager.fetchAttendances(meetingId: meeting.id)
+        .onAppear {
+            if attendanceData[meeting.id] == nil { // Nur laden, wenn noch keine Daten vorhanden sind
+                fetchAttendances(for: meeting.id)
+            }
         }
     }
 
+    // Punkte unter der ScrollView
     private var pagingControl: some View {
         HStack {
             ForEach(meetingManager.meetings.filter { $0.status == .inSession }, id: \.id) { meeting in
                 Button {
                     withAnimation {
+                        // Wenn ein Punkt angeklickt wird, wird zu dieser Sitzung gesprungen
                         activeMeetingID = meeting.id // Setze die ID des aktiven Meetings
                     }
                 } label: {
@@ -119,4 +156,26 @@ struct CurrentMeetingBottomView: View {
             }
         }
     }
+    
+    // Funktion, die die Teilnehmeranzahl steuert
+    private func fetchAttendances(for meetingId: UUID) {
+        loadingStates[meetingId] = true
+        errorMessages[meetingId] = nil
+
+        Task {
+            do {
+                let attendances = try await attendanceManager.fetchAttendances2(meetingId: meetingId)
+                DispatchQueue.main.async {
+                    self.attendanceData[meetingId] = attendances
+                    self.loadingStates[meetingId] = false
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.errorMessages[meetingId] = error.localizedDescription
+                    self.loadingStates[meetingId] = false
+                }
+            }
+        }
+    }
+
 }

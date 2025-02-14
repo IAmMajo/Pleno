@@ -1,11 +1,34 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
 import SwiftUI
 
 struct Onboarding: View {
     @State private var currentIndex = 0
     @State private var ClubLogo: String = "VL"
     @State private var navigateToLogin = false
-    
+    @State private var hasCheckedOnboarding = false
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    var isManualNavigation: Bool = false // Neuer Parameter
     @Binding var isLoggedIn: Bool
+
+
+
 
     var body: some View {
         NavigationStack {
@@ -22,20 +45,30 @@ struct Onboarding: View {
                 if currentIndex == 0 {
                     // Erster Onboarding-Bildschirm
                     VStack {
-                        Image("onboarding4")
+                        Image("onboarding2")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 300)
                         
                         VStack(spacing: 0) {
-                            Text("Mit ")
+                            Text("Mit")
                                 .font(.title3)
                                 .fontWeight(.regular) +
-                            Text("KIVoP ")
+                            Text(" ")
+                                .font(.title3)
+                                .fontWeight(.regular) +
+                            Text("Pleno")
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(.blue) +
-                            Text("zu einer verbesserten ")
+                            Text(" ")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundColor(.blue) +
+                            Text("zu einer verbesserten")
+                                .font(.title3)
+                                .fontWeight(.regular) +
+                            Text(" ")
                                 .font(.title3)
                                 .fontWeight(.regular) +
                             Text("Vereinsplanung")
@@ -51,13 +84,16 @@ struct Onboarding: View {
                 } else if currentIndex == 1 {
                     // Zweiter Onboarding-Bildschirm
                     VStack {
-                        Image("onboarding5")
+                        Image("onboarding1")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 300)
                         
                         VStack {
-                            Text("Verwalte ")
+                            Text("Verwalte")
+                                .font(.title3)
+                                .fontWeight(.regular)
+                            + Text(" ")
                                 .font(.title3)
                                 .fontWeight(.regular)
                             + Text("Ratssitzungen, ")
@@ -126,8 +162,8 @@ struct Onboarding: View {
                             if currentIndex < 1 {
                                 currentIndex += 1
                             } else {
-                                // Flag in UserDefaults setzen und zu Login weiterleiten
-                                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                                // Flag um zu Login weiterleiten
+                                hasSeenOnboarding = true
                                 navigateToLogin = true
                             }
                         }
@@ -176,19 +212,23 @@ struct Onboarding: View {
             .navigationDestination(isPresented: $navigateToLogin) {
                 Onboarding_Login(isLoggedIn: $isLoggedIn)
             }
+
         }
         .onAppear {
-            // Wenn der Benutzer das Onboarding bereits gesehen hat, direkt zur Login-Ansicht weiterleiten
-            if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+            // Nur automatisch zur LoginView navigieren, wenn dies nicht manuell aufgerufen wurde
+            if hasSeenOnboarding && !isManualNavigation {
                 navigateToLogin = true
             }
         }
+
+
         .navigationBarBackButtonHidden(true)
     }
 }
 
-//struct Onboarding_Previews: PreviewProvider {
-//    static var previews: some View {
-//        Onboarding($isLoggedIn: false)
-//    }
-//}
+/*struct Onboarding_Previews: PreviewProvider {
+    static var previews: some View {
+        Onboarding()
+    }
+}
+*/

@@ -1,3 +1,21 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
 import SwiftUI
 import LocalAuthentication
 import AuthServiceDTOs
@@ -44,8 +62,25 @@ struct Onboarding_Login: View {
 
                 // Password TextField
                 inputField(title: "Passwort", text: $password, isSecure: true)
+                
+                // "Passwort vergessen?" Link
+                NavigationLink(destination: ForgotPasswordView()) {
+                    Text("Passwort vergessen?")
+                        .foregroundColor(.blue)
+                        .font(.footnote)
+                        .padding(.top, 5)
+                    }
+
 
                 Spacer()
+                
+                // Error Message
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                        .padding(.horizontal, 24)
+                }
 
                 // Login Button
                 Button(action: {
@@ -70,13 +105,6 @@ struct Onboarding_Login: View {
                 .padding(.bottom, 10)
                 .disabled(isLoading || email.isEmpty || password.isEmpty)
 
-                // Error Message
-                if let errorMessage = errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.footnote)
-                        .padding(.horizontal, 24)
-                }
 
                 // Register Button
                 NavigationLink(destination: Onboarding_Register(isLoggedIn: $isLoggedIn)) {
@@ -90,18 +118,17 @@ struct Onboarding_Login: View {
                 .padding(.horizontal, 24)
 
                 // Back Button
-                Button(action: {
-                    dismiss() // Zur vorherigen Ansicht zurückkehren
-                }) {
-                    Text("Zurück")
-                        .foregroundColor(.gray)
-                        .font(.footnote)
-                        .underline()
-                }
-                .padding(.top, 10)
-                .padding(.bottom, 20)
+                NavigationLink(destination: Onboarding(isManualNavigation: true, isLoggedIn: $isLoggedIn)) { // Setze isManualNavigation auf true
+                                    Text("Zurück")
+                                        .foregroundColor(.gray)
+                                        .font(.footnote)
+                                        .underline()
+                                }
+                                .padding(.top, 10)
+                                .padding(.bottom, 20)
 
-                Spacer().frame(height: 20)
+                                Spacer().frame(height: 20)
+
             }
             .background(Color(UIColor.systemGray6))
             .edgesIgnoringSafeArea(.all)
@@ -139,12 +166,13 @@ struct Onboarding_Login: View {
             }
         }
     }
-
+    // Speichert die Anmeldedaten sicher in der Keychain.
     private func saveCredentialsToKeychain() {
         KeychainHelper.save(key: "email", value: email)
         KeychainHelper.save(key: "password", value: password)
     }
 
+    // Versucht automatisch eine Anmeldung mit gespeicherten Keychain-Daten.
     private func attemptLoginWithKeychain() {
         if let savedEmail = KeychainHelper.load(key: "email"),
            let savedPassword = KeychainHelper.load(key: "password") {
@@ -154,6 +182,7 @@ struct Onboarding_Login: View {
         }
     }
 
+    // Startet FaceID / TouchID zur Authentifizierung, falls aktiviert.
     private func triggerFaceID() {
         guard isKeychainAvailable, !faceIDTriggered, isActive else { return }
         faceIDTriggered = true
@@ -166,6 +195,7 @@ struct Onboarding_Login: View {
         }
     }
 
+    // Überprüft, ob Anmeldedaten in der Keychain gespeichert sind.
     private func checkKeychainAvailability() {
         isKeychainAvailable = KeychainHelper.load(key: "email") != nil && KeychainHelper.load(key: "password") != nil
         if isKeychainAvailable {
@@ -175,6 +205,7 @@ struct Onboarding_Login: View {
         }
     }
 
+    // Erstellt ein wiederverwendbares Eingabefeld für Text und sichere Eingaben.
     private func inputField(title: String, text: Binding<String>, isSecure: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)

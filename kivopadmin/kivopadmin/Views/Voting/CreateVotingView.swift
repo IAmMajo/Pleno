@@ -1,158 +1,140 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
 import SwiftUI
 import MeetingServiceDTOs
 
 struct CreateVotingView: View {
-    @Environment(\.presentationMode) var presentationMode
-    @State private var question = ""
-    @State private var description = ""
-    @State private var anonymous = false
-    @State private var options: [String] = [""] // Mindestens ein leeres Feld für Optionen
-    @State private var selectedMeetingId: UUID? = nil // Ausgewählte Meeting-ID
-    
-    @ObservedObject var meetingManager: MeetingManager
-    var onCreate: (GetVotingDTO) -> Void
-    
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var viewModel: CreateVotingViewModel
+
+    init(meetingManager: MeetingManager, onCreate: @escaping (GetVotingDTO) -> Void) {
+        _viewModel = StateObject(wrappedValue: CreateVotingViewModel(meetingManager: meetingManager, onCreate: onCreate))
+    }
+
     var body: some View {
         NavigationView {
-            Form {
-                // Meeting-Auswahl
-                Section(header: Text("Meeting auswählen")) {
-                    if !meetingManager.meetings.isEmpty {
-                        Menu {
-                            ForEach(meetingManager.meetings.filter { $0.status == .inSession }, id: \.id) { meeting in
-                                Button(action: {
-                                    selectedMeetingId = meeting.id
-                                }) {
-                                    Text(meeting.name)
+            if viewModel.isLoaded {
+                Form {
+                    // Sitzungsauswahl
+                    Section(header: Text("Sitzung auswählen")) {
+                        let activeMeetings = viewModel.meetings.filter { $0.status == .inSession }
+
+                        if !activeMeetings.isEmpty {
+                            Menu {
+                                ForEach(activeMeetings, id: \.id) { meeting in
+                                    Button(action: {
+                                        viewModel.selectedMeetingId = meeting.id
+                                        print("[DEBUG] Sitzung ausgewählt: \(meeting.name)")
+                                    }) {
+                                        Text(meeting.name)
+                                    }
+                                }
+                            } label: {
+                                HStack {
+                                    Text(viewModel.selectedMeetingName())
+                                        .foregroundColor(viewModel.selectedMeetingId == nil ? .gray : .primary)
+                                    Spacer()
+                                    Image(systemName: "chevron.down")
+                                        .foregroundColor(.gray)
                                 }
                             }
-                        } label: {
+                        } else {
+                            Text("Keine aktiven Sitzungen verfügbar")
+                                .foregroundColor(.red)
+                                .font(.subheadline)
+                        }
+                    }
+
+                    // Frage
+                    Section(header: Text("Frage")) {
+                        TextField("Frage eingeben", text: $viewModel.question)
+                            .autocapitalization(.sentences)
+                    }
+
+                    // Beschreibung
+                    Section(header: Text("Beschreibung")) {
+                        TextField("Beschreibung eingeben", text: $viewModel.description)
+                            .autocapitalization(.sentences)
+                            .onChange(of: viewModel.description) { _, newValue in
+                                if newValue.count > 300 {
+                                    viewModel.description = String(newValue.prefix(300))
+                                }
+                            }
+                    }
+
+                    // Anonyme Abstimmung
+                    Section(header: Text("Anonym")) {
+                        Toggle("Anonyme Abstimmung", isOn: $viewModel.anonymous)
+                    }
+
+                    // Optionen
+                    Section(header: Text("Optionen")) {
+                        ForEach(viewModel.options.indices, id: \.self) { index in
                             HStack {
-                                Text(selectedMeetingName())
-                                    .foregroundColor(selectedMeetingId == nil ? .gray : .primary)
-                                Spacer()
-                                Image(systemName: "chevron.down")
-                                    .foregroundColor(.gray)
-                            }
-                        }
-                    } else {
-                        Text("Meetings werden geladen...")
-                            .foregroundColor(.gray)
-                            .font(.subheadline)
-                    }
-                    
-                    if meetingManager.meetings.filter({ $0.status == .inSession }).isEmpty {
-                        Text("Keine aktiven Meetings verfügbar")
-                            .foregroundColor(.red)
-                            .font(.subheadline)
-                    }
-                }
-                
-                // Frage
-                Section(header: Text("Frage")) {
-                    TextField("Frage eingeben", text: $question)
-                        .autocapitalization(.sentences)
-                }
-                
-                // Beschreibung
-                Section(header: Text("Beschreibung")) {
-                    TextField("Beschreibung eingeben", text: $description)
-                        .autocapitalization(.sentences)
-                }
-                
-                // Anonyme Abstimmung
-                Section(header: Text("Anonym")) {
-                    Toggle("Anonyme Abstimmung", isOn: $anonymous)
-                }
-                
-                // Optionen
-                Section(header: Text("Optionen")) {
-                    ForEach($options.indices, id: \.self) { index in
-                        HStack {
-                            TextField("Option \(index + 1)", text: $options[index])
-                            
-                            if options.count > 1 {
-                                Button(action: {
-                                    options.remove(at: index)
-                                }) {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.red)
+                                TextField("Option \(index + 1)", text: $viewModel.options[index])
+                                    .onChange(of: viewModel.options[index]) { _, newValue in
+                                        viewModel.handleOptionChange(index: index, newValue: newValue)
+                                    }
+
+                                if viewModel.options.count > 1 && index != 0 {
+                                    Button(action: {
+                                        viewModel.removeOption(at: index)
+                                    }) {
+                                        Image(systemName: "trash")
+                                            .foregroundColor(.red)
+                                    }
                                 }
                             }
                         }
                     }
-                    Button(action: { options.append("") }) {
-                        Label("Option hinzufügen", systemImage: "plus")
+
+                    // Fehleranzeige
+                    if let errorMessage = viewModel.errorMessage {
+                        Section {
+                            Text(errorMessage)
+                                .foregroundColor(.red)
+                                .font(.footnote)
+                        }
                     }
                 }
-            }
-            .navigationTitle("Neue Umfrage")
-            .navigationBarItems(
-                leading: Button("Abbrechen") {
-                    presentationMode.wrappedValue.dismiss()
-                },
-                trailing: Button("Erstellen") {
-                    createVoting()
-                }
-                .disabled(!isFormValid())
-            )
-            .onAppear {
-                print("Meetings werden geladen...")
-                meetingManager.fetchAllMeetings()
-            }
-        }
-    }
-    
-    private func selectedMeetingName() -> String {
-        if let meeting = meetingManager.meetings.first(where: { $0.id == selectedMeetingId }) {
-            return meeting.name
-        }
-        return "Meeting auswählen"
-    }
-    
-    private func createVoting() {
-        guard let selectedMeetingId = selectedMeetingId else {
-            print("Fehler: Kein Meeting ausgewählt")
-            return
-        }
-        
-        print("Ausgewählte Meeting-ID: \(selectedMeetingId)")
-        
-        let validOptions = options.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
-        print("Gültige Optionen: \(validOptions)")
-        
-        let optionDTOs = validOptions.enumerated().map { GetVotingOptionDTO(index: UInt8($0.offset + 1), text: $0.element) }
-        print("OptionDTOs: \(optionDTOs)")
-        
-        let newVoting = CreateVotingDTO(
-            meetingId: selectedMeetingId,
-            question: question.trimmingCharacters(in: .whitespacesAndNewlines),
-            description: description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : description,
-            anonymous: anonymous,
-            options: optionDTOs
-        )
-        
-        print("CreateVotingDTO gesendet: \(newVoting)")
-        
-        VotingService.shared.createVoting(voting: newVoting) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let createdVoting):
-                    print("Erstellung erfolgreich: \(createdVoting)")
-                    onCreate(createdVoting)
-                    presentationMode.wrappedValue.dismiss()
-                case .failure(let error):
-                    print("Fehler beim Erstellen: \(error.localizedDescription)")
+                .navigationTitle("Neue Abstimmung")
+                .navigationBarItems(
+                    leading: Button("Abbrechen") {
+                        dismiss()
+                    },
+                    trailing: Button("Erstellen") {
+                        viewModel.createVoting(dismiss: dismiss)
+                    }
+                    .disabled(!viewModel.isFormValid())
+                )
+            } else {
+                // Ladeindikator, bis die Sitzungen vollständig geladen sind
+                VStack {
+                    ProgressView("Sitzungen werden geladen...")
+                        .padding()
                 }
             }
         }
-    }
-    
-    private func isFormValid() -> Bool {
-        let isValid = !question.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !options.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.isEmpty &&
-        selectedMeetingId != nil
-        print("Formular gültig: \(isValid)")
-        return isValid
+        .onAppear {
+            print("[DEBUG] Sitzungsauswahl-View erscheint, lade Sitzungen...")
+            viewModel.fetchMeetings()
+        }
     }
 }

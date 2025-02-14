@@ -1,8 +1,31 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
 import SwiftUI
 import MeetingServiceDTOs
 
 struct CreateMeetingView: View {
+    
+    // Wenn der User einen Ort über den Picker auswählt, wird diese Variable verändert
     @State private var selectedLocationID: UUID?
+    
+    // Leere Variablen zum Erstellen einer Sitzung
     @State private var name: String = ""
     @State private var description: String = ""
     @State private var startDate: Date = Date()
@@ -13,104 +36,75 @@ struct CreateMeetingView: View {
     @State private var locationLetter: String = ""
     @State private var locationPostalCode: String = ""
     @State private var locationPlace: String = ""
+    
+    // Der User kann entscheiden, ob er dem System einen neuen Ort hinzufügen möchte oder einen bestehenden Ort wählt.
+    // Das geschieht in Abhängigkeit dieser Variable
+    @State private var isAddingNewLocation = false
 
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var meetingManager = MeetingManager() // MeetingManager verwenden
-    @StateObject private var locationManager = LocationManager() // MeetingManager verwenden
+    
+    
+    @EnvironmentObject private var meetingManager : MeetingManager // MeetingManager für alle Interaktionen mit dem Server im Bezug auf Sitzungen
+    @StateObject private var locationManager = LocationManager() // LocationManager verwenden, um bestehende Orte vom Server zu holen
 
     var body: some View {
         NavigationStack {
             Form {
-                Section(header: Text("Meeting Details")) {
-                    TextField("Meeting Name", text: $name)
-                    
-                    TextField("Description (optional)", text: $description)
-                    
-                    DatePicker("Start Date", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
-                    
-                    TextField("Duration (minutes)", text: $duration)
-                        .keyboardType(.numberPad)
+                // Details zur Sitzung werden bestimmt
+                detailsSection
+                Section(header: Text("Ort")) {
+                    // Hier wird der Ort ausgewählt
+                    placeSection
                 }
-
-                Section(header: Text("Location Details")) {
-                    if locationManager.isLoading {
-                        // Ladeanzeige während Daten geladen werden
-                        ProgressView("Loading locations...")
-                    } else if let errorMessage = locationManager.errorMessage {
-                        // Fehleranzeige, wenn ein Fehler aufgetreten ist
-                        Text("Error: \(errorMessage)")
-                            .foregroundColor(.red)
-                            .multilineTextAlignment(.center)
-                    } else if locationManager.locations.isEmpty {
-                        // Nachricht, wenn keine Standorte gefunden wurden
-                        Text("No locations available.")
-                            .foregroundColor(.gray)
-                    } else {
-                        // Die Locations in einer Liste anzeigen
-                        Picker("Location Name", selection: $selectedLocationID) {
-                            ForEach(locationManager.locations, id: \.id) { location in
-                                Text(location.name).tag(location.id as UUID?)
-                            }
-                        }
-                        .pickerStyle(MenuPickerStyle()) // Optional: Für Dropdown-Stil                    }
-                    }
-                    TextField("Street (optional)", text: $locationStreet)
-                    
-                    HStack {
-                        TextField("Number (optional)", text: $locationNumber)
-                        
-                        TextField("Letter (optional)", text: $locationLetter)
-                    }
-                    
-                    TextField("Postal Code (optional)", text: $locationPostalCode)
-                    
-                    TextField("Place (optional)", text: $locationPlace)
-                }
-
-                Section {
-                    Button(action: saveMeeting) {
-                        if meetingManager.isLoading {
-                            ProgressView()
-                        } else {
-                            Text("Create Meeting")
-                                .frame(maxWidth: .infinity)
-                        }
-                    }
-                    .disabled(meetingManager.isLoading)
-
-                    if let error = meetingManager.errorMessage {
-                        Text(error)
-                            .foregroundColor(.red)
-                    }
-                }
+                
+                // Button zum speichern
+                saveButton
             }
-            .navigationTitle("Create Meeting")
+            .navigationTitle("Sitzung erstellen")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Cancel") {
+                    Button("Zurück") {
                         dismiss()
                     }
                 }
             }
         }
         .onAppear(){
+            // alle bestehenden Orte werden aus vom Server geholt
             locationManager.fetchLocations()
+        }
+        .onDisappear(){
+            // Wenn der User diese View verlässt, werden alle Sitzungen geladen
+            meetingManager.fetchAllMeetings()
         }
     }
 
+    // Funktion zum speichern einer Sitzung
     private func saveMeeting() {
+        
+        // stellt sicher, dass der User eine Zahl eingegeben hat
         guard let durationUInt16 = UInt16(duration) else {
             meetingManager.errorMessage = "Invalid duration. Must be a number."
             return
         }
         
-        if let selectedLocation = locationManager.locations.first(where: { $0.id == selectedLocationID }) {
-            locationName = selectedLocation.name
+        if isAddingNewLocation {
+            // Wenn ein neuer Ort hinzugefügt wird
+            guard !locationName.isEmpty else {
+                meetingManager.errorMessage = "Location name is required for a new location."
+                return
+            }
         } else {
-            locationName = "" // Standardwert, wenn keine Location ausgewählt wurde
+            // Wenn ein bestehender Ort ausgewählt wurde
+            if let selectedLocation = locationManager.locations.first(where: { $0.id == selectedLocationID }) {
+                locationName = selectedLocation.name
+            } else {
+                locationName = "" // Standardwert, wenn keine Location ausgewählt wurde
+            }
         }
 
+        // CreateLocationDTO wird befüllt
         let location = CreateLocationDTO(
             name: locationName,
             street: locationStreet.isEmpty ? nil : locationStreet,
@@ -120,20 +114,26 @@ struct CreateMeetingView: View {
             place: locationPlace.isEmpty ? nil : locationPlace
         )
 
+        // CreateMeetingDTO wird befüllt
         let meeting = CreateMeetingDTO(
             name: name,
             description: description.isEmpty ? nil : description,
             start: startDate,
             duration: durationUInt16,
-            locationId: nil,
+            locationId: isAddingNewLocation ? nil : selectedLocationID,
             location: location
         )
 
         // Meeting über MeetingManager erstellen
         meetingManager.createMeeting(meeting)
+        
+        // Formular wird geleert
         clearForm()
+        
+        // Sheet schließen
         dismiss()
     }
+
 
     private func clearForm() {
         name = ""
@@ -150,6 +150,89 @@ struct CreateMeetingView: View {
     }
 }
 
-#Preview {
-    CreateMeetingView()
+
+extension CreateMeetingView {
+    private var placeSection: some View {
+        VStack(alignment: .leading) {
+            Toggle("Neuen Ort hinzufügen", isOn: $isAddingNewLocation)
+                     
+            // Wenn ein neuer Ort hinzugefügt werden soll, erscheinen Eingabefelder für Ort, Straße, Hausnummer, Buchstabe, Postleitzahl und Stadt
+            if isAddingNewLocation {
+                TextField("Name des Ortes", text: $locationName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                // Eingabefelder für einen neuen Ort
+                TextField("Straße", text: $locationStreet)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                HStack {
+                    TextField("Hausnummer", text: $locationNumber)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
+                    TextField("Buchstabe (optional)", text: $locationLetter)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                }
+                
+                TextField("Postleitzahl", text: $locationPostalCode)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                TextField("Stadt", text: $locationPlace)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            } else {
+                // Wenn kein neuer Ort hinzugefügt werden soll
+                // Auswahl eines bestehenden Ortes über den Picker
+                if locationManager.isLoading {
+                    ProgressView("Lade Orte...")
+                } else if let errorMessage = locationManager.errorMessage {
+                    Text("Error: \(errorMessage)")
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                } else if locationManager.locations.isEmpty {
+                    Text("Keine Orte verfügbar")
+                        .foregroundColor(.gray)
+                } else {
+                    Picker("Name des Ortes", selection: $selectedLocationID) {
+                        Text("Keine Auswahl").tag(nil as UUID?) // Option für "keine Auswahl"
+                        
+                        ForEach(locationManager.locations, id: \.id) { location in
+                            Text(location.name).tag(location.id as UUID?)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                }
+            }
+        }
+    }
+    
+    // Button um Sitzung zu speichern
+    private var saveButton: some View {
+        Section{
+            Button(action: saveMeeting) {
+                if meetingManager.isLoading {
+                    ProgressView()
+                } else {
+                    Text("Sitzung erstellen")
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .disabled(meetingManager.isLoading)
+
+            if let error = meetingManager.errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+            }
+        }
+    }
+    
+    private var detailsSection: some View {
+        Section(header: Text("Details zur Sitzung")) {
+            TextField("Name der Sitzung", text: $name)
+            
+            TextField("Beschreibung (optional)", text: $description)
+            
+            DatePicker("Datum", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
+            
+            TextField("Dauer (in Minuten)", text: $duration)
+                .keyboardType(.numberPad)
+        }
+    }
 }

@@ -1,42 +1,65 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
 import SwiftUI
 import MeetingServiceDTOs
 
 struct EditVotingView: View {
     @Environment(\.dismiss) private var dismiss
-    @State var voting: GetVotingDTO
-    let onReload: () -> Void
-    let onSave: (GetVotingDTO) -> Void
+    @StateObject private var viewModel: EditVotingViewModel
 
-    @State private var question = ""
-    @State private var description = ""
-    @State private var options: [String] = []
-    @State private var isSaving = false
-    @State private var errorMessage: String?
+    init(voting: GetVotingDTO, onReload: @escaping () -> Void, onSave: @escaping (GetVotingDTO) -> Void) {
+        _viewModel = StateObject(wrappedValue: EditVotingViewModel(voting: voting, onReload: onReload, onSave: onSave))
+    }
 
     var body: some View {
         NavigationView {
             Form {
                 // Frage
                 Section(header: Text("Frage")) {
-                    TextField("Frage eingeben", text: $question)
+                    TextField("Frage eingeben", text: $viewModel.question)
                         .autocapitalization(.sentences)
                 }
 
                 // Beschreibung
                 Section(header: Text("Beschreibung")) {
-                    TextField("Beschreibung eingeben", text: $description)
+                    TextField("Beschreibung eingeben", text: $viewModel.description)
                         .autocapitalization(.sentences)
+                }
+
+                // Anonyme Abstimmung
+                Section(header: Text("Anonym")) {
+                    Toggle("Anonyme Abstimmung", isOn: $viewModel.anonymous)
                 }
 
                 // Optionen
                 Section(header: Text("Optionen")) {
-                    ForEach($options.indices, id: \.self) { index in
+                    ForEach(viewModel.options.indices, id: \.self) { index in
                         HStack {
-                            TextField("Option \(index + 1)", text: $options[index])
-                            
-                            if options.count > 1 {
+                            TextField("Option \(index + 1)", text: $viewModel.options[index])
+                                .onChange(of: viewModel.options[index]) { _, newValue in
+                                    viewModel.handleOptionChange(index: index, newValue: newValue)
+                                }
+
+                            if viewModel.options.count > 1 && index != 0 {
                                 Button(action: {
-                                    options.remove(at: index)
+                                    viewModel.removeOption(at: index)
                                 }) {
                                     Image(systemName: "trash")
                                         .foregroundColor(.red)
@@ -44,12 +67,9 @@ struct EditVotingView: View {
                             }
                         }
                     }
-                    Button(action: { options.append("") }) {
-                        Label("Option hinzufügen", systemImage: "plus")
-                    }
                 }
 
-                if let errorMessage = errorMessage {
+                if let errorMessage = viewModel.errorMessage {
                     Section {
                         Text(errorMessage)
                             .foregroundColor(.red)
@@ -57,74 +77,22 @@ struct EditVotingView: View {
                     }
                 }
             }
-            .navigationTitle("Umfrage bearbeiten")
+            .navigationTitle("Abstimmung bearbeiten")
             .navigationBarItems(
                 leading: Button("Abbrechen") {
                     dismiss()
                 },
-                trailing: Button(action: saveChanges) {
-                    if isSaving {
+                trailing: Button(action: {
+                    viewModel.saveChanges(dismiss: dismiss)
+                }) {
+                    if viewModel.isSaving {
                         ProgressView()
                     } else {
                         Text("Speichern")
                     }
                 }
-                .disabled(!isFormValid() || isSaving)
+                .disabled(!viewModel.isFormValid() || viewModel.isSaving)
             )
-            .onAppear(perform: populateFields)
         }
-    }
-
-    private func populateFields() {
-        question = voting.question
-        description = voting.description
-        options = voting.options.map { $0.text }
-    }
-
-    private func saveChanges() {
-        isSaving = true
-        errorMessage = nil
-
-        let filteredOptions = options.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-
-        let patchVoting = PatchVotingDTO(
-            question: question,
-            description: description.isEmpty ? nil : description,
-            anonymous: voting.anonymous,
-            options: filteredOptions.enumerated().map { index, text in
-                GetVotingOptionDTO(index: UInt8(index + 1), text: text)
-            }
-        )
-
-        VotingService.shared.patchVoting(votingId: voting.id, patch: patchVoting) { result in
-            DispatchQueue.main.async {
-                isSaving = false
-                switch result {
-                case .success:
-                    print("Umfrage erfolgreich bearbeitet.")
-                    let updatedVoting = GetVotingDTO(
-                        id: voting.id,
-                        meetingId: voting.meetingId,
-                        question: question,
-                        description: description,
-                        isOpen: voting.isOpen,
-                        startedAt: voting.startedAt,
-                        closedAt: voting.closedAt,
-                        anonymous: voting.anonymous,
-                        options: filteredOptions.enumerated().map { index, text in
-                            GetVotingOptionDTO(index: UInt8(index + 1), text: text)
-                        }
-                    )
-                    onSave(updatedVoting)
-                    dismiss()
-                case .failure(let error):
-                    errorMessage = "Fehler beim Speichern der Umfrage: \(error.localizedDescription)"
-                }
-            }
-        }
-    }
-
-    private func isFormValid() -> Bool {
-        !question.isEmpty && options.contains { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     }
 }

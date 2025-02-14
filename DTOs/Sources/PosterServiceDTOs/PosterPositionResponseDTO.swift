@@ -16,8 +16,8 @@ public struct PosterPositionResponseDTO: Codable {
     public init(id: UUID, posterId: UUID? = nil, latitude: Double, longitude: Double, postedBy: String? = nil, postedAt: Date? = nil, expiresAt: Date, removedBy: String? = nil, removedAt: Date? = nil, responsibleUsers: [ResponsibleUsersDTO], status: PosterPositionStatus) {
         self.id = id
         self.posterId = posterId
-        self.latitude = latitude 
-        self.longitude = longitude 
+        self.latitude = latitude
+        self.longitude = longitude
         self.postedBy = postedBy
         self.postedAt = postedAt
         self.expiresAt = expiresAt

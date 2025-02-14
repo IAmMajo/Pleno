@@ -1,30 +1,45 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
 import SwiftUI
 import MeetingServiceDTOs
 
 struct InPlanungView: View {
-    let voting: GetVotingDTO
-    let onEdit: (GetVotingDTO) -> Void
-    let onDelete: () -> Void
-    let onOpen: () -> Void
-    let onReload: () -> Void
-    @Environment(\.presentationMode) private var presentationMode
-
-    @State private var isProcessing = false
+    @StateObject private var viewModel: InPlanungViewModel
     @State private var showEditPopup = false
-    @State private var errorMessage: String?
+
+    init(voting: GetVotingDTO, onEdit: @escaping (GetVotingDTO) -> Void, onDelete: @escaping () -> Void, onOpen: @escaping () -> Void, onReload: @escaping () -> Void) {
+        _viewModel = StateObject(wrappedValue: InPlanungViewModel(voting: voting, onEdit: onEdit, onDelete: onDelete, onOpen: onOpen, onReload: onReload))
+    }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
                 // Frage anzeigen
-                Text(voting.question)
+                Text(viewModel.voting.question)
                     .font(.title)
                     .bold()
                     .padding()
 
                 // Beschreibung anzeigen (falls vorhanden)
-                if !voting.description.isEmpty {
-                    Text(voting.description)
+                if !viewModel.voting.description.isEmpty {
+                    Text(viewModel.voting.description)
                         .font(.body)
                         .foregroundColor(.gray)
                         .padding([.leading, .trailing])
@@ -36,12 +51,12 @@ struct InPlanungView: View {
                         .font(.headline)
                         .padding(.bottom, 8)
 
-                    TableView(options: voting.options)
+                    TableView(options: viewModel.voting.options)
                 }
                 .padding([.leading, .trailing])
 
                 // Fehlermeldung anzeigen
-                if let errorMessage = errorMessage {
+                if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .font(.subheadline)
@@ -49,25 +64,25 @@ struct InPlanungView: View {
                 }
 
                 // Buttons
-                actionButton(title: "Umfrage eröffnen", icon: "play.fill", color: .green, action: openVoting)
-                actionButton(title: "Umfrage bearbeiten", icon: "pencil", color: .blue) {
+                actionButton(title: "Abstimmung eröffnen", icon: "play.fill", color: .green, action: viewModel.openVoting)
+                actionButton(title: "Abstimmung bearbeiten", icon: "pencil", color: .blue) {
                     showEditPopup = true
                 }
-                actionButton(title: "Umfrage löschen", icon: "trash", color: .red, action: deleteVoting)
+                actionButton(title: "Abstimmung löschen", icon: "trash", color: .red, action: viewModel.deleteVoting)
             }
         }
         .background(Color.white)
         .sheet(isPresented: $showEditPopup) {
             EditVotingView(
-                voting: voting,
+                voting: viewModel.voting,
                 onReload: {
-                    onReload() // Reload-Funktion weitergeben
+                    viewModel.onReload() // Reload-Funktion weitergeben
                 },
                 onSave: { updatedVoting in
                     showEditPopup = false
-                    onEdit(updatedVoting) // Update-Funktion aufrufen
-                    onReload() // Daten nach Bearbeitung neu laden
-                    onDelete()
+                    viewModel.onEdit(updatedVoting) // Update-Funktion aufrufen
+                    viewModel.onReload() // Daten nach Bearbeitung neu laden
+                    viewModel.onDelete()
                 }
             )
         }
@@ -76,7 +91,7 @@ struct InPlanungView: View {
     // MARK: - Buttons
     private func actionButton(title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            if isProcessing {
+            if viewModel.isProcessing {
                 ProgressView()
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -93,56 +108,7 @@ struct InPlanungView: View {
             }
         }
         .padding(.horizontal)
-        .disabled(isProcessing)
-    }
-
-    // MARK: - Server API Calls
-    private func openVoting() {
-        guard !isProcessing else {
-            print("Warnung: openVoting bereits in Bearbeitung.")
-            return
-        }
-
-        isProcessing = true
-        errorMessage = nil
-
-        VotingService.shared.openVoting(votingId: voting.id) { result in
-            DispatchQueue.main.async {
-                self.isProcessing = false
-                switch result {
-                case .success:
-                    print("Umfrage erfolgreich eröffnet: \(self.voting.id)")
-                    onOpen()
-                case .failure(let error):
-                    self.errorMessage = "Fehler beim Öffnen der Umfrage: \(error.localizedDescription)"
-                    print("Fehler beim Öffnen: \(error)")
-                }
-            }
-        }
-    }
-
-    private func deleteVoting() {
-        guard !isProcessing else {
-            print("Warnung: deleteVoting bereits in Bearbeitung.")
-            return
-        }
-
-        isProcessing = true
-        errorMessage = nil
-
-        VotingService.shared.deleteVoting(votingId: voting.id) { result in
-            DispatchQueue.main.async {
-                self.isProcessing = false
-                switch result {
-                case .success:
-                    print("Umfrage erfolgreich gelöscht: \(self.voting.id)")
-                    onDelete()
-                case .failure(let error):
-                    self.errorMessage = "Fehler beim Löschen der Umfrage: \(error.localizedDescription)"
-                    print("Fehler beim Löschen: \(error)")
-                }
-            }
-        }
+        .disabled(viewModel.isProcessing)
     }
 }
 
