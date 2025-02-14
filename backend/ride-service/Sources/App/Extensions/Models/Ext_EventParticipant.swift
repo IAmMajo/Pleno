@@ -4,6 +4,6 @@ import RideServiceDTOs
 extension EventParticipant {
     
     public func patchWithDTO(dto: PatchEventParticipationDTO) {
-        self.participates = participates
+        self.participates = dto.participates
     }
 }
