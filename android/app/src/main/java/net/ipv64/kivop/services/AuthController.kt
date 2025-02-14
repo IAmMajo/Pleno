@@ -19,7 +19,8 @@ class AuthController(private val context: Context) {
   }
 
   private val appContext = context.applicationContext
-
+  // Versucht, den Nutzer mit der angegebenen E-Mail und dem Passwort anzumelden.  
+  // Speichert das Session-Token und die Anmeldedaten bei Erfolg.  
   suspend fun login(email: String, password: String): String? {
     val (token, status) = getToken(email, password)
     return when (status) {
@@ -43,7 +44,8 @@ class AuthController(private val context: Context) {
       else -> "Unexpected error: $status"
     }
   }
-
+  // Registriert einen neuen Nutzer.  
+  // Speichert die Anmeldedaten lokal, falls die Registrierung erfolgreich war.  
   suspend fun register(user: UserRegistrationDTO): Boolean {
     if (postRegister(user)) {
       saveCredentials(user.email!!, user.password!!)
@@ -51,12 +53,12 @@ class AuthController(private val context: Context) {
     }
     return false
   }
-
+  // Sendet die Bestätigungs-E-Mail erneut an die hinterlegte E-Mail-Adresse.
   suspend fun resendEmail() {
     val credentials = getCredentials()
     postResendEmail(credentials.email!!)
   }
-
+  // Löscht die gespeicherten Anmeldedaten und das Session-Token.
   fun logout() {
     val sharedPreferences = getEncryptedSharedPreferences()
 
@@ -64,11 +66,11 @@ class AuthController(private val context: Context) {
     sharedPreferences.edit().remove(PREF_USER_EMAIL).apply()
     sharedPreferences.edit().remove(PREF_USER_PASSWORD).apply()
   }
-
+  // Prüft, ob das angegebene Session-Token gültig ist.  
   suspend fun validateToken(token: String): Boolean {
     return getValidateToken(token)
   }
-
+  // Aktualisiert das Session-Token, falls der alte abgelaufen ist.  
   suspend fun refreshSession(): Boolean {
     val credentials = getCredentials()
     val response = login(credentials.email!!, credentials.password!!)
@@ -77,7 +79,7 @@ class AuthController(private val context: Context) {
     }
     return false
   }
-
+  // Holt den Session-Token aus den EncryptedSharedPreference. 
   suspend fun getSessionToken(): String {
     val sharedPreferences = getEncryptedSharedPreferences()
 
@@ -96,20 +98,20 @@ class AuthController(private val context: Context) {
 
     return sessionToken ?: ""
   }
-
+  // Speichert den Session-Token in die EncryptedSharedPreference.
   private fun saveSessionToken(token: String) {
     val sharedPreferences = getEncryptedSharedPreferences()
 
     sharedPreferences.edit().putString(PREF_SESSION_TOKEN, token).apply()
   }
-
+  // Speichert die Anmeldedaten in die EncryptedSharedPreference.
   private fun saveCredentials(email: String, password: String) {
     val sharedPreferences = getEncryptedSharedPreferences()
 
     sharedPreferences.edit().putString(PREF_USER_EMAIL, email).apply()
     sharedPreferences.edit().putString(PREF_USER_PASSWORD, password).apply()
   }
-
+  // Holt die Anmeldedaten aus den EncryptedSharedPreference.
   private fun getCredentials(): UserLoginDTO {
     val sharedPreferences = getEncryptedSharedPreferences()
 
@@ -120,7 +122,7 @@ class AuthController(private val context: Context) {
     }
     return UserLoginDTO("", "")
   }
-
+  // Holt die EncryptedSharedPreference.
   private fun getEncryptedSharedPreferences(): SharedPreferences {
     // Create or retrieve a master key
     val masterKey =
@@ -137,7 +139,7 @@ class AuthController(private val context: Context) {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM // Value encryption scheme
         )
   }
-
+  // Prüft, ob die Anmeldedaten existieren.
   fun hasCredentials(): Boolean {
     val userLoginDTO = getCredentials()
     if (userLoginDTO.email?.isNotEmpty() == true && userLoginDTO.password?.isNotEmpty() == true) {
@@ -145,7 +147,7 @@ class AuthController(private val context: Context) {
     }
     return false
   }
-
+  // Prüft, ob der User freigeschaltet ist. (Email bestätigt)
   suspend fun isActivated(): String? {
     val userLoginDTO = getCredentials()
     val response = login(userLoginDTO.email!!, userLoginDTO.password!!)
