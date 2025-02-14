@@ -2,6 +2,7 @@ package net.ipv64.kivop.pages.mainApp.Polls
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -32,7 +33,10 @@ fun PollsListPage(navController: NavController) {
   // content
   Column(modifier = Modifier.padding(22.dp)) {
     SpacerTopBar()
-    LazyColumn {
+    LazyColumn(
+      modifier = Modifier
+        .weight(1f)
+    ) {
       items(pollsListViewModel.pollsList) { poll ->
         if (poll != null) {
           ListenItem(
@@ -50,11 +54,15 @@ fun PollsListPage(navController: NavController) {
         }
       }
     }
-    Spacer(Modifier.weight(1f))
-    CustomButton(
+    Box(
+      modifier = Modifier
+        .padding(top = 16.dp)
+    ) {
+      CustomButton(
         modifier = Modifier,
         text = "Erstellen",
         buttonStyle = primaryButtonStyle,
         onClick = { navController.navigate("umfrageErstellen") })
+    }
   }
 }
