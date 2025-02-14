@@ -1,3 +1,20 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 //
 //  Posters_PositionView.swift
 //  KIVoP-ios
@@ -5,43 +22,52 @@
 //  Created by Hanna Steffen on 11.12.24.
 //
 
+// Posters-PositionView.swift
+// Displays detailed information about a specific poster position, including map, responsible users, and actions.
+
 import SwiftUI
 import MeetingServiceDTOs
 import MapKit
 import UIKit
+import PosterServiceDTOs
 
 struct Posters_PositionView: View {
-   let position: PosterPosition
-   @State var name: String = "Am Grabstein 6"
-   @State var coordinate: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)
-   @State private var currentCoordinates: CLLocationCoordinate2D? = CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446)
    
+   let posterId: UUID
+   @StateObject private var viewModel: PosterPositionViewModel /// ViewModel responsible for managing poster position data
+   
+   // Initialize the ViewModel with poster and position IDs
+   init(posterId: UUID, positionId: UUID) {
+      _viewModel = StateObject(wrappedValue: PosterPositionViewModel(posterId: posterId, positionId: positionId))
+      self.posterId = posterId
+   }
+   
+   // MARK: - UI State Variables
+   @State private var currentCoordinates: CLLocationCoordinate2D?
+   @State private var myId: UUID?
    @State private var address: String?
    @State private var isLoadingAddress = true
+   @State private var isLoading = false
    
-   @State private var isFullMapView: Bool = false
+   // UI Modals & Alerts
    @State private var showMapOptions: Bool = false
+   @State private var isGoogleMapsInstalled = false
+   @State private var isWazeInstalled = false
+   @State private var isShowingFullMapSheet: Bool = false
    @State private var shareLocation = false
    @State private var showTakeDownAlert = false
    @State private var showUndoTakeDownAlert = false
+   @State private var showReportDamageAlert = false
+   @State private var showCamera = false
+   @State private var selectedImage: UIImage? = nil
+   
+   @FocusState private var isFocused: Bool
    @Environment(\.dismiss) private var dismiss
    @Environment(\.colorScheme) var colorScheme
    
-   func getDateColor(status: Status) -> Color {
-      switch status {
-      case .hung:
-         return Color(UIColor.label).opacity(0.75)
-      case .takenDown:
-         return Color(UIColor.label).opacity(0.75)
-      case .notDisplayed:
-         return Color(UIColor.label).opacity(0.75)
-      case .expiresInOneDay:
-         return .orange
-      case .expired:
-         return .red
-      }
-   }
    
+   // MARK: - Fetch Address Helper
+   // Converts latitude & longitude to a address using reverse geocoding
    func getAddressFromCoordinates(latitude: Double, longitude: Double, completion: @escaping (String?) -> Void) {
       let geocoder = CLGeocoder()
       let location = CLLocation(latitude: latitude, longitude: longitude)
@@ -51,7 +77,6 @@ struct Posters_PositionView: View {
             print("Geocoding error: \(error.localizedDescription)")
             completion(nil)
          } else if let placemark = placemarks?.first {
-            self.name = placemark.name ?? "Name"
             let postalCodeAndLocality = [
                placemark.postalCode,
                placemark.locality
@@ -68,6 +93,7 @@ struct Posters_PositionView: View {
       }
    }
    
+   // Fetches and updates the address from the given coordinates
    private func fetchAddress(latitude: Double, longitude: Double) {
       getAddressFromCoordinates(latitude: latitude, longitude: longitude) { fetchedAddress in
          DispatchQueue.main.async {
@@ -77,228 +103,329 @@ struct Posters_PositionView: View {
       }
    }
    
-    var body: some View {
-       VStack {
-          ScrollView {
-             VStack {
-                MapView(name: name, coordinate: currentCoordinates!)
-                   .frame(height: 250)
-                   .onTapGesture {
-//                      showMapOptions = true
-                      isFullMapView = true
-                   }
-                   .navigationDestination(isPresented: $isFullMapView) { FullMapView(address: address ?? "", name: name, coordinate: currentCoordinates ?? CLLocationCoordinate2D(latitude: 51.500603516488205, longitude: 6.545327532716446))}
-                
-                CircleImageView(status: position.status, currentCoordinates: $currentCoordinates)
-                //                   .offset(y: -47)
-                   .padding(.top, -95)
-                   .shadow(radius: 5)
-                
-                HStack {
-                   Text("Abhängedatum:")
-                      .foregroundStyle(Color(UIColor.label).opacity(0.75))
-                      .fontWeight(.semibold)
-                      .padding(.trailing, -2)
-                   
-                   Text("\(DateTimeFormatter.formatDate(position.expiresAt))")
-                      .fontWeight(.semibold)
-                      .foregroundStyle(getDateColor(status: position.status))
-                }.padding(.top, 10)
-                
-                VStack{
-                   ProgressInfoView(status: position.status)
-                      .padding(.leading) .padding(.trailing)
-                      .padding(.top, 8) .padding(.bottom, 8)
-                   
-                   ProgressBarView(status: position.status)
-                      .padding(.leading) .padding(.trailing)
-                   if position.status == .notDisplayed {
-                      Text("Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position")
-                         .font(.system(size: 10))
-                         .foregroundStyle(.secondary)
-                   }
-                }
-                
-                var mockUsers: [GetIdentityDTO] {
-                   [mockIdentity1, mockIdentity2]
-                }
-                List{
-                   Section {
-                      //                      var mockUsers: [GetIdentityDTO] {
-                      //                         [mockIdentity1, mockIdentity2]
-                      //                      }
-                      //                      position.responsibleUserIds
-                      ForEach (mockUsers, id: \.self) { user in
-                         HStack {
-                            Image(systemName: "person.crop.square.fill")
-                               .resizable()
-                               .frame(maxWidth: 40, maxHeight: 40)
-                               .aspectRatio(1, contentMode: .fit)
-                               .foregroundStyle(.gray.opacity(0.5))
-                               .padding(.trailing, 5)
-                            
-                            Text(user.name)
-                         }
-                      }
-                   } header: {
-                      Text("Verantwortliche (2)")
-                   }
-                }
-                .scrollDisabled(true)
-                .frame(height: CGFloat((mockUsers.count * 15) + (mockUsers.count < 4 ? 130 : 0)), alignment: .top)
-                //             .scrollContentBackground(.hidden)
-                .environment(\.defaultMinListHeaderHeight, 10)
-                
-                Form {
-                   Section {
-                      HStack(spacing: 0) {
-                         SelectableTextView(text: address ?? "")
-                            .frame(maxWidth: .infinity, alignment: .topLeading)
-                            .fixedSize(horizontal: false, vertical: true)
-                         Spacer()
-                         
-                         VStack {
-                            HStack {
-                               Spacer()
-                               
-                               Button(action: { showMapOptions = true }) {
-                                  Image(systemName: "square.and.arrow.up")
-                               }
-                               .buttonStyle(PlainButtonStyle())
-                               .foregroundStyle(.blue)
-                               .frame(width: 25, height: 25)
-                               .padding(.top, 8)
-                            }
-                            
-                            Spacer()
-                         }
-                         .frame(maxWidth: .infinity)
-                      }
-                      SelectableTextView(text: "\(String(format: "%.6f", currentCoordinates!.latitude))° N, \(String(format: "%.6f", currentCoordinates!.longitude))° E")
-                         .padding(.top, 8)
-                   } header: {
-                      Text("Adresse in der Nähe")
-                   }
-                }
-                .scrollDisabled(true)
-                .frame(height: 185)
-             }
-             .confirmationDialog("\(address ?? "Adresse")\n\(currentCoordinates!.latitude), \(currentCoordinates!.longitude)", isPresented: $showMapOptions, titleVisibility: .visible) {
-                Button("Öffnen mit Apple Maps") {
-                   openInAppleMaps()
-                }
-                Button("Öffnen mit Google Maps") {
-                   openInGoogleMaps()
-                }
-                Button("Teilen...") {
-                   shareLocation = true
-                }
-                Button("Abbrechen", role: .cancel) {}
-             }
-             .sheet(isPresented: $shareLocation) {
-                //                ShareView(address: address ?? "Adresse", coordinate: currentCoordinates!)
-                //                   .presentationDetents([.medium, .large])
-                //                   .presentationDragIndicator(.hidden)
-                ShareSheet(activityItems: [formattedShareText()])
-                   .presentationDetents([.medium, .large])
-                   .presentationDragIndicator(.hidden)
-             }
-          }
-          .refreshable {
-          }
-          if (position.status != Status.notDisplayed) {
-             Button {
-                if (position.status != .takenDown) {
-                   showTakeDownAlert = true
-                } else {
-                   showUndoTakeDownAlert = true
-                }
-             } label: {
-                Text(position.status != .takenDown ? "Abhängen bestätigen" : "Abhängen zurückziehen")
-                   .foregroundStyle(position.status != .takenDown ? Color(UIColor.systemBackground) : Color.red)
-                   .fontWeight(.semibold)
-                   .frame(maxWidth: .infinity)
-             }
-             .background(position.status != .takenDown ? Color.red : Color.gray.opacity(0.2))
-             .cornerRadius(10)
-             .padding(.leading) .padding(.trailing)
-             .padding(.top, 5)
-             .buttonStyle(.bordered)
-             .controlSize(.large)
-             .alert(isPresented: Binding(
-               get: { showTakeDownAlert || showUndoTakeDownAlert },
-               set: { if !$0 { showTakeDownAlert = false; showUndoTakeDownAlert = false } }
-             )) {
-                if showTakeDownAlert {
-                   return Alert(
-                     title: Text("Plakat abhängen?"),
-                     message: Text("Bist du sicher, dass du das Plakat abhängen möchtest?"),
-                     primaryButton: .default(Text("Ja")) {
+   // MARK: - View Body
+   var body: some View {
+      VStack {
+         if let position = viewModel.position,
+            let address = viewModel.address {
+            ScrollView {
+               VStack {
+                  // Map with position with a tappable option for full view
+                  MapView(name: String(address.split(separator: "\n").first ?? ""), coordinate: currentCoordinates!, posterId: posterId)
+                     .frame(height: 250)
+                     .onTapGesture {
+                        isShowingFullMapSheet = true
+                     }
+                     .sheet(isPresented: $isShowingFullMapSheet) {
+                        FullMapSheet(posterId: posterId, address: address, name: String(address.split(separator: "\n").first ?? ""), coordinate: currentCoordinates ?? CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude))
+                     }
+                  
+                  // Position image (or placeholder) with option to hang the position
+                  CircleImageView(
+                     position: position,
+                     positionImage: viewModel.positionImageData != nil ? UIImage(data: viewModel.positionImageData!) : nil,
+                     isResponsible: isResponsible(),
+                     currentCoordinates: $currentCoordinates,
+                     onUpdate: { image, coordinates in
                         Task {
-                           // Perform "Plakat abhängen" action here
+                           await handleImageUpdate(positionId: position.id, image: image, coordinates: coordinates)
                         }
-                     },
-                     secondaryButton: .cancel(Text("Nein"))
-                   )
-                } else if showUndoTakeDownAlert {
-                   return Alert(
-                     title: Text("Abhängen zurückziehen?"),
-                     message: Text("Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt."),
-                     primaryButton: .default(Text("Ja")) {
-                        Task {
-                           // Perform "Abhängen zurückziehen" action here
-                        }
-                     },
-                     secondaryButton: .cancel(Text("Nein"))
-                   )
-                } else {
-                   return Alert(title: Text("Unknown Action")) // Fallback case
-                }
-             }
-          }
-       }
-       .navigationBarTitleDisplayMode(.inline)
-       .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
-       .onAppear {
-          fetchAddress(latitude: currentCoordinates!.latitude, longitude: currentCoordinates!.longitude)
-          Task {
-             
-          }
-       }
-       .onChange(of: currentCoordinates) { oldValue, newValue in
-          fetchAddress(latitude: currentCoordinates!.latitude, longitude: currentCoordinates!.longitude)
-       }
-    }
+                     }
+                  )
+                  .onAppear() {
+                     // loads the image of the position asynchronous
+                     if viewModel.positionImageData == nil {
+                        viewModel.fetchPositionImage(for: position.id)
+                     }
+                  }
+                  .padding(.top, -95)
+                  .shadow(radius: 5)
+                  
+                  // Expiration date
+                  HStack {
+                     Text("Abhängedatum:")
+                        .foregroundStyle(Color(UIColor.label).opacity(0.75))
+                        .fontWeight(.semibold)
+                        .padding(.trailing, -2)
+                     
+                     Text("\(DateTimeFormatter.formatDate(position.expiresAt))")
+                        .fontWeight(.semibold)
+                        .foregroundStyle(DateColorHelper.getDateColor(position: position))
+                  }.padding(.top, 10)
+                  
+                  // Progress info
+                  VStack{
+                     ProgressInfoView(position: position)
+                        .padding(.leading) .padding(.trailing)
+                        .padding(.top, 8) .padding(.bottom, 8)
+                     
+                     ProgressBarView(position: position)
+                        .padding(.leading) .padding(.trailing)
+                     if position.status == .toHang {
+                        Text("Mache jetzt ein Foto des aufgehängten Plakats und bestätige die Position")
+                           .font(.system(size: 10))
+                           .foregroundStyle(.secondary)
+                     }
+                  }
+                  
+                  // Responsible users
+                  ResponsibleUsersView(position: position)
+                  
+                  // Address and coordinates
+                  AddressView(position: position, address: address, showMapOptions: $showMapOptions)
    
-   private func openInAppleMaps() {
-      let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: currentCoordinates!))
-      mapItem.name = name
-      mapItem.openInMaps()
-   }
-   
-   private func openInGoogleMaps() {
-      let urlString = "comgooglemaps://?q=\(currentCoordinates!.latitude),\(currentCoordinates!.longitude)"
-      if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
-         UIApplication.shared.open(url)
-      } else {
-         // Fallback to Google Maps in browser if the app is not installed
-         if let webUrl = URL(string: "https://www.google.com/maps?q=\(currentCoordinates!.latitude),\(currentCoordinates!.longitude)") {
-            UIApplication.shared.open(webUrl)
+               }
+               // Open address/coordinates in app or share dialog
+               .confirmationDialog("\(address)\n\(position.latitude), \(position.longitude)", isPresented: $showMapOptions, titleVisibility: .visible) {
+                  Button("Öffnen mit Apple Maps") {
+                     NavigationAppHelper.shared.openInAppleMaps(
+                        name: String(address.split(separator: "\n").first ?? ""),
+                        coordinate: currentCoordinates!
+                     )
+                  }
+                  if isGoogleMapsInstalled {
+                     Button("Öffnen mit Google Maps") {
+                        NavigationAppHelper.shared.openInGoogleMaps(
+                           name: String(address.split(separator: "\n").first ?? ""),
+                           coordinate: currentCoordinates!)
+                     }
+                  }
+                  if isWazeInstalled {
+                     Button("Öffnen mit Waze") {
+                        NavigationAppHelper.shared.openInWaze(coordinate: currentCoordinates!)
+                     }
+                  }
+                  Button("Teilen...") {
+                     shareLocation = true
+                  }
+                  Button("Abbrechen", role: .cancel) {}
+               }
+               .sheet(isPresented: $shareLocation) {
+                  ShareSheet(activityItems: [formattedShareText()])
+                     .presentationDetents([.medium, .large])
+                     .presentationDragIndicator(.hidden)
+               }
+               
+               // Report damage button (if applicable)
+               if position.status == .hangs { ReportDamageButton(position: position) }
+               
+            }
+            .refreshable {
+               loadMyId()
+               await viewModel.fetchPosition()
+               viewModel.fetchPositionImage(for: position.id)
+            }
+            
+            // Take down (or undo take down) button
+            if (position.status != .toHang && isResponsible()) { TakeDownButton(position: position) }
+            
+         } else if viewModel.isLoading {
+            ProgressView("Loading...")
+               .frame(maxWidth: .infinity, maxHeight: .infinity)
+               .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
+        } else if let error = viewModel.error {
+            Text("Error: \(error)")
+                .foregroundColor(.red)
+        } else {
+            Text("No poster data available.")
+                .foregroundColor(.secondary)
+        }
+      }
+      .overlay {
+         if isLoading {
+            ProgressView("Loading...")
+               .tint(Color(UIColor.label))
+               .frame(maxWidth: .infinity, maxHeight: .infinity)
+               .background(.black.opacity(0.3))
+         }
+      }
+      .navigationBarTitleDisplayMode(.inline)
+      .background(colorScheme == .dark ? Color(UIColor.systemBackground) : Color(UIColor.secondarySystemBackground))
+      .onAppear {
+         // checks if Google Maps or Waze is installed
+         let installedApps = NavigationAppHelper.shared.checkInstalledApps()
+         isGoogleMapsInstalled = installedApps.isGoogleMapsInstalled
+         isWazeInstalled = installedApps.isWazeInstalled
+         // loads position and sets currentCoordinates
+         Task {
+            loadMyId()
+            await viewModel.fetchPosition()
+            if let position = viewModel.position {
+               currentCoordinates = CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)
+            }
          }
       }
    }
    
+   // MARK: - Report Damage Button
+   @ViewBuilder
+   private func ReportDamageButton(position: PosterPositionResponseDTO) -> some View {
+      HStack {
+         Image(systemName: "exclamationmark.circle")
+         Text("Beschädigung melden")
+         Spacer()
+      }
+      .foregroundStyle(Color.red)
+      .padding()
+      .onTapGesture {
+         showReportDamageAlert = true
+      }
+      .alert(isPresented: $showReportDamageAlert) {
+         return Alert(
+            title: Text("Beschädigung melden?"),
+            message: Text("Bestätige mit einem Bild, dass das Plakat beschädigt wurde, oder es nicht mehr an der vorgesehenen Stelle hängt."),
+            primaryButton: .default(Text("Verstanden")) {
+               self.showCamera.toggle()
+            },
+            secondaryButton: .cancel(Text("Abbrechen"))
+         )
+      }
+      .fullScreenCover(isPresented: $showCamera) {
+         accessCameraView(
+            isDamageReport: true,
+            selectedImage: $selectedImage,
+            showCamera: $showCamera,
+            currentCoordinates: $currentCoordinates
+         ) {
+            if let image = selectedImage,
+               let imageData = image.jpegData(compressionQuality: 0.8)
+            {
+               Task {
+                  do {
+                     try await viewModel.reportDamagedPosition(image: imageData)
+                  } catch {
+                     print("Error reporting damaged position: \(error)")
+                  }
+                  await viewModel.fetchPosition()
+                  viewModel.fetchPositionImage(for: position.id)
+               }
+            }
+         }
+         .background(.black)
+      }
+   }
+   
+   // MARK: - Take Down (or undo Take Down) Button
+   @ViewBuilder
+   private func TakeDownButton(position: PosterPositionResponseDTO) -> some View {
+      Button {
+         if (position.status != .takenDown) {
+            showTakeDownAlert = true
+         } else {
+            showUndoTakeDownAlert = true
+         }
+      } label: {
+         Text(position.status != .takenDown ? "Abhängen bestätigen" : "Abhängen zurückziehen")
+            .foregroundStyle(position.status != .takenDown ? Color(UIColor.systemBackground) : Color.red)
+            .fontWeight(.semibold)
+            .frame(maxWidth: .infinity)
+      }
+      .background(position.status != .takenDown ? Color.red : Color.gray.opacity(0.2))
+      .cornerRadius(10)
+      .padding(.leading) .padding(.trailing)
+      .padding(.top, 5)
+      .buttonStyle(.bordered)
+      .controlSize(.large)
+      .alert(isPresented: Binding(
+         get: { showTakeDownAlert || showUndoTakeDownAlert },
+         set: { if !$0 { showTakeDownAlert = false; showUndoTakeDownAlert = false } }
+      )) {
+         if showTakeDownAlert {
+            return Alert(
+               title: Text("Plakat abhängen?"),
+               message: Text("Bist du sicher, dass du das Plakat abhängen möchtest?"),
+               primaryButton: .default(Text("Ja")) {
+                  Task {
+                     isLoading = true
+                     if let image = viewModel.positionImageData {
+                        do {
+                           try await viewModel.takeDownPosition(image: image)
+                        } catch {
+                           print("Error taking down position: \(error)")
+                        }
+                        await viewModel.fetchPosition()
+                        viewModel.fetchPositionImage(for: position.id)
+                        isLoading = false
+                     }
+                  }
+               },
+               secondaryButton: .cancel(Text("Nein"))
+            )
+         } else if showUndoTakeDownAlert {
+            return Alert(
+               title: Text("Abhängen zurückziehen?"),
+               message: Text("Bist du sicher, dass du das Abhängen zurückziehen möchtest? Das Plakat gilt danach wieder als aufgehängt."),
+               primaryButton: .default(Text("Ja")) {
+                  Task {
+                     // Perform "Abhängen zurückziehen" action here
+                     isLoading = true
+                     if let image = viewModel.positionImageData {
+                        do {
+                           try await viewModel.hangPosition(image: image, latitude: nil, longitude: nil) //Koordinaten ergänzen
+                        } catch {
+                           print("Error hanging position after taking it down: \(error)")
+                        }
+                        await viewModel.fetchPosition()
+                        viewModel.fetchPositionImage(for: position.id)
+                        isLoading = false
+                     }
+                  }
+               },
+               secondaryButton: .cancel(Text("Nein"))
+            )
+         } else {
+            return Alert(title: Text("Unknown Action")) // Fallback case
+         }
+      }
+   }
+   
+   // MARK: - Helper Methods
+   // returns a formatted address string
    private func formattedShareText() -> String {
-//      """
-//      \(address ?? "")
-//      \(coordinate.latitude), \(coordinate.longitude)
-//      """
+      if let address = viewModel.address {
+         return
       """
-      \(address ?? "")
+      \(address)
       """
+      }
+      return ""
+   }
+   
+   // Checks if the current user is responsible for the position
+   func isResponsible() -> Bool {
+      guard let myId = myId else { return false }
+      return viewModel.position?.responsibleUsers.contains(where: {
+         $0.id == myId
+      }) ?? false
+   }
+   
+   // Handles updating the position with an image
+   private func handleImageUpdate(positionId: UUID, image: Data, coordinates: CLLocationCoordinate2D) async {
+        isLoading = true
+        do {
+           try await viewModel.hangPosition(image: image, latitude: coordinates.latitude, longitude: coordinates.longitude)
+        } catch {
+           print("Error hanging position: \(error)")
+        }
+        await viewModel.fetchPosition()
+        viewModel.fetchPositionImage(for: positionId)
+        isLoading = false
+     }
+   
+   // Loads the user ID of the currently logged-in user
+   func loadMyId() {
+      MainPageAPI.fetchUserProfile { result in
+         DispatchQueue.main.async {
+            switch result {
+            case .success(let profile):
+               self.myId = profile.uid
+            case .failure(let error):
+               print("Fehler beim Laden des Profils (PositionView): \(error.localizedDescription)")
+            }
+         }
+      }
    }
 }
 
 #Preview {
-   Posters_PositionView(position: mockPosterPosition1)
 }

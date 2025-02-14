@@ -1,17 +1,37 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import SwiftUI
 
 struct ForgotPasswordView: View {
+    // Eingabezustände für das Zurücksetzen des Passworts
     @State private var email: String = ""
     @State private var resetCode: String = ""
     @State private var newPassword: String = ""
     @State private var confirmPassword: String = ""
+    
+    // UI-Zustände für Ladeprozess, Erfolg oder Fehler
     @State private var isLoading: Bool = false
     @State private var successMessage: String? = nil
     @State private var errorMessage: String? = nil
     @State private var isCodeSent: Bool = false
     @State private var navigateToMainPage: Bool = false
 
-
+    // Ermöglicht das Schließen der Ansicht
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -19,7 +39,7 @@ struct ForgotPasswordView: View {
             VStack {
                 Spacer().frame(height: 40)
 
-                // Title
+                // Titel mit dynamischer Anpassung je nach Status
                 ZStack(alignment: .bottom) {
                     Text(isCodeSent ? "Passwort ändern" : "Passwort zurücksetzen")
                         .font(.title)
@@ -34,51 +54,48 @@ struct ForgotPasswordView: View {
                 .padding(.bottom, 40)
                 .padding(.top, 40)
 
+                // Dynamische Ansicht basierend auf Status (E-Mail-Eingabe oder Passwort-Reset)
                 if !isCodeSent {
-                    // Email TextField
                     inputField(title: "E-Mail", text: $email)
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                 } else {
-                    // Reset Code TextField
                     inputField(title: "Reset-Code", text: $resetCode)
+                        .textContentType(.oneTimeCode)
                         .keyboardType(.numberPad)
-                        .onChange(of: resetCode) { _ in
-                            successMessage = nil // Entferne die grüne Nachricht, sobald ein Code eingegeben wird
+                        .onChange(of: resetCode) {
+                            successMessage = nil
                         }
 
-                    // New Password TextField
                     inputField(title: "Neues Passwort", text: $newPassword, isSecure: true)
-                        .onChange(of: newPassword) { _ in
-                            errorMessage = nil // Entferne Fehlernachrichten bei Passwortänderung
+                        .textContentType(.newPassword)
+                        .onChange(of: newPassword) {
+                            errorMessage = nil
                         }
 
-                    // Confirm Password TextField
                     inputField(title: "Passwort bestätigen", text: $confirmPassword, isSecure: true)
-                        .onChange(of: confirmPassword) { _ in
-                            errorMessage = nil // Entferne Fehlernachrichten bei Bestätigung
+                        .onChange(of: confirmPassword) {
+                            errorMessage = nil
                         }
 
-                    // Password Strength Check
+                    // Validierung von Passwortstärke und Übereinstimmung
                     if !newPassword.isEmpty && confirmPassword.isEmpty {
                         if !isPasswordStrong(newPassword) {
-                            Text("Das Passwort ist zu schwach. Bitte verwenden Sie mindestens 8 Zeichen, eine Zahl und ein Sonderzeichen.")
+                            Text("Das Passwort ist zu schwach. Mind. 8 Zeichen, 1 Zahl, 1 Sonderzeichen.")
                                 .foregroundColor(.red)
                                 .font(.footnote)
                                 .padding(.horizontal, 24)
                         }
-                    } else if !confirmPassword.isEmpty {
-                        if newPassword != confirmPassword {
-                            Text("Die Passwörter stimmen nicht überein.")
-                                .foregroundColor(.red)
-                                .font(.footnote)
-                                .padding(.horizontal, 24)
-                        }
+                    } else if !confirmPassword.isEmpty, newPassword != confirmPassword {
+                        Text("Die Passwörter stimmen nicht überein.")
+                            .foregroundColor(.red)
+                            .font(.footnote)
+                            .padding(.horizontal, 24)
                     }
                 }
 
-                // Error or Success Message
+                // Anzeige von Erfolg oder Fehler
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
@@ -93,7 +110,7 @@ struct ForgotPasswordView: View {
 
                 Spacer()
 
-                // Submit Button
+                // Button zur E-Mail-Anfrage oder zum Zurücksetzen des Passworts
                 Button(action: {
                     if isCodeSent {
                         validateAndResetPassword()
@@ -125,7 +142,7 @@ struct ForgotPasswordView: View {
                 .padding(.top, 10)
                 .disabled(isLoading || (isCodeSent ? (resetCode.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty || !isPasswordStrong(newPassword)) : email.isEmpty))
 
-                // Back Button
+                // Button zum Schließen der Ansicht
                 Button(action: {
                     dismiss()
                 }) {
@@ -143,11 +160,12 @@ struct ForgotPasswordView: View {
             .edgesIgnoringSafeArea(.all)
             .navigationBarBackButtonHidden()
             .navigationDestination(isPresented: $navigateToMainPage) {
-                            MainPage()
-                        }
+                MainPage()
+            }
         }
     }
 
+    // Validierung und Absenden des Passwort-Resets
     private func validateAndResetPassword() {
         guard newPassword == confirmPassword else {
             errorMessage = "Die Passwörter stimmen nicht überein."
@@ -165,11 +183,13 @@ struct ForgotPasswordView: View {
         }
     }
 
+    // Prüft, ob das Passwort den Sicherheitsrichtlinien entspricht
     private func isPasswordStrong(_ password: String) -> Bool {
         let regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}$"
         return NSPredicate(format: "SELF MATCHES %@", regex).evaluate(with: password)
     }
 
+    // Verarbeitung von API-Antworten
     private func handleAPIResponse<T>(_ result: Result<T, Error>, onSuccess: @escaping (T) -> Void) {
         DispatchQueue.main.async {
             isLoading = false
@@ -182,6 +202,7 @@ struct ForgotPasswordView: View {
         }
     }
 
+    // Generische Eingabefeld-Komponente für Text und Passwort
     private func inputField(title: String, text: Binding<String>, isSecure: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
@@ -207,8 +228,7 @@ struct ForgotPasswordView: View {
     }
 }
 
-
-
+// Vorschau für verschiedene Darstellungsmodi
 struct ForgotPasswordView_Previews: PreviewProvider {
     static var previews: some View {
         ForgotPasswordView()

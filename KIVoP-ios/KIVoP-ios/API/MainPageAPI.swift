@@ -1,3 +1,20 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 //
 //  MainPageAPI.swift
 //  KIVoP-ios
@@ -182,57 +199,108 @@ struct MainPageAPI {
 
             if let httpResponse = response as? HTTPURLResponse {
                 print("Status Code: \(httpResponse.statusCode)")
-                if httpResponse.statusCode != 200 {
+                switch httpResponse.statusCode {
+                case 200:
+                    completion(.success(()))
+                case 423:
+                    // Fehler 423 korrekt behandeln
+                    let lockedError = NSError(domain: "", code: 423, userInfo: [NSLocalizedDescriptionKey: "Während eines Meetings lassen sich Username und Profilbild nicht ändern."])
+                    completion(.failure(lockedError))
+                default:
                     completion(.failure(APIError.invalidResponse))
-                    return
                 }
+                return
             }
 
-            completion(.success(()))
+            completion(.failure(APIError.invalidResponse))
         }.resume()
     }
-    
+
     // MARK: - Profilbild aktualisieren
     static func updateUserProfileImage(profileImage: UIImage?, completion: @escaping (Result<Void, Error>) -> Void) {
+        print("[DEBUG] Profilbild-Update gestartet.")
+        
+        // URL erstellen
         guard let url = URL(string: "https://kivop.ipv64.net/users/profile") else {
+            print("[DEBUG] Fehler: Ungültige URL.")
             completion(.failure(APIError.invalidURL))
             return
         }
-
+        print("[DEBUG] URL für Profilbild-Update: \(url)")
+        
+        // JWT-Token abrufen
         guard let jwtToken = UserDefaults.standard.string(forKey: "jwtToken") else {
-            completion(.failure(APIError.invalidRequest))
+            print("[DEBUG] Fehler: Kein JWT-Token gefunden.")
+            completion(.failure(APIError.missingToken))
             return
         }
-
+        print("[DEBUG] JWT-Token abgerufen: \(jwtToken.prefix(10))...") // Token maskiert
+        
+        // HTTP-Request erstellen
         var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
-
-        let compressedImageData = profileImage?.jpegData(compressionQuality: 0.6)
-        let updateDTO = UserProfileUpdateDTO(name: nil, profileImage: compressedImageData)
-
+        print("[DEBUG] HTTP-Header gesetzt.")
+        
+        // Bilddaten oder explizites Null-Objekt vorbereiten
+        let updateDTO: [String: Any]
+        if let image = profileImage, let imageData = image.jpegData(compressionQuality: 0.6) {
+            updateDTO = ["profileImage": imageData.base64EncodedString()] // Base64 für JSON
+            print("[DEBUG] Profilbild wird aktualisiert.")
+        } else {
+            updateDTO = ["profileImage": ""] // Explizit `null` senden
+            print("[DEBUG] Profilbild wird gelöscht.")
+        }
+        
         do {
-            request.httpBody = try JSONEncoder().encode(updateDTO)
+            let jsonData = try JSONSerialization.data(withJSONObject: updateDTO, options: [])
+            request.httpBody = jsonData
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("[DEBUG] Encodiertes JSON: \(jsonString)")
+            }
         } catch {
+            print("[DEBUG] Fehler beim Encodieren des JSON: \(error.localizedDescription)")
             completion(.failure(error))
             return
         }
-
-        URLSession.shared.dataTask(with: request) { _, response, error in
+        
+        // API-Request ausführen
+        URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
+                print("[DEBUG] Netzwerkfehler: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
-
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("[DEBUG] Fehler: Keine gültige HTTP-Antwort erhalten.")
                 completion(.failure(APIError.invalidResponse))
                 return
             }
-
-            completion(.success(()))
+            
+            print("[DEBUG] HTTP-Statuscode: \(httpResponse.statusCode)")
+            
+            if let data = data, let responseBody = String(data: data, encoding: .utf8) {
+                print("[DEBUG] Antwort-Body: \(responseBody)")
+            }
+            
+            switch httpResponse.statusCode {
+            case 200:
+                print("[DEBUG] Profilbild-Update erfolgreich.")
+                completion(.success(()))
+            case 423:
+                print("[DEBUG] Fehler: Benutzername/Profilbild kann während eines Meetings nicht geändert werden.")
+                let lockedError = NSError(domain: "", code: 423, userInfo: [NSLocalizedDescriptionKey: "Während eines Meetings lassen sich Username und Profilbild nicht ändern."])
+                completion(.failure(lockedError))
+            default:
+                print("[DEBUG] Fehler: Unerwarteter Statuscode \(httpResponse.statusCode).")
+                completion(.failure(APIError.invalidResponse))
+            }
         }.resume()
     }
+
+
 
 
     // MARK: - Passwort aktualisieren/ändern
@@ -321,10 +389,17 @@ struct MainPageAPI {
     // MARK: - Helferfunktionen
     static func calculateShortName(from fullName: String) -> String {
         let nameParts = fullName.split(separator: " ")
+        
+        if nameParts.count == 1 {
+            // Falls nur ein Name vorhanden ist, verwende die ersten zwei Buchstaben
+            return String(nameParts.first!.prefix(2)).uppercased()
+        }
+
         guard let firstInitial = nameParts.first?.prefix(1),
               let lastInitial = nameParts.last?.prefix(1) else {
             return "??"
         }
+        
         return "\(firstInitial)\(lastInitial)".uppercased()
     }
     

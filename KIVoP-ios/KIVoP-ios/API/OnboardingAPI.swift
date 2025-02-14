@@ -1,3 +1,20 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 //
 //  OnboardingAPI.swift
 //  KIVoP-ios
@@ -49,28 +66,16 @@ class OnboardingAPI {
             }
 
             if httpResponse.statusCode == 201 {
-                // Registrierung erfolgreich, automatischer Login
-                print("Registrierung erfolgreich. Starte automatischen Login...")
-
-                let loginDTO = UserLoginDTO(email: registrationDTO.email, password: registrationDTO.password)
-
-                loginUser(with: loginDTO) { loginResult in
-                    switch loginResult {
-                    case .success(let token):
-                        // Token speichern
-                        UserDefaults.standard.setValue(token, forKey: "jwtToken")
-                        print("JWT-Token erfolgreich gespeichert: \(token)")
-                        completion(.success(token))
-                    case .failure(let loginError):
-                        completion(.failure(loginError))
-                    }
-                }
+                // Registrierung erfolgreich
+                print("Registrierung erfolgreich.")
+                completion(.success("Registrierung erfolgreich."))
             } else {
                 let errorMessage = "Registrierung fehlgeschlagen. Status: \(httpResponse.statusCode)"
                 completion(.failure(NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])))
             }
         }.resume()
     }
+
 
 
     
@@ -181,7 +186,7 @@ class OnboardingAPI {
                 return
             }
             
-            completion(.success(profile.isAdmin ?? false))
+            completion(.success(profile.isAdmin))
         }.resume()
     }
     
@@ -193,7 +198,7 @@ class OnboardingAPI {
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = "PUT"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = jsonData
 
@@ -225,7 +230,7 @@ class OnboardingAPI {
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = "PUT"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = jsonData
 
@@ -252,7 +257,32 @@ class OnboardingAPI {
                 }
             }
         }.resume()
-    }    
+    }
+    
+    static func resendVerificationEmail(email: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users/email/resend/\(email)") else {
+            completion(.failure(NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "Ungültige URL"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                completion(.failure(NSError(domain: "", code: 500, userInfo: [NSLocalizedDescriptionKey: "Fehler beim erneuten Senden der Verifizierungs-E-Mail"])))
+                return
+            }
+
+            completion(.success(()))
+        }.resume()
+    }
+
 }
 
 

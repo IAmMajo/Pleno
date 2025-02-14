@@ -1,9 +1,27 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import SwiftUI
 import AuthServiceDTOs
 import MeetingServiceDTOs
 import UIKit
 
 struct MainPage: View {
+    // Nutzer- und Meeting-Daten
     @State private var name: String = ""
     @State private var shortName: String = "??"
     @State private var profileImage: UIImage? = nil
@@ -11,10 +29,31 @@ struct MainPage: View {
     @State private var meetingDate: String? = nil
     @State private var meetingTime: String? = nil
     @State private var attendeesCount: Int? = nil
+    // UI-Zustände
     @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
 
+    // Meeting-Manager zur Verwaltung von Meeting-Daten
     @StateObject private var meetingManager = MeetingManager()
+    
+    init() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        
+        // Verwende eine dynamische Farbe, die sich an den Dark Mode anpasst
+        let titleColor = UIColor { traitCollection in
+            return traitCollection.userInterfaceStyle == .dark ? .white : .black
+        }
+        
+        appearance.titleTextAttributes = [
+            .font: UIFont.boldSystemFont(ofSize: 18),
+            .foregroundColor: titleColor
+        ]
+        
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+    }
+
 
     var body: some View {
         NavigationStack {
@@ -35,7 +74,7 @@ struct MainPage: View {
                         .padding([.top, .leading], 20)
                 }
 
-                // Profil-Informationen
+                // Profil-Bereich
                 NavigationLink(destination: MainPage_ProfilView()) {
                     HStack {
                         if let profileImage = profileImage {
@@ -78,7 +117,7 @@ struct MainPage: View {
                     .padding(10)
                 }
 
-                // Options List
+                // Navigationsmenü für verschiedene Funktionen
                 List {
                     Section {
                         if meetingManager.isLoading {
@@ -98,6 +137,15 @@ struct MainPage: View {
                                 .foregroundColor(.red)
                         } else {
                             Text("No meetings available.")
+                        }
+                        
+                        NavigationLink(destination: EventView()) {
+                            HStack {
+                               Image(systemName: "star")
+                                    .foregroundColor(.accentColor)
+                                Text("Events")
+                                    .foregroundColor(Color.primary)
+                            }
                         }
                     }
 
@@ -137,6 +185,22 @@ struct MainPage: View {
                                    .foregroundColor(Color.primary)
                            }
                        }
+                        NavigationLink(destination: RideView()) {
+                            HStack {
+                               Image(systemName: "car.fill")
+                                    .foregroundColor(.accentColor)
+                                Text("Fahrgemeinschaften")
+                                    .foregroundColor(Color.primary)
+                            }
+                        }
+                        NavigationLink(destination: PollsView()) {
+                           HStack {
+                              Image(systemName: "bubble.left.and.bubble.right.fill")
+                                   .foregroundColor(.accentColor)
+                               Text("Umfragen")
+                                   .foregroundColor(Color.primary)
+                           }
+                       }
                     }
                 }
                 .listStyle(InsetGroupedListStyle())
@@ -147,7 +211,7 @@ struct MainPage: View {
                 }
 
                 Spacer()
-
+                // Anzeige des aktuellen Meetings am unteren Bildschirmrand
                 CurrentMeetingBottomView()
             }
             .background(Color(UIColor.systemGroupedBackground))
@@ -160,7 +224,7 @@ struct MainPage: View {
         }
     }
 
-    // MARK: - Daten laden
+    // MARK: - Nutzerprofil laden
     func loadUserProfile(retryCount: Int = 4) {
         guard retryCount > 0 else {
             self.errorMessage = "Fehler: Profil konnte nicht geladen werden."
@@ -173,8 +237,8 @@ struct MainPage: View {
                 case .success(let profile):
                     self.isLoading = false
                     self.errorMessage = nil
-                    self.name = profile.name ?? ""
-                    self.shortName = MainPageAPI.calculateShortName(from: profile.name ?? "")
+                    self.name = profile.name
+                    self.shortName = MainPageAPI.calculateShortName(from: profile.name)
                     if let imageData = profile.profileImage, let image = UIImage(data: imageData) {
                         self.profileImage = image
                     } else {
@@ -184,7 +248,7 @@ struct MainPage: View {
                     self.errorMessage = "Fehler beim Laden des Profils: \(error.localizedDescription)"
                     print("Retry \(5 - retryCount): \(error.localizedDescription)")
 
-                    // Retry nach 2 Sekunden
+                    // Wiederholter Abruf nach 2 Sekunden
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                         self.loadUserProfile(retryCount: retryCount - 1)
                     }
@@ -192,7 +256,8 @@ struct MainPage: View {
             }
         }
     }
-
+    
+    // MARK: - Aktuelles Meeting laden
     func loadCurrentMeeting() {
         MainPageAPI.fetchCurrentMeeting { result in
             DispatchQueue.main.async {

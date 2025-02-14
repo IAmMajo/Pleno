@@ -1,16 +1,41 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import SwiftUI
 
 struct Onboarding: View {
+    // Index des aktuellen Onboarding-Bildschirms
     @State private var currentIndex = 0
+    // Vereinslogo als Platzhalter-Text
     @State private var ClubLogo: String = "VL"
+    // Steuerung der Navigation zur Login-Ansicht
     @State private var navigateToLogin = false
+    // Prüft, ob das Onboarding bereits angesehen wurde
+    @State private var hasCheckedOnboarding = false
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    // Parameter zur manuellen Navigation (falls von außerhalb gesteuert)
+    var isManualNavigation: Bool = false
 
     var body: some View {
         NavigationStack {
             VStack {
                 Spacer()
                 
-                // Vereinslogo placeholder
+                // Platzhalter für das Vereinslogo
                 Circle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 120, height: 120)
@@ -18,9 +43,9 @@ struct Onboarding: View {
                     .padding(.bottom, 10)
                 
                 if currentIndex == 0 {
-                    // Erster Onboarding-Bildschirm
+                    // Erster Onboarding-Bildschirm mit Image und Text
                     VStack {
-                        Image("onboarding4_transparent")
+                        Image("onboarding2")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 300)
@@ -29,7 +54,7 @@ struct Onboarding: View {
                             Text("Mit ")
                                 .font(.title3)
                                 .fontWeight(.regular) +
-                            Text("KIVoP ")
+                            Text("Pleno ")
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(.blue) +
@@ -47,9 +72,9 @@ struct Onboarding: View {
                         Spacer().frame(height: 20)
                     }
                 } else if currentIndex == 1 {
-                    // Zweiter Onboarding-Bildschirm
+                    // Zweiter Onboarding-Bildschirm mit Image und Beschreibung der Features
                     VStack {
-                        Image("onboarding5_transparent")
+                        Image("onboarding1")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 300)
@@ -72,7 +97,7 @@ struct Onboarding: View {
                             + Text("oder plane deine nächste ")
                                 .font(.title3)
                                 .fontWeight(.regular)
-                            + Text("Vereinsreise...")
+                            + Text(" Vereinsreise...")
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(.blue)
@@ -86,7 +111,7 @@ struct Onboarding: View {
                 
                 Spacer()
                 
-                // Seitenindikator
+                // Indikator für die aktuelle Seite (Onboarding-Schritte)
                 HStack(spacing: 8) {
                     Circle()
                         .fill(currentIndex == 0 ? Color.blue : Color.gray.opacity(0.3))
@@ -98,7 +123,7 @@ struct Onboarding: View {
                 }
                 .padding(.bottom, 20)
                 
-                // Navigationsbuttons
+                // Navigationsbuttons für Vor- und Zurückblättern
                 HStack {
                     if currentIndex > 0 {
                         Button(action: {
@@ -124,8 +149,8 @@ struct Onboarding: View {
                             if currentIndex < 1 {
                                 currentIndex += 1
                             } else {
-                                // Flag in UserDefaults setzen und zu Login weiterleiten
-                                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                                // Falls letzter Bildschirm erreicht, Navigation zur Login-Seite
+                                hasSeenOnboarding = true
                                 navigateToLogin = true
                             }
                         }
@@ -142,8 +167,8 @@ struct Onboarding: View {
                 .padding(.bottom, 30)
                 
                 if currentIndex == 0 {
+                    // Möglichkeit, das Onboarding zu überspringen
                     Button(action: {
-                        // Onboarding überspringen
                         UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
                         navigateToLogin = true
                     }) {
@@ -155,36 +180,40 @@ struct Onboarding: View {
                     .padding(.bottom, 20)
                 }
             }
+            // Wischen nach links oder rechts erlaubt Navigation zwischen den Onboarding-Bildschirmen
             .gesture(
                 DragGesture()
                     .onEnded { value in
                         if value.translation.width < -50 && currentIndex < 1 {
-                            // Swipe nach links
+                            // Wischbewegung nach links
                             withAnimation {
                                 currentIndex += 1
                             }
                         } else if value.translation.width > 50 && currentIndex > 0 {
-                            // Swipe nach rechts
+                            // Wischbewegung nach rechts
                             withAnimation {
                                 currentIndex -= 1
                             }
                         }
                     }
             )
+            // Navigation zur Login-Seite nach Onboarding-Abschluss
             .navigationDestination(isPresented: $navigateToLogin) {
                 Onboarding_Login()
             }
         }
         .onAppear {
-            // Wenn der Benutzer das Onboarding bereits gesehen hat, direkt zur Login-Ansicht weiterleiten
-            if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+            // Falls das Onboarding bereits gesehen wurde, direkt zur Login-Seite weiterleiten
+            if hasSeenOnboarding && !isManualNavigation {
                 navigateToLogin = true
             }
         }
+        // Versteckt den Zurück-Button in der Navigation
         .navigationBarBackButtonHidden(true)
     }
 }
 
+// Vorschau für das Onboarding-View
 struct Onboarding_Previews: PreviewProvider {
     static var previews: some View {
         Onboarding()
