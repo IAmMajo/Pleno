@@ -18,7 +18,9 @@ actor LocalizableManager {
     }
     
     func translate(key: String, into lang: String) -> String {
-        self.localizableData.strings[key]?.localizations[lang.lowercased()]?.stringUnit.value ?? key
+        self.localizableData.strings[key]?.localizations[lang.lowercased()]?.stringUnit.value ??
+        self.localizableData.strings[key]?.localizations["en"]?.stringUnit.value ??
+        key
     }
 }
 

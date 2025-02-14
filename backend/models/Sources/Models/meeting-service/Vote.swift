@@ -8,8 +8,6 @@ public final class Vote: Model, @unchecked Sendable {
     public static let schema = "votes"
     
     public final class IDValue: Fields, Hashable, @unchecked Sendable {
-//        @Field(key: "voting_id")
-//        public var votingId: UUID // TODO: Ggf. überdenken, ob ein (Optional)CompositeParent sinnvoller wäre
         @Parent(key: "voting_id")
         public var voting: Voting
         

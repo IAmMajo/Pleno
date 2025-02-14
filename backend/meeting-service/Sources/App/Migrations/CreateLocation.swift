@@ -10,7 +10,7 @@ struct CreateLocation: AsyncMigration {
             .field("street", .string, .required, .sql(.default("")))
             .field("number", .string, .required, .sql(.default("")))
             .field("letter", .string, .required, .sql(.default("")))
-            .field("place_id", .uuid, .references(Place.schema, .id))
+            .field("place_id", .uuid, .references(Place.schema, .id, onDelete: .setNull))
             .create()
     }
 
