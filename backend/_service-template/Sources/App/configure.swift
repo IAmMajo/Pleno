@@ -1,3 +1,20 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import NIOSSL
 import Fluent
 import FluentPostgresDriver
@@ -23,8 +40,8 @@ public func configure(_ app: Application) async throws {
       // Settings beim Start laden
     Task {
         do {
-            let configServiceURL = Environment.get("CONFIG_SERVICE_URL") ?? "https://config-service-url"
-            let serviceIDString = Environment.get("SERVICE_ID") ?? "76f93894-7573-4ccd-a067-66c2180750e0"
+            let configServiceURL = Environment.get("CONFIG_SERVICE_URL") ?? "http://kivop-config-service"
+            let serviceIDString = Environment.get("SERVICE_ID") ?? "SRV_CONFIG_SERVICE_UUID_PLACEHOLDER"
             guard let serviceID = UUID(uuidString: serviceIDString) else {
                 app.logger.error("Ungültige Service-ID.")
                 return
@@ -34,6 +51,10 @@ public func configure(_ app: Application) async throws {
             app.logger.error("Fehler beim Laden der Einstellungen: \(error.localizedDescription)")
         }
     }
+
+    // migrations
+    try await app.autoMigrate()
+
     // register routes
     try routes(app)
 }

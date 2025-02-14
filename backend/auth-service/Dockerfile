@@ -66,6 +66,8 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
       libjemalloc2 \
       ca-certificates \
       tzdata \
+      curl \
+      openssl \
 # If your app or its dependencies import FoundationNetworking, also install `libcurl4`.
       # libcurl4 \
 # If your app or its dependencies import FoundationXML, also install `libxml2`.
@@ -84,11 +86,37 @@ COPY --from=build --chown=vapor:vapor /staging /app
 # Provide configuration needed by the built-in crash reporter and some sensible default behaviors.
 ENV SWIFT_BACKTRACE=enable=yes,sanitize=yes,threads=all,images=all,interactive=no,swift-backtrace=./swift-backtrace-static
 
+
+# ECDSA Key Validation & Generation
+RUN mkdir -p /app/certs/jwt /app/certs/auth && \
+    echo "Verzeichnisstruktur erstellt. Überprüfe Dateien..." && \
+    ls -l /app/certs && \
+    if [[ -f /app/certs/auth/private.pem && -f /app/certs/jwt/public.pem ]]; then \
+        echo "ECDSA-Schlüsselpaar existiert, überprüfe Gültigkeit..."; \
+        openssl ec -in /app/certs/auth/private.pem -check -noout && \
+        openssl ec -in /app/certs/auth/private.pem -pubout | diff - /app/certs/jwt/public.pem && \
+        echo "ECDSA-Schlüsselpaar ist gültig."; \
+    else \
+        echo "Schlüsselpaar existiert nicht oder ist ungültig. Erstelle ein neues..." && \
+        openssl ecparam -name prime256v1 -genkey -noout -out /app/certs/auth/private.pem && \
+        openssl ec -in /app/certs/auth/private.pem -pubout -out /app/certs/jwt/public.pem && \
+        echo "Neues ECDSA-Schlüsselpaar erstellt."; \
+    fi && \
+    echo "Setze Berechtigungen und Besitz..." && \
+    chown -R vapor:vapor /app/certs && \
+    chmod 600 /app/certs/auth/private.pem && \
+    chmod 644 /app/certs/jwt/public.pem && \
+    echo "Berechtigungen und Besitz gesetzt." && \
+    ls -l /app/certs    
+
 # Ensure all further commands run as the vapor user
 USER vapor:vapor
 
 # Let Docker bind to port 80
 EXPOSE 80
+
+# Only specify this container as healthy if its service's /internal/healthcheck-route responds successfully
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --start-interval=3s --retries=3 CMD curl -f http://localhost/internal/healthcheck || exit 1
 
 # Start the Vapor service when the image is run, default to listening on 80 in production environment
 ENTRYPOINT ["./App"]

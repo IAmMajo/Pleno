@@ -22,9 +22,11 @@ ticketflow:
   script:
     - 'MERGE_REQ="$(curl -s --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN" $COMMIT_MERGE_REQ_URL)"'
     - if [[ "$(echo "$MERGE_REQ" | jq -r ". | length")" == "0" || "$(echo "$MERGE_REQ" | jq -r ".[0].target_branch")" != "$CI_COMMIT_BRANCH" || "$(echo "$MERGE_REQ" | jq -r ".[0].source_branch")" == "$CI_DEFAULT_BRANCH" ]]; then exit 0; fi
-    - TICKET_IIDS="$(echo "$MERGE_REQ" | jq -r '.[0].description' | grep -oP "${TICKET_ID_REGEX}" | grep -oP '\d+')"
-    - echo "$TICKET_IIDS"
     - >
+      if [[ "$(echo "$MERGE_REQ" | jq -r '.[0].description' | grep -oP "${TICKET_ID_REGEX}" | grep -oP '\d+')" ]]; then
+      TICKET_IIDS="$(echo "$MERGE_REQ" | jq -r '.[0].description' | grep -oP "${TICKET_ID_REGEX}" | grep -oP '\d+')";
+      echo "Adding labels to the following ticket:";
+      echo "$TICKET_IIDS";
       echo "$TICKET_IIDS" | while IFS= read -r iid ; do
       curl
       --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN"
@@ -32,7 +34,8 @@ ticketflow:
       --request PUT
       --data "$(printf '{"add_labels":"%s"}' "$TICKET_DONE_LABEL")"
       "$(printf "$PUT_ISSUE_URL_UNFORMATTED" "${iid}")" | jq -r '.labels[]';
-      done
+      done;
+      fi
     - 'MERGE_REQ_INTO_MAIN="$(curl -s --header "PRIVATE-TOKEN: $PROJECT_API_TOKEN" $GET_MERGE_REQ_INTO_MAIN_URL)"'
     - MERGE_REQ_INTO_MAIN_COUNT="$(echo "$MERGE_REQ_INTO_MAIN" | jq -r ". | length")"
     - >
@@ -139,7 +142,7 @@ build-backend-docker-image-config-service:
       changes:
         - backend/config-service/**/*
         - backend/models/**/*
-        - DTOs/**/*
+        # - DTOs/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -160,7 +163,7 @@ build-backend-docker-image-auth-service:
       changes:
         - backend/auth-service/**/*
         - backend/models/**/*
-        - DTOs/**/*
+        # - DTOs/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -181,7 +184,7 @@ build-backend-docker-image-meeting-service:
       changes:
         - backend/meeting-service/**/*
         - backend/models/**/*
-        - DTOs/**/*
+        # - DTOs/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -202,33 +205,33 @@ build-backend-docker-image-notifications-service:
       changes:
         - backend/notifications-service/**/*
         - backend/models/**/*
-        - DTOs/**/*
+        # - DTOs/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
     action: prepare
     deployment_tier: production
 
-# build-backend-docker-image-poster-service:
-#   stage: build
-#   script:
-#     - cd "$PROD_DIR_LOCATION"
-#     - docker compose build poster-service
-#   rules:
-#     # - changes:
-#     #     - backend/models/**/*
-#     #     - DTOs/**/*
-#     #   when: never
-#     - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
-#       changes:
-#         - backend/poster-service/**/*
-#         - backend/models/**/*
-#         - DTOs/**/*
-#   environment:
-#     name: Production
-#     url: https://kivop.ipv64.net
-#     action: prepare
-#     deployment_tier: production
+build-backend-docker-image-poster-service:
+  stage: build
+  script:
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose build poster-service
+  rules:
+    # - changes:
+    #     - backend/models/**/*
+    #     - DTOs/**/*
+    #   when: never
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/poster-service/**/*
+        - backend/models/**/*
+        # - DTOs/**/*
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: prepare
+    deployment_tier: production
 
 build-backend-docker-image-ride-service:
   stage: build
@@ -244,7 +247,49 @@ build-backend-docker-image-ride-service:
       changes:
         - backend/ride-service/**/*
         - backend/models/**/*
-        - DTOs/**/*
+        # - DTOs/**/*
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: prepare
+    deployment_tier: production
+
+build-backend-docker-image-ai-service:
+  stage: build
+  script:
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose build ai-service
+  rules:
+    # - changes:
+    #     - backend/models/**/*
+    #     - DTOs/**/*
+    #   when: never
+    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/ai-service/**/*
+        - backend/models/**/*
+        # - DTOs/**/*
+  environment:
+    name: Production
+    url: https://kivop.ipv64.net
+    action: prepare
+    deployment_tier: production
+
+build-backend-docker-image-poll-service:
+  stage: build
+  script:
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose build poll-service
+  rules:
+    # - changes:
+    #     - backend/models/**/*
+    #     - DTOs/**/*
+    #   when: never
+    - if: $CI_COMMIT_BRANCH == $BACKEND_STAGING_BRANCH && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - backend/poll-service/**/*
+        - backend/models/**/*
+        # - DTOs/**/*
   environment:
     name: Production
     url: https://kivop.ipv64.net
@@ -261,7 +306,7 @@ build-backend-docker-image-ride-service:
 #     - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
 #       changes:
 #         - backend/models/**/*
-#         - DTOs/**/*
+# #         - DTOs/**/*
 #   timeout: 2 hours
 #   environment:
 #     name: Production
@@ -287,6 +332,19 @@ deploy-containers-on-prod-server:
     url: https://kivop.ipv64.net
     action: start
     deployment_tier: production
+    on_stop: stop-containers-on-prod-server
+
+stop-containers-on-prod-server:
+  stage: deploy
+  script:
+    - cd "$PROD_DIR_LOCATION"
+    - docker compose down
+  rules:
+    - if: $CI_COMMIT_BRANCH == $SERVER_BRANCH && $CI_PIPELINE_SOURCE == "push"
+  environment:
+    name: Production
+    action: stop
+  when: manual
 
 format-android:
   rules:

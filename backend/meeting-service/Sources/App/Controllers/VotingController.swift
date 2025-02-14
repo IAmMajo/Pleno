@@ -1,3 +1,20 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import Fluent
 import Vapor
 import Models
@@ -57,6 +74,9 @@ struct VotingController: RouteCollection {
     
     /// **GET** `/meetings/{id}/votings`
     @Sendable func getVotingsOfMeeting(req: Request) async throws -> [GetVotingDTO] {
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -64,23 +84,25 @@ struct VotingController: RouteCollection {
         return try await meeting.$votings.query(on: req.db)
             .with(\.$votingOptions)
             .all()
-            .map { voting in
-                try voting.toGetVotingDTO()
-            }
+            .toGetVotingDTOs(db: req.db, userId: userId)
     }
     
     /// **GET** `/meetings/votings`
     @Sendable func getAllVotings(req: Request) async throws -> [GetVotingDTO] {
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
         return try await Voting.query(on: req.db)
             .with(\.$votingOptions)
             .all()
-            .map { voting in
-                try voting.toGetVotingDTO()
-            }
+            .toGetVotingDTOs(db: req.db, userId: userId)
     }
     
     /// **POST** `/meetings/votings`
     @Sendable func createVoting(req: Request) async throws -> Response { // -> GetVotingDTO
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
         guard let createVotingDTO = try? req.content.decode(CreateVotingDTO.self) else {
             throw Abort(.badRequest, reason: "Invalid request body! Expected CreateVotingDTO.")
         }
@@ -100,85 +122,19 @@ struct VotingController: RouteCollection {
             }
             try await voting.$votingOptions.load(on: db)
         }
-        return try await voting.toGetVotingDTO().encodeResponse(status: .created, for: req)
+        return try await voting.toGetVotingDTO(db: req.db, userId: userId).encodeResponse(status: .created, for: req)
     }
     
     /// **GET** `/meetings/votings/{id}`
     @Sendable func getSingleVoting(req: Request) async throws -> GetVotingDTO {
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
         guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
         try await voting.$votingOptions.load(on: req.db)
-        return try voting.toGetVotingDTO()
-    }
-    
-    func calculateVotingResults(voting: Voting, userId: UUID, db: Database) async throws -> GetVotingResultsDTO {
-        let identityIds = try await IdentityHistory.byUserId(userId, db).map { identityHistory in
-            try identityHistory.identity.requireID()
-        }
-        guard !voting.isOpen && voting.startedAt != nil && voting.closedAt != nil else {
-            throw Abort(.conflict, reason: "The voting has not closed yet.")
-        }
-        
-        let votingOptions = try await voting.$votingOptions.get(on: db)
-        var getVotingResultsDTO = try GetVotingResultsDTO(votingId: voting.requireID(), myVote: nil, results: [])
-        
-        if let myVote = try await voting.$votes.query(on: db)
-            .with(\.$id.$identity)
-            .filter(\.$id.$identity.$id ~~ identityIds)
-            .first() {
-            getVotingResultsDTO.myVote = myVote.index
-        }
-        
-        var totalVotes: [[Vote]] = []
-        
-        for i in 0...votingOptions.count {
-            try await totalVotes.append(voting.$votes.query(on: db)
-                .filter(\.$index == UInt8(i))
-                .with(\.$id.$identity)
-                .all())
-        }
-        let totalVoteAmounts: [Int] = totalVotes.map { votes in
-            votes.count
-        }
-        let totalVotesCount = totalVoteAmounts.reduce(0) { partialResult, votes in
-            partialResult + votes
-        }
-        guard totalVotesCount > 0 else {
-            return getVotingResultsDTO
-        }
-        var percentageCutoffs: [percentageCutoff] = totalVoteAmounts.enumerated().map { index, votes in
-            let percentage = (Double(votes) / Double(totalVotesCount))
-            let roundedDownPercentage = (percentage * 10000.0).rounded(.down) / 100.0
-            return .init(index: UInt8(index), percentage: roundedDownPercentage, cutoff: percentage - roundedDownPercentage)
-        }
-        
-        percentageCutoffs.sort { percentageCutoff1, percentageCutoff2 in
-            percentageCutoff1.cutoff > percentageCutoff2.cutoff
-        }
-        let totalPercentage = percentageCutoffs.reduce(0.0) { partialResult, percentageCutoff in
-            partialResult + percentageCutoff.percentage
-        }
-        
-        for i in 0..<(Int((100.0 - totalPercentage)*100.0)) {
-            percentageCutoffs[i].percentage += 0.01
-        }
-        percentageCutoffs.sort { percentageCutoff1, percentageCutoff2 in
-            percentageCutoff1.index < percentageCutoff2.index
-        }
-        
-        for index in 0...votingOptions.count {
-            let percentageCutoff = percentageCutoffs[index]
-            try getVotingResultsDTO.results.append(
-                GetVotingResultDTO(index: UInt8(index),
-                                   total: UInt8(totalVoteAmounts[index]),
-                                   percentage: percentageCutoff.percentage,
-                                   identities: voting.anonymous ? nil : totalVotes[index].map({ vote in
-                                       try vote.requireID().identity.toGetIdentityDTO()
-                                   })))
-        }
-        
-        return getVotingResultsDTO
+        return try await voting.toGetVotingDTO(db: req.db, userId: userId)
     }
     
     /// **GET** `/meetings/votings/{id}/results`
@@ -189,11 +145,14 @@ struct VotingController: RouteCollection {
         guard let userId = req.jwtPayload?.userID else {
             throw Abort(.unauthorized)
         }
-        return try await self.calculateVotingResults(voting: voting, userId: userId, db: req.db)
+        return try await voting.toGetVotingResultsDTO(db: req.db, userId: userId)
     }
     
     /// **PATCH** `/meetings/votings/{id}`
     @Sendable func updateVoting(req: Request) async throws -> GetVotingDTO {
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
         guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -229,7 +188,7 @@ struct VotingController: RouteCollection {
             try await voting.update(on: db)
             try await voting.$votingOptions.load(on: db)
         }
-        return try voting.toGetVotingDTO()
+        return try await voting.toGetVotingDTO(db: req.db, userId: userId)
     }
     
     /// **DELETE** `/meetings/votings/{id}`
@@ -251,6 +210,9 @@ struct VotingController: RouteCollection {
     
     /// **PUT** `/meetings/votings/{id}/open`
     @Sendable func openVoting(req: Request) async throws -> GetVotingDTO {
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
         guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -266,19 +228,19 @@ struct VotingController: RouteCollection {
         
         try await voting.update(on: req.db)
         try await voting.$votingOptions.load(on: req.db)
-        return try voting.toGetVotingDTO()
+        return try await voting.toGetVotingDTO(db: req.db, userId: userId)
     }
     
     /// **PUT** `/meetings/votings/{id}/close`
     @Sendable func closeVoting(req: Request) async throws -> GetVotingDTO {
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
         guard let voting = try await Voting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
         guard voting.isOpen && voting.startedAt != nil && voting.closedAt == nil else {
             throw Abort(.badRequest, reason: "Only votings which are currently open can be closed.")
-        }
-        guard let userId = req.jwtPayload?.userID else {
-            throw Abort(.unauthorized)
         }
         
         voting.closedAt = .now
@@ -288,12 +250,12 @@ struct VotingController: RouteCollection {
         
         let clientWebSocketContainer = try self.votingClientWebSocketContainer.getClientWebSocketContainer(votingId: voting.requireID())
         try await clientWebSocketContainer.sendBinary(
-            JSONEncoder().encode(self.calculateVotingResults(voting: voting, userId: userId, db: req.db))
+            JSONEncoder().encode(voting.toGetVotingResultsDTO(db: req.db, userId: userId))
         )
         try await clientWebSocketContainer.closeAllConnections()
         
         try await voting.$votingOptions.load(on: req.db)
-        return try voting.toGetVotingDTO()
+        return try await voting.toGetVotingDTO(db: req.db, userId: userId)
     }
     
     /// **PUT** `/meetings/votings/{id}/vote/{index}`
@@ -302,10 +264,10 @@ struct VotingController: RouteCollection {
             throw Abort(.notFound)
         }
         try await voting.$votingOptions.load(on: req.db)
-        guard let index = UInt8(req.parameters.get("index")!), try index == 0 || voting.votingOptions.contains(where: { votingOption in
+        guard let indexParam = req.parameters.get("index"), let index = UInt8(indexParam), try index == 0 || voting.votingOptions.contains(where: { votingOption in
             try votingOption.requireID().index == index
         }) else {
-            throw Abort(.notFound)
+            throw Abort(.notFound, reason: "Invalid index '\(req.parameters.get("index") ?? "nil")'.")
         }
         guard voting.isOpen && voting.startedAt != nil && voting.closedAt == nil else {
             throw Abort(.badRequest, reason: "You can only vote on votings which are currently open.")
@@ -316,6 +278,9 @@ struct VotingController: RouteCollection {
         let identity = try await Identity.byUserId(userId, req.db)
         guard try await Vote.find(.init(voting: voting, identity: identity), on: req.db) == nil else {
             throw Abort(.badRequest, reason: "You have already voted on this voting.")
+        }
+        guard let _ = try await Attendance.find(.init(meetingId: voting.$meeting.id, identity: identity), on: req.db) else {
+            throw Abort(.badRequest, reason: "You must be attending the voting's corresponding meeting in order to vote on it.")
         }
         
         let vote = try Vote(id: .init(voting: voting, identity: identity), index: index)
@@ -350,7 +315,7 @@ struct VotingController: RouteCollection {
             return try await voting.$votingOptions.get(on: req.db).first { votingOption in
                 try votingOption.requireID().index == myVote.index
             }!
-            .toGetVotingOptionDTO().encodeResponse(status: .ok, for: req)
+                .toGetVotingOptionDTO().encodeResponse(status: .ok, for: req)
         } else {
             return .init(status: .ok)
         }
@@ -374,6 +339,10 @@ struct VotingController: RouteCollection {
             }
             
             self.votingClientWebSocketContainer.getClientWebSocketContainer(votingId: try voting.requireID()).add(userId, ws)
+            
+            try await ws.send(
+                "\(voting.$votes.query(on: req.db).count())/\(voting.$meeting.get(on: req.db).$attendances.query(on: req.db).count())"
+            )
         } catch {
             req.logger.notice("An error occured while handling the votingLiveStatusWebSocket request: \(error)")
             ws.send("ERROR: \(error.localizedDescription)", promise: nil)

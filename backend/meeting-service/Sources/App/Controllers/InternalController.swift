@@ -1,3 +1,20 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import Fluent
 import Vapor
 import Models
@@ -8,12 +25,21 @@ import VaporToOpenAPI
 struct InternalController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let openAPITag = TagObject(name: "Intern", description: "Nur intern erreichbar.")
+        
+        routes.get("healthcheck", use: healthcheck)
+            .openAPI(tags: openAPITag, summary: "Healthcheck des Microservices", statusCode: .ok)
+        
         routes.group("adjust-identities") { route in
             route.put("prepare", ":oldId", ":newId", use: adjustIdentitiesPreparation)
                 .openAPI(tags: openAPITag, summary: "Identitäten in veränderlichen Anwesenheiten anpassen (Schritt 1)", path: .all(of: .type(Identity.IDValue.self), .type(Identity.IDValue.self)), response: .type([Attendance].self), responseContentType: .application(.json), statusCode: .ok)
             route.put(use: adjustIdentities)
                 .openAPI(tags: openAPITag, summary: "Identitäten in veränderlichen Anwesenheiten anpassen (Schritt 2)", body: .type([Attendance].self), contentType: .application(.json), statusCode: .noContent)
         }
+    }
+    
+    /// **GET** `/internal/healthcheck`
+    @Sendable func healthcheck(req: Request) -> HTTPResponseStatus {
+        .ok
     }
     
     /// **PUT** `/internal/adjust-identities/prepare/{oldId}/{newId}`

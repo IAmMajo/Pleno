@@ -1,3 +1,20 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import Vapor
 import Fluent
 import Models
@@ -41,7 +58,6 @@ struct DailyCheckTask: LifecycleHandler {
                     break
                 }
                 
-                // Führen Sie die tägliche Prüfung durch
                 await performDailyCheck(app)
             }
         }
@@ -52,8 +68,8 @@ struct DailyCheckTask: LifecycleHandler {
         // Abrufen des poster_reminder_interval-Werts (in Tagen)
         let posterReminder: Int? = await SettingsManager.shared.getSetting(forKey: "poster_reminder_interval")
         
-        // Verwenden Sie einen Standardwert von 3 Tagen, falls poster_reminder nicht gesetzt ist
-        let reminderDays = posterReminder ?? 3
+        // Verwenden von einen Standardwert von 3 Tagen, falls poster_reminder nicht gesetzt ist
+        let reminderDays = posterReminder ?? 0
         
         let now = Date()
         let calendar = Calendar.current
@@ -64,38 +80,27 @@ struct DailyCheckTask: LifecycleHandler {
             return
         }
         
-        // Definieren des Start- und Endzeitpunkts des targetDate-Tages
-        let startOfDay = calendar.startOfDay(for: targetDate)
-        guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
-            app.logger.error("Fehler beim Berechnen des endOfDay für DailyCheckTask.")
-            return
-        }
-        
+        app.logger.info("Gefundene PosterPositionen für Erinnerungen: \(targetDate)")
         do {
-            // Abfrage der PosterPositions, deren expires_at genau dem targetDate entspricht
+            // Abfrage der PosterPositions, deren expiresAt genau dem targetDate entspricht
             let positions = try await PosterPosition.query(on: app.db)
-                .filter(\.$posted_by.$id != nil)
-                .filter(\.$removed_by.$id == nil)
-                .filter(\.$expires_at >= startOfDay)
-                .filter(\.$expires_at < endOfDay)
-                .with(\.$posted_by)
+                .filter(\.$postedBy.$id != nil)
+                .filter(\.$removedBy.$id == nil)
+                .filter(\.$expiresAt <= targetDate)
+                .with(\.$postedBy)
                 .with(\.$responsibilities)
                 .all()
             
             app.logger.info("Gefundene PosterPositionen für Erinnerungen: \(positions.count)")
             
             for position in positions {
-                guard let expiresAt = position.expires_at else {
-                                   app.logger.warning("PosterPosition (ID: \(position.id?.uuidString ?? "Unbekannt")) hat kein expires_at Datum.")
-                                   continue
-                               }
                 for responsible in position.responsibilities {
                     let email = responsible.user.email
                     
                     // Berechnen der Tage bis zum Ablaufdatum
                     let daysLeft: Int?
                     if reminderDays < 0 {
-                        daysLeft = calendar.dateComponents([.day], from: now, to: expiresAt).day
+                        daysLeft = calendar.dateComponents([.day], from: now, to: position.expiresAt).day
                     } else {
                         daysLeft = nil
                     }
@@ -120,7 +125,7 @@ struct DailyCheckTask: LifecycleHandler {
                         var headers = HTTPHeaders()
                         headers.add(name: .contentType, value: "application/json")
                         
-                        let response = try await app.client.post("http://kivop-notification-service/email") { request in
+                        let response = try await app.client.put("http://notifications-service/internal/email") { request in
                             request.headers = headers
                             request.body = .init(data: jsonData)
                         }

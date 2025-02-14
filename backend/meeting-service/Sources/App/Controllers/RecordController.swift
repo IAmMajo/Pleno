@@ -1,7 +1,25 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import Fluent
 import Vapor
 import Models
 import MeetingServiceDTOs
+import AIServiceDTOs
 import SwiftOpenAPI
 
 struct RecordController: RouteCollection {
@@ -38,6 +56,9 @@ struct RecordController: RouteCollection {
     
     /// **GET** `/meetings/{id}/records`
     @Sendable func getAllRecords(req: Request) async throws -> [GetRecordDTO] {
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -46,23 +67,26 @@ struct RecordController: RouteCollection {
             .with(\.$identity)
             .all()
             .map { record in
-            try record.toGetRecordDTO()
+                try await record.toGetRecordDTO(db: req.db, userId: userId)
         }
     }
     
     /// **GET** `/meetings/{id}/records/{lang}`
     @Sendable func getSingleRecord(req: Request) async throws -> GetRecordDTO {
+        guard let userId = req.jwtPayload?.userID else {
+            throw Abort(.unauthorized)
+        }
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard let lang = req.parameters.get("lang"), !lang.isEmpty else {
+        guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty else {
             throw Abort(.badRequest)
         }
         guard let record =  try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
             throw Abort(.notFound)
         }
         try await record.$identity.load(on: req.db)
-        return try record.toGetRecordDTO()
+        return try await record.toGetRecordDTO(db: req.db, userId: userId)
     }
     
     /// **PATCH** `/meetings/{id}/records/{lang}`
@@ -74,7 +98,7 @@ struct RecordController: RouteCollection {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard let lang = req.parameters.get("lang"), !lang.isEmpty else {
+        guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty else {
             throw Abort(.badRequest)
         }
         guard let patchRecordDTO = try? req.content.decode(PatchRecordDTO.self) else {
@@ -83,7 +107,7 @@ struct RecordController: RouteCollection {
         guard let record = try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard try isAdmin || (identityId == record.identity.requireID() && patchRecordDTO.identityId == nil ) else {
+        guard isAdmin || (identityId == record.$identity.id && patchRecordDTO.identityId == nil ) else {
             throw Abort(.forbidden)
         }
         guard record.status == .underway || (record.status == .submitted && isAdmin) else {
@@ -109,7 +133,7 @@ struct RecordController: RouteCollection {
         
         try await record.update(on: req.db)
         try await record.$identity.load(on: req.db)
-        return try record.toGetRecordDTO()
+        return try await record.toGetRecordDTO(db: req.db, userId: userId)
     }
     
     /// **DELETE** `/meetings/{id}/records/{lang}`
@@ -117,10 +141,13 @@ struct RecordController: RouteCollection {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard let lang = req.parameters.get("lang"), !lang.isEmpty else {
+        guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty else {
             throw Abort(.badRequest)
         }
-        guard lang != "DE" else {
+        guard let defaultLanguage = await SettingsManager.shared.getSetting(forKey: "defaultLanguage") else {
+            throw Abort(.internalServerError, reason: "Could not determine default language.")
+        }
+        guard lang != defaultLanguage else {
             throw Abort(.badRequest, reason: "The record for the club's default language cannot be deleted.")
         }
         guard let record =  try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
@@ -139,13 +166,13 @@ struct RecordController: RouteCollection {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard let lang = req.parameters.get("lang"), !lang.isEmpty else {
+        guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty else {
             throw Abort(.badRequest)
         }
         guard let record = try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard try identityId == record.identity.requireID() else {
+        guard identityId == record.$identity.id else {
             throw Abort(.forbidden, reason: "You are not allowed to submit this record.")
         }
         guard record.status == .underway else {
@@ -156,12 +183,12 @@ struct RecordController: RouteCollection {
         
         try await record.update(on: req.db)
         try await record.$identity.load(on: req.db)
-        return try record.toGetRecordDTO()
+        return try await record.toGetRecordDTO(db: req.db, userId: userId)
     }
     
     /// **PUT** `/meetings/{id}/records/{lang}/approve`
     @Sendable func approveRecord(req: Request) async throws -> GetRecordDTO {
-        guard let isAdmin = req.jwtPayload?.isAdmin else {
+        guard let userId = req.jwtPayload?.userID, let isAdmin = req.jwtPayload?.isAdmin else {
             throw Abort(.unauthorized)
         }
         guard isAdmin else {
@@ -170,7 +197,7 @@ struct RecordController: RouteCollection {
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard let lang = req.parameters.get("lang"), !lang.isEmpty else {
+        guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty else {
             throw Abort(.badRequest)
         }
         guard let record = try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
@@ -184,7 +211,7 @@ struct RecordController: RouteCollection {
         
         try await record.update(on: req.db)
         try await record.$identity.load(on: req.db)
-        return try record.toGetRecordDTO()
+        return try await record.toGetRecordDTO(db: req.db, userId: userId)
     }
     
     /// **PUT** `/meetings/{id}/records/{lang}/translate/{lang2}`
@@ -194,13 +221,16 @@ struct RecordController: RouteCollection {
         }
         let identityId = try await Identity.byUserId(userId, req.db).requireID()
         guard isAdmin else {
-            throw Abort(.forbidden, reason: "You are not allowed to approve this record.")
+            throw Abort(.forbidden, reason: "You are not allowed to translate this record.")
         }
         guard let meeting = try await Meeting.find(req.parameters.get("id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        guard let lang = req.parameters.get("lang"), !lang.isEmpty, let lang2 = req.parameters.get("lang2"), !lang2.isEmpty, lang != lang2 else {
+        guard let lang = req.parameters.get("lang")?.lowercased(), !lang.isEmpty, let lang2 = req.parameters.get("lang2")?.lowercased(), !lang2.isEmpty, lang != lang2 else {
             throw Abort(.badRequest)
+        }
+        guard Locale.LanguageCode(stringLiteral: lang2).isISOLanguage else {
+            throw Abort(.badRequest, reason: "Invalid language '\(lang2)' (expected a two-letter ISO 639-1 or three-letter ISO 639-2 code, e.g. 'en').")
         }
         guard let record = try await Record.find(.init(meeting: meeting, lang: lang), on: req.db) else {
             throw Abort(.notFound)
@@ -209,10 +239,14 @@ struct RecordController: RouteCollection {
             throw Abort(.conflict, reason: "Cannot create a new, translated record, since there is already one for the language '\(lang2)'.")
         }
         
-        let translatedRecord = Record(id: try .init(meeting: meeting, lang: lang2), identityId: identityId, status: .underway, content: record.content)
+        guard let aiServiceResponse: AISendMessageDTO = try? await req.client.put("http://ai-service/internal/translate-record/\(lang)/\(lang2)", content: AISendMessageDTO(content: record.content)).content.decode(AISendMessageDTO.self) else {
+            throw Abort(.serviceUnavailable, reason: "Failed to contact the AI service.")
+        }
+        
+        let translatedRecord = Record(id: try .init(meeting: meeting, lang: lang2), identityId: identityId, status: .underway, content: aiServiceResponse.content)
         
         try await translatedRecord.create(on: req.db)
-        try await record.$identity.load(on: req.db)
-        return try translatedRecord.toGetRecordDTO()
+        try await translatedRecord.$identity.load(on: req.db)
+        return try await translatedRecord.toGetRecordDTO(db: req.db, userId: userId)
     }
 }

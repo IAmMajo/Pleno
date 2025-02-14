@@ -2,47 +2,19 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Willkommen bei der KI-basierten Volunteering-Plattform</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        color: #333333;
-        padding: 20px;
-      }
-      .container {
-        background-color: #ffffff;
-        padding: 30px;
-        border-radius: 8px;
-        text-align: center;
-      }
-      .logo {
-        width: 150px;
-        margin-bottom: 20px;
-      }
-      .verification-code {
-        font-size: 24px;
-        color: #ff6600;
-        margin: 20px 0;
-      }
-      .footer {
-        margin-top: 30px;
-        font-size: 12px;
-        color: #777777;
-      }
-    </style>
+    <title>#(subject) | Pleno</title>
   </head>
-  <body>
-    <div class="container">
+  <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333333; padding: 20px;">
+    <div style="background-color: #ffffff; padding: 30px; border-radius: 8px; text-align: center;">
       <img
-        src="https://kivop.ipv64.net/email/logo.png"
-        alt="Plattform-Logo"
-        class="logo"
+        src="https://kivop.ipv64.net/notifications-service/logo.png"
+        alt="Pleno-Logo"
+        style="width: 150px; margin-bottom: 20px;"
       />
       #import("message")
-      <div class="footer">
+      <div style="margin-top: 30px; font-size: 12px; color: #777777;">
         <p>
-          Mit freundlichen Grüßen,<br />Das Team der KI-Volunteering-Plattform
+          Mit freundlichen Grüßen,<br />Das Team von Pleno
         </p>
       </div>
     </div>

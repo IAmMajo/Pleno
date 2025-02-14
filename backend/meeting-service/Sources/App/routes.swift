@@ -1,12 +1,29 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import Fluent
 import JWTKit
 import Vapor
 import VaporToOpenAPI
+import Models
 
 func routes(_ app: Application) throws {
     // Einbinden der Middleware und des JWTSigner
-    let jwtSigner = JWTSigner.hs256(key: "Ganzgeheimespasswort")
-    let authMiddleware = AuthMiddleware(jwtSigner: jwtSigner, payloadType: JWTPayloadDTO.self)
+    let authMiddleware = AuthMiddleware(payloadType: JWTPayloadDTO.self)
     
     let authProtected = app.grouped(authMiddleware)
     let meetings = authProtected.grouped("meetings")
@@ -14,27 +31,37 @@ func routes(_ app: Application) throws {
     try meetings.register(collection: AttendanceController())
     try meetings.register(collection: VotingController(eventLoop: app.eventLoopGroup.next()))
     try meetings.register(collection: RecordController())
+    try app.register(collection: WebhookController())
     try app.grouped("internal").register(collection: InternalController())
     
     app.get("brew", "coffee") { req -> HTTPStatus in // 418
-        .imATeapot
+            .imATeapot
     }
     .excludeFromOpenAPI()
-
+    
     app.get("openapi.json") { req in
-      app.routes.openAPI(
-        info: .init(
-          title: "KIVoP Meeting Service API",
-          license: .init(
-            name: "MIT-0",
-            url: URL(string: "https://github.com/aws/mit-0")
-          ),
-          version: "0.1.0"
+        app.routes.openAPI(
+            info: .init(
+                title: OpenAPIInfo.title,
+                summary: OpenAPIInfo.summary,
+                description: OpenAPIInfo.description,
+                termsOfService: OpenAPIInfo.termsOfService,
+                contact: OpenAPIInfo.contact == nil ? nil :
+                        .init(name: OpenAPIInfo.contact!.name,
+                              url: OpenAPIInfo.contact!.url,
+                              email: OpenAPIInfo.contact!.email),
+                license: OpenAPIInfo.license == nil ? nil :
+                        .init(
+                            name: OpenAPIInfo.license!.name,
+                            identifier: OpenAPIInfo.license!.identifier,
+                            url: OpenAPIInfo.license!.url
+                        ),
+                version: "\(OpenAPIInfo.version.major).\(OpenAPIInfo.version.minor).\(OpenAPIInfo.version.patch)"
+            )
         )
-      )
     }
     .excludeFromOpenAPI()
-
+    
     app.stoplightDocumentation(
         "stoplight",
         openAPIPath: "/meeting-service/openapi.json"

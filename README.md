@@ -1,7 +1,5 @@
 # KIVoP
 
-
-
 ## About the project
 Volunteer organizations face the challenge of efficiently organizing their work and engaging members in the process. They often lack digital tools specifically tailored to their needs, such as meeting scheduling, task coordination, or attendance management. Existing applications tend to be too generic, difficult to use, or insufficient in functionality. This often leads to inefficient processes, communication issues, and wasted time. An innovative solution is needed—one that addresses the specific requirements of these organizations while remaining easily accessible and user-friendly.
 

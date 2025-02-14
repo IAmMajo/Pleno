@@ -1,50 +1,23 @@
-//
-//  PosterPositionResponseDTO.swift
-//  poster-service
-//
-//  Created by Dennis Sept on 26.11.24.
-//
-import Foundation
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-public struct PosterPositionResponseDTO: Codable {
-    public var id: UUID
-    public var posterId: UUID?
-    public var latitude: Double
-    public var longitude: Double
-    public var posted_by:UUID?
-    public var postedAt:Date?
-    public var expires_at:Date
-    public var removed_by: UUID?
-    public var removed_at: Date?
-    public var imageUrl: String?
-    public var responsible_users: [UUID]
-    public var status: String
-    public init(
-        id: UUID,
-        posterId: UUID? = nil,
-        latitude: Double,
-        longitude: Double,
-        postedBy:UUID? = nil,
-        postedAt:Date? = nil,
-        expiresAt: Date,
-        removedBy:UUID? = nil,
-        removedAt:Date? = nil,
-        imageUrl: String? = nil,
-        responsibleUsers:[UUID],
-        status:String
-    )
-    {
-        self.id = id
-        self.posterId = posterId
-        self.latitude = round(latitude * 1_000_000) / 1_000_000
-        self.longitude = round(longitude * 1_000_000) / 1_000_000
-        self.posted_by = postedBy
-        self.postedAt = postedAt
-        self.expires_at = expiresAt
-        self.removed_by = removedBy
-        self.removed_at = removedAt
-        self.imageUrl = imageUrl
-        self.responsible_users = responsibleUsers
-        self.status = status
-    }
+import PosterServiceDTOs
+import Vapor
+
+
+extension PosterPositionResponseDTO: @retroactive Content, @unchecked @retroactive Sendable {
 }

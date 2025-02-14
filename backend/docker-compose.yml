@@ -1,8 +1,7 @@
 x-shared_environment: &shared_environment
   DATABASE_HOST: postgres
-  DATABASE_USERNAME: vapor
-  DATABASE_PASSWORD: example
   DATABASE_NAME: kivop
+  PUBLIC_CERT_PATH: /app/certs/jwt/public.pem
 
 services:                                                                                                                                      
   traefik:
@@ -25,16 +24,41 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-#
+# 
 # Database
 #
   postgres:
     image: postgres:17.0-bookworm
     container_name: kivop-postgres
     restart: unless-stopped
+    healthcheck:
+      test: pg_isready -U vapor -d kivop
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+      start_interval: 3s
     environment:
       POSTGRES_USER: vapor # only for development
       POSTGRES_PASSWORD: example # only for development
+      # PostgreSQL-Credentials
+      POLL_SERVICE_POSTGRES_USERNAME: ${POLL_SERVICE_POSTGRES_USERNAME:?error}
+      POLL_SERVICE_POSTGRES_PASSWORD: ${POLL_SERVICE_POSTGRES_PASSWORD:?error}
+      AI_SERVICE_POSTGRES_USERNAME: ${AI_SERVICE_POSTGRES_USERNAME:?error}
+      AI_SERVICE_POSTGRES_PASSWORD: ${AI_SERVICE_POSTGRES_PASSWORD:?error}
+      RIDE_SERVICE_POSTGRES_USERNAME: ${RIDE_SERVICE_POSTGRES_USERNAME:?error}
+      RIDE_SERVICE_POSTGRES_PASSWORD: ${RIDE_SERVICE_POSTGRES_PASSWORD:?error}
+      POSTER_SERVICE_POSTGRES_USERNAME: ${POSTER_SERVICE_POSTGRES_USERNAME:?error}
+      POSTER_SERVICE_POSTGRES_PASSWORD: ${POSTER_SERVICE_POSTGRES_PASSWORD:?error}
+      NOTIFICATIONS_SERVICE_POSTGRES_USERNAME: ${NOTIFICATIONS_SERVICE_POSTGRES_USERNAME:?error}
+      NOTIFICATIONS_SERVICE_POSTGRES_PASSWORD: ${NOTIFICATIONS_SERVICE_POSTGRES_PASSWORD:?error}
+      AUTH_SERVICE_POSTGRES_USERNAME: ${AUTH_SERVICE_POSTGRES_USERNAME:?error}
+      AUTH_SERVICE_POSTGRES_PASSWORD: ${AUTH_SERVICE_POSTGRES_PASSWORD:?error}
+      MEETING_SERVICE_POSTGRES_USERNAME: ${MEETING_SERVICE_POSTGRES_USERNAME:?error}
+      MEETING_SERVICE_POSTGRES_PASSWORD: ${MEETING_SERVICE_POSTGRES_PASSWORD:?error}
+      CONFIG_SERVICE_POSTGRES_USERNAME: ${CONFIG_SERVICE_POSTGRES_USERNAME:?error}
+      CONFIG_SERVICE_POSTGRES_PASSWORD: ${CONFIG_SERVICE_POSTGRES_PASSWORD:?error}
+
     volumes:
       - ./init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
       - postgres-data:/var/lib/postgresql/data
@@ -51,29 +75,20 @@ services:
       dockerfile: backend/config-service/Dockerfile
     container_name: kivop-config-service
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${CONFIG_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${CONFIG_SERVICE_POSTGRES_PASSWORD:?error}
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.config-service.rule: PathPrefix(`/config-service`) || PathPrefix(`/config`)
       traefik.http.routers.config-service.middlewares: config-service-replace-path-regex
       traefik.http.middlewares.config-service-replace-path-regex.replacepathregex.regex: ^/config-service(:/(.*))?
       traefik.http.middlewares.config-service-replace-path-regex.replacepathregex.replacement: /$$1
-
-  config-service-migration:
-    profiles:
-      - not-default
-    image: kivop-config-service:latest
-    build:
-      context: ./..
-      dockerfile: backend/config-service/Dockerfile
-    container_name: kivop-config-service-migration
-    environment:
-      <<: *shared_environment
-    depends_on:
-      - postgres
-    command: ["migrate", "--yes"]
 
   config-service-revert:
     profiles:
@@ -85,8 +100,11 @@ services:
     container_name: kivop-config-service-revert
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${CONFIG_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${CONFIG_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: ["migrate", "--revert", "--yes"]
 
 #
@@ -99,29 +117,26 @@ services:
       dockerfile: backend/meeting-service/Dockerfile
     container_name: kivop-meeting-service
     depends_on:
-      - config-service
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      ai-service:
+        condition: service_healthy
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${MEETING_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${MEETING_SERVICE_POSTGRES_PASSWORD:?error}
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.meeting-service.rule: PathPrefix(`/meeting-service`) || PathPrefix(`/meeting`)
       traefik.http.routers.meeting-service.middlewares: meeting-service-replace-path-regex
       traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.regex: ^/meeting-service(:/(.*))?
       traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.replacement: /$$1
-
-  meeting-service-migration:
-    profiles:
-      - not-default
-    image: kivop-meeting-service:latest
-    build:
-      context: ./..
-      dockerfile: backend/meeting-service/Dockerfile
-    container_name: kivop-meeting-service-migration
-    environment:
-      <<: *shared_environment
-    depends_on:
-      - postgres
-    command: ["migrate", "--yes"]
 
   meeting-service-revert:
     profiles:
@@ -133,8 +148,11 @@ services:
     container_name: kivop-meeting-service-revert
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${MEETING_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${MEETING_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: ["migrate", "--revert", "--yes"]
 
 #
@@ -147,29 +165,24 @@ services:
       dockerfile: backend/auth-service/Dockerfile
     container_name: kivop-auth-service
     depends_on:
-     - config-service
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${AUTH_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${AUTH_SERVICE_POSTGRES_PASSWORD:?error}
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - jwt-cert:/app/certs/jwt
+      - jwt-key:/app/certs/auth
     labels:
       traefik.enable: true
-      traefik.http.routers.auth-service.rule: PathPrefix(`/auth-service`) || PathPrefix(`/auth`) || PathPrefix(`/users`)
+      traefik.http.routers.auth-service.rule: PathPrefix(`/auth-service`) || PathPrefix(`/auth`) || PathPrefix(`/users`) || PathPrefix(`/.well-known`)
       traefik.http.routers.auth-service.middlewares: auth-service-replace-path-regex
       traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.regex: ^/auth-service(:/(.*))?
       traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.replacement: /$$1
-
-  auth-service-migration:
-    profiles:
-      - not-default
-    image: kivop-auth-service:latest
-    build:
-      context: ./..
-      dockerfile: backend/auth-service/Dockerfile
-    container_name: kivop-auth-service-migration
-    environment:
-      <<: *shared_environment
-    depends_on:
-      - postgres
-    command: ["migrate", "--yes"]
 
   auth-service-revert:
     profiles:
@@ -181,8 +194,11 @@ services:
     container_name: kivop-auth-service-revert
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${AUTH_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${AUTH_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: ["migrate", "--revert", "--yes"]
 
 #
@@ -195,16 +211,42 @@ services:
       dockerfile: backend/notifications-service/Dockerfile
     container_name: kivop-notifications-service
     depends_on:
-      - config-service
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${NOTIFICATIONS_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${NOTIFICATIONS_SERVICE_POSTGRES_PASSWORD:?error}
+    volumes:
+      - jwt-cert:/app/certs/jwt
     env_file: ./../.env
     labels:
       traefik.enable: true
-      traefik.http.routers.notifications-service.rule: PathPrefix(`/notifications-service`) || PathPrefix(`/email`)
+      traefik.http.routers.notifications-service.rule: PathPrefix(`/notifications-service`) || PathPrefix(`/notification-devices`)
       traefik.http.routers.notifications-service.middlewares: notifications-service-replace-path-regex
       traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.regex: ^/notifications-service(:/(.*))?
       traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.replacement: /$$1
+
+  notifications-service-revert:
+    profiles:
+      - not-default
+    image: kivop-notifications-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/notifications-service/Dockerfile
+    container_name: kivop-notifications-service-revert
+    environment:
+      <<: *shared_environment
+      DATABASE_USERNAME: ${NOTIFICATIONS_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${NOTIFICATIONS_SERVICE_POSTGRES_PASSWORD:?error}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["migrate", "--revert", "--yes"]
 
 #
 # Vapor: poster-service
@@ -216,29 +258,24 @@ services:
       dockerfile: backend/poster-service/Dockerfile
     container_name: kivop-poster-service
     depends_on:
-     - config-service
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${POSTER_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${POSTER_SERVICE_POSTGRES_PASSWORD:?error}
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
-      traefik.http.routers.poster-service.rule: PathPrefix(`/poster-service`) || PathPrefix(`/poster`)
+      traefik.http.routers.poster-service.rule: PathPrefix(`/poster-service`) || PathPrefix(`/posters`)
       traefik.http.routers.poster-service.middlewares: poster-service-replace-path-regex
       traefik.http.middlewares.poster-service-replace-path-regex.replacepathregex.regex: ^/poster-service(:/(.*))?
       traefik.http.middlewares.poster-service-replace-path-regex.replacepathregex.replacement: /$$1
-
-  poster-service-migration:
-    profiles:
-      - not-default
-    image: kivop-poster-service:latest
-    build:
-      context: ./..
-      dockerfile: backend/poster-service/Dockerfile
-    container_name: kivop-poster-service-migration
-    environment:
-      <<: *shared_environment
-    depends_on:
-      - postgres
-    command: ["migrate", "--yes"]
 
   poster-service-revert:
     profiles:
@@ -250,8 +287,11 @@ services:
     container_name: kivop-poster-service-revert
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${POSTER_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${POSTER_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: ["migrate", "--revert", "--yes"]
 
 #
@@ -263,28 +303,25 @@ services:
       context: ./..
       dockerfile: backend/ride-service/Dockerfile
     container_name: kivop-ride-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${RIDE_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${RIDE_SERVICE_POSTGRES_PASSWORD:?error}
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
-      traefik.http.routers.ride-service.rule: PathPrefix(`/ride-service`) || PathPrefix(`/ride`)
+      traefik.http.routers.ride-service.rule: PathPrefix(`/ride-service`) || PathPrefix(`/specialrides`) || PathPrefix(`/eventrides`) || PathPrefix(`/events`)
       traefik.http.routers.ride-service.middlewares: ride-service-replace-path-regex
       traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.regex: ^/ride-service(:/(.*))?
       traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.replacement: /$$1
-
-  ride-service-migration:
-    profiles:
-      - not-default
-    image: kivop-ride-service:latest
-    build:
-      context: ./..
-      dockerfile: backend/ride-service/Dockerfile
-    container_name: kivop-ride-service-migration
-    environment:
-      <<: *shared_environment
-    depends_on:
-      - postgres
-    command: ["migrate", "--yes"]
 
   ride-service-revert:
     profiles:
@@ -296,77 +333,84 @@ services:
     container_name: kivop-ride-service-revert
     environment:
       <<: *shared_environment
+      DATABASE_USERNAME: ${RIDE_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${RIDE_SERVICE_POSTGRES_PASSWORD:?error}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: ["migrate", "--revert", "--yes"]
 
 #
-# Vapor: tdums-service
+# Vapor: ai-service
 #
-  tdums-service:
-    image: tdums-service:latest
+  ai-service:
+    image: kivop-ai-service:latest
     build:
       context: ./..
-      dockerfile: backend/tdums-service/Dockerfile
-    container_name: tdums-service
+      dockerfile: backend/ai-service/Dockerfile
+    container_name: kivop-ai-service
     depends_on:
-     - tdums-postgres
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
     environment:
-      DATABASE_HOST: tdums-postgres
-      DATABASE_USERNAME: vapor
-      DATABASE_PASSWORD: example
-      DATABASE_NAME: kivop
+      <<: *shared_environment
+      DATABASE_USERNAME: ${AI_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${AI_SERVICE_POSTGRES_PASSWORD:?error}
     env_file: ./../.env
     labels:
       traefik.enable: true
-      traefik.http.routers.tdums-service.rule: PathPrefix(`/tdums`)
+      traefik.http.routers.ai-service.rule: PathPrefix(`/ai-service`) || PathPrefix(`/ai`)
+      traefik.http.routers.ai-service.middlewares: ai-service-replace-path-regex
+      traefik.http.middlewares.ai-service-replace-path-regex.replacepathregex.regex: ^/ai-service(:/(.*))?
+      traefik.http.middlewares.ai-service-replace-path-regex.replacepathregex.replacement: /$$1
 
-  tdums-service-migration:
-    profiles:
-      - not-default
-    image: tdums-service:latest
+#
+# Vapor: poll-service
+#
+  poll-service:
+    image: kivop-poll-service:latest
     build:
       context: ./..
-      dockerfile: backend/tdums-service/Dockerfile
-    container_name: tdums-service-migration
-    environment:
-      DATABASE_HOST: tdums-postgres
-      DATABASE_USERNAME: vapor
-      DATABASE_PASSWORD: example
-      DATABASE_NAME: kivop
+      dockerfile: backend/poll-service/Dockerfile
+    container_name: kivop-poll-service
     depends_on:
-      - tdums-postgres
-    command: ["migrate", "--yes"]
-
-  tdums-service-revert:
-    profiles:
-      - not-default
-    image: tdums-service:latest
-    build:
-      context: ./..
-      dockerfile: backend/tdums-service/Dockerfile
-    container_name: tdums-service-revert
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     environment:
-      DATABASE_HOST: tdums-postgres
-      DATABASE_USERNAME: vapor
-      DATABASE_PASSWORD: example
-      DATABASE_NAME: kivop
-    depends_on:
-      - tdums-postgres
-    command: ["migrate", "--revert", "--yes"]
-
-  tdums-postgres:
-    image: postgres:17.0-bookworm
-    container_name: tdums-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: vapor # only for development
-      POSTGRES_PASSWORD: example # only for development
+      <<: *shared_environment
+      DATABASE_USERNAME: ${POLL_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${POLL_SERVICE_POSTGRES_PASSWORD:?error}
     volumes:
-      - ./init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
-      - tdums-data:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
+      - jwt-cert:/app/certs/jwt
+    labels:
+      traefik.enable: true
+      traefik.http.routers.poll-service.rule: PathPrefix(`/poll-service`) || PathPrefix(`/poll`)
+      traefik.http.routers.poll-service.middlewares: poll-service-replace-path-regex
+      traefik.http.middlewares.poll-service-replace-path-regex.replacepathregex.regex: ^/poll-service(:/(.*))?
+      traefik.http.middlewares.poll-service-replace-path-regex.replacepathregex.replacement: /$$1
+
+  poll-service-revert:
+    profiles:
+      - not-default
+    image: kivop-poll-service:latest
+    build:
+      context: ./..
+      dockerfile: backend/poll-service/Dockerfile
+    container_name: kivop-poll-service-revert
+    environment:
+      <<: *shared_environment
+      DATABASE_USERNAME: ${POLL_SERVICE_POSTGRES_USERNAME:?error}
+      DATABASE_PASSWORD: ${POLL_SERVICE_POSTGRES_PASSWORD:?error}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["migrate", "--revert", "--yes"]
 
 #
 # Volumes
@@ -374,8 +418,10 @@ services:
 volumes:
   postgres-data:
     name: "kivop-postgres-data"
-  tdums-data:
-    name: "tdums-postgres-data"
+  jwt-cert:
+    name: "kivop-jwt-cert"
+  jwt-key:
+    name: "kivop-jwt-key"
 
 #
 # Networks

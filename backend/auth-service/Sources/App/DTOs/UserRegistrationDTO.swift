@@ -1,16 +1,25 @@
-import Fluent
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import Vapor
-import Models
+import AuthServiceDTOs
 
-public struct UserRegistrationDTO: Content {
-    public var name: String?
-    public var email: String?
-    public var password: String?
-    public var profileImage: Data?
-}
-
-extension UserRegistrationDTO: Validatable {
-    static public func validations(_ validations: inout Validations) {
+extension UserRegistrationDTO: @retroactive Content, @unchecked @retroactive Sendable, @retroactive Validatable {
+    public static func validations(_ validations: inout Vapor.Validations) {
         validations.add("name", as: String.self, is: !.empty)
         validations.add("email", as: String.self, is: .email)
         validations.add("password", as: String.self, is: !.empty)

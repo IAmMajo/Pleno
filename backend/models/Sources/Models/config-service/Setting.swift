@@ -1,15 +1,23 @@
-//
-//  settings.swift
-//  config-service
-//
-//  Created by Dennis Sept on 30.10.24.
-//
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import Fluent
 import Foundation
 
-/// Property wrappers interact poorly with `Sendable` checking, causing a warning for the `@ID` property
-/// It is recommended you write your model with sendability checking on and then suppress the warning
-/// afterwards with `@unchecked Sendable`.
 public final class Setting: Model, @unchecked Sendable {
     public static let schema = "settings"
     
@@ -43,6 +51,7 @@ public final class Setting: Model, @unchecked Sendable {
     public enum DataType: String, Codable, CaseIterable, Sendable {
         case integer = "Integer"
         case string = "String"
+        case languageCode = "languageCode"
         case float = "Float"
         case boolean = "Boolean"
         case date = "Date"

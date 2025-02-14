@@ -43,9 +43,34 @@ services:
     image: postgres:17.0-bookworm
     container_name: kivop-postgres
     restart: unless-stopped
+    healthcheck:
+      test: pg_isready -U vapor -d kivop
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+      start_interval: 3s
     environment:
       POSTGRES_USER: vapor # only for development
       POSTGRES_PASSWORD: example # only for development
+      # PostgreSQL-Credentials
+      POLL_SERVICE_POSTGRES_USERNAME: ${POLL_SERVICE_POSTGRES_USERNAME:?error}
+      POLL_SERVICE_POSTGRES_PASSWORD: ${POLL_SERVICE_POSTGRES_PASSWORD:?error}
+      AI_SERVICE_POSTGRES_USERNAME: ${AI_SERVICE_POSTGRES_USERNAME:?error}
+      AI_SERVICE_POSTGRES_PASSWORD: ${AI_SERVICE_POSTGRES_PASSWORD:?error}
+      RIDE_SERVICE_POSTGRES_USERNAME: ${RIDE_SERVICE_POSTGRES_USERNAME:?error}
+      RIDE_SERVICE_POSTGRES_PASSWORD: ${RIDE_SERVICE_POSTGRES_PASSWORD:?error}
+      POSTER_SERVICE_POSTGRES_USERNAME: ${POSTER_SERVICE_POSTGRES_USERNAME:?error}
+      POSTER_SERVICE_POSTGRES_PASSWORD: ${POSTER_SERVICE_POSTGRES_PASSWORD:?error}
+      NOTIFICATIONS_SERVICE_POSTGRES_USERNAME: ${NOTIFICATIONS_SERVICE_POSTGRES_USERNAME:?error}
+      NOTIFICATIONS_SERVICE_POSTGRES_PASSWORD: ${NOTIFICATIONS_SERVICE_POSTGRES_PASSWORD:?error}
+      AUTH_SERVICE_POSTGRES_USERNAME: ${AUTH_SERVICE_POSTGRES_USERNAME:?error}
+      AUTH_SERVICE_POSTGRES_PASSWORD: ${AUTH_SERVICE_POSTGRES_PASSWORD:?error}
+      MEETING_SERVICE_POSTGRES_USERNAME: ${MEETING_SERVICE_POSTGRES_USERNAME:?error}
+      MEETING_SERVICE_POSTGRES_PASSWORD: ${MEETING_SERVICE_POSTGRES_PASSWORD:?error}
+      CONFIG_SERVICE_POSTGRES_USERNAME: ${CONFIG_SERVICE_POSTGRES_USERNAME:?error}
+      CONFIG_SERVICE_POSTGRES_PASSWORD: ${CONFIG_SERVICE_POSTGRES_PASSWORD:?error}
+
     volumes:
       - ./backend/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
       - postgres-data:/var/lib/postgresql/data
@@ -58,7 +83,12 @@ services:
       file: ./backend/docker-compose.yml
       service: config-service
     container_name: kivop-config-service
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
       traefik.http.routers.config-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/config-service`) || PathPrefix(`/config`))
@@ -69,19 +99,15 @@ services:
       traefik.http.routers.config-service.tls: true
       traefik.http.routers.config-service.tls.certresolver: myresolver
 
-  config-service-migration:
-    profiles:
-      - not-default
-    extends:
-      file: ./backend/docker-compose.yml
-      service: config-service-migration
-
   config-service-revert:
     profiles:
       - not-default
     extends:
       file: ./backend/docker-compose.yml
-      service: config-service-migration
+      service: config-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 #
 # Vapor: auth-service
@@ -91,10 +117,18 @@ services:
       file: ./backend/docker-compose.yml
       service: auth-service
     container_name: kivop-auth-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
+      - jwt-key:/app/certs/auth
     labels:
       traefik.enable: true
-      traefik.http.routers.auth-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/auth-service`) || PathPrefix(`/auth`) || PathPrefix(`/users`))
+      traefik.http.routers.auth-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/auth-service`) || PathPrefix(`/auth`) || PathPrefix(`/users`) || PathPrefix(`/.well-known`))
       traefik.http.routers.auth-service.middlewares: auth-service-replace-path-regex
       traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.regex: ^/auth-service(:/(.*))?
       traefik.http.middlewares.auth-service-replace-path-regex.replacepathregex.replacement: /$$1
@@ -102,19 +136,15 @@ services:
       traefik.http.routers.auth-service.tls: true
       traefik.http.routers.auth-service.tls.certresolver: myresolver
 
-  auth-service-migration:
-    profiles:
-      - not-default
-    extends:
-      file: ./backend/docker-compose.yml
-      service: auth-service-migration
-
   auth-service-revert:
     profiles:
       - not-default
     extends:
       file: ./backend/docker-compose.yml
-      service: auth-service-migration
+      service: auth-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 #
 # Vapor: meeting-service
@@ -124,10 +154,21 @@ services:
       file: ./backend/docker-compose.yml
       service: meeting-service
     container_name: kivop-meeting-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      ai-service:
+        condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
-      traefik.http.routers.meeting-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/meeting-service`) || PathPrefix(`/meeting`))
+      traefik.http.routers.meeting-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/meeting-service`) || PathPrefix(`/meetings`))
       traefik.http.routers.meeting-service.middlewares: meeting-service-replace-path-regex
       traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.regex: ^/meeting-service(:/(.*))?
       traefik.http.middlewares.meeting-service-replace-path-regex.replacepathregex.replacement: /$$1
@@ -135,19 +176,15 @@ services:
       traefik.http.routers.meeting-service.tls: true
       traefik.http.routers.meeting-service.tls.certresolver: myresolver
 
-  meeting-service-migration:
-    profiles:
-      - not-default
-    extends:
-      file: ./backend/docker-compose.yml
-      service: meeting-service-migration
-
   meeting-service-revert:
     profiles:
       - not-default
     extends:
       file: ./backend/docker-compose.yml
-      service: meeting-service-migration
+      service: meeting-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 #
 # Vapor: notifications-service
@@ -157,16 +194,35 @@ services:
       file: ./backend/docker-compose.yml
       service: notifications-service
     container_name: kivop-notifications-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
-      traefik.http.routers.notifications-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/notifications-service`) || PathPrefix(`/email`))
+      traefik.http.routers.notifications-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/notifications-service`) || PathPrefix(`/notification-devices`))
       traefik.http.routers.notifications-service.middlewares: notifications-service-replace-path-regex
       traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.regex: ^/notifications-service(:/(.*))?
       traefik.http.middlewares.notifications-service-replace-path-regex.replacepathregex.replacement: /$$1
       traefik.http.routers.notifications-service.entrypoints: https
       traefik.http.routers.notifications-service.tls: true
       traefik.http.routers.notifications-service.tls.certresolver: myresolver
+  
+  notifications-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: notifications-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 #
 # Vapor: ride-service
@@ -176,10 +232,19 @@ services:
       file: ./backend/docker-compose.yml
       service: ride-service
     container_name: kivop-ride-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
     labels:
       traefik.enable: true
-      traefik.http.routers.ride-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/ride-service`) || PathPrefix(`/rides`))
+      traefik.http.routers.ride-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/ride-service`) || PathPrefix(`/specialrides`) || PathPrefix(`/eventrides`) || PathPrefix(`/events`))
       traefik.http.routers.ride-service.middlewares: ride-service-replace-path-regex
       traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.regex: ^/ride-service(:/(.*))?
       traefik.http.middlewares.ride-service-replace-path-regex.replacepathregex.replacement: /$$1
@@ -187,46 +252,113 @@ services:
       traefik.http.routers.ride-service.tls: true
       traefik.http.routers.ride-service.tls.certresolver: myresolver
 
-  ride-service-migration:
-    profiles:
-      - not-default
-    extends:
-      file: ./backend/docker-compose.yml
-      service: ride-service-migration
-
   ride-service-revert:
     profiles:
       - not-default
     extends:
       file: ./backend/docker-compose.yml
-      service: ride-service-migration
-
+      service: ride-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 #
-# Vapor: tdums-service // NICHT IP-RELEVANT (abgesprochen)
+# Vapor: poster-service
 #
-  tdums-service:
+  poster-service:
     extends:
       file: ./backend/docker-compose.yml
-      service: tdums-service
-    container_name: tdums-service
+      service: poster-service
+    container_name: kivop-poster-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - jwt-cert:/app/certs/jwt
+    labels:
+      traefik.enable: true
+      traefik.http.routers.poster-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/poster-service`) || PathPrefix(`/posters`))
+      traefik.http.routers.poster-service.middlewares: poster-service-replace-path-regex
+      traefik.http.middlewares.poster-service-replace-path-regex.replacepathregex.regex: ^/poster-service(:/(.*))?
+      traefik.http.middlewares.poster-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.poster-service.entrypoints: https
+      traefik.http.routers.poster-service.tls: true
+      traefik.http.routers.poster-service.tls.certresolver: myresolver
+
+  poster-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: poster-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
+#
+# Vapor: ai-service
+#
+  ai-service:
+    extends:
+      file: ./backend/docker-compose.yml
+      service: ai-service
+    container_name: kivop-ai-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
     restart: unless-stopped
     labels:
       traefik.enable: true
-      traefik.http.routers.tdums-service.rule: Host(`weihnachts-wuensche-ev.de`)
-      traefik.http.routers.tdums-service.entrypoints: https
-      traefik.http.routers.tdums-service.tls: true
-      traefik.http.routers.tdums-service.tls.certresolver: myresolver
+      traefik.http.routers.ai-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/ai-service`) || PathPrefix(`/ai`))
+      traefik.http.routers.ai-service.middlewares: ai-service-replace-path-regex
+      traefik.http.middlewares.ai-service-replace-path-regex.replacepathregex.regex: ^/ai-service(:/(.*))?
+      traefik.http.middlewares.ai-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.ai-service.entrypoints: https
+      traefik.http.routers.ai-service.tls: true
+      traefik.http.routers.ai-service.tls.certresolver: myresolver
 
-  tdums-postgres:
-    image: postgres:17.0-bookworm
-    container_name: tdums-postgres
+#
+# Vapor: poll-service
+#
+  poll-service:
+    extends:
+      file: ./backend/docker-compose.yml
+      service: poll-service
+    container_name: kivop-poll-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: vapor # only for development
-      POSTGRES_PASSWORD: example # only for development
     volumes:
-      - ./backend/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
-      - tdums-data:/var/lib/postgresql/data
+      - jwt-cert:/app/certs/jwt
+    labels:
+      traefik.enable: true
+      traefik.http.routers.poll-service.rule: Host(`kivop.ipv64.net`) && (PathPrefix(`/poll-service`) || PathPrefix(`/polls`))
+      traefik.http.routers.poll-service.middlewares: poll-service-replace-path-regex
+      traefik.http.middlewares.poll-service-replace-path-regex.replacepathregex.regex: ^/poll-service(:/(.*))?
+      traefik.http.middlewares.poll-service-replace-path-regex.replacepathregex.replacement: /$$1
+      traefik.http.routers.poll-service.entrypoints: https
+      traefik.http.routers.poll-service.tls: true
+      traefik.http.routers.poll-service.tls.certresolver: myresolver
+
+  poll-service-revert:
+    profiles:
+      - not-default
+    extends:
+      file: ./backend/docker-compose.yml
+      service: poll-service-revert
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 #
 # Volumes
@@ -236,8 +368,12 @@ volumes:
     name: "kivop-postgres-data"
   traefik-letsencrypt:
     name: "kivop-traefik-letsencrypt"
-  tdums-data:
-    name: "tdums-postgres-data"
+  images-data:
+    name: "kivop-images-data"
+  jwt-cert:
+    name: "kivop-jwt-cert"
+  jwt-key:
+    name: "kivop-jwt-key"
 
 #
 # Networks

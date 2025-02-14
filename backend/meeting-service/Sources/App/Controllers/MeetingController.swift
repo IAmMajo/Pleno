@@ -1,3 +1,20 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import Fluent
 import Vapor
 import Models
@@ -185,6 +202,10 @@ struct MeetingController: RouteCollection {
             throw Abort(.unauthorized)
         }
         let identityId = try await Identity.byUserId(userId, req.db).requireID()
+        guard let defaultLanguage = await SettingsManager.shared.getSetting(forKey: "defaultLanguage") else {
+            throw Abort(.internalServerError, reason: "Could not determine default language.")
+        }
+        
         meeting.status = .inSession
         meeting.start = .now
         meeting.$chair.id = identityId
@@ -193,7 +214,7 @@ struct MeetingController: RouteCollection {
         try await req.db.transaction { db in
             try await meeting.update(on: db)
             
-            let record = Record(id: try .init(meeting: meeting, lang: "DE"), identityId: identityId, status: .underway)
+            let record = Record(id: try .init(meeting: meeting, lang: defaultLanguage), identityId: identityId, status: .underway)
             try await record.create(on: db)
             
             if let attendance = try await Attendance.find(.init(meeting: meeting, identityId: identityId), on: db) {
@@ -286,9 +307,9 @@ struct MeetingController: RouteCollection {
         }
         var placeId: Place.IDValue? = nil
         if let postalCode = createLocationDTO.postalCode, let place = createLocationDTO.place { // If this executes, placeId is not going to be nil
-            do {
-                placeId = try await Place.query(on: db).filter(\.$postalCode == postalCode).filter(\.$place == place).first()!.requireID()
-            } catch {
+            if let existingPlaceId = try await Place.query(on: db).filter(\.$postalCode == postalCode).filter(\.$place == place).first()?.requireID() {
+                placeId = existingPlaceId
+            } else {
                 let placeModel: Place = .init(postalCode: postalCode, place: place)
                 try await placeModel.create(on: db)
                 placeId = try placeModel.requireID()

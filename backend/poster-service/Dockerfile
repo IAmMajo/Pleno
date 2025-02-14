@@ -48,12 +48,15 @@ RUN find -L "$(swift build --package-path /build/backend/poster-service -c relea
 # Ensure that only the necessary permissions are set
 RUN [ -d /build/backend/poster-service/Public ] && { \
         mv /build/backend/poster-service/Public ./Public && \
-        chmod -R u+rwX,go+rX,go-w ./Public; \
+        chmod -R a-w ./Public; \
     } || true
 RUN [ -d /build/backend/poster-service/Resources ] && { \
         mv /build/backend/poster-service/Resources ./Resources && \
         chmod -R a-w ./Resources; \
     } || true
+
+
+
 
 # ================================
 # Run image
@@ -68,6 +71,7 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
       libjemalloc2 \
       ca-certificates \
       tzdata \
+      curl \
     # If your app or its dependencies import FoundationNetworking, also install `libcurl4`.
       # libcurl4 \
     # If your app or its dependencies import FoundationXML, also install `libxml2`.
@@ -91,6 +95,9 @@ USER vapor:vapor
 
 # Let Docker bind to port 80
 EXPOSE 80
+
+# Only specify this container as healthy if its service's /internal/healthcheck-route responds successfully
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --start-interval=3s --retries=3 CMD curl -f http://localhost/internal/healthcheck || exit 1
 
 # Start the Vapor service when the image is run, default to listening on 80 in production environment
 ENTRYPOINT ["./App"]

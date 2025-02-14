@@ -1,3 +1,20 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 // swift-tools-version:6.0
 import PackageDescription
 
@@ -23,8 +40,17 @@ let package = Package(
         .package(path: "../../DTOs"),
         // 📄 Generate OpenAPI documentation from Vapor routes
         .package(url: "https://github.com/dankinsoid/VaporToOpenAPI.git", from: "4.7.1"),
+        // 🔐 JWT
+        .package(url: "https://github.com/vapor/jwt.git", from: "4.0.0"),
+        // 📧 APNS
+        .package(url: "https://github.com/vapor/apns.git", from: "4.2.0"),
+        // 📧 Firebase Cloud Messaging
+        .package(url: "https://github.com/MihaelIsaev/FCM.git", from: "2.13.0"),
         // 📧 SMTP protocol support for the Vapor web framework
-        .package(url: "https://github.com/Mikroservices/Smtp.git", from: "3.1.2")
+        .package(url: "https://github.com/Mikroservices/Smtp.git", from: "3.1.2"),
+        // JWT-KIT
+        .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0"),
+
     ],
     targets: [
         .executableTarget(
@@ -37,9 +63,14 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "Models", package: "models"),
+                .product(name: "ConfigServiceDTOs", package: "dtos"),
                 .product(name: "NotificationsServiceDTOs", package: "dtos"),
                 .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI"),
+                .product(name: "JWT", package: "jwt"),
+                .product(name: "VaporAPNS", package: "apns"),
+                .product(name: "FCM", package: "FCM"),
                 .product(name: "Smtp", package: "Smtp"),
+                .product(name: "JWTKit", package: "jwt-kit"),
             ],
             swiftSettings: swiftSettings
         ),

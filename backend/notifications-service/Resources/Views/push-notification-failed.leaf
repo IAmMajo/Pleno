@@ -1,0 +1,29 @@
+#extend("layout"):
+    #export("message"):
+        <p>
+            Wir konnten dir eine Push-Benachrichtigung nicht zustellen. Damit du
+            keine Informationen verpasst, senden wir dir den Inhalt der
+            Benachrichtigung per E-Mail:
+        </p>
+
+        <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-left: 4px solid #82C8E4;">
+            <p>#(message)</p>
+        </div>
+        
+        <p>Falls du häufiger keine Push-Benachrichtigungen erhältst:</p>
+        <ul style="text-align: left; display: inline-block;">
+            <li>Starte die App einmal neu und melde dich erneut an</li>
+            <li>
+                Überprüfe, ob Push-Benachrichtigungen in deinen
+                Geräteeinstellungen aktiviert sind
+            </li>
+            <li>
+                Stelle sicher, dass du die neueste Version unserer App
+                verwendest
+            </li>
+            <li>Überprüfe deine Internetverbindung</li>
+        </ul>
+        
+        <p>Bei weiteren Fragen stehen wir dir gerne zur Verfügung.</p>
+    #endexport
+#endextend

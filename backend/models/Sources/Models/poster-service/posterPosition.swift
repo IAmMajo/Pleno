@@ -1,12 +1,22 @@
-//
-//  posterPosition.swift
-//  models
-//
-//  Created by Dennis Sept on 26.11.24.
-//
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import Fluent
 import Foundation
-
 
 public final class PosterPosition: Model,@unchecked Sendable {
     public static let schema = "poster_positions"
@@ -14,8 +24,8 @@ public final class PosterPosition: Model,@unchecked Sendable {
     @ID(key: .id)
     public var id: UUID?
     
-    @OptionalParent(key: "poster_id")
-    public var poster: Poster?
+    @Parent(key: "poster_id")
+    public var poster: Poster
     
     @Field(key: "latitude")
     public var latitude: Double
@@ -23,23 +33,26 @@ public final class PosterPosition: Model,@unchecked Sendable {
     @Field(key: "longitude")
     public var longitude: Double
 
-    @Timestamp(key: "posted_at", on: .create)
-    public var posted_at: Date?
+    @Field(key: "posted_at")
+    public var postedAt: Date?
     
     @OptionalParent(key: "posted_by")
-    public var posted_by: Identity?
+    public var postedBy: Identity?
     
-    @Timestamp(key: "expires_at", on: .update)
-    public var expires_at: Date?
+    @Field(key: "expires_at")
+    public var expiresAt: Date
     
-    @Timestamp(key: "removed_at", on: .create)
-    public var removed_at: Date?
+    @Field(key: "removed_at")
+    public var removedAt: Date?
     
     @OptionalParent(key: "removed_by")
-    public var removed_by: Identity?
+    public var removedBy: Identity?
     
-    @Field(key:"image_url")
-    public var image_url: String?
+    @Field(key:"image")
+    public var image: Data?
+    
+    @Field(key:"damaged")
+    public var damaged: Bool
     
     @Children(for: \.$poster_position)
     public var responsibilities: [PosterPositionResponsibilities]
@@ -48,7 +61,7 @@ public final class PosterPosition: Model,@unchecked Sendable {
 
 public init(
     id: UUID? = nil,
-    posterId: UUID? = nil,
+    posterId: UUID,
     latitude: Double,
     longitude: Double,
     expiresAt: Date
@@ -57,7 +70,13 @@ public init(
     self.latitude = round(latitude * 1_000_000) / 1_000_000
     self.longitude = round(longitude * 1_000_000) / 1_000_000
     self.$poster.id = posterId
-    self.expires_at = expiresAt
+    self.expiresAt = expiresAt
+    self.image = nil
+    self.postedAt = nil
+    self.$postedBy.id = nil
+    self.removedAt = nil
+    self.$removedBy.id = nil
+    self.damaged = false
 }
 
 }
