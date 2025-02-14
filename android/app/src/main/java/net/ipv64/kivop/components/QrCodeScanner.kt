@@ -173,6 +173,8 @@ fun DrawRectangle(rect: Rect?) {
   }
 }
 
+
+// das ist die Kamera-Berechtigung und stamt 100% wieder von uns
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun PopCameraPermission(
