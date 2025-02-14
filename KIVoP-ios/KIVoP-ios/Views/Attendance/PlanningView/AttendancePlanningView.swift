@@ -3,13 +3,14 @@ import SwiftUI
 
 struct AttendancePlanningView: View {
     @ObservedObject var viewModel: AttendancePlanningViewModel
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         NavigationStack {
             // Den gesamten Hintergrund grau hinterlegen (Damit alles so aussieht als wäre es eine Liste)
             ZStack {
-                Color.gray.opacity(0.1)
-                    .edgesIgnoringSafeArea(.all)
+                (colorScheme == .dark ? Color.black : Color.gray.opacity(0.1))
+                            .edgesIgnoringSafeArea(.all)
                 // Inhalt
                 VStack {
                     // Datum + Uhrzeit
@@ -17,7 +18,7 @@ struct AttendancePlanningView: View {
                         .padding(5)
                         .overlay(
                             RoundedRectangle(cornerRadius: 30)
-                                .stroke(Color.black, lineWidth: 1)
+                                .stroke(Color(UIColor.label), lineWidth: 1)
                         )
                         .padding(.vertical)
                     // Titel für Teilnahme-Umfrage
@@ -100,7 +101,7 @@ struct AttendancePlanningView: View {
                     // Teilnehmerliste
                     List {
                         Section(header: Text("Mitglieder")) {
-                            ForEach(viewModel.attendances, id: \.identity.id) { attendance in
+                            ForEach(viewModel.filteredAttendances, id: \.identity.id) { attendance in
                                 HStack {
                                     // Profilbild
                                     ProfilePictureAttendance(profile: attendance.identity)

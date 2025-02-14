@@ -6133,6 +6133,7 @@
       }
     },
     "Nach Meeting suchen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6155,7 +6156,6 @@
       }
     },
     "Nach Sitzung suchen" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

@@ -4,9 +4,13 @@ import MeetingServiceDTOs
 
 @MainActor
 class AttendanceDetailViewModel: ObservableObject {
-    @Published var searchText: String = ""
-    @Published var errorMessage: String? = nil
-    @Published var attendances: [GetAttendanceDTO] = []
+    @Published var searchText: String = "" {
+        didSet { filterAttendances() } // Live-Update bei Texteingabe
+    }
+    @Published var attendances: [GetAttendanceDTO] = [] {
+        didSet { filterAttendances() } // Aktualisiert gefilterte Liste, wenn neue Daten geladen werden
+    }
+    @Published var filteredAttendances: [GetAttendanceDTO] = []
     @Published var isLoading: Bool = true
     
     // Hier werden alle API-Aufrufe ausgeführt
@@ -31,6 +35,17 @@ class AttendanceDetailViewModel: ObservableObject {
                 // Fehlerbehandlung
                 print("Fehler beim Abrufen der Attendances: \(error.localizedDescription)")
                 isLoading = false
+            }
+        }
+    }
+    
+    // Filter für die Suche
+    private func filterAttendances() {
+        if searchText.isEmpty {
+            filteredAttendances = attendances
+        } else {
+            filteredAttendances = attendances.filter { attendance in
+                attendance.identity.name.localizedCaseInsensitiveContains(searchText)
             }
         }
     }

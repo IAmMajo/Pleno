@@ -5,13 +5,14 @@ import CoreLocation
 // Das ist die Übersicht von einem Event, in der alle Fahrten zu einem Event angezeigt werden.
 struct EventRideView: View {
     @StateObject var viewModel: EventRideViewModel
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        NavigationStack{
+        NavigationStack {
+            // Den gesamten Hintergrund grau hinterlegen (Damit alles so aussieht als wäre es eine Liste)
             ZStack {
-                // grauer Hintergrund
-                Color.gray.opacity(0.1)
-                    .edgesIgnoringSafeArea(.all)
+                (colorScheme == .dark ? Color.black : Color.gray.opacity(0.1))
+                            .edgesIgnoringSafeArea(.all)
                 // Inhalt
                 VStack{
                     // Datum vom Event

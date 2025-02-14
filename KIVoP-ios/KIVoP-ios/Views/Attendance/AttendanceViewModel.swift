@@ -1,4 +1,3 @@
-// This file is licensed under the MIT-0 License.
 import Foundation
 import SwiftUI
 import MeetingServiceDTOs
@@ -7,48 +6,79 @@ import MeetingServiceDTOs
 class AttendanceViewModel: ObservableObject {
 
     @Published var errorMessage: String? = nil
-    @Published var searchText: String = ""
-    @Published var selectedTab: Int = 0
-    @Published var meetings: [GetMeetingDTO] = []
+    @Published var searchText: String = "" {
+        didSet {
+            filterMeetings() // Wenn der Suchtext geändert wird, wird die Filterung angewendet
+        }
+    }
+    @Published var selectedTab: Int = 0 {
+        didSet {
+            filterMeetings() // Wenn der Tab geändert wird, wird die Filterung erneut angewendet
+        }
+    }
+    @Published var meetings: [GetMeetingDTO] = [] {
+        didSet {
+            filterMeetings() // Wenn neue Meetings abgerufen werden, werden diese ebenfalls gefiltert
+        }
+    }
+    @Published var filteredMeetings: [GetMeetingDTO] = [] // Gefilterte Meetings
+
     @Published var isLoading: Bool = false
-    
-    // Hier werden alle API-Aufrufe ausgeführt
     @Published var attendanceManager = AttendanceManager.shared
     
-    // Abrufen aller Meetings über den attendanceManager
+    // Abrufen aller Meetings
     func fetchMeetings() {
         Task {
             await self.meetings = attendanceManager.fetchMeetings()
+            filterMeetings() // Nachdem Meetings abgerufen wurden, filtere sie
         }
     }
-    
-    // Aktuelle Sitzung werden ermittelt (falls vorhanden)
-    var currentMeetings: [GetMeetingDTO] {
-        meetings
-            .filter { $0.status == .inSession }
-            .sorted { $0.start < $1.start }
+
+    // Filtert die Meetings basierend auf dem Status und dem Suchtext
+    private func filterMeetings() {
+        // Zuerst nach dem Status filtern (je nach Tab)
+        let filteredByStatus = meetings.filter { meeting in
+            switch selectedTab {
+            case 0:
+                return meeting.status == .completed
+            case 1:
+                return meeting.status == .scheduled
+            default:
+                return true // Kein Filter, wenn ein anderer Tab ausgewählt ist
+            }
+        }
+
+        // Danach nach dem Suchtext filtern
+        filteredMeetings = filteredByStatus.filter { meeting in
+            searchText.isEmpty || meeting.name.localizedCaseInsensitiveContains(searchText)
+        }
     }
 
-    // Gruppiert die Sitzungen nach Monat und Jahr
+    // Aktuelle Sitzungen (inSession)
+    var currentMeetings: [GetMeetingDTO] {
+        meetings
+            .filter { $0.status == .inSession } // Filtere nach "inSession"
+            .filter { meeting in
+                // Wenn der searchText nicht leer ist, filtern wir nach dem Namen
+                searchText.isEmpty || meeting.name.localizedCaseInsensitiveContains(searchText)
+            }
+    }
+
+
+    // Gruppierte Sitzungen nach Monat und Jahr
     var groupedMeetings: [Dictionary<String, [GetMeetingDTO]>.Element] {
-        let filtered = filteredMeetings()
-        
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMMM - yyyy"
-
-        // Gruppierung
-        var grouped = Dictionary(grouping: filtered) { meeting in
+        
+        // Gruppierung nach Monat/Jahr
+        var grouped = Dictionary(grouping: filteredMeetings) { meeting in
             dateFormatter.string(from: meeting.start)
         }
 
         // Sortierung innerhalb der Gruppen
         for (key, meetings) in grouped {
             grouped[key] = meetings.sorted { lhs, rhs in
-                if selectedTab == 0 {
-                    return lhs.start > rhs.start // Vergangene: Absteigend
-                } else {
-                    return lhs.start < rhs.start // Anstehende: Aufsteigend
-                }
+                selectedTab == 0 ? lhs.start > rhs.start : lhs.start < rhs.start
             }
         }
 
@@ -62,19 +92,7 @@ class AttendanceViewModel: ObservableObject {
         }
     }
 
-    // Filtert Sitzungen basierend auf dem Status (completed/scheduled)
-    private func filteredMeetings() -> [GetMeetingDTO] {
-        switch selectedTab {
-        case 0:
-            return meetings.filter { $0.status == .completed }
-        case 1:
-            return meetings.filter { $0.status == .scheduled }
-        default:
-            return []
-        }
-    }
-    
-    // Wechsel zwischen den destinations je nach meeting Status
+    // Wechsel zwischen den destination Views je nach Status
     func destinationView(for meeting: GetMeetingDTO) -> some View {
         switch meeting.status {
         case .inSession:

@@ -81,6 +81,7 @@ struct RideLocationView: View {
                             .scaledToFit()
                             .clipShape(RoundedRectangle(cornerRadius: 3))
                             .frame(width: 24, height: 24)
+                            .foregroundColor(.blue)
                     )
                     .frame(width: 39, height: 39)
                     .overlay(alignment: .bottom) {

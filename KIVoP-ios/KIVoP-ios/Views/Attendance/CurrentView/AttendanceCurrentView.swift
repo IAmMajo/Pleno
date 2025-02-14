@@ -4,13 +4,14 @@ import SwiftUI
 struct AttendanceCurrentView: View {
     @State private var isShowingScanner = false
     @StateObject var viewModel: AttendanceCurrentViewModel
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         NavigationStack {
             // Den gesamten Hintergrund grau hinterlegen (Damit alles so aussieht als wäre es eine Liste)
             ZStack {
-                Color.gray.opacity(0.1)
-                    .edgesIgnoringSafeArea(.all)
+                (colorScheme == .dark ? Color.black : Color.gray.opacity(0.1))
+                            .edgesIgnoringSafeArea(.all)
                 // Inhalt
                 VStack {
                     // Datum + Uhrzeit
@@ -18,7 +19,7 @@ struct AttendanceCurrentView: View {
                         .padding(5)
                         .overlay(
                             RoundedRectangle(cornerRadius: 30)
-                                .stroke(Color.black, lineWidth: 1)
+                                .stroke(Color(UIColor.label), lineWidth: 1)
                         )
                         .padding(.vertical)
                     
@@ -61,8 +62,10 @@ struct AttendanceCurrentView: View {
                         TextField("Teilnahmecode", text: $viewModel.participationCode)
                             .multilineTextAlignment(.center)
                             .padding(8)
-                            .background(RoundedRectangle(cornerRadius: 0).fill(Color.white))
-                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.black, lineWidth: 2))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color(UIColor.label), lineWidth: 2)
+                            )
                             .frame(width: 200)
                             .onSubmit {
                                 viewModel.joinMeeting() // Meeting beitreten
@@ -105,7 +108,7 @@ struct AttendanceCurrentView: View {
                     // Teilnehmerliste
                     List {
                         Section(header: Text("Mitglieder")) {
-                            ForEach(viewModel.attendances, id: \.identity.id) { attendance in
+                            ForEach(viewModel.filteredAttendances, id: \.identity.id) { attendance in
                                 HStack {
                                     // Profilbild
                                     ProfilePictureAttendance(profile: attendance.identity)
