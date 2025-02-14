@@ -106,13 +106,13 @@ extension RecordsMainView {
                 Spacer()
 
                 HStack {
-                    Text("In Bearbeitung: \(recordManager.recordsNotApproved)")
+                    Text("In Bearbeitung: \(recordManager.recordsUnderway)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .padding(4)
                         .background(Color.orange.opacity(0.2))
                         .cornerRadius(4)
-                    Text("Eingereicht: \(recordManager.recordsNotSubmitted)")
+                    Text("Eingereicht: \(recordManager.recordsSubmitted)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .padding(4)

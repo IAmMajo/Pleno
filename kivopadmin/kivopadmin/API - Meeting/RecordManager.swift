@@ -22,8 +22,8 @@ class RecordManager: ObservableObject {
     @Published var meetingsWithRecords: [MeetingWithRecords] = []
     
     // Anzahl der Protokolle, die noch nicht veröffentlicht wurden
-    @Published var recordsNotApproved: Int = 0
-    @Published var recordsNotSubmitted: Int = 0
+    @Published var recordsSubmitted: Int = 0
+    @Published var recordsUnderway: Int = 0
     @Published var recordsApproved: Int = 0
     @Published var record: GetRecordDTO? // Speichern eines einzelnen Records
     @Published var records: [GetRecordDTO] = [] // Records-Array
@@ -115,8 +115,8 @@ class RecordManager: ObservableObject {
                             .filter { $0.status == .approved } // Filtere nach 'submitted' Status
                             .count
 
-                        self?.recordsNotApproved = submittedRecordsCount
-                        self?.recordsNotSubmitted = notSubmittedRecordsCount
+                        self?.recordsSubmitted = submittedRecordsCount
+                        self?.recordsUnderway = notSubmittedRecordsCount
                         self?.recordsApproved = approvedRecordsCount
                     }
                     
