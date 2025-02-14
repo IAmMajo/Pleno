@@ -72,6 +72,7 @@ struct EventVotingView: View {
             do {
                 let decodedEventDetails = try decoder.decode(GetEventDetailDTO.self, from: data)
                 DispatchQueue.main.async {
+                    self.details = nil
                     self.details = decodedEventDetails
                     updateSelectedLocation() // Make sure location is updated after details are fetched
                 }
@@ -151,6 +152,9 @@ struct EventVotingView: View {
                 }
                 if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                     print("Participation updated successfully")
+                    DispatchQueue.main.async {
+                        fetchEventDetails(eventID: event.id)
+                    }
                 } else {
                     print("Failed to update participation")
                 }
@@ -194,6 +198,9 @@ struct EventVotingView: View {
                 }
                 if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                     print("Participation status updated successfully")
+                    DispatchQueue.main.async {
+                        fetchEventDetails(eventID: event.id)
+                    }
                 } else {
                     print("Failed to update participation status")
                 }
