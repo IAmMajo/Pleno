@@ -1,3 +1,20 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop.models.viewModel
 
 import android.content.Context
@@ -33,15 +50,16 @@ class CarpoolViewModel(private val carpoolId: String) : ViewModel() {
 
   var addressInputField by mutableStateOf("")
   var myLocation by mutableStateOf<Pair<Double, Double>?>(null)
-
+  
+  // Gibt zurück wie viele User für die Farhgemeinschaft akzeptiert wurden
   fun calcRidersSize() {
     ridersSize = carpool?.riders?.count { it.accepted } ?: 0
   }
-
+  // Prüft ob es noch Platz für weitere riders gibt
   fun canAcceptMoreRiders(): Boolean {
     return ridersSize < (carpool?.emptySeats?.toInt() ?: 0)
   }
-
+  // Hollt die Daten für die Detailansicht und sortiert die Riders nach Accepted
   fun fetchCarpool() {
     viewModelScope.launch {
       val response = getCarpoolApi(carpoolId)
@@ -53,9 +71,10 @@ class CarpoolViewModel(private val carpoolId: String) : ViewModel() {
       }
     }
   }
-
+  // Fragt an einer Fahrgemeinscht beizutreten
   suspend fun postRequest(): Boolean? {
     if (me == null) {
+      // Erstellt neuen User Rider fürs UI wird nicht an den server geschickt
       me =
           GetRiderDTO(
               id = UUID.randomUUID(),
@@ -66,17 +85,18 @@ class CarpoolViewModel(private val carpoolId: String) : ViewModel() {
               accepted = false,
               itsMe = true)
     }
+    // Schickt die anfrage an den server
     return myLocation?.let { postRequestSpecialRideApi(carpoolId, it) }
   }
-
+  // Akzeptiert oder lehnt den Rider ab
   suspend fun patchAcceptRequest(riderId: UUID, accepted: Boolean): Boolean {
     return patchAcceptRiderRequest(riderId.toString(), accepted)
   }
-
+  //Not needed
   suspend fun deleteRequest(riderId: UUID): Boolean {
     return deleteRiderRequest(riderId.toString())
   }
-
+  // Convertiert Koordinaten in Adresse
   suspend fun fetchAddress(lat: Double, long: Double): String? {
     val addressResponse = getAddressFromLatLngApi(lat, long)
     addressResponse?.let {
@@ -90,7 +110,7 @@ class CarpoolViewModel(private val carpoolId: String) : ViewModel() {
     }
     return null
   }
-
+  
   fun fetchAddress() {
     viewModelScope.launch {
       val startAddressResponse =

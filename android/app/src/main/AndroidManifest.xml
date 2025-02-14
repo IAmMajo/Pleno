@@ -15,7 +15,7 @@ xmlns:tools="http://schemas.android.com/tools">
 <application
     android:usesCleartextTraffic="true"
     android:enableOnBackInvokedCallback="true"
-    android:name=".MyApplication"
+    android:name=".pages.MyApplication"
     android:allowBackup="true"
     android:dataExtractionRules="@xml/data_extraction_rules"
     android:fullBackupContent="@xml/backup_rules"
@@ -60,7 +60,7 @@ xmlns:tools="http://schemas.android.com/tools">
         </intent-filter>
     </activity>
     <activity android:name=".MainActivity" />
-    <activity android:name=".pages.onboarding.LoginActivity" />
+    <activity android:name=".pages.LoginActivity" />
 </application>
 
 </manifest>

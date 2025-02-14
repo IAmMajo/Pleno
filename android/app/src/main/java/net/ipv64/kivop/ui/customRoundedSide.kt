@@ -1,3 +1,20 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop.ui
 
 import androidx.annotation.IntRange
@@ -14,8 +31,13 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-
-// Percentage values version
+// Erstellt eine abgerundete Wölbung am oberen Rand einer eckigen Komponente (z. B. Box oder Column).  
+// Die Höhe und Breite der Wölbung werden in Prozent angegeben.  
+// - `color`: Farbe der Wölbung.  
+// - `heightPercent`: Höhe der Wölbung in Prozent des maximalen Wertes (maxHeight).  
+// - `widthPercent`: Breite der Wölbung in Prozent der Gesamtbreite.  
+// - `maxHeight`: Maximale Höhe, um die Skalierung zu begrenzen.  
+// - `heightOffset`: Optionaler vertikaler Versatz.
 fun Modifier.customRoundedTop(
     color: Color = Color.Blue,
     @IntRange(from = 0, to = 100) heightPercent: Int = 40,
@@ -27,7 +49,10 @@ fun Modifier.customRoundedTop(
   val width = size.width * (widthPercent / 100f)
   applyCustomRoundedTop(color, -height, width, heightOffset = -heightOffset)
 }
-
+// Erstellt eine abgerundete Wölbung am oberen Rand mit einem Schatteneffekt.  
+// - `shadowColor`: Farbe des Schattens.  
+// - `alpha`: Transparenz des Schattens.  
+// - `offsetY` & `offsetX`: Versatz des Schattens in x- und y-Richtung.  
 fun Modifier.customRoundedTopWithShadow(
     color: Color = Color.Blue,
     shadowColor: Color = Color(0xFF272626),
@@ -45,7 +70,7 @@ fun Modifier.customRoundedTopWithShadow(
       color, -height, width, 0f, -heightOffset, shadowColor, alpha, offsetY, offsetX)
 }
 
-// Percentage values version
+// Erstellt eine abgerundete Wölbung am unteren Rand einer Komponente.
 fun Modifier.customRoundedBottom(
     color: Color = Color.Blue,
     @IntRange(from = 0, to = 100) heightPercent: Int = 40,
@@ -58,7 +83,7 @@ fun Modifier.customRoundedBottom(
   applyCustomRoundedTop(color, height, width, size.height, heightOffset = heightOffset)
 }
 
-// Percentage values version
+// Erstellt eine abgerundete Wölbung am unteren Rand einer Komponente mit einem Schatteneffekt.
 fun Modifier.customRoundedBottomWithShadow(
     color: Color = Color.Blue,
     shadowColor: Color = Color(0xFF272626),
@@ -75,7 +100,10 @@ fun Modifier.customRoundedBottomWithShadow(
   applyCustomRoundedTopWithShadow(
       color, height, width, size.height, heightOffset, shadowColor, alpha, offsetY, offsetX)
 }
-
+// Zeichnet die eigentliche Wölbung mit einer Bézierkurve.  
+// Diese Funktion wird von `customRoundedTop` und `customRoundedBottom` aufgerufen.  
+// - Berechnet die Kontrollpunkte für die Kurve.  
+// - Zeichnet die Wölbung basierend auf den angegebenen Parametern.
 private fun DrawScope.applyCustomRoundedTop(
     color: Color,
     height: Float,
@@ -111,7 +139,9 @@ private fun DrawScope.applyCustomRoundedTop(
   drawPath(path, color)
 }
 
-// Shared implementation logic
+// Zeichnet eine Wölbung mit einem Schatteneffekt.  
+// Nutzt eine Kombination aus Bézierkurven und einem nativen Canvas-Shadow.  
+// - Verwendet `drawIntoCanvas`, um den Schatten mit `setShadowLayer` zu rendern.  
 private fun DrawScope.applyCustomRoundedTopWithShadow(
     color: Color,
     height: Float,

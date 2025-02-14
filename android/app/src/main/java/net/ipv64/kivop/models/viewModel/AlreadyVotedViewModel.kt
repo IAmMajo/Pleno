@@ -1,3 +1,20 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop.models.viewModel
 
 import android.util.Log
@@ -27,7 +44,7 @@ class VotingViewModel(private val votingId: String) : ViewModel() {
       Log.e("WebSocket", "Fehler: Kein Token verfügbar")
       return
     }
-
+    // Gibt zurück wie viele User abgestimmt haben und wie viele insgesamt
     val url = "${ApiConfig.BASE_URL}meetings/votings/$votingId/live-status"
     val request = Request.Builder().url(url).addHeader("Authorization", "Bearer $token").build()
 
@@ -38,14 +55,12 @@ class VotingViewModel(private val votingId: String) : ViewModel() {
               override fun onOpen(webSocket: WebSocket, response: Response) {
                 Log.d("WebSocket", "Verbunden mit WebSocket")
               }
-
+              // Handle text messages
               override fun onMessage(webSocket: WebSocket, text: String) {
                 Log.d("WebSocket", "Empfangen: $text")
 
                 viewModelScope.launch {
-                  // Check if the response contains an error message
                   if (text.startsWith("ERROR:")) {
-                    // Handle error message
                     _votingStatus.emit("Fehler: ${text.substring(7)}")
                   } else if (text.contains("/")) {
                     // Handle vote count, format "n/total"
@@ -54,14 +69,14 @@ class VotingViewModel(private val votingId: String) : ViewModel() {
                   }
                 }
               }
-
+              // Handle binary messages
               override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
                 val message = bytes.utf8() // Decode ByteString to UTF-8 String
                 Log.d("WebSocket", "Empfangene Bytes: $message")
 
                 try {
                   viewModelScope.launch {
-                    _votingResults.emit(true) // Emit true (or any signal you'd like to use)
+                    _votingResults.emit(true)
                   }
                 } catch (e: Exception) {
                   Log.e("WebSocket", "Fehler beim Parsen der Abstimmungsergebnisse: ${e.message}")

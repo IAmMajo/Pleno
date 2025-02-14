@@ -1,5 +1,23 @@
+// MIT No Attribution
+// 
+// Copyright 2025 KIVoP
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop.models
 
+import android.content.Context
 import android.util.Log
 import com.example.kivopandriod.services.stringToLocalDateTime
 import com.google.gson.Gson
@@ -8,11 +26,21 @@ import com.google.gson.JsonObject
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetLocationDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingOptionDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
+import net.ipv64.kivop.dtos.RideServiceDTOs.GetEventDTO
+import net.ipv64.kivop.dtos.RideServiceDTOs.GetEventDetailDTO
+import net.ipv64.kivop.dtos.RideServiceDTOs.GetEventParticipationDTO
+import net.ipv64.kivop.dtos.RideServiceDTOs.GetUserWithoutFeedbackDTO
+import net.ipv64.kivop.dtos.RideServiceDTOs.UsersEventState
+import net.ipv64.kivop.dtos.RideServiceDTOs.UsersParticipationState
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
@@ -356,3 +384,5 @@ class VotingWebSocketClient(
 interface VotingWebSocketListener {
   fun onVotingStatusUpdate(voting: GetVotingDTO)
 }
+
+
