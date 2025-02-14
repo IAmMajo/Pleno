@@ -124,7 +124,7 @@ extension RecordsMainView {
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.gray)
-                TextField("Nach Meeting suchen", text: $searchText)
+                TextField("Nach Sitzung suchen", text: $searchText)
                     .textFieldStyle(PlainTextFieldStyle())
             }
             .padding(8)
