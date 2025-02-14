@@ -25,7 +25,7 @@ struct EventVotingView: View {
                 EventDescriptionSection(details: details)
                 EventLocationSection(address: $address, selectedLocation: $selectedLocation, details: details)
                 CarpoolSection(event: event)
-                ParticipationSection(details: details, onParticipate: handleParticipation)
+                ParticipationSection(details: details, onParticipate: createParticipation, onUpdateParticipation: patchParticipation)
                 ParticipantListSection(details: details)
             }
             .padding(.vertical)
@@ -72,6 +72,7 @@ struct EventVotingView: View {
             do {
                 let decodedEventDetails = try decoder.decode(GetEventDetailDTO.self, from: data)
                 DispatchQueue.main.async {
+                    self.details = nil
                     self.details = decodedEventDetails
                     updateSelectedLocation() // Make sure location is updated after details are fetched
                 }
@@ -120,8 +121,8 @@ struct EventVotingView: View {
         }
     }
     
-    func handleParticipation(_ dto: CreateEventParticipationDTO) {
-            guard let url = URL(string: "\(baseURL)/events/\(eventID)/participation") else {
+    func createParticipation(_ dto: CreateEventParticipationDTO) {
+            guard let url = URL(string: "\(baseURL)/events/\(eventID)/participations") else {
                 print("Invalid URL")
                 return
             }
@@ -149,10 +150,59 @@ struct EventVotingView: View {
                     print("Network error: \(error.localizedDescription)")
                     return
                 }
-                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 {
                     print("Participation updated successfully")
+                    DispatchQueue.main.async {
+                        fetchEventDetails(eventID: event.id)
+                    }
                 } else {
                     print("Failed to update participation")
+                }
+            }.resume()
+        }
+    func patchParticipation(_ dto: PatchEventParticipationDTO) {
+            guard let participant = details?.participations.first(where: { $0.itsMe }) else {
+                print("No valid participant found")
+                return
+            }
+            let participantID = participant.id
+            
+            guard let url = URL(string: "\(baseURL)/events/participations/\(participantID)") else {
+                print("Invalid URL")
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "PATCH"
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            if let token = UserDefaults.standard.string(forKey: "jwtToken") {
+                request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            } else {
+                print("Unauthorized: No token found")
+                return
+            }
+
+            do {
+                let jsonData = try JSONEncoder().encode(dto)
+                request.httpBody = jsonData
+            } catch {
+                print("JSON Encode Error: \(error.localizedDescription)")
+                return
+            }
+
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("Network error: \(error.localizedDescription)")
+                    return
+                }
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                    print("Participation status updated successfully")
+                    DispatchQueue.main.async {
+                        fetchEventDetails(eventID: event.id)
+                    }
+                } else {
+                    print("Failed to update participation status")
                 }
             }.resume()
         }
@@ -258,6 +308,7 @@ struct CarpoolSection: View {
 struct ParticipationSection: View {
     let details: GetEventDetailDTO?
     let onParticipate: (CreateEventParticipationDTO) -> Void
+    let onUpdateParticipation: (PatchEventParticipationDTO) -> Void
 
     var body: some View {
         VStack(spacing: 20) {
@@ -268,10 +319,18 @@ struct ParticipationSection: View {
             
             HStack(spacing: 50) {
                 ActionButton(title: "Ja", color: .blue) {
-                    onParticipate(CreateEventParticipationDTO(participates: true))
+                    if (details?.participations.first(where: { $0.itsMe })) != nil {
+                        onUpdateParticipation(PatchEventParticipationDTO(participates: true))
+                    } else {
+                        onParticipate(CreateEventParticipationDTO(participates: true))
+                    }
                 }
                 ActionButton(title: "Nein", color: .gray) {
-                    onParticipate(CreateEventParticipationDTO(participates: false))
+                    if (details?.participations.first(where: { $0.itsMe })) != nil {
+                        onUpdateParticipation(PatchEventParticipationDTO(participates: false))
+                    } else {
+                        onParticipate(CreateEventParticipationDTO(participates: false))
+                    }
                 }
             }
             .frame(maxWidth: .infinity)
