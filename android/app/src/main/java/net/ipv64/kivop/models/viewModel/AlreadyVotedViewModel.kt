@@ -1,13 +1,13 @@
 // MIT No Attribution
-// 
+//
 // Copyright 2025 KIVoP
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the Software), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify,
 // merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
 // PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -55,6 +55,7 @@ class VotingViewModel(private val votingId: String) : ViewModel() {
               override fun onOpen(webSocket: WebSocket, response: Response) {
                 Log.d("WebSocket", "Verbunden mit WebSocket")
               }
+
               // Handle text messages
               override fun onMessage(webSocket: WebSocket, text: String) {
                 Log.d("WebSocket", "Empfangen: $text")
@@ -69,15 +70,14 @@ class VotingViewModel(private val votingId: String) : ViewModel() {
                   }
                 }
               }
+
               // Handle binary messages
               override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
                 val message = bytes.utf8() // Decode ByteString to UTF-8 String
                 Log.d("WebSocket", "Empfangene Bytes: $message")
 
                 try {
-                  viewModelScope.launch {
-                    _votingResults.emit(true)
-                  }
+                  viewModelScope.launch { _votingResults.emit(true) }
                 } catch (e: Exception) {
                   Log.e("WebSocket", "Fehler beim Parsen der Abstimmungsergebnisse: ${e.message}")
                 }

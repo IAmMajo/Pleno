@@ -1,13 +1,13 @@
 // MIT No Attribution
-// 
+//
 // Copyright 2025 KIVoP
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the Software), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify,
 // merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
 // PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -40,21 +40,18 @@ fun uriToBase64String(context: Context, uri: Uri): String? {
 
     // Convert original image to byte array (to get its size)
     val originalOutputStream = ByteArrayOutputStream()
-    originalBitmap.compress(
-        Bitmap.CompressFormat.JPEG, 100, originalOutputStream) 
+    originalBitmap.compress(Bitmap.CompressFormat.JPEG, 100, originalOutputStream)
     val originalByteArray = originalOutputStream.toByteArray()
     val originalSizeKB = originalByteArray.size / 1024 // Convert to KB
 
     // Resize the bitmap (adjust width & height as needed)
-    val resizedBitmap =
-        Bitmap.createScaledBitmap(originalBitmap, 800, 800, true) 
+    val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, 800, 800, true)
 
     // Compress and convert to Base64
     val compressedOutputStream = ByteArrayOutputStream()
-    resizedBitmap.compress(
-        Bitmap.CompressFormat.JPEG, 80, compressedOutputStream)
+    resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, compressedOutputStream)
     val compressedByteArray = compressedOutputStream.toByteArray()
-    val compressedSizeKB = compressedByteArray.size / 1024 
+    val compressedSizeKB = compressedByteArray.size / 1024
 
     // Log sizes
     Log.d("ImageSize", "Original Size: ${originalSizeKB}KB")

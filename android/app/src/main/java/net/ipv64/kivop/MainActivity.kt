@@ -1,13 +1,13 @@
 // MIT No Attribution
-// 
+//
 // Copyright 2025 KIVoP
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the Software), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify,
 // merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
 // PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -69,8 +69,6 @@ import net.ipv64.kivop.models.viewModel.MeetingsViewModel
 import net.ipv64.kivop.models.viewModel.UserViewModel
 import net.ipv64.kivop.pages.Screen
 import net.ipv64.kivop.pages.SplashActivity
-import net.ipv64.kivop.pages.mainApp.Votings.AlreadyVoted
-import net.ipv64.kivop.pages.mainApp.Meetings.AttendancesCoordinationPage
 import net.ipv64.kivop.pages.mainApp.Attendances.AttendancesListPage
 import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolPage
 import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolingList
@@ -78,6 +76,7 @@ import net.ipv64.kivop.pages.mainApp.Carpool.onBoardingCreateRide.CreateRidePage
 import net.ipv64.kivop.pages.mainApp.Events.EventsDetailPage
 import net.ipv64.kivop.pages.mainApp.Events.EventsPage
 import net.ipv64.kivop.pages.mainApp.HomePage
+import net.ipv64.kivop.pages.mainApp.Meetings.AttendancesCoordinationPage
 import net.ipv64.kivop.pages.mainApp.Meetings.MeetingsListPage
 import net.ipv64.kivop.pages.mainApp.Polls.PollCreate
 import net.ipv64.kivop.pages.mainApp.Polls.PollOnHoldPage
@@ -91,6 +90,7 @@ import net.ipv64.kivop.pages.mainApp.Protocol.ProtocolDetailPage
 import net.ipv64.kivop.pages.mainApp.Protocol.ProtocolEditPage
 import net.ipv64.kivop.pages.mainApp.Protocol.ProtocolListPage
 import net.ipv64.kivop.pages.mainApp.UserPage
+import net.ipv64.kivop.pages.mainApp.Votings.AlreadyVoted
 import net.ipv64.kivop.pages.mainApp.Votings.VotePage
 import net.ipv64.kivop.pages.mainApp.Votings.VotingResultPage
 import net.ipv64.kivop.services.AuthController
