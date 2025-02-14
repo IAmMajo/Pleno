@@ -6,9 +6,13 @@ import MeetingServiceDTOs
 
 @MainActor
 class AttendancePlanningViewModel: ObservableObject {
-    @Published var searchText: String = ""
-    @Published var errorMessage: String? = nil
-    @Published var attendances: [GetAttendanceDTO] = []
+    @Published var searchText: String = "" {
+        didSet { filterAttendances() } // Live-Update bei Texteingabe
+    }
+    @Published var attendances: [GetAttendanceDTO] = [] {
+        didSet { filterAttendances() } // Aktualisiert gefilterte Liste, wenn neue Daten geladen werden
+    }
+    @Published var filteredAttendances: [GetAttendanceDTO] = []
     @Published var attendance: GetAttendanceDTO?
     @Published var isLoading: Bool = false
     @Published var isShowingAlert = false
@@ -50,6 +54,7 @@ class AttendancePlanningViewModel: ObservableObject {
             attendanceManager.markAttendanceAsAccepted(meetingId: meeting.id)
             // eigenen Status ändern, damit es in der View aktualisiert wird
             if let index = attendances.firstIndex(where: { $0.itsame }) { attendances[index].status = .accepted }
+            attendance = attendances.first { $0.itsame }
             isLoading = false
         }
     }
@@ -61,10 +66,22 @@ class AttendancePlanningViewModel: ObservableObject {
             attendanceManager.markAttendanceAsAbsent(meetingId: meeting.id)
             // eigenen Status ändern, damit es in der View aktualisiert wird
             if let index = attendances.firstIndex(where: { $0.itsame }) { attendances[index].status = .absent }
+            attendance = attendances.first { $0.itsame }
             isLoading = false
         }
         // entfernen aus Kalender
         removeEvent(eventTitle: meeting.name, eventDate: meeting.start)
+    }
+    
+    // Filter für die Suche
+    private func filterAttendances() {
+        if searchText.isEmpty {
+            filteredAttendances = attendances
+        } else {
+            filteredAttendances = attendances.filter { attendance in
+                attendance.identity.name.localizedCaseInsensitiveContains(searchText)
+            }
+        }
     }
 
     // Zählen wie viele Personen noch nicht abgestimmt haben

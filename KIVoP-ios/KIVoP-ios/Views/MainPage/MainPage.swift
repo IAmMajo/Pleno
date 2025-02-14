@@ -19,16 +19,24 @@ struct MainPage: View {
     // Meeting-Manager zur Verwaltung von Meeting-Daten
     @StateObject private var meetingManager = MeetingManager()
     
-    init(){
+    init() {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
+        
+        // Verwende eine dynamische Farbe, die sich an den Dark Mode anpasst
+        let titleColor = UIColor { traitCollection in
+            return traitCollection.userInterfaceStyle == .dark ? .white : .black
+        }
+        
         appearance.titleTextAttributes = [
             .font: UIFont.boldSystemFont(ofSize: 18),
-            .foregroundColor: UIColor.black
+            .foregroundColor: titleColor
         ]
+        
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
     }
+
 
     var body: some View {
         NavigationStack {
