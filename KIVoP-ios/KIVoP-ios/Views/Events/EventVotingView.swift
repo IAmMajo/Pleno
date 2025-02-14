@@ -122,7 +122,7 @@ struct EventVotingView: View {
     }
     
     func createParticipation(_ dto: CreateEventParticipationDTO) {
-            guard let url = URL(string: "\(baseURL)/events/\(eventID)/participation") else {
+            guard let url = URL(string: "\(baseURL)/events/\(eventID)/participations") else {
                 print("Invalid URL")
                 return
             }
@@ -150,7 +150,7 @@ struct EventVotingView: View {
                     print("Network error: \(error.localizedDescription)")
                     return
                 }
-                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 {
                     print("Participation updated successfully")
                     DispatchQueue.main.async {
                         fetchEventDetails(eventID: event.id)
