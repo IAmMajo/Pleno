@@ -1,7 +1,22 @@
-// todo: delete this file
+// MIT No Attribution
+//
+// Copyright 2025 KIVoP
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop.services.api
 
-import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonArray
@@ -69,13 +84,9 @@ suspend fun getAttendances(id: String): List<GetAttendanceDTO> =
       }
     }
 
-suspend fun putPlanAttendance(
-    context: Context,
-    meetingId: String,
-    status: PlanAttendance
-): Boolean =
+suspend fun putPlanAttendance(meetingId: String, status: PlanAttendance): Boolean =
     withContext(Dispatchers.IO) {
-      val path = "/meetings/$meetingId/plan-attendance/${status.name}"
+      val path = "meetings/$meetingId/plan-attendance/${status.name}"
 
       val token = auth.getSessionToken()
 
@@ -109,7 +120,7 @@ suspend fun putPlanAttendance(
 
 suspend fun putAttend(meetingId: String, code: String): Boolean =
     withContext(Dispatchers.IO) {
-      val path = "/meetings/$meetingId/attend/$code"
+      val path = "meetings/$meetingId/attend/$code"
 
       val token = auth.getSessionToken()
 

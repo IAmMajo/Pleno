@@ -1,8 +1,26 @@
+// MIT No Attribution
+//
+// Copyright 2025 KIVoP
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop
 
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.slideInHorizontally
@@ -17,8 +35,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
@@ -51,20 +67,32 @@ import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.drawerItem
 import net.ipv64.kivop.models.viewModel.MeetingsViewModel
 import net.ipv64.kivop.models.viewModel.UserViewModel
-import net.ipv64.kivop.pages.mainApp.AlreadyVoted
-import net.ipv64.kivop.pages.mainApp.AttendancesCoordinationPage
-import net.ipv64.kivop.pages.mainApp.AttendancesListPage
-import net.ipv64.kivop.pages.mainApp.EventsPage
+import net.ipv64.kivop.pages.Screen
+import net.ipv64.kivop.pages.SplashActivity
+import net.ipv64.kivop.pages.mainApp.Attendances.AttendancesListPage
+import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolPage
+import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolingList
+import net.ipv64.kivop.pages.mainApp.Carpool.onBoardingCreateRide.CreateRidePage
+import net.ipv64.kivop.pages.mainApp.Events.EventsDetailPage
+import net.ipv64.kivop.pages.mainApp.Events.EventsPage
 import net.ipv64.kivop.pages.mainApp.HomePage
-import net.ipv64.kivop.pages.mainApp.MeetingsListPage
-import net.ipv64.kivop.pages.mainApp.PosterPage
-import net.ipv64.kivop.pages.mainApp.ProtocolListPage
-import net.ipv64.kivop.pages.mainApp.TravelPage
+import net.ipv64.kivop.pages.mainApp.Meetings.AttendancesCoordinationPage
+import net.ipv64.kivop.pages.mainApp.Meetings.MeetingsListPage
+import net.ipv64.kivop.pages.mainApp.Polls.PollCreate
+import net.ipv64.kivop.pages.mainApp.Polls.PollOnHoldPage
+import net.ipv64.kivop.pages.mainApp.Polls.PollPage
+import net.ipv64.kivop.pages.mainApp.Polls.PollResultPage
+import net.ipv64.kivop.pages.mainApp.Polls.PollsListPage
+import net.ipv64.kivop.pages.mainApp.Posters.PosterDetailedPage
+import net.ipv64.kivop.pages.mainApp.Posters.PosterPage
+import net.ipv64.kivop.pages.mainApp.Posters.PostersListPage
+import net.ipv64.kivop.pages.mainApp.Protocol.ProtocolDetailPage
+import net.ipv64.kivop.pages.mainApp.Protocol.ProtocolEditPage
+import net.ipv64.kivop.pages.mainApp.Protocol.ProtocolListPage
 import net.ipv64.kivop.pages.mainApp.UserPage
-import net.ipv64.kivop.pages.mainApp.VotePage
-import net.ipv64.kivop.pages.mainApp.VotingResultPage
-import net.ipv64.kivop.pages.mainApp.VotingsListPage
-import net.ipv64.kivop.pages.onboarding.LoginActivity
+import net.ipv64.kivop.pages.mainApp.Votings.AlreadyVoted
+import net.ipv64.kivop.pages.mainApp.Votings.VotePage
+import net.ipv64.kivop.pages.mainApp.Votings.VotingResultPage
 import net.ipv64.kivop.services.AuthController
 import net.ipv64.kivop.services.StringProvider.getString
 import net.ipv64.kivop.ui.theme.Background_prime
@@ -82,8 +110,10 @@ class MainActivity : ComponentActivity() {
       KIVoPAndriodTheme {
         val navController: NavHostController = rememberNavController()
         val userViewModel = viewModel<UserViewModel>()
-
-        LaunchedEffect(Unit) { userViewModel.fetchUser() }
+        LaunchedEffect(Unit) {
+          userViewModel.fetchUser()
+          Log.i("nav", navController.graph.toString())
+        }
 
         // A surface container using the 'background' color from the theme
         Surface(
@@ -101,8 +131,9 @@ fun handleLogout(context: Context) {
   val auth = AuthController(context)
   auth.logout()
 
-  val intent = Intent(context, LoginActivity::class.java)
+  val intent = Intent(context, SplashActivity::class.java)
   context.startActivity(intent)
+  (context as? ComponentActivity)?.finish()
 }
 
 // TODO - Navigation anpassen name anpassen
@@ -110,8 +141,11 @@ fun handleLogout(context: Context) {
 fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
 
   val meetingsViewModel = viewModel<MeetingsViewModel>()
-  LaunchedEffect(Unit) { meetingsViewModel.fetchMeetings() }
 
+  LaunchedEffect(Unit) { meetingsViewModel.fetchMeetings() }
+  LaunchedEffect(navController.currentDestination) {
+    Log.i("currentDestination", navController.currentDestination.toString())
+  }
   NavHost(
       navController = navController,
       startDestination = Screen.Home.rout,
@@ -142,16 +176,60 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
               navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
         }
         // Protokolle
-        composable(route = Screen.Protocol.rout) { ProtocolListPage(navController = navController) }
-        // Travel
-        composable(route = Screen.Travel.rout) { TravelPage(navController = navController) }
+        composable(Screen.Protocol.rout) {
+          ProtocolListPage(navController = navController, meetingsViewModel)
+        }
+
+        composable("${Screen.ProtocolEditPage.rout}/{meetingID}/{protocollang}") { backStackEntry ->
+          ProtocolEditPage(
+              navController,
+              backStackEntry.arguments?.getString("meetingID").orEmpty(),
+              backStackEntry.arguments?.getString("protocollang").orEmpty())
+        }
+
+        composable("${Screen.ProtocolDetailPage.rout}/{meetingID}") { backStackEntry ->
+          ProtocolDetailPage(
+              navController,
+              backStackEntry.arguments?.getString("meetingID").orEmpty(),
+              userViewModel = userViewModel)
+        }
+
+        // CarpoolingList
+        composable(route = Screen.CarpoolingList.rout) {
+          CarpoolingList(navController = navController)
+        }
+        // Carpool
+        composable(route = "${Screen.Carpool.rout}/{carpoolID}") { backStackEntry ->
+          CarpoolPage(navController, backStackEntry.arguments?.getString("carpoolID").orEmpty())
+        }
+
+        // Create Carpool
+        composable(route = Screen.CreateCarpool.rout) {
+          CreateRidePage(navController = navController)
+        }
         // Events
         composable(route = Screen.Events.rout) { EventsPage(navController = navController) }
+
+        composable(route = Screen.Event.rout) { EventsDetailPage(navController = navController) }
+
+        // PostersList
+        composable(route = Screen.Posters.rout) { PostersListPage(navController = navController) }
         // Poster
-        composable(route = Screen.Poster.rout) { PosterPage(navController = navController) }
-        // Abstimmungen Listen Page
-        composable(route = Screen.Votings.rout) { VotingsListPage(navController = navController) }
-        // Abstimmung Resultat Page
+        composable("${Screen.Poster.rout}/{posterID}") { backStackEntry ->
+          PosterPage(
+              navController,
+              backStackEntry.arguments?.getString("posterID").orEmpty(),
+              userViewModel)
+        }
+        // PosterDetail
+        composable("${Screen.PosterDetail.rout}/{posterID}/{locationID}") { backStackEntry ->
+          PosterDetailedPage(
+              navController,
+              userViewModel = userViewModel,
+              backStackEntry.arguments?.getString("posterID").orEmpty(),
+              backStackEntry.arguments?.getString("locationID").orEmpty())
+        }
+
         composable("${Screen.Attendance.rout}/{meetingID}") { backStackEntry ->
           AttendancesCoordinationPage(
               navController, backStackEntry.arguments?.getString("meetingID").orEmpty())
@@ -165,6 +243,7 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
               val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
               VotingResultPage(navController = navController, votingID = votingID)
             }
+
         composable(
             route = Screen.Vote.rout,
             arguments =
@@ -174,6 +253,7 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
               val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
               VotePage(navController = navController, votingID = votingID)
             }
+
         composable(
             route = Screen.Voted.rout,
             arguments =
@@ -183,6 +263,20 @@ fun navigation(navController: NavHostController, userViewModel: UserViewModel) {
               val votingID = backStackEntry.arguments?.getString("votingID") ?: ""
               AlreadyVoted(navController = navController, votingID = votingID)
             }
+        // Polls
+        composable(route = Screen.PollList.rout) { PollsListPage(navController = navController) }
+        // Poll
+        composable("${Screen.Poll.rout}/{pollID}") { backStackEntry ->
+          PollPage(navController, backStackEntry.arguments?.getString("pollID").orEmpty())
+        }
+        // Poll result
+        composable("${Screen.PollResult.rout}/{pollID}") { backStackEntry ->
+          PollResultPage(navController, backStackEntry.arguments?.getString("pollID").orEmpty())
+        }
+        // Poll create
+        composable(route = Screen.PollCreate.rout) { PollCreate(navController = navController) }
+        // Poll onHold
+        composable(route = Screen.PollOnHold.rout) { PollOnHoldPage(navController = navController) }
       }
 }
 
@@ -261,36 +355,47 @@ fun DrawerContent(
         listOf(
             drawerItem(
                 modifier = Modifier,
-                icon = Icons.Rounded.Home,
+                icon = R.drawable.ic_groups,
                 title = getString(R.string.meetings),
                 route = Screen.Meetings.rout),
             drawerItem(
                 modifier = Modifier,
-                icon = Icons.Rounded.Home,
+                icon = R.drawable.inbox_20dp,
                 title = getString(R.string.protocol),
                 route = Screen.Protocol.rout),
             drawerItem(
                 modifier = Modifier,
-                icon = Icons.Rounded.Home,
-                title = getString(R.string.travel_planning),
-                route = Screen.Travel.rout),
+                icon = R.drawable.directions_car_20dp,
+                title = getString(R.string.carpooling),
+                route = Screen.CarpoolingList.rout),
             drawerItem(
                 modifier = Modifier,
-                icon = Icons.Rounded.Home,
+                icon = R.drawable.event_today_20dp,
                 title = getString(R.string.events),
                 route = Screen.Events.rout),
             drawerItem(
                 modifier = Modifier,
-                icon = Icons.Rounded.Home,
+                icon = R.drawable.planner_banner_ad_pt_20dp,
                 title = getString(R.string.poster),
-                route = Screen.Poster.rout),
+                route = Screen.Posters.rout),
+            drawerItem(
+                modifier = Modifier,
+                icon = R.drawable.chart_outlined_20dp,
+                title = getString(R.string.poll),
+                route = Screen.PollList.rout),
         )
+
     drawerItems.forEach { item ->
       DrawerItem(
           item,
           selected = currentRoute == item.route,
           onClick = {
-            navController.navigate(item.route)
+            navController.navigate(item.route) {
+              popUpTo(navController.graph.startDestinationId) {
+                saveState = true // Save state when navigating back
+              }
+              launchSingleTop = true
+            }
             coroutineScope.launch { drawerState.close() }
           })
       SpacerBetweenElements(4.dp)

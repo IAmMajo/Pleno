@@ -1,3 +1,20 @@
+// MIT No Attribution
+//
+// Copyright 2025 KIVoP
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop.services
 
 import android.content.ContentResolver
@@ -7,21 +24,43 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
+import androidx.core.content.FileProvider
+import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.InputStream
 
-fun uriToByteArray(context: Context, uri: Uri): ByteArray? {
-  try {
+fun uriToBase64String(context: Context, uri: Uri): String? {
+  return try {
     // Open input stream from the URI
-    val inputStream: InputStream = context.contentResolver.openInputStream(uri)!!
+    val inputStream = context.contentResolver.openInputStream(uri)
 
-    // Convert InputStream to ByteArray
-    val byteArray = inputStream.readBytes()
+    // Read original image into a bitmap
+    val originalBitmap = BitmapFactory.decodeStream(inputStream)
+    inputStream?.close()
 
-    // Encode the ByteArray in Base64
-    return Base64.encodeToString(byteArray, Base64.NO_WRAP).toByteArray()
+    // Convert original image to byte array (to get its size)
+    val originalOutputStream = ByteArrayOutputStream()
+    originalBitmap.compress(Bitmap.CompressFormat.JPEG, 100, originalOutputStream)
+    val originalByteArray = originalOutputStream.toByteArray()
+    val originalSizeKB = originalByteArray.size / 1024 // Convert to KB
+
+    // Resize the bitmap (adjust width & height as needed)
+    val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, 800, 800, true)
+
+    // Compress and convert to Base64
+    val compressedOutputStream = ByteArrayOutputStream()
+    resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, compressedOutputStream)
+    val compressedByteArray = compressedOutputStream.toByteArray()
+    val compressedSizeKB = compressedByteArray.size / 1024
+
+    // Log sizes
+    Log.d("ImageSize", "Original Size: ${originalSizeKB}KB")
+    Log.d("ImageSize", "Compressed Size: ${compressedSizeKB}KB")
+    // return Base64 and remove \n
+    return Base64.encodeToString(compressedByteArray, Base64.DEFAULT).replace("\n", "")
   } catch (e: Exception) {
     e.printStackTrace()
-    return null
+    null
   }
 }
 
@@ -35,23 +74,31 @@ fun uriToBitmap(contentResolver: ContentResolver, uri: Uri): Bitmap? {
   }
 }
 
-fun byteArrayToBitmap(byteArray: ByteArray): Bitmap? {
-  Log.i("byteArrayToBitmap", "byteArrayToBitmap")
+fun base64ToBitmap(base64String: String): Bitmap? {
+  Log.i("base64ToBitmap", "Converting Base64 string to Bitmap")
   return try {
     // Decode Base64 string into a byte array
-    val decodedString = Base64.decode(byteArray.decodeToString(), Base64.NO_WRAP)
+    val decodedBytes = Base64.decode(base64String, Base64.NO_WRAP)
     // Convert byte array into Bitmap
-    BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
   } catch (e: Exception) {
     e.printStackTrace()
     null
   }
 }
 
-fun encodeImageToBase64(imageByteArray: ByteArray): String {
+fun encodeImageToBase64(imageByteArray: ByteArray?): String? {
+  if (imageByteArray == null) {
+    return null
+  }
   return Base64.encodeToString(imageByteArray, Base64.NO_WRAP)
 }
 
 fun decodeFromBase64(base64String: String): ByteArray {
   return Base64.decode(base64String, Base64.NO_WRAP)
+}
+
+fun createTempUri(context: Context): Uri {
+  val tempFile = File(context.cacheDir, "photo_${System.currentTimeMillis()}.jpg")
+  return FileProvider.getUriForFile(context, "${context.packageName}.provider", tempFile)
 }

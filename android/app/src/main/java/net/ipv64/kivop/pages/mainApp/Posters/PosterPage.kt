@@ -1,0 +1,140 @@
+// MIT No Attribution
+//
+// Copyright 2025 KIVoP
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+package net.ipv64.kivop.pages.mainApp.Posters
+
+import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import net.ipv64.kivop.BackPressed.isBackPressed
+import net.ipv64.kivop.components.PosterInfoCard
+import net.ipv64.kivop.components.PosterLocationCard
+import net.ipv64.kivop.components.SpacerBetweenElements
+import net.ipv64.kivop.components.SpacerTopBar
+import net.ipv64.kivop.dtos.PosterServiceDTOs.PosterPositionStatus
+import net.ipv64.kivop.models.viewModel.PosterViewModel
+import net.ipv64.kivop.models.viewModel.PosterViewModelFactory
+import net.ipv64.kivop.models.viewModel.UserViewModel
+import net.ipv64.kivop.pages.Screen
+import net.ipv64.kivop.ui.theme.Background_secondary
+import net.ipv64.kivop.ui.theme.Primary
+import net.ipv64.kivop.ui.theme.TextStyles
+import net.ipv64.kivop.ui.theme.Text_prime
+
+@Composable
+fun PosterPage(navController: NavController, posterID: String, userViewModel: UserViewModel) {
+  val posterViewModel: PosterViewModel = viewModel(factory = PosterViewModelFactory(posterID))
+  // Fetch addresses for each location
+  LaunchedEffect(posterViewModel.posterPositions) {
+    posterViewModel.posterPositions.let { posters ->
+      val newAddresses =
+          posters.associate { poster ->
+            // only fetch when the poster address isnt already in the lib
+            if (posterViewModel.posterAddresses.containsKey(poster.id)) {
+              poster.id to posterViewModel.posterAddresses[poster.id].toString()
+            } else {
+              poster.id to
+                  posterViewModel.fetchAddress(poster.latitude, poster.longitude).toString()
+            }
+          }
+      posterViewModel.posterAddresses = newAddresses
+    }
+  }
+  BackHandler {
+    isBackPressed = navController.popBackStack()
+    Log.i("BackHandler", "BackHandler: $isBackPressed")
+  }
+  Column(modifier = Modifier.padding(18.dp)) {
+    SpacerTopBar()
+
+    // Displays main information
+    posterViewModel.poster?.let { poster ->
+      posterViewModel.posterSummary?.let { summary ->
+        PosterInfoCard(
+            poster = poster,
+            image = posterViewModel.posterImage,
+            summary = summary,
+            clickable = false,
+            showMaps = true)
+      }
+    }
+    SpacerBetweenElements()
+    // Displays each location
+    if (posterViewModel.posterPositions.isEmpty()) {
+      Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(50.dp),
+            trackColor = Background_secondary,
+            color = Primary,
+            strokeWidth = 5.dp,
+            strokeCap = StrokeCap.Round)
+      }
+    }
+    LazyColumn {
+      posterViewModel.groupedPosters.forEach { (status, items) ->
+        // Section Header (Sticky Header Alternative)
+        item {
+          // Heading string
+          val statusLabels =
+              mapOf(
+                  PosterPositionStatus.toHang to "Offen",
+                  PosterPositionStatus.hangs to "Aufgehangen",
+                  PosterPositionStatus.overdue to "Überfällig",
+                  PosterPositionStatus.damaged to "Beschädigt",
+                  PosterPositionStatus.takenDown to "Abgehangen")
+
+          Text(
+              text = statusLabels[status] ?: status.toString(),
+              style = TextStyles.subHeadingStyle,
+              color = Text_prime,
+          )
+          SpacerBetweenElements(8.dp)
+        }
+
+        // Poster Items under the Header
+        items(items) { poster ->
+          PosterLocationCard(
+              poster = poster,
+              image = posterViewModel.posterPositionsImages[poster.id],
+              userViewModel = userViewModel,
+              address = posterViewModel.posterAddresses[poster.id],
+              onClick = {
+                navController.navigate(
+                    Screen.PosterDetail.rout + "/${poster.posterId}/${poster.id}")
+              })
+          SpacerBetweenElements(8.dp)
+        }
+      }
+    }
+  }
+}

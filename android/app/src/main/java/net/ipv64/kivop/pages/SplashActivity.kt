@@ -1,3 +1,20 @@
+// MIT No Attribution
+//
+// Copyright 2025 KIVoP
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop.pages
 
 import android.content.Context
@@ -21,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import net.ipv64.kivop.MainActivity
-import net.ipv64.kivop.pages.onboarding.LoginActivity
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Background_secondary
@@ -30,16 +46,27 @@ import net.ipv64.kivop.ui.theme.Primary
 class SplashActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
     setContent {
       Surface(
           modifier = Modifier.background(Background_prime).fillMaxSize(),
       ) {
         val context = this
-        var isLoggedIn by remember { mutableStateOf<Boolean?>(null) }
+        var hasCredentials by remember { mutableStateOf<Boolean?>(null) }
         LaunchedEffect(Unit) {
-          isLoggedIn = auth.isLoggedIn()
-          if (isLoggedIn as Boolean) {
-            navigateToMainActivity(context)
+          hasCredentials = auth.hasCredentials()
+          if (hasCredentials as Boolean) {
+            val response = auth.isActivated()
+            if (response == "Successful Login!") {
+              navigateToMainActivity(context)
+            } else if (response == "Email not verified") {
+              navigateToLoginActivity(context, true, 1)
+            } else if (response == "This account is inactiv") {
+              navigateToLoginActivity(context, true, 2)
+            } else {
+              auth.logout()
+              navigateToLoginActivity(context)
+            }
           } else {
             navigateToLoginActivity(context)
           }
@@ -63,9 +90,17 @@ class SplashActivity : ComponentActivity() {
 private fun navigateToMainActivity(context: Context) {
   val intent = Intent(context, MainActivity::class.java)
   context.startActivity(intent)
+  (context as? ComponentActivity)?.finish()
 }
 
-private fun navigateToLoginActivity(context: Context) {
+private fun navigateToLoginActivity(
+    context: Context,
+    needsActivation: Boolean = false,
+    activationState: Int = 1
+) {
   val intent = Intent(context, LoginActivity::class.java)
+  intent.putExtra("NEEDS_ACTIVATION", needsActivation)
+  intent.putExtra("ACTIVATION_STATE", activationState)
   context.startActivity(intent)
+  (context as? ComponentActivity)?.finish()
 }

@@ -1,19 +1,42 @@
+// MIT No Attribution
+//
+// Copyright 2025 KIVoP
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package com.example.kivopandriod.components
 
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import net.ipv64.kivop.components.CustomPopupButton
+import net.ipv64.kivop.models.alertButtonStyle
+import net.ipv64.kivop.models.alertSecondaryButtonStyle
+import net.ipv64.kivop.models.primaryButtonStyle
+import net.ipv64.kivop.models.secondaryButtonStyle
 import net.ipv64.kivop.ui.theme.Background_prime
-import net.ipv64.kivop.ui.theme.Secondary
-import net.ipv64.kivop.ui.theme.Tertiary
+import net.ipv64.kivop.ui.theme.TextStyles
+import net.ipv64.kivop.ui.theme.Text_prime
 import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
@@ -23,86 +46,61 @@ fun CallToConfirmation(
     dialogTitle: String,
     dialogText: String,
     buttonOneText: String,
-    buttonTwoText: String?,
     buttonTextDismiss: String,
-    //  alert: Boolean,
-
+    alert: Boolean,
 ) {
+  var buttonOneStyle = if (!alert) primaryButtonStyle else alertButtonStyle
+  var buttonTwoStyle = if (!alert) secondaryButtonStyle else alertSecondaryButtonStyle
   AlertDialog(
+      containerColor = Background_prime,
+      shape = RoundedCornerShape(8.dp),
+      // properties = androidx.compose.ui.window.DialogProperties(),
+      modifier = Modifier.wrapContentSize().padding(horizontal = 0.dp, vertical = 20.dp),
       onDismissRequest = onDismissRequest,
       confirmButton = {
         // Button-One
-        Button(
+        CustomPopupButton(
+            text = buttonOneText,
+            buttonStyle = buttonOneStyle,
             onClick = onConfirmation,
-            modifier = Modifier.height(35.dp),
-            enabled = true,
-            shape = ButtonDefaults.textShape,
-            colors = ButtonDefaults.buttonColors(Tertiary),
-            elevation = null,
-            border = null,
-            contentPadding =
-                PaddingValues(
-                    horizontal = 8.dp, vertical = 0.dp), // ToDo - PaddingValues - anpassen?
-            // interactionSource = remember { MutableInteractionSource() },
-            // //MutableInteractionSource
-            // content: @Composable() (RowScope.() -> Unit)
-        ) {
-          Text(
-              text = buttonOneText,
-              color = Background_prime,
-              modifier = Modifier.padding(horizontal = 12.dp))
-        }
+            modifier = Modifier)
       },
       // Dismiss-Button, TODO - fix placing
       dismissButton = {
-        Button(
+        CustomPopupButton(
+            text = buttonTextDismiss,
+            buttonStyle = buttonTwoStyle,
             onClick = onDismissRequest,
-            modifier = Modifier.height(35.dp),
-            enabled = true,
-            shape = ButtonDefaults.textShape,
-            colors = ButtonDefaults.buttonColors(Secondary),
-            elevation = null,
-            border = null,
-            contentPadding =
-                ButtonDefaults.TextButtonContentPadding, // ToDo - PaddingValues - anpassen?
-            // interactionSource = remember { MutableInteractionSource() },
-            // //MutableInteractionSource
-            // content: @Composable() (RowScope.() -> Unit)
-        ) {
-          //
-          Text(
-              text = buttonTextDismiss,
-              color = Text_tertiary,
-              modifier = Modifier.padding(horizontal = 12.dp))
-        }
+            modifier = Modifier)
       },
-      title = { Text(text = dialogTitle) },
-      text = { Text(text = dialogText) },
-      modifier = Modifier, // TODO
-      //    shape: Shape = AlertDialogDefaults.shape,
-      //    containerColor: Color = AlertDialogDefaults.containerColor,
-      //    iconContentColor: Color = AlertDialogDefaults.iconContentColor,
-      //    titleContentColor: Color = AlertDialogDefaults.titleContentColor,
-      //    textContentColor: Color = AlertDialogDefaults.textContentColor,
-      //    tonalElevation: Dp = AlertDialogDefaults.TonalElevation,
-      //    properties: DialogProperties = DialogProperties()
+      title = {
+        Text(
+            text = dialogTitle,
+            style = TextStyles.headingStyle,
+            color = Text_prime,
+        )
+      },
+      text = {
+        Text(
+            text = dialogText,
+            style = TextStyles.contentStyle,
+            color = Text_tertiary,
+        )
+      },
   )
 }
 
 @Preview
 @Composable
 fun Screen() {
-  CallToConfirmation(
-      onDismissRequest = close,
-      onConfirmation = openCam,
-      dialogTitle = "TestTitel",
-      dialogText = "Sind Sie sicher, dass Sie Ihr Ergebnis abschicken möchten?",
-      buttonOneText = "Bestätigen",
-      buttonTwoText = "Two Button",
-      buttonTextDismiss = "Abbrechen"
-      //  alert = false
-      )
+  Surface(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+    CallToConfirmation(
+        onDismissRequest = {},
+        onConfirmation = {},
+        dialogTitle = "TestTitel",
+        dialogText = "Sind Sie sicher, dass Sie Ihr Ergebnis abschicken möchten?",
+        buttonOneText = "confirm",
+        buttonTextDismiss = "back",
+        alert = false)
+  }
 }
-
-val close: () -> Unit = {}
-val openCam: () -> Unit = {}

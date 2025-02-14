@@ -1,3 +1,20 @@
+// MIT No Attribution
+//
+// Copyright 2025 KIVoP
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop.components
 
 import androidx.compose.animation.AnimatedVisibility
@@ -14,7 +31,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,31 +45,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.ipv64.kivop.R
-import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
+import net.ipv64.kivop.models.attendancesList
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Text_prime
 
-data class ResponseItem(val name: String, val status: AttendanceStatus?)
-
+@Composable
 @OptIn(ExperimentalFoundationApi::class)
-fun LazyListScope.AttendanceCoordinationList(
-    responses: List<ResponseItem>,
+fun AttendanceCoordinationList(
+    responses: List<attendancesList>,
     title: String,
     isVisible: Boolean,
     maxMembernumber: Int,
     onVisibilityToggle: (Boolean) -> Unit,
     background: Color = Color(color = 0xFF686D74)
 ) {
-  // stickyHeader
-  stickyHeader {
-    LabelMax(onClick = { onVisibilityToggle(!isVisible) }, backgroundColor = background) {
-      AttendanceSeparatorContent(
-          text = title, maxMembernumber = maxMembernumber, statusMembernumber = responses.size)
-    }
-  }
+  Column {
+    // Der gesamte Header ist jetzt klickbar
+    LabelMax(
+        backgroundColor = background,
+        onClick = { onVisibilityToggle(!isVisible) } // Klick schaltet Sichtbarkeit um
+        ) {
+          AttendanceSeparatorContent(
+              text = title,
+              maxMembernumber = maxMembernumber,
+              statusMembernumber = responses.size,
+              // onClick = { onVisibilityToggle(!isVisible) } // Hier klickbar machen!
+          )
+        }
 
-  // Item with AnimatedVisibility
-  item {
+    // Sichtbare Liste mit Animation
     AnimatedVisibility(visible = isVisible, enter = expandVertically(), exit = shrinkVertically()) {
       Column { responses.forEach { item -> AttendanceItemRow(item = item) } }
     }
@@ -62,7 +82,7 @@ fun LazyListScope.AttendanceCoordinationList(
 
 // Composable für eine einzelne Zeile in der Rückmeldungs-Liste
 @Composable
-fun AttendanceItemRow(item: ResponseItem) {
+fun AttendanceItemRow(item: attendancesList) {
   Row(
       modifier = Modifier.fillMaxWidth().padding(6.dp),
       verticalAlignment = Alignment.CenterVertically) {
@@ -90,9 +110,17 @@ fun AttendanceItemRow(item: ResponseItem) {
 }
 
 @Composable
-fun AttendanceSeparatorContent(text: String, maxMembernumber: Int, statusMembernumber: Int) {
+fun AttendanceSeparatorContent(
+    text: String,
+    maxMembernumber: Int,
+    statusMembernumber: Int,
+    // onClick: () -> Unit // Klick-Callback für Sichtbarkeitswechsel
+) {
   Row(
-      modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
+      modifier =
+          Modifier.fillMaxWidth()
+              // .clickable { onClick() } // Klick-Event für den Header
+              .padding(start = 8.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.SpaceBetween) {
         Text(

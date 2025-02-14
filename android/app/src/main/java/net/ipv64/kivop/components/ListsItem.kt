@@ -1,3 +1,20 @@
+// MIT No Attribution
+//
+// Copyright 2025 KIVoP
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop.components
 
 import androidx.compose.foundation.background
@@ -42,7 +59,7 @@ import net.ipv64.kivop.ui.theme.Text_secondary
 @Composable
 fun ListenItem(
     itemListData: GetMeetingDTO,
-    onClick: () -> Unit = {},
+    onClick: (() -> Unit)? = {},
     isProtokoll: Boolean = false
 ) {
   val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
@@ -112,9 +129,9 @@ fun ListenItem(
           Modifier.fillMaxWidth()
               .customShadow(cornersRadius = 8.dp, shadowBlurRadius = 2.dp)
               .clip(RoundedCornerShape(8.dp))
+              .clickable(onClick = onClick!!)
               .background(Background_secondary)
-              .padding(8.dp)
-              .clickable(onClick = onClick),
+              .padding(8.dp),
   ) {
     Column(modifier = Modifier) {
       Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -133,12 +150,21 @@ fun ListenItem(
                   modifier = Modifier.size(44.dp))
             }
         Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = itemListData.name,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp,
-            color = Text_prime,
-            modifier = Modifier.weight(1f))
+        if (!isProtokoll) {
+          Text(
+              text = itemListData.name,
+              fontWeight = FontWeight.SemiBold,
+              fontSize = 18.sp,
+              color = Text_prime,
+              modifier = Modifier.weight(1f))
+        } else {
+          Text(
+              text = "Protokoll: " + itemListData.name,
+              fontWeight = FontWeight.SemiBold,
+              fontSize = 18.sp,
+              color = Text_prime,
+              modifier = Modifier.weight(1f))
+        }
         if (!isProtokoll) {
           Label(backgroundColor = iconColor) {
             Text(

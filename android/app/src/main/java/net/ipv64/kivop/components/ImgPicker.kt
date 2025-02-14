@@ -1,3 +1,20 @@
+// MIT No Attribution
+//
+// Copyright 2025 KIVoP
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop.components
 
 import android.net.Uri
@@ -30,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import net.ipv64.kivop.R
-import net.ipv64.kivop.services.byteArrayToBitmap
+import net.ipv64.kivop.services.base64ToBitmap
 import net.ipv64.kivop.ui.customShadow
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Secondary
@@ -39,16 +56,18 @@ import net.ipv64.kivop.ui.theme.Text_tertiary
 
 @Composable
 fun ImgPicker(
-    img: ByteArray? = null,
+    img: String? = null,
     size: Dp = 150.dp,
     userName: String = "Max",
-    edit: Boolean = true
-): Uri? {
+    edit: Boolean = true,
+    onImagePicked: (Uri?) -> Unit
+) {
   var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
   val pickMedia =
       rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
           selectedImageUri = uri
+          onImagePicked(uri)
         } else {
           Log.d("PhotoPicker", "No media selected")
         }
@@ -69,7 +88,7 @@ fun ImgPicker(
       )
     } else if (img != null) {
       AsyncImage(
-          model = byteArrayToBitmap(img),
+          model = base64ToBitmap(img),
           contentDescription = "Profile Picture",
           contentScale = ContentScale.Crop,
           modifier = Modifier.align(Alignment.Center).fillMaxSize().clip(shape = CircleShape),
@@ -104,5 +123,4 @@ fun ImgPicker(
           }
     }
   }
-  return selectedImageUri
 }

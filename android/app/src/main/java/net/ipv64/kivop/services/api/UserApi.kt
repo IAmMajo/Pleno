@@ -1,9 +1,29 @@
+// MIT No Attribution
+//
+// Copyright 2025 KIVoP
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop.services.api
 
+import android.util.Base64
+import android.util.Log
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.ipv64.kivop.dtos.AuthServiceDTOs.UserProfileUpdateDTO
+import net.ipv64.kivop.dtos.AuthServiceDTOs.UserRegistrationDTO
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
@@ -23,7 +43,7 @@ suspend fun patchUserProfile(updatedFields: UserProfileUpdateDTO): Response? {
   }
 
   // Create the request body with the changed fields only
-  val jsonBody = Gson().toJson(updatedFields) // Serialize only the updated fields
+  val jsonBody = Gson().toJson(updatedFields)
 
   // Create the PATCH request
   val request =
@@ -43,3 +63,93 @@ suspend fun patchUserProfile(updatedFields: UserProfileUpdateDTO): Response? {
     }
   }
 }
+
+suspend fun postRegister(user: UserRegistrationDTO): Boolean =
+    withContext(Dispatchers.IO) {
+      val path = "users/register"
+
+      val formBody = Gson().toJson(user)
+
+      val request =
+          Request.Builder()
+              .url(BASE_URL + path)
+              .post(formBody.toRequestBody("application/json".toMediaTypeOrNull()))
+              .build()
+
+      try {
+        okHttpClient.newCall(request).execute().use { response ->
+          if (!response.isSuccessful) {
+            Log.e("Registration", "Unexpected code: $response")
+            return@withContext false
+          } else {
+            return@withContext true
+          }
+        }
+      } catch (e: Exception) {
+        Log.e("Registration", "Fehler bei der Registrierung", e)
+      }
+      return@withContext false
+    }
+
+suspend fun postResendEmail(email: String): Boolean =
+    withContext(Dispatchers.IO) {
+      val path = "users/email/resend/$email"
+
+      val request = Request.Builder().url(BASE_URL + path).put("".toRequestBody(null)).build()
+
+      try {
+        okHttpClient.newCall(request).execute().use { response ->
+          if (!response.isSuccessful) {
+            Log.e("Registration", "Unexpected code: $response")
+            return@withContext false
+          } else {
+            return@withContext true
+          }
+        }
+      } catch (e: Exception) {
+        Log.e("Registration", "Fehler bei der Registrierung", e)
+      }
+      return@withContext false
+    }
+
+suspend fun getProfileImage(userID: String): String? =
+    withContext(Dispatchers.IO) {
+      val path = "users/profile-image/user/$userID"
+
+      val token = auth.getSessionToken()
+
+      if (token.isNullOrEmpty()) {
+        println("Fehler: Kein Token verfügbar")
+        return@withContext null
+      }
+
+      val request =
+          Request.Builder()
+              .url(BASE_URL + path)
+              .addHeader("Authorization", "Bearer $token")
+              .get()
+              .build()
+
+      return@withContext try {
+        val response = okHttpClient.newCall(request).execute()
+        if (response.isSuccessful) {
+          val responseBody = response.body?.bytes()
+          if (responseBody != null) {
+            var base64String = Base64.encodeToString(responseBody, Base64.DEFAULT)
+            // remove unwanted characters
+            base64String = base64String.replace("\n", "")
+
+            return@withContext base64String
+          } else {
+            println("Fehler: Leere Antwort erhalten.")
+            null
+          }
+        } else {
+          println("Fehler bei der Anfrage: ${response.message}")
+          null
+        }
+      } catch (e: Exception) {
+        println("Fehler: ${e.message}")
+        null
+      }
+    }

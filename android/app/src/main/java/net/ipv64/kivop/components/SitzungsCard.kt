@@ -1,3 +1,20 @@
+// MIT No Attribution
+//
+// Copyright 2025 KIVoP
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the Software), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package net.ipv64.kivop.components
 
 import android.util.Log
@@ -33,6 +50,7 @@ import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetLocationDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetRecordDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
 import net.ipv64.kivop.services.api.getAttendances
 import net.ipv64.kivop.ui.theme.Background_secondary
@@ -43,7 +61,11 @@ import net.ipv64.kivop.ui.theme.Text_prime_light
 import net.ipv64.kivop.ui.theme.Text_secondary
 
 @Composable
-fun SitzungsCard(GetMeetingDTO: GetMeetingDTO, backgroundColor: Color = Color.Transparent) {
+fun SitzungsCard(
+    GetMeetingDTO: GetMeetingDTO,
+    backgroundColor: Color = Color.Transparent,
+    protocoll: List<GetRecordDTO>
+) {
   val dateFormatter = java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy")
   val timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
 
@@ -140,6 +162,19 @@ fun SitzungsCard(GetMeetingDTO: GetMeetingDTO, backgroundColor: Color = Color.Tr
                 backgroundColor = Background_secondary.copy(0.15f),
                 texColor = Text_prime_light,
                 onClick = {})
+          }
+          Spacer(modifier = Modifier.height(8.dp))
+          if (GetMeetingDTO.status == MeetingStatus.inSession ||
+              GetMeetingDTO.status == MeetingStatus.completed) {
+            if (protocoll.isNotEmpty()) {
+              ProfileCardSmall(
+                  name = protocoll[0].identity.name,
+                  role = "Protokollant",
+                  profilePicture = null,
+                  backgroundColor = Background_secondary.copy(0.15f),
+                  texColor = Text_prime_light,
+                  onClick = {})
+            }
           }
         }
       }
