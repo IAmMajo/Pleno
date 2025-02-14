@@ -1,8 +1,7 @@
-package net.ipv64.kivop
+package net.ipv64.kivop.pages
 
 import android.app.Application
 import android.content.Context
-import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.request.crossfade

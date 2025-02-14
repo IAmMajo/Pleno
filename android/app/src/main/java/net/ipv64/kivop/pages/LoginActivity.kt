@@ -1,14 +1,13 @@
-package net.ipv64.kivop.pages.onboarding
+package net.ipv64.kivop.pages
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import net.ipv64.kivop.pages.LoginOnboarding.OnboardingNav
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.KIVoPAndriodTheme
 

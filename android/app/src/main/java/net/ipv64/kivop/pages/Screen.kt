@@ -1,6 +1,7 @@
-package net.ipv64.kivop
+package net.ipv64.kivop.pages
 
 sealed class Screen(val rout: String) {
+  //Routen für den NavContoller
   object Home : Screen("home")
 
   object User : Screen("user")
@@ -50,5 +51,3 @@ sealed class Screen(val rout: String) {
   object PollOnHold : Screen("umfrageAbgestimmt")
 }
 
-// routing später anpassen: navController.
-// skip screens mit popBackStack

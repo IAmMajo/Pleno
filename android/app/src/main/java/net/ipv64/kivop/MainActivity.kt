@@ -50,6 +50,7 @@ import net.ipv64.kivop.components.SpacerBetweenElements
 import net.ipv64.kivop.components.drawerItem
 import net.ipv64.kivop.models.viewModel.MeetingsViewModel
 import net.ipv64.kivop.models.viewModel.UserViewModel
+import net.ipv64.kivop.pages.Screen
 import net.ipv64.kivop.pages.SplashActivity
 import net.ipv64.kivop.pages.mainApp.AlreadyVoted
 import net.ipv64.kivop.pages.mainApp.AttendancesCoordinationPage

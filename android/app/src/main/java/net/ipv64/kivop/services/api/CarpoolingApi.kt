@@ -244,7 +244,7 @@ suspend fun patchAcceptRiderRequest(riderId: String, accepted: Boolean): Boolean
         false
       }
     }
-
+//Not needed
 suspend fun deleteRiderRequest(riderId: String): Boolean =
     withContext(Dispatchers.IO) {
       val path = "specialrides/requests/$riderId"

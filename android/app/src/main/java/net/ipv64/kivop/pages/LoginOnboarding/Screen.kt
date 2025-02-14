@@ -1,4 +1,4 @@
-package net.ipv64.kivop.pages.onboarding
+package net.ipv64.kivop.pages.LoginOnboarding
 
 sealed class OnboardingScreen(val rout: String) {
 

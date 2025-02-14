@@ -1,4 +1,3 @@
-// todo: delete this file
 package net.ipv64.kivop.services.api
 
 import android.util.Log

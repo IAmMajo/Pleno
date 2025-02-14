@@ -174,7 +174,7 @@ suspend fun getMeetingByID(id: String): GetMeetingDTO? =
         null
       }
     }
-
+//Not needed
 suspend fun getLocations(context: Context): List<GetLocationDTO> =
     withContext(Dispatchers.IO) {
       val path = "meetings/locations"
@@ -224,7 +224,7 @@ suspend fun getLocations(context: Context): List<GetLocationDTO> =
         emptyList()
       }
     }
-
+//Not needed
 suspend fun getLocationById(id: String): GetLocationDTO? =
     withContext(Dispatchers.IO) {
       val path = "meetings/locations/$id"

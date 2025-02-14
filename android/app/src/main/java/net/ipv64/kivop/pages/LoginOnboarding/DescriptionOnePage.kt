@@ -1,4 +1,4 @@
-package net.ipv64.kivop.pages.onboarding
+package net.ipv64.kivop.pages.LoginOnboarding
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,8 +28,8 @@ import net.ipv64.kivop.ui.theme.Primary
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
 @Composable
-fun DescriptionTwoPage() {
-  Column(modifier = Modifier.fillMaxWidth().background(Color.Green)) {
+fun DescriptionOnePage() {
+  Column(modifier = Modifier.background(Color.Green)) {
     Column(
         modifier =
             Modifier.fillMaxWidth()
@@ -43,7 +43,7 @@ fun DescriptionTwoPage() {
       Spacer(modifier = Modifier.weight(1f))
       Box(modifier = Modifier.height(250.dp).aspectRatio(1f)) {
         Image(
-            painter = painterResource(id = R.drawable.onboardingscreen2),
+            painter = painterResource(id = R.drawable.onboardingscreen1),
             contentDescription = "Onboarding Screen 1",
             modifier = Modifier.fillMaxWidth().aspectRatio(1f))
       }
@@ -59,7 +59,7 @@ fun DescriptionTwoPage() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       Text(
-          text = getString(R.string.description_two),
+          text = getString(R.string.description_one),
           color = Text_prime_light,
           textAlign = TextAlign.Center,
           style = MaterialTheme.typography.headlineLarge,

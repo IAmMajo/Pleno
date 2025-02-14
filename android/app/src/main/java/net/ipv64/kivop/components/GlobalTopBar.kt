@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import net.ipv64.kivop.BackPressed.isBackPressed
-import net.ipv64.kivop.Screen
+import net.ipv64.kivop.pages.Screen
 import net.ipv64.kivop.ui.theme.Background_secondary
 import net.ipv64.kivop.ui.theme.Text_prime
 

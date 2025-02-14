@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import net.ipv64.kivop.BackPressed.isBackPressed
-import net.ipv64.kivop.Screen
+import net.ipv64.kivop.pages.Screen
 import net.ipv64.kivop.components.PosterInfoCard
 import net.ipv64.kivop.components.PosterLocationCard
 import net.ipv64.kivop.components.SpacerBetweenElements

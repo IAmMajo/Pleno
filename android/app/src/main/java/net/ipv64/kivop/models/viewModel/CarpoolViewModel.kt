@@ -72,7 +72,7 @@ class CarpoolViewModel(private val carpoolId: String) : ViewModel() {
   suspend fun patchAcceptRequest(riderId: UUID, accepted: Boolean): Boolean {
     return patchAcceptRiderRequest(riderId.toString(), accepted)
   }
-
+  //Not needed
   suspend fun deleteRequest(riderId: UUID): Boolean {
     return deleteRiderRequest(riderId.toString())
   }

@@ -1,5 +1,6 @@
 package net.ipv64.kivop.models
 
+import android.content.Context
 import android.util.Log
 import com.example.kivopandriod.services.stringToLocalDateTime
 import com.google.gson.Gson
@@ -8,11 +9,21 @@ import com.google.gson.JsonObject
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.AttendanceStatus
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetIdentityDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetLocationDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetMeetingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingOptionDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultDTO
 import net.ipv64.kivop.dtos.MeetingServiceDTOs.GetVotingResultsDTO
+import net.ipv64.kivop.dtos.MeetingServiceDTOs.MeetingStatus
+import net.ipv64.kivop.dtos.RideServiceDTOs.GetEventDTO
+import net.ipv64.kivop.dtos.RideServiceDTOs.GetEventDetailDTO
+import net.ipv64.kivop.dtos.RideServiceDTOs.GetEventParticipationDTO
+import net.ipv64.kivop.dtos.RideServiceDTOs.GetUserWithoutFeedbackDTO
+import net.ipv64.kivop.dtos.RideServiceDTOs.UsersEventState
+import net.ipv64.kivop.dtos.RideServiceDTOs.UsersParticipationState
 import net.ipv64.kivop.services.api.ApiConfig.BASE_URL
 import net.ipv64.kivop.services.api.ApiConfig.auth
 import net.ipv64.kivop.services.api.ApiConfig.okHttpClient
@@ -356,3 +367,5 @@ class VotingWebSocketClient(
 interface VotingWebSocketListener {
   fun onVotingStatusUpdate(voting: GetVotingDTO)
 }
+
+

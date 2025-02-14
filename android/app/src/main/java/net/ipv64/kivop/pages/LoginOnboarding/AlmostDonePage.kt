@@ -1,4 +1,4 @@
-package net.ipv64.kivop.pages.onboarding
+package net.ipv64.kivop.pages.LoginOnboarding
 
 import android.content.Context
 import android.content.Intent
@@ -24,7 +24,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil3.compose.AsyncImagePainter.State.Empty.painter
 import kotlinx.coroutines.launch
 import net.ipv64.kivop.MainActivity
 import net.ipv64.kivop.R

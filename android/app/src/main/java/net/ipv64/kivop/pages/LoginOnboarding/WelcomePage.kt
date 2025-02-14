@@ -1,4 +1,4 @@
-package net.ipv64.kivop.pages.onboarding
+package net.ipv64.kivop.pages.LoginOnboarding
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

@@ -1,5 +1,9 @@
-package net.ipv64.kivop.pages.onboarding
+package net.ipv64.kivop.pages.LoginOnboarding
 
+import android.content.Context
+import android.content.Intent
+import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,11 +29,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import net.ipv64.kivop.MainActivity
 import net.ipv64.kivop.components.CustomInputField
-import net.ipv64.kivop.components.ImgPicker
-import net.ipv64.kivop.dtos.AuthServiceDTOs.UserRegistrationDTO
 import net.ipv64.kivop.services.api.ApiConfig.auth
-import net.ipv64.kivop.services.uriToBase64String
 import net.ipv64.kivop.ui.customRoundedTop
 import net.ipv64.kivop.ui.theme.Background_prime
 import net.ipv64.kivop.ui.theme.Primary
@@ -37,19 +39,13 @@ import net.ipv64.kivop.ui.theme.Signal_blue
 import net.ipv64.kivop.ui.theme.Text_prime_light
 
 @Composable
-fun RegisterPage(navController: NavController) {
-  var imgByteArray: String? = null
-  var name by remember { mutableStateOf("") }
+fun LoginPage(navController: NavController) {
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-  var confirmPassword by remember { mutableStateOf("") }
-
   val focusRequester1 = remember { FocusRequester() }
   val focusRequester2 = remember { FocusRequester() }
-  val focusRequester3 = remember { FocusRequester() }
-  val focusRequester4 = remember { FocusRequester() }
 
-  val scope = rememberCoroutineScope()
+  var scope = rememberCoroutineScope()
 
   Column(modifier = Modifier.fillMaxWidth().background(Color.Green)) {
     Column(
@@ -59,53 +55,28 @@ fun RegisterPage(navController: NavController) {
     ) {
       Spacer(modifier = Modifier.height(32.dp))
       Text(
-          text = "Konfiguriere dein Profil",
+          text = "Melde dich an",
           color = Text_prime_light,
           textAlign = TextAlign.Center,
           style = MaterialTheme.typography.headlineLarge,
       )
       Spacer(modifier = Modifier.height(16.dp))
-      ImgPicker(
-          size = 120.dp,
-          onImagePicked = { uri ->
-            if (uri != null) {
-              uriToBase64String(navController.context, uri)
-            }
-          })
-
-      CustomInputField(
-          label = "Name",
-          placeholder = "Max Mustermann",
-          value = name,
-          onValueChange = { name = it },
-          focusRequester = focusRequester1,
-          nextFocusRequester = focusRequester2 // Fokus auf das nächste Feld setzen
-          )
-
+      // Todo: Fix CustomInputField.kt
       CustomInputField(
           label = "Email",
-          placeholder = "Max@pleno.net",
+          placeholder = "Max Mustermann",
           value = email,
           onValueChange = { email = it },
-          focusRequester = focusRequester2,
-          nextFocusRequester = focusRequester3)
-
+          focusRequester = focusRequester1,
+          nextFocusRequester = focusRequester2)
       CustomInputField(
           label = "Passwort",
-          placeholder = "******",
+          placeholder = "Max Mustermann",
           value = password,
           onValueChange = { password = it },
           isPasswort = true,
-          focusRequester = focusRequester3,
-          nextFocusRequester = focusRequester4)
-
-      CustomInputField(
-          label = "Passwort wiederholen",
-          placeholder = "******",
-          value = confirmPassword,
-          onValueChange = { confirmPassword = it },
-          isPasswort = true,
-          focusRequester = focusRequester4)
+          focusRequester = focusRequester2,
+      )
     }
     Column(
         modifier =
@@ -120,9 +91,9 @@ fun RegisterPage(navController: NavController) {
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = Color.Transparent, contentColor = Signal_blue),
-              onClick = { navController.navigate(OnboardingScreen.Login.rout) }) {
+              onClick = { navController.navigate(OnboardingScreen.Register.rout) }) {
                 Text(
-                    text = "Anmelden",
+                    text = "Regestrieren",
                     style = MaterialTheme.typography.labelMedium,
                     textDecoration = TextDecoration.Underline)
               }
@@ -132,21 +103,31 @@ fun RegisterPage(navController: NavController) {
                   ButtonDefaults.buttonColors(
                       containerColor = Signal_blue, contentColor = Text_prime_light),
               onClick = {
-                val user = UserRegistrationDTO(name, email.lowercase(), password, imgByteArray)
                 scope.launch {
-                  if (user.name != null && user.email != null && user.password != null) {
-                    if (handleRegister(user)) {
-                      navController.navigate(OnboardingScreen.AlmostDone.rout)
-                    }
+                  val response = handleLogin(email.lowercase(), password)
+                  if (response === "Successful Login!") {
+                    navigateToMainActivity(navController.context)
+                  } else if (response === "This account is inactiv" ||
+                      response === "Email not verified") {
+                    navController.navigate(OnboardingScreen.AlmostDone.rout)
+                  } else {
+                    Toast.makeText(navController.context, "Login failed", Toast.LENGTH_SHORT).show()
                   }
                 }
               }) {
-                Text(text = "Weiter", style = MaterialTheme.typography.labelMedium)
+                Text(text = "Bestätigen", style = MaterialTheme.typography.labelMedium)
               }
         }
   }
 }
 
-private suspend fun handleRegister(user: UserRegistrationDTO): Boolean {
-  return auth.register(user)
+private suspend fun handleLogin(email: String, password: String): String? {
+  return auth.login(email, password)
+}
+
+private fun navigateToMainActivity(context: Context) {
+  var appContext = context.applicationContext
+  val intent = Intent(appContext, MainActivity::class.java)
+  context.startActivity(intent)
+  (context as? ComponentActivity)?.finish()
 }
