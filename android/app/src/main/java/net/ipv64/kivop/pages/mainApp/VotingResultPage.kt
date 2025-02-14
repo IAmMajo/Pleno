@@ -47,7 +47,7 @@ fun VotingResultPage(navController: NavController, votingID: String) {
       }
     }
   }
-
+  
   Column(modifier = Modifier.background(Primary)) {
     SpacerTopBar()
     if (votingResultViewModel.votingData != null) {
@@ -66,11 +66,13 @@ fun VotingResultPage(navController: NavController, votingID: String) {
                 .padding(18.dp)) {
           item {
             votingResultViewModel.votingResults?.let {
+              //Ergebnisse der Umfrage in einem Kuchendiagram
               PieChart(votingResults = it, explodeDistance = 15f)
             }
             Spacer(modifier = Modifier.size(16.dp))
             if (votingResultViewModel.votingResults != null &&
                 votingResultViewModel.votingData != null) {
+              //Ergebnisse der Umfrage
               ResultCard(votingResultViewModel.votingResults!!, votingResultViewModel.votingData!!)
             }
           }

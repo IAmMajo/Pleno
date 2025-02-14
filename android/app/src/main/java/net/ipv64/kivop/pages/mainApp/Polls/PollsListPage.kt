@@ -41,6 +41,7 @@ fun PollsListPage(navController: NavController) {
         if (poll != null) {
           ListenItem(
               poll,
+              // Navigiert zur richtigen Seite basierend auf dem Status der Umfrage
               onClick = {
                 if (poll.isOpen && !poll.iVoted) {
                   navController.navigate("umfrage/${poll.id}")
