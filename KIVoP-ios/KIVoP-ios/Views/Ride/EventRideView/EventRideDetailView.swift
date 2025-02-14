@@ -7,13 +7,14 @@ struct EventRideDetailView: View {
     @StateObject var viewModel: EventRideDetailViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var shouldShowDriversProfilePicture = false
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         NavigationStack {
+            // Den gesamten Hintergrund grau hinterlegen (Damit alles so aussieht als wäre es eine Liste)
             ZStack {
-                // grauer Hintergrund
-                Color.gray.opacity(0.1)
-                    .edgesIgnoringSafeArea(.all)
+                (colorScheme == .dark ? Color.black : Color.gray.opacity(0.1))
+                            .edgesIgnoringSafeArea(.all)
                 // Inhalt
                 VStack {
                     // Datum + Uhrzeit
@@ -21,7 +22,7 @@ struct EventRideDetailView: View {
                         .padding(5)
                         .overlay(
                             RoundedRectangle(cornerRadius: 30)
-                                .stroke(Color.black, lineWidth: 1)
+                                .stroke(Color(UIColor.label), lineWidth: 1)
                         )
                         .padding(.vertical)
                     

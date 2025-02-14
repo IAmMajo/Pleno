@@ -18,7 +18,7 @@ struct AttendancePlanningView: View {
                         .padding(5)
                         .overlay(
                             RoundedRectangle(cornerRadius: 30)
-                                .stroke(Color.black, lineWidth: 1)
+                                .stroke(Color(UIColor.label), lineWidth: 1)
                         )
                         .padding(.vertical)
                     // Titel für Teilnahme-Umfrage

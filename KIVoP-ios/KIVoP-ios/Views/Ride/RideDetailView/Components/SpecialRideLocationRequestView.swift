@@ -7,13 +7,14 @@ import MapKit
 struct SpecialRideLocationRequestView: View {
     @ObservedObject var viewModel: RideDetailViewModel
     @Environment(\.dismiss) private var dismiss
-
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
-        NavigationView {
+        NavigationStack {
+            // Den gesamten Hintergrund grau hinterlegen (Damit alles so aussieht als wäre es eine Liste)
             ZStack {
-                // grauer Hintergrund
-                Color.gray.opacity(0.1)
-                    .edgesIgnoringSafeArea(.all)
+                (colorScheme == .dark ? Color.black.opacity(0.1) : Color.gray.opacity(0.1))
+                            .edgesIgnoringSafeArea(.all)
                 VStack {
                     Text("Bitte überprüfe und bestätige die Adresse von der du abgeholt werden möchtest")
                         .font(.headline)

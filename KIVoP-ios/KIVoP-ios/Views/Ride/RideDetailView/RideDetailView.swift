@@ -6,13 +6,14 @@ struct RideDetailView: View {
     @StateObject var viewModel: RideDetailViewModel
     @ObservedObject var rideViewModel: RideViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         NavigationStack {
+            // Den gesamten Hintergrund grau hinterlegen (Damit alles so aussieht als wäre es eine Liste)
             ZStack {
-                // grauer Hintergrund um die View an den Prototypen anzupassen
-                Color.gray.opacity(0.1)
-                    .edgesIgnoringSafeArea(.all)
+                (colorScheme == .dark ? Color.black : Color.gray.opacity(0.1))
+                            .edgesIgnoringSafeArea(.all)
                 // Inhalt
                 VStack {
                     // Datum
@@ -20,7 +21,7 @@ struct RideDetailView: View {
                         .padding(5)
                         .overlay(
                             RoundedRectangle(cornerRadius: 30)
-                                .stroke(Color.black, lineWidth: 1)
+                                .stroke(Color(UIColor.label), lineWidth: 1)
                         )
                         .padding(.vertical)
                     

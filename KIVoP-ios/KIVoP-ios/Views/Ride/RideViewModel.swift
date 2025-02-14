@@ -122,18 +122,44 @@ class RideViewModel: ObservableObject {
     // Tab 2 Sonderfahrten (bei denen noch Platz ist)
     // Tab 3 Fahrten zu Events und Sonderfahrten (Mit denen der Nutezr interagiert hat)
     var filteredData: [Any] {
+        // Zuerst filtern wir nach dem Tab, der aktuell ausgewählt ist
+        let filteredByTab: [Any]
         switch selectedTab {
         case 0:
-            return events
+            filteredByTab = events
         case 1:
-            return rides.filter { $0.emptySeats - $0.allocatedSeats > 0 }
+            filteredByTab = rides.filter { $0.emptySeats - $0.allocatedSeats > 0 }
         case 2:
             let filteredRides = rides.filter { $0.myState != .nothing }
             let filteredEventRides = eventRides.filter { $0.myState != .nothing }
-            return filteredRides + filteredEventRides
+            filteredByTab = filteredRides + filteredEventRides
         default:
-            return []
+            filteredByTab = []
         }
+
+        // Jetzt filtere zusätzlich nach dem searchText, wenn er nicht leer ist
+        if !searchText.isEmpty {
+            if let eventsArray = filteredByTab as? [EventWithAggregatedData] {
+                // Filtere nach dem searchText, falls es Events sind
+                return eventsArray.filter { $0.event.name.localizedCaseInsensitiveContains(searchText) }
+            } else if let ridesArray = filteredByTab as? [GetSpecialRideDTO] {
+                // Filtere nach dem searchText, falls es Fahrten sind
+                return ridesArray.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+            } else {
+                // Entferne den redundanten cast, da filteredByTab bereits vom Typ [Any] ist
+                let filteredCombined = filteredByTab.compactMap { item -> Any? in
+                    if let ride = item as? GetSpecialRideDTO, ride.name.localizedCaseInsensitiveContains(searchText) {
+                        return ride
+                    } else if let eventRide = item as? GetEventRideDTO, eventRide.eventName.localizedCaseInsensitiveContains(searchText) {
+                        return eventRide
+                    }
+                    return nil
+                }
+                // Rückgabe der gefilterten kombinierten Fahrten
+                return filteredCombined
+            }
+        }
+        return filteredByTab
     }
 }
 

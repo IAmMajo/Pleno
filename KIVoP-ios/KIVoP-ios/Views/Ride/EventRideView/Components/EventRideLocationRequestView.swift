@@ -8,13 +8,14 @@ import CoreLocation
 struct EventRideLocationRequestView: View {
     @ObservedObject var viewModel: EventRideViewModel
     @Environment(\.dismiss) private var dismiss
-
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
-        NavigationView {
+        NavigationStack {
+            // Den gesamten Hintergrund grau hinterlegen (Damit alles so aussieht als wäre es eine Liste)
             ZStack {
-                // grauer Hintergrund
-                Color.gray.opacity(0.1)
-                    .edgesIgnoringSafeArea(.all)
+                (colorScheme == .dark ? Color.black.opacity(0.1) : Color.gray.opacity(0.1))
+                            .edgesIgnoringSafeArea(.all)
                 VStack {
                     Text("Bitte überprüfe und bestätige die Adresse von der du abgeholt werden möchtest")
                         .font(.headline)
@@ -101,7 +102,7 @@ struct EventRideLocationRequestView: View {
                     if viewModel.editInterestEvent && viewModel.interestedEvent != nil {
                         viewModel.requestedLocation = CLLocationCoordinate2D(latitude: CLLocationDegrees(viewModel.interestedEvent!.latitude), longitude: CLLocationDegrees(viewModel.interestedEvent!.longitude))
                     } else {
-                        viewModel.requestedLocation = CLLocationCoordinate2D(latitude: CLLocationDegrees(viewModel.eventDetails!.latitude), longitude: CLLocationDegrees(viewModel.eventDetails!.longitude))
+                        viewModel.requestedLocation = CLLocationCoordinate2D(latitude: CLLocationDegrees(viewModel.eventDetails?.latitude ?? 0), longitude: CLLocationDegrees(viewModel.eventDetails?.longitude ?? 0))
                     }
                 }
             }
