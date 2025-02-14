@@ -361,33 +361,6 @@ services:
         condition: service_healthy
 
 #
-# Vapor: tdums-service // NICHT IP-RELEVANT (abgesprochen)
-#
-  tdums-service:
-    extends:
-      file: ./backend/docker-compose.yml
-      service: tdums-service
-    container_name: tdums-service
-    restart: unless-stopped
-    labels:
-      traefik.enable: true
-      traefik.http.routers.tdums-service.rule: Host(`weihnachts-wuensche-ev.de`)
-      traefik.http.routers.tdums-service.entrypoints: https
-      traefik.http.routers.tdums-service.tls: true
-      traefik.http.routers.tdums-service.tls.certresolver: myresolver
-
-  tdums-postgres:
-    image: postgres:17.0-bookworm
-    container_name: tdums-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: vapor # only for development
-      POSTGRES_PASSWORD: example # only for development
-    volumes:
-      - ./backend/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
-      - tdums-data:/var/lib/postgresql/data
-
-#
 # Volumes
 #
 volumes:
@@ -395,8 +368,6 @@ volumes:
     name: "kivop-postgres-data"
   traefik-letsencrypt:
     name: "kivop-traefik-letsencrypt"
-  tdums-data:
-    name: "tdums-postgres-data"
   images-data:
     name: "kivop-images-data"
   jwt-cert:
