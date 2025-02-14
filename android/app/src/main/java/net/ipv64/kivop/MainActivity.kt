@@ -70,7 +70,7 @@ import net.ipv64.kivop.models.viewModel.UserViewModel
 import net.ipv64.kivop.pages.Screen
 import net.ipv64.kivop.pages.SplashActivity
 import net.ipv64.kivop.pages.mainApp.Votings.AlreadyVoted
-import net.ipv64.kivop.pages.mainApp.Attendances.AttendancesCoordinationPage
+import net.ipv64.kivop.pages.mainApp.Meetings.AttendancesCoordinationPage
 import net.ipv64.kivop.pages.mainApp.Attendances.AttendancesListPage
 import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolPage
 import net.ipv64.kivop.pages.mainApp.Carpool.CarpoolingList
@@ -78,7 +78,7 @@ import net.ipv64.kivop.pages.mainApp.Carpool.onBoardingCreateRide.CreateRidePage
 import net.ipv64.kivop.pages.mainApp.Events.EventsDetailPage
 import net.ipv64.kivop.pages.mainApp.Events.EventsPage
 import net.ipv64.kivop.pages.mainApp.HomePage
-import net.ipv64.kivop.pages.mainApp.MeetingsListPage
+import net.ipv64.kivop.pages.mainApp.Meetings.MeetingsListPage
 import net.ipv64.kivop.pages.mainApp.Polls.PollCreate
 import net.ipv64.kivop.pages.mainApp.Polls.PollOnHoldPage
 import net.ipv64.kivop.pages.mainApp.Polls.PollPage
